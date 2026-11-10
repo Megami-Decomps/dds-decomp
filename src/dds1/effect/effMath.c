@@ -5,7 +5,6 @@
 #include "fpu.h"
 
 /* DDS's names for the same objects. */
-#define aViewEye sdfViewTargetVector
 #define func_001AC068 effMathResetBezierSlot
 
 /* The owner is stored after its contiguous cubic segments. */

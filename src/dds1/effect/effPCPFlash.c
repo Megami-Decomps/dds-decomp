@@ -6,7 +6,6 @@
 #include "sdfFrame.h"
 
 /* DDS's names for the same objects. */
-#define aViewEye sdfViewTargetVector
 #define dds3EffectBase effDefaultRandomState
 
 struct effDebugPolyParams_t;

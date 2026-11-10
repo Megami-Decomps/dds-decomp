@@ -240,7 +240,7 @@ void effSwordTrackDrawTex(EffMagatuhiValueWork *work) {
 }
 
 extern EffRandState effDefaultRandomState[];
-extern f32 sdfViewTargetVector[4];
+extern f32 aViewEye[4];
 extern f32 aViewTarget[4];
 
 void effMagaCylinderSetPartPos(EffMagatuhiValueWork *work, s32 index, const f32 vector[4]) {
@@ -298,7 +298,7 @@ void effMagaCylinderSetPartPos(EffMagatuhiValueWork *work, s32 index, const f32 
             }
         }
 
-        SDF_VU0_LOADVECTOR(sdfViewTargetVector);
+        SDF_VU0_LOADVECTOR(aViewEye);
         SDF_VU0_LOADVECTOR_B(aViewTarget);
         SDF_VU0_SUBVECTOR();
         SDF_VU0_COPYVECTOR_A_TO_C();
@@ -355,7 +355,7 @@ void effMagaCylinderBlendColor(EffMagatuhiValueWork *work, u32 colorA, u32 color
 }
 
 extern EffRandState effDefaultRandomState[];
-extern f32 sdfViewTargetVector[EFF_MAGATUHI_VECTOR_WORD_COUNT];
+extern f32 aViewEye[EFF_MAGATUHI_VECTOR_WORD_COUNT];
 extern f32 aViewTarget[EFF_MAGATUHI_VECTOR_WORD_COUNT];
 
 
@@ -468,7 +468,7 @@ void effMagaSmokeConvDraw(EffMagatuhiWideFirst *work) {
     s32 age;
     u32 i;
 
-    SDF_VU0_LOADVECTOR(sdfViewTargetVector);
+    SDF_VU0_LOADVECTOR(aViewEye);
     SDF_VU0_LOADVECTOR_B(aViewTarget);
     SDF_VU0_SUBVECTOR();
     SDF_VU0_STOREVECTOR(viewDirection);
@@ -621,7 +621,7 @@ void effMagaPoint4PartInit(EffMagatuhiWideSecond *work, s32 index) {
     f32 step;
     f32 random;
 
-    SDF_VU0_LOADVECTOR(sdfViewTargetVector);
+    SDF_VU0_LOADVECTOR(aViewEye);
     SDF_VU0_LOADVECTOR_B(aViewTarget);
     SDF_VU0_SUBVECTOR();
     SDF_VU0_STOREVECTOR(viewDirection);

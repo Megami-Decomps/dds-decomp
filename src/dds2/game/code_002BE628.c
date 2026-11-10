@@ -3966,7 +3966,7 @@ void evtStageTestCopyEntryRotation(s32 encodedIndex, f32 *rotation) {
 
 extern f32 evtStageTestViewUpVector[4];
 
-extern f32 sdfViewTargetVector[4];
+extern f32 aViewEye[4];
 
 extern f32 aViewTarget[4];
 
@@ -4017,7 +4017,7 @@ void evtStageTestResetViewAndLighting(void)
     dds3SetFogColor(0, drawColor);
     dds3SetFogPara(0, 255.0f, 255.0f, 2000.0f, 30000.0f);
     dds3ScreenParam.camera.fov = 0.7551905f;
-    SDF_VU0_COPYVECTOR(sdfViewTargetVector, evtStageTestViewTargetVector);
+    SDF_VU0_COPYVECTOR(aViewEye, evtStageTestViewTargetVector);
     SDF_VU0_COPYVECTOR(aViewTarget, evtStageTestViewEyeVector);
     SDF_VU0_COPYVECTOR(aViewDown, evtStageTestViewUpVector);
     VU0_LOAD_MATRIX(&sdfViewMatrix);
@@ -4323,12 +4323,12 @@ void evtStageTestUpdateCamera(void)
 
     drawBufferIndex = dds3GetFrameID();
     evtStageTestResetViewAndLighting();
-    SDF_VU0_COPYVECTOR(sdfViewTargetVector, evtStageTestViewTargetVector);
+    SDF_VU0_COPYVECTOR(aViewEye, evtStageTestViewTargetVector);
     SDF_VU0_COPYVECTOR(aViewTarget, evtStageTestViewEyeVector);
     SDF_VU0_COPYVECTOR(aViewDown, evtStageTestViewUpVector);
     sdf3DMakeScreenParam(&dds3ScreenParam.camera);
     SDF_VU0_LOADVECTOR(aViewTarget);
-    SDF_VU0_LOADVECTOR_B(sdfViewTargetVector);
+    SDF_VU0_LOADVECTOR_B(aViewEye);
     SDF_VU0_SUBVECTOR();
     SDF_VU0_NORMALIZE();
     VU0_SCALAR_OP(600.0f, "vmulx.xyzw vf10, vf10, vf2x");
@@ -4336,7 +4336,7 @@ void evtStageTestUpdateCamera(void)
     SDF_VU0_LOADVECTOR_B(sdfViewShakeVector);
     SDF_VU0_ADDVECTOR();
     SDF_VU0_STOREVECTOR(&eye);
-    SDF_VU0_LOADVECTOR(sdfViewTargetVector);
+    SDF_VU0_LOADVECTOR(aViewEye);
     SDF_VU0_ADDVECTOR();
     SDF_VU0_STOREVECTOR_NOMEM(&target);
     LookAtMatrix((const f32 *)&eye, (const f32 *)&target, aViewDown);

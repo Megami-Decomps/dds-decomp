@@ -24,7 +24,7 @@ extern CameraVector D_0039F708;
 extern u8 dds3CheckPoseSetFlag(dds3PoseSet_t *node, u32 flags);
 extern void dds3OffPoseSetFlag(dds3PoseSet_t *node, u32 flags);
 extern f32 aViewTarget[4];
-extern f32 sdfViewTargetVector[4];
+extern f32 aViewEye[4];
 extern f32 aViewDown[4];
 
 
@@ -52,7 +52,7 @@ s32 dds3UpdateCameraObject(dds3Basic_t *camera) {
         dds3SetRadiusPoseSet(inner);
     }
     if (dds3GetActiveCameraSceneBasic(dds3GetControlScene()) == camera) {
-        SDF_VU0_COPYVECTOR(sdfViewTargetVector, &inner->pos);
+        SDF_VU0_COPYVECTOR(aViewEye, &inner->pos);
         SDF_VU0_COPYVECTOR(aViewTarget, &data->worldEye);
         SDF_VU0_COPYVECTOR(aViewDown, &data->worldUp);
         if (data->fovUpdatePending & DDS3_CAMERA_UPDATE_FOV_BIT) {

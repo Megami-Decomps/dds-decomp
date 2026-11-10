@@ -28,7 +28,7 @@ extern f32 effBattleAnchorHeightFactors[];
 extern f32 effBTL_Ptr_D[];
 extern void SetRotateMatrixY(f32 angle);
 extern f32 aViewTarget[4];
-extern f32 sdfViewTargetVector[4];
+extern f32 aViewEye[4];
 extern f32 aViewDown[4];
 extern f32 btlMeasureEffectTargetGroupBounds(s32 mask, f32 *outMaxTop, f32 *outMinTop);
 /* The selected position provider leaves its vector in vf10. */
@@ -110,7 +110,7 @@ void effBattleComputeTargetPosition(BtlUnit *unit, EffectVectorRequest *request)
         dir[2] = halfHeight < length ? -length : -halfHeight;
         dir[0] = dir[1] = 0.0f;
         pos[1] = height;
-        LookAtMatrix(pos, sdfViewTargetVector, aViewDown);
+        LookAtMatrix(pos, aViewEye, aViewDown);
         ReverseMatrix();
         SDF_VU0_LOADVECTOR(dir);
         SDF_VU0_VECTOR_W_SET_ZERO();
@@ -343,7 +343,7 @@ void effBTLPartGetRotateMatrixPtr(EffectVectorRequest *request, u128 *out) {
     f32 tilt = 0;
 
     if (request->count == 4 || request->directionMode == 9) {
-        LookAtMatrix(aViewTarget, sdfViewTargetVector, aViewDown);
+        LookAtMatrix(aViewTarget, aViewEye, aViewDown);
         ReverseMatrix();
         SDF_VU0_RESET_ROW3();
     } else {

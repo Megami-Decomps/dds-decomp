@@ -132,7 +132,7 @@ void effPCPThunderSphereInit(EffThunderVectorWork *work, s32 index) {
     cell->color = EFF_THUNDER_NEUTRAL_COLOR;
 }
 
-extern f32 aViewTarget[4], sdfViewTargetVector[4];
+extern f32 aViewTarget[4], aViewEye[4];
 extern void SetRotateMatrixXYZ(const struct RwV3d *);
 
 /* Sample a width multiplier, then bend the cell's placement vector around
@@ -173,7 +173,7 @@ void effPCPThunderSphereRotate(EffThunderVectorWork *work, s32 index) {
     rotationScale = -source->rotationScale;
     radius = source->radius;
     SDF_VU0_LOADVECTOR(aViewTarget);
-    SDF_VU0_LOADVECTOR_B(sdfViewTargetVector);
+    SDF_VU0_LOADVECTOR_B(aViewEye);
     SDF_VU0_SUBVECTOR_EXTENDED();
     SDF_VU0_STOREVECTOR_NOMEM(cameraDirection);
     placement[0] = source->placementVector[0];
@@ -464,7 +464,7 @@ void effPCPThunderSphereLowRotate(EffThunderVectorWork *work, s32 index) {
     originalAxis[3] = 0.0f;
     radius = source->radius;
     SDF_VU0_LOADVECTOR(aViewTarget);
-    SDF_VU0_LOADVECTOR_B(sdfViewTargetVector);
+    SDF_VU0_LOADVECTOR_B(aViewEye);
     SDF_VU0_SUBVECTOR_EXTENDED();
     SDF_VU0_STOREVECTOR_NOMEM(cameraDirection);
     placement[0] = source->placementVector[0];
@@ -714,7 +714,7 @@ void effThunderBuildSparkStripCell(EffThunderSparkWork *work, s32 index) {
     distance /= work->head.halfLife;
     amplitude = work->head.waveAmplitude;
     SDF_VU0_LOADVECTOR(aViewTarget);
-    SDF_VU0_LOADVECTOR_B(sdfViewTargetVector);
+    SDF_VU0_LOADVECTOR_B(aViewEye);
     SDF_VU0_SUBVECTOR_EXTENDED();
     SDF_VU0_STOREVECTOR_NOMEM(cameraDirection);
     SDF_VU0_LOADVECTOR_B(direction);
@@ -1053,7 +1053,7 @@ void effPCP_ThunderPolyPartRefresh(EffThunderFragmentWork *work, s32 index) {
     distance /= work->head.halfLife;
     amplitude = work->head.waveAmplitude;
     SDF_VU0_LOADVECTOR(aViewTarget);
-    SDF_VU0_LOADVECTOR_B(sdfViewTargetVector);
+    SDF_VU0_LOADVECTOR_B(aViewEye);
     SDF_VU0_SUBVECTOR_EXTENDED();
     SDF_VU0_STOREVECTOR_NOMEM(cameraDirection);
     SDF_VU0_LOADVECTOR_B(direction);
@@ -1360,7 +1360,7 @@ void effPCP_ThunderPolyLowPartRefresh(EffThunderFragmentWork *work, s32 index) {
     distance /= work->head.halfLife;
     amplitude = work->head.waveAmplitude;
     SDF_VU0_LOADVECTOR(aViewTarget);
-    SDF_VU0_LOADVECTOR_B(sdfViewTargetVector);
+    SDF_VU0_LOADVECTOR_B(aViewEye);
     SDF_VU0_SUBVECTOR_EXTENDED();
     SDF_VU0_STOREVECTOR_NOMEM(cameraDirection);
     SDF_VU0_LOADVECTOR_B(direction);
@@ -1639,7 +1639,7 @@ void effPCP_ThunderRadiatePolyPartRefresh(EffThunderCellWork *work, s32 index) {
     vertices = cell->history;
     segments = work->head.halfLife;
     SDF_VU0_LOADVECTOR(aViewTarget);
-    SDF_VU0_LOADVECTOR_B(sdfViewTargetVector);
+    SDF_VU0_LOADVECTOR_B(aViewEye);
     SDF_VU0_SUBVECTOR_EXTENDED();
     SDF_VU0_STOREVECTOR_NOMEM(cameraDirection);
     direction[0] = source->directionX;
@@ -1898,7 +1898,7 @@ void effPCP_ThunderPolyListPartRefresh(EffThunderFragmentWork *work, s32 index, 
     distance /= work->head.halfLife;
     amplitude = work->head.waveAmplitude;
     SDF_VU0_LOADVECTOR(aViewTarget);
-    SDF_VU0_LOADVECTOR_B(sdfViewTargetVector);
+    SDF_VU0_LOADVECTOR_B(aViewEye);
     SDF_VU0_SUBVECTOR_EXTENDED();
     SDF_VU0_STOREVECTOR_NOMEM(cameraDirection);
     SDF_VU0_LOADVECTOR_B(direction);
@@ -2325,7 +2325,7 @@ void effThunderUpdateCurveGroup(EffPcpThunderGroup *group) {
         start[2] = -400.0f;
     }
     SDF_VU0_LOADVECTOR(aViewTarget);
-    SDF_VU0_LOADVECTOR_B(sdfViewTargetVector);
+    SDF_VU0_LOADVECTOR_B(aViewEye);
     SDF_VU0_SUBVECTOR_EXTENDED();
     SDF_VU0_STOREVECTOR_NOMEM(cameraDirection);
     VEC3_SPLAT(width, group->params.width * 0.5f);

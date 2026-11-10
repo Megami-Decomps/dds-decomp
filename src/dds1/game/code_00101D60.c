@@ -155,7 +155,7 @@ extern Matrix4 kwlnHeldTextureViewMatrix;
 
 extern Matrix4 D_00329790;
 
-extern f32 aViewTarget[4], sdfViewTargetVector[4], aViewDown[4];
+extern f32 aViewTarget[4], aViewEye[4], aViewDown[4];
 
 extern u8 sdfViewShakeVector[];
 
@@ -241,7 +241,7 @@ s32 dds3DrawFirstProcess(dds3ProcessID_t *task) {
     }
     sdf3DMakeScreenParam(&dds3ScreenParam.camera);
     SDF_VU0_LOADVECTOR(aViewTarget);
-    SDF_VU0_LOADVECTOR_B(sdfViewTargetVector);
+    SDF_VU0_LOADVECTOR_B(aViewEye);
     SDF_VU0_SUBVECTOR();
     SDF_VU0_NORMALIZE();
     VU0_SCALAR_OP(600.0f, "vmulx.xyzw vf10, vf10, vf2x");
@@ -249,7 +249,7 @@ s32 dds3DrawFirstProcess(dds3ProcessID_t *task) {
     SDF_VU0_LOADVECTOR_B(sdfViewShakeVector);
     SDF_VU0_ADDVECTOR();
     SDF_VU0_STOREVECTOR(&eye);
-    SDF_VU0_LOADVECTOR(sdfViewTargetVector);
+    SDF_VU0_LOADVECTOR(aViewEye);
     SDF_VU0_ADDVECTOR();
     SDF_VU0_STOREVECTOR_NOMEM(&target);
     LookAtMatrix((const f32 *)&eye, (const f32 *)&target, aViewDown);

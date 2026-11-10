@@ -264,7 +264,7 @@ BtlRuntimeTask *btlCreateControlObject(void) {
     return task;
 }
 
-extern f32 sdfViewTargetVector[];
+extern f32 aViewEye[];
 extern f32 sdfViewMatrix[];
 extern f32 sdfProjectionMatrix[];
 extern f32 D_0037F660[];
@@ -277,7 +277,7 @@ BtlProjectedScreenPointResult btlProjectForwardPositionToScreen(BtlProjectedScre
     BtlVec4 position;
 
     SDF_VU0_COPYVECTOR_A_TO_C();
-    SDF_VU0_LOADVECTOR_B(sdfViewTargetVector);
+    SDF_VU0_LOADVECTOR_B(aViewEye);
     SDF_VU0_SUBVECTOR();
     SDF_VU0_GETLENGTH(distance);
     if (!(distance > 16.0)) {
@@ -321,7 +321,7 @@ s32 nbClipEffectNum(s32 screenPosition[4]) {
     f32 *projectionData;
 
     SDF_VU0_COPYVECTOR_A_TO_C();
-    SDF_VU0_LOADVECTOR_B(sdfViewTargetVector);
+    SDF_VU0_LOADVECTOR_B(aViewEye);
     SDF_VU0_SUBVECTOR();
     SDF_VU0_GETLENGTH(viewDistance);
     if (!(viewDistance > 16.0))

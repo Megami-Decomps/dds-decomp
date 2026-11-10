@@ -191,7 +191,7 @@ void effPCPSparkleSphereDelete(EffPCPRingWork *work) {
 
 extern f32 aViewTarget[4];
 
-extern f32 sdfViewTargetVector[4];
+extern f32 aViewEye[4];
 
 extern void dds3BillboardDraw(billHandle_t *effect);
 
@@ -208,7 +208,7 @@ void effPCPSparkleSphereDraw(EffPCPRingWork *work) {
     u32 color;
     s32 i;
 
-    VU0_LOAD_VF($vf10, sdfViewTargetVector);
+    VU0_LOAD_VF($vf10, aViewEye);
     VU0_LOAD_VF($vf11, aViewTarget);
     SDF_VU0_SUBVECTOR();
     SDF_VU0_NORMALIZE();
@@ -2808,7 +2808,7 @@ void effPCPAgiraoFireDraw(EffPCPTripleWork *work) {
     u32 group;
     u32 handleIndex;
 
-    LookAtMatrix(aViewTarget, sdfViewTargetVector, aViewDown);
+    LookAtMatrix(aViewTarget, aViewEye, aViewDown);
     VU0_STORE_MATRIX(basis);
     for (group = 0; group < 3; group++) {
         s32 start = work->head.groupStartFrame[group];
@@ -3102,7 +3102,7 @@ void effPcpBlockSetUpdate(EffPCPBlockSetWork *work) {
                     SDF_VU0_MULVECTOR();
                     SDF_VU0_STOREVECTOR(step);
                     SDF_VU0_COPYVECTOR(position, work->previousPosition);
-                    SDF_VU0_LOADVECTOR(sdfViewTargetVector);
+                    SDF_VU0_LOADVECTOR(aViewEye);
                     SDF_VU0_LOADVECTOR_B(aViewTarget);
                     SDF_VU0_SUBVECTOR();
                     SDF_VU0_COPYVECTOR_C_TO_B();
@@ -4223,7 +4223,7 @@ void effPCPRingPolyExp2SetVertex(EffPCPBeamLargeWork *work, f32 radius) {
     points = work->node->points;
     step = 6.2831851f / (f32)work->head.segments;
     if (work->head.mode == 0) {
-        LookAtMatrix(aViewTarget, sdfViewTargetVector, aViewDown);
+        LookAtMatrix(aViewTarget, aViewEye, aViewDown);
         ReverseMatrix();
     } else {
         SetRotateMatrixZ(work->rotationA);
@@ -5182,7 +5182,7 @@ void effPCPRadiateTBDraw(EffPCPPairedEventWork *work) {
     place.payload[9] = 100.0f;
     place.payload[10] = 1.0f;
     SDF_VU0_LOADVECTOR(aViewTarget);
-    SDF_VU0_LOADVECTOR_B(sdfViewTargetVector);
+    SDF_VU0_LOADVECTOR_B(aViewEye);
     SDF_VU0_SUBVECTOR();
     SDF_VU0_NORMALIZE();
     SDF_VU0_STOREVECTOR(viewAxis);

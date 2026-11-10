@@ -1327,7 +1327,7 @@ void sdfReleaseFlagListResource(SdfFlagListWork *work) {
     sdfMemFreeDirect(work->allocation);
 }
 
-extern f32 sdfViewTargetVector[4];
+extern f32 aViewEye[4];
 
 extern f32 sdfAtan(f32 ratio);
 
@@ -1398,12 +1398,12 @@ void sdfUpdateFlagListEntries(SdfFlagListWork *work) {
                     SDF_VU0_APPLYMATRIX_XYZ1();
                     SDF_VU0_STOREVECTOR(vertices[0]);
                     vertices[0][1] -= depth * spreadY * 1.7f;
-                    if (sdfViewTargetVector[1] + 500.0f < vertices[0][1]) {
-                        vertices[0][1] -= vertices[0][1] - sdfViewTargetVector[1];
+                    if (aViewEye[1] + 500.0f < vertices[0][1]) {
+                        vertices[0][1] -= vertices[0][1] - aViewEye[1];
                     }
                     if (D_003BD2C8 != 0) {
                         SDF_VU0_LOADVECTOR(vertices[0]);
-                        SDF_VU0_LOADVECTOR_B(sdfViewTargetVector);
+                        SDF_VU0_LOADVECTOR_B(aViewEye);
                         SDF_VU0_SUBVECTOR();
                         SDF_VU0_STOREVECTOR(vertices[0]);
                     }
@@ -1413,10 +1413,10 @@ void sdfUpdateFlagListEntries(SdfFlagListWork *work) {
                     pos[2] = (dds3GetRandFloatA(effSharedRandomState) - 0.5f) * 2.0f * 1000.0f;
                     pos[1] = lateral * 100.0f + -200.0f;
                     SDF_VU0_LOADVECTOR(pos);
-                    SDF_VU0_LOADVECTOR_B(sdfViewTargetVector);
+                    SDF_VU0_LOADVECTOR_B(aViewEye);
                     SDF_VU0_ADDVECTOR();
                     if (D_003BD2C8 != 0) {
-                        SDF_VU0_LOADVECTOR_B(sdfViewTargetVector);
+                        SDF_VU0_LOADVECTOR_B(aViewEye);
                         SDF_VU0_SUBVECTOR();
                     }
                     SDF_VU0_STOREVECTOR(vertices[0]);
@@ -1496,7 +1496,7 @@ void sdfDrawFlagListVertices(SdfFlagListWork *work) {
     for (vertexIndex = 0; vertexIndex < count; vertexIndex++) {
         SDF_VU0_LOADVECTOR(&sourceVertices[vertexIndex]);
         if (D_003BD2C8 != 0) {
-            SDF_VU0_LOADVECTOR_B(sdfViewTargetVector);
+            SDF_VU0_LOADVECTOR_B(aViewEye);
             SDF_VU0_ADDVECTOR();
         }
         SDF_VU0_STOREVECTOR_NOMEM(&copiedVertices[vertexIndex]);

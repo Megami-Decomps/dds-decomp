@@ -71,7 +71,7 @@ void dds3EffectObjectBasicSetFldEx(dds3Basic_t *owner, BillConfig *config) {
 
 extern u8 fldTestMapTargetFlag(s32 mapId, u32 slotIndex, s32 bit);
 extern s32 fldGetMapSlotByte(s32 mapId, u32 slotIndex, s32 valueIndex);
-extern f32 sdfViewTargetVector[4];
+extern f32 aViewEye[4];
 
 void dds3EffectObjectBasicCalcFldEx(dds3Basic_t *object) {
     EffectDependencyState *resource = object->workdata;
@@ -100,9 +100,9 @@ void dds3EffectObjectBasicCalcFldEx(dds3Basic_t *object) {
         }
     }
 
-    dx = sdfViewTargetVector[0] - resource->sourcePosition[0];
-    dy = sdfViewTargetVector[1] - resource->sourcePosition[1];
-    value = sdfViewTargetVector[2] - resource->sourcePosition[2];
+    dx = aViewEye[0] - resource->sourcePosition[0];
+    dy = aViewEye[1] - resource->sourcePosition[1];
+    value = aViewEye[2] - resource->sourcePosition[2];
     projectionDistanceWord = config->projectionDistance;
     distance = fsqrtf(dx * dx + dy * dy + value * value);
 

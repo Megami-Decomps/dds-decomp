@@ -8,7 +8,6 @@
 /* DDS's names for the same objects. */
 #define Eff_ModelTrackPolyListColorSet effTrackPolySetIndexedColor
 #define ParRand effEmitterDelayRandomState
-#define aViewEye sdfViewTargetVector
 #define dds3BillboardGeneral effCreateBillboardSharingIndexedResource
 #define dds3EffectBase effDefaultRandomState
 #define func_001621A0 effScaleSingleParticleTemplate

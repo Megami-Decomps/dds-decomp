@@ -531,7 +531,7 @@ extern Matrix4 sdfViewMatrix;
 
 extern f32 aViewTarget[4];
 
-extern f32 sdfViewTargetVector[4];
+extern f32 aViewEye[4];
 
 extern f32 aViewDown[4];
 
@@ -544,7 +544,7 @@ void itfInitDoubleBufferedScenePackets(void) {
     s32 i;
 
     sdf3DMakeScreenParam(&dds3ScreenParam.camera);
-    LookAtMatrix(aViewTarget, sdfViewTargetVector, aViewDown);
+    LookAtMatrix(aViewTarget, aViewEye, aViewDown);
     VU0_STORE_MATRIX_UNCLOBBERED(&sdfViewMatrix);
     for (i = 0; i < 2; i++) {
         sdfDrawTagInit(&D_003DFAB0[i]);

@@ -260,7 +260,7 @@ extern char D_004370C0[]; /* "%5.2f" */
 
 #define MDL_PART_OBJECT 3
 
-extern u8 sdfViewTargetVector[];
+extern u8 aViewEye[];
 
 extern void dds3BillboardDraw(billHandle_t *billboard);
 
@@ -794,7 +794,7 @@ void mdlStopEffect(dds3ModelHandle_t *owner, MdlMotionSlotIndex motionSlotIndex)
     }
 }
 
-/* vu0 routine: positionOut = p + normalize(p - sdfViewTargetVector) * scale, p = transformed node position. */
+/* vu0 routine: positionOut = p + normalize(p - aViewEye) * scale, p = transformed node position. */
 void mdlEffect_P2A_D3P_GetPos(sdfModelRootNode_t *model, dds3ModelEffectCtrlr_t *anchorRecord, f32 *positionOut) {
     SdfMapPositionRecord *mapPosition = anchorRecord->payload.part.mapPositionRecord;
     sdfModelNode_t *drawNode = sdfModelSearchNode(model, mapPosition->nodeId);
@@ -804,7 +804,7 @@ void mdlEffect_P2A_D3P_GetPos(sdfModelRootNode_t *model, dds3ModelEffectCtrlr_t 
     SDF_VU0_LOADVECTOR(&mapPosition->position);
     SDF_VU0_APPLYMATRIX_XYZ1();
     SDF_VU0_COPYVECTOR_A_TO_B();
-    SDF_VU0_LOADVECTOR_C(sdfViewTargetVector);
+    SDF_VU0_LOADVECTOR_C(aViewEye);
     SDF_VU0_SUBVECTOR_A_C();
     SDF_VU0_NORMALIZE();
     VU0_SET_VF2X(scale);
@@ -2548,7 +2548,7 @@ s32 mdlViewer(dds3ProcessID_t *task) {
         mdlViewerState.taskPhase = 0;
         mdlViewerState.selectedTaskIndex = mdlViewerState.unk0B - 1;
     }
-    SDF_VU0_COPYVECTOR(sdfViewTargetVector, &D_00453620);
+    SDF_VU0_COPYVECTOR(aViewEye, &D_00453620);
     SDF_VU0_COPYVECTOR(aViewTarget, &D_00453630);
     SDF_VU0_COPYVECTOR(aViewDown, &D_00453640);
     mdlViewerState.packetList = dds3FontReqAllocDrawTag();

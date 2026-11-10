@@ -120,7 +120,7 @@ extern s32 fldFindNearestOccupiedMapGridCell(
 
 extern s32 D_003899E0[];
 extern f32 aViewTarget[4];
-extern f32 sdfViewTargetVector[4];
+extern f32 aViewEye[4];
 extern u8 D_00435C48[2][2];
 extern f32 aViewDown[4];
 extern void fldAutoMapGetBBox(f32 *, f32 *, f32 *, f32 *);
@@ -3369,7 +3369,7 @@ void fldUpdateAutomapInput(void) {
     kwlnOverlayFrustumParameters.fogFar = 255.0f;
     kwlnOverlayFrustumParameters.depthFar = 20000.0f;
     kwlnOverlayFrustumParameters.fogColor = 0x808080;
-    SDF_VU0_COPYVECTOR(sdfViewTargetVector, eye);
+    SDF_VU0_COPYVECTOR(aViewEye, eye);
     SDF_VU0_COPYVECTOR(aViewTarget, focus);
     SDF_VU0_COPYVECTOR(aViewDown, up);
 }
@@ -4895,7 +4895,7 @@ extern void fldUpdatePositionedTextureNodes(void);
 extern void fldUpdateIndexedResourceEffectPosition(void);
 extern void fldUpdateMenuResourceEffects(void);
 
-extern f32 sdfViewTargetVector[4];
+extern f32 aViewEye[4];
 
 extern EffNode *D_004362DC;
 extern EffNode *D_004362E8;
@@ -4992,7 +4992,7 @@ void func_0014DEA8(void) {
         if (entry->type == 999) {
             continue;
         }
-        SDF_VU0_COPYVECTOR(target, sdfViewTargetVector);
+        SDF_VU0_COPYVECTOR(target, aViewEye);
         if (entry->object == 0) {
             continue;
         }
@@ -6991,8 +6991,8 @@ void fldUpdateTargetGuideMovementState(void) {
     state->updateFlags = 0;
     fldCalcTargetDistanceYaw(&state->targetDistance, &state->targetBearing);
 
-    dx = aViewTarget[0] - sdfViewTargetVector[0];
-    dz = aViewTarget[2] - sdfViewTargetVector[2];
+    dx = aViewTarget[0] - aViewEye[0];
+    dz = aViewTarget[2] - aViewEye[2];
     magnitude = fsqrtf(dx * dx + dz * dz);
     viewAngle = 0.0f;
     if (!(magnitude < 1.0f)) {

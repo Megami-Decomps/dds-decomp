@@ -343,14 +343,14 @@ f32 effComputeProjectedOffsetAngle(const void *position, const void *offset) {
     return sdfAtan2(projectedDelta[1], projectedDelta[0]);
 }
 
-extern f32 aViewTarget[4], sdfViewTargetVector[4];
+extern f32 aViewTarget[4], aViewEye[4];
 
 /* vu0 routine: 1 - |dot(normalised eye - target, axis)|, how far the axis is from the view direction */
 f32 dds3BillboardGetDirectionScale(void *self, f32 *axis) {
     f32 dot;
 
     SDF_VU0_LOADVECTOR(aViewTarget);
-    SDF_VU0_LOADVECTOR_B(sdfViewTargetVector);
+    SDF_VU0_LOADVECTOR_B(aViewEye);
     SDF_VU0_SUBVECTOR();
     SDF_VU0_NORMALIZE();
     SDF_VU0_COPYVECTOR_A_TO_B();

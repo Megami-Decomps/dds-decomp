@@ -5847,7 +5847,7 @@ extern void effDrawSurfaceNode(s32);
 extern void effCopyRingFrameVectors(EffSurfaceGridNode *, u128 *, s32);
 extern void effInterpolateSurfaceGridVectors(EffSurfaceGridNode *work, const f32 (*vectors)[4]);
 extern void effBeginMatrixVuDrawPacket(const Matrix4 *);
-extern f32 aViewTarget[4], sdfViewTargetVector[4], aViewDown[4];
+extern f32 aViewTarget[4], aViewEye[4], aViewDown[4];
 extern sdfGrOt_t *effGetPacketSubmissionSurface(s32);
 extern void effSubmitIndexedRenderPacket(u32);
 extern void effSubmitGeneratedTexturePacket(sdfGrOt_t *, EffGeneratedTextureDescriptor *);
@@ -5929,7 +5929,7 @@ void effDrawSurfaceNode(s32 nodeAddress) {
         record = node->record;
     }
     VU0_LOAD_VF(vf10, aViewTarget);
-    VU0_LOAD_VF(vf11, sdfViewTargetVector);
+    VU0_LOAD_VF(vf11, aViewEye);
     VU0_SUB(vf10, vf10, vf11);
     VU0_STORE_VF(vf10, viewDifference);
     count = (s32)node->handleCount;
@@ -6971,7 +6971,7 @@ void effFreeIndexedEntries(EffClassWork *work) {
 }
 
 extern f32 effWorldUpVector[4];
-extern f32 sdfViewTargetVector[4];
+extern f32 aViewEye[4];
 extern f32 aViewTarget[4];
 
 /* Advance radial five-point wave strips from the class orientation. */
@@ -7010,7 +7010,7 @@ void effUpdateRadialWavePointRows(EffClassWork *work) {
     if (step <= 0.0f) {
         return;
     }
-    SDF_VU0_LOADVECTOR(sdfViewTargetVector);
+    SDF_VU0_LOADVECTOR(aViewEye);
     SDF_VU0_LOADVECTOR_B(aViewTarget);
     SDF_VU0_SUBVECTOR();
     SDF_VU0_STOREVECTOR(view);
@@ -7479,7 +7479,7 @@ void effReleaseBillPointEntries(EffClassWork *work) {
 }
 
 /* Actual same-title provider contracts; full four-float VU buffers remain. */
-extern f32 sdfViewTargetVector[4];
+extern f32 aViewEye[4];
 extern f32 aViewTarget[4];
 
 /* Advance orbiting entries and rebuild their camera-facing, wavy point spans. */
@@ -7524,7 +7524,7 @@ void effUpdateOrbitalPointSpanWaves(EffClassWork *work) {
     if (step <= 0.0f) {
         return;
     }
-    SDF_VU0_LOADVECTOR(sdfViewTargetVector);
+    SDF_VU0_LOADVECTOR(aViewEye);
     SDF_VU0_LOADVECTOR_B(aViewTarget);
     SDF_VU0_SUBVECTOR();
     SDF_VU0_STOREVECTOR(view);
@@ -8089,7 +8089,7 @@ void effDrawEffectStrip(EffectStripNode *node) {
     billSize = node->copiedHeader.billSize;
     dds3BillboardSetMode(billboard, (s16)info->alphaTrack.surfaceIndex);
     SDF_VU0_LOADVECTOR(aViewTarget);
-    SDF_VU0_LOADVECTOR_B(sdfViewTargetVector);
+    SDF_VU0_LOADVECTOR_B(aViewEye);
     SDF_VU0_SUBVECTOR();
     SDF_VU0_NORMALIZE();
     SDF_VU0_STOREVECTOR_NOMEM(view);

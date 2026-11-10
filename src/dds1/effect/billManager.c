@@ -28,7 +28,7 @@ typedef struct DmaPacketHeader DmaPacketHeader;
 extern void sdf3DMakeDirectRefPacket(DmaPacketHeader *packet, u32 source, s32 bytes);
 extern void sdfBillBoardMakeTMPacket(u8 *packet, const f32 *matrix);
 extern f32 aViewTarget[4];
-extern f32 sdfViewTargetVector[4];
+extern f32 aViewEye[4];
 extern f32 billChildFacingReferenceAxis[4];
 extern f32 dds3BillboardTagParam[4];
 extern f64 fabs(f64 value);
@@ -72,7 +72,7 @@ void dds3BillboardTagLink(billHandle_t *obj, BillChildPayload *child) {
         sdfDrawTagLinkRef(child->pendingLists[selected], packet);
         if ((u16)(child->variant & 1) != 0) {
             SDF_VU0_LOADVECTOR(aViewTarget);
-            SDF_VU0_LOADVECTOR_B(sdfViewTargetVector);
+            SDF_VU0_LOADVECTOR_B(aViewEye);
             SDF_VU0_SUBVECTOR();
             SDF_VU0_NORMALIZE();
             SDF_VU0_LOADVECTOR_B(billChildFacingReferenceAxis);
@@ -258,7 +258,7 @@ void billAppendPairedQuadEntry(billHandle_t *obj, BillRenderPair *node) {
         geometry = (u8 *)sdfGrAllocPacketBuff(0x38);
         if (node->cameraFacingMode == 1) {
             SDF_VU0_LOADVECTOR(aViewTarget);
-            SDF_VU0_LOADVECTOR_B(sdfViewTargetVector);
+            SDF_VU0_LOADVECTOR_B(aViewEye);
             SDF_VU0_SUBVECTOR();
             SDF_VU0_NORMALIZE();
             SDF_VU0_LOADVECTOR_B(billPairFacingReferenceAxis);

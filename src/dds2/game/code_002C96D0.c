@@ -4601,7 +4601,7 @@ void mnuProjectViewPoint(void) {
     SDF_VU0_ADDVECTOR();
 }
 
-extern u8 sdfViewTargetVector[];
+extern u8 aViewEye[];
 
 /* vu0 routine: tests whether vf10 projects within the camera's forward cone. */
 s32 sdfProjectPointInForwardConeVU(void) {
@@ -4609,7 +4609,7 @@ s32 sdfProjectPointInForwardConeVU(void) {
     f32 *projection;
 
     SDF_VU0_COPYVECTOR_A_TO_C();
-    SDF_VU0_LOADVECTOR_B(sdfViewTargetVector);
+    SDF_VU0_LOADVECTOR_B(aViewEye);
     SDF_VU0_SUBVECTOR();
     SDF_VU0_GETLENGTH(distance);
     if (!(distance > 16.0))
@@ -4663,7 +4663,7 @@ f32 mnuMeasureProjectedPerpendicularDistance(f32 rate) {
     scale[0] = scale[1] = scale[2] = rate;
     SDF_VU0_LOADVECTOR(origin);
     SDF_VU0_COPYVECTOR_A_TO_C();
-    SDF_VU0_LOADVECTOR_B(sdfViewTargetVector);
+    SDF_VU0_LOADVECTOR_B(aViewEye);
     SDF_VU0_SUBVECTOR();
     SDF_VU0_LOADVECTOR_B(aViewDown);
     SDF_VU0_OUTERPRODUCT();
@@ -4737,14 +4737,14 @@ void vuCatmullRomPoint(f32 (*p)[4], f32 t)
     SDF_VU0_ADDVECTOR_A_C();
 }
 
-extern u8 sdfViewTargetVector[];
+extern u8 aViewEye[];
 extern u8 aViewTarget[];
 extern u8 aViewDown[];
 
-/* vu0 routine: camera basis rows vf28-vf31 from eye sdfViewTargetVector, target aViewTarget and up aViewDown */
+/* vu0 routine: camera basis rows vf28-vf31 from eye aViewEye, target aViewTarget and up aViewDown */
 void vuBuildLookAtBasis(void)
 {
-    SDF_VU0_LOADVECTOR(sdfViewTargetVector);
+    SDF_VU0_LOADVECTOR(aViewEye);
     SDF_VU0_SET_ROW3();
     SDF_VU0_COPYVECTOR_A_TO_B();
     SDF_VU0_LOADVECTOR(aViewTarget);
@@ -5982,7 +5982,7 @@ s32 fileQueueCountLinkedJobs(FileQueue *queue) {
 }
 
 
-/* vu0 routine: dst = |pos| * unit(sdfViewTargetVector - aViewTarget); flag 0x10 flattens y, then puts pos.y back */
+/* vu0 routine: dst = |pos| * unit(aViewEye - aViewTarget); flag 0x10 flattens y, then puts pos.y back */
 void camFollowOffsetVec(FileJob *obj, void *dst)
 {
     f32 len[4];
@@ -5999,7 +5999,7 @@ void camFollowOffsetVec(FileJob *obj, void *dst)
     }
     SDF_VU0_GETLENGTH(length);
     VEC3_SPLAT(len, length);
-    SDF_VU0_LOADVECTOR(sdfViewTargetVector);
+    SDF_VU0_LOADVECTOR(aViewEye);
     SDF_VU0_LOADVECTOR_B(aViewTarget);
     SDF_VU0_SUBVECTOR();
     if (obj->xformFlags & 0x10) {
@@ -6014,7 +6014,7 @@ void camFollowOffsetVec(FileJob *obj, void *dst)
     SDF_VU0_STOREVECTOR(dst);
 }
 
-/* dst = rotation facing unit(sdfViewTargetVector - aViewTarget) (pitch and yaw); flag 0x40 composes it onto obj->quat, no flag 0x60 copies obj->quat */
+/* dst = rotation facing unit(aViewEye - aViewTarget) (pitch and yaw); flag 0x40 composes it onto obj->quat, no flag 0x60 copies obj->quat */
 void camAimRotation(CamAim *obj, void *dst)
 {
     f32 v[4];
@@ -6025,7 +6025,7 @@ void camAimRotation(CamAim *obj, void *dst)
         SDF_VU0_COPYVECTOR(dst, obj->quat);
         return;
     }
-    SDF_VU0_LOADVECTOR(sdfViewTargetVector);
+    SDF_VU0_LOADVECTOR(aViewEye);
     SDF_VU0_LOADVECTOR_B(aViewTarget);
     SDF_VU0_SUBVECTOR();
     SDF_VU0_NORMALIZE();

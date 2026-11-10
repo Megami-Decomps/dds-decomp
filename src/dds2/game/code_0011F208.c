@@ -994,7 +994,7 @@ extern f32 D_0043E5F0[50][3][4];
 extern s8 D_0043EF50[26][26][2];
 extern f32 D_0043F4A0[26][26][4];
 extern f32 D_00441EE0[26][26][4];
-extern f32 aViewTarget[4], sdfViewTargetVector[4];
+extern f32 aViewTarget[4], aViewEye[4];
 extern SdfLightSources D_0037F770;
 
 extern f32 D_0038BB10[16];
@@ -1265,9 +1265,9 @@ void fldDrawEffectObjectShadow(dds3Basic_t *object) {
         slotExtrusion[slot][2] = D_0043E5E0[2] * length;
         slotExtrusion[slot][3] = 1.0f;
     }
-    viewDirection[0] = aViewTarget[0] - sdfViewTargetVector[0];
-    viewDirection[1] = aViewTarget[1] - sdfViewTargetVector[1];
-    viewDirection[2] = aViewTarget[2] - sdfViewTargetVector[2];
+    viewDirection[0] = aViewTarget[0] - aViewEye[0];
+    viewDirection[1] = aViewTarget[1] - aViewEye[1];
+    viewDirection[2] = aViewTarget[2] - aViewEye[2];
     viewDirection[3] = 1.0f;
     VU0_LOAD_VF_PTR(vf10, viewDirection);
     SDF_VU0_NORMALIZE();

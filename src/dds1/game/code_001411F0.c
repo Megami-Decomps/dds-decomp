@@ -98,7 +98,7 @@ extern void p2sdStopAllBgm(void);
 extern u8 dds3PadButtonState[2][2][16];
 extern u8 D_003BA878[2][2];
 extern f32 aViewTarget[4];
-extern f32 sdfViewTargetVector[4];
+extern f32 aViewEye[4];
 extern f32 aViewDown[4];
 extern void fldAutoMapGetBBox(f32 *, f32 *, f32 *, f32 *);
 
@@ -2920,7 +2920,7 @@ void fldUpdateAutomapInput(void) {
     kwlnOverlayFrustumParameters.fogFar = 255.0f;
     kwlnOverlayFrustumParameters.depthFar = 20000.0f;
     kwlnOverlayFrustumParameters.fogColor = 0x808080;
-    SDF_VU0_COPYVECTOR(sdfViewTargetVector, eye);
+    SDF_VU0_COPYVECTOR(aViewEye, eye);
     SDF_VU0_COPYVECTOR(aViewTarget, focus);
     SDF_VU0_COPYVECTOR(aViewDown, up);
 }
@@ -4433,7 +4433,7 @@ extern void fldDrawLocationPanel(void);
 extern void fldUpdateEffectTextureTransforms(void);
 extern void fldUpdateMenuResourceEffects(void);
 
-extern f32 sdfViewTargetVector[4];
+extern f32 aViewEye[4];
 extern u8 fldAutoMapSeqTestFlag(u32 mask);
 extern s32 D_003BAF48, D_003BAF40;
 
@@ -4527,7 +4527,7 @@ void func_00149B68(void) {
         if (entry->type == 999) {
             continue;
         }
-        SDF_VU0_COPYVECTOR(target, sdfViewTargetVector);
+        SDF_VU0_COPYVECTOR(target, aViewEye);
         if (entry->object == 0) {
             continue;
         }

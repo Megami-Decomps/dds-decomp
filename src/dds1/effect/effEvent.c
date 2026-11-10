@@ -848,7 +848,7 @@ extern f32 D_003563A0[];
 
 extern f32 D_003563B8[];
 
-extern f32 sdfViewTargetVector[4];
+extern f32 aViewEye[4];
 
 extern f32 aViewDown[4];
 
@@ -893,7 +893,7 @@ void effEveBEDPartGetPositionPtr(EffEventInit *source, EffectVectorRequest *para
         dir[2] = half < radius ? -radius : -half;
         dir[0] = dir[1] = 0.0f;
         pos[1] = y;
-        LookAtMatrix(pos, sdfViewTargetVector, aViewDown);
+        LookAtMatrix(pos, aViewEye, aViewDown);
         ReverseMatrix();
         SDF_VU0_LOADVECTOR(dir);
         SDF_VU0_VECTOR_W_SET_ZERO();
@@ -1042,7 +1042,7 @@ void effEventUpdateBillboardParticles(EffEventBillSet *work) {
     f32 acceleration, swayPhaseStep, swayAmplitudeStep;
 
     SDF_VU0_LOADVECTOR(aViewTarget);
-    SDF_VU0_LOADVECTOR_B(sdfViewTargetVector);
+    SDF_VU0_LOADVECTOR_B(aViewEye);
     SDF_VU0_SUBVECTOR();
     SDF_VU0_LOADVECTOR_B(aViewDown);
     SDF_VU0_OUTERPRODUCT();
@@ -1190,7 +1190,7 @@ void effEVECombParSmokeDraw(EffEventBillSet *work) {
     sdfBillBoardMakeTMPacket(geometryPacket, matrix[0]);
     sdfDrawTagLink(secondaryList, (u32)geometryPacket);
     SDF_VU0_LOADVECTOR(aViewTarget);
-    SDF_VU0_LOADVECTOR_B(sdfViewTargetVector);
+    SDF_VU0_LOADVECTOR_B(aViewEye);
     SDF_VU0_SUBVECTOR();
     SDF_VU0_LOADVECTOR_B(aViewDown);
     SDF_VU0_OUTERPRODUCT();
@@ -1558,7 +1558,7 @@ void effAPPoint4PartInit(EffChanWork *work, u32 recordIndex) {
     f32 cursorStep;
     f32 centeredRandom;
 
-    SDF_VU0_LOADVECTOR(sdfViewTargetVector);
+    SDF_VU0_LOADVECTOR(aViewEye);
     SDF_VU0_LOADVECTOR_B(aViewTarget);
     SDF_VU0_SUBVECTOR();
     SDF_VU0_STOREVECTOR(viewDirection);

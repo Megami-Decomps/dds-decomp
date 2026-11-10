@@ -14,7 +14,7 @@ extern f32 D_0037F5EC[];
 
 extern f32 aViewTarget[4];
 
-extern f32 sdfViewTargetVector[4];
+extern f32 aViewEye[4];
 
 /* Replace only the high byte of the model's broadcast word. */
 void mnuSetNodeModelBroadcastByte(MnuModelNode *node, u8 highByte) {
@@ -57,7 +57,7 @@ void itfProjectScreenPointToViewPlane(f32 *position, s32 screenX, s32 screenY) {
     f32 eyeTargetDepth;
 
     halfViewAngle = D_0037F5EC[0] * 0.5f;
-    eyeTargetDepth = aViewTarget[2] - sdfViewTargetVector[2];
+    eyeTargetDepth = aViewTarget[2] - aViewEye[2];
     position[0] = eyeTargetDepth * tanf(halfViewAngle * 1.3f) *
         ((f32)(screenX - 256) * 0.00390625f);
     position[1] = eyeTargetDepth * tanf(halfViewAngle) *
@@ -71,7 +71,7 @@ void itfProjectScreenPointToFixedDepth(f32 *position, s32 screenX, s32 screenY) 
     f32 depth;
 
     halfViewAngle = D_0037F5EC[0] * 0.5f;
-    depth = -300.0f - sdfViewTargetVector[2];
+    depth = -300.0f - aViewEye[2];
     position[0] = depth * tanf(halfViewAngle * 1.3f) *
         ((f32)(screenX - 256) * 0.00390625f);
     position[1] = depth * tanf(halfViewAngle) *

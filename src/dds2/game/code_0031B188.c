@@ -31,7 +31,7 @@ typedef struct SoundSlotPool {
 
 
 
-extern f32 sdfViewTargetVector[4];
+extern f32 aViewEye[4];
 extern void sdfMat4RotateX(SdfMat4 *, f32);
 extern void sdfMat4RotateY(SdfMat4 *, f32);
 extern void sdfMat4RotateZ(SdfMat4 *, f32);
@@ -416,9 +416,9 @@ void mnuOrientPositionedEffectTowardViewTarget(MnuEffectRecord *record, f32 xAng
     f32 quaternion[4];
 
     fileQueueReadPosition(record->queue, position);
-    mnuSetBasisRow(vector, sdfViewTargetVector[0] - position[0],
-                   sdfViewTargetVector[1] - position[1],
-                   sdfViewTargetVector[2] - position[2], 0.0f);
+    mnuSetBasisRow(vector, aViewEye[0] - position[0],
+                   aViewEye[1] - position[1],
+                   aViewEye[2] - position[2], 0.0f);
     mnuSetBasisRow(left, -1.0f, 0.0f, 0.0f, 0.0f);
     VU0_NORMALIZE_PACKED_VECTOR(vector);
     SDF_VU0_LOADVECTOR(vector);
@@ -720,9 +720,9 @@ void mnuSetViewFacingModelNodeRotation(MnuModelNode *node, f32 xAngle, f32 yAngl
     SdfMat4 basis;
     f32 quaternion[4];
 
-    mnuSetBasisRow(vector, sdfViewTargetVector[0] - node->primary[0],
-                   sdfViewTargetVector[1] - node->primary[1],
-                   sdfViewTargetVector[2] - node->primary[2], 0.0f);
+    mnuSetBasisRow(vector, aViewEye[0] - node->primary[0],
+                   aViewEye[1] - node->primary[1],
+                   aViewEye[2] - node->primary[2], 0.0f);
     mnuSetBasisRow(left, -1.0f, 0.0f, 0.0f, 0.0f);
     VU0_NORMALIZE_PACKED_VECTOR(vector);
     SDF_VU0_LOADVECTOR(vector);

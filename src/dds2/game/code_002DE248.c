@@ -1405,7 +1405,7 @@ void effUpdateFadeBlendB(EffKindWork *work) {
 }
 
 extern f32 aViewTarget[4];
-extern f32 sdfViewTargetVector[4];
+extern f32 aViewEye[4];
 extern f32 sdfViewMatrix[4][4];
 extern f32 sdfProjectionMatrix[4][4];
 extern f32 D_004582A0[4];
@@ -1455,7 +1455,7 @@ void func_002DF6C8(EffKindWork *work) {
     out->color = blended[0];
     stretch = effSampleScalarCurve(&config->blendB, frame, duration);
     VU0_LOAD_VF(vf10, aViewTarget);
-    VU0_LOAD_VF(vf11, sdfViewTargetVector);
+    VU0_LOAD_VF(vf11, aViewEye);
     VU0_SUB(vf10, vf10, vf11);
     SDF_VU0_NORMALIZE();
     VU0_SCALAR_OP(100.0f, "vmulx.xyzw vf10, vf10, vf2x");
@@ -6023,7 +6023,7 @@ extern void fileReadRecordSecondVector(u8 *obj, void *dst);
 extern void fileReadVectorPtr20(u8 *obj, void *dst);
 extern void dds3BillboardDraw(billHandle_t *);
 extern f32 aViewTarget[4];
-extern f32 sdfViewTargetVector[4];
+extern f32 aViewEye[4];
 extern u8 effZeroVector[];
 extern void effBeginMatrixVuDrawPacket(const Matrix4 *matrix);
 extern void effResetSurfaceGridFrame(EffSurfaceGridNode *node);
@@ -6112,7 +6112,7 @@ void effDrawSurfaceNode(s32 nodeAddress) {
         record = node->record;
     }
     VU0_LOAD_VF(vf10, aViewTarget);
-    VU0_LOAD_VF(vf11, sdfViewTargetVector);
+    VU0_LOAD_VF(vf11, aViewEye);
     VU0_SUB(vf10, vf10, vf11);
     VU0_STORE_VF(vf10, viewDifference);
     count = (s32)node->handleCount;
@@ -7190,7 +7190,7 @@ void effFreeIndexedEntries(EffClassWork *work) {
     sdfChipFreeDirect(table);
 }
 
-extern f32 sdfViewTargetVector[4];
+extern f32 aViewEye[4];
 extern f32 aViewTarget[4];
 
 /* Advance radial five-point wave strips from the class orientation. */
@@ -7229,7 +7229,7 @@ void effUpdateRadialWavePointRows(EffClassWork *work) {
     if (step <= 0.0f) {
         return;
     }
-    VU0_LOAD_VF(vf10, sdfViewTargetVector);
+    VU0_LOAD_VF(vf10, aViewEye);
     VU0_LOAD_VF(vf11, aViewTarget);
     VU0_SUB(vf10, vf10, vf11);
     VU0_STORE_VF(vf10, view);
@@ -7681,7 +7681,7 @@ void effReleaseBillPointEntries(EffClassWork *work) {
 }
 
 /* Actual same-title provider contracts; full four-float VU buffers remain. */
-extern f32 sdfViewTargetVector[4];
+extern f32 aViewEye[4];
 extern f32 aViewTarget[4];
 extern f32 atanf(f32);
 
@@ -7727,7 +7727,7 @@ void effUpdateOrbitalPointSpanWaves(EffClassWork *work) {
     if (step <= 0.0f) {
         return;
     }
-    VU0_LOAD_VF(vf10, sdfViewTargetVector);
+    VU0_LOAD_VF(vf10, aViewEye);
     VU0_LOAD_VF(vf11, aViewTarget);
     VU0_SUB(vf10, vf10, vf11);
     VU0_STORE_VF(vf10, view);
@@ -8095,7 +8095,7 @@ void effReleaseBillboardFramePointSets(EffClassWork *work) {
 #include "pcp_vu0.h"
 
 extern f32 aViewTarget[4];
-extern f32 sdfViewTargetVector[4];
+extern f32 aViewEye[4];
 extern u8 effOnesVector[];
 extern f32 effWorldUpVector[4];
 extern EffRandState effSharedRandomState[];
@@ -8143,7 +8143,7 @@ void effUpdateLightningPointSetRows(EffClassWork *work) {
     }
     count = config->timed.count;
     respawnDelay = config->respawnDelay;
-    VU0_LOAD_VF(vf10, sdfViewTargetVector);
+    VU0_LOAD_VF(vf10, aViewEye);
     VU0_LOAD_VF(vf11, aViewTarget);
     VU0_SUB(vf10, vf10, vf11);
     VU0_STORE_VF(vf10, view);
@@ -8715,7 +8715,7 @@ void effDrawEffectStrip(EffectStripNode *node) {
     billSize = node->copiedHeader.billSize;
     dds3BillboardSetMode(billboard, (s16)info->alphaTrack.surfaceIndex);
     VU0_LOAD_VF(vf10, aViewTarget);
-    VU0_LOAD_VF(vf11, sdfViewTargetVector);
+    VU0_LOAD_VF(vf11, aViewEye);
     VU0_SUB(vf10, vf10, vf11);
     SDF_VU0_NORMALIZE();
     VU0_STORE_VF_UNCLOBBERED(vf10, view);
