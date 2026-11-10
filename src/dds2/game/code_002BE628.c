@@ -1548,7 +1548,6 @@ void mnuFreeSimpleSpriteWork(MenuSpriteState *sprite) {
     sdfChipFreeDirect(sprite);
 }
 
-#ifdef NON_MATCHING
 #include "common.h"
 #include "sdk_ps2.h"
 #include "fr_font.h"
@@ -1573,55 +1572,70 @@ extern u8 (*datSkillNames)[17];
 /* A profile's panel in the party menu: its frame (four rows of sprite 4,
  * sprites 0 and 1, three rows of sprite 2, sprite 3), then one row per skill
  * of the profile's raw list, 0xB0 apart: range sprite, name, cost and icon,
- * or eight blank cells for an empty slot. Everything fades with the panel. */
+ * or eight blank cells for an empty slot. Everything fades with the panel.
+ * A single selected-piece index feeds the fixed and indexed frame phases.
+ * Each selection has real resource/slot/offset consumers. The frame Y
+ * workspace becomes the skill-row countdown only after its final draw.
+ * Qualified compiler evidence: docs/matching/party-profile-panel-contents.md. */
+extern const MenuPanelSprite D_0042B220[5];
+extern const MenuPoint D_0042B270[4];
 void mnuDrawPartyProfilePanelContents(s32 x, s32 y, s32 depth, datUnitWork_t *actor, s32 profile,
                                       MenuSpriteState *panel, s32 surface) {
     PrfSkillListBuffer list;
-    MenuPanelSprite sprites[5] = {
-        { 0, 0x4B, { 0xE00, 0x818 } },
-        { 1, 6, { 0xFD0, 0x840 } },
-        { 0, 0x4C, { 0xF70, 0x990 } },
-        { 0, 0x50, { 0xF70, 0xB98 } },
-        { 2, 0x18, { 0xDA0, 0x8F8 } },
-    };
-    /* A skill row's range sprite, name, cost and icon, and blank cells. */
-    MenuPoint rows[4] = { { 0x1120, 0x8F8 }, { 0x12A0, 0x900 }, { 0x1A30, 0x920 }, { 0x1490, 0x938 } };
+    MenuPanelSprite sprites[5];
+    MenuPoint rows[4];
     s32 fade = panel->initialValue;
     s32 row;
     s32 i;
+    s32 spriteIndex;
     s32 drawX;
-    s32 drawY;
+    s32 vertical;
     s32 rowOffset;
     u16 *skill;
     u16 skillId;
     _FRQ *glyph;
+    EffectSlotSet *resource;
+    s32 slot;
+
+    memcpy(sprites, D_0042B220, sizeof(sprites));
+    memcpy(rows, D_0042B270, sizeof(rows));
 
     prfBuildRawSkillList(profile, &list.list);
 
-    drawX = x + sprites[4].offset.x;
-    drawY = y + sprites[4].offset.y;
+    spriteIndex = 4;
+    drawX = x + sprites[spriteIndex].offset.x;
+    vertical = y + sprites[spriteIndex].offset.y;
+    resource = panel->resourceSets[sprites[spriteIndex].set];
+    slot = sprites[spriteIndex].slot;
     for (row = 3; row >= 0; row--) {
-        effDrawTextureSlotWithBlendedCornerColors(drawX, drawY, depth, fade, 1, panel->resourceSets[sprites[4].set],
-                                                  sprites[4].slot, surface);
-        drawY += 0xB0;
+        effDrawTextureSlotWithBlendedCornerColors(drawX, vertical, depth, fade, 1, resource, slot, surface);
+        vertical += 0xB0;
     }
-    for (i = 0; i < 2; i++) {
-        effDrawTextureSlotWithBlendedCornerColors(x + sprites[i].offset.x, y + sprites[i].offset.y, depth, fade, 1,
-                                                  panel->resourceSets[sprites[i].set], sprites[i].slot, surface);
+    for (i = 0; i < 2;) {
+        spriteIndex = i++;
+        resource = panel->resourceSets[sprites[spriteIndex].set];
+        slot = sprites[spriteIndex].slot;
+        drawX = x + sprites[spriteIndex].offset.x;
+        vertical = y + sprites[spriteIndex].offset.y;
+        effDrawTextureSlotWithBlendedCornerColors(drawX, vertical, depth, fade, 1,
+                                                  resource, slot, surface);
     }
-    drawX = x + sprites[2].offset.x;
-    drawY = y + sprites[2].offset.y;
+    spriteIndex = 2;
+    drawX = x + sprites[spriteIndex].offset.x;
+    vertical = y + sprites[spriteIndex].offset.y;
+    resource = panel->resourceSets[sprites[spriteIndex].set];
+    slot = sprites[spriteIndex].slot;
     for (row = 2; row >= 0; row--) {
-        effDrawTextureSlotWithBlendedCornerColors(drawX, drawY, depth, fade, 1, panel->resourceSets[sprites[2].set],
-                                                  sprites[2].slot, surface);
-        drawY += 0xB0;
+        effDrawTextureSlotWithBlendedCornerColors(drawX, vertical, depth, fade, 1, resource, slot, surface);
+        vertical += 0xB0;
     }
-    effDrawTextureSlotWithBlendedCornerColors(x + sprites[3].offset.x, y + sprites[3].offset.y, depth, fade, 1,
-                                              panel->resourceSets[sprites[3].set], sprites[3].slot, surface);
+    spriteIndex = 3;
+    effDrawTextureSlotWithBlendedCornerColors(x + sprites[spriteIndex].offset.x, y + sprites[spriteIndex].offset.y, depth, fade, 1,
+                                              panel->resourceSets[sprites[spriteIndex].set], sprites[spriteIndex].slot, surface);
 
     skill = list.list.skills;
     rowOffset = 0;
-    for (row = 3; row >= 0; row--) {
+    for (vertical = 3; vertical >= 0; vertical--) {
         skillId = *skill++;
         if (skillId != 0) {
             mnuDrawRangeSpriteVariant(x + rows[0].x, y + rows[0].y + rowOffset, depth, fade, skillId,
@@ -1639,9 +1653,7 @@ void mnuDrawPartyProfilePanelContents(s32 x, s32 y, s32 depth, datUnitWork_t *ac
         rowOffset += 0xB0;
     }
 }
-#else
-INCLUDE_ASM(const s32, "game/code_002BE628", mnuDrawPartyProfilePanelContents);
-#endif
+
 
 
 void mnuResetGradientFadeColor(MenuGradientFade *state, s32 color) {
