@@ -1858,7 +1858,6 @@ typedef struct _FRQ _FRQ;
 extern char D_00437C88[];
 extern _FRQ *itfCreateFont2TextGlyph(s32, s32, s32, u32, char *, _FRQ *);
 extern s32 frFontDrawGlyphChain(_FRQ *, s8, u32);
-#ifdef NON_MATCHING
 #include "common.h"
 #include "sdk_ps2.h"
 #include "ui_color.h"
@@ -1870,6 +1869,12 @@ extern s32 frFontDrawGlyphChain(_FRQ *, s8, u32);
 typedef struct _FRQ _FRQ;
 extern _FRQ *itfCreateFont2TextGlyph(s32, s32, s32, u32, char *, _FRQ *);
 extern void effDrawTextureSlotWithBlendedCornerColors(s32, s32, s32, u32, s32, EffectSlotSet *, s32, s32);
+INCLUDE_SDATA(const s32, "game/code_002BE628", D_00437C60);
+
+INCLUDE_SDATA(const s32, "game/code_002BE628", D_00437C68);
+
+const s32 D_00437C70[2] = {2096, 104};
+
 /* The ratio panel's figures. A negative value draws nothing. With a total,
  * draw its two marks (bar textures 5 and 6), the value in the faded color and
  * the total in the half-faded grey; without one, one mark and the value. */
@@ -1882,9 +1887,14 @@ void mnuDrawRatioPanelContents(s32 x, s32 y, s32 depth, u32 color, u32 fade,
     color = fclBlendColor(color, color & ~0xFF, fade);
     totalColor = fclBlendColor(0xA09DC380, 0xA09DC300, fade >> 1);
     if (value >= 0) {
+        /* Keep the initialized texture owner in s2 until its last slot load.
+         * The qualified allocation trace explains the y/glyph register reuse;
+         * this is a compiler constraint, not a hardware requirement.
+         * See docs/compiler-trace-ratio-panel.md. */
+        register MenuPageBar *style __asm__("$18") = pair;
         if (total >= 0) {
-            effDrawTextureSlotWithBlendedCornerColors(x + 0x950, y + 8, depth, fade, 1, pair->textures[5], 0, flags);
-            effDrawTextureSlotWithBlendedCornerColors(x + 0x6C0, y, depth, fade, 1, pair->textures[6], 0, flags);
+            effDrawTextureSlotWithBlendedCornerColors(x + 0x950, y + 8, depth, fade, 1, style->textures[5], 0, flags);
+            effDrawTextureSlotWithBlendedCornerColors(x + 0x6C0, y, depth, fade, 1, style->textures[6], 0, flags);
             sprintf(text, "%3d", value);
             glyph = itfCreateFont2TextGlyph(x + 0x520, y, depth, color, text, NULL);
             frFontDrawGlyphChain(glyph, 1, flags);
@@ -1894,7 +1904,7 @@ void mnuDrawRatioPanelContents(s32 x, s32 y, s32 depth, u32 color, u32 fade,
             frFontDrawGlyphChain(glyph, 1, flags);
             frDestroyFontRequestAfter(glyph);
         } else {
-            effDrawTextureSlotWithBlendedCornerColors(x + 0x6D0, y + 8, depth, fade, 1, pair->textures[5], 0, flags);
+            effDrawTextureSlotWithBlendedCornerColors(x + 0x6D0, y + 8, depth, fade, 1, style->textures[5], 0, flags);
             sprintf(text, "%3d", value);
             glyph = itfCreateFont2TextGlyph(x + 0x520, y, depth, color, text, NULL);
             frFontDrawGlyphChain(glyph, 1, flags);
@@ -1902,9 +1912,6 @@ void mnuDrawRatioPanelContents(s32 x, s32 y, s32 depth, u32 color, u32 fade,
         }
     }
 }
-#else
-INCLUDE_ASM(const s32, "game/code_002BE628", mnuDrawRatioPanelContents);
-#endif
 
 extern void mnuDrawRatioPanelContents(s32, s32, s32, u32, u32, s32, s32, MenuPageBar *, u32);
 extern void mnuDrawAndSwapPageBarEffect(s32, s32, s32, u32, MenuPageBar *, u32);
@@ -4611,15 +4618,7 @@ s32 pacFileHandleFree_(void *request) {
     return pacFileHandleFree(request);
 }
 
-INCLUDE_SDATA(const s32, "game/code_002BE628", D_00437C60);
-
-INCLUDE_SDATA(const s32, "game/code_002BE628", D_00437C68);
-
-const s32 D_00437C70[2] = {2096, 104};
-
 INCLUDE_RODATA(const s32, "game/code_002BE628", D_0042B610);
-
-INCLUDE_SDATA(const s32, "game/code_002BE628", D_00437C78);
 
 INCLUDE_SDATA(const s32, "game/code_002BE628", D_00437C80);
 
