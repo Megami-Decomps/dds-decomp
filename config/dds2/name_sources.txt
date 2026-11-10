@@ -10453,6 +10453,7 @@
 0x0040B290	sdfGrFrameSet	inferred	SMT3HD name via SLUS_209.11 0x00529388, sdf/sdfGsMemIO SMT3 rename; was D_0040B290
 0x0040B298	sdfPacketResourceEntries	inferred	confidence=high; src/dds2/game/code_0032C278.c:D_0040B298; type=sdfGsMemSlice_t*[]; refs=sdfLinkStoreFrameImagePredraw,sdfPrimFrameMovePredraw; Indexed texture resources supply the VRAM word offset for patching the low resource-address bits of draw packets. [names_qp9.tsv]
 0x0040B308	sdfGrDrawState	inferred	SMT3HD data name via SLUS_209.11 0x005293F8, 4 agreeing references; was sdfGrDrawState
+0x0040B348	sdfMatMultiTexAlphaTable	inferred	SMT3HD name via SLUS_209.11 0x00529438, sdf/sdfMat SMT3 rename; was D_0040B348
 0x0040B358	sdfMotGenNodeTable	inferred	SMT3HD name via SLUS_209.11 0x00529448, sdfMotion node generator table; was D_0040B358
 0x0040B368	sdfMotGenNodeDef	inferred	SMT3HD name via SLUS_209.11 0x00529458, sdfMotion data twin; was D_0040B368
 0x0040B380	sdfMotModelLinerPosTable	inferred	SMT3HD name via SLUS_209.11 0x00529470, sdfMotion model position vtable; was D_0040B380

@@ -5,7 +5,7 @@
 #define sdfTexFreeDelayed sdfTexReleaseReferenceViaHandler
 #define sdfMatSetRefMap sdfSetPrimaryStateWordFourth
 #define sdfMatSetTex sdfSetAssetPrimaryTextureAddress
-#define D_00529438 D_00398198
+#define D_00529438 sdfMatMultiTexAlphaTable
 
 extern void *sdfChipAllocDirect(s32 aSize);
 extern void *sdfChipAllocZeroDirect(s32 aSize);

@@ -97,7 +97,7 @@ void sdfMatUpdatePacketBasic(sdfMat_t *, SdfAssetEntry *);
 void sdfMatUpdatePacketMultiTex(sdfMat_t *, SdfAssetEntry *);
 void sdfApplyAssetEntryChangesWithForcedTexture(sdfMat_t *, s32);
 extern void sdfMatSetUvwParm(SdfDrawTransform *, const SdfSubParam *);
-extern u16 D_00398198[];
+extern u16 sdfMatMultiTexAlphaTable[];
 extern sdfTexHandle_t *sdfTexDup(sdfTexHandle_t *);
 extern void sdfTexSetClutColor(sdfTexHandle_t *, s32, f32);
 
@@ -847,7 +847,7 @@ void sdfMatUpdatePacketMultiTex(sdfMat_t *asset, SdfAssetEntry *drawEntry) {
     drawEntry->secondaryColor = asset->secondaryColor;
     packetMode = asset->secondaryMode;
     drawEntry->secondaryMode = packetMode;
-    drawEntry->alphaState = D_00398198[packetMode];
+    drawEntry->alphaState = sdfMatMultiTexAlphaTable[packetMode];
     if (texture != NULL) {
         drawEntry->secondaryTextureState.sampling = sdfTexGetTex1Reg(texture);
         drawEntry->secondaryTextureState.texture = sdfTexGetTex0Reg(texture);

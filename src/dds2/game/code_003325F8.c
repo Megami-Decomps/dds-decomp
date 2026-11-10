@@ -846,7 +846,7 @@ void sdfMatUpdatePacketUvwParm(sdfMat_t *asset, SdfAssetEntry *entry) {
     sdfMatSetUvwParm(&entry->transforms[0], asset->primarySubParam);
 }
 
-extern u16 D_0040B348[];
+extern u16 sdfMatMultiTexAlphaTable[];
 /* Copy color, unchecked mode/palette state and optional GS texture words,
  * then apply the secondary scalar block to the entry's native location. */
 void sdfMatUpdatePacketMultiTex(sdfMat_t *asset, SdfAssetEntry *drawEntry) {
@@ -856,7 +856,7 @@ void sdfMatUpdatePacketMultiTex(sdfMat_t *asset, SdfAssetEntry *drawEntry) {
     drawEntry->secondaryColor = asset->secondaryColor;
     packetMode = asset->secondaryMode;
     drawEntry->secondaryMode = packetMode;
-    drawEntry->alphaState = D_0040B348[packetMode];
+    drawEntry->alphaState = sdfMatMultiTexAlphaTable[packetMode];
     if (texture != NULL) {
         drawEntry->secondaryTextureState.sampling = sdfTexGetTex1Reg(texture);
         drawEntry->secondaryTextureState.texture = sdfTexGetTex0Reg(texture);

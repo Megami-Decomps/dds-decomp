@@ -8135,6 +8135,7 @@ sdfGrFrameModes = 0x003980B0;
 sdfGrFrameSet = 0x003980E0;
 sdfPacketResourceEntries = 0x003980E8;
 sdfGrDrawState = 0x00398158;
+sdfMatMultiTexAlphaTable = 0x00398198;
 sdfMotGenNodeTable = 0x003981A8;
 sdfMotGenNodeDef = 0x003981B8;
 sdfMotModelLinerPosTable = 0x003981D0;
