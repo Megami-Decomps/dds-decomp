@@ -10026,6 +10026,9 @@
 0x003AA950	dds3BillboardTagParam	inferred	SMT3HD data name via SLUS_209.11 0x00317040, 2 agreeing references; was dds3BillboardTagParam
 0x003AA970	billPairFacingReferenceAxis	inferred	confidence=high; Reference vector used in the corresponding cameraFacingMode==1 paired-quad path. Same role in DDS1 at 0x0034E040. Existing declarations, data bits, bounds and native VU operations remain; no imported/ASM-referenced root. No new function/data-ownership credit. [PurC5 readability data b12; matched pending-list/draw lifecycle and native-bank evidence; identifier-only]
 0x003AA980	billPairFacingScale	inferred	confidence=high; Mutable paired-stream facing scale vector, Y updated before geometry matrix row scaling. Same role in DDS1 at 0x0034E050. Existing declarations, data bits, bounds and native VU operations remain; no imported/ASM-referenced root. No new function/data-ownership credit. [PurC5 readability data b12; matched pending-list/draw lifecycle and native-bank evidence; identifier-only]
+0x003AA9F0	dds3ParticleSparkDirTable	inferred	SMT3HD name via SLUS_209.11 0x003170E0, effect/parManager SMT3 rename; was D_003AA9F0
+0x003AAAB0	dds3ParticleNegOneVec	inferred	SMT3HD name via SLUS_209.11 0x003171A0, effect/parManager SMT3 rename; was D_003AAAB0
+0x003AAAC0	dds3ParticleSparkOffsetDirTable	inferred	SMT3HD name via SLUS_209.11 0x003171B0, effect/parManager SMT3 rename; was D_003AAAC0
 0x003AAB80	dds3ParticleFuncTable	inferred	SMT3HD data name via SLUS_209.11 0x00317270, 5 agreeing references; was dds3ParticleFuncTable
 0x003AAC90	dds3TrackPolyPairFaceIndex	inferred	SMT3HD name via SLUS_209.11 0x317380, effect/polyManager SMT3 rename; was D_003AAC90
 0x003AAD10	dds3TrackPolyTriangleFaceIndex	inferred	SMT3HD name via SLUS_209.11 0x00317400, effect/polyManager SMT3 rename; was D_003AAD10

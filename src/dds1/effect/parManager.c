@@ -14,9 +14,9 @@
 #define func_001621C8 effCloneSingleParticleTemplate
 #define func_00162248 effFreeSingleParticleTemplate
 #define func_00162270 effInitParticleRecord
-#define D_003170E0 D_0034E0C0
-#define D_003171A0 D_0034E180
-#define D_003171B0 D_0034E190
+#define D_003170E0 dds3ParticleSparkDirTable
+#define D_003171A0 dds3ParticleNegOneVec
+#define D_003171B0 dds3ParticleSparkOffsetDirTable
 #define dds3ParticleAllBuffInitTable D_0034E2F0
 #define dds3ParticleSetScaleTable D_0034E328
 
