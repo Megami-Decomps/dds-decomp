@@ -12,12 +12,12 @@ void sdfMemFreeDirect(sdfMemHandle_t *aHandle);
 void sdfChipFreeDirect(void *aPtr);
 void sdfIpuFree(sdfIpuDecodeCb_t *cb);
 s32 p2sdSyncMovie(void);
-void *memcpy(void *a, const void *b, u32 c);
+void *memcpy(void *a, const void *b, size_t c);
 s32 sdfFileCmdFileSize(void *aHandle);
 s32 sdfFileCmdFree(void *aHandle);
 s32 DIntr(void);
 s32 EIntr(void);
-void *memset(void *a, s32 b, u32 c);
+void *memset(void *a, s32 b, size_t c);
 char *strrchr(const char *aStr, s32 aChar);
 s32 strcasecmp(const char *aLeft, const char *aRight);
 void *sdfChipAllocZeroDirect(s32 aSize);
@@ -53,9 +53,6 @@ void movie_2C5080(const char *aStr)
     puts(aStr);
 }
 
-/* NON_MATCHING: 21 of 52 words match, one word short (first differing word
- * at +0x44); the +0x70 arm needs retail's movn, which gcc folds away. */
-#ifdef NON_MATCHING
 u8 *movieWaitSema(s32 aSize)
 {
     sdfMovieCb_t *mov = movieSemaId;
@@ -68,26 +65,38 @@ u8 *movieWaitSema(s32 aSize)
         obj->scratchSize -= aSize;
         obj->scratch = ptr + aSize;
     } else {
-        ptr = obj->ringBuffer + obj->ringOffset;
+        s32 offset = obj->ringOffset;
+        ptr = obj->ringBuffer + offset;
         if (obj->ringLength < aSize) {
+            /* Retail copies the old count before reusing its register for
+             * the XOR predicate: countScratch has those two live phases.
+             * Ordinary scalar reuse keeps the select; these local constraints
+             * recover native allocation and XOR operand order. This is a
+             * reconstruction aid, not original-source evidence. */
+            FAKEMATCH_ASM_REG(s32, frame, "$2") = mov->decodeCb.frame;
+            FAKEMATCH_ASM_REG(u32, countScratch, "$3") = movieSemaCount;
+            u32 count;
+
             ptr = NULL;
-            if (movieSemaCount != mov->decodeCb.frame) {
-                movieSemaCount = mov->decodeCb.frame;
+            count = countScratch;
+            countScratch = (u32)frame ^ countScratch;
+            FAKEMATCH_ASM_LIVE(countScratch);
+            if (countScratch != 0) {
+                count = frame;
             }
+            movieSemaCount = count;
         } else {
             obj->ringLength -= aSize;
-            obj->ringOffset += aSize;
-            if (obj->ringOffset > 0xFFFF) {
-                obj->ringOffset -= 0x10000;
+            offset += aSize;
+            if (offset > 0xFFFF) {
+                offset -= 0x10000;
             }
+            obj->ringOffset = offset;
         }
     }
     SignalSema(movieStreamSema);
     return ptr;
 }
-#else
-INCLUDE_ASM(const s32, "sdf/sdfMovie", movieWaitSema);
-#endif
 
 /* Store the stream-frame draw-path mode; movie viewport setup selects 1. */
 void sdfSetStreamFrameDrawMode(u32 value) {
@@ -254,8 +263,8 @@ typedef struct sdfMovieDrawPacket_t {
 extern u8 *movieWaitSema(s32 size);
 extern s32 sdfGrAllocPacketBuff(s32 size);
 extern sdfDrawTag_t *sdfPrimAllocDrawTag(s32 (*allocator)(s32));
-extern void sdfDrawTagLink(sdfDrawTag_t *tag, u32 packet);
-extern u32 p2sdSetPcmCallback(u32 callback);
+extern void sdfDrawTagLink(sdfDrawTag_t *tag, addr_t packet);
+extern u32 p2sdSetPcmCallback(addr_t callback);
 extern s32 p2sdPlayPcm(u8 channel);
 
 void release_movieobj2(sdfMovieCb_t *obj, sdfGrOt_t *ot)
@@ -279,11 +288,11 @@ void release_movieobj2(sdfMovieCb_t *obj, sdfGrOt_t *ot)
     if (obj->sndActive != 0 && obj->sndPlaying == 0 && obj->readCb.pac->ringLength >= 0x1000) {
         obj->sndPlaying = 1;
         movieSemaId = obj;
-        p2sdSetPcmCallback((u32)movieWaitSema);
+        p2sdSetPcmCallback(EE_ADDR(movieWaitSema));
         p2sdPlayPcm(obj->sndVolume);
     }
 
-    packet = (sdfMovieDrawPacket_t *)sdfGrAllocPacketBuff(sizeof(sdfMovieDrawPacket_t));
+    packet = EE_ADDR_AS(sdfMovieDrawPacket_t *, sdfGrAllocPacketBuff(sizeof(sdfMovieDrawPacket_t)));
     packet->dmaTag = 0x100000A;
     height = obj->decodeCb.height;
     width = obj->decodeCb.width;
@@ -323,7 +332,7 @@ void release_movieobj2(sdfMovieCb_t *obj, sdfGrOt_t *ot)
         (u32)((s16)obj->x + (s16)obj->width);
     packet->vertexExtent.reg = 0x05;
     tag = sdfPrimAllocDrawTag(NULL);
-    sdfDrawTagLink(tag, (u32)packet);
+    sdfDrawTagLink(tag, EE_ADDR(packet));
     ot->regFunc(ot, tag);
 }
 
@@ -799,3 +808,4 @@ INCLUDE_SDATA(const s32, "sdf/sdfMovie", sdfMovieDrawColor);
 INCLUDE_SDATA(const s32, "sdf/sdfMovie", D_003BD634);
 
 INCLUDE_SDATA(const s32, "sdf/sdfMovie", D_003BD638);
+
