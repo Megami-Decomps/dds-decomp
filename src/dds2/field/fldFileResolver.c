@@ -187,7 +187,7 @@ extern dds3Basic_t *dds3AddLightObjectBasic(s32);
 extern dds3Basic_t *dds3AddPathBasic(s32 key, Dds3PathCurveTable *work, const char *name);
 extern dds3Basic_t *dds3AddModelRangeBasicNew(s32, void *, const f32 *, const char *);
 extern void dds3GetRadiusPoseSet(dds3Basic_t *, f32);
-extern void dds3SetLightObjectResoruce(dds3Basic_t *, WorldTransformSetup *);
+extern void dds3SetLightObjectResoruce(dds3Basic_t *, fldResourceLight_t *);
 extern void fldMakePlane(const FldCollisionDescriptor *geometry, const f32 *translation,
                          u32 id, s32 sceneFlag,
                          FldMapSlotAuxiliaryFlagSelector auxiliaryFlagSelector);
@@ -329,7 +329,7 @@ void fldMakeResouceBasicFL1(FldSpawnBatch *batch, u32 batchCount) {
                 dds3SetUnitObjectId(spawnedObject, resource->name);
                 dds3SetPosPoseSet(spawnedObject, (u128 *)position);
                 /* Type-12 serialization uses this shared slot for outer radius. */
-                dds3GetRadiusPoseSet(spawnedObject, ((WorldTransformSetup *)resource->data)->transform.rotation[1]);
+                dds3GetRadiusPoseSet(spawnedObject, ((fldResourceLight_t *)resource->data)->OutsideR);
                 dds3SetLightObjectResoruce(spawnedObject, resource->data);
                 if ((u32)fldGlobalBase.area - 200U < 300U) {
                     ((EffLightData *)spawnedObject->workdata)->flags |= 8;

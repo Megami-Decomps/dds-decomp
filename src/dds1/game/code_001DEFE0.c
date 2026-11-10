@@ -8229,9 +8229,9 @@ void btlTickFieldSwayAndTint(void) {
     effBTLFieldFilterDraw();
 }
 
-extern WorldTransformSetup D_003D74A0;
+extern fldResourceLight_t D_003D74A0;
 
-extern void dds3SetLightObjectResoruce(dds3Basic_t *, WorldTransformSetup *);
+extern void dds3SetLightObjectResoruce(dds3Basic_t *, fldResourceLight_t *);
 
 extern void dds3LinkSceneLight(dds3Basic_t *object, s32 blendFrames);
 
@@ -8240,19 +8240,19 @@ void btlBeginSceneLightColorTransition(f32 *lightColor, f32 *ambientColor, s32 f
     BtlState *work = (BtlState *)btlGetRuntime();
     dds3Basic_t *listener = work->sceneLightNode;
 
-    D_003D74A0.transform.position[0] = lightColor[0];
-    D_003D74A0.transform.position[1] = lightColor[1];
-    D_003D74A0.transform.position[2] = lightColor[2];
-    D_003D74A0.transform.scale[0] = ambientColor[0];
-    D_003D74A0.transform.scale[1] = ambientColor[1];
-    D_003D74A0.transform.scale[2] = ambientColor[2];
-    D_003D74A0.unk00 = 0;
-    D_003D74A0.flags = 0;
-    D_003D74A0.mode = 0;
-    D_003D74A0.transform.rotation[0] = 0.0f;
-    D_003D74A0.transform.rotation[1] = 0.0f;
-    D_003D74A0.transform.rotation[2] = 0.0f;
-    D_003D74A0.transform.rotation[3] = 0.0f;
+    D_003D74A0.DiffuseR = lightColor[0];
+    D_003D74A0.DiffuseG = lightColor[1];
+    D_003D74A0.DiffuseB = lightColor[2];
+    D_003D74A0.AmbientR = ambientColor[0];
+    D_003D74A0.AmbientG = ambientColor[1];
+    D_003D74A0.AmbientB = ambientColor[2];
+    D_003D74A0.resv = 0;
+    D_003D74A0.Flag = 0;
+    D_003D74A0.AnimeType = 0;
+    D_003D74A0.InsideR = 0.0f;
+    D_003D74A0.OutsideR = 0.0f;
+    D_003D74A0.Soften = 0.0f;
+    D_003D74A0.Bias = 0.0f;
     dds3SetLightObjectResoruce(listener, &D_003D74A0);
     dds3LinkSceneLight(work->sceneLightNode, frames);
 }
@@ -8568,19 +8568,19 @@ s32 btlRestoreSceneTransformLighting(SceneLightRestoreArgs *args) {
             VEC3_SPLAT(dds3LightParam[0], 0.0078125f);
         }
         listener = work->sceneLightNode;
-        D_003D74A0.transform.position[0] = work->baselineLightColor[0];
-        D_003D74A0.transform.position[1] = work->baselineLightColor[1];
-        D_003D74A0.transform.position[2] = work->baselineLightColor[2];
-        D_003D74A0.transform.scale[0] = work->baselineAmbientColor[0];
-        D_003D74A0.transform.scale[1] = work->baselineAmbientColor[1];
-        D_003D74A0.transform.scale[2] = work->baselineAmbientColor[2];
-        D_003D74A0.unk00 = 0;
-        D_003D74A0.flags = 0;
-        D_003D74A0.mode = 0;
-        D_003D74A0.transform.rotation[0] = 0.0f;
-        D_003D74A0.transform.rotation[1] = 0.0f;
-        D_003D74A0.transform.rotation[2] = 0.0f;
-        D_003D74A0.transform.rotation[3] = 0.0f;
+        D_003D74A0.DiffuseR = work->baselineLightColor[0];
+        D_003D74A0.DiffuseG = work->baselineLightColor[1];
+        D_003D74A0.DiffuseB = work->baselineLightColor[2];
+        D_003D74A0.AmbientR = work->baselineAmbientColor[0];
+        D_003D74A0.AmbientG = work->baselineAmbientColor[1];
+        D_003D74A0.AmbientB = work->baselineAmbientColor[2];
+        D_003D74A0.resv = 0;
+        D_003D74A0.Flag = 0;
+        D_003D74A0.AnimeType = 0;
+        D_003D74A0.InsideR = 0.0f;
+        D_003D74A0.OutsideR = 0.0f;
+        D_003D74A0.Soften = 0.0f;
+        D_003D74A0.Bias = 0.0f;
         dds3SetLightObjectResoruce(listener, &D_003D74A0);
         dds3LinkSceneLight(work->sceneLightNode, args->value);
         PCP_COPY_VECTOR_F32(work->lightColor, work->baselineLightColor);

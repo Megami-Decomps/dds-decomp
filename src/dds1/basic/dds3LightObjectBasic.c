@@ -188,28 +188,28 @@ void dds3UnlinkLightObjectFromUnitObject(dds3Basic_t *effectNode, s32 duration) 
     evtUnlinkLightObjectBasic((struct evtUnitHandle_t *)effectData->transitionWork, duration);
 }
 /* Load flags, mode and the transform block from a setup record. */
-void dds3SetLightObjectResoruce(dds3Basic_t *worldNode, WorldTransformSetup *setup) {
+void dds3SetLightObjectResoruce(dds3Basic_t *worldNode, fldResourceLight_t *resource) {
     WorldTransformData *transformData = worldNode->workdata;
 
     transformData->flags = 0;
-    if (setup->flags & 1) {
+    if (resource->Flag & 1) {
         transformData->flags = 1;
     }
-    if (setup->flags & 2) {
+    if (resource->Flag & 2) {
         transformData->flags |= 4;
     }
-    transformData->rotation[0] = setup->transform.rotation[0];
-    transformData->mode = setup->mode;
-    transformData->rotation[1] = setup->transform.rotation[1];
-    transformData->rotation[2] = setup->transform.rotation[2];
-    transformData->rotation[3] = setup->transform.rotation[3];
-    transformData->position[0] = setup->transform.position[0];
-    transformData->position[1] = setup->transform.position[1];
-    transformData->position[2] = setup->transform.position[2];
+    transformData->rotation[0] = resource->InsideR;
+    transformData->mode = resource->AnimeType;
+    transformData->rotation[1] = resource->OutsideR;
+    transformData->rotation[2] = resource->Soften;
+    transformData->rotation[3] = resource->Bias;
+    transformData->position[0] = resource->DiffuseR;
+    transformData->position[1] = resource->DiffuseG;
+    transformData->position[2] = resource->DiffuseB;
     transformData->positionW = 0.0f;
-    transformData->scale[0] = setup->transform.scale[0];
-    transformData->scale[1] = setup->transform.scale[1];
-    transformData->scale[2] = setup->transform.scale[2];
+    transformData->scale[0] = resource->AmbientR;
+    transformData->scale[1] = resource->AmbientG;
+    transformData->scale[2] = resource->AmbientB;
     transformData->scaleW = 1.0f;
 }
 

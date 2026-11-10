@@ -163,13 +163,22 @@ typedef struct WorldTransformParams {
     f32 scale[3];
 } WorldTransformParams;
 
-/* Setup record consumed by dds3SetLightObjectResoruce (0x34). */
-typedef struct WorldTransformSetup {
-    u32 unk00;
-    u32 flags;                      /* bit 0 -> 1, bit 1 -> 4 in the object's flags */
-    u32 mode;
-    WorldTransformParams transform;
-} WorldTransformSetup;
+typedef struct fldResourceLight_t
+{
+    u32 resv;
+    u32 Flag;
+    u32 AnimeType;
+    f32 InsideR;
+    f32 OutsideR;
+    f32 Soften;
+    f32 Bias;
+    f32 DiffuseR;
+    f32 DiffuseG;
+    f32 DiffuseB;
+    f32 AmbientR;
+    f32 AmbientG;
+    f32 AmbientB;
+} fldResourceLight_t;
 
 /* Confirmed transform payload fields; no total allocation extent is claimed. */
 typedef struct WorldTransformData {
@@ -183,7 +192,7 @@ typedef struct WorldTransformData {
     u32 flags;        /* 0x64 */
 } WorldTransformData;
 
-void dds3SetLightObjectResoruce(dds3Basic_t *object, WorldTransformSetup *setup);
+void dds3SetLightObjectResoruce(dds3Basic_t *basic, fldResourceLight_t *resource);
 void dds3SetLightObjectPathResoruce(dds3Basic_t *object, const WorldTransformParams *params);
 
 typedef char WorldTransformData_offsets_must_match_paired_loaders[
