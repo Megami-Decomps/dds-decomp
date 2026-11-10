@@ -918,6 +918,13 @@ class DevElfTests(unittest.TestCase):
         with self.assertRaisesRegex(dev_elf.DevElfError, "stale HI16/LO16"):
             dev_elf.scan_stale_move_references(bytes(image), ranges)
 
+        # addu $4, $5, $6 replaces the high half before the store reads $4.
+        struct.pack_into("<I", image, 0x1004, (5 << 21) | (6 << 16) | (4 << 11) | 0x21)
+        struct.pack_into(
+            "<I", image, 0x1008, (0x2B << 26) | (4 << 21) | (low & 0xFFFF)
+        )
+        dev_elf.scan_stale_move_references(bytes(image), ranges)
+
     def test_relocation_closure_rejects_stale_relocation_target(self) -> None:
         old_vaddr = 0x00100040
         new_vaddr = 0x00412000

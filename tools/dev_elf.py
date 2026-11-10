@@ -2389,6 +2389,23 @@ def _jump_target(word: int, pc: int) -> int:
     return ((pc + 4) & 0xF0000000) | ((word & 0x03FFFFFF) << 2)
 
 
+def _writes_gpr(word: int) -> int | None:
+    """The general register an EE instruction writes, or None."""
+
+    opcode = word >> 26
+    rt = (word >> 16) & 0x1F
+    if opcode in (0x00, 0x1C):  # SPECIAL, MMI
+        return (word >> 11) & 0x1F
+    if opcode == 0x03:  # JAL
+        return 31
+    if opcode in (0x10, 0x11, 0x12) and (word >> 21) & 0x1F in (0, 1, 2):
+        return rt  # MFCz, DMFCz, CFCz
+    if opcode in (0x08, 0x09, 0x0A, 0x0B, 0x0C, 0x0D, 0x0E, 0x0F, 0x18, 0x19,
+                  0x1A, 0x1B, 0x1E, 0x37) or 0x20 <= opcode <= 0x27:
+        return rt
+    return None
+
+
 def scan_stale_move_references(
     image: bytes,
     ranges: list[tuple[int, int, int, int]],
@@ -2447,6 +2464,8 @@ def scan_stale_move_references(
                     low_opcode not in ADDRESS_LOW_OPCODES
                     or (low_word >> 21) & 0x1F != register
                 ):
+                    if _writes_gpr(low_word) == register:
+                        break
                     continue
                 address = _decode_mips_relocation_address(
                     image, file_offset, low_offset
@@ -2456,6 +2475,8 @@ def scan_stale_move_references(
                         f"stale HI16/LO16 construction at 0x{vaddr:X}/"
                         f"0x{vaddr + distance * 4:X} targets an abandoned move slot"
                     )
+                if _writes_gpr(low_word) == register:
+                    break
     return scanned_words
 
 
