@@ -1782,7 +1782,7 @@
 0x0015EF50	dds3SpPoly_RollRingBuffInit	inferred	SMT3HD name via SLUS_209.11 0x00169768, reloc-identical; was polyRotatingRandomizeRecord
 0x0015F0C0	dds3SpPoly_RollRingMove	inferred	SMT3HD name via SLUS_209.11 0x001698D8, reloc-identical; was polyBandLayoutRingRotated
 0x0015F2B0	dds3SpPoly_RollRingSetScale	inferred	SMT3HD name via SLUS_209.11 0x00169AC8, shared-hash-in-run; was polyScaleNodeFloatingParameters
-0x0015F2D0	polyUpdateRotatingBandCells	inferred	confidence=high; matched-C; Updates rotating-band radii/rotation/tint/geometry and queues cells; completion remains gated by duration>=2. DDS2 twin0x00166EC0. Namer1 batch20.
+0x0015F2D0	dds3SpPoly_RollRingDraw	inferred	SMT3HD name via SLUS_209.11 0x00169AE8, effect/polyManager SMT3 rename; was polyUpdateRotatingBandCells
 0x0015F468	dds3SpPoly_RollRingSetEndless	inferred	SMT3HD name via SLUS_209.11 0x00169C70, byte-identical; was polyResetEntries
 0x0015F4D0	dds3SpPolyCreate	inferred	SMT3HD name via SLUS_209.11 0x00169CD8, reloc-identical; was effBillCreateDispatch
 0x0015F520	dds3SpPolyCopy	inferred	SMT3HD name via SLUS_209.11 0x00169D28, reloc-identical; was effCreateDispatchStateForHandler
