@@ -63,7 +63,7 @@ extern s32 sceSifLoadStartModule(const char *modulePath, s32 flags, void *module
 
 extern s8 sdfPrintIopFlag;
 
-extern char D_003BD3D0[];
+extern char sdfPrintStrFmt[];
 
 extern char sdfCdDirectPrefix[]; /* cdrom */
 

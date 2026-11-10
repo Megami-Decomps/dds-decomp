@@ -14575,7 +14575,7 @@ DDS2 integer-handle declarations rather than imposing a new common view.
 
 `sdfFileHostRootPath` remains the 64-byte, C-owned `host0:` buffer. Its
 six-byte prefix copy and unchecked path/slash/NUL appending are unchanged.
-`sdfDevRpcClient` keeps the existing 0x30-byte context owner and its SDK
+`sdfPrintRpcClient` keeps the existing 0x30-byte context owner and its SDK
 client prefix; naming introduces no alternate RPC layout.
 
 `sdfCdSectorBuf`, `sdfCdImageOffset` and

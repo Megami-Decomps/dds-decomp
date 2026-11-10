@@ -10935,6 +10935,7 @@
 0x00438AB0	devConsTop	inferred	SMT3HD name via SLUS_209.11 0x005518F8, sdfDevCons reference; was D_00438AB0
 0x00438AB4	alreadyInitDevCons	inferred	SMT3HD name via SLUS_209.11 0x005518FC, sdfDevCons reference; was D_00438AB4
 0x00438AB8	sdfPrintIopFlag	inferred	SMT3HD name via SLUS_209.11 0x00551900, sdfPrint reference; was D_00438AB8
+0x00438AC0	sdfPrintStrFmt	inferred	SMT3HD name via SLUS_209.11 0x00551908, sdf/sdfPrint SMT3 rename; was D_00438AC0
 0x00438AC8	sdfDiscRequestPending	inferred	high confidence; src/dds2/game/code_0033D5D0.c sdfDevSignalPendingSemaphore(): if (D_00438AC8 != 0) { Instruction-aligned data counterpart of DDS1 D_003BD3D8 in the matched sdfDevSignalPendingSemaphore() twin. Pending marker cleared after signaling the disc-request semaphore. [names_reviewed26.tsv]
 0x00438AD0	sdfCdDirectPrefix	inferred	SMT3HD name via SLUS_209.11 0x00551910, sdf/sdfCd SMT3 rename; was D_00438AD0
 0x00438AD8	sdfCdTrayMode	inferred	SMT3HD name via SLUS_209.11 0x00551918, sdfCd twin; was sdfDiscType
@@ -11308,7 +11309,7 @@
 0x00476240	corePktFogParm	inferred	SMT3HD name via SLUS_209.11 0x0058F060, sdfCoreDraw reference; was D_00476240
 0x00476250	sdfVuObjectBasisCache	inferred	the three basis vectors corePktLoadWorldLightMtx caches (VU0_ROTATE_BASIS_AND_CACHE); corePktEmitRefMapPass reads them. DDS1 twin 0x003F98A0.
 0x00476480	sdfPadCb	inferred	SMT3HD data name via SLUS_209.11 0x0058F2C0, 2 agreeing references; was sdfPadCb
-0x004764D0	sdfDevRpcClient	inferred	confidence=high; Dev RPC startup binds this existing SifRpcClientContextView.client and formatted output passes this context to the transport. Keep complete current owner and client prefix. Same role in DDS1 at 0x003F9B50. Preserve prior Cedar data-ownership credit; no new function/data-ownership credit. [PurC5 readability data b8; matched-C/native-twin evidence; identifier-only]
+0x004764D0	sdfPrintRpcClient	inferred	SMT3HD name via SLUS_209.11 0x0058F310, sdf/sdfPrint SMT3 rename; was sdfDevRpcClient
 0x00476510	sdfPrintRpcBuff	inferred	SMT3HD data name via SLUS_209.11 0x0058F350, 1 agreeing references; was sdfPrintRpcBuff
 0x00476940	sdfCdImageSearchFileDirect_ent	inferred	SMT3HD name via SLUS_209.11 0x0058F780, sdfCd data twin, the record sdfCdImageSearchFileDirect returns; was D_00476940
 0x00476980	sdfCdSectorBuf	inferred	SMT3HD name via SLUS_209.11 0x0058F7C0, sdf/sdfCd SMT3 rename; was sdfDevReadSectorBuffer

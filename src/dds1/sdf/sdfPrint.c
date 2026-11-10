@@ -68,13 +68,13 @@ extern void *memcpy(void *, const void *, unsigned int);
 
 #include "sdk_libmrpc.h"
 
-#define D_0058F310 sdfDevRpcClient
+#define D_0058F310 sdfPrintRpcClient
 
 extern sifRpcClientContextView_t D_0058F310;
 
 extern s8 sdfPrintIopFlag;
 
-#define D_00551908 D_003BD3D0
+#define D_00551908 sdfPrintStrFmt
 
 extern char D_00551908[];
 
@@ -203,4 +203,4 @@ s32 sdfPrintf(const char *str, ...) {
 }
 INCLUDE_SDATA(const s32, "sdf/sdfPrint", sdfPrintIopFlag);
 
-INCLUDE_SDATA(const s32, "sdf/sdfPrint", D_003BD3D0);
+INCLUDE_SDATA(const s32, "sdf/sdfPrint", sdfPrintStrFmt);

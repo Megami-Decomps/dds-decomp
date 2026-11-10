@@ -58,7 +58,7 @@ extern Bytes7 sdfFileHostPrefix[];
 
 extern s8 sdfPrintIopFlag;
 
-extern char D_00438AC0[];
+extern char sdfPrintStrFmt[];
 
 extern char sdfCdDirectPrefix[]; /* cdrom */
 
