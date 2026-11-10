@@ -3000,18 +3000,18 @@
 0x00194978	frGetGsFontNum	inferred	SMT3HD name via SLUS_209.11 0x001C7050, shared-hash-in-run; was frFontGetCachedItemCount
 0x00194988	frGetTextHandleNum	inferred	SMT3HD name via SLUS_209.11 0x001C7060, shared-hash-in-run; was frFontGetChildGlyphCount
 0x00194998	frGetFontHandleNum	inferred	SMT3HD name via SLUS_209.11 0x001C7070, shared-hash-in-run; was frFontGetParentGlyphCount
-0x001949A8	frFontGetInitialGlyphY	inferred	confidence=high; The glyph constructor assigns this return value to glyph->y when setup flag0x10 is set. Retail always returns zero; original empty parameter list and two-argument calls retained. DDS2 19C638 twin. [Namer1 b62]
-0x001949B0	frFontFillGlyphMetrics	inferred	Fills one glyph's cell dimensions, advance and horizontal bearing, as stated in the adjacent source comment; twin=DDS2 0x0019C640.
+0x001949A8	frGetYShiftLev	inferred	SMT3HD name via SLUS_209.11 0x001C7080, same slot and body shape in IDA, was frFontGetInitialGlyphY; was frFontGetInitialGlyphY
+0x001949B0	frGetXShiftLev	inferred	SMT3HD name via SLUS_209.11 0x001C7088, same slot and body shape in IDA, was frFontFillGlyphMetrics; was frFontFillGlyphMetrics
 0x00194BA0	frSetUserImage	inferred	SMT3HD name via SLUS_209.11 0x001C7288, unique-masked-hash; was frFontAppendGlyphReference
 0x00194CD0	frLinkUserImage	inferred	SMT3HD name via SLUS_209.11 0x001C73B8, reloc-identical; was frFontAppendClonedGlyph
 0x00194D20	frTranslateUserData	inferred	SMT3HD name via SLUS_209.11 0x001C7408, reloc-identical; was frFontCreateAtlasItem
 0x00194E00	frDecodeFontImage	inferred	SMT3HD name via SLUS_209.11 0x001C74E8, reloc-identical; was frFontCloneEntryResource
 0x00194E80	frTranslateFont2GS	inferred	SMT3HD name via SLUS_209.11 0x001C7568, reloc-identical; was frFontRetainOrCreateCachedItem
 0x00194F78	frInitTextHandle	inferred	SMT3HD name via SLUS_209.11 0x001C7660, reloc-identical; was frFontSetupGlyph
-0x00194FC0	frFontInitGlyph	inferred	zero-initializes glyph record with defaults and self link
-0x00195010	frFontCreateGlyphFromCode	inferred	Dequeues a child glyph, maps its encoded 16-bit code into a cached item, initializes metrics and returns the glyph pointer.
-0x00195160	frFontAppendTextToGlyphChain	inferred	Decodes an encoded text string into a glyph chain and optionally attaches it after the supplied prior glyph.
-0x001951C8	frFontBuildGlyphChain	inferred	Decodes a byte string into pooled child glyphs, links them to an existing or new head and records aggregate child count/advance; twin of DDS2 0x0019CE78.
+0x00194FC0	frInitFontHandle	inferred	SMT3HD name via SLUS_209.11 0x001C76A8, same slot and body shape in IDA, was frFontInitGlyph; was frFontInitGlyph
+0x00195010	frSetFont	inferred	SMT3HD name via SLUS_209.11 0x001C76E0, same slot and body shape in IDA, was frFontCreateGlyphFromCode; was frFontCreateGlyphFromCode
+0x00195160	frLinkFontString	inferred	SMT3HD name via SLUS_209.11 0x001C7828, same slot and body shape in IDA, was frFontAppendTextToGlyphChain; was frFontAppendTextToGlyphChain
+0x001951C8	frSetFontString	inferred	SMT3HD name via SLUS_209.11 0x001C7890, same slot and body shape in IDA, was frFontBuildGlyphChain; was frFontBuildGlyphChain
 0x00195360	frSetDrawSpeed	inferred	SMT3HD name via SLUS_209.11 0x001C7A60, byte-identical; was frFontSetContextEncodedByte
 0x001953A8	frSetFontSpace	inferred	SMT3HD name via SLUS_209.11 0x001C7A88, reloc-identical; was frFontSetSpacingAndMeasureGlyphs
 0x001953D8	frSetFontSize	inferred	SMT3HD name via SLUS_209.11 0x001C7AB8, reloc-identical; was frFontSetGlyphChainDimensions
@@ -3023,13 +3023,13 @@
 0x00195530	frDisableMode	inferred	interface/frFont: clears mask bits from the shared font flag byte D_003BB174 and returns the previous value; setter is func_00195520 [names_L10_LiteSweep.tsv]
 0x00195548	frSetFontDrawOT	inferred	stores render flags used when drawing glyphs [names_reviewed5.tsv]
 0x00195550	frEraseEffect	inferred	SMT3HD name via SLUS_209.11 0x001C7C30, byte-identical; was frFontAdvanceGlyphFade
-0x001955D8	frFontAdvanceChildFadeAndGetJitter	inferred	Gates child fade on predecessor/control state, advances its low byte up to 0x80 and returns the transient X jitter.
+0x001955D8	frDrawEffect	inferred	SMT3HD name via SLUS_209.11 0x001C7CB8, same slot and body shape in IDA, was frFontAdvanceChildFadeAndGetJitter; was frFontAdvanceChildFadeAndGetJitter
 0x00195868	frDrawFont	inferred	SMT3HD name via SLUS_209.11 0x001C7E00, draw producer, was frFontDrawGlyphInDefaultMode (dds-port names-for-conform); was frFontDrawGlyphInDefaultMode
 0x00195880	frDrawFontEx	inferred	SMT3HD name via SLUS_209.11 0x001C7E18, draw producer, was frFontDrawGlyphWithSharedFlags (dds-port names-for-conform); was frFontDrawGlyphWithSharedFlags
 0x001958A0	frDrawFontOt	inferred	SMT3HD name via SLUS_209.11 0x001C7E38, SMT3 frDrawFontEx callee (named upstream 804311e8), was frFontDrawGlyphChain; was frFontDrawGlyphChain
 0x00195B10	frFlipPacketBuf	inferred	Releases slot 1 when the current draw-buffer selector low byte is zero, otherwise slot 0; returns signed zero.
 0x00195B60	frCombineFontRequest	inferred	SMT3HD name via SLUS_209.11 0x001C8108, shared-hash-in-run; was frFontLinkGlyphAfterPrevious
-0x00195B78	frFontLinkGlyph	inferred	splices a glyph record into another's list with optional pos copy
+0x00195B78	frCombineFontRequestEx	inferred	SMT3HD name via SLUS_209.11 0x001C8120, same slot and body shape in IDA, was frFontLinkGlyph; was frFontLinkGlyph
 0x00195BD8	frSetExtDic	inferred	SMT3HD name via SLUS_209.11 0x001C81B8, reloc-identical; was frFontLoadTemporaryEntry
 0x00195BF8	frDestroyExtDic	inferred	SMT3HD name via SLUS_209.11 0x001C81D8, reloc-identical; was frFontFreeTemporaryEntry
 0x00195C10	frStrLen	inferred	SMT3HD name via SLUS_209.11 0x001C81F0, byte-identical; was frFontCountChars
@@ -3057,7 +3057,7 @@
 0x00196AB0	MessageRequest	inferred	SMT3HD name via SLUS_209.11 0x001C9108, reloc-identical; was itfDrawDefaultColorText
 0x00196AE8	MessageRequestEx	inferred	SMT3HD name via SLUS_209.11 0x001C9140, reloc-identical; was itfDrawCustomColorText
 0x00196B30	MessageRequestEx2	inferred	SMT3HD name via SLUS_209.11 0x001C9188, reloc-identical; was itfDrawEncodedTextStream
-0x00196B88	itfDrawColor	inferred	itf interface rendering and text in interface/frFont.c
+0x00196B88	MessageRequestNS	inferred	SMT3HD name via SLUS_209.11 0x001C91E0, same slot and body shape in IDA, was itfDrawColor; was itfDrawColor
 0x00196BB0	frGetMessageResult	inferred	SMT3HD name via SLUS_209.11 0x001C9220, shared-hash-in-run; was itfTestTextInterfaceMask
 0x00196BC0	frSetVariableRequest	inferred	SMT3HD name via SLUS_209.11 0x001C9230, reloc-identical; was itfSetIndexedTextSlot
 0x00196BD8	itfGetTextLipsUnitId	inferred	Returns the first value stored by encoded-text control 0xF416; itfMesBuildEntryGlyph passes it as the unique-unit identifier to evtLipsExecFunction. DDS2 twin 0x0019E908. [Namer1 batch 40]
@@ -3066,15 +3066,15 @@
 0x00196ED0	itfSkipEncodedTextOpcode	inferred	Inferred from the current C implementation in interface/frFont.c; agent-proposed name checked against its owner, fields and callees (R1 finite names pass).
 0x00197068	itfScanEncodedTextControls	inferred	Inferred from the current C implementation in interface/frFont.c; agent-proposed name checked against its owner, fields and callees (R1 finite names pass).
 0x00197190	itfInitTextDrawArgs	inferred	fills TextDrawArgs with defaults and forwards to itfScanEncodedTextControls
-0x001971E0	frFontGetSlotCellWidth	inferred	confidence=high; matched-C; src/dds1/interface/frFont.c:2272:func_001971E0; confidence=high; matched-C; src/dds1/interface/frFont.c:2272:func_001971E0; Returns the selected font-resource record cell width; interface/frFont.c identifies this halfword as cellWidth and supplies it to the cached glyph item constructor. Semantic twin has the same record stride and member access.; twin=dds2:0x0019B870; source=names_R_Names36.tsv:1 [names_qp11.tsv]
-0x00197200	frFontGetSlotCellHeight	inferred	confidence=high; matched-C; src/dds1/interface/frFont.c:2277:func_00197200; confidence=high; matched-C; src/dds1/interface/frFont.c:2277:func_00197200; Returns the selected font-resource record cell height; interface/frFont.c identifies this halfword as cellHeight and supplies it to the cached glyph item constructor. Semantic twin has the same record stride and member access.; twin=dds2:0x0019B890; source=names_R_Names36.tsv:2 [names_qp11.tsv]
+0x001971E0	frGetFontWidth	inferred	SMT3HD name via SLUS_209.11 0x001C83F0, same slot and body shape in IDA, was frFontGetSlotCellWidth; was frFontGetSlotCellWidth
+0x00197200	frGetFontHeight	inferred	SMT3HD name via SLUS_209.11 0x001C8458, same slot and body shape in IDA, was frFontGetSlotCellHeight; was frFontGetSlotCellHeight
 0x00197220	itfSetTextDrawLimit	inferred	Stores the text render limit or its default when nonpositive. [names_reviewed8.tsv]
 0x00197238	frwGetStaffFontFRQ	inferred	SMT3HD name via SLUS_209.11 0x001C9EB8, reloc-identical; was frFontBuildColoredGlyphWithSharedFlags
 0x00197348	frwLoadStaffFont	inferred	SMT3HD name via SLUS_209.11 0x001C9FC8, reloc-identical; was mnuLoadStaffFonts
 0x00197378	frwFreeStaffFont	inferred	SMT3HD name via SLUS_209.11 0x001C9FF8, reloc-identical; was mnuUnloadStaffFonts
 0x00197398	itfDecodeGlyph	inferred	itf interface rendering and text in interface/frWrap.c
 0x001973E8	itfConvertText	inferred	itf interface rendering and text in interface/frWrap.c
-0x001974B8	itfAttachGlyph16x18	inferred	Builds a glyph with 0x10 by 0x12 cell, sets color and flags and links it to its parent; sequel twin 0019F1B8.
+0x001974B8	frwGetSmallFont1FRQ	inferred	SMT3HD name via SLUS_209.11 0x001CA018, same slot and body shape in IDA, was itfAttachGlyph16x18; was itfAttachGlyph16x18
 0x00197580	frwGetFontEx	inferred	SMT3HD name via SLUS_209.11 0x001CA0D0, reloc-identical; was itfAppendTextGlyphChain
 0x00197708	frwGetSmallFontFRQ	inferred	SMT3HD name via SLUS_209.11 0x001CA258, reloc-identical; was frFontCreateMeasuredFlaggedGlyph
 0x00197748	itfCreateMeasuredTextGlyph	inferred	confidence=high; public positioned/colored text interface uses measured glyph creation and parent linkage; DDS2 twin0x0019F448; signature preserved. [Namer1 naming batch45]
@@ -3128,7 +3128,7 @@
 0x001997E0	dds3DebugDevDumpProcess	inferred	SMT3HD name via SLUS_209.11 0x001CC038, shared-hash-in-run; was kwlnUpdateDevelopmentDumpTask
 0x001997E8	itfCamp	inferred	SMT3HD name via SLUS_209.11 0x001CC040, shared-hash-in-run; was scrCmdCompleteImmediately
 0x001997F0	itfCampStartProcess	inferred	SMT3HD name via SLUS_209.11 0x001CC048, unique-masked-hash; was mnuReportCampProcessHalted
-0x00199828	itfCreateUiSpriteByKind	inferred	Allocates a itfpanel_t and kind-sized payload, initializes texture-bearing payloads 6-9 from the supplied value, and returns the sprite; DDS2 twin 0x001A1858.
+0x00199828	itfPnlRegist2	inferred	SMT3HD name via SLUS_209.11 0x001CC080, same slot and body shape in IDA, was itfCreateUiSpriteByKind; was itfCreateUiSpriteByKind
 0x00199900	itfPnlRelease	inferred	SMT3HD name via SLUS_209.11 0x001CC150, reloc-identical; was itfPanelReleasePrimitiveResources
 0x00199950	itfPnlSetPosition	inferred	SMT3HD name via SLUS_209.11 0x001CC1A0, unique-masked-hash; was itfSetPanelLayoutAndNotify
 0x00199998	itfPnlSetPositionOffset	inferred	SMT3HD name via SLUS_209.11 0x001CC1E8, unique-masked-hash; was itfAdvancePanelLayoutAndNotify
@@ -10187,7 +10187,7 @@
 0x003BB0FF	dblurDone	inferred	SMT3HD data name via SLUS_209.11 0x0054F307, 6 agreeing references; was dblurDone
 0x003BB127	evtViewerDirty	inferred	SMT3HD data name via SLUS_209.11 0x0054F317, 6 agreeing references; was evtViewerDirty
 0x003BB13F	rblurDone	inferred	SMT3HD data name via SLUS_209.11 0x0054F32F, 6 agreeing references; was rblurDone
-0x003BB160	frFontEncodedTextGlyphSpacing	inferred	confidence=high; Signed additive child spacing passed by indexed-text and encoded-stream builders; DDS2 plain-text wrapper temporarily clears and restores it. Existing s8 .sdata defaults DDS1 zero/DDS2 one, padding and attributes unchanged. Preserve Harbor Maple initialized-object recovery2ff415cac; ownership6158482611 explicitly released6158614821. DDS2 twin 0x00436550; native/matched-C consumers only; no import or active ASM reader. [PurD readability data b8; identifier-only]
+0x003BB160	gMessageSpaceX	inferred	SMT3HD name via SLUS_209.11 0x0054F408, saved and restored by MessageRequestNS, was frFontEncodedTextGlyphSpacing; was frFontEncodedTextGlyphSpacing
 0x003BB164	gMessageStepY	inferred	SMT3HD data name via SLUS_209.11 0x0054F40C, 3 agreeing references; was gMessageStepY
 0x003BB168	frDefaultFontHandle	inferred	SMT3HD data name via SLUS_209.11 0x0054F410, 2 agreeing references; was frDefaultFontHandle
 0x003BB16C	itfTextLipsUnitId	inferred	confidence=high; Unit id returned by itfGetTextLipsUnitId and written by the encoded-text 0xF416 lips command from itfReadEncodedTextLead. Twin 0x0043655C. [PurD readability data; identifier-only]
@@ -10571,7 +10571,7 @@
 0x003BD8E0	mnuTitleCameraObject	inferred	high confidence; src/dds1/game/code_00268AB8.c mnuCreateTitleCameraWorldEntry(): D_003BD8E0 = dds3AddCameraObjectBasicTypeFree(dds3AllocObjectId(), (f32 *)mnuTitleCameraPosition, (f32 *)mnuTitleCameraRotation); World camera object created with the retail title_camera callback label. [names_reviewed26.tsv]
 0x003BD8E8	sdfMcInfo	inferred	SMT3HD name via SLUS_209.11 0x00552030, mcManager twin; was fileActiveCardDetectionRequestIndex
 0x003BD8EC	fileMenuConvertedTextGlyph	inferred	confidence=high; mnuDrawAndStoreTextGlyphHandle saves itfCreateConvertedTextGlyph result, then draws with shared flags and queues the same _FRQ pointer in both games. Native object extent0x4; same role in DDS2 at0x00439004. Identifier-only; existing types,widths,bounds,casts,arithmetic,storage and per-game layouts retained; no source import or native ASM root/interior consumer. [Namer1 readability b88; matched-C/native-data evidence]
-0x003BD8F0	fileMenuStringGlyph	inferred	confidence=high; mcdCreateFontDrawHandle saves frFontBuildGlyphChain(const char*) result, sets spacing/position/colors, draws layer0x56 and queues the same pointer; separate from converted-text glyph. Native object extent0x4; same role in DDS2 at0x0043900C. Identifier-only; existing types,widths,bounds,casts,arithmetic,storage and per-game layouts retained; no source import or native ASM root/interior consumer. [Namer1 readability b88; matched-C/native-data evidence]
+0x003BD8F0	fileMenuStringGlyph	inferred	confidence=high; mcdCreateFontDrawHandle saves frSetFontString(const char*) result, sets spacing/position/colors, draws layer0x56 and queues the same pointer; separate from converted-text glyph. Native object extent0x4; same role in DDS2 at0x0043900C. Identifier-only; existing types,widths,bounds,casts,arithmetic,storage and per-game layouts retained; no source import or native ASM root/interior consumer. [Namer1 readability b88; matched-C/native-data evidence]
 0x003BD8F4	fileMainSaveBlobAddress	inferred	confidence=high; fileBuildMainBlobAndWrite stores DDS3_GBWK in this address word and passes its address to slSaveWriteFile. Preserve DDS1 u32 versus DDS2 dds3GlobalWork_t* declarations and existing casts. Same role in DDS2 at 0x00439010. Identifier-only: preserve all original declarations, widths, bounds, casts, storage, bytes and control flow. No source-owned import or native ASM root/interior consumer. [Namer1 readability data b90; matched-C/native-twin evidence]
 0x003BD8F8	fileMainSaveBlobSize	inferred	confidence=high; fileBuildMainBlobAndWrite stores the main save-image size (DDS1 0x33600; DDS2 sizeof(dds3GlobalWork_t)) and passes the word address to slSaveWriteFile. Same role in DDS2 at 0x00439014. Identifier-only: preserve all original declarations, widths, bounds, casts, storage, bytes and control flow. No source-owned import or native ASM root/interior consumer. [Namer1 readability data b90; matched-C/native-twin evidence]
 0x003BD8FC	fileMenuStateHandler	inferred	confidence=high; src/dds1/game/code_0028A150.c:slCalc; Current state callback invoked and replaced as the file-menu state runner advances. [names_qp9.tsv]

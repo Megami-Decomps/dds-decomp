@@ -311,7 +311,7 @@ void mnuDrawMenuTextById(s32 x, s32 y, s32 unused, s32 color, s32 textId, s32 su
 
     color = (color & 0xFF) | 0xD7ABFA00;
     prfCopyMantraNamePart(textId & 0xFFFF, 1, text);
-    item = frFontBuildGlyphChain(text, 0, 0, 0, 0);
+    item = frSetFontString(text, 0, 0, 0, 0);
     frSetFontColor(item, color);
     frSetDrawPosition(item, x, y);
     frDrawFontOt(item, 1, surface);

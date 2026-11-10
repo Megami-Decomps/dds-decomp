@@ -344,9 +344,9 @@ _FRQ *MessageRequestEx(s32 x, s32 y, s32 channel0, s32 channel1,
     s32 channel2, s32 channel3, const u8 *encodedText, _FRQ *sub);
 _FRQ *MessageRequestEx2(s32 x, s32 y, s32 depth, s32 channel0,
     s32 channel1, s32 channel2, s32 channel3, const u8 *encodedText, _FRQ *sub);
-_FRQ *itfDrawColor(s32 x, s32 y, s32 depth, s32 channel0, s32 channel1,
+_FRQ *MessageRequestNS(s32 x, s32 y, s32 depth, s32 channel0, s32 channel1,
     s32 channel2, s32 channel3, const u8 *encodedText, _FRQ *unusedSub);
-_FRQ *itfDrawPlainEncodedTextWithByteColors(s32 x, s32 y, s32 depth,
+_FRQ *MessageRequestNS(s32 x, s32 y, s32 depth,
     s32 channel0, s32 channel1, s32 channel2, s32 channel3,
     const u8 *encodedText, _FRQ *unusedSub);
 s32 frDrawFont(_FRQ *glyph);

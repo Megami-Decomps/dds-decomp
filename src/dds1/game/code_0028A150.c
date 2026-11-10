@@ -567,11 +567,11 @@ void mnuDrawAndStoreTextGlyphHandle(s32 x, s32 y, u32 colors, const u8 *text) {
     frDestroyFontRequestAfter(fileMenuConvertedTextGlyph);
 }
 
-extern _FRQ * frFontBuildGlyphChain(const char *text, s8 fontIndex, s8 firstOption, s8 secondOption, _FRQ *existingGlyph);
+extern _FRQ * frSetFontString(const char *text, s8 fontIndex, s8 firstOption, s8 secondOption, _FRQ *existingGlyph);
 
 void mcdCreateFontDrawHandle(s32 x, s32 y, u32 color, const char *text) {
     frEnableMode(1);
-    fileMenuStringGlyph = frFontBuildGlyphChain(text, 0, 0, 0, 0);
+    fileMenuStringGlyph = frSetFontString(text, 0, 0, 0, 0);
     frDisableMode(1);
     frSetFontSpace(fileMenuStringGlyph, 1);
     frSetDrawPosition(fileMenuStringGlyph, x << 4, y << 3);

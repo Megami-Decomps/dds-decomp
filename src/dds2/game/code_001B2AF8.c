@@ -5964,7 +5964,7 @@ void btlDrawWindowHelpLine(s32 x, s32 y, u32 unusedColor, u32 childColor, u16 te
         glyph = itfDrawTextWithSelectedFontMode(x << 4, (y + 12) << 3, 0xFF0000, 1, textId, 2);
         break;
     default:
-        glyph = itfDrawPlainEncodedTextWithByteColors(x << 4, (y + 12) << 3, 0xFF0000, 1, 0, 0, 0x80,
+        glyph = MessageRequestNS(x << 4, (y + 12) << 3, 0xFF0000, 1, 0, 0, 0x80,
                                                       MessageNumSearch(kind, datCommandHelpMessages, 0), NULL);
         break;
     }

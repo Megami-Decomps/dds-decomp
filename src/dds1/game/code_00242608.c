@@ -860,12 +860,12 @@ void evtUpdateCameraColorTrackEffect(evtViewerInfo_t *scene) {
 
 extern s32 D_00368BD8[];
 struct _FRQ;
-extern struct _FRQ * frFontBuildGlyphChain(const char *text, s8 fontIndex, s8 firstOption, s8 secondOption, struct _FRQ *existingGlyph);
+extern struct _FRQ * frSetFontString(const char *text, s8 fontIndex, s8 firstOption, s8 secondOption, struct _FRQ *existingGlyph);
 
 void mnuCampInitFontResource(evtViewerInfo_t *scene) {
     s32 fontHandle;
     scene->glyph = 0;
-    fontHandle = (s32)(u32)frFontBuildGlyphChain((const char *)D_00368BD8, 0, 0, 0, 0);
+    fontHandle = (s32)(u32)frSetFontString((const char *)D_00368BD8, 0, 0, 0, 0);
     scene->glyph = fontHandle;
     frSetDrawPosition((struct _FRQ *)(u32)fontHandle,
         CAMP_FONT_CONTEXT_WIDTH, CAMP_FONT_CONTEXT_HEIGHT);

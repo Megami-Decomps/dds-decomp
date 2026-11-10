@@ -1182,7 +1182,7 @@ void mnuDrawTextSprite(s32 x, s32 y, s32 scale, s32 color, s32 textId, s32 param
     s32 top = y - 0x10;
 
     frEnableMode(1);
-    item = frFontAppendTextToGlyphChain((const char *)(u32)textId, 0, 0, 0, 0);
+    item = frLinkFontString((const char *)(u32)textId, 0, 0, 0, 0);
     frSetDrawPosition(item, x, top);
     frSetPriority(item, scale * 0x10);
     frSetFontColor(item, color);

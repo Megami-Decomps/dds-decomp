@@ -2348,7 +2348,7 @@ void mnuDrawPartyPageEntry(s32 x, s32 y, s32 z, s32 partyIndex, MenuSprites *pag
 
 extern void prfCopyMantraNamePart(u32 textId, s32 mode, char *destination);
 
-extern _FRQ * frFontBuildGlyphChain(const char *text, s8 fontIndex, s8 firstOption, s8 secondOption, _FRQ *existingGlyph);
+extern _FRQ * frSetFontString(const char *text, s8 fontIndex, s8 firstOption, s8 secondOption, _FRQ *existingGlyph);
 
 void mnuDrawCenteredLabel(s32 x, s32 y, s32 unused, s32 color, s32 textId, s32 surface) {
     char text[0x40];
@@ -2356,7 +2356,7 @@ void mnuDrawCenteredLabel(s32 x, s32 y, s32 unused, s32 color, s32 textId, s32 s
     s32 width;
 
     prfCopyMantraNamePart(textId & 0xFFFF, 1, text);
-    glyph = frFontBuildGlyphChain(text, 0, 0, 0, 0);
+    glyph = frSetFontString(text, 0, 0, 0, 0);
     frSetFontColor(glyph, color);
     width = frGetStrWidth(glyph) + 8;
     frSetDrawPosition(glyph, x - (width * 0x10 >> 1) + 0x5F0, y);

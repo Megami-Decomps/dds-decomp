@@ -14101,7 +14101,7 @@ that two data tables are twins.
 
 The file-menu glyph words distinguish two producers:
 `fileMenuConvertedTextGlyph` stores `itfCreateConvertedTextGlyph`'s result,
-whereas `fileMenuStringGlyph` stores `frFontBuildGlyphChain`'s result before
+whereas `fileMenuStringGlyph` stores `frSetFontString`'s result before
 spacing, positioning, coloring and drawing it. They are glyph pointers, not
 the shared font-rendering flags.
 

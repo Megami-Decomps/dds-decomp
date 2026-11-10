@@ -1644,7 +1644,7 @@ void mnuDrawTextSprite(s32 x, s32 y, s32 width, u32 color, const char *text, s32
     s32 top = y - 0x10;
     _FRQ *handle;
     frEnableMode(1);
-    handle = frFontAppendTextToGlyphChain(text, 0, 0, 0, 0);
+    handle = frLinkFontString(text, 0, 0, 0, 0);
     frSetDrawPosition(handle, x, top);
     frSetPriority(handle, width << 4);
     frSetFontColor(handle, color);

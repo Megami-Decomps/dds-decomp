@@ -57,7 +57,7 @@ extern u8 D_003BB1C0[8];
 
 extern s32 D_00357AB8[];
 
-itfpanel_t *itfCreateUiSpriteByKind(s32 kind, const sdfTexHandle_t *borrowedTexture) {
+itfpanel_t *itfPnlRegist2(s32 kind, const sdfTexHandle_t *borrowedTexture) {
     sdfMemHandle_t *allocation = sdfMemAllocDirect(sizeof(itfpanel_t));
     itfpanel_t *work = (itfpanel_t *)sdfMemLock(allocation);
 

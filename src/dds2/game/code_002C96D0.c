@@ -577,7 +577,7 @@ void mcdCreateConfiguredDrawHandle(s32 x, s32 y, u32 colors, const u8 *text) {
 
 void mcdCreateFontDrawHandle(s32 x, s32 y, u32 colors, const char *text) {
     frEnableMode(1);
-    fileMenuStringGlyph = frFontBuildGlyphChain(text, 0, 0, 0, 0);
+    fileMenuStringGlyph = frSetFontString(text, 0, 0, 0, 0);
     frDisableMode(1);
     frSetFontSpace(fileMenuStringGlyph, 1);
     frSetDrawPosition(fileMenuStringGlyph, x << 4, y << 3);

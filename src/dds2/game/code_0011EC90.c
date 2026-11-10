@@ -167,7 +167,7 @@ Dds3FontNode *dds3CreateFontNode(s32 x, s32 y, const char *text) {
     struct _FRQ *glyph;
     Dds3FontNode *node;
 
-    glyph = frFontBuildGlyphChain(text, 0, 0, 0, NULL);
+    glyph = frSetFontString(text, 0, 0, 0, NULL);
     if (x == 0x800000) {
         x = (0x200 - glyph->advance) * 8;
     }

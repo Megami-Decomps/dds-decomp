@@ -22,14 +22,14 @@ extern _FRQ *itfDrawBankTextWithSegmentCounter(s32, s32, s32, u16, FrFontTextBan
 extern sdfTexHandle_t *itfBackgroundSpriteTexture;
 extern u8 frWrapEmptyString[];
 extern _FRQ *frCombineFontRequest(_FRQ *, _FRQ *);
-extern _FRQ *frFontLinkGlyph(_FRQ *, _FRQ *, s32);
+extern _FRQ *frCombineFontRequestEx(_FRQ *, _FRQ *, s32);
 extern void frEnableMode(s32 value);
 extern u8 frDisableMode(u8 value);
 void frFontEnsureSlotLoaded(s32 id, const char *path);
 extern u16 D_003B2F58[];
 extern void frDelFontStyle(s32 slotId);
-extern _FRQ *frFontLinkGlyph(_FRQ *previous, _FRQ *next, s32 positionNext);
-_FRQ *frFontBuildGlyphChain(const char *text, s8 fontIndex, s8 firstOption, s8 secondOption, _FRQ *head);
+extern _FRQ *frCombineFontRequestEx(_FRQ *previous, _FRQ *next, s32 positionNext);
+_FRQ *frSetFontString(const char *text, s8 fontIndex, s8 firstOption, s8 secondOption, _FRQ *head);
 _FRQ *frCombineFontRequest(_FRQ *previous, _FRQ *next);
 extern void frFontEnsureSlotLoaded(s32 slotId, const char *path);
 
@@ -44,7 +44,7 @@ _FRQ *frwGetStaffFontFRQ(u32 x, u32 y, s32 depth, s32 alt, s32 measureFlag, s32 
     frEnableMode(1);
     frDisableMode(2);
     frDisableMode(0x10);
-    glyph = frFontAppendTextToGlyphChain(source, kind, 0, 0, 0);
+    glyph = frLinkFontString(source, kind, 0, 0, 0);
     frEnableMode(0x10);
     frEnableMode(2);
     frDisableMode(1);
@@ -101,17 +101,17 @@ void itfConvertText(u8 *output, const char *input) {
 }
 
 /* Build a glyph with a fixed 16x18 cell, then attach it to its parent. */
-void itfAttachGlyph16x18(u32 x, u32 y, s32 depth, u32 colors,
+void frwGetSmallFont1FRQ(u32 x, u32 y, s32 depth, u32 colors,
                                     void *glyphSource, _FRQ *parent) {
     _FRQ *glyph;
 
-    glyph = frFontAppendTextToGlyphChain(glyphSource, 0, 0, 0, 0);
+    glyph = frLinkFontString(glyphSource, 0, 0, 0, 0);
     frSetFontSize(glyph, 0x10, 0x12);
     frSetDrawPosition(glyph, x, y);
     frSetPriority(glyph, depth << 4);
     frSetFontColor(glyph, colors);
     frSetFontSpace(glyph, -4);
-    frFontLinkGlyph(parent, glyph, 0);
+    frCombineFontRequestEx(parent, glyph, 0);
 }
 
 _FRQ *frwGetFontEx(s32 x, s32 y, s32 depth, u32 colors, const char *text,
@@ -143,7 +143,7 @@ _FRQ *frwGetFontEx(s32 x, s32 y, s32 depth, u32 colors, const char *text,
                 glyphLength = 2;
                 glyphData[2] = 0;
             }
-            glyph = frFontAppendTextToGlyphChain(glyphData, glyphMode, 0, 0, 0);
+            glyph = frLinkFontString(glyphData, glyphMode, 0, 0, 0);
             frSetPriority(glyph, depth << 4);
             frSetFontColor(glyph, colors);
             frSetFontSpace(glyph, 3);
@@ -211,21 +211,21 @@ _FRQ *itfCreateConvertedTextGlyph(s32 x, s32 y, s32 depth, u32 colors, const u8 
         }
     }
     frEnableMode(1);
-    glyph = frFontAppendTextToGlyphChain(buffer, 1, 0, 0, 0);
+    glyph = frLinkFontString(buffer, 1, 0, 0, 0);
     frEnableMode(2);
     frDisableMode(1);
     frSetDrawPosition(glyph, x, y);
     frSetPriority(glyph, depth << 4);
     frSetFontColor(glyph, colors);
-    return frFontLinkGlyph(parent, glyph, 0);
+    return frCombineFontRequestEx(parent, glyph, 0);
 }
 
 _FRQ *itfCreateFont2TextGlyph(s32 x, s32 y, s32 depth, u32 colors, char *text, _FRQ *previousGlyph) {
     _FRQ *glyph;
 
-    glyph = frFontAppendTextToGlyphChain((const char *)frWrapEmptyString, 0, 0, 0, previousGlyph);
+    glyph = frLinkFontString((const char *)frWrapEmptyString, 0, 0, 0, previousGlyph);
     frDisableMode(2);
-    glyph = frFontBuildGlyphChain(text, 2, 0, 0, glyph);
+    glyph = frSetFontString(text, 2, 0, 0, glyph);
     frSetFontSpace(glyph, -1);
     frEnableMode(2);
     frSetDrawPosition(glyph, x, y);
@@ -238,9 +238,9 @@ _FRQ *itfCreateFont2TextGlyph(s32 x, s32 y, s32 depth, u32 colors, char *text, _
 _FRQ *itfCreateFont3TextGlyph(s32 x, s32 y, s32 depth, u32 colors, const char *text, _FRQ *previousGlyph) {
     _FRQ *glyph;
 
-    glyph = frFontAppendTextToGlyphChain((const char *)frWrapEmptyString, 0, 0, 0, previousGlyph);
+    glyph = frLinkFontString((const char *)frWrapEmptyString, 0, 0, 0, previousGlyph);
     frDisableMode(2);
-    glyph = frFontBuildGlyphChain(text, 3, 0, 0, glyph);
+    glyph = frSetFontString(text, 3, 0, 0, glyph);
     frEnableMode(2);
     frSetDrawPosition(glyph, x, y);
     frSetPriority(glyph, depth << 4);
@@ -252,9 +252,9 @@ _FRQ *itfCreateFont3TextGlyph(s32 x, s32 y, s32 depth, u32 colors, const char *t
 _FRQ *itfCreateTightFont3TextGlyph(s32 x, s32 y, s32 depth, u32 colors, char *text, _FRQ *previousGlyph) {
     _FRQ *glyph;
 
-    glyph = frFontAppendTextToGlyphChain((const char *)frWrapEmptyString, 0, 0, 0, previousGlyph);
+    glyph = frLinkFontString((const char *)frWrapEmptyString, 0, 0, 0, previousGlyph);
     frDisableMode(2);
-    glyph = frFontBuildGlyphChain(text, 3, 0, 0, glyph);
+    glyph = frSetFontString(text, 3, 0, 0, glyph);
     frSetFontSpace(glyph, -2);
     frEnableMode(2);
     frSetDrawPosition(glyph, x, y);
@@ -268,13 +268,13 @@ void itfAttachGlyph12x16(u32 x, u32 y, s32 depth, u32 colors,
                                     void *glyphSource, _FRQ *parent) {
     _FRQ *glyph;
 
-    glyph = frFontBuildGlyphChain(glyphSource, 0, 0, 0, 0);
+    glyph = frSetFontString(glyphSource, 0, 0, 0, 0);
     frSetFontSize(glyph, 0xc, 0x10);
     frSetFontSpace(glyph, -3);
     frSetDrawPosition(glyph, x, y);
     frSetPriority(glyph, depth << 4);
     frSetFontColor(glyph, colors);
-    frFontLinkGlyph(parent, glyph, 0);
+    frCombineFontRequestEx(parent, glyph, 0);
 }
 
 /* Count 0xFx0F separators in the packed text stream. */
@@ -363,7 +363,7 @@ _FRQ *itfDrawBankTextWithSegmentCounter(s32 x, s32 y, s32 depth, u16 textId, FrF
     }
     itfCopyTextSegment((const char *)text, buffer, D_00436584);
     /* The original draw uses the full stream rather than the copied segment. */
-    handle = itfDrawPlainEncodedTextWithByteColors(x, y, depth, 1, 0, 0, 0x80, text, 0);
+    handle = MessageRequestNS(x, y, depth, 1, 0, 0, 0x80, text, 0);
     if (flags & 0x10000) {
         s32 maxWidth = 0;
         s32 i;
@@ -410,7 +410,7 @@ _FRQ *itfDrawBankTextWithLayoutFlags(s32 x, s32 y, s32 depth, u16 textId, FrFont
         frEnableMode(0x20);
         break;
     }
-    handle = itfDrawPlainEncodedTextWithByteColors(x, y, depth, 1, 0, 0, 0x80, text, 0);
+    handle = MessageRequestNS(x, y, depth, 1, 0, 0, 0x80, text, 0);
     if (flags & 0x10000) {
         s32 maxWidth = 0;
         s32 i;

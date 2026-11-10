@@ -147,10 +147,10 @@ struct _FRQ *func_001951C8(const char *text, s8 fontIndex,
     s8 firstOption, s8 secondOption, struct _FRQ *existingGlyph);
 #endif
 #ifdef VERSION_DDS2
-struct _FRQ *frFontBuildGlyphChain(const char *text, s8 fontIndex,
+struct _FRQ *frSetFontString(const char *text, s8 fontIndex,
     s8 firstOption, s8 secondOption, struct _FRQ *existingGlyph);
 #endif
-struct _FRQ *frFontAppendTextToGlyphChain(const char *text, s8 fontIndex,
+struct _FRQ *frLinkFontString(const char *text, s8 fontIndex,
     s8 firstOption, s8 secondOption, struct _FRQ *previousGlyph);
 /* Update the first-option byte of every child on this glyph chain. */
 void frSetFontColorNo(struct _FRQ *glyph, u8 firstOption);

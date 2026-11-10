@@ -56,7 +56,7 @@ extern void mnuPlayTitleVoiceFile(char *);
 extern s32 mnuGetTitleEffectFrameCounter(void);
 
 extern _FRQ *frCombineFontRequest(_FRQ *, _FRQ *);
-extern _FRQ *frFontLinkGlyph(_FRQ *, _FRQ *, s32);
+extern _FRQ *frCombineFontRequestEx(_FRQ *, _FRQ *, s32);
 
 extern void frEnableMode(s32 value);
 
@@ -99,17 +99,17 @@ extern _FRQ *frFontReleaseGlyphChain(_FRQ *glyph);
 
 extern _FRQ *frSetUserImage(GsFont_t *source, _FRQ *destination);
 extern void frInitTextHandle(_TEXT *glyph, s32 glyphId, s32 fontIndex, s32 firstOption, s32 packedFlags, s32 secondOption);
-extern void frFontInitGlyph(_FRQ *glyph);
+extern void frInitFontHandle(_FRQ *glyph);
 extern u32 frFontGetGlyphCellWidth(u8 fontIndex);
 extern u32 frFontGetGlyphCellHeight(u8 fontIndex);
 extern s8 gFontBaseWidth[];
 
-extern _FRQ *frFontLinkGlyph(_FRQ *previous, _FRQ *next, s32 positionNext);
+extern _FRQ *frCombineFontRequestEx(_FRQ *previous, _FRQ *next, s32 positionNext);
 
 _FRQ *frCombineFontRequest(_FRQ *previous, _FRQ *next);
 extern u8 D_003BB17C;
-_FRQ *frFontBuildGlyphChain(const char *text, s8 fontIndex, s8 firstOption, s8 secondOption, _FRQ *existingGlyph);
-_TEXT *frFontCreateGlyphFromCode(u16 glyphId, s32 fontIndexArg, u8 firstOption, u8 secondOption);
+_FRQ *frSetFontString(const char *text, s8 fontIndex, s8 firstOption, s8 secondOption, _FRQ *existingGlyph);
+_TEXT *frSetFont(u16 glyphId, s32 fontIndexArg, u8 firstOption, u8 secondOption);
 extern void frFontEnsureSlotLoaded(s32 slotId, const char *path);
 
 #define FR_FONT_ENTRY_CAPACITY 9
@@ -612,7 +612,7 @@ _FRQ *frFontReleaseGlyphChain(_FRQ *glyph) {
 s32 frDestroyFontRequestAfter(_FRQ *glyph) {
     _FRQ **queueSlot = &frFontWork.glyphSlots[dds3GetFrameID() & 0xFF];
 
-    *queueSlot = frFontLinkGlyph(*queueSlot, glyph, 0);
+    *queueSlot = frCombineFontRequestEx(*queueSlot, glyph, 0);
     return 0;
 }
 
@@ -632,16 +632,16 @@ s32 frGetFontHandleNum(void) {
 }
 
 /* Glyph setup queries its initial Y here for flag 0x10; retail always returns zero. */
-u32 frFontGetInitialGlyphY(s8 fontIndex, s32 glyphIndex) {
+u32 frGetYShiftLev(s8 fontIndex, s32 glyphIndex) {
     (void)fontIndex;
     (void)glyphIndex;
     return 0;
 }
 
-extern u16 frFontGetSlotCellWidth(s32 index);
+extern u16 frGetFontWidth(s32 index);
 
 /* Fill cell dimensions, advance and horizontal bearing for one glyph. */
-void frFontFillGlyphMetrics(FrFontGlyphMeasureWork *work, s32 glyphIndex) {
+void frGetXShiftLev(FrFontGlyphMeasureWork *work, s32 glyphIndex) {
     s32 fontIndex;
     s32 defaultSlot = 0;
     s8 right;
@@ -666,7 +666,7 @@ void frFontFillGlyphMetrics(FrFontGlyphMeasureWork *work, s32 glyphIndex) {
 
     if (defaultSlot != 0) {
         scale = (f32)(work->cellWidth + 4) /
-                (f32)frFontGetSlotCellWidth(work->fontIndex);
+                (f32)frGetFontWidth(work->fontIndex);
     } else {
         scale = 1.0f;
     }
@@ -732,7 +732,7 @@ _FRQ *frSetUserImage(GsFont_t *source, _FRQ *destination) {
     if (destination == NULL) {
         destination = frAllocFontNode(frFontWork.glyphPool);
         frFontWork.glyphCount++;
-        frFontInitGlyph(destination);
+        frInitFontHandle(destination);
     }
     glyph = frAllocFontNode(frFontWork.itemPool);
     previous = destination->lastChild;
@@ -813,7 +813,7 @@ u8 *frDecodeFontImage(u8 fontIndex, s32 entryIndex) {
     return clonedResource;
 }
 
-extern u16 frFontGetSlotCellHeight(s32 index);
+extern u16 frGetFontHeight(s32 index);
 
 /* Retain a cached table item, or create/upload a new one and cache it.
  * New records start with one reference; itemIndex is not bounds-checked. */
@@ -827,7 +827,7 @@ GsFont_t *frTranslateFont2GS(_TEXT *glyph, s32 itemIndex) {
         return cachedItem;
     }
     clonedResource = frDecodeFontImage(glyph->renderValueOrSetupOrShade.setupBytes.fontIndex, itemIndex);
-    cachedItem = frTranslateUserData(frFontGetSlotCellWidth(glyph->renderValueOrSetupOrShade.setupBytes.fontIndex), frFontGetSlotCellHeight(glyph->renderValueOrSetupOrShade.setupBytes.fontIndex), clonedResource, FR_FONT_PIXELS_TRANSFERRED_TO_UPLOAD);
+    cachedItem = frTranslateUserData(frGetFontWidth(glyph->renderValueOrSetupOrShade.setupBytes.fontIndex), frGetFontHeight(glyph->renderValueOrSetupOrShade.setupBytes.fontIndex), clonedResource, FR_FONT_PIXELS_TRANSFERRED_TO_UPLOAD);
     cachedItem->id = itemIndex;
     entry->slots[itemIndex] = cachedItem;
     frFontWork.cachedItemCount++;
@@ -854,7 +854,7 @@ void frInitTextHandle(_TEXT *glyph, s32 glyphId, s32 fontIndex, s32 firstOption,
 }
 
 /* Reset standalone chain-head state and context controls; leave drawCount intact. */
-void frFontInitGlyph(_FRQ *glyph) {
+void frInitFontHandle(_FRQ *glyph) {
     glyph->glyphCodeOrContext.byteRoles.encodedContextByte = -0x80;
     glyph->x = 0;
     glyph->y = 0;
@@ -874,9 +874,9 @@ void frFontInitGlyph(_FRQ *glyph) {
     glyph->contextModeEnabled = 0;
 }
 
-extern void frFontFillGlyphMetrics(FrFontGlyphMeasureWork *work, s32 glyphIndex);
+extern void frGetXShiftLev(FrFontGlyphMeasureWork *work, s32 glyphIndex);
 
-_TEXT *frFontCreateGlyphFromCode(u16 glyphId, s32 fontIndexArg, u8 firstOption, u8 secondOption) {
+_TEXT *frSetFont(u16 glyphId, s32 fontIndexArg, u8 firstOption, u8 secondOption) {
     _TEXT *glyph;
     s32 glyphIndex;
     s32 fontIndex = fontIndexArg & 0xFF;
@@ -898,9 +898,9 @@ _TEXT *frFontCreateGlyphFromCode(u16 glyphId, s32 fontIndexArg, u8 firstOption, 
         glyphIndex = 0x147;
     }
     glyph->cachedItem = frTranslateFont2GS(glyph, glyphIndex);
-    frFontFillGlyphMetrics((FrFontGlyphMeasureWork *)glyph, glyphIndex);
+    frGetXShiftLev((FrFontGlyphMeasureWork *)glyph, glyphIndex);
     if (glyph->renderValueOrSetupOrShade.setupBytes.sharedFlags & 0x10) {
-        glyph->y = frFontGetInitialGlyphY((s8)fontIndex, glyphIndex);
+        glyph->y = frGetYShiftLev((s8)fontIndex, glyphIndex);
     } else {
         glyph->y = 0;
     }
@@ -909,8 +909,8 @@ _TEXT *frFontCreateGlyphFromCode(u16 glyphId, s32 fontIndexArg, u8 firstOption, 
 
 /* Build text and position its chain after the previous glyph. A NULL build
  * preserves the previous chain. */
-_FRQ *frFontAppendTextToGlyphChain(const char *text, s8 fontIndex, s8 firstOption, s8 secondOption, _FRQ *previousGlyph) {
-    _FRQ *newGlyphChain = frFontBuildGlyphChain(text, fontIndex, firstOption, secondOption, 0);
+_FRQ *frLinkFontString(const char *text, s8 fontIndex, s8 firstOption, s8 secondOption, _FRQ *previousGlyph) {
+    _FRQ *newGlyphChain = frSetFontString(text, fontIndex, firstOption, secondOption, 0);
 
     if (newGlyphChain == NULL) {
         return previousGlyph;
@@ -919,7 +919,7 @@ _FRQ *frFontAppendTextToGlyphChain(const char *text, s8 fontIndex, s8 firstOptio
 }
 
 /* Decode text into child glyphs appended to an existing or newly pooled head. */
-_FRQ *frFontBuildGlyphChain(const char *text, s8 fontIndex, s8 firstOption, s8 secondOption, _FRQ *existingGlyph) {
+_FRQ *frSetFontString(const char *text, s8 fontIndex, s8 firstOption, s8 secondOption, _FRQ *existingGlyph) {
     _FRQ *head = existingGlyph;
     _TEXT *previous;
     _TEXT *glyph;
@@ -939,7 +939,7 @@ _FRQ *frFontBuildGlyphChain(const char *text, s8 fontIndex, s8 firstOption, s8 s
     if (head == NULL) {
         head = frAllocFontNode(frFontWork.glyphPool);
         frFontWork.glyphCount++;
-        frFontInitGlyph(head);
+        frInitFontHandle(head);
     }
     previous = head->lastChild;
     glyph = NULL;
@@ -949,7 +949,7 @@ _FRQ *frFontBuildGlyphChain(const char *text, s8 fontIndex, s8 firstOption, s8 s
             textByteOffset++;
             code = (code << 8) | (u8)text[textByteOffset];
         }
-        glyph = frFontCreateGlyphFromCode(code, D_003BB17C, (u8)firstOption, (u8)secondOption);
+        glyph = frSetFont(code, D_003BB17C, (u8)firstOption, (u8)secondOption);
         if (previous == NULL) {
             head->firstChild = glyph;
         } else {
@@ -1090,7 +1090,7 @@ s32 frEraseEffect(_FRQ *glyph) {
 }
 
 /* Advance one rendered glyph's fade state and return its transient X jitter. */
-s32 frFontAdvanceChildFadeAndGetJitter(_FRQ *parent, _TEXT *glyph, u8 threshold, u8 step) {
+s32 frDrawEffect(_FRQ *parent, _TEXT *glyph, u8 threshold, u8 step) {
     _FRQ *previousParent;
     _TEXT *previousGlyph;
     u32 *fadeWord;
@@ -1222,7 +1222,7 @@ s32 frDrawFontOt(_FRQ *glyph, s8 mode, u32 renderFlags) {
                     atlas = &frFontWork.atlas;
                     do {
                         s32 xOffset = mode != 0 ? 0 :
-                            frFontAdvanceChildFadeAndGetJitter(glyph, child, FR_FONT_FADE_PREDECESSOR_THRESHOLD, (u8)glyph->glyphCodeOrContext.byteRoles.encodedContextByte);
+                            frDrawEffect(glyph, child, FR_FONT_FADE_PREDECESSOR_THRESHOLD, (u8)glyph->glyphCodeOrContext.byteRoles.encodedContextByte);
                         u32 glyphState;
                         if (child->sourceItem == NULL) {
                             if ((u16)child->glyphCodeOrContext.glyphCode < 0x80) {
@@ -1301,12 +1301,12 @@ dds3TaskUpdateResult_t frFlipPacketBuf(dds3ProcessID_t *task) {
 
 /* Link chains with the renderer's relative-positioning option enabled. */
 _FRQ *frCombineFontRequest(_FRQ *previous, _FRQ *next) {
-    return frFontLinkGlyph(previous, next, 1);
+    return frCombineFontRequestEx(previous, next, 1);
 }
 
 /* Splice chains and return the next chain endpoint. Only option 1 repositions
  * that endpoint; other nonzero options do not. NULL inputs pass through. */
-_FRQ *frFontLinkGlyph(_FRQ *previous, _FRQ *next, s32 positionNext) {
+_FRQ *frCombineFontRequestEx(_FRQ *previous, _FRQ *next, s32 positionNext) {
     if (previous == NULL) {
         return next;
     }
@@ -1391,7 +1391,7 @@ s32 frGetStrWidth2(const _FRQ *glyphChain) {
 
 u32 frFontGetGlyphCellWidth(u8 fontIndex);
 u32 frFontGetGlyphCellHeight(u8 fontIndex);
-extern void frFontFillGlyphMetrics(FrFontGlyphMeasureWork *work, s32 glyphIndex);
+extern void frGetXShiftLev(FrFontGlyphMeasureWork *work, s32 glyphIndex);
 
 s32 frFontMeasureTextAdvance(const u8 *text, u8 fontIndex, FrFontTextMeasureMode mode) {
     FrFontGlyphMeasureWork work;
@@ -1421,7 +1421,7 @@ s32 frFontMeasureTextAdvance(const u8 *text, u8 fontIndex, FrFontTextMeasureMode
             u32 adjusted = code - 0x8080;
             glyphIndex = ((adjusted & 0xFF00) >> 1) + (adjusted & 0x7F);
         }
-        frFontFillGlyphMetrics(&work, glyphIndex);
+        frGetXShiftLev(&work, glyphIndex);
         offset++;
         totalAdvance += work.advance;
     }
@@ -1647,7 +1647,7 @@ const u8 *MessageNumSearch(s32 textId, const FrFontTextBank *bank, s32 mode) {
     return (const u8 *)bank + offset;
 }
 
-extern s8 frFontEncodedTextGlyphSpacing;
+extern s8 gMessageSpaceX;
 
 void frFontAppendIndexedTextToGlyphChain(u8 fontIndex, FrFontCtx *ctx) {
     char glyphText[3];
@@ -1676,12 +1676,12 @@ void frFontAppendIndexedTextToGlyphChain(u8 fontIndex, FrFontCtx *ctx) {
             context = ctx->glyphChain;
             if (context != NULL) {
                 if (context->firstChild != NULL) {
-                    ctx->glyphChain = frFontAppendTextToGlyphChain(
+                    ctx->glyphChain = frLinkFontString(
                         (const char *)D_003BB180, 0, ctx->firstOption,
                         ctx->secondOption, context);
                 }
             } else {
-                ctx->glyphChain = frFontAppendTextToGlyphChain(
+                ctx->glyphChain = frLinkFontString(
                     (const char *)D_003BB180, 0, ctx->firstOption,
                     ctx->secondOption, NULL);
             }
@@ -1689,10 +1689,10 @@ void frFontAppendIndexedTextToGlyphChain(u8 fontIndex, FrFontCtx *ctx) {
             previousMode = mode;
         }
 
-        existingGlyph = frFontBuildGlyphChain(glyphText, mode, ctx->firstOption,
+        existingGlyph = frSetFontString(glyphText, mode, ctx->firstOption,
                                        ctx->secondOption, ctx->glyphChain);
         ctx->glyphChain = existingGlyph;
-        frSetFontSpace(existingGlyph, frFontEncodedTextGlyphSpacing);
+        frSetFontSpace(existingGlyph, gMessageSpaceX);
     }
 }
 
@@ -1703,7 +1703,7 @@ void frFontCreateContext(ctx)
     FrFontCtx *ctx;
 
 {
-    _FRQ *childGlyph = frFontAppendTextToGlyphChain((const char *)&D_003BB180, 0, ctx->firstOption, ctx->secondOption, ctx->glyphChain);
+    _FRQ *childGlyph = frLinkFontString((const char *)&D_003BB180, 0, ctx->firstOption, ctx->secondOption, ctx->glyphChain);
 
     ctx->glyphChain = childGlyph;
     frSetDrawSpeed(childGlyph, ctx->contextEncodedByte);
@@ -1742,7 +1742,7 @@ void frMessageReturnCode(FrFontCtx *ctx) {
     ctx->pendingPosition = 1;
 }
 
-s8 frFontEncodedTextGlyphSpacing __attribute__((section(".sdata"))) = 0;
+s8 gMessageSpaceX __attribute__((section(".sdata"))) = 0;
 
 u32 gMessageStepY __attribute__((section(".sdata"))) = 21;
 
@@ -1901,9 +1901,9 @@ advanceLine:
     return 0;
 }
 
-extern s8 frFontEncodedTextGlyphSpacing;
+extern s8 gMessageSpaceX;
 
-extern _FRQ * frFontBuildGlyphChain(const char *text, s8 fontIndex, s8 firstOption, s8 secondOption, _FRQ *existingGlyph);
+extern _FRQ * frSetFontString(const char *text, s8 fontIndex, s8 firstOption, s8 secondOption, _FRQ *existingGlyph);
 
 _FRQ *itfBuildGlyphChainFromEncodedStream(FrFontCtx *stream) {
     u8 encodedText[3];
@@ -1939,7 +1939,7 @@ _FRQ *itfBuildGlyphChainFromEncodedStream(FrFontCtx *stream) {
             if (value < 0x80) {
                 encodedText[0] = value;
                 encodedText[1] = 0;
-                stream->glyphChain = frFontBuildGlyphChain((const char *)encodedText, stream->fontIndex,
+                stream->glyphChain = frSetFontString((const char *)encodedText, stream->fontIndex,
                     stream->firstOption, stream->secondOption, stream->glyphChain);
             } else {
                 value = (value << 8) | stream->encodedText[stream->encodedTextOffset++];
@@ -1947,18 +1947,18 @@ _FRQ *itfBuildGlyphChainFromEncodedStream(FrFontCtx *stream) {
                     encodedText[0] = (u32)value >> 8;
                     encodedText[1] = value;
                     encodedText[2] = 0;
-                    stream->glyphChain = frFontBuildGlyphChain((const char *)encodedText, stream->fontIndex,
+                    stream->glyphChain = frSetFontString((const char *)encodedText, stream->fontIndex,
                         stream->firstOption, stream->secondOption, stream->glyphChain);
                 } else {
                     value -= 0x4000;
                     encodedText[0] = (u32)value >> 8;
                     encodedText[1] = value;
                     encodedText[2] = 0;
-                    stream->glyphChain = frFontBuildGlyphChain((const char *)encodedText, 8,
+                    stream->glyphChain = frSetFontString((const char *)encodedText, 8,
                         stream->firstOption, stream->secondOption, stream->glyphChain);
                 }
             }
-            frSetFontSpace(stream->glyphChain, frFontEncodedTextGlyphSpacing);
+            frSetFontSpace(stream->glyphChain, gMessageSpaceX);
             frSetPriority(stream->glyphChain, stream->z);
         }
         bytes = stream->encodedText;
@@ -1996,7 +1996,7 @@ _FRQ *MessageRequestEx2(s32 x, s32 y, s32 depth, s32 channel0, s32 channel1, s32
     return itfBuildGlyphChainFromEncodedStream(&args);
 }
 
-_FRQ *itfDrawColor(s32 x, s32 y, s32 depth, s32 channel0, s32 channel1,
+_FRQ *MessageRequestNS(s32 x, s32 y, s32 depth, s32 channel0, s32 channel1,
                    s32 channel2, s32 channel3, const u8 *encodedText, _FRQ *unusedSub) {
     return MessageRequestEx2(x, y, depth, channel0 & 0xff, channel1 & 0xff,
                   channel2 & 0xff, channel3 & 0xff, encodedText, 0);
@@ -2269,12 +2269,12 @@ s32 itfInitTextDrawArgs(const u8 *encodedText, _FRQ *sub) {
 }
 
 /* Return the selected resource header's cell width; index is unchecked. */
-u16 frFontGetSlotCellWidth(s32 slotIndex) {
+u16 frGetFontWidth(s32 slotIndex) {
     return frFontWork.entries[slotIndex].resourceHeader->cellWidth;
 }
 
 /* Return the selected resource header's cell height; index is unchecked. */
-u16 frFontGetSlotCellHeight(s32 slotIndex) {
+u16 frGetFontHeight(s32 slotIndex) {
     return frFontWork.entries[slotIndex].resourceHeader->cellHeight;
 }
 
