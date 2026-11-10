@@ -65,7 +65,7 @@ extern s8 sdfPrintIopFlag;
 
 extern char D_003BD3D0[];
 
-extern char D_003BD3E0[]; /* cdrom */
+extern char sdfCdDirectPrefix[]; /* cdrom */
 
 extern char sdfDiscPathPrefix[];
 

@@ -14578,7 +14578,7 @@ six-byte prefix copy and unchecked path/slash/NUL appending are unchanged.
 `sdfDevRpcClient` keeps the existing 0x30-byte context owner and its SDK
 client prefix; naming introduces no alternate RPC layout.
 
-`sdfDevReadSectorBuffer`, `sdfCdImageOffset` and
+`sdfCdSectorBuf`, `sdfCdImageOffset` and
 `sdfCdImageCurrActive` retain partial reads from the same 0x800-byte
 disc sector. Keep the existing signed byte-count arithmetic and transfer
 calls. `sdfDevHddModuleArguments` and `sdfDevPfsModuleArguments` are packed

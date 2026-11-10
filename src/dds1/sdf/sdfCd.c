@@ -3,10 +3,10 @@
 #include "libsdf.h"
 #include "ps2asm.h"
 
-#define D_00551910 D_003BD3E0
-#define D_0055210C sdfDiscReadPosition
-#define D_00552110 sdfDiscReadMode
-#define D_0058F7C0 sdfDevReadSectorBuffer
+#define D_00551910 sdfCdDirectPrefix
+#define D_0055210C sdfCdCurrLsn
+#define D_00552110 sdfCdImageMode
+#define D_0058F7C0 sdfCdSectorBuf
 
 typedef struct
 {
@@ -563,7 +563,7 @@ void sdfCdInit(void)
 }
 INCLUDE_SDATA(const s32, "sdf/sdfCd", sdfDiscRequestPending);
 
-INCLUDE_SDATA(const s32, "sdf/sdfCd", D_003BD3E0);
+INCLUDE_SDATA(const s32, "sdf/sdfCd", sdfCdDirectPrefix);
 
 INCLUDE_SDATA(const s32, "sdf/sdfCd", sdfCdTrayMode);
 
