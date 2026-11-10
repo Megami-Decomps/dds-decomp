@@ -1,0 +1,17 @@
+# SDFSDMAN.IRX, the sound driver. See docs/irx-modules.md.
+name: SDFSDMAN.IRX
+sha1: e8d8942cefcfe6cfec7dd3c1b4d4299c1e3d617f
+
+# The fields tools/irx.py writes into .iopmod. Everything else in the
+# container is derived from the link.
+module:
+  name: sdf_sound_driver
+  version: 0x0000
+  entry: sdfSdManInit
+
+paths:
+  target: orig/irx/SDFSDMAN.IRX
+  asm: asm/irx/SDFSDMAN
+  src: src/irx/SDFSDMAN.c
+  build: build/irx/SDFSDMAN
+  symbols: config/irx/SDFSDMAN/symbol_addrs.txt
