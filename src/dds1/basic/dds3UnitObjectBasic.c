@@ -27,11 +27,12 @@
 #include "effect_value_object.h"
 #include "fld_actor_motion_step_result_api.h"
 
+extern void dds3SetRadiusPoseSet(dds3PoseSet_t *pose);
+
 dds3ObjectBaseControlWorkData_t *dds3UnitObjectBasicGetControlWorkData(dds3Basic_t *object) {
     return ((EffectObjectData *)object->workdata)->modelHolder;
 }
 
-extern void dds3SetRadiusPoseSet(dds3PoseSet_t *node);
 extern dds3Basic_t *dds3GetFirstWorldObjectNodeOfKind2(void);
 extern s32 dds3ObjectBaseRegistArea(dds3Basic_t *object);
 
@@ -259,7 +260,6 @@ extern EvtUnitMotionStepResult evtUpdateUnitMotion(dds3PoseSet_t *, dds3Basic_t 
 extern void dds3OffPoseSetFlag(dds3PoseSet_t *node, u32 flags);
 extern void Normalize(void);
 extern void FromRotation(f32);
-extern void dds3SetRadiusPoseSet(dds3PoseSet_t *inner);
 extern void dds3UnitObjectBasicEL_Link(dds3Basic_t *obj);
 extern void effObjStepFollowAngleTowardZero(dds3Basic_t *object);
 extern void effObjStepFollowAngleTowardPosition(dds3Basic_t *obj, const f32 *targetPosition);
