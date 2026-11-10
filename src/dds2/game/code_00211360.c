@@ -466,60 +466,37 @@ s32 btlRollAiBucket(void) {
     return roll;
 }
 
-#ifdef NON_MATCHING
-#include "common.h"
-#include "btl_skill_max_api.h"
-#include "eff_random.h"
-#include "btl_ai_slot.h"
-#include "sdf_chip.h"
-#include "sdf.h"
-#include "sdf_draw.h"
-#include "btl_command.h"
-#include "btl_command_affinity_api.h"
-#include "pcp_vu0.h"
-#include "ee_mmi.h"
-#include "btl_action.h"
-#include "btl_ai_table.h"
-#include "btl_ai_scratch.h"
-#include "btl_unit_tasks.h"
-#include "btl_state.h"
-#include "btl_battle_work.h"
-#include "eff_transform.h"
-#include "dat_state.h"
-#include "dat_command.h"
-#include "evt_unit.h"
-#include "mdl.h"
-#include "mdl_flag_api.h"
-#include "btl_boss_debug_api.h"
-#include "btl_actor_entry_code_api.h"
-
 extern s32 btlResolveCommandSlotAndKind(ActionStateLink *task, s32 id, u16 *slot, s32 *result);
-extern void (*btlAiActionHandlers[])(ActionStateLink *, u32); /* the AI actions' handlers, by the packed action's top ten bits */
+extern void (*btlAiActionHandlers[])(ActionStateLink *, u32);
 
-/* Run one AI table action: turn the slot's command id into the command slot
- * and result kind the task acts on (btlResolveCommandSlotAndKind), record them in the task
- * and as the unit's action slot, then call the handler the packed action's
- * top ten bits select with its low 22 bits. Always returns 1. DDS1's
- * btlRunAiAction (C upstream) is the same, with a third handler argument.
- * Upstream: INCLUDE_ASM in game/code_00211360; written from the retail
- * routine. Against retail its facts are the same, the body building 0xFFFF
- * once more. */
+/* Resolve the command slot and kind, publish the unit/task action, then dispatch
+ * the packed handler and its low 22-bit argument. */
 s32 btlExecuteAiTableAction(ActionStateLink *task, u16 id, u32 packed) {
-    u16 slot;
-    s32 result;
+    struct {
+        u16 slot;
+        s32 result;
+    } lookup;
     u32 op = packed >> 22;
     u32 payload = packed & 0x3FFFFF;
+    u32 commandSlot;
+    s32 resultKind;
 
-    btlResolveCommandSlotAndKind(task, id & 0xFFFF, &slot, &result);
-    task->unit->partyRecord.actionSlot = slot;
-    task->indexWork.phase = result;
-    task->indexWork.skillId = slot;
+    btlResolveCommandSlotAndKind(task, id, &lookup.slot, &lookup.result);
+    commandSlot = lookup.slot;
+    {
+        /* The real unit-pointer transfer needs v0 here. A plain pointer reverses
+         * the result/unit homes in local allocation and changes sched2 ordering.
+         * This call-free binding adds no read or consumer; see
+         * docs/compiler-trace-ai-action-transfer.md. */
+        register BtlUnit *unit __asm__("$2") = task->unit;
+        resultKind = lookup.result;
+        unit->partyRecord.actionSlot = commandSlot;
+    }
+    task->indexWork.phase = resultKind;
+    task->indexWork.skillId = commandSlot;
     btlAiActionHandlers[op](task, payload);
     return 1;
 }
-#else
-INCLUDE_ASM(const s32, "game/code_00211360", btlExecuteAiTableAction);
-#endif
 
 #ifdef NON_MATCHING
 #include "common.h"
