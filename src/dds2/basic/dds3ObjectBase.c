@@ -58,6 +58,8 @@
 #include "mdl.h"
 #include "evt_unit.h"
 #include "evt_script_model_api.h"
+#include "eff_dependency.h"
+#include "eff_event.h"
 
 /* Initialize a kind-3 slot state and its index node.
  * Every slot and currentSlot start unused (-1). */
@@ -77,25 +79,20 @@ dds3ObjectBaseControlWorkData_t *dds3ObjectBaseInitControlWorkData(dds3Basic_t *
     state->currentSlot = -1;
     return state;
 }
-extern void Normalize(void);
 
+extern void Normalize(void);
 
 void dds3MoverBasicSetCallBackPrimaryControl(dds3Basic_t *object, Dds3MoverUpdate update);
 
 Dds3ObjectControlSlotIndex BasicTypeToItemType(u32 kind);
 
-
-
 extern dds3Basic_t *dds3AddMoverBasic(dds3Basic_t *object);
-
 
 void dds3MoverBasicMakePath(dds3Basic_t *object);
 void dds3MoverBasicFreePath(dds3Basic_t *object);
 
-
 void dds3AreaBasicGetItemArray(dds3Basic_t *slot, dds3Basic_t *owner);
 void dds3ObjectBaseFreeModelHandle(dds3Basic_t *object);
-
 
 #define DDS3_OBJECT_SLOT_COUNT 8
 #define DDS3_OBJECT_WORLD_SLOT_LIMIT 3
@@ -383,7 +380,6 @@ void dds3ObjectBaseMakeMatter(dds3Basic_t *object) {
     base->mode = DDS3_OBJECT_MATTER_ANIME_MODE_FULL_SPEED;
     base->unk44 = 0;
 }
-
 
 /* Modes 0, 4 and 5 use weight 1; the other valid modes use 0.
  * Values outside 0..6 leave both the current mode and weight unchanged. */
@@ -700,6 +696,31 @@ void dds3ObjectBaseFreePath(dds3Basic_t *object) {
 /* Return the data slot's retained curve work; the data slot must exist. */
 dds3PathBasicControl_t *dds3ObjectBaseGetPathControl(dds3Basic_t *object) {
     return dds3MoverBasicGetPathControl(dds3ObjectBaseGetControlBasic(object, DDS3_OBJECT_DATA_SLOT));
+}
+
+extern dds3ObjectBaseControlWorkData_t *dds3LightObjectBasicGetControlWorkData(dds3Basic_t *object);
+
+/* Each object kind keeps its handle in a different structure. */
+dds3ObjectBaseControlWorkData_t *dds3GetBaseControlWorkData(dds3Basic_t *worldNode) {
+    dds3ObjectBaseControlWorkData_t *handle;
+
+    handle = 0;
+    switch ((worldNode->kindTag >> 24) - 4) {
+    case 0: handle = dds3GetCameraObjectBaseControlWorkData(worldNode); break;
+    case 1: handle = dds3UnitObjectBasicGetControlWorkData(worldNode); break;
+    case 2: handle = dds3MatterObjectBasicGetControlWorkData(worldNode); break;
+    case 3: handle = dds3EffectObjectBasicGetControlWorkData(worldNode); break;
+    case 4: handle = dds3EventObjectBasicGetControlWorkData(worldNode); break;
+    case 5: handle = dds3LightObjectBasicGetControlWorkData(worldNode); break;
+    }
+    return handle;
+}
+
+void dds3ObjectBaseSetControlBasicSvs(dds3Basic_t *object, u32 value) {
+    dds3ObjectBaseControlWorkData_t *base;
+
+    base = dds3GetBaseControlWorkData(object);
+    base->unk44 = value;
 }
 
 INCLUDE_SDATA(const s32, "basic/dds3ObjectBase", D_00435D98);

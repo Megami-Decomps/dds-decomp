@@ -82,12 +82,10 @@ segments:
       - [0x11FF0, c, basic/dds3AreaBasic]  # Nocturne __FILE__; SMT3 unit boundary
       - [0x12400, c, basic/dds3MoverBasic]  # Nocturne __FILE__; SMT3 unit boundary
       - [0x127A8, c, basic/dds3ObjectBase]  # Nocturne __FILE__; SMT3 unit boundary
-      - [0x13888, c, game/code_00112888]
-      - [0x139B8, c, basic/dds3CameraObjectBasic]  # Nocturne __FILE__
-      - [0x13FE0, c, game/code_00112FE0]
-      - [0x140C8, c, basic/dds3UnitObjectBasic]  # Nocturne __FILE__
-      - [0x140E0, c, game/code_001130E0]
-      - [0x15570, c, basic/dds3EffectObjectBasic]  # Nocturne __FILE__
+      - [0x13958, c, basic/dds3CameraObjectBasic]  # Nocturne __FILE__; SMT3 unit boundary
+      - [0x14008, c, basic/dds3UnitObjectBasic]  # Nocturne __FILE__; SMT3 unit boundary
+      - [0x14CD8, c, basic/dds3MatterObjectBasic]  # SMT3 unit boundary
+      - [0x153D8, c, basic/dds3EffectObjectBasic]  # Nocturne __FILE__; SMT3 unit boundary
       - [0x170F8, c, basic/dds3EventObjectBasic]  # Nocturne __FILE__
       - [0x17260, c, basic/dds3LightObjectBasic]  # Nocturne __FILE__
       - [0x17860, c, basic/dds3ModelBasic]  # Nocturne __FILE__
@@ -337,10 +335,10 @@ segments:
       - [0x2A0590, .rodata, basic/dds3DbgBasic]
       - [0x2A0610, .rodata, basic/dds3MoverBasic]
       - [0x2A0640, .rodata, basic/dds3ObjectBase]
-      - [0x2A06E0, .rodata, game/code_00112888]
       - [0x2A06F8, .rodata, basic/dds3CameraObjectBasic]
-      - [0x2A0720, .rodata, game/code_001130E0]
-      - [0x2A0790, .rodata, basic/dds3EffectObjectBasic]
+      - [0x2A0720, .rodata, basic/dds3UnitObjectBasic]
+      - [0x2A0740, .rodata, basic/dds3MatterObjectBasic]
+      - [0x2A0770, .rodata, basic/dds3EffectObjectBasic]
       - [0x2A0930, .rodata, game/code_00117438]
       - [0x2A09A0, .rodata, game/code_0011D3A0]
       - [0x2A0B60, .rodata, game/code_00122030]
@@ -460,7 +458,7 @@ segments:
       - [0x2B9D18, .lit4, script/scrCommonCommand]
       - [0x2B9D20, .lit4, basic/dds3ObjectBase]
       - [0x2B9D40, .lit4, basic/dds3CameraObjectBasic]
-      - [0x2B9D48, .lit4, game/code_001130E0]
+      - [0x2B9D48, .lit4, basic/dds3UnitObjectBasic]
       - [0x2B9D64, .lit4, basic/dds3LightObjectBasic]
       - [0x2B9D6C, .lit4, game/code_0011D3A0]
       - [0x2B9D9C, .lit4, game/code_00122030]
@@ -557,7 +555,7 @@ segments:
       - [0x2BB9B8, .sdata, basic/dds3Basic]
       - [0x2BB9C0, .sdata, basic/dds3MoverBasic]
       - [0x2BB9C8, .sdata, basic/dds3ObjectBase]
-      - [0x2BB9D0, .sdata, game/code_001130E0]
+      - [0x2BB9D0, .sdata, basic/dds3MatterObjectBasic]
       - [0x2BB9E0, .sdata, game/code_00117438]
       - [0x2BBA08, .sdata, newdata/datCalc]
       - [0x2BBAD0, .sdata, game/code_0011CEB8]
