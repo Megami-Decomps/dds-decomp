@@ -3,6 +3,7 @@
 
 #include "common.h"
 #include "sdf_resource.h"
+#include "sdf_types.h"
 #include "sdf_list_node.h"
 #include "sdf_gs_packet.h"
 #include "sdf_texture_clamp.h"
@@ -95,24 +96,19 @@ typedef struct SdfQuad {
 
 /* Texture buffer GPU command words (0x40); DDS1/2 game/code_002D10B0/00329F60.c. */
 typedef struct sdfTexPacket_t {
-    s32 gifTagWord; /* Low GIFtag word; NLOOP occupies bits 0-14. */
-    u32 gifTagControl; /* High GIFtag control word; one packed register. */
-    u64 gifTagRegisters; /* Packed register list: A+D. */
-    u64 samplingState; /* GS TEX1 data, including minification/magnification filters. */
-    u64 samplingRegister; /* GS TEX1_1/TEX1_2 register selector. */
-    u64 textureState; /* GS TEX0 data. */
-    u64 textureRegister; /* GS TEX0_1/TEX0_2 register selector. */
-    u64 clampState; /* GS CLAMP data. */
-    u64 clampRegister; /* GS CLAMP_1/CLAMP_2 register selector. */
+    sdfGifTag_t giftag;
+    sdfGrTagStdReg_t tex1;
+    sdfGrTagStdReg_t tex0;
+    sdfGrTagStdReg_t clamp;
 } sdfTexPacket_t;
 
 typedef char SdfTexBuf_size_must_be_0x40[(sizeof(sdfTexPacket_t) == 0x40) ? 1 : -1];
 typedef char SdfTexBuf_registers_offset_must_be_8[
-    ((u32)&((sdfTexPacket_t *)0)->gifTagRegisters == 8) ? 1 : -1];
+    ((u32)&((sdfTexPacket_t *)0)->giftag.regs == 8) ? 1 : -1];
 typedef char SdfTexBuf_sampling_register_offset_must_be_0x18[
-    ((u32)&((sdfTexPacket_t *)0)->samplingRegister == 0x18) ? 1 : -1];
+    ((u32)&((sdfTexPacket_t *)0)->tex1.reg == 0x18) ? 1 : -1];
 typedef char SdfTexBuf_texture_register_offset_must_be_0x28[
-    ((u32)&((sdfTexPacket_t *)0)->textureRegister == 0x28) ? 1 : -1];
+    ((u32)&((sdfTexPacket_t *)0)->tex0.reg == 0x28) ? 1 : -1];
 
 /* Known sdfGsMemSlice_t allocation categories. Unknown u32 values are preserved. */
 enum SdfTexResourceAllocationMode {
@@ -545,22 +541,12 @@ typedef struct sdfMatPacket_t
 
 typedef char sdfMatPacket_t_ambient_at_0x04[
     ((u32)&((sdfMatPacket_t *)0)->ambient == 0x04) ? 1 : -1];
-typedef char sdfMatPacket_t_diffuse_at_0x08[
-    ((u32)&((sdfMatPacket_t *)0)->diffuse == 0x08) ? 1 : -1];
-typedef char sdfMatPacket_t_specularColor_at_0x10[
-    ((u32)&((sdfMatPacket_t *)0)->specularColor == 0x10) ? 1 : -1];
-typedef char sdfMatPacket_t_refmapColor_at_0x14[
-    ((u32)&((sdfMatPacket_t *)0)->refmapColor == 0x14) ? 1 : -1];
+typedef char sdfMatPacket_t_mtexDiffuse_at_0x0C[
+    ((u32)&((sdfMatPacket_t *)0)->mtexDiffuse == 0x0C) ? 1 : -1];
 typedef char sdfMatPacket_t_constant_at_0x1C[
     ((u32)&((sdfMatPacket_t *)0)->constant == 0x1C) ? 1 : -1];
-typedef char sdfMatPacket_t_mtexAlpha_at_0x20[
-    ((u32)&((sdfMatPacket_t *)0)->mtexAlpha == 0x20) ? 1 : -1];
 typedef char sdfMatPacket_t_mtexAlgo_at_0x24[
     ((u32)&((sdfMatPacket_t *)0)->mtexAlgo == 0x24) ? 1 : -1];
-typedef char sdfMatPacket_t_fdBias_at_0x28[
-    ((u32)&((sdfMatPacket_t *)0)->fdBias == 0x28) ? 1 : -1];
-typedef char sdfMatPacket_t_fdSoften_at_0x2C[
-    ((u32)&((sdfMatPacket_t *)0)->fdSoften == 0x2C) ? 1 : -1];
 typedef char sdfMatPacket_t_tex1Data_at_0x38[
     ((u32)&((sdfMatPacket_t *)0)->tex1Data == 0x38) ? 1 : -1];
 typedef char sdfMatPacket_t_clampData_at_0x48[
@@ -571,8 +557,6 @@ typedef char sdfMatPacket_t_mtexClampData_at_0x60[
     ((u32)&((sdfMatPacket_t *)0)->mtexClampData == 0x60) ? 1 : -1];
 typedef char sdfMatPacket_t_texTm_at_0x68[
     ((u32)&((sdfMatPacket_t *)0)->texTm == 0x68) ? 1 : -1];
-typedef char sdfMatPacket_t_mtexTexTm_at_0x80[
-    ((u32)&((sdfMatPacket_t *)0)->mtexTexTm == 0x80) ? 1 : -1];
 typedef char sdfMatPacket_t_cmd_call_spec_at_0x98[
     ((u32)&((sdfMatPacket_t *)0)->cmd_call_spec == 0x98) ? 1 : -1];
 typedef char sdfMatPacket_t_cmd_call_kind_at_0x9C[
@@ -589,12 +573,12 @@ typedef char sdfMat_t_diffuse_at_0x14[
     ((u32)&((sdfMat_t *)0)->diffuse == 0x14) ? 1 : -1];
 typedef char sdfMat_t_multiTexDiffuse_at_0x18[
     ((u32)&((sdfMat_t *)0)->multiTexDiffuse == 0x18) ? 1 : -1];
+typedef char sdfMat_t_constant_at_0x1C[
+    ((u32)&((sdfMat_t *)0)->constant == 0x1C) ? 1 : -1];
 typedef char sdfMat_t_specularParm_at_0x24[
     ((u32)&((sdfMat_t *)0)->specularParm == 0x24) ? 1 : -1];
 typedef char sdfMat_t_refmap_at_0x28[
     ((u32)&((sdfMat_t *)0)->refmap == 0x28) ? 1 : -1];
-typedef char sdfMat_t_texHandle_at_0x2C[
-    ((u32)&((sdfMat_t *)0)->texHandle == 0x2C) ? 1 : -1];
 typedef char sdfMat_t_multiTexHandle_at_0x30[
     ((u32)&((sdfMat_t *)0)->multiTexHandle == 0x30) ? 1 : -1];
 typedef char sdfMat_t_multiTexMethod_at_0x34[

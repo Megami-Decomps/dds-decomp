@@ -1675,7 +1675,7 @@ BtlRuntimeFadeStepResult btlDrawCapturedScreenTileOverlay(
         ReverseMatrix();
         waveRadius = 640.0f;
         sdf3DPrimLinkTm(tiles, NULL);
-        dds3RenderTexture->packet->clampState = 0x37C00000008ULL;
+        dds3RenderTexture->packet->clamp.data = 0x37C00000008ULL;
         sdfMatSetTex(D_00436D10, dds3RenderTexture);
         sdf3DPrimLinkMat(tiles, D_00436D10, NULL);
         btlCapturedScreenTileDrawParams.color = 0x80808080;

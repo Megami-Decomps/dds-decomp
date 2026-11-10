@@ -925,7 +925,7 @@ sdfTexHandle_t *sdfGetOrCreateTextureForReference(sdfGrOt_t *surface, RefObj *so
     EE_MMI_BIT_LENGTH(heightLog2);
     EE_MMI_BIT_LENGTH(widthLog2);
     secondary >>= 6;
-    texture->packet->textureState =
+    texture->packet->tex0.data =
         ((u64)2 << 61) |
         ((u64)clutFormat << 51) |
         ((u64)secondary << 37) |
