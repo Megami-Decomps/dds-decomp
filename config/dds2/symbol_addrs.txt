@@ -8353,6 +8353,7 @@ dds3SpPolyColorFrom = 0x003AAF70;
 dds3SpPolyTable = 0x003AAF80;
 dds3SpPolyResetTable = 0x003AAFB0;
 dds3SpPolySetScaleTable = 0x003AAFC0;
+effPktDefaultFaceIndex = 0x003AAFD0;
 effBTL_Ptr_D = 0x003AF1D8;
 GetPositionPtrTable = 0x003AF208;
 effPartPCPDataTable = 0x003AFFD0;

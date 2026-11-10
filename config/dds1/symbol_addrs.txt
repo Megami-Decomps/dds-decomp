@@ -8069,6 +8069,7 @@ dds3SpPolyTable = 0x0034E650;
 billObjectCallbacks = 0x0034E658;
 dds3SpPolyResetTable = 0x0034E680;
 dds3SpPolySetScaleTable = 0x0034E690;
+effPktDefaultFaceIndex = 0x0034E6A0;
 effBTL_Ptr_D = 0x003528A8;
 GetPositionPtrTable = 0x003528D8;
 effPartPCPDataTable = 0x003536A0;

@@ -5,7 +5,7 @@
 /* DDS's names for the same objects. */
 #define D_002F5C20 kwlnHeldTextureTargetVector
 #define D_002F5C30 kwlnHeldTextureEyeVector
-#define D_003176C0 D_0034E6A0
+#define D_003176C0 effPktDefaultFaceIndex
 #define dds3CrossfadeEndMessage D_003A0D70
 
 /* DDS keeps the end message as data: its rodata block has 8 more bytes than
