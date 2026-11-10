@@ -1,10 +1,17 @@
 #include "common.h"
 #include "sdf_chip.h"
 #include "sdf_packet_list.h"
-#include "kernel.h"
-#include "sdf.h"
 #include "evt_picture.h"
 #include "itf_panel_draw.h"
+#include "sdk_ps2.h"
+#include "snd_packed_track_load_status.h"
+#include "evt_viewer.h"
+#include "evt_sky_alpha_animation_status.h"
+#include "mdl_motion_controller_lookup_api.h"
+#include "dds3_task_create.h"
+#include "evt_task.h"
+#include "btl.h"
+
 extern u8 evtPictureQuadBounds[];
 extern u8 evtPictureQuadTexcoords[];
 extern u8 evtPictureQuadColor[];
@@ -47,3 +54,46 @@ void evtPictureShutdown(dds3ProcessID_t *task) {
     }
     sdfChipFreeDirect(picture);
 }
+
+/* Declared before first use (were implicit int). */
+
+struct SoundMixer;
+
+/* Native viewer child node; frame rows traverse this same linked record. */
+
+/* World-slot node borrowed by a viewer group. Its data is slot-specific;
+ * model groups use EvtModelSlot, while all named nodes share the list links. */
+
+/* The native 0x84-byte viewer entry owns its child list and borrows info.
+ * EvtRuntime.frameGroup selects one of these entries, not a separate list. */
+
+/* The command API stores words; timed-prompt drawing consumes their text pointers. */
+
+/* The file header emits this whole word; type-8 spans use its low halfword. */
+
+/* Native 0x2490-byte viewer runtime shared by dialogs, task polls and file writers. */
+
+typedef struct {
+    s16 enabled;
+    s8 fields[8]; /* Per-row signed lookup values at +0x2. */
+} EvtTblEntry; /* 0xA bytes */
+
+/* Create a task with an initialized event payload. */
+dds3ProcessID_t *evtStartPictureProcess2(s32 taskId, const char *path) {
+    EvtPictureWork *data;
+
+    data = evtAllocateContext();
+    LoadTexture(data, path);
+    return dds3StartProcess(evtPictureTaskName, taskId, 1, 1, evtUpdatePictureWhenFlagged, evtPictureShutdown, (u32)data);
+}
+
+dds3ProcessID_t *evtStartPictureProcess(s32 taskId, sdfTexHandle_t *texture) {
+    EvtPictureWork *data;
+
+    data = evtAllocateContext();
+    data->texture = texture;
+    return dds3StartProcess(evtPictureTaskName, taskId, 1, 1, evtUpdatePictureWhenFlagged, evtPictureShutdown, (u32)data);
+}
+
+INCLUDE_SDATA(const s32, "event/evtPicture", evtPictureTaskName);
+

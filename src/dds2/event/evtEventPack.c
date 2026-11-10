@@ -1,26 +1,151 @@
 #include "sdk_ps2.h"
 #include "common.h"
-#include "kernel.h"
 #include "dds3_task_create.h"
 #include "sdf_chip.h"
 #include "sdf_heap_api.h"
-#include "sdf.h"
 #include "evt_unit.h"
-#include "evt_event_pack.h"
-#include "file.h"
-#include "evt_motion_se.h"
 #include "evt_sound_variation.h"
 #include "evt_task.h"
-#include "eff_transform.h"
-#include "dds3obj.h"
 #include "mdl.h"
 #include "mdl_motion_controller_lookup_api.h"
 #include "file_request_api.h"
 #include "sdf_texture_offset_list.h"
 #include "fld_file_addr_reset_mode.h"
 #include "evt_event_pack_task.h"
-
 #include "dds3_world_primary.h"
+#include "snd_packed_track_load_status.h"
+#include "evt_viewer.h"
+#include "evt_pad.h"
+#include "evt_sky_alpha_animation_status.h"
+#include "eff_event.h"
+#include "evt_effect_scale_object.h"
+#include "sdf_texture_file.h"
+#include "btl.h"
+#include "sdf_debug_api.h"
+
+/* Declared before first use (were implicit int). */
+/* Original-style implicit int, kept: matched code depends on it: sceWrite. */
+
+typedef struct {
+    s16 columnCount;
+    s8 columns[8]; /* The halfword counts signed property selectors. */
+} EvtTblEntry; /* 0xA bytes */
+
+/* Native viewer child node; frame rows traverse this same linked record. */
+
+/* World-slot node borrowed by a viewer group. Its data is slot-specific;
+ * model groups use EvtModelSlot, while all named nodes share the list links. */
+
+/* The native 0x84-byte viewer entry owns its child list and borrows info.
+ * EvtRuntime.frameGroup selects one of these entries, not a separate list. */
+
+/* The command API stores words; timed-prompt drawing consumes their text pointers. */
+
+/* The file header emits this whole word; type-8 spans use its low halfword. */
+
+/* Native 0x24BC-byte viewer runtime shared by dialogs, task polls and file writers. */
+
+extern char D_004233F0[]; /* " RR  = ENTER" */
+extern char D_00423400[]; /* " RD  = CANCEL" */
+extern char D_00423428[]; /* " L,R = VALUE-+" */
+extern s32 dds3SelectMenu(s32 padSet, s32 secondaryCount, s32 primaryCount, s32 secondaryVisible,
+                                  s32 primaryVisible, s32 *secondaryScroll, s32 *primaryScroll,
+                                  s32 *secondaryCursor, s32 *primaryCursor);
+
+dds3ProcessID_t *evtSearchEventPack(EvtPackEventId eventId) {
+    char taskName[32];
+
+    evtMakeEventPackName(eventId, taskName);
+    return dds3SearchProcessName((const char *)taskName);
+}
+
+/* Return its load phase, or EVT_PACK_LOAD_NOT_FOUND when the task is absent. */
+EvtPackLoadStatus evtGetEventPackStat(EvtPackEventId eventId) {
+    dds3ProcessID_t *task = evtSearchEventPack(eventId);
+    if (task == 0) {
+        return EVT_PACK_LOAD_NOT_FOUND;
+    }
+    return ((EvtPackLoadState *)dds3GetProcessData(task))->loadPhase;
+}
+
+EvtPackLoadState *evtGetPackProcessData(EvtPackEventId eventId) {
+    dds3ProcessID_t *task = evtSearchEventPack(eventId);
+    if (task != 0) {
+        return (EvtPackLoadState *)dds3GetProcessData(task);
+    }
+    return NULL;
+}
+
+void *evtGetEventPackResourceAddress(EvtPackEventId eventId, EvtPackSecondaryResourceId secondaryResourceId) {
+    dds3ProcessID_t *task;
+    EvtPackLoadState *data;
+    s32 i;
+
+    task = evtSearchEventPack(eventId);
+    if (task == 0) {
+        return 0;
+    }
+    data = (EvtPackLoadState *)dds3GetProcessData(task);
+    if (data->loadPhase != EVT_PACK_LOAD_COMPLETE) {
+        return 0;
+    }
+    for (i = 0; i < data->header->entryCount; i++) {
+        if (data->entries[i].secondaryResourceId == secondaryResourceId) {
+            return data->data + data->entries[i].dataOffset;
+        }
+    }
+    return 0;
+}
+
+extern void Eve_DistortionBlurSetTex(sdfTexHandle_t *);
+void evtRefreshTaskEffectTexture(EvtPackEventId eventId, EvtPackSecondaryResourceId key) {
+    EvtPackLoadState *data = evtGetPackProcessData(eventId);
+    void *address = evtGetEventPackResourceAddress(eventId, key);
+    sdfTexHandle_t *texture;
+    if (address != 0) {
+        if (data->effect72 != 0) {
+            sdfTexFreeDelayed(data->effect72);
+            data->effect72 = 0;
+        }
+        texture = sdfTexSet((SdfTextureFileHeader *)(address));
+        Eve_DistortionBlurSetTex(texture);
+        data->effect72 = texture;
+    }
+}
+
+extern EvtModelScaleEntry *D_00435DE0;
+extern EvtModelScaleEntry *D_00435DF0;
+extern void dds3EffectObjectBasicStatOn(dds3Basic_t *object, u32 flags);
+struct SoundMixer;
+extern dds3Basic_t *dds3AddBEDEffectObjectBasic2(struct SoundMixer *resource, const void *position, const void *scale);
+
+/* Spawn from a keyed task resource with two zeroed constructor vectors.
+ * A nonnegative index applies the selected model-table scale relative to the base. */
+dds3Basic_t *evtSpawnResourceObject(EvtPackEventId eventId, EvtPackSecondaryResourceId key, s32 index) {
+    u8 vecA[16];
+    u8 vecB[16];
+    void *found;
+    dds3Basic_t *obj;
+    EvtEffectInner *inner;
+
+    memset(vecA, 0, 0x10);
+    memset(vecB, 0, 0x10);
+    found = evtGetEventPackResourceAddress(eventId, key);
+    if (found != 0) {
+        obj = dds3AddBEDEffectObjectBasic2(found, vecA, vecB);
+        if (obj != 0) {
+            dds3EffectObjectBasicStatOn(obj, 1);
+            if (index >= 0) {
+                inner = ((EvtEffectObject *)obj)->inner;
+                effEveBEDCutSetScale(inner->scaledObject, D_00435DF0[index].modelScale / D_00435DE0->modelScale);
+            }
+            return obj;
+        }
+        return obj;
+    }
+    return found;
+}
+
 extern EvtPackedSoundTrackId evtPlaySe(s32 eventId, EvtSoundVariation variation);
 
 extern s32 evtLoadArea_FromMemory(s32 area, s32 room, u8 *resource0Data, u8 *resource1Data,
@@ -28,7 +153,6 @@ extern s32 evtLoadArea_FromMemory(s32 area, s32 room, u8 *resource0Data, u8 *res
 extern u32 dds3DrawFlag;
 
 extern s32 evtMotionSeWork;
-#include "sdf_debug_api.h"
 extern void mdlPackDecode(s32, s32, s32, const u8 *, s32);
 extern s32 evtSetRegistUnit(s32 slotKind, s32 resource);
 
@@ -192,7 +316,6 @@ void evtFreeScriptProcessData(dds3ProcessID_t *task) {
 /* Preserve the complete native format record, including its trailing zeros. */
 const char evtMotionSeTaskNameFormat[0x10] __attribute__((aligned(8))) = "mse_%d_%d";
 
-
 /* Allocate a three-word task parameter block and format its "mse_..." name. */
 dds3ProcessID_t *evtLoadModelSe(EvtMotionSeModelKey modelKey, EvtPackEventId eventId,
                                 EvtMotionSeResourceId resourceId) {
@@ -228,8 +351,6 @@ void evtLoadEventScript(EvtPackLoadState *state) {
 }
 
 struct FileRequest;
-struct FileWork;
-
 
 extern char D_004377E8[];
 

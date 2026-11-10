@@ -5,17 +5,11 @@
 #include "evt_viewer_track_file_format.h"
 #include "sdf_delayed_resource_check_api.h"
 #include "ps2asm.h"
-#include "snd_track_playback_api.h"
 #include "dds3_background_fade_api.h"
-#include "snd_sequence_volume_pan.h"
-#include "dat_state.h"
-#include "sdf_texture_offset_list.h"
 #include "itf_mes_window.h"
 #include "itf_mes_panel_mode.h"
 #include "sdf_packet_list.h"
 #include "sdf_heap_api.h"
-#include "evt_viewer.h"
-#include "event.h"
 #include "evt_menu_table_entry_availability.h"
 #include "mnu_camp_option_index_api.h"
 #include "evt_reload_viewer_api.h"
@@ -24,72 +18,43 @@
 #include "evt_pad.h"
 #include "evt_serialized_child.h"
 #include "sdf_vu_matrix.h"
-
-#include "evt_world.h"
 #include "evt_picture.h"
 #include "evt_event_bgm_readiness.h"
 #include "evt_sound_variation.h"
 #include "evt_sky_alpha_animation_status.h"
 #include "eff_object.h"
-#include "eff_event.h"
 #include "eff_event_setup_readiness.h"
 #include "mdl.h"
 #include "mdl_motion_controller_lookup_api.h"
-#include "sdf.h"
 #include "sdf_sif_command.h"
-#include "kernel.h"
-#include "dds3_task_runner.h"
 #include "dds3_task_update_count.h"
-#include "dds3_task_create.h"
 #include "evt_task.h"
 #include "evt_unit.h"
 #include "evt_unit_object_key.h"
 #include "evt_unit_vector_slot.h"
-#include "evt_event_pack.h"
-#include "evt_polygon_movie.h"
 #include "evt_polygon_movie_load_api.h"
-#include "evt_effect_scale_object.h"
-#include "fld.h"
 #include "dds3_task_lifecycle.h"
 #include "sdf_texture_file.h"
 #include "btl.h"
+#include "sdf_debug_api.h"
+
 /* Declared before first use (were implicit int). */
 extern void evtViewerPushCommandHistory(s32 actionMode, s32 first, s32 second, evtViewerInfo_t *viewer);
-/* Original-style implicit int, kept: matched code depends on it: sceWrite. */
 
-extern u32 fldbokasi;
+extern s32 evtDrawFrameListColumnHeadings(sdfDrawTag_t *list, s32 x, s32 y, evtViewerInfo_t *ctx);
 
-extern EvtSkyAlphaAnimationStatus skyanime;
+extern void evtWriteSerializedBytes(s32 output, void *data, s32 size);
 
-extern void fldSkySetAlphaOfs(u32 alpha);
-
-extern s16 fldSkyGetAlphaOfs(void);
-
-extern u16 skyanow;
-
-extern u16 skyamax;
-
-extern s16 skyatarget;
-
-extern s16 skyabase_par;
-
-extern void fldSkyDrawFilter(void);
-
-extern void rsetOtOfs(s32 id);
-
-extern void fldDrawBokasi(void);
-
-
-
-typedef struct {
-    s16 columnCount;
-    s8 columns[8]; /* The halfword counts signed property selectors. */
-} EvtTblEntry; /* 0xA bytes */
-
-extern EvtTblEntry D_003C9730[];
+struct SoundMixer;
+extern void evtApplyViewerTimelineFrame(s32 time, evtViewerInfo_t *viewer);
+extern char D_003BC058[]; /* "     %d" */
+extern char D_003BC0A8[]; /* " EVENT" */
+extern char D_003BC0B0[]; /* "%3d" */
+extern char D_003BC0B8[]; /* "   CUT" */
+extern char D_003BC0C0[]; /* "%03d" */
+extern char D_003BC098[];
 
 /* Native viewer child node; frame rows traverse this same linked record. */
-
 
 /* World-slot node borrowed by a viewer group. Its data is slot-specific;
  * model groups use EvtModelSlot, while all named nodes share the list links. */
@@ -97,160 +62,28 @@ extern EvtTblEntry D_003C9730[];
 /* The native 0x84-byte viewer entry owns its child list and borrows info.
  * EvtRuntime.frameGroup selects one of these entries, not a separate list. */
 
-
 /* The command API stores words; timed-prompt drawing consumes their text pointers. */
-
 
 /* The file header emits this whole word; type-8 spans use its low halfword. */
 
-/* Native 0x24BC-byte viewer runtime shared by dialogs, task polls and file writers. */
+/* Native 0x2490-byte viewer runtime shared by dialogs, task polls and file writers. */
 
-extern s32 evtEditEffectSpriteFrame(evtViewerInfo_t *runtime);
-extern s32 evtEditCameraColorKeyFrame(evtViewerInfo_t *runtime);
-extern s32 func_002582D0(evtViewerInfo_t *runtime);
-extern void *D_004364B0;
-extern void *D_0043653C;
-extern void *D_00436520;
+typedef struct {
+    s16 enabled;
+    s8 fields[8]; /* Per-row signed lookup values at +0x2. */
+} EvtTblEntry; /* 0xA bytes */
+extern EvtTblEntry D_00368950[];
 
+extern u16 D_003BBE78;
+extern u16 D_003BBE7A;
 
-extern EvtPad dds3PadButtonState;
-extern sdfGrOt_t sdfDebugGrOt;
-extern char D_004233F0[]; /* " RR  = ENTER" */
-extern char D_00423400[]; /* " RD  = CANCEL" */
-extern char D_00423428[]; /* " L,R = VALUE-+" */
-extern char D_004374A0[]; /* "     %d" */
-extern char D_004374F0[]; /* " EVENT" */
-extern char D_004374F8[]; /* "%3d" */
-extern char D_00437500[]; /* "   CUT" */
-extern char D_00437508[]; /* "%03d" */
-extern s32 dds3SelectMenu(s32 padSet, s32 secondaryCount, s32 primaryCount, s32 secondaryVisible,
-                                  s32 primaryVisible, s32 *secondaryScroll, s32 *primaryScroll,
-                                  s32 *secondaryCursor, s32 *primaryCursor);
-extern s32 evtDrawFrameListColumnHeadings(sdfDrawTag_t *list, s32 x, s32 y, evtViewerInfo_t *ctx);
-
-extern void p2sdLoadSMGFile(s32 sound);
-
-extern SndPackedTrackLoadStatus p2sdLoadCheckMidi(s32 sound);
-
-
-#include "sdf_debug_api.h"
-
-extern void p2sdPlayBGMFade(s32 track);
-
-extern void p2sdStopBGM(u32 sound);
-extern void p2sdStopSe(u32 sound);
-
-extern s32 (*D_003C9928[])(s32, s32, evtViewerInfo_t *);
-
-
-
-/* Create a task with an initialized event payload. */
-dds3ProcessID_t *evtStartPictureProcess2(s32 taskId, const char *path) {
-    EvtPictureWork *taskData = evtAllocateContext();
-    LoadTexture(taskData, path);
-    return dds3StartProcess(evtPictureTaskName, taskId, 1, 1, evtUpdatePictureWhenFlagged, evtPictureShutdown, (u32)taskData);
-}
-
-
-dds3ProcessID_t *evtStartPictureProcess(s32 taskId, sdfTexHandle_t *texture) {
-    EvtPictureWork *taskData = evtAllocateContext();
-    taskData->texture = texture;
-    return dds3StartProcess(evtPictureTaskName, taskId, 1, 1, evtUpdatePictureWhenFlagged, evtPictureShutdown, (u32)taskData);
-}
-
-void evtSetBokasi(u32 enabled) {
-    fldbokasi = enabled;
-}
-
-/* Either set the sky alpha immediately or interpolate from its current value. */
-void evtSetSkyAlpha(s32 duration, s32 target) {
-    s16 current;
-
-    current = fldSkyGetAlphaOfs();
-    if (current != target) {
-        if (duration == 0) {
-            fldSkySetAlphaOfs(target);
-            skyanime = EVT_SKY_ALPHA_ANIMATION_INACTIVE;
-        } else {
-            skyamax = duration;
-            skyatarget = current;
-            skyabase_par = target;
-            skyanime = EVT_SKY_ALPHA_ANIMATION_ACTIVE;
-            skyanow = 0;
-        }
-    }
-}
-
-EvtSkyAlphaAnimationStatus evtCheckSkyAlphaAnime(void) {
-    return skyanime;
-}
-
-void evtUpdateSkyAlpha(void) {
-    if (skyanime != EVT_SKY_ALPHA_ANIMATION_INACTIVE) {
-        skyanow += 1;
-        fldSkySetAlphaOfs(skyatarget + (s32)((f32)(skyabase_par - skyatarget) * ((f32)skyanow / (f32)skyamax)));
-        if (skyanow >= skyamax) {
-            skyanime = EVT_SKY_ALPHA_ANIMATION_INACTIVE;
-        }
-    }
-}
-
-s32 evtSkyProcess1(dds3ProcessID_t *task) {
-    evtUpdateSkyAlpha();
-    fldSkyDrawFilter();
-    if (fldbokasi != 0) {
-        rsetOtOfs(0x53);
-        fldDrawBokasi();
-    }
-    return 0;
-}
-
-void evtSkyShutdown(dds3ProcessID_t *task) {
-    skyanime = EVT_SKY_ALPHA_ANIMATION_INACTIVE;
-    fldbokasi = 0;
-}
-
-extern char evtSkyTaskName[];
-
-void evtExitSky(void) {
-    dds3ProcessID_t *task = dds3SearchProcessName(evtSkyTaskName);
-    if (task != 0) {
-        dds3KillProcess(task, 1);
-    }
-}
-
-extern void fldSetFilterAnime(u32 mode);
-extern void fldSkySetAlpha(u32 drawState);
-extern void fldSkySetAlphaOfs(u32 alpha);
-extern void fldSetFadeTarget(s32 area, s32 targetMode, s32 duration);
-
-dds3ProcessID_t *evtInitSky(void) {
-    fldSetFilterAnime(0);
-    fldSkySetAlpha(0x80);
-    fldSkySetAlphaOfs(0);
-    fldSetFadeTarget(0, 1, 0);
-    return dds3StartProcess(evtSkyTaskName, 0x2B0E, 1, 1, evtSkyProcess1, evtSkyShutdown, 0);
-}
-
-/* Frame-variable task update: polls the parent task's user value each frame. */
-dds3TaskUpdateResult_t evtUpdateFrameVariableTask(dds3ProcessID_t *task) {
-    u8 unused[16]; /* retail frame 0x20: unused local storage */
-
-    dds3GetProcessData(task->parent);
-    return DDS3_TASK_UPDATE_RETAIN_CALLBACK;
-}
-
-extern char D_00423380[]; /* "FrameVar" */
-
-dds3ProcessID_t *evtInitFrameVar(void) {
-    return dds3StartProcess(D_00423380, 0x2AF9, 1, 1, evtUpdateFrameVariableTask, 0, 0);
-}
+extern char D_003BC0C8[]; /* "NAME:" */
 
 typedef s32 (*EvtMenuHeaderFn)();
 typedef void (*EvtMenuRowFn)();
-extern u32 D_00437488;
-extern char D_00437490[];
-extern char D_00437498[];
+extern u32 D_003BC040;
+extern char D_003BC048[];
+extern char D_003BC050[];
 
 /* Draw a framed debug menu: the optional header returns how many rows it used, the row callback fills the rest,
  * and blinking scroll markers appear above/below when entries precede `first` or follow the last drawn one. */
@@ -261,7 +94,7 @@ void evtDrawMenuFrame(sdfDrawTag_t *list, s32 x, s32 y, s32 width, s32 rows, s32
     s32 textY;
     s32 index;
 
-    dds3ConsPanelTagLink((void *)list, x, y, width, rows);
+    dds3ConsPanelTagLink(list, x, y, width, rows);
     textX = (x << 4) + 0x7000;
     textY = (y << 3) + 0x7900;
     if (header != NULL) {
@@ -278,65 +111,68 @@ void evtDrawMenuFrame(sdfDrawTag_t *list, s32 x, s32 y, s32 width, s32 rows, s32
             index++;
         }
     }
-    if (D_00437488 & 0x10) {
+    if (D_003BC040 & 0x10) {
         textY = ((y - 10) << 3) + 0x7900;
         textX = ((x + 5 * width + 6) << 4) + 0x7000;
         if (first > 0) {
-            sdfDrawTagLink(list, (u32)sdfDevPrintf(textX, textY, 0xFEFFFF, 6, D_00437490));
+            sdfDrawTagLink(list, (u32)sdfDevPrintf(textX, textY, 0xFEFFFF, 6, D_003BC048));
         }
         textY = ((y + 12 * rows - 2) << 3) + 0x7900;
         if (index < total) {
-            sdfDrawTagLink(list, (u32)sdfDevPrintf(textX, textY, 0xFEFFFF, 6, D_00437498));
+            sdfDrawTagLink(list, (u32)sdfDevPrintf(textX, textY, 0xFEFFFF, 6, D_003BC050));
         }
     }
-    D_00437488++;
+    D_003BC040++;
 }
 
-INCLUDE_RODATA(const s32, "game/code_00250010", D_00423380);
-
-INCLUDE_RODATA(const s32, "game/code_00250010", D_00423390);
+INCLUDE_RODATA(const s32, "event/evtEventViewerMenu", D_003ADDE0);
 
 s32 evtAppendValueChangeDebugLabel(sdfDrawTag_t *list, s32 x, s32 y) {
     sdfDrawTagLink(list, (u32)sdfDevPrintf(x, y, 0xFEFFFF, 0, "VALUE CHANGE."));
     return 2;
 }
 
-extern char D_004233B0[]; /* "     %.1f" */
-extern char D_004233C0[]; /* " L,R = VALUE-+0.1" */
-extern char D_004233D8[]; /* " U,D = VALUE-+1.0" */
-extern char D_004233F0[]; /* " RR  = ENTER" */
-extern char D_00423400[]; /* " RD  = CANCEL" */
+extern char D_003ADE00[]; /* "     %.1f" */
+extern char D_003ADE10[]; /* " L,R = VALUE-+0.1" */
+extern char D_003ADE28[]; /* " U,D = VALUE-+1.0" */
+extern char D_003ADE40[];
+extern char D_003ADE50[];
 
-INCLUDE_RODATA(const s32, "game/code_00250010", D_004233B0);
+INCLUDE_RODATA(const s32, "event/evtEventViewerMenu", D_003ADE00);
 
-INCLUDE_RODATA(const s32, "game/code_00250010", D_004233C0);
+INCLUDE_RODATA(const s32, "event/evtEventViewerMenu", D_003ADE10);
 
-INCLUDE_RODATA(const s32, "game/code_00250010", D_004233D8);
+INCLUDE_RODATA(const s32, "event/evtEventViewerMenu", D_003ADE28);
 
-INCLUDE_RODATA(const s32, "game/code_00250010", D_004233F0);
+INCLUDE_RODATA(const s32, "event/evtEventViewerMenu", D_003ADE40);
 
-INCLUDE_RODATA(const s32, "game/code_00250010", D_00423400);
+INCLUDE_RODATA(const s32, "event/evtEventViewerMenu", D_003ADE50);
 
 void evtDrawFloatValueEditorRow(sdfDrawTag_t *list, s32 x, s32 y, s32 index, evtViewerInfo_t *ctx) {
     switch (index) {
     case 0:
-        sdfDrawTagLink(list, (u32)sdfDevPrintf(x, y, 0xFEFFFF, 4, D_004233B0,
+        sdfDrawTagLink(list, (u32)sdfDevPrintf(x, y, 0xFEFFFF, 4, D_003ADE00,
                                                                  ctx->floatValue));
         return;
     case 2:
-        sdfDrawTagLink(list, (u32)sdfDevPrintf(x, y, 0xFEFFFF, 0, D_004233C0));
+        sdfDrawTagLink(list, (u32)sdfDevPrintf(x, y, 0xFEFFFF, 0, D_003ADE10));
         return;
     case 3:
-        sdfDrawTagLink(list, (u32)sdfDevPrintf(x, y, 0xFEFFFF, 0, D_004233D8));
+        sdfDrawTagLink(list, (u32)sdfDevPrintf(x, y, 0xFEFFFF, 0, D_003ADE28));
         return;
     case 4:
-        sdfDrawTagLink(list, (u32)sdfDevPrintf(x, y, 0xFEFFFF, 0, D_004233F0));
+        sdfDrawTagLink(list, (u32)sdfDevPrintf(x, y, 0xFEFFFF, 0, D_003ADE40));
         return;
     case 5:
-        sdfDrawTagLink(list, (u32)sdfDevPrintf(x, y, 0xFEFFFF, 0, D_00423400));
+        sdfDrawTagLink(list, (u32)sdfDevPrintf(x, y, 0xFEFFFF, 0, D_003ADE50));
         break;
     }
 }
+
+extern sdfGrOt_t sdfDebugGrOt;
+extern EvtPad dds3PadButtonState;
+
+extern void evtDrawFloatValueEditorRow();
 
 /* Edit the bounded float only in mode 8. Confirm precedes cancel; coarse steps
  * replace fine steps before the value is clamped to the runtime limits. */
@@ -382,30 +218,31 @@ s32 evtDrawValueChangeNoticeRow(sdfDrawTag_t *list, s32 x, s32 y) {
     return 2;
 }
 
-INCLUDE_RODATA(const s32, "game/code_00250010", D_00423428);
+extern char D_003ADE40[];
+extern char D_003ADE50[];
+extern char D_003ADE78[];
+
+INCLUDE_RODATA(const s32, "event/evtEventViewerMenu", D_003ADE78);
 
 void evtDrawValueChangeInstructionRow(sdfDrawTag_t *list, s32 x, s32 y, u32 index, evtViewerInfo_t *ctx) {
     switch (index) {
     case 0:
-        sdfDrawTagLink(list, (u32)sdfDevPrintf(x, y, 0xFEFFFF, 4, D_004374A0, ctx->value));
+        sdfDrawTagLink(list, (u32)sdfDevPrintf(x, y, 0xFEFFFF, 4, D_003BC058, ctx->value));
         return;
     case 2:
-        sdfDrawTagLink(list, (u32)sdfDevPrintf(x, y, 0xFEFFFF, 0, D_00423428));
+        sdfDrawTagLink(list, (u32)sdfDevPrintf(x, y, 0xFEFFFF, 0, D_003ADE78));
         return;
     case 3:
         sdfDrawTagLink(list, (u32)sdfDevPrintf(x, y, 0xFEFFFF, 0, " U,D = VALUE-+10"));
         return;
     case 4:
-        sdfDrawTagLink(list, (u32)sdfDevPrintf(x, y, 0xFEFFFF, 0, D_004233F0));
+        sdfDrawTagLink(list, (u32)sdfDevPrintf(x, y, 0xFEFFFF, 0, D_003ADE40));
         return;
     case 5:
-        sdfDrawTagLink(list, (u32)sdfDevPrintf(x, y, 0xFEFFFF, 0, D_00423400));
+        sdfDrawTagLink(list, (u32)sdfDevPrintf(x, y, 0xFEFFFF, 0, D_003ADE50));
         break;
     }
 }
-
-extern s32 evtDrawValueChangeNoticeRow(sdfDrawTag_t *list, s32 x, s32 y);
-extern void evtDrawValueChangeInstructionRow(sdfDrawTag_t *list, s32 x, s32 y, u32 index, evtViewerInfo_t *ctx);
 
 s32 evtUpdateValueChangeDialog(s32 x, s32 y, evtViewerInfo_t *ctx) {
     sdfDrawTag_t *list;
@@ -453,7 +290,7 @@ s32 evtFrameChangeHead(sdfDrawTag_t *target, s32 x, s32 y) {
 void evtViewerDrawFrameChangeRow(sdfDrawTag_t *list, s32 x, s32 y, u32 index, evtViewerInfo_t *ctx) {
     switch (index) {
     case 0:
-        sdfDrawTagLink(list, (u32)sdfDevPrintf(x, y, 0xFEFFFF, 4, D_004374A0, ctx->value));
+        sdfDrawTagLink(list, (u32)sdfDevPrintf(x, y, 0xFEFFFF, 4, D_003BC058, ctx->value));
         return;
     case 2:
         sdfDrawTagLink(list, (u32)sdfDevPrintf(x, y, 0xFEFFFF, 0, " L,R = FRMAE-+"));
@@ -465,10 +302,10 @@ void evtViewerDrawFrameChangeRow(sdfDrawTag_t *list, s32 x, s32 y, u32 index, ev
         sdfDrawTagLink(list, (u32)sdfDevPrintf(x, y, 0xFEFFFF, 0, "L1,R1= FRAME-+100"));
         return;
     case 5:
-        sdfDrawTagLink(list, (u32)sdfDevPrintf(x, y, 0xFEFFFF, 0, D_004233F0));
+        sdfDrawTagLink(list, (u32)sdfDevPrintf(x, y, 0xFEFFFF, 0, D_003ADE40));
         return;
     case 6:
-        sdfDrawTagLink(list, (u32)sdfDevPrintf(x, y, 0xFEFFFF, 0, D_00423400));
+        sdfDrawTagLink(list, (u32)sdfDevPrintf(x, y, 0xFEFFFF, 0, D_003ADE50));
         return;
     case 7:
         sdfDrawTagLink(list, (u32)sdfDevPrintf(x, y, 0xFEFFFF, 0, " RL  = NOW FRAME"));
@@ -480,9 +317,6 @@ void evtViewerDrawFrameChangeRow(sdfDrawTag_t *list, s32 x, s32 y, u32 index, ev
         break;
     }
 }
-
-extern void evtApplyViewerTimelineFrame(s32 time, evtViewerInfo_t *viewer);
-extern void evtViewerDrawFrameChangeRow(sdfDrawTag_t *list, s32 x, s32 y, u32 index, evtViewerInfo_t *ctx);
 
 s32 evtViewerFrameChangeUpdate(s32 x, s32 y, evtViewerInfo_t *ctx) {
     sdfDrawTag_t *list;
@@ -537,10 +371,10 @@ s32 evtViewerFrameChangeUpdate(s32 x, s32 y, evtViewerInfo_t *ctx) {
     return 0;
 }
 
-extern const char *D_004374B8[];
-extern const char *D_00423688[];
-extern char D_004374C8[];
-extern char D_004374D0[];
+extern const char *D_003BC070[];
+extern const char *D_003AE0D8[];
+extern char D_003BC080[];
+extern char D_003BC088[];
 /* Draw a project-menu command, including its current toggle/skip option. */
 void evtDrawProjectCommandRow(sdfDrawTag_t *list, s32 x, s32 y, s32 index, evtViewerInfo_t *ctx) {
     char labels[11][30] = {
@@ -560,8 +394,8 @@ void evtDrawProjectCommandRow(sdfDrawTag_t *list, s32 x, s32 y, s32 index, evtVi
     const char *secondaryOptions[3];
     s32 style;
 
-    memcpy(primaryOptions, D_004374B8, sizeof(primaryOptions));
-    memcpy(secondaryOptions, D_00423688, sizeof(secondaryOptions));
+    memcpy(primaryOptions, D_003BC070, sizeof(primaryOptions));
+    memcpy(secondaryOptions, D_003AE0D8, sizeof(secondaryOptions));
     if (index < 11) {
         if (ctx->inputA == index) {
             if (ctx->actionMode == 1) {
@@ -574,118 +408,110 @@ void evtDrawProjectCommandRow(sdfDrawTag_t *list, s32 x, s32 y, s32 index, evtVi
         }
         if (index == 9) {
             sdfDrawTagLink(list, (u32)sdfDevPrintf(x, y, 0xFEFFFF, style,
-                D_004374C8, labels[index], primaryOptions[mnuCampGetPrimaryOption(ctx)]));
+                D_003BC080, labels[index], primaryOptions[mnuCampGetPrimaryOption(ctx)]));
         } else if (index == 10) {
             sdfDrawTagLink(list, (u32)sdfDevPrintf(x, y, 0xFEFFFF, style,
-                D_004374C8, labels[index], secondaryOptions[mnuCampGetSecondaryOption(ctx)]));
+                D_003BC080, labels[index], secondaryOptions[mnuCampGetSecondaryOption(ctx)]));
         } else {
             sdfDrawTagLink(list, (u32)sdfDevPrintf(x, y, 0xFEFFFF, style,
-                D_004374D0, labels[index]));
+                D_003BC088, labels[index]));
         }
     }
 }
 
-s32 mnuDrawInfoWindowA(s32 x, s32 y, evtViewerInfo_t *ctx) {
-    sdfDrawTag_t *list;
+extern void evtDrawEntrySelectionRow();
+extern s32 dds3SelectMenu(s32 padSet, s32 secondaryCount, s32 primaryCount, s32 secondaryVisible,
+                                 s32 primaryVisible, s32 *secondaryScroll, s32 *primaryScroll,
+                                 s32 *secondaryCursor, s32 *primaryCursor);
 
-    list = dds3FontReqAllocDrawTag();
-    evtDrawMenuFrame(list, x, y, 0xF, 0xB, 0, 0xB, ctx, NULL, evtDrawProjectCommandRow);
-    sdfDebugGrOt.regFunc(&sdfDebugGrOt, list);
-    if (ctx->actionMode != 1) {
+s32 mnuDrawInfoWindowA(s32 x, s32 y, evtViewerInfo_t *work) {
+    sdfDrawTag_t *packets = dds3FontReqAllocDrawTag();
+    evtDrawMenuFrame(packets, x, y, 0xF, 0xB, 0, 0xB, work, 0, evtDrawProjectCommandRow);
+    sdfDebugGrOt.regFunc(&sdfDebugGrOt, packets);
+    if (work->actionMode != 1) {
         return 0;
     }
-    return dds3SelectMenu(0, 1, 0xB, 1, 0xB, 0, 0, 0, &ctx->inputA);
+    return dds3SelectMenu(0, 1, 0xB, 1, 0xB, 0, 0, 0, &work->inputA);
 }
 
-extern char D_004374D0[];
+extern char D_003BC090[];
+extern char D_003BC0A0[];
+extern s8 D_003688B8[][12];
 
 /* Draw the runtime title when present; return two rows used, or zero for no title. */
-s32 evtDrawStringEntry(sdfDrawTag_t *list, s32 x, s32 y, evtViewerInfo_t *ctx) {
-    if (ctx->title == NULL) {
+s32 evtDrawStringEntry(sdfDrawTag_t *output, s32 x, s32 y, evtViewerInfo_t *work) {
+    if (work->title == 0) {
         return 0;
     }
-    sdfDrawTagLink(list, (u32)sdfDevPrintf(x, y, 0xFEFFFF, 0, D_004374D0, ctx->title));
+    sdfDrawTagLink(output, (u32)sdfDevPrintf(x, y, 0xFEFFFF, 0, D_003BC088, work->title));
     return 2;
 }
 
-extern char D_004374D8[]; /* " %s" */
-
 /* Draw an in-range item name, distinguishing selected active and inactive rows. */
-void evtDrawSelectableTextRow(sdfDrawTag_t *list, s32 x, s32 y, s32 index, evtViewerInfo_t *ctx) {
-    if (index < ctx->itemCount) {
-        s32 color;
+void evtDrawSelectableTextRow(sdfDrawTag_t *list, s32 x, s32 y, s32 index, evtViewerInfo_t *work) {
+    s32 color;
 
-        if (ctx->cursor == index) {
-            if (ctx->actionMode == 2) {
-                color = 4;
-            } else {
-                color = 5;
-            }
+    if (index < work->itemCount) {
+        if (work->cursor == index) {
+            color = work->actionMode == 2 ? 4 : 5;
         } else {
             color = 0;
         }
-        sdfDrawTagLink(list, (u32)sdfDevPrintf(x, y, 0xFEFFFF, color, D_004374D8, ctx->itemNames[index]));
+        sdfDrawTagLink(list, (u32)sdfDevPrintf(x, y, 0xFEFFFF, color, D_003BC090, work->itemNames[index]));
     }
 }
 
-
 /* Draw a title-sized selection dialog; only action mode 2 advances its cursor. */
-s32 evtUpdateTextSelectionDialog(s32 x, s32 y, evtViewerInfo_t *ctx) {
-    sdfDrawTag_t *list;
-    s32 width;
-    s32 len;
+s32 evtUpdateTextSelectionDialog(s32 x, s32 y, evtViewerInfo_t *work) {
+    sdfDrawTag_t *packets = dds3FontReqAllocDrawTag();
+    s32 width = 10;
 
-    list = dds3FontReqAllocDrawTag();
-    width = 10;
-    if (ctx->title != NULL) {
-        len = strlen(ctx->title);
-        width = len;
-        if (len < 6) {
+    if (work->title != 0) {
+        width = strlen(work->title);
+        if (width < 6) {
             width = 6;
         }
     }
-    evtDrawMenuFrame(list, x, y, width, ctx->itemCount + 3, 0, ctx->itemCount, ctx, evtDrawStringEntry, evtDrawSelectableTextRow);
-    sdfDebugGrOt.regFunc(&sdfDebugGrOt, list);
-    if (ctx->actionMode != 2) {
+    evtDrawMenuFrame(packets, x, y, width, work->itemCount + 3, 0, work->itemCount, work, evtDrawStringEntry, evtDrawSelectableTextRow);
+    sdfDebugGrOt.regFunc(&sdfDebugGrOt, packets);
+    if (work->actionMode != 2) {
         return 0;
     }
-    return dds3SelectMenu(0, 1, ctx->itemCount, 1, ctx->itemCount, 0, 0, 0, &ctx->cursor);
+    return dds3SelectMenu(0, 1, work->itemCount, 1, work->itemCount, 0, 0, 0, &work->cursor);
 }
-
-extern char D_004374E0[];
-extern char D_004374D0[];
 
 s32 evtDrawInputValueRow(sdfDrawTag_t *list, s32 x, s32 y, u8 *ctx) {
     char text[16];
-    sprintf(text, D_004374E0, (s32)ctx + 0x22D4, (s32)ctx + 0x22E0);
-    sdfDrawTagLink(list, (u32)sdfDevPrintf(x, y, 0xFEFFFF, 0, D_004374D0, text));
+    sprintf(text, D_003BC098, (s32)ctx + 0x22D4, (s32)ctx + 0x22E0);
+    sdfDrawTagLink(list, (u32)sdfDevPrintf(x, y, 0xFEFFFF, 0, D_003BC088, text));
     return 2;
 }
 
-extern s8 D_003C9688[][12];
-extern char D_004374E8[]; /* "%c" */
-
 /* Draw eleven characters from a twelve-byte keyboard row and highlight the
  * runtime character selection, using mode 3 for the active color. */
-void evtDrawKeyboardRow(sdfDrawTag_t *list, s32 x, s32 y, s32 row, evtViewerInfo_t *ctx) {
-    s32 i;
+void evtDrawKeyboardRow(sdfDrawTag_t *list, s32 xPosition, s32 y, s32 row, evtViewerInfo_t *work) {
+    s32 x = xPosition + 0xC0;
+    s8 *table = D_003688B8[row];
+    s32 i = 0;
     s32 color;
+    s8 ch;
+    s32 drawX;
 
-    for (i = 0; i < 11; i++) {
+    do {
         color = 0;
-        if (ctx->charRow == row && ctx->charCol == i) {
-            if (ctx->actionMode == 3) {
-                color = 4;
-            } else {
-                color = 5;
-            }
+        if (work->charRow == row && work->charCol == i) {
+            color = work->actionMode == 3 ? 4 : 5;
         }
-        sdfDrawTagLink(list, (u32)sdfDevPrintf(x + (i + 1) * 0xC0, y, 0xFEFFFF, color, D_004374E8, D_003C9688[row][i]));
-    }
+        ch = *table++;
+        drawX = x;
+        x += 0xC0;
+        i++;
+        sdfDrawTagLink(list, (u32)sdfDevPrintf(drawX, y, 0xFEFFFF, color, D_003BC0A0, ch));
+    } while (i < 0xB);
 }
 
 /* Draw the keyboard and edit the eight-character name when input is active. */
-s32 evtEditMovieToolName(s32 x, s32 y, evtViewerInfo_t *ctx) {
+s32 evtUpdateNameEntryDialog(s32 x, s32 y, evtViewerInfo_t *ctx) {
     sdfDrawTag_t *list;
     s32 input;
     s32 length;
@@ -705,7 +531,7 @@ s32 evtEditMovieToolName(s32 x, s32 y, evtViewerInfo_t *ctx) {
         return -1;
     }
     if (input == 1) {
-        key = D_003C9688[ctx->charRow][ctx->charCol];
+        key = D_003688B8[ctx->charRow][ctx->charCol];
         if (ctx->charRow == 3 && ctx->charCol >= 4) {
             switch (key) {
             case 'B':
@@ -735,20 +561,16 @@ s32 evtEditMovieToolName(s32 x, s32 y, evtViewerInfo_t *ctx) {
     return 0;
 }
 
+INCLUDE_RODATA(const s32, "event/evtEventViewerMenu", D_003AE0B8);
 
-extern u16 D_004372B0;
-extern u16 D_004372B2;
+INCLUDE_RODATA(const s32, "event/evtEventViewerMenu", D_003AE0C8);
 
-INCLUDE_RODATA(const s32, "game/code_00250010", D_00423668);
-
-INCLUDE_RODATA(const s32, "game/code_00250010", D_00423678);
-
-INCLUDE_RODATA(const s32, "game/code_00250010", D_00423688);
+INCLUDE_RODATA(const s32, "event/evtEventViewerMenu", D_003AE0D8);
 
 s32 evtDrawEventFileNameRow(sdfDrawTag_t *list, s32 x, s32 y) {
     char text[32];
-    sprintf(text, "[E%3d_%03d.PM1+2+3]", D_004372B0, D_004372B2);
-    sdfDrawTagLink(list, (u32)sdfDevPrintf(x, y, 0xFEFFFF, 0, D_004374D0, text));
+    sprintf(text, "[E%3d_%03d.PM1+2+3]", D_003BBE78, D_003BBE7A);
+    sdfDrawTagLink(list, (u32)sdfDevPrintf(x, y, 0xFEFFFF, 0, D_003BC088, text));
     return 2;
 }
 
@@ -760,12 +582,12 @@ void evtDrawEventCutSelectRow(sdfDrawTag_t *list, s32 x, s32 y, u32 index, evtVi
     }
     switch (index) {
     case 0:
-        sdfDrawTagLink(list, (u32)sdfDevPrintf(x, y, 0xFEFFFF, 0xE, D_004374F0));
-        sdfDrawTagLink(list, (u32)sdfDevPrintf(x + 0x600, y, 0xFEFFFF, color, D_004374F8, D_004372B0));
+        sdfDrawTagLink(list, (u32)sdfDevPrintf(x, y, 0xFEFFFF, 0xE, D_003BC0A8));
+        sdfDrawTagLink(list, (u32)sdfDevPrintf(x + 0x600, y, 0xFEFFFF, color, D_003BC0B0, D_003BBE78));
         return;
     case 1:
-        sdfDrawTagLink(list, (u32)sdfDevPrintf(x, y, 0xFEFFFF, 0xE, D_00437500));
-        sdfDrawTagLink(list, (u32)sdfDevPrintf(x + 0x600, y, 0xFEFFFF, color, D_00437508, D_004372B2));
+        sdfDrawTagLink(list, (u32)sdfDevPrintf(x, y, 0xFEFFFF, 0xE, D_003BC0B8));
+        sdfDrawTagLink(list, (u32)sdfDevPrintf(x + 0x600, y, 0xFEFFFF, color, D_003BC0C0, D_003BBE7A));
         return;
     case 3:
         sdfDrawTagLink(list, (u32)sdfDevPrintf(x, y, 0xFEFFFF, color, " L,R = NO-+"));
@@ -774,10 +596,10 @@ void evtDrawEventCutSelectRow(sdfDrawTag_t *list, s32 x, s32 y, u32 index, evtVi
         sdfDrawTagLink(list, (u32)sdfDevPrintf(x, y, 0xFEFFFF, color, " U,D = SELECT"));
         return;
     case 5:
-        sdfDrawTagLink(list, (u32)sdfDevPrintf(x, y, 0xFEFFFF, color, D_004233F0));
+        sdfDrawTagLink(list, (u32)sdfDevPrintf(x, y, 0xFEFFFF, color, D_003ADE40));
         return;
     case 6:
-        sdfDrawTagLink(list, (u32)sdfDevPrintf(x, y, 0xFEFFFF, color, D_00423400));
+        sdfDrawTagLink(list, (u32)sdfDevPrintf(x, y, 0xFEFFFF, color, D_003ADE50));
         return;
     case 7:
         sdfDrawTagLink(list, (u32)sdfDevPrintf(x, y, 0xFEFFFF, color, " RL  = SET 600"));
@@ -804,13 +626,13 @@ s32 evtUpdateEventCutSelectDialog(s32 x, s32 y, evtViewerInfo_t *ctx) {
     if (dds3PadButtonState.decOne & 2) {
         switch (ctx->charRow) {
         case 0:
-            if (D_004372B0 >= 0x1F5) {
-                D_004372B0--;
+            if (D_003BBE78 >= 0x1F5) {
+                D_003BBE78--;
             }
             break;
         case 1:
-            if (D_004372B2 >= 2) {
-                D_004372B2--;
+            if (D_003BBE7A >= 2) {
+                D_003BBE7A--;
             }
             break;
         }
@@ -818,13 +640,13 @@ s32 evtUpdateEventCutSelectDialog(s32 x, s32 y, evtViewerInfo_t *ctx) {
     if (dds3PadButtonState.incOne & 2) {
         switch (ctx->charRow) {
         case 0:
-            if (D_004372B0 < 0x3E7) {
-                D_004372B0++;
+            if (D_003BBE78 < 0x3E7) {
+                D_003BBE78++;
             }
             break;
         case 1:
-            if (D_004372B2 < 0x3E7) {
-                D_004372B2++;
+            if (D_003BBE7A < 0x3E7) {
+                D_003BBE7A++;
             }
             break;
         }
@@ -832,22 +654,22 @@ s32 evtUpdateEventCutSelectDialog(s32 x, s32 y, evtViewerInfo_t *ctx) {
     if (dds3PadButtonState.decHun & 2) {
         switch (ctx->charRow) {
         case 0:
-            if (D_004372B0 >= 0x1F5) {
-                num = (u16)(D_004372B0 - 500);
+            if (D_003BBE78 >= 0x1F5) {
+                num = (u16)(D_003BBE78 - 500);
                 if (num < 0x1F4) {
-                    D_004372B0 = 0x1F4;
+                    D_003BBE78 = 0x1F4;
                 } else {
-                    D_004372B0 -= 500;
+                    D_003BBE78 -= 500;
                 }
             }
             break;
         case 1:
-            if (D_004372B2 >= 2) {
-                num = (u16)(D_004372B2 - 10);
+            if (D_003BBE7A >= 2) {
+                num = (u16)(D_003BBE7A - 10);
                 if (num == 0) {
-                    D_004372B2 = 1;
+                    D_003BBE7A = 1;
                 } else {
-                    D_004372B2 -= 10;
+                    D_003BBE7A -= 10;
                 }
             }
             break;
@@ -856,10 +678,10 @@ s32 evtUpdateEventCutSelectDialog(s32 x, s32 y, evtViewerInfo_t *ctx) {
     if (dds3PadButtonState.incHun & 2) {
         switch (ctx->charRow) {
         case 0:
-            D_004372B0 += 100;
+            D_003BBE78 += 100;
             break;
         case 1:
-            D_004372B2 += 10;
+            D_003BBE7A += 10;
             break;
         }
     }
@@ -870,26 +692,23 @@ s32 evtUpdateEventCutSelectDialog(s32 x, s32 y, evtViewerInfo_t *ctx) {
         return -1;
     }
     if (dds3PadButtonState.syncKey < 0) {
-        D_004372B0 = 0x258;
+        D_003BBE78 = 0x258;
     }
     return 0;
 }
 
-extern char D_00437510[]; /* "NAME:" */
-
 void evtDrawSelectedEntryLabel(sdfDrawTag_t *list, EvtRuntimeGroup *selected, s32 x,
                                s32 unused, evtViewerInfo_t *runtime) {
     x += 0x6C0;
-    dds3ConsPanelTagLink((void *)list, (x - 0x7000) >> 4, 0x3C, 0x1C, 3);
-    sdfDrawTagLink(list, (u32)sdfDevPrintf(x, 0x7AE0, 0xFEFFFF, 0xE, D_00437510));
+    dds3ConsPanelTagLink(list, (x - 0x7000) >> 4, 0x3C, 0x1C, 3);
+    sdfDrawTagLink(list, (u32)sdfDevPrintf(x, 0x7AE0, 0xFEFFFF, 0xE, D_003BC0C8));
     if (selected->entryHeader >= 0) {
         sdfDrawTagLink(list, (u32)sdfDevPrintf(
-            x + 0x3C0, 0x7AE0, 0xFEFFFF, 0, D_004374D0,
+            x + 0x3C0, 0x7AE0, 0xFEFFFF, 0, D_003BC088,
             runtime->entryName[selected->entryHeader]));
     }
 }
 
-/* Draw one event-group row, highlighting the entry under the cursor. */
 void evtDrawEntrySelectionRow(sdfDrawTag_t *list, s32 x, s32 y, s32 index, evtViewerInfo_t *ctx) {
     char names[33][30] = {
         "STAGE",
@@ -952,24 +771,21 @@ void evtDrawEntrySelectionRow(sdfDrawTag_t *list, s32 x, s32 y, s32 index, evtVi
         } else {
             style = 0;
         }
-        sdfDrawTagLink(list, (u32)sdfDevPrintf(x, y, 0xFEFFFF, style, D_004374D0, names[group->type]));
+        sdfDrawTagLink(list, (u32)sdfDevPrintf(x, y, 0xFEFFFF, style, D_003BC088, names[group->type]));
     }
 }
 
-extern void evtDrawEntrySelectionRow(sdfDrawTag_t *list, s32 x, s32 y, s32 index, evtViewerInfo_t *ctx);
-
-s32 evtUpdateEntrySelectionDialog(s32 x, s32 y, evtViewerInfo_t *ctx) {
-    sdfDrawTag_t *list;
+s32 evtUpdateEntrySelectionDialog(s32 x, s32 y, evtViewerInfo_t *work) {
+    sdfDrawTag_t *packets = dds3FontReqAllocDrawTag();
     s32 count;
     s32 shown;
 
-    list = dds3FontReqAllocDrawTag();
-    evtDrawMenuFrame(list, x, y, 8, 0x1D, ctx->entryFirst, ctx->entryCount, ctx, NULL, evtDrawEntrySelectionRow);
-    sdfDebugGrOt.regFunc(&sdfDebugGrOt, list);
-    if (ctx->actionMode != 4) {
+    evtDrawMenuFrame(packets, x, y, 8, 0x1D, work->entryFirst, work->entryCount, work, 0, evtDrawEntrySelectionRow);
+    sdfDebugGrOt.regFunc(&sdfDebugGrOt, packets);
+    if (work->actionMode != 4) {
         return 0;
     }
-    count = ctx->entryCount;
+    count = work->entryCount;
     if (count == 0) {
         return 0;
     }
@@ -977,12 +793,12 @@ s32 evtUpdateEntrySelectionDialog(s32 x, s32 y, evtViewerInfo_t *ctx) {
     if (count < 0x1D) {
         shown = count;
     }
-    return dds3SelectMenu(0, 1, count, 1, shown, 0, &ctx->entryFirst, 0, &ctx->entryCursor);
+    return dds3SelectMenu(0, 1, count, 1, shown, 0, &work->entryFirst, 0, &work->entryCursor);
 }
 
-extern const char *D_003C94C8[];
-extern s8 D_003C9520[];
-extern char D_00437518[];
+extern const char *D_003686F8[];
+extern s8 D_00368750[];
+extern char D_003BC0D0[];
 
 /* Header row of the frame list: one text cell per column of the selected group's table row. */
 s32 evtDrawFrameListColumnHeadings(sdfDrawTag_t *list, s32 x, s32 y, evtViewerInfo_t *ctx) {
@@ -990,84 +806,70 @@ s32 evtDrawFrameListColumnHeadings(sdfDrawTag_t *list, s32 x, s32 y, evtViewerIn
     s32 i;
     s32 kind;
 
-    for (i = 0; i < D_003C9538[type].columns; i++) {
-        kind = D_003C9538[type].columnTypes[i];
+    for (i = 0; i < D_00368768[type].columns; i++) {
+        kind = D_00368768[type].columnTypes[i];
         if (kind == 0x15) {
-            ctx->frameTextFormat = D_00437518;
+            ctx->frameTextFormat = D_003BC0D0;
             ctx->frameTextWidth = 0;
-            sdfDrawTagLink(list, (u32)sdfDevPrintf(x, y, 0xFEFFFF, 0xE, D_004374D0, D_00437518));
+            sdfDrawTagLink(list, (u32)sdfDevPrintf(x, y, 0xFEFFFF, 0xE, D_003BC088, D_003BC0D0));
             x += ctx->frameTextWidth * 0xC0;
         } else {
-            sdfDrawTagLink(list, (u32)sdfDevPrintf(x, y, 0xFEFFFF, 0xE, D_004374D0, D_003C94C8[kind]));
-            x += D_003C9520[D_003C9538[type].columnTypes[i]] * 0xC0;
+            sdfDrawTagLink(list, (u32)sdfDevPrintf(x, y, 0xFEFFFF, 0xE, D_003BC088, D_003686F8[kind]));
+            x += D_00368750[D_00368768[type].columnTypes[i]] * 0xC0;
         }
     }
     return 1;
 }
 
-extern char D_004375A8[]; /* "%4d" */
-extern char D_004375B0[]; /* " ---" */
-extern char D_004375B8[]; /* "..." */
-extern char D_004375C0[]; /* "  x" */
-extern char D_004375C8[]; /* "ON " */
-extern char D_004375D0[]; /* "OFF" */
-extern char D_004375D8[]; /* "NORMAL" */
-extern char D_004375E0[]; /* "ADD" */
-extern char D_004375E8[]; /* "SUB" */
-extern char D_004375F0[]; /* " -- " */
-extern char D_004375F8[]; /* "1STOP" */
-extern char D_00437600[]; /* "DOWN" */
-extern char D_00437608[]; /* "UP" */
-extern char D_00437610[]; /* " IN " */
-extern char D_00437618[]; /* " OUT " */
-extern char D_00437638[]; /* "%.1f" */
-extern char D_00437648[]; /* "%d" */
-extern char D_00437650[]; /* "%-.11s" */
-extern char D_00437658[]; /* "N" */
-extern char D_00437660[]; /* "B%d" */
-extern char D_00437668[]; /* " X" */
-extern char D_00437670[]; /* " -" */
-extern char D_00437678[]; /* "LEV %d" */
-extern char D_00437680[]; /* "DEF " */
-extern char D_00437688[]; /* "%3d " */
-extern char D_00437690[]; /* " x" */
-extern char D_00437698[]; /* "CUR" */
-extern char D_004376A0[]; /* "DEF" */
-extern s8 D_003C9520[];
-extern char *D_003C96B8[];
-extern char *D_003C96D8[];
-extern char *D_003C96F8[];
-extern char *D_003C9718[];
-extern char *D_003C9720[];
-extern char *D_003C9728[];
-
-extern char D_00437578[]; /* "HIGH" */
-extern char D_00437620[]; /* "LOW " */
-extern char D_00437628[]; /* "OUT" */
-extern char D_00437630[]; /* "IN" */
-extern char D_00437640[]; /* "X" */
+extern char D_003BC160[]; /* "%4d" */
+extern char D_003BC168[]; /* " ---" */
+extern char D_003BC170[]; /* "..." */
+extern char D_003BC178[]; /* "  x" */
+extern char D_003BC180[]; /* "ON " */
+extern char D_003BC188[]; /* "OFF" */
+extern char D_003BC190[]; /* "NORMAL" */
+extern char D_003BC198[]; /* "ADD" */
+extern char D_003BC1A0[]; /* "SUB" */
+extern char D_003BC1A8[]; /* " -- " */
+extern char D_003BC1B0[]; /* "1STOP" */
+extern char D_003BC1B8[]; /* "DOWN" */
+extern char D_003BC1C0[]; /* "UP" */
+extern char D_003BC1C8[]; /* " IN " */
+extern char D_003BC1D0[]; /* " OUT " */
+extern char D_003BC1D8[]; /* "%.1f" */
+extern char D_003BC1E0[]; /* "%d" */
+extern char D_003BC1E8[]; /* "%-.11s" */
+extern char D_003BC1F0[]; /* "N" */
+extern char D_003BC1F8[]; /* "B%d" */
+extern char D_003BC200[]; /* " X" */
+extern char D_003BC208[]; /* " -" */
+extern char D_003BC210[]; /* "LEV %d" */
+extern char D_003BC218[]; /* "DEF " */
+extern char D_003BC220[]; /* "%3d " */
+extern char D_003BC228[]; /* " x" */
+extern char D_003BC230[]; /* "CUR" */
+extern char D_003BC238[]; /* "DEF" */
+extern s8 D_00368750[];
+extern char *D_003688E8[];
+extern char *D_003688F8[];
+extern char *D_00368918[];
+extern char *D_00368938[];
+extern char *D_00368940[];
+extern char *D_00368948[];
 
 /* Format each enabled column of a timeline key. Some columns reuse the
  * preceding scalar selection; the selected group kind is fixed for this row. */
-INCLUDE_RODATA(const s32, "game/code_00250010", D_00423AE0);
+INCLUDE_RODATA(const s32, "event/evtEventViewerMenu", D_003AE530);
 
-INCLUDE_RODATA(const s32, "game/code_00250010", D_00423AF0);
+INCLUDE_RODATA(const s32, "event/evtEventViewerMenu", D_003AE540);
 
-INCLUDE_RODATA(const s32, "game/code_00250010", D_00423B00);
+INCLUDE_RODATA(const s32, "event/evtEventViewerMenu", D_003AE550);
 
-INCLUDE_RODATA(const s32, "game/code_00250010", D_00423B10);
+INCLUDE_RODATA(const s32, "event/evtEventViewerMenu", D_003AE560);
 
-INCLUDE_RODATA(const s32, "game/code_00250010", D_00423B20);
+INCLUDE_RODATA(const s32, "event/evtEventViewerMenu", D_003AE570);
 
-INCLUDE_RODATA(const s32, "game/code_00250010", D_00423B30);
-
-INCLUDE_RODATA(const s32, "game/code_00250010", D_00423B40);
-
-INCLUDE_RODATA(const s32, "game/code_00250010", D_00423B50);
-
-INCLUDE_RODATA(const s32, "game/code_00250010", D_00423B60);
-
-INCLUDE_RODATA(const s32, "game/code_00250010", D_00423B70);
+INCLUDE_RODATA(const s32, "event/evtEventViewerMenu", D_003AE580);
 
 void evtDrawFrameListKeyValues(sdfDrawTag_t *list, s32 x, s32 y, s32 color,
                    EvtRuntimeChild *node, evtViewerInfo_t *ctx) {
@@ -1081,14 +883,14 @@ void evtDrawFrameListKeyValues(sdfDrawTag_t *list, s32 x, s32 y, s32 color,
 
     type = ctx->frameGroup->type;
     value = 0;
-    for (column = 0; column < D_003C9538[type].columns; column++) {
+    for (column = 0; column < D_00368768[type].columns; column++) {
         style = color;
         if (ctx->frameColumn != column) {
             style = 0;
         }
-        switch (D_003C9538[type].columnTypes[column]) {
+        switch (D_00368768[type].columnTypes[column]) {
         case 0:
-            sdfDrawTagLink(list, (u32)sdfDevPrintf(x, y, 0xFEFFFF, style, D_004375A8, node->frame + ctx->frameGroup->metadata.value));
+            sdfDrawTagLink(list, (u32)sdfDevPrintf(x, y, 0xFEFFFF, style, D_003BC160, node->frame + ctx->frameGroup->metadata.value));
             break;
         case 9:
             switch (type) {
@@ -1098,7 +900,7 @@ void evtDrawFrameListKeyValues(sdfDrawTag_t *list, s32 x, s32 y, s32 color,
             case 21: value = node->p08.sh[1]; break;
             case 26: value = node->p08.sh[1]; break;
             }
-            sdfDrawTagLink(list, (u32)sdfDevPrintf(x, y, 0xFEFFFF, style, D_004375A8, value));
+            sdfDrawTagLink(list, (u32)sdfDevPrintf(x, y, 0xFEFFFF, style, D_003BC160, value));
             break;
         case 15:
             switch (type) {
@@ -1107,19 +909,19 @@ void evtDrawFrameListKeyValues(sdfDrawTag_t *list, s32 x, s32 y, s32 color,
             case 21:
             case 26: value = node->duration; break;
             }
-            sdfDrawTagLink(list, (u32)sdfDevPrintf(x, y, 0xFEFFFF, style, D_004375A8, value));
+            sdfDrawTagLink(list, (u32)sdfDevPrintf(x, y, 0xFEFFFF, style, D_003BC160, value));
             break;
         case 1:
             if (type != 10) {
-                sdfDrawTagLink(list, (u32)sdfDevPrintf(x, y, 0xFEFFFF, style, D_004375A8, node->duration));
+                sdfDrawTagLink(list, (u32)sdfDevPrintf(x, y, 0xFEFFFF, style, D_003BC160, node->duration));
             } else if (ctx->frameGroup->metadata.option != 3) {
-                sdfDrawTagLink(list, (u32)sdfDevPrintf(x, y, 0xFEFFFF, style, D_004375B0));
+                sdfDrawTagLink(list, (u32)sdfDevPrintf(x, y, 0xFEFFFF, style, D_003BC168));
             } else {
-                sdfDrawTagLink(list, (u32)sdfDevPrintf(x, y, 0xFEFFFF, style, D_004375A8, node->duration));
+                sdfDrawTagLink(list, (u32)sdfDevPrintf(x, y, 0xFEFFFF, style, D_003BC160, node->duration));
             }
             break;
         case 13:
-            sdfDrawTagLink(list, (u32)sdfDevPrintf(x, y, 0xFEFFFF, style, D_004375B8));
+            sdfDrawTagLink(list, (u32)sdfDevPrintf(x, y, 0xFEFFFF, style, D_003BC170));
             break;
         case 14:
             sdfDrawTagLink(list, (u32)sdfDevPrintf(x, y, 0xFEFFFF, style, "%.1f %.2f", node->p08.f, node->p0C.f));
@@ -1127,7 +929,7 @@ void evtDrawFrameListKeyValues(sdfDrawTag_t *list, s32 x, s32 y, s32 color,
         case 2:
             if (type == 7) {
                 value = node->p08.sh[0];
-                sdfDrawTagLink(list, (u32)sdfDevPrintf(x, y, 0xFEFFFF, style, D_004375A8, value));
+                sdfDrawTagLink(list, (u32)sdfDevPrintf(x, y, 0xFEFFFF, style, D_003BC160, value));
             }
             break;
         case 3:
@@ -1137,13 +939,13 @@ void evtDrawFrameListKeyValues(sdfDrawTag_t *list, s32 x, s32 y, s32 color,
             case 31: value = node->p08.sh[1]; break;
             }
             if (type == 31 && node->p08.sh[0] == 0) {
-                sdfDrawTagLink(list, (u32)sdfDevPrintf(x, y, 0xFEFFFF, style, D_004375C0));
+                sdfDrawTagLink(list, (u32)sdfDevPrintf(x, y, 0xFEFFFF, style, D_003BC178));
             } else {
-                sdfDrawTagLink(list, (u32)sdfDevPrintf(x, y, 0xFEFFFF, style, D_004375A8, value));
+                sdfDrawTagLink(list, (u32)sdfDevPrintf(x, y, 0xFEFFFF, style, D_003BC160, value));
             }
             break;
         case 4:
-            sdfDrawTagLink(list, (u32)sdfDevPrintf(x, y, 0xFEFFFF, style, D_004375A8, node->p08.sh[1]));
+            sdfDrawTagLink(list, (u32)sdfDevPrintf(x, y, 0xFEFFFF, style, D_003BC160, node->p08.sh[1]));
             break;
         case 5:
             switch (type) {
@@ -1161,78 +963,54 @@ void evtDrawFrameListKeyValues(sdfDrawTag_t *list, s32 x, s32 y, s32 color,
             case 25: value = node->p0C.sh[0]; break;
             }
             if (value) {
-                sdfDrawTagLink(list, (u32)sdfDevPrintf(x, y, 0xFEFFFF, style, D_004375C8));
+                sdfDrawTagLink(list, (u32)sdfDevPrintf(x, y, 0xFEFFFF, style, D_003BC180));
             } else {
-                sdfDrawTagLink(list, (u32)sdfDevPrintf(x, y, 0xFEFFFF, style, D_004375D0));
+                sdfDrawTagLink(list, (u32)sdfDevPrintf(x, y, 0xFEFFFF, style, D_003BC188));
             }
             break;
         case 12:
             switch (type) {
             case 12:
                 switch (node->p08.sh[0]) {
-                case 0: sdfDrawTagLink(list, (u32)sdfDevPrintf(x, y, 0xFEFFFF, style, D_004375D8)); break;
-                case 1: sdfDrawTagLink(list, (u32)sdfDevPrintf(x, y, 0xFEFFFF, style, D_004375E0)); break;
-                case 2: sdfDrawTagLink(list, (u32)sdfDevPrintf(x, y, 0xFEFFFF, style, D_004375E8)); break;
+                case 0: sdfDrawTagLink(list, (u32)sdfDevPrintf(x, y, 0xFEFFFF, style, D_003BC190)); break;
+                case 1: sdfDrawTagLink(list, (u32)sdfDevPrintf(x, y, 0xFEFFFF, style, D_003BC198)); break;
+                case 2: sdfDrawTagLink(list, (u32)sdfDevPrintf(x, y, 0xFEFFFF, style, D_003BC1A0)); break;
                 }
                 break;
             case 6:
-                sdfDrawTagLink(list, (u32)sdfDevPrintf(x, y, 0xFEFFFF, style, D_004374D0, D_003C96B8[node->p08.sh[0]]));
+                sdfDrawTagLink(list, (u32)sdfDevPrintf(x, y, 0xFEFFFF, style, D_003BC088, D_003688E8[node->p08.sh[0]]));
                 break;
             case 19:
-                sdfDrawTagLink(list, (u32)sdfDevPrintf(x, y, 0xFEFFFF, style, D_004374D0, D_003C96D8[node->p08.sh[0]]));
+                sdfDrawTagLink(list, (u32)sdfDevPrintf(x, y, 0xFEFFFF, style, D_003BC088, D_003688F8[node->p08.sh[0]]));
                 break;
             case 1:
-                sdfDrawTagLink(list, (u32)sdfDevPrintf(x, y, 0xFEFFFF, style, D_004374D0, D_003C96F8[node->p08.sb[0]]));
+                sdfDrawTagLink(list, (u32)sdfDevPrintf(x, y, 0xFEFFFF, style, D_003BC088, D_00368918[node->p08.sb[0]]));
                 break;
             case 28:
-                sdfDrawTagLink(list, (u32)sdfDevPrintf(x, y, 0xFEFFFF, style, D_004374D0, D_003C9718[node->p08.sh[0]]));
+                sdfDrawTagLink(list, (u32)sdfDevPrintf(x, y, 0xFEFFFF, style, D_003BC088, D_00368938[node->p08.sh[0]]));
                 break;
             case 10:
                 if (node->p14.sh[0] == 0) {
-                    sdfDrawTagLink(list, (u32)sdfDevPrintf(x, y, 0xFEFFFF, style, D_004375F0));
+                    sdfDrawTagLink(list, (u32)sdfDevPrintf(x, y, 0xFEFFFF, style, D_003BC1A8));
                 } else {
-                    sdfDrawTagLink(list, (u32)sdfDevPrintf(x, y, 0xFEFFFF, style, D_004375F8));
+                    sdfDrawTagLink(list, (u32)sdfDevPrintf(x, y, 0xFEFFFF, style, D_003BC1B0));
                 }
                 break;
             case 30:
                 if (node->p08.sh[1] == 0) {
-                    sdfDrawTagLink(list, (u32)sdfDevPrintf(x, y, 0xFEFFFF, style, D_00437600));
+                    sdfDrawTagLink(list, (u32)sdfDevPrintf(x, y, 0xFEFFFF, style, D_003BC1B8));
                 } else {
-                    sdfDrawTagLink(list, (u32)sdfDevPrintf(x, y, 0xFEFFFF, style, D_00437608));
+                    sdfDrawTagLink(list, (u32)sdfDevPrintf(x, y, 0xFEFFFF, style, D_003BC1C0));
                 }
                 break;
             case 31:
-                sdfDrawTagLink(list, (u32)sdfDevPrintf(x, y, 0xFEFFFF, style, D_004374D0, D_003C9728[node->p08.sh[0]]));
+                sdfDrawTagLink(list, (u32)sdfDevPrintf(x, y, 0xFEFFFF, style, D_003BC088, D_00368948[node->p08.sh[0]]));
                 break;
             case 32:
                 if (node->p08.sh[0] == 0) {
-                    sdfDrawTagLink(list, (u32)sdfDevPrintf(x, y, 0xFEFFFF, style, D_00437610));
+                    sdfDrawTagLink(list, (u32)sdfDevPrintf(x, y, 0xFEFFFF, style, D_003BC1C8));
                 } else {
-                    sdfDrawTagLink(list, (u32)sdfDevPrintf(x, y, 0xFEFFFF, style, D_00437618));
-                }
-                break;
-            case 24:
-                if (node->p1C.sb[0] == 0) {
-                    sdfDrawTagLink(list, (u32)sdfDevPrintf(x, y, 0xFEFFFF, style, D_00437578));
-                } else {
-                    sdfDrawTagLink(list, (u32)sdfDevPrintf(x, y, 0xFEFFFF, style, D_00437620));
-                }
-                break;
-            case 3:
-            case 20:
-            case 21:
-            case 26:
-                if (node->p10.sb[0] == 0) {
-                    sdfDrawTagLink(list, (u32)sdfDevPrintf(x, y, 0xFEFFFF, style, D_00437628));
-                } else {
-                    sdfDrawTagLink(list, (u32)sdfDevPrintf(x, y, 0xFEFFFF, style, D_00437630));
-                }
-                break;
-            case 29:
-                if (node->p0C.sb[0] == 0) {
-                    sdfDrawTagLink(list, (u32)sdfDevPrintf(x, y, 0xFEFFFF, style, D_004375D8));
-                } else {
-                    sdfDrawTagLink(list, (u32)sdfDevPrintf(x, y, 0xFEFFFF, style, "END STOP"));
+                    sdfDrawTagLink(list, (u32)sdfDevPrintf(x, y, 0xFEFFFF, style, D_003BC1D0));
                 }
                 break;
             }
@@ -1244,9 +1022,9 @@ void evtDrawFrameListKeyValues(sdfDrawTag_t *list, s32 x, s32 y, s32 color,
             case 25: value = node->p08.sh[0]; break;
             }
             if (value) {
-                sdfDrawTagLink(list, (u32)sdfDevPrintf(x, y, 0xFEFFFF, style, D_004375C8));
+                sdfDrawTagLink(list, (u32)sdfDevPrintf(x, y, 0xFEFFFF, style, D_003BC180));
             } else {
-                sdfDrawTagLink(list, (u32)sdfDevPrintf(x, y, 0xFEFFFF, style, D_004375D0));
+                sdfDrawTagLink(list, (u32)sdfDevPrintf(x, y, 0xFEFFFF, style, D_003BC188));
             }
             break;
         case 16:
@@ -1257,16 +1035,15 @@ void evtDrawFrameListKeyValues(sdfDrawTag_t *list, s32 x, s32 y, s32 color,
             case 26: value = node->p0C.sb[0]; break;
             }
             if (value) {
-                sdfDrawTagLink(list, (u32)sdfDevPrintf(x, y, 0xFEFFFF, style, D_004375C8));
+                sdfDrawTagLink(list, (u32)sdfDevPrintf(x, y, 0xFEFFFF, style, D_003BC180));
             } else {
-                sdfDrawTagLink(list, (u32)sdfDevPrintf(x, y, 0xFEFFFF, style, D_004375D0));
+                sdfDrawTagLink(list, (u32)sdfDevPrintf(x, y, 0xFEFFFF, style, D_003BC188));
             }
             break;
         case 6:
-            sdfDrawTagLink(list, (u32)sdfDevPrintf(x, y, 0xFEFFFF, style, D_00437638, node->p08.f * 57.29577637f));
+            sdfDrawTagLink(list, (u32)sdfDevPrintf(x, y, 0xFEFFFF, style, D_003BC1D8, node->p08.f * 57.29577637f));
             break;
         case 8:
-            unavailable = 0;
             switch (type) {
             case 3: value = node->p0C.sb[1]; break;
             case 26: value = node->p0C.sb[1]; break;
@@ -1278,30 +1055,18 @@ void evtDrawFrameListKeyValues(sdfDrawTag_t *list, s32 x, s32 y, s32 color,
             case 5: value = node->p08.sh[0]; break;
             case 29: value = node->p08.sh[0]; break;
             case 30: value = node->p08.sh[0]; break;
-            case 1:
-                if (node->p08.sb[0] == 5) {
-                    value = node->p18.sh[0];
-                } else {
-                    unavailable = 1;
-                }
-                break;
-            case 2: value = node->p0C.sh[1]; break;
             }
-            if (unavailable) {
-                sdfDrawTagLink(list, (u32)sdfDevPrintf(x, y, 0xFEFFFF, style, D_00437640));
-            } else {
-                sdfDrawTagLink(list, (u32)sdfDevPrintf(x, y, 0xFEFFFF, style, D_00437648, value));
-            }
+            sdfDrawTagLink(list, (u32)sdfDevPrintf(x, y, 0xFEFFFF, style, D_003BC1E0, value));
             break;
         case 21:
             value = 0;
-            sdfDrawTagLink(list, (u32)sdfDevPrintf(x, y, 0xFEFFFF, style, D_00437648, value));
+            sdfDrawTagLink(list, (u32)sdfDevPrintf(x, y, 0xFEFFFF, style, D_003BC1E0, value));
             break;
         case 7:
             if (type == 5) {
                 value = node->p08.sh[1];
             }
-            sdfDrawTagLink(list, (u32)sdfDevPrintf(x, y, 0xFEFFFF, style, D_004375A8, value));
+            sdfDrawTagLink(list, (u32)sdfDevPrintf(x, y, 0xFEFFFF, style, D_003BC160, value));
             break;
         case 10:
             switch (type) {
@@ -1314,18 +1079,18 @@ void evtDrawFrameListKeyValues(sdfDrawTag_t *list, s32 x, s32 y, s32 color,
                 sdfDrawTagLink(list, (u32)sdfDevPrintf(x, y, 0xFEFFFF, style, "-----------"));
             } else {
                 memcpy(name, ctx->entryName[value], sizeof(name));
-                sdfDrawTagLink(list, (u32)sdfDevPrintf(x, y, 0xFEFFFF, style, D_00437650, name));
+                sdfDrawTagLink(list, (u32)sdfDevPrintf(x, y, 0xFEFFFF, style, D_003BC1E8, name));
             }
             break;
         case 17:
             value = node->p08.sh[0];
             bank = (value >> 12) & 15;
             if (bank == 0) {
-                sdfDrawTagLink(list, (u32)sdfDevPrintf(x, y, 0xFEFFFF, style, D_00437658));
+                sdfDrawTagLink(list, (u32)sdfDevPrintf(x, y, 0xFEFFFF, style, D_003BC1F0));
             } else {
-                sdfDrawTagLink(list, (u32)sdfDevPrintf(x, y, 0xFEFFFF, style, D_00437660, bank - 1));
+                sdfDrawTagLink(list, (u32)sdfDevPrintf(x, y, 0xFEFFFF, style, D_003BC1F8, bank - 1));
             }
-            sdfDrawTagLink(list, (u32)sdfDevPrintf(x + 0x240, y, 0xFEFFFF, style, D_00437648, value & 0xFFF));
+            sdfDrawTagLink(list, (u32)sdfDevPrintf(x + 0x240, y, 0xFEFFFF, style, D_003BC1E0, value & 0xFFF));
             break;
         case 18:
             unavailable = 0;
@@ -1334,6 +1099,7 @@ void evtDrawFrameListKeyValues(sdfDrawTag_t *list, s32 x, s32 y, s32 color,
                 value = node->p08.sh[1];
                 if (node->p08.h[0] >> 12) unavailable = 1;
                 break;
+            case 2: value = node->p0C.sh[0]; break;
             case 1:
                 if (node->p08.sb[0] >= 6) {
                     unavailable = 1;
@@ -1346,14 +1112,11 @@ void evtDrawFrameListKeyValues(sdfDrawTag_t *list, s32 x, s32 y, s32 color,
             case 12: value = node->p14.sh[0]; break;
             case 16: value = node->p14.sh[0]; break;
             case 17: value = node->p14.sh[0]; break;
-            case 5: value = node->p08.sh[1]; break;
-            case 2:
-            case 19: value = node->p0C.sh[0]; break;
             }
             if (unavailable) {
-                sdfDrawTagLink(list, (u32)sdfDevPrintf(x, y, 0xFEFFFF, style, D_00437668));
+                sdfDrawTagLink(list, (u32)sdfDevPrintf(x, y, 0xFEFFFF, style, D_003BC200));
             } else if (((value >> 12) & 15) == 0) {
-                sdfDrawTagLink(list, (u32)sdfDevPrintf(x, y, 0xFEFFFF, style, D_00437670));
+                sdfDrawTagLink(list, (u32)sdfDevPrintf(x, y, 0xFEFFFF, style, D_003BC208));
             } else {
                 sdfDrawTagLink(list, (u32)sdfDevPrintf(x, y, 0xFEFFFF, style, "B%d = %d", ((value >> 12) & 15) - 1, value & 0xFFF));
             }
@@ -1361,10 +1124,10 @@ void evtDrawFrameListKeyValues(sdfDrawTag_t *list, s32 x, s32 y, s32 color,
         case 19:
             switch (node->p08.sb[0]) {
             case 5:
-                sdfDrawTagLink(list, (u32)sdfDevPrintf(x, y, 0xFEFFFF, style, "%d-%d %s H%d", node->p0C.sb[0], node->p0C.sb[1], D_003C9720[node->p0C.sb[2]], node->p0C.sb[3]));
+                sdfDrawTagLink(list, (u32)sdfDevPrintf(x, y, 0xFEFFFF, style, "%d-%d %s H%d", node->p0C.sb[0], node->p0C.sb[1], D_00368940[node->p0C.sb[2]], node->p0C.sb[3]));
                 break;
             case 6:
-                sdfDrawTagLink(list, (u32)sdfDevPrintf(x, y, 0xFEFFFF, style, D_00437678, node->p0C.sb[0]));
+                sdfDrawTagLink(list, (u32)sdfDevPrintf(x, y, 0xFEFFFF, style, D_003BC210, node->p0C.sb[0]));
                 break;
             case 7:
                 value = node->p0C.sh[0];
@@ -1372,14 +1135,14 @@ void evtDrawFrameListKeyValues(sdfDrawTag_t *list, s32 x, s32 y, s32 color,
                     sdfDrawTagLink(list, (u32)sdfDevPrintf(x, y, 0xFEFFFF, style, "-----------"));
                 } else {
                     memcpy(name, ctx->entryName[value], sizeof(name));
-                    sdfDrawTagLink(list, (u32)sdfDevPrintf(x, y, 0xFEFFFF, style, D_00437650, name));
+                    sdfDrawTagLink(list, (u32)sdfDevPrintf(x, y, 0xFEFFFF, style, D_003BC1E8, name));
                 }
                 break;
             case 3:
                 if (node->p0C.sb[0] == 0 || node->p0C.sb[0] == 2) {
-                    sdfDrawTagLink(list, (u32)sdfDevPrintf(x, y, 0xFEFFFF, style, D_00437680));
+                    sdfDrawTagLink(list, (u32)sdfDevPrintf(x, y, 0xFEFFFF, style, D_003BC218));
                 } else {
-                    sdfDrawTagLink(list, (u32)sdfDevPrintf(x, y, 0xFEFFFF, style, D_00437688, node->p0C.b[1]));
+                    sdfDrawTagLink(list, (u32)sdfDevPrintf(x, y, 0xFEFFFF, style, D_003BC220, node->p0C.b[1]));
                 }
                 if (node->p0C.b[0] < 2) {
                     sdfDrawTagLink(list, (u32)sdfDevPrintf(x, y, 0xFEFFFF, style, "    DEF "));
@@ -1389,13 +1152,13 @@ void evtDrawFrameListKeyValues(sdfDrawTag_t *list, s32 x, s32 y, s32 color,
                 break;
             case 4:
                 if (node->p0C.sb[0] == 0 || node->p0C.sb[0] == 2) {
-                    sdfDrawTagLink(list, (u32)sdfDevPrintf(x, y, 0xFEFFFF, style, D_00437680));
+                    sdfDrawTagLink(list, (u32)sdfDevPrintf(x, y, 0xFEFFFF, style, D_003BC218));
                 } else {
-                    sdfDrawTagLink(list, (u32)sdfDevPrintf(x, y, 0xFEFFFF, style, D_00437688, node->p0C.b[1]));
+                    sdfDrawTagLink(list, (u32)sdfDevPrintf(x, y, 0xFEFFFF, style, D_003BC220, node->p0C.b[1]));
                 }
                 break;
             default:
-                sdfDrawTagLink(list, (u32)sdfDevPrintf(x, y, 0xFEFFFF, style, D_00437690));
+                sdfDrawTagLink(list, (u32)sdfDevPrintf(x, y, 0xFEFFFF, style, D_003BC228));
                 break;
             }
             break;
@@ -1408,17 +1171,17 @@ void evtDrawFrameListKeyValues(sdfDrawTag_t *list, s32 x, s32 y, s32 color,
             case 23: value = node->p10.sh[0]; break;
             }
             if (value == 0) {
-                sdfDrawTagLink(list, (u32)sdfDevPrintf(x, y, 0xFEFFFF, style, D_00437698));
+                sdfDrawTagLink(list, (u32)sdfDevPrintf(x, y, 0xFEFFFF, style, D_003BC230));
             } else if (value == 1) {
-                sdfDrawTagLink(list, (u32)sdfDevPrintf(x, y, 0xFEFFFF, style, D_004376A0));
+                sdfDrawTagLink(list, (u32)sdfDevPrintf(x, y, 0xFEFFFF, style, D_003BC238));
             } else {
                 value -= 2;
                 memcpy(name, ctx->entryName[value], sizeof(name));
-                sdfDrawTagLink(list, (u32)sdfDevPrintf(x, y, 0xFEFFFF, style, D_004374D0, name));
+                sdfDrawTagLink(list, (u32)sdfDevPrintf(x, y, 0xFEFFFF, style, D_003BC088, name));
             }
             break;
         }
-        x += D_003C9520[D_003C9538[type].columnTypes[column]] * 0xC0;
+        x += D_00368750[D_00368768[type].columnTypes[column]] * 0xC0;
     }
 }
 
@@ -1468,17 +1231,17 @@ s32 evtUpdateFrameListDialog(s32 x, s32 y, evtViewerInfo_t *ctx) {
         return 0;
     }
     group = ctx->frameGroup;
-    if (D_003C9538[group->type].columns == 0) {
+    if (D_00368768[group->type].columns == 0) {
         return -1;
     }
     list = dds3FontReqAllocDrawTag();
-    evtDrawMenuFrame(list, x, y, 39, 21, ctx->frameCursor,
+    evtDrawMenuFrame(list, x, y, 28, 21, ctx->frameCursor,
                  group->childCount + 1, ctx, evtDrawFrameListColumnHeadings, (EvtMenuRowFn)evtFrameListItem);
     sdfDebugGrOt.regFunc(&sdfDebugGrOt, list);
     if (ctx->actionMode != 5) {
         return 0;
     }
-    columns = D_003C9538[group->type].columns;
+    columns = D_00368768[group->type].columns;
     if (group->childCount + 1 < shown) {
         shown = group->childCount + 1;
     }
@@ -1509,9 +1272,7 @@ s32 evtUpdateFrameListDialog(s32 x, s32 y, evtViewerInfo_t *ctx) {
     return result;
 }
 
-
 #include "dds3_world_selection.h"
-extern char D_004374D8[]; /* " %s" */
 
 void evtViewerDrawWorldNodeRow(sdfDrawTag_t *list, s32 x, s32 y, s32 index, evtViewerInfo_t *ctx) {
     s32 color;
@@ -1534,7 +1295,7 @@ void evtViewerDrawWorldNodeRow(sdfDrawTag_t *list, s32 x, s32 y, s32 index, evtV
                 if (((char *)node->name) != NULL) {
                     count++;
                     if (count == index) {
-                        sdfDrawTagLink(list, (u32)sdfDevPrintf(x, y, 0xFEFFFF, color, D_004374D8, ((char *)node->name)));
+                        sdfDrawTagLink(list, (u32)sdfDevPrintf(x, y, 0xFEFFFF, color, D_003BC090, ((char *)node->name)));
                         return;
                     }
                 }
@@ -1576,10 +1337,9 @@ s32 evtUpdateWorldNodeListDialog(s32 x, s32 y, evtViewerInfo_t *ctx) {
                                  &ctx->groupFirst, NULL, &ctx->groupCursor);
 }
 
-extern char D_004376A8[]; /* "P%d:" */
-extern char D_004376B0[]; /* "   %s" */
+extern char D_003BC240[]; /* "P%d:" */
+extern char D_003BC248[]; /* "   %s" */
 
-/* The pending-node's signed slot indices begin at +0xC (also used in DDS1). */
 void evtViewerDrawPendingNodeRow(sdfDrawTag_t *list, s32 x, s32 y, s32 index, evtViewerInfo_t *ctx) {
     dds3Basic_t *node;
     s32 color;
@@ -1594,96 +1354,83 @@ void evtViewerDrawPendingNodeRow(sdfDrawTag_t *list, s32 x, s32 y, s32 index, ev
     if (slot >= 0) {
         node = dds3SceneBasicSearchName(dds3GetActiveScene(), ctx->entryName[slot]);
     }
-    sdfDrawTagLink(list, (u32)sdfDevPrintf(x, y, 0xFEFFFF, 0xE, D_004376A8, index));
+    sdfDrawTagLink(list, (u32)sdfDevPrintf(x, y, 0xFEFFFF, 0xE, D_003BC240, index));
     if (node != NULL) {
-        sdfDrawTagLink(list, (u32)sdfDevPrintf(x, y, 0xFEFFFF, color, D_004376B0, ((char *)node->name)));
+        sdfDrawTagLink(list, (u32)sdfDevPrintf(x, y, 0xFEFFFF, color, D_003BC248, ((char *)node->name)));
     } else {
         sdfDrawTagLink(list, (u32)sdfDevPrintf(x, y, 0xFEFFFF, color, "   -----------------------"));
     }
 }
 
-extern void evtViewerDrawPendingNodeRow(sdfDrawTag_t *list, s32 x, s32 y, s32 index, evtViewerInfo_t *ctx);
+extern void evtViewerDrawPendingNodeRow();
 
 /* Draw the pending-node selector for group types 20/21; other types return -1. */
-s32 mnuDrawInfoWindowB(s32 x, s32 y, evtViewerInfo_t *ctx) {
-    sdfDrawTag_t *list;
+s32 mnuDrawInfoWindowB(s32 x, s32 y, evtViewerInfo_t *work) {
+    sdfDrawTag_t *packets = dds3FontReqAllocDrawTag();
     s32 rows;
-
-    list = dds3FontReqAllocDrawTag();
-    switch (ctx->frameGroup->type) {
-    case 0x14:
+    switch (work->frameGroup->type) {
+    case 20:
         rows = 2;
         break;
-    case 0x15:
+    case 21:
         rows = 4;
         break;
     default:
         return -1;
     }
-    evtDrawMenuFrame(list, x, y, 0x1C, rows, 0, rows, ctx, NULL, evtViewerDrawPendingNodeRow);
-    sdfDebugGrOt.regFunc(&sdfDebugGrOt, list);
-    if (ctx->actionMode != 0xC) {
+    evtDrawMenuFrame(packets, x, y, 0x1C, rows, 0, rows, work, 0, evtViewerDrawPendingNodeRow);
+    sdfDebugGrOt.regFunc(&sdfDebugGrOt, packets);
+    if (work->actionMode != 0xC) {
         return 0;
     }
-    return dds3SelectMenu(0, 1, rows, 1, rows, 0, 0, 0, &ctx->inputB);
+    return dds3SelectMenu(0, 1, rows, 1, rows, 0, 0, 0, &work->inputB);
 }
-
-extern char D_00423EC0[]; /* "MESSAGE MENU (MESMAX %3d)" */
-
-/* The message-menu work references a window whose entry handle lives at +0x104. */
-
 
 /* Draw the message count from the runtime window context
  * and its entry handle, returning two rows used. */
-s32 mnuDrawMessageMenuLabel(sdfDrawTag_t *list, s32 x, s32 y, evtViewerInfo_t *ctx) {
-    sdfDrawTagLink(list, (u32)sdfDevPrintf(x, y, 0xFEFFFF, 0, D_00423EC0, itfMesGetEntryCount(ctx->windowContext->messageManagerHandle)));
+s32 mnuDrawMessageMenuLabel(sdfDrawTag_t *list, s32 x, s32 y, evtViewerInfo_t *work) {
+    s32 count = itfMesGetEntryCount(work->windowContext->messageManagerHandle);
+    sdfDrawTagLink(list, (u32)sdfDevPrintf(x, y, 0xFEFFFF, 0, "MESSAGE MENU (MESMAX %3d)", count));
     return 2;
 }
 
+extern char D_003BC250[];
+extern char D_003BC258[];
+extern char D_003BC260[];
+extern char D_003AE8D0[];
+extern char D_003AE8E0[];
+extern char D_003AE8F0[];
+extern char D_003AE900[];
+extern char D_003AE910[];
+extern char D_003AE920[];
+extern char D_003AE930[];
+extern char D_003AE940[];
+extern char D_003AE950[];
+extern char D_003AE960[];
 
-extern char D_004376B8[];
-extern char D_004376C0[];
-extern char D_004376C8[];
-extern char D_004374A0[];
-extern char D_00423EE0[];
-extern char D_00423EF0[];
-extern char D_00423F00[];
-extern char D_00423F10[];
-extern char D_00423F20[];
-extern char D_00423F30[];
-extern char D_00423F40[];
-extern char D_00423F50[];
-extern char D_00423F60[];
-extern char D_00423F70[];
-extern char D_00423428[];
-extern char D_004233F0[];
-extern char D_00423400[];
+INCLUDE_RODATA(const s32, "event/evtEventViewerMenu", D_003AE8D0);
 
-INCLUDE_RODATA(const s32, "game/code_00250010", D_00423EC0);
+INCLUDE_RODATA(const s32, "event/evtEventViewerMenu", D_003AE8E0);
 
-INCLUDE_RODATA(const s32, "game/code_00250010", D_00423EE0);
+INCLUDE_RODATA(const s32, "event/evtEventViewerMenu", D_003AE8F0);
 
-INCLUDE_RODATA(const s32, "game/code_00250010", D_00423EF0);
+INCLUDE_RODATA(const s32, "event/evtEventViewerMenu", D_003AE900);
 
-INCLUDE_RODATA(const s32, "game/code_00250010", D_00423F00);
+INCLUDE_RODATA(const s32, "event/evtEventViewerMenu", D_003AE910);
 
-INCLUDE_RODATA(const s32, "game/code_00250010", D_00423F10);
+INCLUDE_RODATA(const s32, "event/evtEventViewerMenu", D_003AE920);
 
-INCLUDE_RODATA(const s32, "game/code_00250010", D_00423F20);
+INCLUDE_RODATA(const s32, "event/evtEventViewerMenu", D_003AE930);
 
-INCLUDE_RODATA(const s32, "game/code_00250010", D_00423F30);
+INCLUDE_RODATA(const s32, "event/evtEventViewerMenu", D_003AE940);
 
-INCLUDE_RODATA(const s32, "game/code_00250010", D_00423F40);
+INCLUDE_RODATA(const s32, "event/evtEventViewerMenu", D_003AE950);
 
-INCLUDE_RODATA(const s32, "game/code_00250010", D_00423F50);
+INCLUDE_RODATA(const s32, "event/evtEventViewerMenu", D_003AE960);
 
-INCLUDE_RODATA(const s32, "game/code_00250010", D_00423F60);
-
-INCLUDE_RODATA(const s32, "game/code_00250010", D_00423F70);
-
-void evtDrawMessageDataRow(sdfDrawTag_t *list, s32 x, s32 y, s32 kind, evtViewerInfo_t *ctx) {
-    char *names[11] = {D_004376B8, D_00423EE0, D_00423EF0, D_00423F00,
-        D_00423F10, D_00423F20, D_00423F30, D_00423F40, D_00423F50, D_00423F60, D_00423F70};
+void evtDrawMessageDataRow(sdfDrawTag_t *list, s32 x, s32 y, u32 kind, evtViewerInfo_t *ctx) {
+    char *names[11] = {D_003BC250, D_003AE8D0, D_003AE8E0, D_003AE8F0,
+        D_003AE900, D_003AE910, D_003AE920, D_003AE930, D_003AE940, D_003AE950, D_003AE960};
 
     switch (kind) {
     case 0: {
@@ -1691,7 +1438,7 @@ void evtDrawMessageDataRow(sdfDrawTag_t *list, s32 x, s32 y, s32 kind, evtViewer
         if (ctx->messageField != 0) {
             color = 0;
         }
-        sdfDrawTagLink(list, (u32)sdfDevPrintf(x, y, 0xFEFFFF, color, D_004374A0, ctx->value & 0xFFF));
+        sdfDrawTagLink(list, (u32)sdfDevPrintf(x, y, 0xFEFFFF, color, D_003BC058, ctx->value & 0xFFF));
         if (ctx->windowContext->messageManagerHandle == -1) {
             sdfDrawTagLink(list, (u32)sdfDevPrintf(x + 0x600, y, 0xFEFFFF, color, "NONE MESDATA!!"));
         } else if (itfMesGetWindowEntryItems(ctx->windowContext->messageManagerHandle, ctx->value & 0xFFF) == ITF_MES_ENTRY_ITEMS_NONE) {
@@ -1706,20 +1453,20 @@ void evtDrawMessageDataRow(sdfDrawTag_t *list, s32 x, s32 y, s32 kind, evtViewer
         if (ctx->messageField != 1) {
             color = 0;
         }
-        sdfDrawTagLink(list, (u32)sdfDevPrintf(x, y, 0xFEFFFF, color, D_004376C0, names[(ctx->value >> 12) & 0xF]));
+        sdfDrawTagLink(list, (u32)sdfDevPrintf(x, y, 0xFEFFFF, color, D_003BC258, names[(ctx->value >> 12) & 0xF]));
         break;
     }
     case 3:
-        sdfDrawTagLink(list, (u32)sdfDevPrintf(x, y, 0xFEFFFF, 0, D_00423428));
+        sdfDrawTagLink(list, (u32)sdfDevPrintf(x, y, 0xFEFFFF, 0, D_003ADE78));
         break;
     case 4:
         sdfDrawTagLink(list, (u32)sdfDevPrintf(x, y, 0xFEFFFF, 0, " U,D = SELECT "));
         break;
     case 5:
-        sdfDrawTagLink(list, (u32)sdfDevPrintf(x, y, 0xFEFFFF, 0, D_004233F0));
+        sdfDrawTagLink(list, (u32)sdfDevPrintf(x, y, 0xFEFFFF, 0, D_003ADE40));
         break;
     case 6:
-        sdfDrawTagLink(list, (u32)sdfDevPrintf(x, y, 0xFEFFFF, 0, D_00423400));
+        sdfDrawTagLink(list, (u32)sdfDevPrintf(x, y, 0xFEFFFF, 0, D_003ADE50));
         break;
     }
 }
@@ -1787,42 +1534,39 @@ s32 evtUpdateMessageValueDialog(s32 x, s32 y, evtViewerInfo_t *ctx) {
     return dds3PadButtonState.cancel >= 0 ? 0 : -1;
 }
 
-
-
 s32 mnuDrawCutFlagLabel(sdfDrawTag_t *target, s32 x, s32 y) {
     sdfDrawTagLink(target, (u32)sdfDevPrintf(x, y, 0xFEFFFF, 0, "CUTFLAG MENU"));
     return 2;
 }
 
-
 /* Draw the packed four-bit option or twelve-bit number and highlight
  * the selected comparison field; later rows provide input instructions. */
-void evtDrawComparisonValueRow(sdfDrawTag_t *list, s32 x, s32 y, s32 index, evtViewerInfo_t *ctx) {
-    char *labels[11] = {D_004376C8, D_00423EE0, D_00423EF0, D_00423F00,
-        D_00423F10, D_00423F20, D_00423F30, D_00423F40, D_00423F50, D_00423F60, D_00423F70};
+void evtDrawComparisonValueRow(sdfDrawTag_t *list, s32 x, s32 y, u32 index, evtViewerInfo_t *ctx) {
+    char *labels[11] = {D_003BC260, D_003AE8D0, D_003AE8E0, D_003AE8F0,
+        D_003AE900, D_003AE910, D_003AE920, D_003AE930, D_003AE940, D_003AE950, D_003AE960};
     s32 flag;
 
     switch (index) {
     case 0:
         flag = ctx->compareField != 0 ? 0 : 4;
-        sdfDrawTagLink(list, (u32)sdfDevPrintf(x, y, 0xFEFFFF, flag, D_004376C0, labels[(ctx->value >> 12) & 0xF]));
+        sdfDrawTagLink(list, (u32)sdfDevPrintf(x, y, 0xFEFFFF, flag, D_003BC258, labels[(ctx->value >> 12) & 0xF]));
         return;
     case 1:
         flag = ctx->compareField != 1 ? 0 : 4;
-        sdfDrawTagLink(list, (u32)sdfDevPrintf(x, y, 0xFEFFFF, flag, D_004374A0, ctx->value & 0xFFF));
+        sdfDrawTagLink(list, (u32)sdfDevPrintf(x, y, 0xFEFFFF, flag, D_003BC058, ctx->value & 0xFFF));
         sdfDrawTagLink(list, (u32)sdfDevPrintf(x + 0x600, y, 0xFEFFFF, flag, "  (CMP VALUE)"));
         return;
     case 3:
-        sdfDrawTagLink(list, (u32)sdfDevPrintf(x, y, 0xFEFFFF, 0, D_00423428));
+        sdfDrawTagLink(list, (u32)sdfDevPrintf(x, y, 0xFEFFFF, 0, D_003ADE78));
         return;
     case 4:
         sdfDrawTagLink(list, (u32)sdfDevPrintf(x, y, 0xFEFFFF, 0, " U,D = SELECT "));
         return;
     case 5:
-        sdfDrawTagLink(list, (u32)sdfDevPrintf(x, y, 0xFEFFFF, 0, D_004233F0));
+        sdfDrawTagLink(list, (u32)sdfDevPrintf(x, y, 0xFEFFFF, 0, D_003ADE40));
         return;
     case 6:
-        sdfDrawTagLink(list, (u32)sdfDevPrintf(x, y, 0xFEFFFF, 0, D_00423400));
+        sdfDrawTagLink(list, (u32)sdfDevPrintf(x, y, 0xFEFFFF, 0, D_003ADE50));
         break;
     }
 }
@@ -1882,20 +1626,20 @@ s32 evtUpdateComparisonValueDialog(s32 x, s32 y, evtViewerInfo_t *ctx) {
 }
 
 EvtMenuTableEntryAvailability evtIsMenuTableEntryEnabled(s32 *index) {
-    return D_003C9730[*index].columnCount != EVT_MENU_TABLE_ENTRY_DISABLED;
+    return D_00368950[*index].enabled != EVT_MENU_TABLE_ENTRY_DISABLED;
 }
 
 /* Return the table value selected by this group's type and editor column. */
 s32 mnuGetSelectedTableValue(evtViewerInfo_t *runtime) {
-    return D_003C9730[runtime->frameGroup->type].columns[runtime->tableColumn];
+    return D_00368950[runtime->frameGroup->type].fields[runtime->tableColumn];
 }
 
-extern char *D_003C9880[];
-extern char *D_003C9890[];
-extern char D_004376F8[];
-extern char D_00437700[];
-extern char D_00437708[];
-extern s8 D_004376D0[3];
+extern char *D_00368AA0[];
+extern char *D_00368AB0[];
+extern char D_003BC290[];
+extern char D_003BC298[];
+extern char D_003BC2A0[];
+extern s8 D_003BC268[3];
 
 void evtDrawGroupPropertyTable(sdfDrawTag_t *list, s32 x, s32 y, s32 hidden, evtViewerInfo_t *runtime) {
     s32 offset = 0;
@@ -1907,48 +1651,47 @@ void evtDrawGroupPropertyTable(sdfDrawTag_t *list, s32 x, s32 y, s32 hidden, evt
     if (hidden != 0) {
         return;
     }
-    for (i = 0; i < D_003C9730[group->type].columnCount; i++) {
-        field = D_003C9730[group->type].columns[i];
+    for (i = 0; i < D_00368950[group->type].enabled; i++) {
+        field = D_00368950[group->type].fields[i];
         sdfDrawTagLink(list, (u32)sdfDevPrintf(x + offset * 192, y,
-            0xFEFFFF, 14, D_003C9880[field]));
+            0xFEFFFF, 14, D_00368AA0[field]));
         style = i == runtime->tableColumn && runtime->actionMode == 15 ? 4 : 0;
         switch (field) {
         case 0:
             sdfDrawTagLink(list, (u32)sdfDevPrintf(x + (offset * 12 << 4),
-                y + 0x80, 0xFEFFFF, style, D_004376F8, runtime->frameGroup->metadata.value));
+                y + 0x80, 0xFEFFFF, style, D_003BC290, runtime->frameGroup->metadata.value));
             break;
         case 1:
             if (runtime->frameGroup->metadata.option < 3) {
                 sdfDrawTagLink(list, (u32)sdfDevPrintf(x + (offset * 12 << 4),
-                    y + 0x80, 0xFEFFFF, style, D_004374D0,
-                    D_003C9890[runtime->frameGroup->metadata.option]));
+                    y + 0x80, 0xFEFFFF, style, D_003BC088,
+                    D_00368AB0[runtime->frameGroup->metadata.option]));
             } else {
                 sdfDrawTagLink(list, (u32)sdfDevPrintf(x + (offset * 12 << 4),
-                    y + 0x80, 0xFEFFFF, style, D_004374D0,
+                    y + 0x80, 0xFEFFFF, style, D_003BC088,
                     runtime->entryName[runtime->frameGroup->metadata.extra2]));
             }
             break;
         case 2:
             if (runtime->frameGroup->metadata.option == 0) {
                 sdfDrawTagLink(list, (u32)sdfDevPrintf(x + (offset * 12 << 4),
-                    y + 0x80, 0xFEFFFF, style, D_00437700));
+                    y + 0x80, 0xFEFFFF, style, D_003BC298));
             } else {
                 sdfDrawTagLink(list, (u32)sdfDevPrintf(x + (offset * 12 << 4),
-                    y + 0x80, 0xFEFFFF, style, D_00437708));
+                    y + 0x80, 0xFEFFFF, style, D_003BC2A0));
             }
             break;
         }
-        offset += D_004376D0[field];
+        offset += D_003BC268[field];
     }
 }
+extern char *D_00368AC0[];
 
-extern char *D_003C98A0[];
+INCLUDE_RODATA(const s32, "event/evtEventViewerMenu", D_003AEA70);
 
-INCLUDE_RODATA(const s32, "game/code_00250010", D_00424080);
+INCLUDE_RODATA(const s32, "event/evtEventViewerMenu", D_003AEA80);
 
-INCLUDE_RODATA(const s32, "game/code_00250010", D_00424090);
-
-s32 evtUpdateGroupPropertyDialog(s32 x, s32 y, evtViewerInfo_t *runtime) {
+s32 evtHandleGroupPropertyMenu(s32 x, s32 y, evtViewerInfo_t *runtime) {
     sdfDrawTag_t *packets;
     EvtRuntimeGroup *group;
     EvtRuntimeChild *child;
@@ -1961,7 +1704,7 @@ s32 evtUpdateGroupPropertyDialog(s32 x, s32 y, evtViewerInfo_t *runtime) {
     if (group == NULL) {
         return 0;
     }
-    if (D_003C9730[group->type].columnCount == 0) {
+    if (D_00368950[group->type].enabled == 0) {
         return 0;
     }
     evtDrawMenuFrame(packets, x, y, 28, 3, 0, 1, runtime, NULL, evtDrawGroupPropertyTable);
@@ -1970,12 +1713,12 @@ s32 evtUpdateGroupPropertyDialog(s32 x, s32 y, evtViewerInfo_t *runtime) {
         return 0;
     }
     column = runtime->tableColumn;
-    if (column >= D_003C9730[group->type].columnCount && D_003C9730[group->type].columnCount > 0) {
-        column = runtime->tableColumn = D_003C9730[group->type].columnCount - 1;
+    if (column >= D_00368950[group->type].enabled && D_00368950[group->type].enabled > 0) {
+        column = runtime->tableColumn = D_00368950[group->type].enabled - 1;
     }
-    field = D_003C9730[group->type].columns[column];
+    field = D_00368950[group->type].fields[column];
     if (dds3PadButtonState.incOne < 0) {
-        if (column < D_003C9730[group->type].columnCount - 1) {
+        if (column < D_00368950[group->type].enabled - 1) {
             runtime->tableColumn = column + 1;
         } else {
             runtime->tableColumn = 0;
@@ -1984,7 +1727,7 @@ s32 evtUpdateGroupPropertyDialog(s32 x, s32 y, evtViewerInfo_t *runtime) {
         if (column > 0) {
             runtime->tableColumn = column - 1;
         } else {
-            runtime->tableColumn = D_003C9730[group->type].columnCount == 0 ? 0 : D_003C9730[group->type].columnCount - 1;
+            runtime->tableColumn = D_00368950[group->type].enabled == 0 ? 0 : D_00368950[group->type].enabled - 1;
         }
     } else if (dds3PadButtonState.confirm < 0) {
         switch (field) {
@@ -2005,7 +1748,7 @@ s32 evtUpdateGroupPropertyDialog(s32 x, s32 y, evtViewerInfo_t *runtime) {
             runtime->cursor = runtime->frameGroup->metadata.option;
             runtime->itemCount = field;
             runtime->title = "PATH APPLY MODE";
-            runtime->itemNames = D_003C98A0;
+            runtime->itemNames = D_00368AC0;
             evtViewerPushCommandHistory(2, 216, 120, runtime);
             break;
         }
@@ -2058,222 +1801,204 @@ typedef union EvtMotionValue {
     EvtMotionBits bits;
 } EvtMotionValue;
 
-extern char D_00437710[];
-extern char D_00437438[];
+extern char D_003BC2A8[];
+extern char D_003BBFF0[];
 
-INCLUDE_SDATA(const s32, "game/code_00250010", evtPictureTaskName);
+INCLUDE_SDATA(const s32, "event/evtEventViewerMenu", D_003BBFA0);
 
-INCLUDE_SDATA(const s32, "game/code_00250010", skyanime);
+INCLUDE_SDATA(const s32, "event/evtEventViewerMenu", D_003BBFA8);
 
-INCLUDE_SDATA(const s32, "game/code_00250010", fldbokasi);
+INCLUDE_SDATA(const s32, "event/evtEventViewerMenu", D_003BBFB0);
 
-INCLUDE_SDATA(const s32, "game/code_00250010", evtSkyTaskName);
+INCLUDE_SDATA(const s32, "event/evtEventViewerMenu", D_003BBFB8);
 
-INCLUDE_SDATA(const s32, "game/code_00250010", D_004373E0);
+INCLUDE_SDATA(const s32, "event/evtEventViewerMenu", D_003BBFC0);
 
-INCLUDE_SDATA(const s32, "game/code_00250010", D_004373E8);
+INCLUDE_SDATA(const s32, "event/evtEventViewerMenu", D_003BBFC8);
 
-INCLUDE_SDATA(const s32, "game/code_00250010", D_004373F0);
+INCLUDE_SDATA(const s32, "event/evtEventViewerMenu", D_003BBFD0);
 
-INCLUDE_SDATA(const s32, "game/code_00250010", D_004373F8);
+INCLUDE_SDATA(const s32, "event/evtEventViewerMenu", D_003BBFD8);
 
-INCLUDE_SDATA(const s32, "game/code_00250010", D_00437400);
+INCLUDE_SDATA(const s32, "event/evtEventViewerMenu", D_003BBFE0);
 
-INCLUDE_SDATA(const s32, "game/code_00250010", D_00437408);
+INCLUDE_SDATA(const s32, "event/evtEventViewerMenu", D_003BBFE8);
 
-INCLUDE_SDATA(const s32, "game/code_00250010", D_00437410);
+INCLUDE_SDATA(const s32, "event/evtEventViewerMenu", D_003BBFF0);
 
-INCLUDE_SDATA(const s32, "game/code_00250010", D_00437418);
+INCLUDE_SDATA(const s32, "event/evtEventViewerMenu", D_003BBFF8);
 
-INCLUDE_SDATA(const s32, "game/code_00250010", D_00437420);
+INCLUDE_SDATA(const s32, "event/evtEventViewerMenu", D_003BC000);
 
-INCLUDE_SDATA(const s32, "game/code_00250010", D_00437428);
+INCLUDE_SDATA(const s32, "event/evtEventViewerMenu", D_003BC008);
 
-INCLUDE_SDATA(const s32, "game/code_00250010", D_00437430);
+INCLUDE_SDATA(const s32, "event/evtEventViewerMenu", D_003BC010);
 
-INCLUDE_SDATA(const s32, "game/code_00250010", D_00437438);
+INCLUDE_SDATA(const s32, "event/evtEventViewerMenu", D_003BC018);
 
-INCLUDE_SDATA(const s32, "game/code_00250010", D_00437440);
+INCLUDE_SDATA(const s32, "event/evtEventViewerMenu", D_003BC020);
 
-INCLUDE_SDATA(const s32, "game/code_00250010", D_00437448);
+INCLUDE_SDATA(const s32, "event/evtEventViewerMenu", D_003BC028);
 
-INCLUDE_SDATA(const s32, "game/code_00250010", D_00437450);
+INCLUDE_SDATA(const s32, "event/evtEventViewerMenu", D_003BC030);
 
-INCLUDE_SDATA(const s32, "game/code_00250010", D_00437458);
+INCLUDE_SDATA(const s32, "event/evtEventViewerMenu", D_003BC038);
 
-INCLUDE_SDATA(const s32, "game/code_00250010", D_00437460);
+INCLUDE_SDATA(const s32, "event/evtEventViewerMenu", D_003BC040);
 
-INCLUDE_SDATA(const s32, "game/code_00250010", D_00437468);
+INCLUDE_SDATA(const s32, "event/evtEventViewerMenu", D_003BC048);
 
-INCLUDE_SDATA(const s32, "game/code_00250010", D_00437470);
+INCLUDE_SDATA(const s32, "event/evtEventViewerMenu", D_003BC050);
 
-INCLUDE_SDATA(const s32, "game/code_00250010", D_00437478);
+INCLUDE_SDATA(const s32, "event/evtEventViewerMenu", D_003BC058);
 
-INCLUDE_SDATA(const s32, "game/code_00250010", D_00437480);
+INCLUDE_SDATA(const s32, "event/evtEventViewerMenu", D_003BC060);
 
-INCLUDE_SDATA(const s32, "game/code_00250010", D_00437488);
+INCLUDE_SDATA(const s32, "event/evtEventViewerMenu", D_003BC068);
 
-INCLUDE_SDATA(const s32, "game/code_00250010", D_00437490);
+INCLUDE_SDATA(const s32, "event/evtEventViewerMenu", D_003BC070);
 
-INCLUDE_SDATA(const s32, "game/code_00250010", D_00437498);
+INCLUDE_SDATA(const s32, "event/evtEventViewerMenu", D_003BC078);
 
-INCLUDE_SDATA(const s32, "game/code_00250010", D_004374A0);
+INCLUDE_SDATA(const s32, "event/evtEventViewerMenu", D_003BC080);
 
-INCLUDE_SDATA(const s32, "game/code_00250010", D_004374A8);
+INCLUDE_SDATA(const s32, "event/evtEventViewerMenu", D_003BC088);
 
-INCLUDE_SDATA(const s32, "game/code_00250010", D_004374B0);
+INCLUDE_SDATA(const s32, "event/evtEventViewerMenu", D_003BC090);
 
-INCLUDE_SDATA(const s32, "game/code_00250010", D_004374B8);
+INCLUDE_SDATA(const s32, "event/evtEventViewerMenu", D_003BC098);
 
-INCLUDE_SDATA(const s32, "game/code_00250010", D_004374C0);
+INCLUDE_SDATA(const s32, "event/evtEventViewerMenu", D_003BC0A0);
 
-INCLUDE_SDATA(const s32, "game/code_00250010", D_004374C8);
+INCLUDE_SDATA(const s32, "event/evtEventViewerMenu", D_003BC0A8);
 
-INCLUDE_SDATA(const s32, "game/code_00250010", D_004374D0);
+INCLUDE_SDATA(const s32, "event/evtEventViewerMenu", D_003BC0B0);
 
-INCLUDE_SDATA(const s32, "game/code_00250010", D_004374D8);
+INCLUDE_SDATA(const s32, "event/evtEventViewerMenu", D_003BC0B8);
 
-INCLUDE_SDATA(const s32, "game/code_00250010", D_004374E0);
+INCLUDE_SDATA(const s32, "event/evtEventViewerMenu", D_003BC0C0);
 
-INCLUDE_SDATA(const s32, "game/code_00250010", D_004374E8);
+INCLUDE_SDATA(const s32, "event/evtEventViewerMenu", D_003BC0C8);
 
-INCLUDE_SDATA(const s32, "game/code_00250010", D_004374F0);
+INCLUDE_SDATA(const s32, "event/evtEventViewerMenu", D_003BC0D0);
 
-INCLUDE_SDATA(const s32, "game/code_00250010", D_004374F8);
+INCLUDE_SDATA(const s32, "event/evtEventViewerMenu", D_003BC0D8);
 
-INCLUDE_SDATA(const s32, "game/code_00250010", D_00437500);
+INCLUDE_SDATA(const s32, "event/evtEventViewerMenu", D_003BC0E0);
 
-INCLUDE_SDATA(const s32, "game/code_00250010", D_00437508);
+INCLUDE_SDATA(const s32, "event/evtEventViewerMenu", D_003BC0E8);
 
-INCLUDE_SDATA(const s32, "game/code_00250010", D_00437510);
+INCLUDE_SDATA(const s32, "event/evtEventViewerMenu", D_003BC0F0);
 
-INCLUDE_SDATA(const s32, "game/code_00250010", D_00437518);
+INCLUDE_SDATA(const s32, "event/evtEventViewerMenu", D_003BC0F8);
 
-INCLUDE_SDATA(const s32, "game/code_00250010", D_00437520);
+INCLUDE_SDATA(const s32, "event/evtEventViewerMenu", D_003BC100);
 
-INCLUDE_SDATA(const s32, "game/code_00250010", D_00437528);
+INCLUDE_SDATA(const s32, "event/evtEventViewerMenu", D_003BC108);
 
-INCLUDE_SDATA(const s32, "game/code_00250010", D_00437530);
+INCLUDE_SDATA(const s32, "event/evtEventViewerMenu", D_003BC110);
 
-INCLUDE_SDATA(const s32, "game/code_00250010", D_00437538);
+INCLUDE_SDATA(const s32, "event/evtEventViewerMenu", D_003BC118);
 
-INCLUDE_SDATA(const s32, "game/code_00250010", D_00437540);
+INCLUDE_SDATA(const s32, "event/evtEventViewerMenu", D_003BC120);
 
-INCLUDE_SDATA(const s32, "game/code_00250010", D_00437548);
+INCLUDE_SDATA(const s32, "event/evtEventViewerMenu", D_003BC128);
 
-INCLUDE_SDATA(const s32, "game/code_00250010", D_00437550);
+INCLUDE_SDATA(const s32, "event/evtEventViewerMenu", D_003BC130);
 
-INCLUDE_SDATA(const s32, "game/code_00250010", D_00437558);
+INCLUDE_SDATA(const s32, "event/evtEventViewerMenu", D_003BC138);
 
-INCLUDE_SDATA(const s32, "game/code_00250010", D_00437560);
+INCLUDE_SDATA(const s32, "event/evtEventViewerMenu", D_003BC140);
 
-INCLUDE_SDATA(const s32, "game/code_00250010", D_00437568);
+INCLUDE_SDATA(const s32, "event/evtEventViewerMenu", D_003BC148);
 
-INCLUDE_SDATA(const s32, "game/code_00250010", D_00437570);
+INCLUDE_SDATA(const s32, "event/evtEventViewerMenu", D_003BC150);
 
-INCLUDE_SDATA(const s32, "game/code_00250010", D_00437578);
+INCLUDE_SDATA(const s32, "event/evtEventViewerMenu", D_003BC158);
 
-INCLUDE_SDATA(const s32, "game/code_00250010", D_00437580);
+INCLUDE_SDATA(const s32, "event/evtEventViewerMenu", D_003BC160);
 
-INCLUDE_SDATA(const s32, "game/code_00250010", D_00437588);
+INCLUDE_SDATA(const s32, "event/evtEventViewerMenu", D_003BC168);
 
-INCLUDE_SDATA(const s32, "game/code_00250010", D_00437590);
+INCLUDE_SDATA(const s32, "event/evtEventViewerMenu", D_003BC170);
 
-INCLUDE_SDATA(const s32, "game/code_00250010", D_00437598);
+INCLUDE_SDATA(const s32, "event/evtEventViewerMenu", D_003BC178);
 
-INCLUDE_SDATA(const s32, "game/code_00250010", D_004375A0);
+INCLUDE_SDATA(const s32, "event/evtEventViewerMenu", D_003BC180);
 
-INCLUDE_SDATA(const s32, "game/code_00250010", D_004375A8);
+INCLUDE_SDATA(const s32, "event/evtEventViewerMenu", D_003BC188);
 
-INCLUDE_SDATA(const s32, "game/code_00250010", D_004375B0);
+INCLUDE_SDATA(const s32, "event/evtEventViewerMenu", D_003BC190);
 
-INCLUDE_SDATA(const s32, "game/code_00250010", D_004375B8);
+INCLUDE_SDATA(const s32, "event/evtEventViewerMenu", D_003BC198);
 
-INCLUDE_SDATA(const s32, "game/code_00250010", D_004375C0);
+INCLUDE_SDATA(const s32, "event/evtEventViewerMenu", D_003BC1A0);
 
-INCLUDE_SDATA(const s32, "game/code_00250010", D_004375C8);
+INCLUDE_SDATA(const s32, "event/evtEventViewerMenu", D_003BC1A8);
 
-INCLUDE_SDATA(const s32, "game/code_00250010", D_004375D0);
+INCLUDE_SDATA(const s32, "event/evtEventViewerMenu", D_003BC1B0);
 
-INCLUDE_SDATA(const s32, "game/code_00250010", D_004375D8);
+INCLUDE_SDATA(const s32, "event/evtEventViewerMenu", D_003BC1B8);
 
-INCLUDE_SDATA(const s32, "game/code_00250010", D_004375E0);
+INCLUDE_SDATA(const s32, "event/evtEventViewerMenu", D_003BC1C0);
 
-INCLUDE_SDATA(const s32, "game/code_00250010", D_004375E8);
+INCLUDE_SDATA(const s32, "event/evtEventViewerMenu", D_003BC1C8);
 
-INCLUDE_SDATA(const s32, "game/code_00250010", D_004375F0);
+INCLUDE_SDATA(const s32, "event/evtEventViewerMenu", D_003BC1D0);
 
-INCLUDE_SDATA(const s32, "game/code_00250010", D_004375F8);
+INCLUDE_SDATA(const s32, "event/evtEventViewerMenu", D_003BC1D8);
 
-INCLUDE_SDATA(const s32, "game/code_00250010", D_00437600);
+INCLUDE_SDATA(const s32, "event/evtEventViewerMenu", D_003BC1E0);
 
-INCLUDE_SDATA(const s32, "game/code_00250010", D_00437608);
+INCLUDE_SDATA(const s32, "event/evtEventViewerMenu", D_003BC1E8);
 
-INCLUDE_SDATA(const s32, "game/code_00250010", D_00437610);
+INCLUDE_SDATA(const s32, "event/evtEventViewerMenu", D_003BC1F0);
 
-INCLUDE_SDATA(const s32, "game/code_00250010", D_00437618);
+INCLUDE_SDATA(const s32, "event/evtEventViewerMenu", D_003BC1F8);
 
-INCLUDE_SDATA(const s32, "game/code_00250010", D_00437620);
+INCLUDE_SDATA(const s32, "event/evtEventViewerMenu", D_003BC200);
 
-INCLUDE_SDATA(const s32, "game/code_00250010", D_00437628);
+INCLUDE_SDATA(const s32, "event/evtEventViewerMenu", D_003BC208);
 
-INCLUDE_SDATA(const s32, "game/code_00250010", D_00437630);
+INCLUDE_SDATA(const s32, "event/evtEventViewerMenu", D_003BC210);
 
-INCLUDE_SDATA(const s32, "game/code_00250010", D_00437638);
+INCLUDE_SDATA(const s32, "event/evtEventViewerMenu", D_003BC218);
 
-INCLUDE_SDATA(const s32, "game/code_00250010", D_00437640);
+INCLUDE_SDATA(const s32, "event/evtEventViewerMenu", D_003BC220);
 
-INCLUDE_SDATA(const s32, "game/code_00250010", D_00437648);
+INCLUDE_SDATA(const s32, "event/evtEventViewerMenu", D_003BC228);
 
-INCLUDE_SDATA(const s32, "game/code_00250010", D_00437650);
+INCLUDE_SDATA(const s32, "event/evtEventViewerMenu", D_003BC230);
 
-INCLUDE_SDATA(const s32, "game/code_00250010", D_00437658);
+INCLUDE_SDATA(const s32, "event/evtEventViewerMenu", D_003BC238);
 
-INCLUDE_SDATA(const s32, "game/code_00250010", D_00437660);
+INCLUDE_SDATA(const s32, "event/evtEventViewerMenu", D_003BC240);
 
-INCLUDE_SDATA(const s32, "game/code_00250010", D_00437668);
+INCLUDE_SDATA(const s32, "event/evtEventViewerMenu", D_003BC248);
 
-INCLUDE_SDATA(const s32, "game/code_00250010", D_00437670);
+INCLUDE_SDATA(const s32, "event/evtEventViewerMenu", D_003BC250);
 
-INCLUDE_SDATA(const s32, "game/code_00250010", D_00437678);
+INCLUDE_SDATA(const s32, "event/evtEventViewerMenu", D_003BC258);
 
-INCLUDE_SDATA(const s32, "game/code_00250010", D_00437680);
+INCLUDE_SDATA(const s32, "event/evtEventViewerMenu", D_003BC260);
 
-INCLUDE_SDATA(const s32, "game/code_00250010", D_00437688);
+INCLUDE_SDATA(const s32, "event/evtEventViewerMenu", D_003BC268);
 
-INCLUDE_SDATA(const s32, "game/code_00250010", D_00437690);
+INCLUDE_SDATA(const s32, "event/evtEventViewerMenu", D_003BC270);
 
-INCLUDE_SDATA(const s32, "game/code_00250010", D_00437698);
+INCLUDE_SDATA(const s32, "event/evtEventViewerMenu", D_003BC278);
 
-INCLUDE_SDATA(const s32, "game/code_00250010", D_004376A0);
+INCLUDE_SDATA(const s32, "event/evtEventViewerMenu", D_003BC280);
 
-INCLUDE_SDATA(const s32, "game/code_00250010", D_004376A8);
+INCLUDE_SDATA(const s32, "event/evtEventViewerMenu", D_003BC288);
 
-INCLUDE_SDATA(const s32, "game/code_00250010", D_004376B0);
+INCLUDE_SDATA(const s32, "event/evtEventViewerMenu", D_003BC290);
 
-INCLUDE_SDATA(const s32, "game/code_00250010", D_004376B8);
+INCLUDE_SDATA(const s32, "event/evtEventViewerMenu", D_003BC298);
 
-INCLUDE_SDATA(const s32, "game/code_00250010", D_004376C0);
+INCLUDE_SDATA(const s32, "event/evtEventViewerMenu", D_003BC2A0);
 
-INCLUDE_SDATA(const s32, "game/code_00250010", D_004376C8);
-
-INCLUDE_SDATA(const s32, "game/code_00250010", D_004376D0);
-
-INCLUDE_SDATA(const s32, "game/code_00250010", D_004376D8);
-
-INCLUDE_SDATA(const s32, "game/code_00250010", D_004376E0);
-
-INCLUDE_SDATA(const s32, "game/code_00250010", D_004376E8);
-
-INCLUDE_SDATA(const s32, "game/code_00250010", D_004376F0);
-
-INCLUDE_SDATA(const s32, "game/code_00250010", D_004376F8);
-
-INCLUDE_SDATA(const s32, "game/code_00250010", D_00437700);
-
-INCLUDE_SDATA(const s32, "game/code_00250010", D_00437708);
-
-INCLUDE_SDATA(const s32, "game/code_00250010", D_00437710);
+INCLUDE_SDATA(const s32, "event/evtEventViewerMenu", D_003BC2A8);
 
 void evtDrawMotionChangeRow(sdfDrawTag_t *list, s32 x, s32 y, s32 row, evtViewerInfo_t *ctx) {
     s32 i;
@@ -2281,7 +2006,7 @@ void evtDrawMotionChangeRow(sdfDrawTag_t *list, s32 x, s32 y, s32 row, evtViewer
     s32 style = 0;
     dds3ModelHandle_t *model = (dds3ModelHandle_t *)((EffectObjectData *)ctx->frameGroup->info->workdata)->modelHolder->resourceHandle;
     EvtMotionValue packed;
-    char *loopNames[] = {D_00437710, D_00437438};
+    char *loopNames[] = {D_003BC2A8, D_003BBFF0};
 
     if (ctx->fieldIndex == row) {
         style = 4;
@@ -2319,7 +2044,6 @@ void evtDrawMotionChangeRow(sdfDrawTag_t *list, s32 x, s32 y, s32 row, evtViewer
         break;
     }
 }
-
 
 extern void evtDrawMotionChangeRow();
 
@@ -2419,9 +2143,9 @@ s32 evtUpdateMotionChangeRow(s32 x, s32 y, evtViewerInfo_t *ctx) {
     return dds3PadButtonState.cancel >= 0 ? 0 : -1;
 }
 
-extern char D_00424090[]; /* "UNIT ALL" */
-extern char D_004376E8[]; /* "ALL" */
-extern char D_004376F0[]; /* "DISABLE" */
+extern char D_003BC288[]; /* "DISABLE" */
+extern char D_003BC280[]; /* "ALL" */
+extern char D_003AEA80[]; /* "UNIT ALL" */
 
 void evtDrawGroupListRow(sdfDrawTag_t *list, s32 x, s32 y, s32 index, evtViewerInfo_t *ctx) {
     EvtRuntimeGroup *group;
@@ -2433,19 +2157,19 @@ void evtDrawGroupListRow(sdfDrawTag_t *list, s32 x, s32 y, s32 index, evtViewerI
         color = 0;
     }
     if (index == 0) {
-        sdfDrawTagLink(list, (u32)sdfDevPrintf(x, y, 0xFEFFFF, color, D_004376F0));
+        sdfDrawTagLink(list, (u32)sdfDevPrintf(x, y, 0xFEFFFF, color, D_003BC288));
     } else if (index == 1) {
-        sdfDrawTagLink(list, (u32)sdfDevPrintf(x, y, 0xFEFFFF, color, D_004376E8));
+        sdfDrawTagLink(list, (u32)sdfDevPrintf(x, y, 0xFEFFFF, color, D_003BC280));
         return;
     } else if (index == 2) {
-        sdfDrawTagLink(list, (u32)sdfDevPrintf(x, y, 0xFEFFFF, color, D_00424090));
+        sdfDrawTagLink(list, (u32)sdfDevPrintf(x, y, 0xFEFFFF, color, D_003AEA80));
         return;
     }
     n = 3;
     for (group = ctx->groups; group != NULL; group = group->next) {
         if (group->type == 1) {
             if (n == index) {
-                sdfDrawTagLink(list, (u32)sdfDevPrintf(x, y, 0xFEFFFF, color, D_004374D0, ((char *)group->info->name)));
+                sdfDrawTagLink(list, (u32)sdfDevPrintf(x, y, 0xFEFFFF, color, D_003BC088, ((char *)group->info->name)));
                 return;
             }
             n++;
@@ -2478,13 +2202,13 @@ s32 evtUpdateGroupListDialog(s32 x, s32 y, evtViewerInfo_t *ctx) {
 }
 
 /* Empty RGB-editor row renderer passed to evtDrawMenuFrame. */
-void evtNoOpRGBEditorRow(sdfDrawTag_t *list, s32 x, s32 y, s32 index, void *context) {
+void evtNoOpRGBEditorRow(sdfDrawTag_t *list, s32 x, s32 y, s32 row, void *runtime) {
 }
 
 extern f32 sdfViewMatrix[];
 extern void FromRotation(f32 angle);
 
-/* vu0 routine: rotate an event-viewer position about camera axes selected by the pad. */
+/* vu0 routine: apply the selected camera-axis rotations to a position. */
 void evtRotateViewerPositionFromPad(f32 *position)
 {
     if (dds3PadButtonState.incOne != 0) {
@@ -2523,14 +2247,14 @@ void evtRotateViewerPositionFromPad(f32 *position)
     }
 }
 
-extern u16 D_003C98A8[];
-extern char D_00437728[];
-extern char D_00437730[];
-extern const char D_00424150[];
-extern const char D_00424160[];
-extern const char D_00424170[];
-extern u64 *dds3PrimLine3D(s32, s32, s32, s32);
-extern void dds3PrimDebugTextBox(sdfDrawTag_t *, s32, s32, s32, f32 *);
+extern u16 D_00368AC8[];
+extern char D_003BC2C0[];
+extern char D_003BC2C8[];
+extern const char D_003AEB40[];
+extern const char D_003AEB50[];
+extern const char D_003AEB60[];
+extern void *dds3PrimLine3D(s32, s32, s32, s32);
+extern void dds3PrimDebugTextBox(void *, s32, s32, s32, f32 *);
 extern void mnuShopSavePrimaryTransform(evtViewerInfo_t *);
 extern void mnuShopSaveFullTransform(evtViewerInfo_t *);
 extern void mnuShopRestoreTransform(evtViewerInfo_t *);
@@ -2538,7 +2262,6 @@ extern void dds3SetLightColor(s32, s32, const f32 *);
 extern void dds3SetLightDir(s32, s32, const f32 *);
 extern void dds3SetAmbientColor(s32, f32 *);
 extern void evtSetSlotVectors(s32, EvtUnitVectorSlotState, evtUnitHandle_t *, const f32 *, const f32 *, const f32 *);
-
 
 /* Select and draw one light-color bank at the current panel offset. */
 static inline void evtDrawLightRgbComponents(sdfDrawTag_t *list, evtViewerInfo_t *runtime,
@@ -2575,8 +2298,8 @@ s32 evtUpdateLightAndBackgroundEditor(s32 x, s32 y, evtViewerInfo_t *runtime) {
 
     sdfDrawTagLink(list, (u32)sdfDevPrintf(
         (s32)(0x8680u + ((u32)runtime->lightPanelOffset << 4)),
-        D_003C98A8[runtime->lightEditorSelectionIndex],
-        0xFF0080, 0, D_00437728));
+        D_00368AC8[runtime->lightEditorSelectionIndex],
+        0xFF0080, 0, D_003BC2C0));
 
     {
         s32 selected;
@@ -2599,14 +2322,14 @@ s32 evtUpdateLightAndBackgroundEditor(s32 x, s32 y, evtViewerInfo_t *runtime) {
                               8);
 
     sdfDrawTagLink(list, (u32)sdfDevPrintf(
-        evtLightCaptionX(runtime->lightPanelOffset), D_003C98A8[7],
-        0xFF0080, 0, D_00424150));
+        evtLightCaptionX(runtime->lightPanelOffset), D_00368AC8[7],
+        0xFF0080, 0, D_003AEB40));
     sdfDrawTagLink(list, (u32)sdfDevPrintf(
-        evtLightCaptionX(runtime->lightPanelOffset), D_003C98A8[8],
-        0xFF0080, 0, D_00424160));
+        evtLightCaptionX(runtime->lightPanelOffset), D_00368AC8[8],
+        0xFF0080, 0, D_003AEB50));
     sdfDrawTagLink(list, (u32)sdfDevPrintf(
-        evtLightCaptionX(runtime->lightPanelOffset), D_003C98A8[9],
-        0xFF0080, 0, D_00437730));
+        evtLightCaptionX(runtime->lightPanelOffset), D_00368AC8[9],
+        0xFF0080, 0, D_003BC2C8));
 
     if (runtime->actionMode != 0x12) {
         return 0;
@@ -2757,7 +2480,7 @@ s32 evtUpdateLightAndBackgroundEditor(s32 x, s32 y, evtViewerInfo_t *runtime) {
             if (node != NULL) {
                 nestedValue = evtGetUnitHandle2(node);
             } else {
-                printf((char *)D_00424170);
+                printf((char *)D_003AEB60);
                 break;
             }
             evtSetSlotVectors(group->setterId, group->metadata.option, nestedValue,
@@ -2776,13 +2499,13 @@ void evtNoOpXYSlotVectorEditorRow(void) {
 }
 
 /* This coordinate table is supplied by the ordinary data segment. */
-extern const u16 D_003C98C0[];
-extern const EvtFloatPanelRow D_003C98C8[4];
-extern char D_00437728[];
-extern char D_00437750[];
-extern char D_00437758[];
-extern char D_00437760[];
-extern char D_004375D0[];
+extern const u16 D_00368AE0[];
+extern const EvtFloatPanelRow D_00368AE8[4];
+extern char D_003BC2C0[];
+extern char D_003BC2E8[];
+extern char D_003BC2F0[];
+extern char D_003BC2F8[];
+extern char D_003BC188[];
 extern u8 corePktSoftenBias;
 extern f32 sdfFaceDivSoften;
 extern f32 sdfFaceDivBias;
@@ -2805,8 +2528,8 @@ s32 evtDrawAndHandleXYSlotVectorEditor(s32 x, s32 y, evtViewerInfo_t *runtime) {
 
     sdfDrawTagLink(list, (u32)sdfDevPrintf(
         0x8500 + (runtime->horizontalOffset << 4),
-        D_003C98C0[runtime->floatSelection], 0xFF0080, 0, D_00437728));
-    row = D_003C98C8;
+        D_00368AE0[runtime->floatSelection], 0xFF0080, 0, D_003BC2C0));
+    row = D_00368AE8;
     i = 0;
     do {
         sdfDrawTagLink(list, (u32)sdfDevPrintf(
@@ -2821,7 +2544,7 @@ s32 evtDrawAndHandleXYSlotVectorEditor(s32 x, s32 y, evtViewerInfo_t *runtime) {
         s32 style = runtime->floatEditMode == 1 && runtime->floatSelection == 0 ? 6 : 0;
 
         sdfDrawTagLink(list, (u32)sdfDevPrintf(
-            valueX, 0x7A80, 0xFF0080, style, D_00437750,
+            valueX, 0x7A80, 0xFF0080, style, D_003BC2E8,
             runtime->floatEditX));
     }
     {
@@ -2829,7 +2552,7 @@ s32 evtDrawAndHandleXYSlotVectorEditor(s32 x, s32 y, evtViewerInfo_t *runtime) {
         s32 style = runtime->floatEditMode == 1 && runtime->floatSelection == 1 ? 6 : 0;
 
         sdfDrawTagLink(list, (u32)sdfDevPrintf(
-            valueX, 0x7AE0, 0xFF0080, style, D_00437758,
+            valueX, 0x7AE0, 0xFF0080, style, D_003BC2F0,
             runtime->floatEditY));
     }
     {
@@ -2837,9 +2560,9 @@ s32 evtDrawAndHandleXYSlotVectorEditor(s32 x, s32 y, evtViewerInfo_t *runtime) {
         s32 style = runtime->floatEditMode == 1 && runtime->floatSelection == 2 ? 6 : 0;
         const char *toggleText;
         if (corePktSoftenBias == 0) {
-            toggleText = D_00437760;
+            toggleText = D_003BC2F8;
         } else {
-            toggleText = D_004375D0;
+            toggleText = D_003BC188;
         }
 
         sdfDrawTagLink(list, (u32)sdfDevPrintf(
@@ -2977,47 +2700,41 @@ s32 evtDrawAndHandleXYSlotVectorEditor(s32 x, s32 y, evtViewerInfo_t *runtime) {
 }
 
 /* Draw command text for row 0 or 1; null texts and other rows emit nothing. */
-void evtDrawOptionalPromptText(sdfDrawTag_t *list, s32 x, s32 y, s32 kind, evtViewerInfo_t *ctx) {
+void evtDrawOptionalPromptText(sdfDrawTag_t *list, s32 x, s32 y, s32 kind, evtViewerInfo_t *work) {
     switch (kind) {
     case 0:
-        if (ctx->commandSecond.text != NULL) {
-            sdfDrawTagLink(list, (u32)sdfDevPrintf(x, y, 0xFEFFFF, 0, D_004374D0, ctx->commandSecond.text));
-            return;
+        if (work->commandSecond.text != 0) {
+            sdfDrawTagLink(list, (u32)sdfDevPrintf(x, y, 0xFEFFFF, 0, D_003BC088, work->commandSecond.text));
         }
-        break;
+        return;
     case 1:
-        if (ctx->commandThird.text != NULL) {
-            sdfDrawTagLink(list, (u32)sdfDevPrintf(x, y, 0xFEFFFF, 0, D_004374D0, ctx->commandThird.text));
+        if (work->commandThird.text != 0) {
+            sdfDrawTagLink(list, (u32)sdfDevPrintf(x, y, 0xFEFFFF, 0, D_003BC088, work->commandThird.text));
         }
         break;
     }
 }
 
-extern void evtDrawOptionalPromptText(sdfDrawTag_t *list, s32 x, s32 y, s32 kind, evtViewerInfo_t *ctx);
-
 /* In mode 0x14, count down before checking input: zero expires, negative waits
  * indefinitely, and confirm takes precedence over cancel. */
-s32 mnuDrawTimedPrompt(s32 x, s32 y, evtViewerInfo_t *ctx) {
-    sdfDrawTag_t *list;
-
-    list = dds3FontReqAllocDrawTag();
-    evtDrawMenuFrame(list, x, y, 0x19, 2, 0, 1, ctx, NULL, evtDrawOptionalPromptText);
-    sdfDebugGrOt.regFunc(&sdfDebugGrOt, list);
-    if (ctx->actionMode != 0x14) {
+s32 mnuDrawTimedPrompt(s32 x, s32 y, evtViewerInfo_t *work) {
+    sdfDrawTag_t *packets = dds3FontReqAllocDrawTag();
+    s32 count;
+    evtDrawMenuFrame(packets, x, y, 0x19, 2, 0, 1, work, 0, evtDrawOptionalPromptText);
+    sdfDebugGrOt.regFunc(&sdfDebugGrOt, packets);
+    if (work->actionMode != 0x14) {
         return 0;
     }
-    if (ctx->commandFirst > 0) {
-        ctx->commandFirst--;
-    } else if (ctx->commandFirst == 0) {
+    count = work->commandFirst;
+    if (count > 0) {
+        work->commandFirst = count - 1;
+    } else if (count == 0) {
         return -1;
     }
     if (dds3PadButtonState.confirm < 0) {
         return 1;
     }
-    if (dds3PadButtonState.cancel >= 0) {
-        return 0;
-    }
-    return -1;
+    return dds3PadButtonState.cancel >= 0 ? 0 : -1;
 }
 
 /* Store a countdown and the two optional strings used by timed prompts. */
@@ -3027,15 +2744,15 @@ void evtSetRuntimeCommandValues(evtViewerInfo_t *runtime, s32 frames, char *firs
     runtime->commandThird.text = secondText;
 }
 
-extern char D_00437768[]; /* "CURRENT" */
+extern char D_003BC300[]; /* "CURRENT" */
 
-INCLUDE_RODATA(const s32, "game/code_00250010", D_00424150);
+INCLUDE_RODATA(const s32, "event/evtEventViewerMenu", D_003AEB40);
 
-INCLUDE_RODATA(const s32, "game/code_00250010", D_00424160);
+INCLUDE_RODATA(const s32, "event/evtEventViewerMenu", D_003AEB50);
 
-INCLUDE_RODATA(const s32, "game/code_00250010", D_00424170);
+INCLUDE_RODATA(const s32, "event/evtEventViewerMenu", D_003AEB60);
 
-INCLUDE_RODATA(const s32, "game/code_00250010", D_004241A0);
+INCLUDE_RODATA(const s32, "event/evtEventViewerMenu", D_003AEB90);
 
 void evtViewerDrawGroupRow(sdfDrawTag_t *list, s32 x, s32 y, s32 index, evtViewerInfo_t *ctx) {
     EvtRuntimeGroup *group;
@@ -3047,7 +2764,7 @@ void evtViewerDrawGroupRow(sdfDrawTag_t *list, s32 x, s32 y, s32 index, evtViewe
         color = 0;
     }
     if (index == 0) {
-        sdfDrawTagLink(list, (u32)sdfDevPrintf(x, y, 0xFEFFFF, color, D_00437768));
+        sdfDrawTagLink(list, (u32)sdfDevPrintf(x, y, 0xFEFFFF, color, D_003BC300));
         return;
     }
     if (index == 1) {
@@ -3058,7 +2775,7 @@ void evtViewerDrawGroupRow(sdfDrawTag_t *list, s32 x, s32 y, s32 index, evtViewe
     for (group = ctx->groups; group != NULL; group = group->next) {
         if (group->type == 0x18) {
             if (n == index) {
-                sdfDrawTagLink(list, (u32)sdfDevPrintf(x, y, 0xFEFFFF, color, D_004374D0, ctx->entryName[group->entryHeader]));
+                sdfDrawTagLink(list, (u32)sdfDevPrintf(x, y, 0xFEFFFF, color, D_003BC088, ctx->entryName[group->entryHeader]));
                 return;
             }
             n++;
@@ -3090,12 +2807,12 @@ s32 evtViewerDrawGroupWindow(s32 x, s32 y, evtViewerInfo_t *ctx) {
     return dds3SelectMenu(0, 1, count, 1, shown, 0, &ctx->groupFirst, 0, &ctx->groupCursor);
 }
 
-extern char *D_003C98F8[];
+extern char *D_00368B18[];
 
 /* Draw one row of the shadow-configuration menu. */
-INCLUDE_RODATA(const s32, "game/code_00250010", D_004241C0);
+INCLUDE_RODATA(const s32, "event/evtEventViewerMenu", D_003AEBB0);
 
-void evtViewerDrawShadowConfigRow(sdfDrawTag_t *list, s32 x, s32 y, s32 index, evtViewerInfo_t *ctx) {
+void evtDrawShadowSettingsRow(sdfDrawTag_t *list, s32 x, s32 y, s32 index, evtViewerInfo_t *ctx) {
     EvtRuntimeChild *node;
     s32 color;
 
@@ -3106,7 +2823,7 @@ void evtViewerDrawShadowConfigRow(sdfDrawTag_t *list, s32 x, s32 y, s32 index, e
         sdfDrawTagLink(list, (u32)sdfDevPrintf(x, y, 0xFEFFFF, color, "SHADOW CONFIG"));
         return;
     case 2:
-        sdfDrawTagLink(list, (u32)sdfDevPrintf(x, y, 0xFEFFFF, color, "MODE   :%s", D_003C98F8[ctx->shadowMode]));
+        sdfDrawTagLink(list, (u32)sdfDevPrintf(x, y, 0xFEFFFF, color, "MODE   :%s", D_00368B18[ctx->shadowMode]));
         return;
     case 3:
         sdfDrawTagLink(list, (u32)sdfDevPrintf(x, y, 0xFEFFFF, color, "ALPHA  :%3d", ctx->shadowAlpha));
@@ -3127,7 +2844,7 @@ s32 evtViewerEditShadowProperties(s32 x, s32 y, evtViewerInfo_t *ctx) {
     s32 lastRow = 0;
     s32 lastMode = 0;
 
-    evtDrawMenuFrame(list, x, y, 0x16, 6, 0, 0, ctx, 0, evtViewerDrawShadowConfigRow);
+    evtDrawMenuFrame(list, x, y, 0x16, 6, 0, 0, ctx, 0, evtDrawShadowSettingsRow);
     sdfDebugGrOt.regFunc(&sdfDebugGrOt, list);
     if (ctx->actionMode != 0x16) {
         return 0;
@@ -3234,32 +2951,28 @@ typedef struct EvtSelectionCache {
     s32 selectedEntry; /* 0x24 */
 } EvtSelectionCache;
 
-extern EvtSelectionCache *D_00436518;
-
+extern EvtSelectionCache *D_003BB128;
 extern s32 evtActiveEntryFlags;
 
 /* Cache nonzero selections and publish first-tick flags at timer zero. A zero
  * setup status clears runtime control and finishes the polling task. */
 dds3TaskUpdateResult_t evtSynchronizeSelectedEntry(dds3ProcessID_t *task) {
     evtViewerInfo_t *runtime = (evtViewerInfo_t *)dds3GetProcessData(task);
-
     if (mfilterRun() == EFF_EVENT_SETUP_NOT_READY) {
         runtime->controlState = 0;
         return DDS3_TASK_UPDATE_FINISH_CALLBACK;
     }
     if (dds3GetProcessRunTime(task) == 0) {
         s32 selected = runtime->selectedEntry;
-
         evtActiveEntryFlags = selected;
         if (selected != 0) {
-            D_00436518->selectedEntry = selected;
+            D_003BB128->selectedEntry = selected;
         }
     }
-    if (D_00436518->selectedEntry != runtime->selectedEntry) {
+    if (D_003BB128->selectedEntry != runtime->selectedEntry) {
         s32 selected = runtime->selectedEntry;
-
         if (selected != 0) {
-            D_00436518->selectedEntry = selected;
+            D_003BB128->selectedEntry = selected;
         }
     }
     return DDS3_TASK_UPDATE_RETAIN_CALLBACK;
@@ -3267,7 +2980,9 @@ dds3TaskUpdateResult_t evtSynchronizeSelectedEntry(dds3ProcessID_t *task) {
 
 /* Poll solid-rectangle setup until it clears runtime control and finishes. */
 dds3TaskUpdateResult_t evtPollRuntimeControlReady(dds3ProcessID_t *task) {
-    evtViewerInfo_t *runtime = (evtViewerInfo_t *)dds3GetProcessData(task);
+    evtViewerInfo_t *runtime;
+
+    runtime = (evtViewerInfo_t *)dds3GetProcessData(task);
     if (evtViewerCheckDirty() == EFF_EVENT_SETUP_NOT_READY) {
         runtime->controlState = 0;
         return DDS3_TASK_UPDATE_FINISH_CALLBACK;
@@ -3275,33 +2990,30 @@ dds3TaskUpdateResult_t evtPollRuntimeControlReady(dds3ProcessID_t *task) {
     return DDS3_TASK_UPDATE_RETAIN_CALLBACK;
 }
 
-
-
-
 typedef char EvtViewKey_size_must_be_0x38[(sizeof(EvtRuntimeChild) == 0x38) ? 1 : -1];
 
-extern void dds3PrimDebugTextBoxRGB(sdfDrawTag_t *packetList, s32 x, s32 y,
+extern void dds3PrimDebugTextBoxRGB(void *packetList, s32 x, s32 y,
                                    s32 selected, u32 color,
                                    s32 showNormalized);
-extern char D_00437780[];
-extern char D_00437788[];
-extern char D_00437790[];
-extern char D_00437798[];
-extern char D_004377A0[];
-extern char D_004377A8[];
-extern char D_00424210[];
-extern char D_00424220[];
-extern char D_00424230[];
-extern char D_00424240[];
+extern char D_003BC318[];
+extern char D_003BC320[];
+extern char D_003BC328[];
+extern char D_003BC330[];
+extern char D_003BC338[];
+extern char D_003BC340[];
+extern char D_003AEC00[];
+extern char D_003AEC10[];
+extern char D_003AEC20[];
+extern char D_003AEC30[];
 
 /* Edit the pending key's position, color, blend mode and scale. */
-INCLUDE_RODATA(const s32, "game/code_00250010", D_00424210);
+INCLUDE_RODATA(const s32, "event/evtEventViewerMenu", D_003AEC00);
 
-INCLUDE_RODATA(const s32, "game/code_00250010", D_00424220);
+INCLUDE_RODATA(const s32, "event/evtEventViewerMenu", D_003AEC10);
 
-INCLUDE_RODATA(const s32, "game/code_00250010", D_00424230);
+INCLUDE_RODATA(const s32, "event/evtEventViewerMenu", D_003AEC20);
 
-INCLUDE_RODATA(const s32, "game/code_00250010", D_00424240);
+INCLUDE_RODATA(const s32, "event/evtEventViewerMenu", D_003AEC30);
 
 s32 evtEditEffectSpriteFrame(evtViewerInfo_t *runtime) {
     EvtRuntimeChild *key;
@@ -3314,20 +3026,20 @@ s32 evtEditEffectSpriteFrame(evtViewerInfo_t *runtime) {
     s32 style;
 
     packetList = dds3FontReqAllocDrawTag();
-    dds3ConsPanelTagLink((void *)packetList, 0x78, 0x138, 0xC, 9);
+    dds3ConsPanelTagLink(packetList, 0x78, 0x138, 0xC, 9);
     key = evtEventViewerGetPendingNode(runtime);
 
     style = runtime->editField == 0 ? 6 : 0;
     sdfDrawTagLink(packetList, (u32)sdfDevPrintf(
-        0x7780, 0x82C0, 0xFEFFFF, 0, D_00437780));
+        0x7780, 0x82C0, 0xFEFFFF, 0, D_003BC318));
     sdfDrawTagLink(packetList, (u32)sdfDevPrintf(
-        0x7780, 0x82C0, 0xFEFFFF, style, D_004376F8, key->p0C.sh[0]));
+        0x7780, 0x82C0, 0xFEFFFF, style, D_003BC290, key->p0C.sh[0]));
 
     style = runtime->editField == 1 ? 6 : 0;
     sdfDrawTagLink(packetList, (u32)sdfDevPrintf(
-        0x7780, 0x8320, 0xFEFFFF, 0, D_00437788));
+        0x7780, 0x8320, 0xFEFFFF, 0, D_003BC320));
     sdfDrawTagLink(packetList, (u32)sdfDevPrintf(
-        0x7780, 0x8320, 0xFEFFFF, style, D_004376F8, key->p0C.sh[1]));
+        0x7780, 0x8320, 0xFEFFFF, style, D_003BC290, key->p0C.sh[1]));
 
     selectedChannel = runtime->editField - 2;
     if ((u32)selectedChannel >= 3) {
@@ -3339,40 +3051,40 @@ s32 evtEditEffectSpriteFrame(evtViewerInfo_t *runtime) {
 
     style = runtime->editField == 5 ? 6 : 0;
     sdfDrawTagLink(packetList, (u32)sdfDevPrintf(
-        0x7780, 0x84A0, 0xFEFFFF, 0, D_00437790));
+        0x7780, 0x84A0, 0xFEFFFF, 0, D_003BC328));
     sdfDrawTagLink(packetList, (u32)sdfDevPrintf(
-        0x7780, 0x84A0, 0xFEFFFF, style, D_004376F8, key->p10.b[3]));
+        0x7780, 0x84A0, 0xFEFFFF, style, D_003BC290, key->p10.b[3]));
 
     style = runtime->editField == 6 ? 6 : 0;
     sdfDrawTagLink(packetList, (u32)sdfDevPrintf(
-        0x7780, 0x8500, 0xFEFFFF, 0, D_00437798));
+        0x7780, 0x8500, 0xFEFFFF, 0, D_003BC330));
     switch ((s8)key->p08.b[1]) {
     case 0:
         sdfDrawTagLink(packetList, (u32)sdfDevPrintf(
-            0x7780, 0x8500, 0xFEFFFF, style, D_00424210));
+            0x7780, 0x8500, 0xFEFFFF, style, D_003AEC00));
         break;
     case 1:
         sdfDrawTagLink(packetList, (u32)sdfDevPrintf(
-            0x7780, 0x8500, 0xFEFFFF, style, D_00424220));
+            0x7780, 0x8500, 0xFEFFFF, style, D_003AEC10));
         break;
     case 2:
         sdfDrawTagLink(packetList, (u32)sdfDevPrintf(
-            0x7780, 0x8500, 0xFEFFFF, style, D_00424230));
+            0x7780, 0x8500, 0xFEFFFF, style, D_003AEC20));
         break;
     }
 
     style = runtime->editField == 7 ? 6 : 0;
     sdfDrawTagLink(packetList, (u32)sdfDevPrintf(
-        0x7780, 0x8560, 0xFEFFFF, 0, D_004377A0));
+        0x7780, 0x8560, 0xFEFFFF, 0, D_003BC338));
     sdfDrawTagLink(packetList, (u32)sdfDevPrintf(
-        0x7780, 0x8560, 0xFEFFFF, style, D_00424240,
+        0x7780, 0x8560, 0xFEFFFF, style, D_003AEC30,
         key->p14.f));
 
     style = runtime->editField == 8 ? 6 : 0;
     sdfDrawTagLink(packetList, (u32)sdfDevPrintf(
-        0x7780, 0x85C0, 0xFEFFFF, 0, D_004377A8));
+        0x7780, 0x85C0, 0xFEFFFF, 0, D_003BC340));
     sdfDrawTagLink(packetList, (u32)sdfDevPrintf(
-        0x7780, 0x85C0, 0xFEFFFF, style, D_00424240,
+        0x7780, 0x85C0, 0xFEFFFF, style, D_003AEC30,
         key->p18.f));
     sdfDebugGrOt.regFunc(&sdfDebugGrOt,
                                      packetList);
@@ -3512,7 +3224,6 @@ s32 evtEditEffectSpriteFrame(evtViewerInfo_t *runtime) {
         }
     }
 
-
     if (dds3PadButtonState.cancel < 0) {
         runtime->frameGroup->parameterKeySource =
             EVT_VIEWER_PARAMETER_KEY_SOURCE_TIMELINE;
@@ -3521,54 +3232,49 @@ s32 evtEditEffectSpriteFrame(evtViewerInfo_t *runtime) {
     return 1;
 }
 
-
-
-
-
 /* Type-0x19 node payload: the producer allocates and the writer emits 0x40 bytes. */
-
 
 typedef char EvtCameraColorPayload_size_must_be_0x40[
     (sizeof(EvtCameraColorPayload) == 0x40) ? 1 : -1];
 
 /* Edit the camera color channels and the three speed/alpha parameter banks. */
-INCLUDE_SDATA(const s32, "game/code_00250010", D_00437728);
+INCLUDE_SDATA(const s32, "event/evtEventViewerMenu", D_003BC2C0);
 
-INCLUDE_SDATA(const s32, "game/code_00250010", D_00437730);
+INCLUDE_SDATA(const s32, "event/evtEventViewerMenu", D_003BC2C8);
 
-INCLUDE_SDATA(const s32, "game/code_00250010", D_00437738);
+INCLUDE_SDATA(const s32, "event/evtEventViewerMenu", D_003BC2D0);
 
-INCLUDE_SDATA(const s32, "game/code_00250010", D_00437740);
+INCLUDE_SDATA(const s32, "event/evtEventViewerMenu", D_003BC2D8);
 
-INCLUDE_SDATA(const s32, "game/code_00250010", D_00437748);
+INCLUDE_SDATA(const s32, "event/evtEventViewerMenu", D_003BC2E0);
 
-INCLUDE_SDATA(const s32, "game/code_00250010", D_00437750);
+INCLUDE_SDATA(const s32, "event/evtEventViewerMenu", D_003BC2E8);
 
-INCLUDE_SDATA(const s32, "game/code_00250010", D_00437758);
+INCLUDE_SDATA(const s32, "event/evtEventViewerMenu", D_003BC2F0);
 
-INCLUDE_SDATA(const s32, "game/code_00250010", D_00437760);
+INCLUDE_SDATA(const s32, "event/evtEventViewerMenu", D_003BC2F8);
 
-INCLUDE_SDATA(const s32, "game/code_00250010", D_00437768);
+INCLUDE_SDATA(const s32, "event/evtEventViewerMenu", D_003BC300);
 
-INCLUDE_SDATA(const s32, "game/code_00250010", D_00437770);
+INCLUDE_SDATA(const s32, "event/evtEventViewerMenu", D_003BC308);
 
-INCLUDE_SDATA(const s32, "game/code_00250010", D_00437778);
+INCLUDE_SDATA(const s32, "event/evtEventViewerMenu", D_003BC310);
 
-INCLUDE_SDATA(const s32, "game/code_00250010", D_00437780);
+INCLUDE_SDATA(const s32, "event/evtEventViewerMenu", D_003BC318);
 
-INCLUDE_SDATA(const s32, "game/code_00250010", D_00437788);
+INCLUDE_SDATA(const s32, "event/evtEventViewerMenu", D_003BC320);
 
-INCLUDE_SDATA(const s32, "game/code_00250010", D_00437790);
+INCLUDE_SDATA(const s32, "event/evtEventViewerMenu", D_003BC328);
 
-INCLUDE_SDATA(const s32, "game/code_00250010", D_00437798);
+INCLUDE_SDATA(const s32, "event/evtEventViewerMenu", D_003BC330);
 
-INCLUDE_SDATA(const s32, "game/code_00250010", D_004377A0);
+INCLUDE_SDATA(const s32, "event/evtEventViewerMenu", D_003BC338);
 
-INCLUDE_SDATA(const s32, "game/code_00250010", D_004377A8);
+INCLUDE_SDATA(const s32, "event/evtEventViewerMenu", D_003BC340);
 
 s32 evtEditCameraColorKeyFrame(evtViewerInfo_t *runtime) {
     EvtCameraColorPayload *key;
-    sdfDrawTag_t *packetList;
+    s32 packetList;
     s32 selectedChannel;
     s32 color;
     s32 style;
@@ -3578,15 +3284,15 @@ s32 evtEditCameraColorKeyFrame(evtViewerInfo_t *runtime) {
     s32 textY;
     s32 step;
 
-    packetList = dds3FontReqAllocDrawTag();
+    packetList = (s32)dds3FontReqAllocDrawTag();
     panelX = 0x138;
     dds3ConsPanelTagLink(packetList, panelX, 0x30, 0xD, 0x10);
     key = evtEventViewerGetPendingNode(runtime)->payload;
 
     style = runtime->colorSelection == 0 ? 6 : 0;
-    sdfDrawTagLink(packetList, (u32)sdfDevPrintf(
+    sdfDrawTagLink((sdfDrawTag_t *)packetList, (u32)sdfDevPrintf(
         0x7000 + (panelX << 4), 0x7A80, 0xFEFFFF, 0, "SPEED:"));
-    sdfDrawTagLink(packetList, (u32)sdfDevPrintf(
+    sdfDrawTagLink((sdfDrawTag_t *)packetList, (u32)sdfDevPrintf(
         0x7000 + (panelX << 4), 0x7A80, 0xFEFFFF, style, "       %d", key->parameters.x));
 
     if (runtime->colorSelection > 0 && runtime->editField < 4) {
@@ -3595,30 +3301,30 @@ s32 evtEditCameraColorKeyFrame(evtViewerInfo_t *runtime) {
         selectedChannel = -1;
     }
     color = key->parameters.w[0] | (key->parameters.w[1] << 8) | (key->parameters.w[2] << 16);
-    dds3PrimDebugTextBoxRGB(packetList, 0x7000 + (panelX << 4), 0x7AE0,
+    dds3PrimDebugTextBoxRGB((void *)packetList, 0x7000 + (panelX << 4), 0x7AE0,
                            selectedChannel, color, 0);
 
     style = runtime->colorSelection == 4 ? 6 : 0;
-    sdfDrawTagLink(packetList, (u32)sdfDevPrintf(
-        0x7000 + (panelX << 4), 0x7C00, 0xFEFFFF, 0, D_00437790));
-    sdfDrawTagLink(packetList, (u32)sdfDevPrintf(
-        0x7000 + (panelX << 4), 0x7C00, 0xFEFFFF, style, D_004376F8, key->parameters.w[3]));
+    sdfDrawTagLink((sdfDrawTag_t *)packetList, (u32)sdfDevPrintf(
+        0x7000 + (panelX << 4), 0x7C00, 0xFEFFFF, 0, D_003BC328));
+    sdfDrawTagLink((sdfDrawTag_t *)packetList, (u32)sdfDevPrintf(
+        0x7000 + (panelX << 4), 0x7C00, 0xFEFFFF, style, D_003BC290, key->parameters.w[3]));
 
     style = runtime->colorSelection == 5 ? 6 : 0;
-    sdfDrawTagLink(packetList, (u32)sdfDevPrintf(
-        0x7000 + (panelX << 4), 0x7C60, 0xFEFFFF, 0, D_00437798));
+    sdfDrawTagLink((sdfDrawTag_t *)packetList, (u32)sdfDevPrintf(
+        0x7000 + (panelX << 4), 0x7C60, 0xFEFFFF, 0, D_003BC330));
     switch ((s32)key->parameters.flagWord) {
     case 0:
-        sdfDrawTagLink(packetList, (u32)sdfDevPrintf(
-            0x7000 + (panelX << 4), 0x7C60, 0xFEFFFF, style, D_00424210));
+        sdfDrawTagLink((sdfDrawTag_t *)packetList, (u32)sdfDevPrintf(
+            0x7000 + (panelX << 4), 0x7C60, 0xFEFFFF, style, D_003AEC00));
         break;
     case 1:
-        sdfDrawTagLink(packetList, (u32)sdfDevPrintf(
-            0x7000 + (panelX << 4), 0x7C60, 0xFEFFFF, style, D_00424220));
+        sdfDrawTagLink((sdfDrawTag_t *)packetList, (u32)sdfDevPrintf(
+            0x7000 + (panelX << 4), 0x7C60, 0xFEFFFF, style, D_003AEC10));
         break;
     case 2:
-        sdfDrawTagLink(packetList, (u32)sdfDevPrintf(
-            0x7000 + (panelX << 4), 0x7C60, 0xFEFFFF, style, D_00424230));
+        sdfDrawTagLink((sdfDrawTag_t *)packetList, (u32)sdfDevPrintf(
+            0x7000 + (panelX << 4), 0x7C60, 0xFEFFFF, style, D_003AEC20));
         break;
     }
 
@@ -3627,25 +3333,25 @@ s32 evtEditCameraColorKeyFrame(evtViewerInfo_t *runtime) {
     for (; bank < 3; bank++) {
         style = runtime->colorSelection == bank * 2 + 6 ? 6 : 0;
         textY = 0x7900 + ((bank * 36 + 144) << 3);
-        sdfDrawTagLink(packetList, (u32)sdfDevPrintf(
+        sdfDrawTagLink((sdfDrawTag_t *)packetList, (u32)sdfDevPrintf(
             textX, textY, 0xFEFFFF, 0,
             "S%d SPEED:", bank));
-        sdfDrawTagLink(packetList, (u32)sdfDevPrintf(
+        sdfDrawTagLink((sdfDrawTag_t *)packetList, (u32)sdfDevPrintf(
             textX, textY, 0xFEFFFF, style,
             "          %d", key->parameters.y[bank]));
 
         style = runtime->colorSelection == bank * 2 + 7 ? 6 : 0;
         textY = 0x7900 + ((bank * 36 + 156) << 3);
-        sdfDrawTagLink(packetList, (u32)sdfDevPrintf(
+        sdfDrawTagLink((sdfDrawTag_t *)packetList, (u32)sdfDevPrintf(
             textX, textY, 0xFEFFFF, 0,
             "S0 ALPHA:"));
-        sdfDrawTagLink(packetList, (u32)sdfDevPrintf(
+        sdfDrawTagLink((sdfDrawTag_t *)packetList, (u32)sdfDevPrintf(
             textX, textY, 0xFEFFFF, style,
             "          %d", key->parameters.z[bank]));
     }
 
     sdfDebugGrOt.regFunc(&sdfDebugGrOt,
-                                     packetList);
+                                     (sdfDrawTag_t *)packetList);
     fldApplyCameraColorKeyWords(runtime, &key->parameters);
 
     step = 0;
@@ -3851,125 +3557,13 @@ s32 evtEditCameraColorKeyFrame(evtViewerInfo_t *runtime) {
     return 1;
 }
 
+extern s32 evtEditEffectSpriteFrame(evtViewerInfo_t *runtime);
+extern s32 evtEditCameraColorKeyFrame(evtViewerInfo_t *runtime);
+extern void *D_003BB0C0;
+extern void *D_003BB14C;
+extern void *D_003BB130;
 
-#include "sdf_bordered_rectangle_packet.h"
-
-extern void dds3ConsPanelTagLinkZ(sdfDrawTag_t *packetList, s32 column, s32 row, s32 columnCount, s32 rowCount, s32 depth);
-extern s32 mnuSolveCubicBezierYForX(s32 target, const s32 *x, const s32 *y);
-extern u64 *dds3PrimLine(s32 x0, s32 y0, s32 z0, s32 color0, s32 x1, s32 y1, s32 z1, s32 color1, s32 flags);
-extern char D_004377B8[];
-
-/* Read the selected signed parameter at its display call boundary. */
-static inline s32 evtReadBezierParameter(s8 *bytes, s32 index) {
-    return bytes[index];
-}
-
-/* Apply the panel's signed-byte editing bounds to the selected parameter. */
-static inline void evtIncrementBezierParameter(s8 *bytes, s32 index) {
-    if (bytes[index] < 126) {
-        bytes[index]++;
-    }
-}
-
-static inline void evtDecrementBezierParameter(s8 *bytes, s32 index) {
-    if (bytes[index] >= 2) {
-        bytes[index]--;
-    }
-}
-
-/* Convert one already-halved curve ordinate to the panel coordinate. */
-static inline s32 evtProjectBezierOrdinate(s32 ordinate) {
-    return (ordinate << 3) + 0x83C0;
-}
-
-s32 func_002582D0(evtViewerInfo_t *runtime) {
-    s32 x[4];
-    s32 y[4];
-    sdfDrawTag_t *list;
-    EvtRuntimeChild *node;
-    s32 component;
-    s32 offset;
-    u32 markerDefaultColor;
-    s32 selectedPoint;
-    s32 i = 0;
-
-    markerDefaultColor = 0x80808080;
-    list = dds3FontReqAllocDrawTag();
-    dds3ConsPanelTagLinkZ(list, 120, 312, 12, 9, 0xFEFFF);
-    node = evtEventViewerGetPendingNode(runtime);
-    component = runtime->curveComponent;
-    sdfDrawTagLink(list, (u32)sdfDevPrintf(0x7780, 0x82C0, 0xFEFFFF, 0, D_004377B8));
-    sdfDrawTagLink(list, (u32)sdfDevPrintf(0x7780, 0x82C0, 0xFEFFFF, 0, D_004376F8, component));
-    offset = component * 2;
-    sdfDrawTagLink(list, (u32)sdfDevPrintf(0x7780, 0x8320, 0xFEFFFF, 0, D_00437780));
-    {
-        s8 *bytes = node->parameterBytes;
-        selectedPoint = component + 1;
-        sdfDrawTagLink(list, (u32)sdfDevPrintf(0x7780, 0x8320, 0xFEFFFF, 0, D_004376F8, evtReadBezierParameter(bytes, offset + 4)));
-        sdfDrawTagLink(list, (u32)sdfDevPrintf(0x7C00, 0x8320, 0xFEFFFF, 0, D_00437788));
-        sdfDrawTagLink(list, (u32)sdfDevPrintf(0x7C00, 0x8320, 0xFEFFFF, 0, D_004376F8, evtReadBezierParameter(bytes, offset + 5)));
-
-        x[0] = 0;
-        y[0] = 0;
-        x[1] = node->parameterBytes[4];
-        y[1] = node->parameterBytes[5];
-        x[2] = node->parameterBytes[6];
-        y[2] = node->parameterBytes[7];
-        x[3] = 128;
-        y[3] = 128;
-        for (; i < 4; i++) {
-            u32 color;
-            if (selectedPoint == i) {
-                color = 0x80008000;
-            } else {
-                color = markerDefaultColor;
-            }
-            sdfDrawTagLink(list, (u32)dds3PrimFrameRect(
-                (x[i] << 4) + 0x77E0, ((y[i] / 2) << 3) + 0x83B0,
-                0xFEFFFF, 0x40, 0x20, 0, color));
-        }
-        for (i = 0; i < 128; i++) {
-            s32 firstY = mnuSolveCubicBezierYForX(i, x, y) / 2;
-            s32 next = i + 1;
-            s32 secondY = mnuSolveCubicBezierYForX(next, x, y) / 2;
-            {
-                s32 x0 = i;
-                s32 y0 = firstY;
-                s32 y1 = secondY;
-                x0 = (x0 << 4) + 0x7800;
-                y0 = evtProjectBezierOrdinate(y0);
-                next = (next << 4) + 0x7800;
-                y1 = evtProjectBezierOrdinate(y1);
-                sdfDrawTagLink(list, (u32)dds3PrimLine(
-                    x0, y0, 0xFEFFFF, 0x80808080,
-                    next, y1, 0xFEFFFF, 0x80808080, 0));
-            }
-        }
-        sdfDebugGrOt.regFunc(&sdfDebugGrOt, list);
-
-        if (dds3PadButtonState.incTen & 2) {
-            evtIncrementBezierParameter(bytes, component * 2 + 5);
-        } else if (dds3PadButtonState.decTen & 2) {
-            evtDecrementBezierParameter(bytes, component * 2 + 5);
-        } else if (dds3PadButtonState.decOne & 2) {
-            evtDecrementBezierParameter(bytes, component * 2 + 4);
-        } else if (dds3PadButtonState.incOne & 2) {
-            evtIncrementBezierParameter(bytes, component * 2 + 4);
-        } else if (dds3PadButtonState.decHun & 2) {
-            runtime->curveComponent ^= 1;
-        } else if (dds3PadButtonState.incHun & 2) {
-            runtime->curveComponent ^= 1;
-        }
-        if (dds3PadButtonState.cancel < 0) {
-            runtime->frameGroup->parameterKeySource =
-                EVT_VIEWER_PARAMETER_KEY_SOURCE_TIMELINE;
-            return 0;
-        }
-        return 1;
-    }
-}
-
-s32 evtUpdateEffectViewerGroup(s32 arg0, s32 arg1, evtViewerInfo_t *runtime) {
+s32 evtPollEffectFrameControl(s32 x, s32 y, evtViewerInfo_t *runtime) {
     s32 status = 1;
 
     switch (runtime->frameGroup->type) {
@@ -3979,19 +3573,19 @@ s32 evtUpdateEffectViewerGroup(s32 arg0, s32 arg1, evtViewerInfo_t *runtime) {
     case 0xE:
         status = effEventAdvanceBlurTemplateSetup();
         if (runtime->selectedEntry != 0) {
-            *(s32 *)((u8 *)D_004364B0 + 0x2C) = runtime->selectedEntry;
+            *(s32 *)((u8 *)D_003BB0C0 + 0x2C) = runtime->selectedEntry;
         }
         break;
     case 0xF:
         status = effEventAdvanceScatterBlurSetup();
         if (runtime->selectedEntry != 0) {
-            *(s32 *)((u8 *)D_0043653C + 0x2C) = runtime->selectedEntry;
+            *(s32 *)((u8 *)D_003BB14C + 0x2C) = runtime->selectedEntry;
         }
         break;
     case 0x17:
         status = rblurProcess();
         if (runtime->selectedEntry != 0) {
-            *(s32 *)((u8 *)D_00436520 + 0x2C) = runtime->selectedEntry;
+            *(s32 *)((u8 *)D_003BB130 + 0x2C) = runtime->selectedEntry;
         }
         break;
     case 0x1B:
@@ -4009,15 +3603,6 @@ s32 evtUpdateEffectViewerGroup(s32 arg0, s32 arg1, evtViewerInfo_t *runtime) {
     case 0x19:
         status = evtEditCameraColorKeyFrame(runtime);
         break;
-    case 0x6:
-        status = func_002582D0(runtime);
-        break;
-    case 0x7:
-    case 0x8:
-    case 0x9:
-    case 0xA:
-    case 0xB:
-    case 0xC:
     default:
         if (dds3PadButtonState.apply < 0) {
             status = 0;
@@ -4035,17 +3620,18 @@ s32 evtUpdateEffectViewerGroup(s32 arg0, s32 arg1, evtViewerInfo_t *runtime) {
     return 1;
 }
 
+extern s32 (*D_00368B48[])(s32, s32, evtViewerInfo_t *);
+
 s32 evtDispatchActionByIndex(s32 actionIndex, s32 x, s32 y, evtViewerInfo_t *runtime) {
     s32 mode = runtime->actionMode;
     if (mode == 11 && actionIndex != mode) {
         return 0;
     }
-    return D_003C9928[actionIndex](x, y, runtime);
+    return D_00368B48[actionIndex](x, y, runtime);
 }
 
-
-void evtWriteOutputBytes(s32 output, s32 data, s32 size) {
-    sceWrite(output, (const void *)data, size);
+void evtWriteSerializedBytes(s32 output, void *data, s32 size) {
+    sceWrite(output, data, size);
 }
 
 s32 evtAssignRuntimeChildSequenceAndCount(evtViewerInfo_t *runtime) {
@@ -4321,7 +3907,7 @@ void evtViewerWriteTrackDirectory(s32 output, EvtViewerTrackFileFormat format, e
     header.kind = 9;
     header.reserved18 = 0;
     header.reserved1C = 0;
-    evtWriteOutputBytes(output, (s32)&header, sizeof(header));
+    evtWriteSerializedBytes(output, &header, sizeof(header));
 
     for (i = 0; i < 26; i++) {
         entry.type = i;
@@ -4435,21 +4021,25 @@ void evtViewerWriteTrackDirectory(s32 output, EvtViewerTrackFileFormat format, e
         if (entry.elementSize != 0 || entry.value != 0) {
             entry.offset = payloadOffset;
             payloadOffset += (s32)entry.elementSize * (s32)entry.value;
-            evtWriteOutputBytes(output, (s32)&entry, sizeof(entry));
+            evtWriteSerializedBytes(output, &entry, sizeof(entry));
         }
     }
 }
 
-
 /* Emit first, range, third and metadata words in file order. The range word
  * is written whole, not narrowed to the terminal halfword used by child spans. */
 void evtWriteRuntimeHeaderValues(s32 output, evtViewerInfo_t *state) {
-    s32 buffer[4];
-    buffer[0] = state->headerFirst;
-    buffer[1] = state->frameRange.word;
-    buffer[2] = state->headerThird;
-    buffer[3] = state->headerMetadata;
-    evtWriteOutputBytes(output, buffer, 0x10);
+    s32 first = state->headerFirst;
+    s32 second = state->frameRange.word;
+    s32 third = state->headerThird;
+    s32 metadata = state->headerMetadata;
+    s32 buf[4];
+
+    buf[0] = first;
+    buf[1] = second;
+    buf[2] = third;
+    buf[3] = metadata;
+    evtWriteSerializedBytes(output, buf, 0x10);
 }
 
 /* Filter groups by file format and serialize each child body. Type-8 spans use the
@@ -4494,47 +4084,48 @@ void evtViewerWriteChildRecords(s32 output, EvtViewerTrackFileFormat format, evt
                     }
                 }
             }
-            evtWriteOutputBytes(output, (s32)&record, sizeof(record));
+            evtWriteSerializedBytes(output, &record, sizeof(record));
         }
     }
 }
 
 /* Emit entryTotal consecutive thirty-two-byte names; nonpositive totals emit nothing. */
 void evtWriteFixedSizeEntries(s32 output, evtViewerInfo_t *table) {
-    s32 i;
-    u8 *entry;
-    i = 0;
-    if (table->entryTotal > 0) {
-        entry = (u8 *)table->entryName;
+    void *entry;
+    s32 index;
+
+    index = 0;
+    if (0 < table->entryTotal) {
+        entry = table->entryName;
         do {
-            evtWriteOutputBytes(output, entry, 0x20);
-            entry += 0x20;
-            i++;
-        } while (i < table->entryTotal);
+            evtWriteSerializedBytes(output, entry, 0x20);
+            index = index + 1;
+            entry = (void *)((s32)entry + 0x20);
+        } while (index < table->entryTotal);
     }
 }
 
 void evtWriteGroupHeader(s32 output, evtViewerInfo_t *runtime) {
     EvtRuntimeGroup *group;
-    s32 header[4];
-    for (group = runtime->groups; group != 0; group = group->next) {
+    for (group = runtime->groups; group != NULL; group = group->next) {
         if (group->type == 2) {
+            s32 header[4];
             header[0] = group->entryHeader;
             header[1] = 0;
             header[2] = 0;
             header[3] = 0;
-            evtWriteOutputBytes(output, header, 0x10);
+            evtWriteSerializedBytes(output, header, 0x10);
         }
     }
 }
 
 void evtCopyRuntimeChildPayloadsToBuffer(s32 output, evtViewerInfo_t *runtime) {
     EvtRuntimeGroup *group;
-    EvtRuntimeChild *child;
-    for (group = runtime->groups; group != 0; group = group->next) {
+    for (group = runtime->groups; group != NULL; group = group->next) {
         if (group->type == 0xA) {
-            for (child = group->children; child != 0; child = child->next) {
-                evtWriteOutputBytes(output, (s32)child->payload, 0x30);
+            EvtRuntimeChild *child;
+            for (child = group->children; child != NULL; child = child->next) {
+                evtWriteSerializedBytes(output, child->payload, 0x30);
             }
         }
     }
@@ -4542,11 +4133,11 @@ void evtCopyRuntimeChildPayloadsToBuffer(s32 output, evtViewerInfo_t *runtime) {
 
 void evtEmitGroupTypeElevenPayloads(s32 output, evtViewerInfo_t *runtime) {
     EvtRuntimeGroup *group;
-    EvtRuntimeChild *child;
-    for (group = runtime->groups; group != 0; group = group->next) {
+    for (group = runtime->groups; group != NULL; group = group->next) {
         if (group->type == 0xB) {
-            for (child = group->children; child != 0; child = child->next) {
-                evtWriteOutputBytes(output, (s32)child->payload, 0x20);
+            EvtRuntimeChild *child;
+            for (child = group->children; child != NULL; child = child->next) {
+                evtWriteSerializedBytes(output, child->payload, 0x20);
             }
         }
     }
@@ -4554,11 +4145,11 @@ void evtEmitGroupTypeElevenPayloads(s32 output, evtViewerInfo_t *runtime) {
 
 void evtEmitGroupTypeThirteenPayloads(s32 output, evtViewerInfo_t *runtime) {
     EvtRuntimeGroup *group;
-    EvtRuntimeChild *child;
-    for (group = runtime->groups; group != 0; group = group->next) {
+    for (group = runtime->groups; group != NULL; group = group->next) {
         if (group->type == 0xD) {
-            for (child = group->children; child != 0; child = child->next) {
-                evtWriteOutputBytes(output, (s32)child->payload, 0x28);
+            EvtRuntimeChild *child;
+            for (child = group->children; child != NULL; child = child->next) {
+                evtWriteSerializedBytes(output, child->payload, 0x28);
             }
         }
     }
@@ -4566,11 +4157,11 @@ void evtEmitGroupTypeThirteenPayloads(s32 output, evtViewerInfo_t *runtime) {
 
 void evtEmitGroupTypeFourteenPayloads(s32 output, evtViewerInfo_t *runtime) {
     EvtRuntimeGroup *group;
-    EvtRuntimeChild *child;
-    for (group = runtime->groups; group != 0; group = group->next) {
+    for (group = runtime->groups; group != NULL; group = group->next) {
         if (group->type == 0xE) {
-            for (child = group->children; child != 0; child = child->next) {
-                evtWriteOutputBytes(output, (s32)child->payload, 0x2C);
+            EvtRuntimeChild *child;
+            for (child = group->children; child != NULL; child = child->next) {
+                evtWriteSerializedBytes(output, child->payload, 0x2C);
             }
         }
     }
@@ -4578,11 +4169,11 @@ void evtEmitGroupTypeFourteenPayloads(s32 output, evtViewerInfo_t *runtime) {
 
 void evtEmitGroupTypeFifteenPayloads(s32 output, evtViewerInfo_t *runtime) {
     EvtRuntimeGroup *group;
-    EvtRuntimeChild *child;
-    for (group = runtime->groups; group != 0; group = group->next) {
+    for (group = runtime->groups; group != NULL; group = group->next) {
         if (group->type == 0xF) {
-            for (child = group->children; child != 0; child = child->next) {
-                evtWriteOutputBytes(output, (s32)child->payload, 0x2C);
+            EvtRuntimeChild *child;
+            for (child = group->children; child != NULL; child = child->next) {
+                evtWriteSerializedBytes(output, child->payload, 0x2C);
             }
         }
     }
@@ -4590,11 +4181,11 @@ void evtEmitGroupTypeFifteenPayloads(s32 output, evtViewerInfo_t *runtime) {
 
 void evtEmitGroupTypeTwentyThreePayloads(s32 output, evtViewerInfo_t *runtime) {
     EvtRuntimeGroup *group;
-    EvtRuntimeChild *child;
-    for (group = runtime->groups; group != 0; group = group->next) {
+    for (group = runtime->groups; group != NULL; group = group->next) {
         if (group->type == 0x17) {
-            for (child = group->children; child != 0; child = child->next) {
-                evtWriteOutputBytes(output, (s32)child->payload, 0x2C);
+            EvtRuntimeChild *child;
+            for (child = group->children; child != NULL; child = child->next) {
+                evtWriteSerializedBytes(output, child->payload, 0x2C);
             }
         }
     }
@@ -4602,11 +4193,11 @@ void evtEmitGroupTypeTwentyThreePayloads(s32 output, evtViewerInfo_t *runtime) {
 
 void evtEmitGroupTypeTwentySevenPayloads(s32 output, evtViewerInfo_t *runtime) {
     EvtRuntimeGroup *group;
-    EvtRuntimeChild *child;
-    for (group = runtime->groups; group != 0; group = group->next) {
+    for (group = runtime->groups; group != NULL; group = group->next) {
         if (group->type == 0x1B) {
-            for (child = group->children; child != 0; child = child->next) {
-                evtWriteOutputBytes(output, (s32)child->payload, 0x28);
+            EvtRuntimeChild *child;
+            for (child = group->children; child != NULL; child = child->next) {
+                evtWriteSerializedBytes(output, child->payload, 0x28);
             }
         }
     }
@@ -4614,11 +4205,11 @@ void evtEmitGroupTypeTwentySevenPayloads(s32 output, evtViewerInfo_t *runtime) {
 
 void evtEmitGroupTypeSixteenPayloads(s32 output, evtViewerInfo_t *runtime) {
     EvtRuntimeGroup *group;
-    EvtRuntimeChild *child;
-    for (group = runtime->groups; group != 0; group = group->next) {
+    for (group = runtime->groups; group != NULL; group = group->next) {
         if (group->type == 0x10) {
-            for (child = group->children; child != 0; child = child->next) {
-                evtWriteOutputBytes(output, (s32)child->payload, 0x18);
+            EvtRuntimeChild *child;
+            for (child = group->children; child != NULL; child = child->next) {
+                evtWriteSerializedBytes(output, child->payload, 0x18);
             }
         }
     }
@@ -4626,11 +4217,11 @@ void evtEmitGroupTypeSixteenPayloads(s32 output, evtViewerInfo_t *runtime) {
 
 void evtEmitGroupTypeSeventeenPayloads(s32 output, evtViewerInfo_t *runtime) {
     EvtRuntimeGroup *group;
-    EvtRuntimeChild *child;
-    for (group = runtime->groups; group != 0; group = group->next) {
+    for (group = runtime->groups; group != NULL; group = group->next) {
         if (group->type == 0x11) {
-            for (child = group->children; child != 0; child = child->next) {
-                evtWriteOutputBytes(output, (s32)child->payload, 0x24);
+            EvtRuntimeChild *child;
+            for (child = group->children; child != NULL; child = child->next) {
+                evtWriteSerializedBytes(output, child->payload, 0x24);
             }
         }
     }
@@ -4638,38 +4229,35 @@ void evtEmitGroupTypeSeventeenPayloads(s32 output, evtViewerInfo_t *runtime) {
 
 void evtWriteGroupMetadata(s32 output, evtViewerInfo_t *runtime) {
     EvtRuntimeGroup *group;
-    EvtGroupMetadata record;
-    for (group = runtime->groups; group != 0; group = group->next) {
-        record.type = *(u8 *)&group->type;
-        record.flag = group->metadataFlag;
-        record.entry = (u16)group->entryHeader;
-        record.value = group->metadata.value;
-        record.option = group->metadata.option;
-        record.extra2 = group->metadata.extra2;
-        evtWriteOutputBytes(output, &record, 8);
+    for (group = runtime->groups; group != NULL; group = group->next) {
+        u8 header[8];
+        header[0] = *(u8 *)group;
+        header[1] = group->metadataFlag;
+        *(u16 *)&header[2] = (u16)group->entryHeader;
+        *(u16 *)&header[4] = group->metadata.value;
+        header[6] = group->metadata.option;
+        header[7] = group->metadata.extra2;
+        evtWriteSerializedBytes(output, header, sizeof(header));
     }
 }
 
 void evtEmitGroupTypeTwentyFivePayloads(s32 output, evtViewerInfo_t *runtime) {
     EvtRuntimeGroup *group;
-    EvtRuntimeChild *child;
-    for (group = runtime->groups; group != 0; group = group->next) {
+    for (group = runtime->groups; group != NULL; group = group->next) {
         if (group->type == 0x19) {
-            for (child = group->children; child != 0; child = child->next) {
-                evtWriteOutputBytes(output, (s32)child->payload, 0x40);
+            EvtRuntimeChild *child;
+            for (child = group->children; child != NULL; child = child->next) {
+                evtWriteSerializedBytes(output, child->payload, 0x40);
             }
         }
     }
 }
 
 extern u8 sdfHddValid;
-extern char *sdfFileGetHostRoot(void);
-extern void evtViewerWriteTrackDirectory(s32 output, EvtViewerTrackFileFormat format, evtViewerInfo_t *runtime);
-extern char D_004377C0[];
-extern char D_004377C8[];
+extern void *sdfFileGetHostRoot(void);
+extern char D_003BC350[];
+extern char D_003BC358[];
 
-/* Save the runtime to its paired PM2/PM3 files. Mode zero uses the
- * viewer name; other modes use the selected event and cut identifiers. */
 s32 evtViewerSaveTrackFiles(s32 mode, evtViewerInfo_t *runtime) {
     char pm2Path[64];
     char pm3Path[64];
@@ -4691,18 +4279,18 @@ s32 evtViewerSaveTrackFiles(s32 mode, evtViewerInfo_t *runtime) {
         }
     } else if (sdfHddValid) {
         sprintf(pm2Path, "pfs0:/event/e%03d/e%03d/e%03d_%03d/E%03d_%03d.PM2",
-            ((u32)D_004372B0 / 10U) * 10, D_004372B0, D_004372B0,
-            D_004372B2, D_004372B0, D_004372B2);
+            ((u32)D_003BBE78 / 10U) * 10, D_003BBE78, D_003BBE78,
+            D_003BBE7A, D_003BBE78, D_003BBE7A);
         sprintf(pm3Path, "pfs0:/event/e%03d/e%03d/e%03d_%03d/E%03d_%03d.PM3",
-            ((u32)D_004372B0 / 10U) * 10, D_004372B0, D_004372B0,
-            D_004372B2, D_004372B0, D_004372B2);
+            ((u32)D_003BBE78 / 10U) * 10, D_003BBE78, D_003BBE78,
+            D_003BBE7A, D_003BBE78, D_003BBE7A);
     } else {
         sprintf(pm2Path, "%sevent/e%03d/e%03d/e%03d_%03d/E%03d_%03d.PM2",
-            sdfFileGetHostRoot(), ((u32)D_004372B0 / 10U) * 10,
-            D_004372B0, D_004372B0, D_004372B2, D_004372B0, D_004372B2);
+            sdfFileGetHostRoot(), ((u32)D_003BBE78 / 10U) * 10,
+            D_003BBE78, D_003BBE78, D_003BBE7A, D_003BBE78, D_003BBE7A);
         sprintf(pm3Path, "%sevent/e%03d/e%03d/e%03d_%03d/E%03d_%03d.PM3",
-            sdfFileGetHostRoot(), ((u32)D_004372B0 / 10U) * 10,
-            D_004372B0, D_004372B0, D_004372B2, D_004372B0, D_004372B2);
+            sdfFileGetHostRoot(), ((u32)D_003BBE78 / 10U) * 10,
+            D_003BBE78, D_003BBE78, D_003BBE7A, D_003BBE78, D_003BBE7A);
     }
 
     if (sdfHddValid) {
@@ -4715,7 +4303,7 @@ s32 evtViewerSaveTrackFiles(s32 mode, evtViewerInfo_t *runtime) {
         pm3 = sceOpen(pm3Path, 0x602);
     }
     if (pm2 < 0 || pm3 < 0) {
-        printf(D_004377C0);
+        printf(D_003BC350);
         return 0;
     }
 
@@ -4746,7 +4334,7 @@ s32 evtViewerSaveTrackFiles(s32 mode, evtViewerInfo_t *runtime) {
         }
     }
     sceClose(pm2);
-    sceSync(D_004377C8, 0);
+    sceSync(D_003BC358, 0);
     evtViewerWriteTrackDirectory(pm3, EVT_VIEWER_TRACK_FILE_FORMAT_PM3, runtime);
     for (section = 0; section < 26; section++) {
         if (section == 4) {
@@ -4755,10 +4343,9 @@ s32 evtViewerSaveTrackFiles(s32 mode, evtViewerInfo_t *runtime) {
     }
     sceClose(pm3);
     printf("save pm3 file\n");
-    sceSync(D_004377C8, 0);
+    sceSync(D_003BC358, 0);
     return 1;
 }
-
 
 u16 evtGetRowValue(const PolyMovieWork *work, s32 row) {
     if (work->sub->kind == 4) {
@@ -4788,13 +4375,12 @@ u16 evtGetRowFlags(const PolyMovieWork *work, s32 row) {
     return work->subEntry4OtherData[row].flags;
 }
 
-const u8 *evtGetRowPayloadAddress(const PolyMovieWork *work, s32 row) {
+const u8 * evtGetRowPayloadAddress(const PolyMovieWork *work, s32 row) {
     if (work->sub->kind == 4) {
         return work->subEntry4Kind4Data[row].payload;
     }
     return work->subEntry4OtherData[row].payload;
 }
-
 
 void evtResolveLinkGroupIndex(PolyMovieWork *src, evtViewerInfo_t *runtime, EvtGroupMetadata *link) {
     s32 i;
@@ -4817,131 +4403,147 @@ void evtResolveLinkGroupIndex(PolyMovieWork *src, evtViewerInfo_t *runtime, EvtG
     }
 }
 
-/* Independent reconstruction of the PMD resource-to-viewer initializer.
- * Phase boundaries were previously mapped by Kestrel; no prior complete C
- * implementation was available for this reconstruction. */
-/* PMD section payloads are not directory PmdEntry records. */
-typedef struct EvtPmdWorldResource {
-    s32 nameIndex;
-    s32 unknown04;
-    s32 area;
-    s32 room;
-} EvtPmdWorldResource;
+#include "sdf_texture_offset_list.h"
 
-typedef struct EvtPmdAuxResource {
+/* PM1 section 2 and section 3 use the same 0x20-byte package record. */
+typedef struct EvtViewerPackageRecord {
     s32 nameIndex;
-    s32 dataOffset;
-    s32 kind;
-    s32 unknown0C;
-} EvtPmdAuxResource;
-
-typedef struct EvtPmdModelResource {
-    s32 nameIndex;
-    s32 unknown04;
-    s32 resourceGroup;
-    s32 resourceId;
-    s32 dataOffset;
-    s32 dataSize;
+    s32 reserved04;
+    s32 packageId;
+    s32 partId;
+    u32 offset;
+    s32 length;
     s32 loadOrder;
-    s32 unknown1C;
-} EvtPmdModelResource;
+    s32 reserved1C;
+} EvtViewerPackageRecord;
 
-typedef struct EvtPmdRuntimeHeader {
-    s32 firstFrame;
-    s32 frameRange;
-    s32 frameCount;
-    s32 metadata;
-} EvtPmdRuntimeHeader;
-extern s32 evtLoadArea_FromMemory(s32 area, s32 room, u8 *resource0Data, u8 *resource1Data, const SdfTextureOffsetListHeader *textureOffsets, s32 flags);
-extern void mdlPackDecode(s32, s32, s32, const u8 *, s32);
-extern s32 evtSetRegistUnit(s32, s32);
+/* PM1 auxiliary and texture section entries each occupy 0x10 bytes. */
+typedef struct EvtViewerResourceRecord {
+    s32 nameIndex;
+    u32 offset;
+    s32 kind;
+    s32 reserved0C;
+} EvtViewerResourceRecord;
+
+/* The section-21 wire record is also the group's link subobject at +0x18. */
+typedef char EvtViewerPackageRecord_size[(sizeof(EvtViewerPackageRecord) == 0x20) ? 1 : -1];
+typedef char EvtViewerResourceRecord_size[(sizeof(EvtViewerResourceRecord) == 0x10) ? 1 : -1];
+
+extern s32 evtLoadArea_FromMemory(s32 area, s32 room, u8 *resource0Data, u8 *resource1Data,
+                                            const SdfTextureOffsetListHeader *textureOffsets, s32 flags);
+extern EvtRuntimeGroup *evtEventViewerCreateEntry(s32 kind, evtViewerInfo_t *runtime);
+extern EvtViewerNameIndex evtEventViewerAddName(const char *name, evtViewerInfo_t *runtime);
+extern void mdlPackDecode(s32 packageId, s32 partId, s32 flags, const u8 *data, s32 length);
+extern s32 evtSetRegistUnit(s32 packageId, s32 partId);
 extern evtUnitHandle_t *evtGetUnitHandle(EvtUnitObjectKey worldObjectKey);
 extern EvtPathLinkResult evtPathLinkAndMake(dds3Basic_t *object, dds3Basic_t *owner);
-extern EvtRuntimeGroup *evtEventViewerCreateEntry(s32, evtViewerInfo_t *);
-extern EvtRuntimeChild *evtAddFrameInfo(EvtRuntimeGroup *, s32, evtViewerInfo_t *);
-extern EvtViewerNameIndex evtEventViewerAddName(const char *, evtViewerInfo_t *);
-extern void dds3CameraObjectBasicSetFovy(dds3Basic_t *, f32);
-extern EvtViewerNameIndex mnuCampFindMatchingEntryIndex(PolyMovieWork *, evtViewerInfo_t *, s32);
+extern EvtRuntimeChild *evtAddFrameInfo(EvtRuntimeGroup *group, s32 frame, evtViewerInfo_t *runtime);
 extern EvtPackedSoundTrackId evtLoadEventBgm(s32 eventId);
 extern EvtEventBgmReadiness evtCheckEventBgmLoaded(s32 eventId);
 extern u8 fldTitleChk(void);
 extern void fldStartTitle(s32 field, s32 mode, s32 option);
-extern void dds3FadeBackgroundStartIn(s32);
+extern void dds3FadeBackgroundStartIn(s32 frames);
+
+typedef struct { u8 bytes[0x18]; } EvtRowPayload18;
+typedef struct { u8 bytes[0x20]; } EvtRowPayload20;
+typedef struct { u8 bytes[0x24]; } EvtRowPayload24;
+typedef struct { u8 bytes[0x28]; } EvtRowPayload28;
+typedef struct { u8 bytes[0x2C]; } EvtRowPayload2C;
+typedef struct { u8 bytes[0x30]; } EvtRowPayload30;
+typedef struct { u8 bytes[0x40]; } EvtRowPayload40;
+
+extern EvtRuntimeChild *evtAddFrameInfo(EvtRuntimeGroup *, s32, evtViewerInfo_t *);
+extern EvtRuntimeGroup *evtEventViewerCreateEntry(s32, evtViewerInfo_t *);
+extern EvtViewerNameIndex evtEventViewerAddName(const char *, evtViewerInfo_t *);
+extern void dds3CameraObjectBasicSetFovy(dds3Basic_t *, f32);
+extern EvtViewerNameIndex mnuCampFindMatchingEntryIndex(PolyMovieWork *, evtViewerInfo_t *, s32);
 
 s32 evtPopulateViewerTimelineFromMovie(PolyMovieWork *work, evtViewerInfo_t *runtime) {
-    char motionName[0x40];
-    evtWorldTable_t *world;
-    s32 needsBgm;
+    char motionName[64];
+    evtWorldTable_t *worldTable;
+    s32 soundRowsPresent;
+    s16 timeiId;
     s32 row;
-    s32 index;
-    s32 resourceGroup;
-    s32 resourceId;
-    s32 objectId;
-    s32 nameIndex;
-    EvtViewerNameIndex linkIndex;
-    s32 count;
-    s32 title;
-    s32 groupType;
+    s32 secondaryIndex;
+    s32 packageId;
+    s32 partId;
+    s32 objectKey;
     dds3Basic_t *node;
     dds3Basic_t *owner;
-    dds3Basic_t *worldObject;
-    dds3PoseSet_t *transform;
     EvtRuntimeGroup *group;
     EvtRuntimeChild *key;
-    EvtPmdRuntimeHeader *header;
-    EvtCameraColorPayload *color;
+
+    dds3Basic_t *world;
+    EvtCameraColorPayload *rain;
+    const u8 *data;
     void *payload;
+    s32 *header;
+    s32 rowCount;
+    s32 oldIndex;
+    s32 headerLast, headerFirst;
 
     printf("start SetGameData\n");
-    needsBgm = 0;
+    soundRowsPresent = 0;
     if (work->mainEntry2Data != NULL) {
-        resourceGroup = ((EvtPmdWorldResource *)work->mainEntry2Data)->area;
-        resourceId = ((EvtPmdWorldResource *)work->mainEntry2Data)->room;
-        evtLoadArea_FromMemory(resourceGroup, resourceId,
-            work->mainEntry10Data, work->mainEntry11Data,
-            (SdfTextureOffsetListHeader *)work->mainEntry12Data, 0);
+        packageId = ((EvtViewerPackageRecord *)work->mainEntry2Data)->packageId;
+        partId = ((EvtViewerPackageRecord *)work->mainEntry2Data)->partId;
+        evtLoadArea_FromMemory(packageId, partId, work->mainEntry10Data,
+            work->mainEntry11Data, (SdfTextureOffsetListHeader *)work->mainEntry12Data, 0);
         group = evtEventViewerCreateEntry(0, runtime);
-        group->entryHeader = evtEventViewerAddName((char *)work->mainEntry1Data +
-            ((EvtPmdWorldResource *)work->mainEntry2Data)->nameIndex * 32, runtime);
-        group->resourceIds.resourceGroup = resourceGroup;
-        group->resourceIds.resourceId = resourceId;
+        group->entryHeader = evtEventViewerAddName(
+            (char *)work->mainEntry1Data + ((EvtViewerPackageRecord *)work->mainEntry2Data)->nameIndex * 32, runtime);
+        group->resourceIds.resourceGroup = packageId;
+        group->resourceIds.resourceId = partId;
     }
-    world = ((dds3Basic_t *)dds3GetControlScene())->workdata;
-    for (node = world->slots[4].head; node != NULL; node = node->next) {
+    worldTable = ((dds3Basic_t *)dds3GetControlScene())->workdata;
+    for (node = worldTable->slots[4].head; node != NULL; node = node->next) {
         if (node->name != 0) {
+            const char *objectName;
             group = evtEventViewerCreateEntry(2, runtime);
+            objectName = (char *)node->name;
             group->info = node;
-            group->entryHeader = evtEventViewerAddName((char *)node->name, runtime);
+            group->entryHeader = evtEventViewerAddName(objectName, runtime);
         }
     }
-    for (index = 2; index >= 0; index--) {
+    for (secondaryIndex = 2; secondaryIndex >= 0; secondaryIndex--) {
         for (row = 0; row < (s32)work->mainEntry3Count; row++) {
-            if (((EvtPmdModelResource *)work->mainEntry3Data)[row].loadOrder != index) {
-                continue;
+            if (((EvtViewerPackageRecord *)work->mainEntry3Data)[row].loadOrder == secondaryIndex) {
+                packageId = ((EvtViewerPackageRecord *)work->mainEntry3Data)[row].packageId;
+                partId = ((EvtViewerPackageRecord *)work->mainEntry3Data)[row].partId;
+                mdlPackDecode(packageId, partId, 0x103,
+                    (u8 *)work->data + ((EvtViewerPackageRecord *)work->mainEntry3Data)[row].offset,
+                    ((EvtViewerPackageRecord *)work->mainEntry3Data)[row].length);
+                objectKey = evtSetRegistUnit(packageId, partId);
+                group = evtEventViewerCreateEntry(1, runtime);
+                {
+                    dds3Basic_t *modelObject;
+                    EvtViewerPackageRecord *packages;
+                    char *names;
+                    modelObject = dds3SearchSceneBasic((void *)dds3GetControlScene(), objectKey, 5);
+                    packages = (EvtViewerPackageRecord *)work->mainEntry3Data;
+                    names = (char *)work->mainEntry1Data;
+                    group->info = modelObject;
+                    group->entryHeader = evtEventViewerAddName(names + packages[row].nameIndex * 32, runtime);
+                }
+                group->info->name = runtime->entryName[group->entryHeader];
+                group->resourceIds.resourceGroup = packageId;
+                group->resourceIds.resourceId = partId;
+                if (evtGetUnitHandle(objectKey)->owner->first != NULL) {
+                    mdlSmoothSingleMotion(evtGetUnitHandle(objectKey)->owner, 0, 0, 0.0f, 0.0f);
+                }
+                {
+                    dds3PoseSet_t *transform = group->info->poseset;
+                    SDF_VU0_COPYVECTOR(group->savedPosition, transform->pos);
+                    SDF_VU0_COPYVECTOR(group->savedRotation, transform->rotation);
+                }
             }
-            resourceGroup = ((EvtPmdModelResource *)work->mainEntry3Data)[row].resourceGroup;
-            resourceId = ((EvtPmdModelResource *)work->mainEntry3Data)[row].resourceId;
-            mdlPackDecode(resourceGroup, resourceId, 0x103,
-                (const u8 *)work->data + ((EvtPmdModelResource *)work->mainEntry3Data)[row].dataOffset,
-                ((EvtPmdModelResource *)work->mainEntry3Data)[row].dataSize);
-            objectId = evtSetRegistUnit(resourceGroup, resourceId);
-            group = evtEventViewerCreateEntry(1, runtime);
-            group->info = dds3SearchSceneBasic(dds3GetControlScene(), objectId, 5);
-            group->entryHeader = evtEventViewerAddName((char *)work->mainEntry1Data +
-                ((EvtPmdModelResource *)work->mainEntry3Data)[row].nameIndex * 32, runtime);
-            group->info->name = runtime->entryName[group->entryHeader];
-            group->resourceIds.resourceGroup = resourceGroup;
-            group->resourceIds.resourceId = resourceId;
-            if (evtGetUnitHandle(objectId)->owner->first != NULL) {
-                mdlSmoothSingleMotion(evtGetUnitHandle(objectId)->owner, 0, 0, 0.0f, 0.0f);
-            }
-            transform = group->info->poseset;
-            SDF_VU0_COPYVECTOR(group->savedPosition, transform->pos);
-            SDF_VU0_COPYVECTOR(group->savedRotation, transform->rotation);
         }
     }
     for (row = 0; row < (s32)work->mainEntry7Count; row++) {
-        switch (((EvtPmdAuxResource *)work->mainEntry7Data)[row].kind) {
+        EvtViewerNameIndex entryNameIndex;
+        EvtViewerResourceRecord *resources;
+        u8 *resourceBase;
+        switch (((EvtViewerResourceRecord *)work->mainEntry7Data)[row].kind) {
         case 0: group = evtEventViewerCreateEntry(3, runtime); break;
         case 1: group = evtEventViewerCreateEntry(0x12, runtime); break;
         case 2: group = evtEventViewerCreateEntry(0x14, runtime); break;
@@ -4949,28 +4551,47 @@ s32 evtPopulateViewerTimelineFromMovie(PolyMovieWork *work, evtViewerInfo_t *run
         case 4: group = evtEventViewerCreateEntry(0x1A, runtime); break;
         default: continue;
         }
-        group->entryHeader = evtEventViewerAddName((char *)work->mainEntry1Data +
-            ((EvtPmdAuxResource *)work->mainEntry7Data)[row].nameIndex * 32, runtime);
-        group->resourceData = (u8 *)work->data + ((EvtPmdAuxResource *)work->mainEntry7Data)[row].dataOffset;
+        entryNameIndex = evtEventViewerAddName(
+            (char *)work->mainEntry1Data + ((EvtViewerResourceRecord *)work->mainEntry7Data)[row].nameIndex * 32, runtime);
+        resources = (EvtViewerResourceRecord *)work->mainEntry7Data;
+        group->entryHeader = entryNameIndex;
+        resourceBase = (u8 *)work->data;
+        group->resourceData = resourceBase + resources[row].offset;
     }
-    for (row = 0; row < (s32)work->mainEntry22Count; row++) {
-        group = evtEventViewerCreateEntry(0x18, runtime);
-        group->entryHeader = evtEventViewerAddName((char *)work->mainEntry1Data +
-            ((EvtPmdAuxResource *)work->mainEntry22Data)[row].nameIndex * 32, runtime);
-        group->texture = sdfTexSet((SdfTextureFileHeader *)
-            ((u8 *)work->data + ((EvtPmdAuxResource *)work->mainEntry22Data)[row].dataOffset));
+    row = 0;
+    if ((s32)work->mainEntry22Count > 0) {
+        s32 textureCount;
+        do {
+            EvtViewerNameIndex entryNameIndex;
+            EvtViewerResourceRecord *resources;
+            u8 *resourceBase;
+            sdfTexHandle_t *texture;
+            group = evtEventViewerCreateEntry(0x18, runtime);
+            entryNameIndex = evtEventViewerAddName(
+                (char *)work->mainEntry1Data + ((EvtViewerResourceRecord *)work->mainEntry22Data)[row].nameIndex * 32, runtime);
+            resources = (EvtViewerResourceRecord *)work->mainEntry22Data;
+            group->entryHeader = entryNameIndex;
+            resourceBase = (u8 *)work->data;
+            texture = sdfTexSet(
+                (SdfTextureFileHeader *)(resourceBase + resources[row].offset));
+            textureCount = (s32)work->mainEntry22Count;
+            group->texture = texture;
+            row++;
+        } while (row < textureCount);
     }
-    for (node = world->slots[9].head; node != NULL; node = node->next) {
+    for (node = worldTable->slots[9].head; node != NULL; node = node->next) {
         if (node->name != 0) {
+            const char *objectName;
             group = evtEventViewerCreateEntry(9, runtime);
+            objectName = (char *)node->name;
             group->info = node;
-            group->entryHeader = evtEventViewerAddName((char *)node->name, runtime);
+            group->entryHeader = evtEventViewerAddName(objectName, runtime);
         }
     }
-    runtime->activeEntryIndex = NULL;
-    for (node = world->slots[16].head; node != NULL; node = node->next) {
+    runtime->activeEntryIndex = 0;
+    for (node = worldTable->slots[16].head; node != NULL; node = node->next) {
         if (node->name != 0) {
-            for (owner = world->slots[4].head; owner != NULL; owner = owner->next) {
+            for (owner = worldTable->slots[4].head; owner != NULL; owner = owner->next) {
                 if (owner->name != 0) {
                     sprintf(motionName, "%s_MOTION", (char *)owner->name);
                     if (strcmp((char *)node->name, motionName) == 0) {
@@ -4978,7 +4599,7 @@ s32 evtPopulateViewerTimelineFromMovie(PolyMovieWork *work, evtViewerInfo_t *run
                     }
                 }
             }
-            for (owner = world->slots[9].head; owner != NULL; owner = owner->next) {
+            for (owner = worldTable->slots[9].head; owner != NULL; owner = owner->next) {
                 if (owner->name != 0) {
                     sprintf(motionName, "%s_MOTION", (char *)owner->name);
                     if (strcmp((char *)node->name, motionName) == 0) {
@@ -4986,7 +4607,7 @@ s32 evtPopulateViewerTimelineFromMovie(PolyMovieWork *work, evtViewerInfo_t *run
                     }
                 }
             }
-            for (owner = world->slots[7].head; owner != NULL; owner = owner->next) {
+            for (owner = worldTable->slots[7].head; owner != NULL; owner = owner->next) {
                 if (owner->name != 0) {
                     sprintf(motionName, "%s_MOTION", (char *)owner->name);
                     if (strcmp((char *)node->name, motionName) == 0) {
@@ -4997,121 +4618,156 @@ s32 evtPopulateViewerTimelineFromMovie(PolyMovieWork *work, evtViewerInfo_t *run
         }
     }
     printf("end pm1 load\n");
-    header = (EvtPmdRuntimeHeader *)work->subEntry0Data;
-    if (header != NULL) {
-        runtime->headerThird = header->frameCount;
-        runtime->headerFirst = header->firstFrame;
-        runtime->frameRange.word = header->frameRange;
-        runtime->headerMetadata = header->metadata;
-        runtime->nowframe = runtime->headerFirst < 0 ? 0 : runtime->headerFirst;
-        if (runtime->nowframe > runtime->headerThird - 1) {
-            runtime->nowframe = runtime->headerThird - 1;
+
+    /* Access each serialized row through its version-specific accessor. */
+    if (work->subEntry0Data != NULL) {
+        s32 metadata;
+        header = (s32 *)work->subEntry0Data;
+        runtime->headerThird = header[2];
+        headerLast = runtime->headerThird - 1;
+        headerFirst = header[0];
+        runtime->headerFirst = headerFirst;
+        if (headerFirst < 0) {
+            headerFirst = 0;
+        }
+        runtime->frameRange.word = header[1];
+        metadata = header[3];
+        runtime->nowframe = headerFirst;
+        runtime->headerMetadata = metadata;
+        if (headerLast < headerFirst) {
+            runtime->nowframe = headerLast;
         }
     }
+
+    /* 0023F500..0023F6F0: kind 0x1. */
     for (row = 0; row < (s32)work->subEntry4Count; row++) {
-        if (evtGetRowValue(work, row) == 1) {
+        if (evtGetRowValue(work, row) == 0x1) {
             for (group = runtime->groups; group != NULL; group = group->next) {
-                if (strcmp(runtime->entryName[group->entryHeader],
-                    (char *)work->subEntry1Data + evtGetRowVariant(work, row) * 32) == 0) {
+                const char *rowName;
+                s32 nameIndex;
+                nameIndex = evtGetRowVariant(work, row);
+                rowName = (char *)work->subEntry1Data + nameIndex * 32;
+                if (strcmp(runtime->entryName[group->entryHeader], rowName) == 0) {
                     key = evtAddFrameInfo(group, evtGetRowParameter(work, row), runtime);
-                    key->p08.b[0] = ((const EvtViewParam *)evtGetRowPayloadAddress(work, row))[0].b[0];
-                    key->p0C.i = ((const EvtViewParam *)evtGetRowPayloadAddress(work, row))[1].i;
-                    key->serializedValue = evtEventViewerAddName((char *)work->subEntry1Data +
-                        evtGetRowVariant(work, row) * 32, runtime);
+                    key->p08.b[0] = *(const u8 *)(evtGetRowPayloadAddress(work, row) + 0x0);
+                    key->p0C.i = *(const s32 *)(evtGetRowPayloadAddress(work, row) + 0x4);
+                    nameIndex = evtGetRowVariant(work, row);
+                    key->serializedValue = evtEventViewerAddName(
+                        (char *)work->subEntry1Data + nameIndex * 32, runtime);
                     if (key->p08.sb[0] == 7) {
-                        nameIndex = ((const EvtViewParam *)evtGetRowPayloadAddress(work, row))[1].sh[0];
-                        printf("oldtable index=%d string=%s\n", nameIndex,
-                            (char *)work->subEntry1Data + ((const EvtViewParam *)evtGetRowPayloadAddress(work, row))[1].sh[0] * 32);
-                        if (((const EvtViewParam *)evtGetRowPayloadAddress(work, row))[1].sh[0] != -1) {
-                            worldObject = dds3GetActiveScene();
-                            if (dds3SceneBasicSearchName(worldObject, work->subEntry1Data +
-                                ((const EvtViewParam *)evtGetRowPayloadAddress(work, row))[1].sh[0] * 32) != NULL) {
-                                key->p0C.h[0] = evtEventViewerAddName((char *)work->subEntry1Data +
-                                    ((const EvtViewParam *)evtGetRowPayloadAddress(work, row))[1].sh[0] * 32, runtime);
+                        const char *oldName;
+                        oldIndex = *(const s16 *)(evtGetRowPayloadAddress(work, row) + 0x4);
+                        nameIndex = *(const s16 *)(evtGetRowPayloadAddress(work, row) + 0x4);
+                        oldName = (char *)work->subEntry1Data + nameIndex * 32;
+                        printf("oldtable index=%d string=%s\n", oldIndex, oldName);
+                        if (*(const s16 *)(evtGetRowPayloadAddress(work, row) + 0x4) != -1) {
+                            s32 objectNameIndex;
+                            world = dds3GetActiveScene();
+                            objectNameIndex = *(const s16 *)(evtGetRowPayloadAddress(work, row) + 0x4);
+                            if (dds3SceneBasicSearchName(world,
+                                    work->subEntry1Data + objectNameIndex * 32) != NULL) {
+                                s32 linkedNameIndex = *(const s16 *)(evtGetRowPayloadAddress(work, row) + 0x4);
+                                key->p0C.h[0] = evtEventViewerAddName(
+                                    (char *)work->subEntry1Data + linkedNameIndex * 32, runtime);
                             } else {
                                 key->p0C.h[0] = -1;
                                 printf("name not found \n");
                             }
                         }
                     }
-                    key->p10.h[0] = ((const EvtViewParam *)evtGetRowPayloadAddress(work, row))[2].h[0];
-                    key->p14.f = ((const EvtViewParam *)evtGetRowPayloadAddress(work, row))[3].f;
-                    key->p18.h[0] = ((const EvtViewParam *)evtGetRowPayloadAddress(work, row))[4].h[0];
+                    key->p10.h[0] = *(const u16 *)(evtGetRowPayloadAddress(work, row) + 0x8);
+                    key->p14.f = *(const f32 *)(evtGetRowPayloadAddress(work, row) + 0xC);
                 }
             }
         }
     }
+
+    /* 0023F6F4..0023F7EC: kind 0x2. */
     for (row = 0; row < (s32)work->subEntry4Count; row++) {
-        if (evtGetRowValue(work, row) == 2) {
+        if (evtGetRowValue(work, row) == 0x2) {
             for (group = runtime->groups; group != NULL; group = group->next) {
-                if (strcmp(runtime->entryName[group->entryHeader],
-                    (char *)work->subEntry1Data + evtGetRowVariant(work, row) * 32) == 0) {
+                const char *rowName;
+                s32 nameIndex;
+                nameIndex = evtGetRowVariant(work, row);
+                rowName = (char *)work->subEntry1Data + nameIndex * 32;
+                if (strcmp(runtime->entryName[group->entryHeader], rowName) == 0) {
                     key = evtAddFrameInfo(group, evtGetRowParameter(work, row), runtime);
                     key->p08.f = ((const EvtCameraFovRowPayload *)evtGetRowPayloadAddress(work, row))->cameraFieldOfView;
                     key->p0C.h[0] = ((const EvtCameraFovRowPayload *)evtGetRowPayloadAddress(work, row))->opaque04;
-                    key->p0C.h[1] = ((const EvtCameraFovRowPayload *)evtGetRowPayloadAddress(work, row))->opaque06;
-                    key->serializedValue = evtEventViewerAddName((char *)work->subEntry1Data +
-                        evtGetRowVariant(work, row) * 32, runtime);
-                    dds3CameraObjectBasicSetFovy(group->info, key->p08.f);
+                    {
+                        EvtViewerNameIndex serializedNameIndex;
+                        dds3Basic_t *camera;
+                        nameIndex = evtGetRowVariant(work, row);
+                        serializedNameIndex = evtEventViewerAddName(
+                            (char *)work->subEntry1Data + nameIndex * 32, runtime);
+                        camera = group->info;
+                        key->serializedValue = serializedNameIndex;
+                        dds3CameraObjectBasicSetFovy(camera, key->p08.f);
+                    }
                 }
             }
         }
     }
+
+    /* 0023F7F0..0023FAC8: native two jump tables both cover 3..0x1A.
+     * Do not replace the second accessor call with the outer switch value. */
     for (row = 0; row < (s32)work->subEntry4Count; row++) {
         switch (evtGetRowValue(work, row)) {
         case 3: case 0x12: case 0x14: case 0x15: case 0x1A:
             for (group = runtime->groups; group != NULL; group = group->next) {
-                if (strcmp(runtime->entryName[group->entryHeader],
-                    (char *)work->subEntry1Data + evtGetRowVariant(work, row) * 32) == 0) {
+                const char *rowName;
+                s32 nameIndex;
+                nameIndex = evtGetRowVariant(work, row);
+                rowName = (char *)work->subEntry1Data + nameIndex * 32;
+                if (strcmp(runtime->entryName[group->entryHeader], rowName) == 0) {
                     key = evtAddFrameInfo(group, evtGetRowParameter(work, row), runtime);
                     switch (evtGetRowValue(work, row)) {
                     case 3: case 0x1A:
-                        key->p08.h[1] = ((const EvtViewParam *)evtGetRowPayloadAddress(work, row))[0].h[1];
-                        key->p0C.b[1] = ((const EvtViewParam *)evtGetRowPayloadAddress(work, row))[1].b[1];
-                        if (((const EvtViewParam *)evtGetRowPayloadAddress(work, row))[1].sh[1] < 0) {
+                        key->p08.h[1] = *(const u16 *)(evtGetRowPayloadAddress(work, row) + 0x2);
+                        key->p0C.b[1] = *(const u8 *)(evtGetRowPayloadAddress(work, row) + 0x5);
+                        if (*(const s16 *)(evtGetRowPayloadAddress(work, row) + 0x6) < 0) {
                             key->p0C.h[1] = -1;
                         } else {
-                            key->p0C.h[1] = evtEventViewerAddName((char *)work->subEntry1Data +
-                                ((const EvtViewParam *)evtGetRowPayloadAddress(work, row))[1].sh[1] * 32, runtime);
+                            nameIndex = *(const s16 *)(evtGetRowPayloadAddress(work, row) + 0x6);
+                            key->p0C.h[1] = evtEventViewerAddName(
+                                (char *)work->subEntry1Data + nameIndex * 32, runtime);
                         }
-                        key->p0C.b[0] = ((const EvtViewParam *)evtGetRowPayloadAddress(work, row))[1].b[0];
-                        key->p0C.b[1] = ((const EvtViewParam *)evtGetRowPayloadAddress(work, row))[2].b[0];
+                        key->p0C.b[0] = *(const u8 *)(evtGetRowPayloadAddress(work, row) + 0x4);
                         if (work->sub->kind < 4) {
                             key->duration = 0;
                         } else {
                             key->duration = evtGetRowFlags(work, row);
                         }
-                        key->p10.b[0] = ((const EvtViewParam *)evtGetRowPayloadAddress(work, row))[2].b[0];
                         if (work->sub->kind < 9) {
                             key->duration = 0;
                         }
                         break;
                     case 0x14: case 0x15:
-                        key->p08.h[1] = ((const EvtViewParam *)evtGetRowPayloadAddress(work, row))[0].h[1];
+                        key->p08.h[1] = *(const u16 *)(evtGetRowPayloadAddress(work, row) + 0x2);
                         key->duration = evtGetRowFlags(work, row);
-                        for (index = 0; index < 4; index++) {
-                            if (((const EvtViewParam *)evtGetRowPayloadAddress(work, row))[1].sb[index] < 0) {
-                                key->p0C.sb[index] = -1;
+                        for (secondaryIndex = 0; secondaryIndex < 4; secondaryIndex++) {
+                            if (*(const s8 *)(evtGetRowPayloadAddress(work, row) + 4 + secondaryIndex) < 0) {
+                                key->p0C.b[secondaryIndex] = -1;
                             } else {
-                                key->p0C.sb[index] = evtEventViewerAddName((char *)work->subEntry1Data +
-                                    ((const EvtViewParam *)evtGetRowPayloadAddress(work, row))[1].sb[index] * 32, runtime);
+                                nameIndex = *(const s8 *)(evtGetRowPayloadAddress(work, row) + 4 + secondaryIndex);
+                                key->p0C.b[secondaryIndex] = evtEventViewerAddName(
+                                    (char *)work->subEntry1Data + nameIndex * 32, runtime);
                             }
                         }
-                        key->p08.b[1] = ((const EvtViewParam *)evtGetRowPayloadAddress(work, row))[0].b[1];
-                        key->p08.b[2] = ((const EvtViewParam *)evtGetRowPayloadAddress(work, row))[2].b[0];
-                        key->p10.b[0] = ((const EvtViewParam *)evtGetRowPayloadAddress(work, row))[2].b[0];
+                        key->p08.b[1] = *(const u8 *)(evtGetRowPayloadAddress(work, row) + 0x1);
                         if (work->sub->kind < 9) {
                             key->duration = 0;
                         }
                         break;
                     case 0x12:
-                        key->p08.h[0] = ((const EvtViewParam *)evtGetRowPayloadAddress(work, row))[0].h[0];
-                        key->p0C.b[0] = ((const EvtViewParam *)evtGetRowPayloadAddress(work, row))[1].b[0];
-                        if (((const EvtViewParam *)evtGetRowPayloadAddress(work, row))[0].sh[1] < 0) {
+                        key->p08.h[0] = *(const u16 *)(evtGetRowPayloadAddress(work, row) + 0x0);
+                        key->p0C.b[0] = *(const u8 *)(evtGetRowPayloadAddress(work, row) + 0x4);
+                        if (*(const s16 *)(evtGetRowPayloadAddress(work, row) + 0x2) < 0) {
                             key->p08.h[1] = -1;
                         } else {
-                            key->p08.h[1] = evtEventViewerAddName((char *)work->subEntry1Data +
-                                ((const EvtViewParam *)evtGetRowPayloadAddress(work, row))[0].sh[1] * 32, runtime);
+                            nameIndex = *(const s16 *)(evtGetRowPayloadAddress(work, row) + 0x2);
+                            key->p08.h[1] = evtEventViewerAddName(
+                                (char *)work->subEntry1Data + nameIndex * 32, runtime);
                         }
                         break;
                     }
@@ -5120,207 +4776,264 @@ s32 evtPopulateViewerTimelineFromMovie(PolyMovieWork *work, evtViewerInfo_t *run
             break;
         }
     }
+
+    /* 0023FACC..0023FBD8: kind 0x9. */
     for (row = 0; row < (s32)work->subEntry4Count; row++) {
-        if (evtGetRowValue(work, row) == 9) {
+        if (evtGetRowValue(work, row) == 0x9) {
             for (group = runtime->groups; group != NULL; group = group->next) {
-                if (strcmp(runtime->entryName[group->entryHeader],
-                    (char *)work->subEntry1Data + evtGetRowVariant(work, row) * 32) == 0) {
+                const char *rowName;
+                s32 nameIndex;
+                nameIndex = evtGetRowVariant(work, row);
+                rowName = (char *)work->subEntry1Data + nameIndex * 32;
+                if (strcmp(runtime->entryName[group->entryHeader], rowName) == 0) {
                     key = evtAddFrameInfo(group, evtGetRowParameter(work, row), runtime);
                     key->duration = evtGetRowFlags(work, row);
-                    key->p08.h[1] = ((const EvtViewParam *)evtGetRowPayloadAddress(work, row))[0].h[1];
-                    if (((const EvtViewParam *)evtGetRowPayloadAddress(work, row))[0].sh[0] < 0) {
+                    key->p08.h[1] = *(const u16 *)(evtGetRowPayloadAddress(work, row) + 0x2);
+                    if (*(const s16 *)(evtGetRowPayloadAddress(work, row) + 0x0) < 0) {
                         key->p08.h[0] = -1;
                     } else {
-                        key->p08.h[0] = evtEventViewerAddName((char *)work->subEntry1Data +
-                            ((const EvtViewParam *)evtGetRowPayloadAddress(work, row))[0].sh[0] * 32, runtime);
+                        nameIndex = *(const s16 *)(evtGetRowPayloadAddress(work, row) + 0x0);
+                        key->p08.h[0] = evtEventViewerAddName(
+                            (char *)work->subEntry1Data + nameIndex * 32, runtime);
                     }
                 }
             }
         }
     }
-    for (index = 0; index < 10; index++) {
+
+    /* 0023FBDC..0023FE28: seven separate groups are always constructed.
+     * Version <7 swaps ordinal/flags sources relative to later versions. */
+    for (secondaryIndex = 0; secondaryIndex < 7; secondaryIndex++) {
         group = evtEventViewerCreateEntry(0xA, runtime);
-        group->setterId = index;
+        group->setterId = secondaryIndex;
         for (row = 0; row < (s32)work->subEntry4Count; row++) {
             if (evtGetRowValue(work, row) == 0xA &&
-                ((const EvtViewParam *)evtGetRowPayloadAddress(work, row))[2].sh[0] == index) {
+                *(const s16 *)(evtGetRowPayloadAddress(work, row) + 0x8) == secondaryIndex) {
                 key = evtAddFrameInfo(group, evtGetRowParameter(work, row), runtime);
-                key->p08.f = ((const EvtViewParam *)evtGetRowPayloadAddress(work, row))[0].f;
-                key->p0C.f = ((const EvtViewParam *)evtGetRowPayloadAddress(work, row))[1].f;
-                key->p10.h[0] = ((const EvtViewParam *)evtGetRowPayloadAddress(work, row))[2].h[0];
+                key->p08.f = *(const f32 *)(evtGetRowPayloadAddress(work, row) + 0x0);
+                key->p0C.f = *(const f32 *)(evtGetRowPayloadAddress(work, row) + 0x4);
+                key->p10.h[0] = *(const u16 *)(evtGetRowPayloadAddress(work, row) + 0x8);
                 if (work->sub->kind < 7) {
-                    key->duration = ((const EvtViewParam *)evtGetRowPayloadAddress(work, row))[2].h[1];
+                    key->duration = *(const u16 *)(evtGetRowPayloadAddress(work, row) + 0xA);
                 } else {
                     key->duration = evtGetRowFlags(work, row);
                 }
-                key->serializedValue = evtGetRowVariant(work, row);
-                if (work->sub->kind < 7) {
-                    payload = key->payload;
-                    memcpy(payload, work->subEntry13Data + evtGetRowFlags(work, row) * 0x30, 0x30);
-                } else {
-                    payload = key->payload;
-                    memcpy(payload, work->subEntry13Data +
-                        ((const EvtViewParam *)evtGetRowPayloadAddress(work, row))[2].sh[1] * 0x30, 0x30);
+                {
+                    s32 serializedValue = evtGetRowVariant(work, row);
+                    PmdHeader *format = work->sub;
+                    key->serializedValue = serializedValue;
+                    if (format->kind < 7) {
+                        s32 ordinal;
+                        payload = key->payload;
+                        ordinal = evtGetRowFlags(work, row);
+                        *(EvtRowPayload30 *)payload =
+                            *(EvtRowPayload30 *)(work->subEntry13Data + ordinal * 0x30);
+                    } else {
+                        s32 ordinal;
+                        payload = key->payload;
+                        ordinal = *(const s16 *)(evtGetRowPayloadAddress(work, row) + 0xA);
+                        *(EvtRowPayload30 *)payload =
+                            *(EvtRowPayload30 *)(work->subEntry13Data + ordinal * 0x30);
+                    }
                 }
-                key->p14.h[0] = ((const EvtViewParam *)evtGetRowPayloadAddress(work, row))[3].h[0];
+                key->p14.h[0] = *(const u16 *)(evtGetRowPayloadAddress(work, row) + 0xC);
             }
         }
     }
+
+    /* 0023FE2C..0023FF00: kind 0xB. */
     group = evtEventViewerCreateEntry(0xB, runtime);
     for (row = 0; row < (s32)work->subEntry4Count; row++) {
         if (evtGetRowValue(work, row) == 0xB) {
+            s32 ordinal;
             key = evtAddFrameInfo(group, evtGetRowParameter(work, row), runtime);
-            key->p08.h[0] = ((const EvtViewParam *)evtGetRowPayloadAddress(work, row))[0].h[0];
+            data = (const u8 *)evtGetRowPayloadAddress(work, row);
             payload = key->payload;
-            memcpy(payload, work->subEntry14Data + evtGetRowFlags(work, row) * 0x20, 0x20);
+            key->p08.h[0] = *(const u16 *)data;
+            ordinal = evtGetRowFlags(work, row);
+            *(EvtRowPayload20 *)payload =
+                *(EvtRowPayload20 *)(work->subEntry14Data + ordinal * 0x20);
         }
     }
+
+    /* 0023FF04..00240030: kind 0xC. */
     group = evtEventViewerCreateEntry(0xC, runtime);
     for (row = 0; row < (s32)work->subEntry4Count; row++) {
         if (evtGetRowValue(work, row) == 0xC) {
             key = evtAddFrameInfo(group, evtGetRowParameter(work, row), runtime);
             key->duration = evtGetRowFlags(work, row);
-            key->p08.h[0] = ((const EvtViewParam *)evtGetRowPayloadAddress(work, row))[0].h[0];
-            key->p08.h[1] = ((const EvtViewParam *)evtGetRowPayloadAddress(work, row))[0].h[1];
-            key->p0C.i = ((const EvtViewParam *)evtGetRowPayloadAddress(work, row))[1].i;
+            key->p08.h[0] = *(const u16 *)(evtGetRowPayloadAddress(work, row) + 0x0);
+            key->p08.h[1] = *(const u16 *)(evtGetRowPayloadAddress(work, row) + 0x2);
+            key->p0C.i = *(const s32 *)(evtGetRowPayloadAddress(work, row) + 0x4);
             if (work->sub->kind == 1) {
                 key->p08.h[1] = 0;
             }
             if (work->sub->kind == 2) {
                 key->p08.sh[1] -= 128;
                 if (key->p08.sh[1] < -255) {
-                    key->p08.sh[1] = -255;
+                    key->p08.h[1] = -255;
                 }
                 if (key->p08.sh[1] > 255) {
-                    key->p08.sh[1] = 255;
+                    key->p08.h[1] = 255;
                 }
             }
-            key->p14.h[0] = ((const EvtViewParam *)evtGetRowPayloadAddress(work, row))[3].h[0];
+            key->p14.h[0] = *(const u16 *)(evtGetRowPayloadAddress(work, row) + 0xC);
         }
     }
+
+    /* 00240034..002400AC: kind 0x16. */
     group = evtEventViewerCreateEntry(0x16, runtime);
     for (row = 0; row < (s32)work->subEntry4Count; row++) {
         if (evtGetRowValue(work, row) == 0x16) {
             key = evtAddFrameInfo(group, evtGetRowParameter(work, row), runtime);
-            key->p08.h[0] = ((const EvtViewParam *)evtGetRowPayloadAddress(work, row))[0].h[0];
+            key->p08.h[0] = *(const u16 *)(evtGetRowPayloadAddress(work, row) + 0x0);
         }
     }
+
+    /* 002400B0..002401A4: kind 0xD. */
     group = evtEventViewerCreateEntry(0xD, runtime);
     for (row = 0; row < (s32)work->subEntry4Count; row++) {
         if (evtGetRowValue(work, row) == 0xD) {
+            s32 ordinal;
             key = evtAddFrameInfo(group, evtGetRowParameter(work, row), runtime);
-            key->p08.h[0] = ((const EvtViewParam *)evtGetRowPayloadAddress(work, row))[0].h[0];
+            data = (const u8 *)evtGetRowPayloadAddress(work, row);
             payload = key->payload;
-            memcpy(payload, work->subEntry15Data +
-                ((const EvtViewParam *)evtGetRowPayloadAddress(work, row))[0].sh[1] * 0x28, 0x28);
+            key->p08.h[0] = *(const u16 *)data;
+            ordinal = *(const s16 *)(evtGetRowPayloadAddress(work, row) + 0x2);
+            *(EvtRowPayload28 *)payload =
+                *(EvtRowPayload28 *)(work->subEntry15Data + ordinal * 0x28);
         }
     }
+
+    /* 002401A8..0024032C: kind 0xE. */
     group = evtEventViewerCreateEntry(0xE, runtime);
     for (row = 0; row < (s32)work->subEntry4Count; row++) {
         if (evtGetRowValue(work, row) == 0xE) {
+            s32 ordinal;
             key = evtAddFrameInfo(group, evtGetRowParameter(work, row), runtime);
-            key->p08.h[0] = ((const EvtViewParam *)evtGetRowPayloadAddress(work, row))[0].h[0];
+            data = (const u8 *)evtGetRowPayloadAddress(work, row);
             payload = key->payload;
-            memcpy(payload, work->subEntry16Data +
-                ((const EvtViewParam *)evtGetRowPayloadAddress(work, row))[0].sh[1] * 0x2C, 0x2C);
-            key->p10.h[0] = ((const EvtViewParam *)evtGetRowPayloadAddress(work, row))[2].h[0];
-            if (((const EvtViewParam *)evtGetRowPayloadAddress(work, row))[2].sh[0] != 0 &&
-                ((const EvtViewParam *)evtGetRowPayloadAddress(work, row))[2].sh[0] != 1) {
-                linkIndex = mnuCampFindMatchingEntryIndex(work, runtime,
-                    ((const EvtViewParam *)evtGetRowPayloadAddress(work, row))[2].sh[0] - 2);
-                if (linkIndex != EVT_VIEWER_NAME_INDEX_NOT_FOUND) {
-                    key->p10.h[0] = linkIndex + 2;
+            key->p08.h[0] = *(const u16 *)data;
+            ordinal = *(const s16 *)(evtGetRowPayloadAddress(work, row) + 0x2);
+            *(EvtRowPayload2C *)payload =
+                *(EvtRowPayload2C *)(work->subEntry16Data + ordinal * 0x2C);
+            key->p10.h[0] = *(const u16 *)(evtGetRowPayloadAddress(work, row) + 0x8);
+            if (*(const s16 *)(evtGetRowPayloadAddress(work, row) + 0x8) != 0 && *(const s16 *)(evtGetRowPayloadAddress(work, row) + 0x8) != 1) {
+                EvtViewerNameIndex matchedNameIndex = mnuCampFindMatchingEntryIndex(work, runtime, *(const s16 *)(evtGetRowPayloadAddress(work, row) + 0x8) - 2);
+                if (matchedNameIndex != EVT_VIEWER_NAME_INDEX_NOT_FOUND) {
+                    key->p10.h[0] = matchedNameIndex + 2;
                 } else {
                     key->p10.h[0] = 0;
                 }
             }
         }
     }
+
+    /* 00240330..002404B4: kind 0xF. */
     group = evtEventViewerCreateEntry(0xF, runtime);
     for (row = 0; row < (s32)work->subEntry4Count; row++) {
         if (evtGetRowValue(work, row) == 0xF) {
+            s32 ordinal;
             key = evtAddFrameInfo(group, evtGetRowParameter(work, row), runtime);
-            key->p08.h[0] = ((const EvtViewParam *)evtGetRowPayloadAddress(work, row))[0].h[0];
+            data = (const u8 *)evtGetRowPayloadAddress(work, row);
             payload = key->payload;
-            memcpy(payload, work->subEntry17Data +
-                ((const EvtViewParam *)evtGetRowPayloadAddress(work, row))[0].sh[1] * 0x2C, 0x2C);
-            key->p10.h[0] = ((const EvtViewParam *)evtGetRowPayloadAddress(work, row))[2].h[0];
-            if (((const EvtViewParam *)evtGetRowPayloadAddress(work, row))[2].sh[0] != 0 &&
-                ((const EvtViewParam *)evtGetRowPayloadAddress(work, row))[2].sh[0] != 1) {
-                linkIndex = mnuCampFindMatchingEntryIndex(work, runtime,
-                    ((const EvtViewParam *)evtGetRowPayloadAddress(work, row))[2].sh[0] - 2);
-                if (linkIndex != EVT_VIEWER_NAME_INDEX_NOT_FOUND) {
-                    key->p10.h[0] = linkIndex + 2;
+            key->p08.h[0] = *(const u16 *)data;
+            ordinal = *(const s16 *)(evtGetRowPayloadAddress(work, row) + 0x2);
+            *(EvtRowPayload2C *)payload =
+                *(EvtRowPayload2C *)(work->subEntry17Data + ordinal * 0x2C);
+            key->p10.h[0] = *(const u16 *)(evtGetRowPayloadAddress(work, row) + 0x8);
+            if (*(const s16 *)(evtGetRowPayloadAddress(work, row) + 0x8) != 0 && *(const s16 *)(evtGetRowPayloadAddress(work, row) + 0x8) != 1) {
+                EvtViewerNameIndex matchedNameIndex = mnuCampFindMatchingEntryIndex(work, runtime, *(const s16 *)(evtGetRowPayloadAddress(work, row) + 0x8) - 2);
+                if (matchedNameIndex != EVT_VIEWER_NAME_INDEX_NOT_FOUND) {
+                    key->p10.h[0] = matchedNameIndex + 2;
                 } else {
                     key->p10.h[0] = 0;
                 }
             }
         }
     }
+
+    /* 002404B8..0024063C: kind 0x17. */
     group = evtEventViewerCreateEntry(0x17, runtime);
     for (row = 0; row < (s32)work->subEntry4Count; row++) {
         if (evtGetRowValue(work, row) == 0x17) {
+            s32 ordinal;
             key = evtAddFrameInfo(group, evtGetRowParameter(work, row), runtime);
-            key->p08.h[0] = ((const EvtViewParam *)evtGetRowPayloadAddress(work, row))[0].h[0];
+            data = (const u8 *)evtGetRowPayloadAddress(work, row);
             payload = key->payload;
-            memcpy(payload, work->subEntry20Data +
-                ((const EvtViewParam *)evtGetRowPayloadAddress(work, row))[0].sh[1] * 0x2C, 0x2C);
-            key->p10.h[0] = ((const EvtViewParam *)evtGetRowPayloadAddress(work, row))[2].h[0];
-            if (((const EvtViewParam *)evtGetRowPayloadAddress(work, row))[2].sh[0] != 0 &&
-                ((const EvtViewParam *)evtGetRowPayloadAddress(work, row))[2].sh[0] != 1) {
-                linkIndex = mnuCampFindMatchingEntryIndex(work, runtime,
-                    ((const EvtViewParam *)evtGetRowPayloadAddress(work, row))[2].sh[0] - 2);
-                if (linkIndex != EVT_VIEWER_NAME_INDEX_NOT_FOUND) {
-                    key->p10.h[0] = linkIndex + 2;
+            key->p08.h[0] = *(const u16 *)data;
+            ordinal = *(const s16 *)(evtGetRowPayloadAddress(work, row) + 0x2);
+            *(EvtRowPayload2C *)payload =
+                *(EvtRowPayload2C *)(work->subEntry20Data + ordinal * 0x2C);
+            key->p10.h[0] = *(const u16 *)(evtGetRowPayloadAddress(work, row) + 0x8);
+            if (*(const s16 *)(evtGetRowPayloadAddress(work, row) + 0x8) != 0 && *(const s16 *)(evtGetRowPayloadAddress(work, row) + 0x8) != 1) {
+                EvtViewerNameIndex matchedNameIndex = mnuCampFindMatchingEntryIndex(work, runtime, *(const s16 *)(evtGetRowPayloadAddress(work, row) + 0x8) - 2);
+                if (matchedNameIndex != EVT_VIEWER_NAME_INDEX_NOT_FOUND) {
+                    key->p10.h[0] = matchedNameIndex + 2;
                 } else {
                     key->p10.h[0] = 0;
                 }
             }
         }
     }
+
+    /* 00240640..00240734: kind 0x1B. */
     group = evtEventViewerCreateEntry(0x1B, runtime);
     for (row = 0; row < (s32)work->subEntry4Count; row++) {
         if (evtGetRowValue(work, row) == 0x1B) {
+            s32 ordinal;
             key = evtAddFrameInfo(group, evtGetRowParameter(work, row), runtime);
-            key->p08.h[0] = ((const EvtViewParam *)evtGetRowPayloadAddress(work, row))[0].h[0];
+            data = (const u8 *)evtGetRowPayloadAddress(work, row);
             payload = key->payload;
-            memcpy(payload, work->subEntry24Data +
-                ((const EvtViewParam *)evtGetRowPayloadAddress(work, row))[0].sh[1] * 0x28, 0x28);
+            key->p08.h[0] = *(const u16 *)data;
+            ordinal = *(const s16 *)(evtGetRowPayloadAddress(work, row) + 0x2);
+            *(EvtRowPayload28 *)payload =
+                *(EvtRowPayload28 *)(work->subEntry24Data + ordinal * 0x28);
         }
     }
+
+    /* 00240738..00240820: kind 0x10. */
     group = evtEventViewerCreateEntry(0x10, runtime);
     for (row = 0; row < (s32)work->subEntry4Count; row++) {
         if (evtGetRowValue(work, row) == 0x10) {
+            s32 ordinal;
             key = evtAddFrameInfo(group, evtGetRowParameter(work, row), runtime);
-            key->p08.h[0] = ((const EvtViewParam *)evtGetRowPayloadAddress(work, row))[0].h[0];
+            data = (const u8 *)evtGetRowPayloadAddress(work, row);
             payload = key->payload;
-            memcpy(payload, work->subEntry18Data +
-                ((const EvtViewParam *)evtGetRowPayloadAddress(work, row))[0].sh[1] * 0x18, 0x18);
-            key->p14.h[0] = ((const EvtViewParam *)evtGetRowPayloadAddress(work, row))[3].h[0];
+            key->p08.h[0] = *(const u16 *)data;
+            ordinal = *(const s16 *)(evtGetRowPayloadAddress(work, row) + 0x2);
+            *(EvtRowPayload18 *)payload =
+                *(EvtRowPayload18 *)(work->subEntry18Data + ordinal * 0x18);
+            key->p14.h[0] = *(const u16 *)(evtGetRowPayloadAddress(work, row) + 0xC);
         }
     }
+
+    /* 00240824..002409A8: kind 0x11. */
     group = evtEventViewerCreateEntry(0x11, runtime);
     for (row = 0; row < (s32)work->subEntry4Count; row++) {
         if (evtGetRowValue(work, row) == 0x11) {
+            s32 ordinal;
             key = evtAddFrameInfo(group, evtGetRowParameter(work, row), runtime);
-            key->p08.h[0] = ((const EvtViewParam *)evtGetRowPayloadAddress(work, row))[0].h[0];
+            data = (const u8 *)evtGetRowPayloadAddress(work, row);
             payload = key->payload;
-            memcpy(payload, work->subEntry19Data +
-                ((const EvtViewParam *)evtGetRowPayloadAddress(work, row))[0].sh[1] * 0x24, 0x24);
-            key->p10.h[0] = ((const EvtViewParam *)evtGetRowPayloadAddress(work, row))[2].h[0];
-            if (((const EvtViewParam *)evtGetRowPayloadAddress(work, row))[2].sh[0] != 0 &&
-                ((const EvtViewParam *)evtGetRowPayloadAddress(work, row))[2].sh[0] != 1) {
-                linkIndex = mnuCampFindMatchingEntryIndex(work, runtime,
-                    ((const EvtViewParam *)evtGetRowPayloadAddress(work, row))[2].sh[0] - 2);
-                if (linkIndex != EVT_VIEWER_NAME_INDEX_NOT_FOUND) {
-                    key->p10.h[0] = linkIndex + 2;
+            key->p08.h[0] = *(const u16 *)data;
+            ordinal = *(const s16 *)(evtGetRowPayloadAddress(work, row) + 0x2);
+            *(EvtRowPayload24 *)payload =
+                *(EvtRowPayload24 *)(work->subEntry19Data + ordinal * 0x24);
+            key->p10.h[0] = *(const u16 *)(evtGetRowPayloadAddress(work, row) + 0x8);
+            if (*(const s16 *)(evtGetRowPayloadAddress(work, row) + 0x8) != 0 && *(const s16 *)(evtGetRowPayloadAddress(work, row) + 0x8) != 1) {
+                EvtViewerNameIndex matchedNameIndex = mnuCampFindMatchingEntryIndex(work, runtime, *(const s16 *)(evtGetRowPayloadAddress(work, row) + 0x8) - 2);
+                if (matchedNameIndex != EVT_VIEWER_NAME_INDEX_NOT_FOUND) {
+                    key->p10.h[0] = matchedNameIndex + 2;
                 } else {
                     key->p10.h[0] = 0;
                 }
             }
-            key->p14.h[0] = ((const EvtViewParam *)evtGetRowPayloadAddress(work, row))[3].h[0];
+            key->p14.h[0] = *(const u16 *)(evtGetRowPayloadAddress(work, row) + 0xC);
         }
     }
+
+    /* 002409AC..00240A84: message track exists only for a live populated window. */
     if (work->messageManagerHandle != -1 && itfMesGetEntryCount(work->messageManagerHandle) != 0) {
         itfMesMngChangeWindowType(work->messageManagerHandle, ITF_MES_PANEL_MODE_NO_SPRITE_TRANSITION, 0);
         group = evtEventViewerCreateEntry(4, runtime);
@@ -5328,174 +5041,188 @@ s32 evtPopulateViewerTimelineFromMovie(PolyMovieWork *work, evtViewerInfo_t *run
             if (evtGetRowValue(work, row) == 4) {
                 key = evtAddFrameInfo(group, evtGetRowParameter(work, row), runtime);
                 key->duration = evtGetRowFlags(work, row);
-                key->p08.h[0] = ((const EvtViewParam *)evtGetRowPayloadAddress(work, row))[0].h[0];
-                key->p08.h[1] = ((const EvtViewParam *)evtGetRowPayloadAddress(work, row))[0].h[1];
+                key->p08.h[0] = *(const u16 *)(evtGetRowPayloadAddress(work, row) + 0x0);
+                key->p08.h[1] = *(const u16 *)(evtGetRowPayloadAddress(work, row) + 0x2);
             }
         }
         itfMesMngMarkBitStat(work->messageManagerHandle, 0xD00000);
     }
+
+    /* Primary rows precede version 6; later versions use the extended table. */
     group = evtEventViewerCreateEntry(5, runtime);
     if (work->sub->kind < 6) {
-        count = work->subEntry4Count;
+        rowCount = work->subEntry4Count;
     } else {
-        count = work->extendedEntry4Count;
+        rowCount = work->extendedEntry4Count;
     }
-    for (row = 0; row < count; row++) {
+    for (row = 0; row < rowCount; row++) {
         if (work->sub->kind < 6) {
             if (evtGetRowValue(work, row) == 5) {
-                needsBgm = 1;
+                soundRowsPresent = 1;
                 key = evtAddFrameInfo(group, evtGetRowParameter(work, row), runtime);
-                key->p08.h[0] = ((const EvtViewParam *)evtGetRowPayloadAddress(work, row))[0].h[0];
-                key->p08.h[1] = ((const EvtViewParam *)evtGetRowPayloadAddress(work, row))[0].h[1];
+                key->p08.h[0] = *(const u16 *)evtGetRowPayloadAddress(work, row);
             }
         } else if (work->secondEntry4Data[row].value == 5) {
-            needsBgm = 1;
+            soundRowsPresent = 1;
             key = evtAddFrameInfo(group, work->secondEntry4Data[row].parameter, runtime);
-            key->p08.h[0] = ((const EvtViewParam *)work->secondEntry4Data[row].payload)[0].h[0];
-            key->p08.h[1] = ((const EvtViewParam *)work->secondEntry4Data[row].payload)[0].h[1];
+            key->p08.h[0] = *(const u16 *)work->secondEntry4Data[row].payload;
         }
     }
     group = evtEventViewerCreateEntry(0x13, runtime);
     if (work->sub->kind < 6) {
-        count = work->subEntry4Count;
+        rowCount = work->subEntry4Count;
     } else {
-        count = work->extendedEntry4Count;
+        rowCount = work->extendedEntry4Count;
     }
-    for (row = 0; row < count; row++) {
+    for (row = 0; row < rowCount; row++) {
         if (work->sub->kind < 6) {
             if (evtGetRowValue(work, row) == 0x13) {
-                needsBgm = 1;
+                soundRowsPresent = 1;
                 key = evtAddFrameInfo(group, evtGetRowParameter(work, row), runtime);
-                key->p08.h[0] = ((const EvtViewParam *)evtGetRowPayloadAddress(work, row))[0].h[0];
-                key->p08.h[1] = ((const EvtViewParam *)evtGetRowPayloadAddress(work, row))[0].h[1];
-                key->p0C.h[0] = ((const EvtViewParam *)evtGetRowPayloadAddress(work, row))[1].h[0];
+                key->p08.h[0] = *(const u16 *)evtGetRowPayloadAddress(work, row);
+                key->p08.h[1] = *(const u16 *)(evtGetRowPayloadAddress(work, row) + 2);
             }
         } else if (work->secondEntry4Data[row].value == 0x13) {
-            needsBgm = 1;
+            soundRowsPresent = 1;
             key = evtAddFrameInfo(group, work->secondEntry4Data[row].parameter, runtime);
-            key->p08.h[0] = ((const EvtViewParam *)work->secondEntry4Data[row].payload)[0].h[0];
-            key->p08.h[1] = ((const EvtViewParam *)work->secondEntry4Data[row].payload)[0].h[1];
-            key->p0C.h[0] = ((const EvtViewParam *)work->secondEntry4Data[row].payload)[1].h[0];
+            key->p08.h[0] = *(const u16 *)work->secondEntry4Data[row].payload;
+            key->p08.h[1] = *(const u16 *)(work->secondEntry4Data[row].payload + 2);
         }
     }
-    group = evtEventViewerCreateEntry(6, runtime);
+
+    /* 00240D0C..00240D94: kind 0x6. */
+    group = evtEventViewerCreateEntry(0x6, runtime);
     for (row = 0; row < (s32)work->subEntry4Count; row++) {
-        if (evtGetRowValue(work, row) == 6) {
+        if (evtGetRowValue(work, row) == 0x6) {
             key = evtAddFrameInfo(group, evtGetRowParameter(work, row), runtime);
             key->duration = evtGetRowFlags(work, row);
-            key->p08.h[0] = ((const EvtViewParam *)evtGetRowPayloadAddress(work, row))[0].h[0];
-            key->p0C.b[0] = ((const EvtViewParam *)evtGetRowPayloadAddress(work, row))[1].b[0];
-            key->p0C.b[1] = ((const EvtViewParam *)evtGetRowPayloadAddress(work, row))[1].b[1];
-            key->p0C.b[2] = ((const EvtViewParam *)evtGetRowPayloadAddress(work, row))[1].b[2];
-            key->p0C.b[3] = ((const EvtViewParam *)evtGetRowPayloadAddress(work, row))[1].b[3];
+            key->p08.h[0] = *(const u16 *)(evtGetRowPayloadAddress(work, row) + 0x0);
         }
     }
-    group = evtEventViewerCreateEntry(7, runtime);
+
+    /* 00240D98..00240E24: kind 0x7. */
+    group = evtEventViewerCreateEntry(0x7, runtime);
     for (row = 0; row < (s32)work->subEntry4Count; row++) {
-        if (evtGetRowValue(work, row) == 7) {
+        if (evtGetRowValue(work, row) == 0x7) {
             key = evtAddFrameInfo(group, evtGetRowParameter(work, row), runtime);
             key->duration = evtGetRowFlags(work, row);
-            key->p08.h[0] = ((const EvtViewParam *)evtGetRowPayloadAddress(work, row))[0].h[0];
+            key->p08.h[0] = *(const u16 *)(evtGetRowPayloadAddress(work, row) + 0x0);
         }
     }
-    group = evtEventViewerCreateEntry(8, runtime);
+
+    /* 00240E28..00240ECC: kind 0x8. */
+    group = evtEventViewerCreateEntry(0x8, runtime);
     for (row = 0; row < (s32)work->subEntry4Count; row++) {
-        if (evtGetRowValue(work, row) == 8) {
+        if (evtGetRowValue(work, row) == 0x8) {
             key = evtAddFrameInfo(group, evtGetRowParameter(work, row), runtime);
-            key->p08.h[0] = ((const EvtViewParam *)evtGetRowPayloadAddress(work, row))[0].h[0];
-            key->p08.h[1] = ((const EvtViewParam *)evtGetRowPayloadAddress(work, row))[0].h[1];
-            key->p0C.h[0] = ((const EvtViewParam *)evtGetRowPayloadAddress(work, row))[1].h[0];
+            key->p08.h[0] = *(const u16 *)(evtGetRowPayloadAddress(work, row) + 0x0);
+            key->p08.h[1] = *(const u16 *)(evtGetRowPayloadAddress(work, row) + 0x2);
+            key->p0C.h[0] = *(const u16 *)(evtGetRowPayloadAddress(work, row) + 0x4);
         }
     }
+
+    /* 00240ED0..0024103C: kind 0x18. */
     for (row = 0; row < (s32)work->subEntry4Count; row++) {
         if (evtGetRowValue(work, row) == 0x18) {
             for (group = runtime->groups; group != NULL; group = group->next) {
-                if (strcmp(runtime->entryName[group->entryHeader],
-                    (char *)work->subEntry1Data + evtGetRowVariant(work, row) * 32) == 0) {
+                const char *rowName;
+                s32 nameIndex;
+                nameIndex = evtGetRowVariant(work, row);
+                rowName = (char *)work->subEntry1Data + nameIndex * 32;
+                if (strcmp(runtime->entryName[group->entryHeader], rowName) == 0) {
                     key = evtAddFrameInfo(group, evtGetRowParameter(work, row), runtime);
-                    key->p08.b[0] = ((const EvtViewParam *)evtGetRowPayloadAddress(work, row))[0].b[0];
-                    key->p08.b[1] = ((const EvtViewParam *)evtGetRowPayloadAddress(work, row))[0].b[1];
-                    key->p0C.h[0] = ((const EvtViewParam *)evtGetRowPayloadAddress(work, row))[1].h[0];
-                    key->p0C.h[1] = ((const EvtViewParam *)evtGetRowPayloadAddress(work, row))[1].h[1];
-                    key->p10.b[0] = ((const EvtViewParam *)evtGetRowPayloadAddress(work, row))[2].b[0];
-                    key->p10.b[1] = ((const EvtViewParam *)evtGetRowPayloadAddress(work, row))[2].b[1];
-                    key->p10.b[2] = ((const EvtViewParam *)evtGetRowPayloadAddress(work, row))[2].b[2];
-                    key->p10.b[3] = ((const EvtViewParam *)evtGetRowPayloadAddress(work, row))[2].b[3];
-                    key->p14.f = ((const EvtViewParam *)evtGetRowPayloadAddress(work, row))[3].f;
-                    key->p18.f = ((const EvtViewParam *)evtGetRowPayloadAddress(work, row))[4].f;
-                    key->p1C.b[0] = ((const EvtViewParam *)evtGetRowPayloadAddress(work, row))[5].b[0];
+                    key->p08.b[0] = *(const u8 *)(evtGetRowPayloadAddress(work, row) + 0x0);
+                    key->p08.b[1] = *(const u8 *)(evtGetRowPayloadAddress(work, row) + 0x1);
+                    key->p0C.h[0] = *(const u16 *)(evtGetRowPayloadAddress(work, row) + 0x4);
+                    key->p0C.h[1] = *(const u16 *)(evtGetRowPayloadAddress(work, row) + 0x6);
+                    key->p10.b[0] = *(const u8 *)(evtGetRowPayloadAddress(work, row) + 0x8);
+                    key->p10.b[1] = *(const u8 *)(evtGetRowPayloadAddress(work, row) + 0x9);
+                    key->p10.b[2] = *(const u8 *)(evtGetRowPayloadAddress(work, row) + 0xA);
+                    key->p10.b[3] = *(const u8 *)(evtGetRowPayloadAddress(work, row) + 0xB);
+                    key->p14.f = *(const f32 *)(evtGetRowPayloadAddress(work, row) + 0xC);
+                    key->p18.f = *(const f32 *)(evtGetRowPayloadAddress(work, row) + 0x10);
                 }
             }
         }
     }
+
+    /* 00241040..002411E4: kind 0x19. */
     group = evtEventViewerCreateEntry(0x19, runtime);
     for (row = 0; row < (s32)work->subEntry4Count; row++) {
         if (evtGetRowValue(work, row) == 0x19) {
             key = evtAddFrameInfo(group, evtGetRowParameter(work, row), runtime);
-            key->p08.h[0] = ((const EvtViewParam *)evtGetRowPayloadAddress(work, row))[0].h[0];
-            key->p08.h[1] = ((const EvtViewParam *)evtGetRowPayloadAddress(work, row))[0].h[1];
-            key->p0C.h[0] = ((const EvtViewParam *)evtGetRowPayloadAddress(work, row))[1].h[0];
+            key->p08.h[0] = *(const u16 *)(evtGetRowPayloadAddress(work, row) + 0x0);
+            key->p08.h[1] = *(const u16 *)(evtGetRowPayloadAddress(work, row) + 0x2);
+            key->p0C.h[0] = *(const u16 *)(evtGetRowPayloadAddress(work, row) + 0x4);
             if (work->subEntry25Count != 0 && work->subEntry25Data != NULL) {
-                memcpy(key->payload, work->subEntry25Data + key->p08.sh[1] * 0x40, 0x40);
+                *(EvtRowPayload40 *)key->payload =
+                    *(EvtRowPayload40 *)(work->subEntry25Data + key->p08.sh[1] * 0x40);
             }
             if (work->sub->kind < 8 && key->p08.sh[0] == 0) {
                 s32 component;
-                color = key->payload;
-                color->parameters.w[3] = 0;
+                rain = (EvtCameraColorPayload *)key->payload;
+                rain->parameters.w[3] = 0;
                 for (component = 2; component >= 0; component--) {
-                    color->parameters.z[component] = 0;
+                    rain->parameters.z[component] = 0;
                 }
                 printf("modify rain param\n");
             }
         }
     }
+
+    /* 002411E8..00241288: kind 0x1C. */
     group = evtEventViewerCreateEntry(0x1C, runtime);
     for (row = 0; row < (s32)work->subEntry4Count; row++) {
         if (evtGetRowValue(work, row) == 0x1C) {
             key = evtAddFrameInfo(group, evtGetRowParameter(work, row), runtime);
             key->duration = evtGetRowFlags(work, row);
-            key->p08.h[0] = ((const EvtViewParam *)evtGetRowPayloadAddress(work, row))[0].h[0];
-            key->p08.h[1] = ((const EvtViewParam *)evtGetRowPayloadAddress(work, row))[0].h[1];
+            key->p08.h[0] = *(const u16 *)(evtGetRowPayloadAddress(work, row) + 0x0);
+            key->p08.h[1] = *(const u16 *)(evtGetRowPayloadAddress(work, row) + 0x2);
         }
     }
+
+    /* 0024128C..00241314: kind 0x1D. */
     group = evtEventViewerCreateEntry(0x1D, runtime);
     for (row = 0; row < (s32)work->subEntry4Count; row++) {
         if (evtGetRowValue(work, row) == 0x1D) {
             key = evtAddFrameInfo(group, evtGetRowParameter(work, row), runtime);
             key->duration = evtGetRowFlags(work, row);
-            key->p08.h[0] = ((const EvtViewParam *)evtGetRowPayloadAddress(work, row))[0].h[0];
-            key->p0C.b[0] = ((const EvtViewParam *)evtGetRowPayloadAddress(work, row))[1].b[0];
+            key->p08.h[0] = *(const u16 *)(evtGetRowPayloadAddress(work, row) + 0x0);
         }
     }
+
+    /* 00241318..00241360 plus cold .L00240BC8..00240C10.
+     * Exactly the first matching title row is restored, then scanning stops. */
     group = evtEventViewerCreateEntry(0x1E, runtime);
-    title = -1;
-    row = 0;
-    if ((s32)work->subEntry4Count > 0) {
-        do {
-            if (evtGetRowValue(work, row) == 0x1E) {
-                key = evtAddFrameInfo(group, evtGetRowParameter(work, row), runtime);
-                key->p08.h[0] = ((const EvtViewParam *)evtGetRowPayloadAddress(work, row))[0].h[0];
-                key->p08.h[1] = ((const EvtViewParam *)evtGetRowPayloadAddress(work, row))[0].h[1];
-                title = key->p08.sh[0];
-                break;
-            }
-            row++;
-        } while (row < (s32)work->subEntry4Count);
+    timeiId = -1;
+    for (row = 0; row < (s32)work->subEntry4Count; row++) {
+        if (evtGetRowValue(work, row) == 0x1E) {
+            key = evtAddFrameInfo(group, evtGetRowParameter(work, row), runtime);
+            key->p08.h[0] = *(const u16 *)(evtGetRowPayloadAddress(work, row) + 0x0);
+            data = (const u8 *)evtGetRowPayloadAddress(work, row);
+            timeiId = key->p08.sh[0];
+            key->p08.h[1] = *(u16 *)(data + 2);
+            break;
+        }
     }
+
+    /* 00241364..002413EC: kind 0x20. */
     group = evtEventViewerCreateEntry(0x20, runtime);
     for (row = 0; row < (s32)work->subEntry4Count; row++) {
         if (evtGetRowValue(work, row) == 0x20) {
             key = evtAddFrameInfo(group, evtGetRowParameter(work, row), runtime);
             key->duration = evtGetRowFlags(work, row);
-            key->p08.h[0] = ((const EvtViewParam *)evtGetRowPayloadAddress(work, row))[0].h[0];
+            key->p08.h[0] = *(const u16 *)(evtGetRowPayloadAddress(work, row) + 0x0);
         }
     }
+
+    /* Continue with native .L002413F0: work->subEntry21Data link metadata. */
     if (work->subEntry21Data != NULL) {
         for (row = 0; row < (s32)work->subEntry21Count; row++) {
             if (((EvtGroupMetadata *)work->subEntry21Data)[row].entry != -1) {
                 for (group = runtime->groups; group != NULL; group = group->next) {
-                    if (strcmp(runtime->entryName[group->entryHeader], (char *)work->subEntry1Data +
-                        ((EvtGroupMetadata *)work->subEntry21Data)[row].entry * 32) == 0) {
+                    if (strcmp(runtime->entryName[group->entryHeader],
+                        (char *)work->subEntry1Data + ((EvtGroupMetadata *)work->subEntry21Data)[row].entry * 32) == 0) {
                         group->metadata.type = ((EvtGroupMetadata *)work->subEntry21Data)[row].type;
                         group->metadata.entry = ((EvtGroupMetadata *)work->subEntry21Data)[row].entry;
                         if (group->type == 2) {
@@ -5509,7 +5236,7 @@ s32 evtPopulateViewerTimelineFromMovie(PolyMovieWork *work, evtViewerInfo_t *run
                 }
             } else {
                 for (group = runtime->groups; group != NULL; group = group->next) {
-                    groupType = group->type;
+                    s32 groupType = group->type;
                     if (groupType == ((EvtGroupMetadata *)work->subEntry21Data)[row].type &&
                         group->setterId == ((EvtGroupMetadata *)work->subEntry21Data)[row].flag) {
                         group->metadata.type = groupType;
@@ -5525,20 +5252,23 @@ s32 evtPopulateViewerTimelineFromMovie(PolyMovieWork *work, evtViewerInfo_t *run
             }
         }
     }
-    for (row = 0; row < 10; row++) {
-        DDS3_GBWK->script.ints[200 + row] = -1;
+    {
+        s32 *ids = &DDS3_GBWK->script.ints[200];
+        for (row = 0; row < 10; row++) {
+            *ids++ = -1;
+        }
     }
-    if (needsBgm == 1) {
-        evtLoadEventBgm(((EvtPmdWorldResource *)work->mainEntry2Data)->area);
-        while (evtCheckEventBgmLoaded(((EvtPmdWorldResource *)work->mainEntry2Data)->area) ==
+    if (soundRowsPresent == 1) {
+        evtLoadEventBgm(((EvtViewerPackageRecord *)work->mainEntry2Data)->packageId);
+        while (evtCheckEventBgmLoaded(((EvtViewerPackageRecord *)work->mainEntry2Data)->packageId) ==
                EVT_EVENT_BGM_NOT_READY) {
         }
         printf("smg file load :eventViewer\n");
     }
-    if (title != -1) {
-        if (fldTitleChk() == 0) {
-            fldStartTitle(title, -1, 30);
-            printf("timei file load=%d\n", title);
+    if (timeiId != -1) {
+        if (!fldTitleChk()) {
+            fldStartTitle(timeiId, -1, 30);
+            printf("timei file load=%d\n", timeiId);
         } else {
             printf("warning!! timei process doing!!\n");
         }
@@ -5552,10 +5282,9 @@ s32 evtPopulateViewerTimelineFromMovie(PolyMovieWork *work, evtViewerInfo_t *run
     evtApplyViewerTimelineFrame(runtime->nowframe, runtime);
     evtViewerDispatchFlagMode(runtime);
     printf("SetGameData PM2 Version = %d Stageno = %d\n",
-        work->sub->kind, ((EvtPmdWorldResource *)work->mainEntry2Data)->area);
+        work->sub->kind, ((EvtViewerPackageRecord *)work->mainEntry2Data)->packageId);
     return 1;
 }
-
 
 extern void mnuReleaseCampSceneRegisteredIds(evtViewerInfo_t *runtime);
 extern void movieStop(void);
@@ -5588,7 +5317,7 @@ EvtViewerReloadResult evtReloadEventViewer(EvtPolygonMovieResourceMode resourceM
     while (sdfDelayedResrcCheck() != 0) {
     }
     dds3DrawFlag |= 0x2000000;
-    evtFormatPolygonMoviePaths(D_004372B0, D_004372B2, path0, path1, path2);
+    evtFormatPolygonMoviePaths(D_003BBE78, D_003BBE7A, path0, path1, path2);
     if (resourceMode == EVT_POLYGON_MOVIE_RESOURCE_MODE_SYNTHESIZE) {
         if (sdfFileCheckExist(path0) != SDF_FILE_EXISTS) {
             return EVT_VIEWER_RELOAD_FAILED;
@@ -5606,7 +5335,7 @@ EvtViewerReloadResult evtReloadEventViewer(EvtPolygonMovieResourceMode resourceM
     runtime->flags |= 1;
     while (sdfDelayedResrcCheck() != 0) {
     }
-    work = evtGetPolygonMovieWorkData2(D_004372B0, D_004372B2, resourceMode);
+    work = evtGetPolygonMovieWorkData2(D_003BBE78, D_003BBE7A, resourceMode);
     if (work != NULL) {
         runtime->windowContext = work;
         evtPopulateViewerTimelineFromMovie(work, runtime);
@@ -5615,214 +5344,7 @@ EvtViewerReloadResult evtReloadEventViewer(EvtPolygonMovieResourceMode resourceM
     return EVT_VIEWER_RELOAD_FAILED;
 }
 
-EvtPackedSoundTrackId evtGetSoundIndex(s32 eventId, EvtSoundVariation variation) {
-    s32 sequenceId;
+INCLUDE_SDATA(const s32, "event/evtEventViewerMenu", D_003BC350);
 
-    sequenceId = 0xC7;
-    if (eventId != 0x31F) {
-        sequenceId = eventId - 0x259;
-        if (eventId >= 0x320) {
-            sequenceId = (eventId < 0x384) ? (eventId - 0x258) : (eventId - 0x29E);
-        }
-    }
-    return ((sequenceId + 0x100) << 0x10) + variation;
-}
-
-EvtPackedSoundTrackId evtLoadEventBgm(s32 eventId) {
-    EvtPackedSoundTrackId packedTrackId;
-    if ((u32)(eventId - 0x258) >= 0x100) {
-        return 0;
-    }
-    packedTrackId = evtGetSoundIndex(eventId, 0);
-    p2sdLoadSMGFile(packedTrackId);
-    return packedTrackId;
-}
-
-EvtEventBgmReadiness evtCheckEventBgmLoaded(s32 eventId) {
-    if ((u32)(eventId - 0x258) >= 0x100) {
-        return EVT_EVENT_BGM_READY;
-    }
-    return p2sdLoadCheckMidi(evtGetSoundIndex(eventId, 0)) == SND_PACKED_TRACK_LOAD_RESIDENT
-        ? EVT_EVENT_BGM_READY
-        : EVT_EVENT_BGM_NOT_READY;
-}
-
-EvtPackedSoundTrackId evtPlayEventBgm(s32 eventId, EvtSoundVariation variation) {
-    EvtPackedSoundTrackId packedTrackId;
-    if ((u32)(eventId - 0x258) >= 0x100) {
-        return 0;
-    }
-    packedTrackId = evtGetSoundIndex(eventId, variation);
-    printf("Event BGM play :%08X\n", packedTrackId);
-    p2sdPlayBGM(packedTrackId);
-    return packedTrackId;
-}
-
-extern char D_004247F8[]; /* "Event BGM trans :%08X\n" */
-extern EvtPackedSoundTrackId evtGetSoundIndex(s32 eventId, EvtSoundVariation variation);
-extern void p2sdSetBgmTrack();
-
-void evtTransEventBgm(s32 eventId, EvtSoundVariation variation) {
-    EvtPackedSoundTrackId packedTrackId;
-    if ((u32)(eventId - 0x258) < 0x100U) {
-        packedTrackId = -1;
-        if (variation >= 0) {
-            packedTrackId = evtGetSoundIndex(eventId, variation);
-        }
-        printf(D_004247F8, packedTrackId);
-        p2sdSetBgmTrack(packedTrackId);
-    }
-}
-
-INCLUDE_RODATA(const s32, "game/code_00250010", D_004247F8);
-
-EvtPackedSoundTrackId evtFadeInEventBgm(s32 eventId, EvtSoundVariation variation) {
-    EvtPackedSoundTrackId packedTrackId;
-    if ((u32)(eventId - 0x258) >= 0x100) {
-        return 0;
-    }
-    packedTrackId = evtGetSoundIndex(eventId, variation);
-    printf("Event BGM fade in play :%08X\n", packedTrackId);
-    p2sdPlayBGMFade(packedTrackId);
-    return packedTrackId;
-}
-
-EvtPackedSoundTrackId evtStopEventBgm(s32 eventId, EvtSoundVariation variation) {
-    EvtPackedSoundTrackId packedTrackId;
-    if ((u32)(eventId - 0x258) >= 0x100) {
-        return 0;
-    }
-    packedTrackId = evtGetSoundIndex(eventId, variation);
-    p2sdStopBGM(packedTrackId);
-    return packedTrackId;
-}
-
-EvtPackedSoundTrackId evtPlaySe(s32 eventId, EvtSoundVariation variation) {
-    EvtPackedSoundTrackId packedTrackId;
-    if ((u32)(eventId - 0x258) >= 0x100) {
-        return 0;
-    }
-    packedTrackId = evtGetSoundIndex(eventId, variation);
-    p2sdPlaySE(packedTrackId, 0x7F, 0x3F);
-    return packedTrackId;
-}
-
-EvtPackedSoundTrackId evtStartBgmBySoundIdAndFade(s32 eventId, EvtSoundVariation variation) {
-    EvtPackedSoundTrackId packedTrackId;
-    if ((u32)(eventId - 0x258) >= 0x100) {
-        return 0;
-    }
-    packedTrackId = evtGetSoundIndex(eventId, variation);
-    p2sdStopSe(packedTrackId);
-    return packedTrackId;
-}
-
-extern char D_004377D0[];
-
-void evtMakeEventPackName(EvtPackEventId eventId, char *buffer) {
-    sprintf(buffer, D_004377D0, eventId);
-}
-
-dds3ProcessID_t *evtSearchEventPack(EvtPackEventId eventId) {
-    char taskName[32];
-
-    evtMakeEventPackName(eventId, taskName);
-    return dds3SearchProcessName((const char *)taskName);
-}
-
-/* Return its load phase, or EVT_PACK_LOAD_NOT_FOUND when the task is absent. */
-EvtPackLoadStatus evtGetEventPackStat(EvtPackEventId eventId) {
-    dds3ProcessID_t *task = evtSearchEventPack(eventId);
-    if (task == 0) {
-        return EVT_PACK_LOAD_NOT_FOUND;
-    }
-    return ((EvtPackLoadState *)dds3GetProcessData(task))->loadPhase;
-}
-
-EvtPackLoadState *evtGetPackProcessData(EvtPackEventId eventId) {
-    dds3ProcessID_t *task = evtSearchEventPack(eventId);
-    if (task != 0) {
-        return (EvtPackLoadState *)dds3GetProcessData(task);
-    }
-    return NULL;
-}
-
-
-void *evtGetEventPackResourceAddress(EvtPackEventId eventId, EvtPackSecondaryResourceId secondaryResourceId) {
-    dds3ProcessID_t *task;
-    EvtPackLoadState *data;
-    s32 i;
-
-    task = evtSearchEventPack(eventId);
-    if (task == 0) {
-        return 0;
-    }
-    data = (EvtPackLoadState *)dds3GetProcessData(task);
-    if (data->loadPhase != EVT_PACK_LOAD_COMPLETE) {
-        return 0;
-    }
-    for (i = 0; i < data->header->entryCount; i++) {
-        if (data->entries[i].secondaryResourceId == secondaryResourceId) {
-            return data->data + data->entries[i].dataOffset;
-        }
-    }
-    return 0;
-}
-
-extern void Eve_DistortionBlurSetTex(sdfTexHandle_t *);
-void evtRefreshTaskEffectTexture(EvtPackEventId eventId, EvtPackSecondaryResourceId key) {
-    EvtPackLoadState *data = evtGetPackProcessData(eventId);
-    void *address = evtGetEventPackResourceAddress(eventId, key);
-    sdfTexHandle_t *texture;
-    if (address != 0) {
-        if (data->effect72 != 0) {
-            sdfTexFreeDelayed(data->effect72);
-            data->effect72 = 0;
-        }
-        texture = sdfTexSet((SdfTextureFileHeader *)(address));
-        Eve_DistortionBlurSetTex(texture);
-        data->effect72 = texture;
-    }
-}
-
-extern EvtModelScaleEntry *D_00435DE0;
-extern EvtModelScaleEntry *D_00435DF0;
-extern void dds3EffectObjectBasicStatOn(dds3Basic_t *object, u32 flags);
-struct SoundMixer;
-extern dds3Basic_t *dds3AddBEDEffectObjectBasic2(struct SoundMixer *resource, const void *position, const void *scale);
-
-/* Spawn from a keyed task resource with two zeroed constructor vectors.
- * A nonnegative index applies the selected model-table scale relative to the base. */
-dds3Basic_t *evtSpawnResourceObject(EvtPackEventId eventId, EvtPackSecondaryResourceId key, s32 index) {
-    u8 vecA[16];
-    u8 vecB[16];
-    void *found;
-    dds3Basic_t *obj;
-    EvtEffectInner *inner;
-
-    memset(vecA, 0, 0x10);
-    memset(vecB, 0, 0x10);
-    found = evtGetEventPackResourceAddress(eventId, key);
-    if (found != 0) {
-        obj = dds3AddBEDEffectObjectBasic2(found, vecA, vecB);
-        if (obj != 0) {
-            dds3EffectObjectBasicStatOn(obj, 1);
-            if (index >= 0) {
-                inner = ((EvtEffectObject *)obj)->inner;
-                effEveBEDCutSetScale(inner->scaledObject, D_00435DF0[index].modelScale / D_00435DE0->modelScale);
-            }
-            return obj;
-        }
-        return obj;
-    }
-    return found;
-}
-
-INCLUDE_SDATA(const s32, "game/code_00250010", D_004377B8);
-
-INCLUDE_SDATA(const s32, "game/code_00250010", D_004377C0);
-
-INCLUDE_SDATA(const s32, "game/code_00250010", D_004377C8);
-
-INCLUDE_SDATA(const s32, "game/code_00250010", D_004377D0);
+INCLUDE_SDATA(const s32, "event/evtEventViewerMenu", D_003BC358);
 

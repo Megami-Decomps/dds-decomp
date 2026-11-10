@@ -2984,7 +2984,7 @@
 0x00193D70	frFontDrawAtlasGlyph	inferred	Draws one glyph from its atlas using screen position, cell dimensions, render state, UV rectangle, atlas state and draw flags; paired call sites render each child glyph. DDS2 counterpart is 0x0019BA00.
 0x00193FD0	frCreateUserFontPacket	inferred	SMT3HD name via SLUS_209.11 0x001C6698, reloc-identical; was frFontDrawCachedGlyphRelative
 0x00194038	frCopyFontClutToVram	inferred	SMT3HD name via SLUS_209.11 0x001C6700, reloc-identical; was sdfUploadGsImageUnderSemaphore
-0x001940B8	frFontUploadClearedTexture	inferred	confidence=high; src/dds1/game/code_00193C08.c:func_001940B8; Allocates a zeroed font texture image, uploads it to GS under semaphore protection and releases the temporary buffer. [names_qp9.tsv]
+0x001940B8	frFontUploadClearedTexture	inferred	confidence=high; src/dds1/interface/frFont.c:frFontUploadClearedTexture; Allocates a zeroed font texture image, uploads it to GS under semaphore protection and releases the temporary buffer. [names_qp9.tsv]
 0x00194190	frFontEnsureSlotLoaded	inferred	src/dds1/interface/frFont.c func_00194190: Loads font slot once; special slot uses existing entry buffer, others load requested resource path. [names_reviewed24.tsv]
 0x00194228	frInitFontTable	inferred	SMT3HD name via SLUS_209.11 0x001C68F0, unique-masked-hash; was frFontInitializeSystem
 0x00194440	frDestroyFontTable	inferred	SMT3HD name via SLUS_209.11 0x001C6B08, reloc-identical; was frFontReleaseAll
@@ -3317,7 +3317,7 @@
 0x001A14C8	btlResetActorEntryState	inferred	Resets battle controller counters and per-party-entry saved values. [names_reviewed14.tsv]
 0x001A1530	btlSnapshotResultRewards	inferred	Inferred from the current C implementation in game/code_001A0CA0.c; agent-proposed name checked against its owner, fields and callees (R1 finite names pass).
 0x001A1668	btlResolveQueuedSceneRequestParameters	inferred	Consumes a field scene request and selects its output parameter using model flags. [names_reviewed12.tsv]
-0x001A17F0	btlGetRuntime	inferred	confidence=high; src/dds1/game/code_001A04C0.c:func_001A17F0; Returns the battle runtime address. [names_qp9.tsv]
+0x001A17F0	btlGetRuntime	inferred	confidence=high; src/dds1/game/code_001A0CA0.c:btlGetRuntime; Returns the battle runtime address. [names_qp9.tsv]
 0x001A17F8	btlReadCurrentUnitHp	inferred	confidence=high; matched-C; src/dds1/game/code_001A0CA0.c:534:func_001A17F8; Reads current HP halfword; neighboring refresh clamps the same halfword against computed maximum.; twin=0x001AA700, anchored ordered retail pairing.; sources=names_R_Names35.tsv [names_qp10.tsv]
 0x001A1800	btlReadCurrentUnitMp	inferred	confidence=high; matched-C; src/dds1/game/code_001A0CA0.c:539:func_001A1800; Reads current MP halfword; neighboring refresh clamps it against computed maximum.; twin=0x001AA708, anchored ordered retail pairing.; sources=names_R_Names35.tsv [names_qp10.tsv]
 0x001A1808	btlComputeProfileMaxHp	inferred	confidence=high; matched-C; src/dds1/game/code_001A0CA0.c:546:func_001A1808; Battle callback invokes profile/enemy-table maximum HP calculation before passive-skill boosts.; twin=0x001AA710, anchored ordered retail pairing.; sources=names_R_Names35.tsv [names_qp10.tsv]
@@ -5207,10 +5207,10 @@
 0x00228520	evtCommand_BGM_VOL_DOWN	inferred	SMT3HD name via SLUS_209.11 0x001E90D8, shared-hash-in-run; was evtOpcodeStartReducedBgm
 0x00228548	evtCommand_BGM_VOL_UP	inferred	SMT3HD name via SLUS_209.11 0x001E9100, shared-hash-in-run; was evtOpcodeStopReducedBgm
 0x00228570	evtCommand_SE_PLAY_E	inferred	SMT3HD name via SLUS_209.11 0x001E9128, same slot and code (smt3units =), was evtOpcodeSetBgmVolumePan; was evtOpcodeSetBgmVolumePan
-0x002285B0	evtCommandStartBgmWithFade	inferred	confidence=high; src/dds1/game/code_00228058.c:func_002285B0; Reads sound-id and fade script parameters and starts the requested BGM. [names_qp9.tsv]
+0x002285B0	evtCommandStartBgmWithFade	inferred	confidence=high; src/dds1/event/evtCommand.c:evtCommandStartBgmWithFade; Reads sound-id and fade script parameters and starts the requested BGM. [names_qp9.tsv]
 0x002285F0	evtOpcodeRefreshTaskData	inferred	Forwards the task ID and resource key to evtRefreshTaskEffectTexture.
 0x00228630	evtOpcodeInitializeEffectSoundChannel	inferred	Invokes Eve_DistortionBlurSetDefTex and returns event opcode completion status one.
-0x00228650	evtCommandSetDrawFlagWhileWaiting	inferred	confidence=high; src/dds1/game/code_00228058.c:func_00228650; Sets draw-control bit 0x02000000 while the script command timer is below the requested duration; returns pending until elapsed. [names_qp9.tsv]
+0x00228650	evtCommandSetDrawFlagWhileWaiting	inferred	confidence=high; src/dds1/event/evtCommand.c:evtCommandSetDrawFlagWhileWaiting; Sets draw-control bit 0x02000000 while the script command timer is below the requested duration; returns pending until elapsed. [names_qp9.tsv]
 0x002286C0	evtGetAgeOfMoon	inferred	SMT3HD name via SLUS_209.11 0x001E9998, same code in IDA, was evtGetMirroredSolarPhase; was evtGetMirroredSolarPhase
 0x002286E8	evtGetAgeOfMoon16	inferred	SMT3HD name via SLUS_209.11 0x001E99C0, shared-hash-in-run; was evtGetSolarPhase
 0x002286F8	evtSetAgeOfMoon	inferred	SMT3HD name via SLUS_209.11 0x001E99D0, reloc-identical; was evtSetSolarPhase
@@ -5405,12 +5405,12 @@
 0x00235560	evtInitFrameVar	inferred	SMT3HD name via SLUS_209.11 0x001F4AF0, reloc-identical; was evtCreateFrameVariableTask
 0x00235598	evtDrawMenuFrame	inferred	TaskPurist
 0x00235768	evtAppendValueChangeDebugLabel	inferred	Appends the literal VALUE CHANGE. via the formatted SIF command to the caller packet list. [names_reviewed19.tsv]
-0x002357B8	evtDrawFloatValueEditorRow	inferred	Inferred from the current C implementation in game/code_00235270.c; agent-proposed name checked against its owner, fields and callees (R1 finite names pass).
+0x002357B8	evtDrawFloatValueEditorRow	inferred	Inferred from the current C implementation in event/evtEventViewerMenu.c; agent-proposed name checked against its owner, fields and callees (R1 finite names pass).
 0x00235978	evtViewerFloatValueUpdate	inferred	float-valued twin of func_00235C68 (VALUE CHANGE), steps +-0.1/+-1.0 into ctx+0x231C clamped to +0x2320/+0x2324 [names_M74_BattleLarge.tsv]
-0x00235AE0	evtDrawValueChangeNoticeRow	inferred	confidence=high; src/dds1/game/code_00235270.c:func_00235AE0; Appends the VALUE CHANGE. diagnostic text and returns its row-count contribution. CORRECTED: this is a row emitter handed to func_00235598 alongside evtDrawValueChangeInstructionRow = 0x00235B30, not a viewer/dialog routine; 'Viewer' was wrong and the Row suffix matches the sibling. [names_qp9.tsv]
+0x00235AE0	evtDrawValueChangeNoticeRow	inferred	confidence=high; src/dds1/event/evtEventViewerMenu.c:evtDrawValueChangeNoticeRow; Appends the VALUE CHANGE. diagnostic text and returns its row-count contribution. CORRECTED: this is a row emitter handed to func_00235598 alongside evtDrawValueChangeInstructionRow = 0x00235B30, not a viewer/dialog routine; 'Viewer' was wrong and the Row suffix matches the sibling. [names_qp9.tsv]
 0x00235B30	evtDrawValueChangeInstructionRow	inferred	Draws configured value and directional adjustment instructions by row selection. [names_reviewed7.tsv]
 0x00235C68	evtUpdateValueChangeDialog	inferred	Draws value editor, reads action controls and adjusts displayed value by one or ten. [names_reviewed7.tsv]
-0x00235DB0	evtFrameChangeHead	inferred	mnu menu, title, shop, or movie UI in game/code_00235270.c
+0x00235DB0	evtFrameChangeHead	inferred	mnu menu, title, shop, or movie UI in event/evtEventViewerMenu.c
 0x00235E00	evtViewerDrawFrameChangeRow	evidence	DDS2 twin func_00250BA0 (strings " L,R = FRMAE-+", "FRAME-+10", "FRAME-+100", "NOW FRAME", "CAMERA FOCUS") [names_M74_BattleLarge.tsv]
 0x00235FC8	evtViewerFrameChangeUpdate	inferred	DDS2 twin func_00250D68; frame-change window, steps +-1/10/100, dispatches evtApplyViewerTimelineFrame on apply [names_M74_BattleLarge.tsv]
 0x00236180	evtDrawProjectCommandRow	inferred	TaskPurist
@@ -5420,7 +5420,7 @@
 0x002365A0	evtUpdateTextSelectionDialog	inferred	Draws titled item list and handles cursor input when selection mode is active. [names_reviewed7.tsv]
 0x002366A0	evtDrawInputValueRow	inferred	sprintf of D_003BC098 with the two input strings at work+0x22D4/+0x22E0 [names_M95_Event.tsv]
 0x00236728	evtDrawKeyboardRow	inferred	11 keys of D_003688B8[row*12] at 0xC0 spacing, "%c" format, cursor highlight [names_M95_Event.tsv]
-0x00236828	evtUpdateNameEntryDialog	inferred	Inferred from the current C implementation in game/code_00235270.c; agent-proposed name checked against its owner, fields and callees (R1 finite names pass).
+0x00236828	evtUpdateNameEntryDialog	inferred	Inferred from the current C implementation in event/evtEventViewerMenu.c; agent-proposed name checked against its owner, fields and callees (R1 finite names pass).
 0x00236A40	evtDrawEventFileNameRow	evidence	"[E%3d_%03d.PM1+2+3]" from D_003BBE78/D_003BBE7A (event id pair) [names_M95_Event.tsv]
 0x00236AC8	evtDrawEventCutSelectRow	inferred	Draws event/cut row and key hints. [names_qp9.tsv]
 0x00236D80	evtUpdateEventCutSelectDialog	inferred	Updates selection; returns confirm or cancel state. [names_qp9.tsv]
@@ -5432,68 +5432,68 @@
 0x00238600	evtFrameListItem	inferred	draws one frame row; "----- NEW FRAME -----" placeholder for the empty end row; cursor colour 4/5 [names_M95_Event.tsv]
 0x002386E0	evtUpdateFrameListDialog	inferred	L13
 0x002388F8	evtViewerDrawWorldNodeRow	evidence	DDS2 twin func_002537A8; lists dds3GetActiveScene slot nodes (skips slot 3) with " %s" [names_M74_BattleLarge.tsv]
-0x00238A88	evtUpdateWorldNodeListDialog	inferred	Inferred from the current C implementation in game/code_00235270.c; agent-proposed name checked against its owner, fields and callees (R1 finite names pass).
+0x00238A88	evtUpdateWorldNodeListDialog	inferred	Inferred from the current C implementation in event/evtEventViewerMenu.c; agent-proposed name checked against its owner, fields and callees (R1 finite names pass).
 0x00238BE8	evtViewerDrawPendingNodeRow	evidence	DDS2 twin func_00253A98; "P%d:" plus resolved node name or dashes [names_M74_BattleLarge.tsv]
 0x00238D58	mnuDrawInfoWindowB	inferred	Same window builder, row count selected by the kind word at work+0x2308 (20 -> 2, 21 -> 4)
 0x00238E58	mnuDrawMessageMenuLabel	inferred	string "MESSAGE MENU (MESMAX %3d)" with itfMesGetEntryCount [names_reviewed2.tsv]
 0x00238ED0	evtDrawMessageDataRow	inferred	readability/matching review (QP16)
 0x00239148	evtUpdateMessageValueDialog	inferred	readability/matching review (QP16)
-0x00239350	mnuDrawCutFlagLabel	inferred	mnu menu, title, shop, or movie UI in game/code_00235270.c
+0x00239350	mnuDrawCutFlagLabel	inferred	mnu menu, title, shop, or movie UI in event/evtEventViewerMenu.c
 0x002393A0	evtDrawComparisonValueRow	inferred	readability/matching review (QP16)
 0x002395A8	evtUpdateComparisonValueDialog	inferred	readability/matching review (QP16)
 0x00239770	evtIsMenuTableEntryEnabled	inferred	Tests the selected entry enabled flag in the event viewer table. [names_reviewed8.tsv]
 0x00239798	mnuGetSelectedTableValue	inferred	Indexes the ten-column D_00368952 byte table by the runtime's selected row pointer and column field.
-0x00239A90	evtHandleGroupPropertyMenu	inferred	Inferred from the current C implementation in game/code_00235270.c; agent-proposed name checked against its owner, fields and callees (R1 finite names pass).
-0x00239DE0	mnuDrawMotionChangeLabel	inferred	mnu menu, title, shop, or movie UI in game/code_00235270.c
+0x00239A90	evtHandleGroupPropertyMenu	inferred	Inferred from the current C implementation in event/evtEventViewerMenu.c; agent-proposed name checked against its owner, fields and callees (R1 finite names pass).
+0x00239DE0	mnuDrawMotionChangeLabel	inferred	mnu menu, title, shop, or movie UI in event/evtEventViewerMenu.c
 0x00239E30	evtDrawMotionChangeRow	inferred	confidence=high; Draws GROUP, MOTNO, LOOP, HOKAN and MAXFRAME rows from the packed motion-change value; adopts canonical DDS2 00254CE0 name. Callback signature preserved. [PurC readability b2]
 0x0023A0D0	evtUpdateMotionChangeRow	inferred	Updates the motion-change row state. [names_qp9.tsv]
 0x0023A4B0	evtDrawGroupListRow	evidence	strings "DISABLE"/"ALL"/"UNIT ALL" then the type-1 group names [names_M95_Event.tsv]
-0x0023A688	evtUpdateGroupListDialog	inferred	Inferred from the current C implementation in game/code_00235270.c; agent-proposed name checked against its owner, fields and callees (R1 finite names pass).
+0x0023A688	evtUpdateGroupListDialog	inferred	Inferred from the current C implementation in event/evtEventViewerMenu.c; agent-proposed name checked against its owner, fields and callees (R1 finite names pass).
 0x0023A798	evtNoOpRGBEditorRow	inferred	confidence=high; RGB editor native0023A9B4..E8 materializes this callback and stores it at SP+8 for evtDrawMenuFrame's row argument. It draws nothing; evtDrawMenuFrame supplies list,x,y,index,data to row callbacks. DDS2 twin0x00255648 is installed identically at00255864..98. Existing five-argument DDS1 and void-formal DDS2 definitions retained. [Namer1 readability b81; native behavior and registered debug hooks]
 0x0023A7A0	evtRotateViewerPositionFromPad	inferred	Rotates the event-viewer position by the pad-selected camera-axis steps. Exact DDS2 pair: 0x00255650. [LiteH b29]
 0x0023A968	evtUpdateLightAndBackgroundEditor	inferred	Draws the light/background editor, handles mode and value input, then applies or restores the selected light color, direction, background and slot vectors; paired DDS2 implementation at 0x00255818. The provider body supplies the behavior evidence; no direct C caller is named.
 0x0023B1F8	evtNoOpXYSlotVectorEditorRow	inferred	Empty row callback passed to evtDrawMenuFrame by evtDrawAndHandleXYSlotVectorEditor; the editor draws its values directly. DDS2 twin at 0x002560A8.
-0x0023B200	evtDrawAndHandleXYSlotVectorEditor	inferred	confidence=high; src/dds1/game/code_00235270.c:2449; Draws and handles the X/Y slot-vector editor, uses evtNoOpXYSlotVectorEditorRow for the frame's blank row, applies .1/.01 edits through evtSetSlotVector, and restores saved values on cancel. DDS2 twin 0x002560B0.
+0x0023B200	evtDrawAndHandleXYSlotVectorEditor	inferred	confidence=high; src/dds1/event/evtEventViewerMenu.c:2515; Draws and handles the X/Y slot-vector editor, uses evtNoOpXYSlotVectorEditorRow for the frame's blank row, applies .1/.01 edits through evtSetSlotVector, and restores saved values on cancel. DDS2 twin 0x002560B0.
 0x0023B848	evtDrawOptionalPromptText	inferred	Draws first or second optional prompt string according to row kind. [names_reviewed7.tsv]
 0x0023B8F8	mnuDrawTimedPrompt	inferred	Window builder with a countdown at work+0x23E4 and confirm/cancel from the pad state
 0x0023B9D8	evtSetRuntimeCommandValues	inferred	Stores the three supplied values in successive runtime command fields at offsets 0x23E4, 0x23E8 and 0x23EC.
 0x0023B9E8	evtViewerDrawGroupRow	evidence	DDS2 twin func_00256898; "CURRENT", "DEFFAULT", then type 0x18 groups by entryName [names_M74_BattleLarge.tsv]
 0x0023BB20	evtViewerDrawGroupWindow	inferred	R1
-0x0023BC30	evtDrawShadowSettingsRow	inferred	Inferred from the current C implementation in game/code_00235270.c; agent-proposed name checked against its owner, fields and callees (R1 finite names pass).
+0x0023BC30	evtDrawShadowSettingsRow	inferred	Inferred from the current C implementation in event/evtEventViewerMenu.c; agent-proposed name checked against its owner, fields and callees (R1 finite names pass).
 0x0023BE40	evtViewerEditShadowProperties	inferred	confidence=high; Edits shadow mode, alpha and Y offset with row selection and stepped values; confirm1/cancel-1. Adopts canonical DDS2 00256CF0 name; native action-table slot22. [PurC readability b2]
 0x0023C178	evtSynchronizeSelectedEntry	inferred	Mirrors the event runtime selection into the active task and global slot.
 0x0023C208	evtPollRuntimeControlReady	inferred	Returns negative and clears runtime control state if external control poll is false. [names_reviewed7.tsv]
-0x0023C248	evtEditEffectSpriteFrame	inferred	Inferred from the current C implementation in game/code_00235270.c; agent-proposed name checked against its owner, fields and callees (R1 finite names pass).
-0x0023CA60	evtEditCameraColorKeyFrame	inferred	Inferred from the current C implementation in game/code_00235270.c; agent-proposed name checked against its owner, fields and callees (R1 finite names pass).
+0x0023C248	evtEditEffectSpriteFrame	inferred	Inferred from the current C implementation in event/evtEventViewerMenu.c; agent-proposed name checked against its owner, fields and callees (R1 finite names pass).
+0x0023CA60	evtEditCameraColorKeyFrame	inferred	Inferred from the current C implementation in event/evtEventViewerMenu.c; agent-proposed name checked against its owner, fields and callees (R1 finite names pass).
 0x0023D420	evtPollEffectFrameControl	inferred	readability/matching review (QP16)
 0x0023D560	evtDispatchActionByIndex	inferred	Calls indexed event action handler except when mode 11 requires a different index.
 0x0023D5B0	evtWriteSerializedBytes	inferred	Writes serialized event-runtime headers, directory entries, fixed records and payload bytes to the output handle; reused by the runtime export routines. [code-quality cleanup, 2026-10-13]
 0x0023D5C8	evtAssignRuntimeChildSequenceAndCount	inferred	Numbers children of the selected runtime group and returns their count. [names_reviewed17.tsv]
-0x0023D630	evtIndexGroupTypeElevenChildren	inferred	confidence=high; src/dds1/game/code_00235270.c:func_0023D630; Assigns sequential child indices only for runtime group tag 0xB; returns the number indexed. Group meaning remains unresolved. [names_qp9.tsv]
-0x0023D698	evtIndexGroupTypeThirteenChildren	inferred	confidence=high; src/dds1/game/code_00235270.c:func_0023D698; Assigns sequential child indices only for runtime group tag 0xD; returns the number indexed. Group meaning remains unresolved. [names_qp9.tsv]
-0x0023D700	evtIndexGroupTypeFourteenChildren	inferred	confidence=high; src/dds1/game/code_00235270.c:func_0023D700; Assigns sequential child indices only for runtime group tag 0xE; returns the number indexed. Group meaning remains unresolved. [names_qp9.tsv]
-0x0023D768	evtIndexGroupTypeFifteenChildren	inferred	confidence=high; src/dds1/game/code_00235270.c:func_0023D768; Assigns sequential child indices only for runtime group tag 0xF; returns the number indexed. Group meaning remains unresolved. [names_qp9.tsv]
-0x0023D7D0	evtIndexGroupTypeTwentyThreeChildren	inferred	confidence=high; src/dds1/game/code_00235270.c:func_0023D7D0; Assigns sequential child indices only for runtime group tag 0x17; returns the number indexed. Group meaning remains unresolved. [names_qp9.tsv]
-0x0023D838	evtIndexGroupTypeTwentySevenChildren	inferred	confidence=high; src/dds1/game/code_00235270.c:func_0023D838; Assigns sequential child indices only for runtime group tag 0x1B; returns the number indexed. Group meaning remains unresolved. [names_qp9.tsv]
-0x0023D8A0	evtIndexGroupTypeSixteenChildren	inferred	confidence=high; src/dds1/game/code_00235270.c:func_0023D8A0; Assigns sequential child indices only for runtime group tag 0x10; returns the number indexed. Group meaning remains unresolved. [names_qp9.tsv]
-0x0023D908	evtIndexGroupTypeSeventeenChildren	inferred	confidence=high; src/dds1/game/code_00235270.c:func_0023D908; Assigns sequential child indices only for runtime group tag 0x11; returns the number indexed. Group meaning remains unresolved. [names_qp9.tsv]
-0x0023D970	evtIndexGroupTypeTwentyFiveChildren	inferred	confidence=high; src/dds1/game/code_00235270.c:func_0023D970; Assigns sequential child indices only for runtime group tag 0x19; returns the number indexed. Group meaning remains unresolved. [names_qp9.tsv]
+0x0023D630	evtIndexGroupTypeElevenChildren	inferred	confidence=high; src/dds1/event/evtEventViewerMenu.c:evtIndexGroupTypeElevenChildren; Assigns sequential child indices only for runtime group tag 0xB; returns the number indexed. Group meaning remains unresolved. [names_qp9.tsv]
+0x0023D698	evtIndexGroupTypeThirteenChildren	inferred	confidence=high; src/dds1/event/evtEventViewerMenu.c:evtIndexGroupTypeThirteenChildren; Assigns sequential child indices only for runtime group tag 0xD; returns the number indexed. Group meaning remains unresolved. [names_qp9.tsv]
+0x0023D700	evtIndexGroupTypeFourteenChildren	inferred	confidence=high; src/dds1/event/evtEventViewerMenu.c:evtIndexGroupTypeFourteenChildren; Assigns sequential child indices only for runtime group tag 0xE; returns the number indexed. Group meaning remains unresolved. [names_qp9.tsv]
+0x0023D768	evtIndexGroupTypeFifteenChildren	inferred	confidence=high; src/dds1/event/evtEventViewerMenu.c:evtIndexGroupTypeFifteenChildren; Assigns sequential child indices only for runtime group tag 0xF; returns the number indexed. Group meaning remains unresolved. [names_qp9.tsv]
+0x0023D7D0	evtIndexGroupTypeTwentyThreeChildren	inferred	confidence=high; src/dds1/event/evtEventViewerMenu.c:evtIndexGroupTypeTwentyThreeChildren; Assigns sequential child indices only for runtime group tag 0x17; returns the number indexed. Group meaning remains unresolved. [names_qp9.tsv]
+0x0023D838	evtIndexGroupTypeTwentySevenChildren	inferred	confidence=high; src/dds1/event/evtEventViewerMenu.c:evtIndexGroupTypeTwentySevenChildren; Assigns sequential child indices only for runtime group tag 0x1B; returns the number indexed. Group meaning remains unresolved. [names_qp9.tsv]
+0x0023D8A0	evtIndexGroupTypeSixteenChildren	inferred	confidence=high; src/dds1/event/evtEventViewerMenu.c:evtIndexGroupTypeSixteenChildren; Assigns sequential child indices only for runtime group tag 0x10; returns the number indexed. Group meaning remains unresolved. [names_qp9.tsv]
+0x0023D908	evtIndexGroupTypeSeventeenChildren	inferred	confidence=high; src/dds1/event/evtEventViewerMenu.c:evtIndexGroupTypeSeventeenChildren; Assigns sequential child indices only for runtime group tag 0x11; returns the number indexed. Group meaning remains unresolved. [names_qp9.tsv]
+0x0023D970	evtIndexGroupTypeTwentyFiveChildren	inferred	confidence=high; src/dds1/event/evtEventViewerMenu.c:evtIndexGroupTypeTwentyFiveChildren; Assigns sequential child indices only for runtime group tag 0x19; returns the number indexed. Group meaning remains unresolved. [names_qp9.tsv]
 0x0023D9D8	evtViewerWriteTrackDirectory	inferred	Writes the mode-selected PMD directory and payload offsets.
 0x0023DF60	evtWriteRuntimeHeaderValues	inferred	Copies four selected event state words into a contiguous serialized header.
 0x0023DFA8	evtViewerWriteChildRecords	inferred	Writes serialized child records, filtering groups by PM2/PM3 mode and deriving type-8 spans.
 0x0023E138	evtWriteFixedSizeEntries	inferred	Copies each 0x20-byte table entry to the event output using the table's count.
-0x0023E1B0	evtWriteGroupHeader	inferred	evt event state and dispatch in game/code_00235270.c
+0x0023E1B0	evtWriteGroupHeader	inferred	evt event state and dispatch in event/evtEventViewerMenu.c
 0x0023E228	evtCopyRuntimeChildPayloadsToBuffer	inferred	Copies payloads for all children of the selected runtime group. [names_reviewed17.tsv]
-0x0023E2B0	evtEmitGroupTypeElevenPayloads	inferred	confidence=high; src/dds1/game/code_00235270.c:func_0023E2B0; Walks runtime group tag 0xB and forwards each child payload with fixed size 0x20 to the output routine. Group meaning remains unresolved. [names_qp9.tsv]
-0x0023E338	evtEmitGroupTypeThirteenPayloads	inferred	confidence=high; src/dds1/game/code_00235270.c:func_0023E338; Walks runtime group tag 0xD and forwards each child payload with fixed size 0x28 to the output routine. Group meaning remains unresolved. [names_qp9.tsv]
-0x0023E3C0	evtEmitGroupTypeFourteenPayloads	inferred	confidence=high; src/dds1/game/code_00235270.c:func_0023E3C0; Walks runtime group tag 0xE and forwards each child payload with fixed size 0x2C to the output routine. Group meaning remains unresolved. [names_qp9.tsv]
-0x0023E448	evtEmitGroupTypeFifteenPayloads	inferred	confidence=high; src/dds1/game/code_00235270.c:func_0023E448; Walks runtime group tag 0xF and forwards each child payload with fixed size 0x2C to the output routine. Group meaning remains unresolved. [names_qp9.tsv]
-0x0023E4D0	evtEmitGroupTypeTwentyThreePayloads	inferred	confidence=high; src/dds1/game/code_00235270.c:func_0023E4D0; Walks runtime group tag 0x17 and forwards each child payload with fixed size 0x2C to the output routine. Group meaning remains unresolved. [names_qp9.tsv]
-0x0023E558	evtEmitGroupTypeTwentySevenPayloads	inferred	confidence=high; src/dds1/game/code_00235270.c:func_0023E558; Walks runtime group tag 0x1B and forwards each child payload with fixed size 0x28 to the output routine. Group meaning remains unresolved. [names_qp9.tsv]
-0x0023E5E0	evtEmitGroupTypeSixteenPayloads	inferred	confidence=high; src/dds1/game/code_00235270.c:func_0023E5E0; Walks runtime group tag 0x10 and forwards each child payload with fixed size 0x18 to the output routine. Group meaning remains unresolved. [names_qp9.tsv]
-0x0023E668	evtEmitGroupTypeSeventeenPayloads	inferred	confidence=high; src/dds1/game/code_00235270.c:func_0023E668; Walks runtime group tag 0x11 and forwards each child payload with fixed size 0x24 to the output routine. Group meaning remains unresolved. [names_qp9.tsv]
-0x0023E6F0	evtWriteGroupMetadata	inferred	evt event state and dispatch in game/code_00235270.c
-0x0023E770	evtEmitGroupTypeTwentyFivePayloads	inferred	confidence=high; src/dds1/game/code_00235270.c:func_0023E770; Walks runtime group tag 0x19 and forwards each child payload with fixed size 0x40 to the output routine. Group meaning remains unresolved. [names_qp9.tsv]
+0x0023E2B0	evtEmitGroupTypeElevenPayloads	inferred	confidence=high; src/dds1/event/evtEventViewerMenu.c:evtEmitGroupTypeElevenPayloads; Walks runtime group tag 0xB and forwards each child payload with fixed size 0x20 to the output routine. Group meaning remains unresolved. [names_qp9.tsv]
+0x0023E338	evtEmitGroupTypeThirteenPayloads	inferred	confidence=high; src/dds1/event/evtEventViewerMenu.c:evtEmitGroupTypeThirteenPayloads; Walks runtime group tag 0xD and forwards each child payload with fixed size 0x28 to the output routine. Group meaning remains unresolved. [names_qp9.tsv]
+0x0023E3C0	evtEmitGroupTypeFourteenPayloads	inferred	confidence=high; src/dds1/event/evtEventViewerMenu.c:evtEmitGroupTypeFourteenPayloads; Walks runtime group tag 0xE and forwards each child payload with fixed size 0x2C to the output routine. Group meaning remains unresolved. [names_qp9.tsv]
+0x0023E448	evtEmitGroupTypeFifteenPayloads	inferred	confidence=high; src/dds1/event/evtEventViewerMenu.c:evtEmitGroupTypeFifteenPayloads; Walks runtime group tag 0xF and forwards each child payload with fixed size 0x2C to the output routine. Group meaning remains unresolved. [names_qp9.tsv]
+0x0023E4D0	evtEmitGroupTypeTwentyThreePayloads	inferred	confidence=high; src/dds1/event/evtEventViewerMenu.c:evtEmitGroupTypeTwentyThreePayloads; Walks runtime group tag 0x17 and forwards each child payload with fixed size 0x2C to the output routine. Group meaning remains unresolved. [names_qp9.tsv]
+0x0023E558	evtEmitGroupTypeTwentySevenPayloads	inferred	confidence=high; src/dds1/event/evtEventViewerMenu.c:evtEmitGroupTypeTwentySevenPayloads; Walks runtime group tag 0x1B and forwards each child payload with fixed size 0x28 to the output routine. Group meaning remains unresolved. [names_qp9.tsv]
+0x0023E5E0	evtEmitGroupTypeSixteenPayloads	inferred	confidence=high; src/dds1/event/evtEventViewerMenu.c:evtEmitGroupTypeSixteenPayloads; Walks runtime group tag 0x10 and forwards each child payload with fixed size 0x18 to the output routine. Group meaning remains unresolved. [names_qp9.tsv]
+0x0023E668	evtEmitGroupTypeSeventeenPayloads	inferred	confidence=high; src/dds1/event/evtEventViewerMenu.c:evtEmitGroupTypeSeventeenPayloads; Walks runtime group tag 0x11 and forwards each child payload with fixed size 0x24 to the output routine. Group meaning remains unresolved. [names_qp9.tsv]
+0x0023E6F0	evtWriteGroupMetadata	inferred	evt event state and dispatch in event/evtEventViewerMenu.c
+0x0023E770	evtEmitGroupTypeTwentyFivePayloads	inferred	confidence=high; src/dds1/event/evtEventViewerMenu.c:evtEmitGroupTypeTwentyFivePayloads; Walks runtime group tag 0x19 and forwards each child payload with fixed size 0x40 to the output routine. Group meaning remains unresolved. [names_qp9.tsv]
 0x0023E7F8	evtViewerSaveTrackFiles	inferred	Opens, writes, and closes the paired PM2 and PM3 track files; returns success status.
 0x0023ED08	evtGetRowValue	inferred	Selects compact or extended row layout to read its value field. [names_reviewed7.tsv]
 0x0023ED58	evtGetRowVariant	inferred	Selects compact or extended row layout to read its signed variant field. [names_reviewed7.tsv]
