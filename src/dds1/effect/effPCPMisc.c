@@ -2010,7 +2010,7 @@ void effPCPMultiFilterExpDraw(EffPCPCompactFadeWork *work) {
         color = work->color;
         rect->param.Filter.rgba = effMagaCylinderCalcColor(
             effColorBlend(color & 0xFFFFFF, color, opacity), work->baseColor);
-        effResourceRectDrawPixels(rect);
+        dds3EffectPartialMultiFilterDraw(rect);
         work->frame++;
     }
 }

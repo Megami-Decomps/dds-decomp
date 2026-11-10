@@ -2670,7 +2670,7 @@
 0x0018F9E8	dds3EffectFilterDrawTexQuad	inferred	Existing descriptive name, shared by audited native identity; was effResourceQuadDraw.
 0x0018FBF8	dds3EffectPartialMultiFilterCreate	inferred	SMT3HD name via SLUS_209.11 0x001A2E28, reloc-identical; was effCloneResourceTemplate
 0x0018FC88	dds3EffectPartialMultiFilterDelete	inferred	SMT3HD name via SLUS_209.11 0x001A2EB8, shared-hash-in-run; was effReleaseResourceTemplate
-0x0018FCA0	effResourceRectDrawPixels	inferred	confidence=high; func_0018FCA0 generates bounds around center offsets 256/224 and calls the quad renderer with coordinate-scaling flag 0.; sources=names_R_Structs54b.tsv; twin=0x00188068, input-family pairing. [names_qp10.tsv]
+0x0018FCA0	dds3EffectPartialMultiFilterDraw	inferred	SMT3HD name via SLUS_209.11 0x001A2ED0, same body after PartialMultiFilterCreate/Delete; was effResourceRectDrawPixels
 0x0018FD10	effResourceRectDrawGsCoords	inferred	confidence=high; func_0018FD10 generates already-scaled GS bounds with half-height coordinates and calls the quad renderer with flag 1.; sources=names_R_Structs54b.tsv; twin=0x001880D8, input-family pairing. [names_qp10.tsv]
 0x0018FD88	effTrackPolyCreateWork	inferred	confidence=high; src/dds2/game/code_0018F9E8.c:func_0018FD88; Copies source work and creates a point-history buffer, then installs its initial vector and control value. CORRECTED: dds1 twin correction, applied identically (effModelTrackPoly caller). [names_qp9.tsv]
 0x0018FE60	effTrackPolyRelease	inferred	Frees a track polygon's nested data and then its containing object.

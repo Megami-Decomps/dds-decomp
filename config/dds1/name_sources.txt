@@ -2723,7 +2723,7 @@
 0x00187DB0	dds3EffectFilterDrawTexQuad	inferred	Existing descriptive name, shared by audited native identity; was effResourceQuadDraw.
 0x00187FC0	dds3EffectPartialMultiFilterCreate	inferred	SMT3HD name via SLUS_209.11 0x001A2E28, reloc-identical; was effCloneResourceTemplate
 0x00188050	dds3EffectPartialMultiFilterDelete	inferred	SMT3HD name via SLUS_209.11 0x001A2EB8, shared-hash-in-run; was effReleaseResourceTemplate
-0x00188068	effResourceRectDrawPixels	inferred	confidence=high; func_00188068 generates bounds around center offsets 256/224 and calls the quad renderer with coordinate-scaling flag 0.; sources=names_R_Structs54b.tsv; twin=0x0018FCA0, input-family pairing. [names_qp10.tsv]
+0x00188068	dds3EffectPartialMultiFilterDraw	inferred	SMT3HD name via SLUS_209.11 0x001A2ED0, same body after PartialMultiFilterCreate/Delete; was effResourceRectDrawPixels
 0x001880D8	effComputeBlurRectBounds	inferred	readability/matching review (QP16)
 0x00188150	effTrackPolyCreateWork	inferred	confidence=high; src/dds1/game/code_00187DB0.c:func_00188150; Copies source work and creates a point-history buffer, then installs its initial vector and control value. CORRECTED: callees are game/code_00187DB0.c tracks; the caller declares it EffTrackPolyWork *(EffTrackPolyModel *), so 'effect clone with point history' was a claim beyond the body. [names_qp9.tsv]
 0x00188278	Eff_ModelTrackPolyGetMarkPosition	inferred	SMT3HD name via SLUS_209.11 0x001A31B8, reloc-identical; was effSampleTrackPolyEndpoints

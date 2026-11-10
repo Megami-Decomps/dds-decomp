@@ -77,30 +77,30 @@ void dds3EffectFilterDrawTexQuad(effResourceRectDrawParams_t *params, sdfTexHand
 
 
 /* Clone rectangle parameters and select a fresh source handle. */
-dds3Effect_PartialMultiFilter_t *dds3EffectPartialMultiFilterCreate(dds3Effect_PartialMultiFilterParam_t *src) {
+dds3Effect_PartialMultiFilter_t *dds3EffectPartialMultiFilterCreate(dds3Effect_PartialMultiFilterParam_t *pParam) {
     dds3Effect_PartialMultiFilter_t *dst = sdfChipAllocDirect(sizeof(dds3Effect_PartialMultiFilter_t));
 
     dst->hAlphaTex = dds3BillboardGetGeneralTex(0);
-    memcpy(&dst->param, src, sizeof(*src));
+    memcpy(&dst->param, pParam, sizeof(*pParam));
     return dst;
 }
 
-void dds3EffectPartialMultiFilterDelete(dds3Effect_PartialMultiFilter_t *work) {
-    sdfChipFreeDirect(work);
+void dds3EffectPartialMultiFilterDelete(dds3Effect_PartialMultiFilter_t *hPartialMultiFilter) {
+    sdfChipFreeDirect(hPartialMultiFilter);
 }
 
 
 /* Generate pixel-coordinate bounds; the renderer applies GS coordinate scale. */
-void effResourceRectDrawPixels(dds3Effect_PartialMultiFilter_t *work) {
-    s32 extent = (s32)((f32)work->param.area * 1.4f);
-    s32 x = work->param.center[0] + 0x100;
-    s32 y = work->param.center[1] + 0xE0;
+void dds3EffectPartialMultiFilterDraw(dds3Effect_PartialMultiFilter_t *hPartialMultiFilter) {
+    s32 half = (s32)((f32)hPartialMultiFilter->param.area * 1.4f);
+    s32 x = hPartialMultiFilter->param.center[0] + 0x100;
+    s32 y = hPartialMultiFilter->param.center[1] + 0xE0;
 
-    work->param.Filter.bounds.left = x - extent;
-    work->param.Filter.bounds.top = y - extent;
-    work->param.Filter.bounds.right = x + extent;
-    work->param.Filter.bounds.bottom = y + extent;
-    dds3EffectFilterDrawTexQuad(&work->param.Filter, work->hAlphaTex, 0);
+    hPartialMultiFilter->param.Filter.bounds.left = x - half;
+    hPartialMultiFilter->param.Filter.bounds.top = y - half;
+    hPartialMultiFilter->param.Filter.bounds.right = x + half;
+    hPartialMultiFilter->param.Filter.bounds.bottom = y + half;
+    dds3EffectFilterDrawTexQuad(&hPartialMultiFilter->param.Filter, hPartialMultiFilter->hAlphaTex, 0);
 }
 
 /* Generate already-scaled GS coordinates; the renderer must not scale again. */

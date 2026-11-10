@@ -320,7 +320,7 @@ void Eve_EffectDraw(void) {
         dds3EffectFilter(&Eve_Filter);
     }
     if (Eve_PartialMultiFilterShow) {
-        effResourceRectDrawPixels(hEve_PartialMultiFilter);
+        dds3EffectPartialMultiFilterDraw(hEve_PartialMultiFilter);
     }
 }
 
