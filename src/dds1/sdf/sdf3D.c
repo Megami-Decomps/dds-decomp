@@ -6,12 +6,12 @@
 #include "libsdf.h"
 #include "sdf_resource.h"
 
-#define D_002E8ED0 D_00317C20
-#define D_002ECF10 D_0031BC60
-#define D_002F5600 D_00324350
+#define D_002E8ED0 sdf3DSlot2TmxData
+#define D_002ECF10 sdf3DSlot1TmxData
+#define D_002F5600 vu1MicroPacketEnd
 #define D_00529630 D_00398390
-#define D_005518B8 D_003BD37C
-#define D_005518C8 D_003BD390
+#define D_005518B8 sdf3DSlot2Tex
+#define D_005518C8 sdf3DSlot1Tex
 
 /* Register selectors carried by GIF A+D writes in the two GS contexts. */
 enum {
@@ -573,12 +573,12 @@ INCLUDE_SDATA(const s32, "sdf/sdf3D", sdf3DLightDefault);
 
 INCLUDE_SDATA(const s32, "sdf/sdf3D", sdf3DFogDefault);
 
-INCLUDE_SDATA(const s32, "sdf/sdf3D", D_003BD37C);
+INCLUDE_SDATA(const s32, "sdf/sdf3D", sdf3DSlot2Tex);
 
 INCLUDE_SDATA(const s32, "sdf/sdf3D", sdf3DSpecularTex);
 
 INCLUDE_SDATA(const s32, "sdf/sdf3D", sdf3DRefMapParam);
 
-INCLUDE_SDATA(const s32, "sdf/sdf3D", D_003BD390);
+INCLUDE_SDATA(const s32, "sdf/sdf3D", sdf3DSlot1Tex);
 
 INCLUDE_SDATA(const s32, "sdf/sdf3D", sdfPadPortSlotPairs);
