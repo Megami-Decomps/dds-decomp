@@ -4,7 +4,7 @@
 #include "evt_message_window_api.h"
 #include "mnu_input.h"
 #include "snd_sequence_volume_pan.h"
-#include "kwln.h"
+#include "kernel.h"
 #include "mnu.h"
 #include "brs_level_progress_api.h"
 #include "mnu_result.h"

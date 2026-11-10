@@ -41,7 +41,7 @@
 #include "ee_mmi.h"
 #include "pcp_vu0.h"
 #include "sdf_vu_transform_api.h"
-#include "kwln.h"
+#include "kernel.h"
 #include "scr.h"
 #include "scr_current_process_user_data_api.h"
 #include "scr.h"

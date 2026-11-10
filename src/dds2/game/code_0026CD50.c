@@ -1,5 +1,5 @@
 #include "sdk_ps2.h"
-#include "kwln.h"
+#include "kernel.h"
 #include "mnu_list.h"
 #include "dds3_task_state.h"
 #include "evt_world.h"

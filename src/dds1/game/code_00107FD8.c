@@ -32,6 +32,7 @@
 #include "sdf_chip.h"
 #include "sdf_primitive_packet_api.h"
 
+#include "kernel.h"
 #include "kwln.h"
 #include "dds3_task_priority_query.h"
 #include "dds3_task_create.h"
@@ -1063,7 +1064,7 @@ u32 evtCheckSelectionState(void) {
 #include "fr_font.h"
 #include "sdf_chip.h"
 #include "sdf_primitive_packet_api.h"
-#include "kwln.h"
+#include "kernel.h"
 #include "dds3_task_priority_query.h"
 #include "dds3_task_create.h"
 #include "sdf.h"

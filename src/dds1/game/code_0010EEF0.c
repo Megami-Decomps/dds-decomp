@@ -9,7 +9,7 @@
 #include "sdf_vu_matrix.h"
 #include "sdf_chip.h"
 #include "sdf_packet_list.h"
-#include "kwln.h"
+#include "kernel.h"
 #include "pcp_vu0.h"
 #include "eff_transform.h"
 #include "dds3obj.h"

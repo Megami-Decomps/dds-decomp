@@ -8115,7 +8115,7 @@ s32 btlUpdateCameraCursorPose(BtlLinkedCommand *action, BtlCamState *pose) {
 #include "sdf_debug_api.h"
 #include "btl_sound_handle_node.h"
 #include "sdf_trig.h"
-#include "kwln.h"
+#include "kernel.h"
 #include "btl_actor_work.h"
 
 extern BtlCameraCursorView btlCameraCursor;

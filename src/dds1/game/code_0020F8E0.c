@@ -7,7 +7,7 @@
 #include "btl_event_pack_id_api.h"
 #include "btl_command.h"
 #include "ee_mmi.h"
-#include "kwln.h"
+#include "kernel.h"
 #include "dds3_process_registration.h"
 #include "scr.h"
 #include "scr.h"

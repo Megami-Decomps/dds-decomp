@@ -6,7 +6,7 @@
 #include "dsp_entry_api.h"
 #include "fr_font.h"
 #include "ui_color.h"
-#include "kwln.h"
+#include "kernel.h"
 #include "mnu_result.h"
 #include "pty_accumulate_stat_gains_api.h"
 #include "mdl_flag_api.h"

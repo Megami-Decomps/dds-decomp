@@ -11,7 +11,7 @@
 #include "eff_resource_slots.h"
 #include "eff_resource_records.h"
 #include "mnu_input.h"
-#include "kwln.h"
+#include "kernel.h"
 #include "pty_skill_menu_api.h"
 #include "mnu_list.h"
 #include "sdf_heap_api.h"

@@ -9,6 +9,7 @@
 #include "dds3_frame_draw_bank.h"
 #include "dds3_effect_sprite.h"
 #include "dds3Admin.h"
+#include "kernel.h"
 #include "kwln.h"
 #include "dds3_task_flags.h"
 #include "sdf.h"

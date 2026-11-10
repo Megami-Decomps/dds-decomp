@@ -117,7 +117,7 @@ void mnuTitleApplySequenceState(BrsSkillPackageWork *work) {
 
 #include "common.h"
 #include "fr_font.h"
-#include "kwln.h"
+#include "kernel.h"
 #include "mnu_result.h"
 struct EffectSlotSet;
 extern void effDrawSpriteWithCornerColors(s32, s32, s32, u32 *, s32, struct EffectSlotSet *, s32, s32);

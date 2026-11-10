@@ -6,7 +6,7 @@
 #include "mnu_mantra.h"
 #include "mnu_mantra_position_api.h"
 #include "snd_sequence_volume_pan.h"
-#include "kwln.h"
+#include "kernel.h"
 #include "dds3_process_registration.h"
 #include "sdf_heap_api.h"
 #include "mnu.h"

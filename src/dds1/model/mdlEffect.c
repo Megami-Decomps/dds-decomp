@@ -3,6 +3,7 @@
 #include "dds3_path.h"
 #include "dds3_admin_control_api.h"
 #include "sdf_request.h"
+#include "kernel.h"
 #include "kwln.h"
 #include "dds3_task_create.h"
 #include "sdf_packet_list.h"

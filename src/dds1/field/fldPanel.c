@@ -2,7 +2,7 @@
 #include "fld_title_banner_menu.h"
 #include "sdf_chip.h"
 
-#include "kwln.h"
+#include "kernel.h"
 #include "dds3_task_create.h"
 #include "dds3_task_lifecycle.h"
 extern dds3ProcessID_t *inputpanel_id;

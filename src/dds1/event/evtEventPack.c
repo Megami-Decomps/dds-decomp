@@ -1,6 +1,6 @@
 #include "sdk_ps2.h"
 #include "common.h"
-#include "kwln.h"
+#include "kernel.h"
 #include "dds3_task_create.h"
 #include "sdf_chip.h"
 #include "sdf_heap_api.h"

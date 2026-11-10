@@ -3,7 +3,7 @@
 #include "fr_font_draw_glyph.h"
 #include "mnu_input.h"
 #include "itf_draw_grid.h"
-#include "kwln.h"
+#include "kernel.h"
 #include "mnu.h"
 #include "mnu_staff.h"
 #include "mnu_list.h"

@@ -5,7 +5,7 @@
 #include "sdf_chip.h"
 #include "fr_font_context.h"
 #include "fr_font.h"
-#include "kwln.h"
+#include "kernel.h"
 #include "dds3_task_create.h"
 #include "sdf_heap_api.h"
 

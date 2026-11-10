@@ -13,7 +13,7 @@
 #include "eff_resource_slots.h"
 #include "eff_resource_source_lifetime.h"
 #include "eff_resource_list.h"
-#include "kwln.h"
+#include "kernel.h"
 #include "dds3_task_create.h"
 #include "dds3_fade.h"
 #include "sdf_heap_api.h"

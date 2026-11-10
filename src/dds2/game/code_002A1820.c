@@ -12,7 +12,7 @@
 #include "sdf.h"
 #include "mnu_movie_playback_api.h"
 #include "sdf_semaphore_api.h"
-#include "kwln.h"
+#include "kernel.h"
 #include "dds3_task_runner.h"
 #include "dds3_task_create.h"
 #include "dds3_fade.h"

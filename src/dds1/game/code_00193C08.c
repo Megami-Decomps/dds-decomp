@@ -7,7 +7,7 @@
 #include "sdf_heap_api.h"
 #include "itf.h"
 #include "itf_mem_node.h"
-#include "kwln.h"
+#include "kernel.h"
 #include "font_mem_control_api.h"
 /* Declared before first use (were implicit int). */
 extern void frLoadStyleAll(void);

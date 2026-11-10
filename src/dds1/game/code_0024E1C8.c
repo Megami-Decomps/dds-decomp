@@ -5,7 +5,7 @@
 #include "mnu_title_stream.h"
 #include "sdf_chip.h"
 #include "eff_resource_slots.h"
-#include "kwln.h"
+#include "kernel.h"
 #include "sdf_heap_api.h"
 #include "eff.h"
 #include "mnu_list.h"

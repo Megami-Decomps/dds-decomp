@@ -1,7 +1,7 @@
 #ifndef EFF_MANAGER_TASK_H
 #define EFF_MANAGER_TASK_H
 
-#include "kwln.h"
+#include "kernel.h"
 
 /* These updates run each scheduler pass; RETAIN keeps each callback installed. */
 dds3TaskUpdateResult_t effSubmitFieldBlendStateTask(dds3ProcessID_t *task);

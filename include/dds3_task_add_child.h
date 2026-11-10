@@ -1,7 +1,7 @@
 #ifndef DDS3_TASK_ADD_CHILD_H
 #define DDS3_TASK_ADD_CHILD_H
 
-#include "kwln.h"
+#include "kernel.h"
 
 /*
  * Append child to parent's child list, detaching it from any previous parent.

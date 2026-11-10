@@ -12,7 +12,7 @@
 #include "sdf_trig.h"
 #include "snd_pad.h"
 #include "sdf_packet_list.h"
-#include "kwln.h"
+#include "kernel.h"
 #include "dds3_task_priority_query.h"
 #include "dds3_task_create.h"
 #include "sdf_heap_api.h"

@@ -25,7 +25,7 @@
 #include "sdf_heap_api.h"
 #include "mnu_staff.h"
 #include "mnu_party_entry_lookup.h"
-#include "kwln.h"
+#include "kernel.h"
 #include "dds3_task_create.h"
 #include "dds3_fade.h"
 #include "evt_world.h"

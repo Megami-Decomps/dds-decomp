@@ -137,7 +137,7 @@ typedef struct FileStatBonus {
 extern MdlFlagPair fileRareItemNoticeFlagRows[];
 extern FileStatBonus ptyUnlockedUnitStatBonusRows[24];
 extern s32 mnuAdvanceTitleStateUnderSemaphore(void);
-#include "kwln.h"
+#include "kernel.h"
 #include "dds3_task_create.h"
 #include "dds3_fade.h"
 #include "fpu.h"

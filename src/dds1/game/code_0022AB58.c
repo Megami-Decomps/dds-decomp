@@ -3,7 +3,7 @@
 #include "common.h"
 #include "sdf_file_existence_api.h"
 #include "mdl_flag_api.h"
-#include "kwln.h"
+#include "kernel.h"
 #include "dds3_task_create.h"
 #include "sdf_packet_list.h"
 #include "sdf.h"
@@ -121,7 +121,7 @@ void evtChkEndProcess(void) {
 
 #ifdef NON_MATCHING
 #include "common.h"
-#include "kwln.h"
+#include "kernel.h"
 #include "sdf.h"
 #include "sdf_packet_list.h"
 #include "sdf_packet_alloc.h"

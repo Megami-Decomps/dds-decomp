@@ -6,7 +6,7 @@
 #include "snd_sequence_volume_pan.h"
 #include "mnu_input.h"
 #include "itf_draw_grid.h"
-#include "kwln.h"
+#include "kernel.h"
 #include "mnu.h"
 #include "mnu_item_requirement_api.h"
 #include "mnu_staff.h"

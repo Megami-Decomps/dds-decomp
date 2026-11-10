@@ -45,7 +45,7 @@
 #include "btl_state.h"
 #include "eff.h"
 #include "btl_action.h"
-#include "kwln.h"
+#include "kernel.h"
 #include "dat_state.h"
 #include "dat_calculated_stat_value_api.h"
 #include "dat_calculate_command_base_value_api.h"

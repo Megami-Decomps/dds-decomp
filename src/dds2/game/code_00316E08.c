@@ -12,7 +12,7 @@
 #include "file.h"
 #include "eff_resource_slots.h"
 #include "eff_resource_source_lifetime.h"
-#include "kwln.h"
+#include "kernel.h"
 #include "dds3_task_create.h"
 #include "sdf_heap_api.h"
 #include "mnu_work.h"

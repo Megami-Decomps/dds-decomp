@@ -36,7 +36,7 @@
 #include "dds3obj.h"
 #include "dds3_basic_array_cursor.h"
 #include "dds3_world_primary.h"
-#include "kwln.h"
+#include "kernel.h"
 #include "dds3_task_create.h"
 #include "dat_state.h"
 #include "dat_new_cycle_state.h"

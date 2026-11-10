@@ -15,7 +15,7 @@
 #include "sdf_textured_rect.h"
 #include "sdf_chip.h"
 #include "sdf_dev_state.h"
-#include "kwln.h"
+#include "kernel.h"
 #include "dds3_process_registration.h"
 #include "sdf_heap_api.h"
 #include "fld_waypoint.h"

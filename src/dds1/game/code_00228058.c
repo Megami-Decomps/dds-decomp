@@ -10,7 +10,7 @@
 #include "scr.h"
 #include "scr_command_timer_api.h"
 #include "scr_string_parameter_api.h"
-#include "kwln.h"
+#include "kernel.h"
 #include "dds3_process_registration.h"
 #include "dds3_task_create.h"
 #include "evt_world.h"

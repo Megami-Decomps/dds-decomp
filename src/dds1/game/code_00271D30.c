@@ -14,7 +14,7 @@
 #include "itf_draw_grid.h"
 #include "mnu_staff.h"
 #include "mnu_camp_state_ack_api.h"
-#include "kwln.h"
+#include "kernel.h"
 #include "dds3_task_create.h"
 #include "dds3_fade.h"
 #include "sdf_heap_api.h"

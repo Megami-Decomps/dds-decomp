@@ -7,7 +7,7 @@
 #include "fld_area_encounter_table.h"
 #include "sdf_packet_list.h"
 #include "ee_mmi.h"
-#include "kwln.h"
+#include "kernel.h"
 #include "dds3_task_runner.h"
 #include "dds3_task_priority_query.h"
 #include "dds3_admin_control_api.h"

@@ -1,5 +1,5 @@
 #include "mnu_input.h"
-#include "kwln.h"
+#include "kernel.h"
 #include "mnu.h"
 #include "mnu_result.h"
 #include "brs_result_counter_completion_api.h"

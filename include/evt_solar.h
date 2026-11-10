@@ -2,7 +2,7 @@
 #define EVT_SOLAR_H
 
 #include "common.h"
-#include "kwln.h"
+#include "kernel.h"
 
 /* DatWorldState control bits used by the shared solar clock and overlay. */
 #define SOLAR_PHASE_ADVANCE_FLAG 1

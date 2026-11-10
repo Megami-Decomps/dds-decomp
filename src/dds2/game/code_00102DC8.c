@@ -18,7 +18,7 @@
 #include "sdf_packet_builders.h"
 #include "sdf_texture_draw_packet.h"
 #include "sdf_tex_packet.h"
-#include "kwln.h"
+#include "kernel.h"
 #include "dds3_task_update_count.h"
 #include "dds3_process_registration.h"
 #include "dds3_named_slot.h"

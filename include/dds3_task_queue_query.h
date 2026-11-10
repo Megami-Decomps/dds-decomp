@@ -2,7 +2,7 @@
 #define DDS3_TASK_QUEUE_QUERY_H
 
 #include "common.h"
-#include "kwln.h"
+#include "kernel.h"
 #include "dds3_task_state.h"
 
 /* Zero-based position in the current linked order of one scheduler queue. */

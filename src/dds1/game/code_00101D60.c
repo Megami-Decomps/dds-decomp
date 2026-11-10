@@ -11,6 +11,7 @@
 #include "dds3Admin.h"
 #include "sdf_linked_packet.h"
 #include "sdf_dev_start_load_api.h"
+#include "kernel.h"
 #include "kwln.h"
 #include "dds3_task_flags.h"
 #include "sdf.h"

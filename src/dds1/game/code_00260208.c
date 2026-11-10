@@ -16,7 +16,7 @@
 #include "mnu_staff.h"
 #include "brs_task.h"
 #include "brs_task_poll_done_api.h"
-#include "kwln.h"
+#include "kernel.h"
 #include "dds3_task_create.h"
 #include "dds3_fade.h"
 #include "sdf_heap_api.h"

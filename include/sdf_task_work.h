@@ -2,7 +2,7 @@
 #define SDF_TASK_WORK_H
 
 #include "common.h"
-#include "kwln.h"
+#include "kernel.h"
 #include "sdf.h"
 
 struct sdfMemHandle_t;

@@ -2,6 +2,7 @@
 #include "sdf_line_pair_packet_api.h"
 #include "dds3_path.h"
 #include "sdf_request.h"
+#include "kernel.h"
 #include "kwln.h"
 #include "dds3_task_create.h"
 #include "sdf_packet_list.h"

@@ -10,7 +10,7 @@
 #include "evt_message_window_api.h"
 #include "evt_world_object_api.h"
 #include "evt_active_entry_flag_api.h"
-#include "kwln.h"
+#include "kernel.h"
 #include "mnu_list.h"
 #include "dds3_task_state.h"
 #include "dds3_task_state_query.h"

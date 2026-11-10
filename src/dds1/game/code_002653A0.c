@@ -13,7 +13,7 @@
 #include "pty_accumulate_stat_gains_api.h"
 #include "mnu_result.h"
 #include "brs_result_counter_completion_api.h"
-#include "kwln.h"
+#include "kernel.h"
 #include "mdl_flag_api.h"
 #include "prf_profile_cap.h"
 #include "prf_current_record_view.h"

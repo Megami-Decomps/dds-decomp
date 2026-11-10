@@ -3,7 +3,7 @@
 #include "dat_command.h"
 #include "dat_command_record_index.h"
 #include "mnu_input.h"
-#include "kwln.h"
+#include "kernel.h"
 #include "mnu.h"
 #include "mnu_item_requirement_api.h"
 #include "mnu_shop.h"

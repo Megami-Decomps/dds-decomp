@@ -4,7 +4,7 @@
 #include "sdf_chip.h"
 #include "dds3Admin.h"
 #include "kernel.h"
-#include "kwln.h"
+#include "kernel.h"
 #include "dds3_task_runner.h"
 #include "dds3_admin_dispatch.h"
 
@@ -34,7 +34,7 @@ u32 dds3GetAdminTaskValue(void) {
 void dds3AdminiCallSequence(s32 requestedMode, const void *requestData, u32 dataBytes, s32 markHistory) {
     dds3AdminiData_t *work;
     void *previousRequestData;
-    Dds3AdminControlFlags flags;
+    u32 flags;
 
     if (requestData == NULL || dataBytes <= DDS3_ADMIN_REQUEST_DATA_MAX_BYTES) {
         work = GetAdminiProcessData();
@@ -119,7 +119,7 @@ Dds3AdminHistoryFlags dds3AdminiGetPrevHistoryFlag(void)
 /* Activate a pending mode request and continue through the mode dispatcher. */
 dds3TaskUpdateResult_t dds3AdminiStartSequence(dds3ProcessID_t *task) {
     dds3AdminiData_t *work = (dds3AdminiData_t *)dds3GetProcessData(task);
-    Dds3AdminControlFlags flags = work->Stat;
+    u32 flags = work->Stat;
     s32 isRestoringHistory;
     void (*modeEntryCallback)(s32, void *);
 
@@ -184,7 +184,7 @@ dds3TaskUpdateResult_t dds3AdminiEndCheck(dds3ProcessID_t *task) {
 
 dds3TaskUpdateResult_t dds3AdminiNeoProcess(dds3ProcessID_t *task) {
     dds3AdminiData_t *work = (dds3AdminiData_t *)dds3GetProcessData(task);
-    Dds3AdminControlFlags flags = work->Stat;
+    u32 flags = work->Stat;
     Dds3AdminModeCleanupResult (*cleanup)(void);
     s32 previousHistoryIndex;
 

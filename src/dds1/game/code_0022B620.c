@@ -2,6 +2,7 @@
 #include "mnu_camp_display.h"
 #include "common.h"
 #include "mdl_flag_api.h"
+#include "kernel.h"
 #include "kwln.h"
 #include "dds3_task_create.h"
 #include "sdf_chip.h"

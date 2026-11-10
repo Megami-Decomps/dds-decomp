@@ -11,7 +11,7 @@
 #include "dds3_world_selection.h"
 #include "dds3_world_value.h"
 #include "sdf_heap_api.h"
-#include "kwln.h"
+#include "kernel.h"
 #include "mnu_title_effect.h"
 #include "file.h"
 #include "file_request_api.h"

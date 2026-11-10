@@ -19,7 +19,7 @@
 #include "itf_mes_window.h"
 #include "itf_mes_panel_mode.h"
 #include "itf_panel_api.h"
-#include "kwln.h"
+#include "kernel.h"
 #include "dds3_task_create.h"
 
 

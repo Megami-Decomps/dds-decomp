@@ -32,7 +32,7 @@
 #include "sdf_linked_packet.h"
 #include "sdf_packet_builders.h"
 #include "itf_panel_draw.h"
-#include "kwln.h"
+#include "kernel.h"
 #include "dds3_task_priority_query.h"
 #include "dds3_task_create.h"
 #include "dds3_fade.h"
@@ -2526,7 +2526,7 @@ void mnuQueueCampTextGlyphWithChildColor(s32 fontValue, s32 enabled, s32 unused2
 #include "mnu.h"
 #include "dat_state.h"
 #include "mnu_list.h"
-#include "kwln.h"
+#include "kernel.h"
 
 /* The dispatcher passes its last argument to entry callbacks as opaque data,
  * not as a function address. Modes select polling, primary and secondary actions. */
@@ -4141,7 +4141,7 @@ void mnuSetFlagForMenuEntry(s32 slotIndex) {
 }
 
 
-#include "kwln.h"
+#include "kernel.h"
 #include "mnu.h"
 #include "dat_state.h"
 #include "mnu_list.h"

@@ -54,7 +54,7 @@
 #include "snd_slot.h"
 #include "snd_track_load_activity.h"
 #include "active_sound_node.h"
-#include "kwln.h"
+#include "kernel.h"
 #include "btl_task_state.h"
 #include "btl_task_condition.h"
 #include "sdf_heap_api.h"
@@ -6497,7 +6497,7 @@ extern f32 btlCameraTerminalDistance;
 #include "sdf_debug_api.h"
 #include "btl_sound_handle_node.h"
 #include "sdf_trig.h"
-#include "kwln.h"
+#include "kernel.h"
 #include "btl_actor_work.h"
 
 extern BtlCameraCursorView btlCameraCursor;
@@ -9690,7 +9690,7 @@ void sndFreeResourceLink(SoundResourceLink *node) {
 #include "btl_effect_position.h"
 #include "sdf_chip.h"
 #include "snd_slot.h"
-#include "kwln.h"
+#include "kernel.h"
 #include "btl_task_state.h"
 #include "btl_task_condition.h"
 #include "sdf_heap_api.h"

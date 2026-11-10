@@ -7,7 +7,7 @@
 #include "fr_font.h"
 #include "itf_draw_grid.h"
 #include "mnu_staff.h"
-#include "kwln.h"
+#include "kernel.h"
 #include "sdf_heap_api.h"
 #include "dat_state.h"
 #include "mnu.h"

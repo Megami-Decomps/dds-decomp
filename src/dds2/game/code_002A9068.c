@@ -15,7 +15,7 @@
 #include "dds3_task_add_child.h"
 #include "ui_color.h"
 #include "fr_font.h"
-#include "kwln.h"
+#include "kernel.h"
 #include "dds3_task_create.h"
 #include "dds3_fade.h"
 #include "sdf_heap_api.h"
@@ -610,7 +610,7 @@ s64 mnuReleaseTitleEffectResourceGroups(MenuStaffContext *work) {
 
 #ifdef NON_MATCHING
 #include "common.h"
-#include "kwln.h"
+#include "kernel.h"
 #include "eff.h"
 #include "mnu.h"
 #include "mnu_staff.h"

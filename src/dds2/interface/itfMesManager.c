@@ -24,7 +24,7 @@
 #include "fr_font_measure.h"
 #include "eff_resource_slots.h"
 #include "sdf_chip.h"
-#include "kwln.h"
+#include "kernel.h"
 #include "dds3_task_create.h"
 #include "pcp_vu0.h"
 #include "btl_scene_fade.h"
@@ -2297,7 +2297,7 @@ void itfDrawSelectedSoundRow(instanceMes_tag *panel) {
 #include "itf_panel_draw.h"
 #include "sdf_packet_list.h"
 #include "sdf_packet_alloc.h"
-#include "kwln.h"
+#include "kernel.h"
 #include "fr_font_measure.h"
 #include "fr_font_position.h"
 

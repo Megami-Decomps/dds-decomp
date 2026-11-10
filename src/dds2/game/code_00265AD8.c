@@ -3,7 +3,7 @@
 #include "evt_message_window_api.h"
 #include "evt_active_entry_flag_api.h"
 #include "eff_resource_slots.h"
-#include "kwln.h"
+#include "kernel.h"
 #include "dds3_fade.h"
 #include "mnu.h"
 #include "sdf_heap_api.h"

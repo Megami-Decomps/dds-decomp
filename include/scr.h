@@ -6,7 +6,7 @@
  * See include/README.md for how the layouts were verified. */
 
 #include "common.h"
-#include "kwln.h"
+#include "kernel.h"
 #include "scr_trace_result.h"
 #include "scr_command_result.h"
 #include "scr_command_index.h"

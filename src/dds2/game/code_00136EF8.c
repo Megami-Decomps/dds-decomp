@@ -6,7 +6,7 @@
 #include "sdf_textured_rect.h"
 #include "sdf_chip.h"
 #include "sdf_dev_state.h"
-#include "kwln.h"
+#include "kernel.h"
 #include "sdf_heap_api.h"
 #include "fld_waypoint.h"
 #include "fld_npc_motion.h"

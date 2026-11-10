@@ -1,6 +1,7 @@
 #include "sdk_ps2.h"
 #include "mnu_camp_display.h"
 #include "common.h"
+#include "kernel.h"
 #include "kwln.h"
 #include "dds3_task_create.h"
 #include "sdf_chip.h"

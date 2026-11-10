@@ -6,7 +6,7 @@
 #include "sdf_chip.h"
 #include "sdf_packet_list.h"
 #include "sdf_packet_builders.h"
-#include "kwln.h"
+#include "kernel.h"
 #include "dds3_task_runner.h"
 #include "dds3_task_create.h"
 #include "sdf.h"

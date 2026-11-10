@@ -1,7 +1,7 @@
 #ifndef PTY_SKILL_MENU_API_H
 #define PTY_SKILL_MENU_API_H
 
-#include "kwln.h"
+#include "kernel.h"
 
 typedef s32 PtySkillUnavailableMarking;
 enum {

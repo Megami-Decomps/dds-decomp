@@ -14,7 +14,7 @@
 #include "fr_font_temporary_entry_api.h"
 #include "itf_mem_node.h"
 #include "itf_resource_segments.h"
-#include "kwln.h"
+#include "kernel.h"
 #include "dds3_draw_buffer.h"
 #include "dds3_task_runner.h"
 #include "btl.h"
@@ -1197,7 +1197,7 @@ void frFontMoveChainTo(s32 targetX, s32 targetY, _FRQ *glyphChain) {
 #include "fr_font_temporary_entry_api.h"
 #include "itf_mem_node.h"
 #include "itf_resource_segments.h"
-#include "kwln.h"
+#include "kernel.h"
 #include "dds3_draw_buffer.h"
 
 #define FR_FONT_POSITION_BAND_HEIGHT 0x54 /* a text line's band: glyphs within it share a line */

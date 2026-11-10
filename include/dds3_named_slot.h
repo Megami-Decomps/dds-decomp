@@ -2,7 +2,7 @@
 #define DDS3_NAMED_SLOT_H
 
 #include "common.h"
-#include "kwln.h"
+#include "kernel.h"
 
 /* Linked named-task slots shared by the DDS1 and DDS2 kernel windows. */
 typedef struct fclNamedSlot_t {

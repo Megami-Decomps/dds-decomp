@@ -49,7 +49,7 @@
 #include "fr_font_measure.h"
 #include "eff_resource_slots.h"
 #include "sdf_chip.h"
-#include "kwln.h"
+#include "kernel.h"
 #include "dds3_task_priority_query.h"
 #include "dds3_task_create.h"
 #include "sdf_heap_api.h"

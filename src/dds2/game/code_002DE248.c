@@ -1,4 +1,5 @@
 #include "sdk_ps2.h"
+#include "kernel.h"
 #include "eff_block128.h"
 #include "sdf_model_packet_callback.h"
 #include "eff_editor_menu.h"

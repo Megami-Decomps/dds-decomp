@@ -9,7 +9,7 @@
 #include "mnu_staff_bullet_list_refresh_api.h"
 #include "mnu_shop.h"
 #include "mnu_list.h"
-#include "kwln.h"
+#include "kernel.h"
 #include "dat_state.h"
 #include "mdl_flag_api.h"
 #include "pty_adjust_item_quantity_api.h"

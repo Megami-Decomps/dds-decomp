@@ -39,7 +39,7 @@
 #include "mdl_motion_controller_lookup_api.h"
 #include "sdf.h"
 #include "sdf_sif_command.h"
-#include "kwln.h"
+#include "kernel.h"
 #include "dds3_task_runner.h"
 #include "dds3_task_update_count.h"
 #include "dds3_task_create.h"

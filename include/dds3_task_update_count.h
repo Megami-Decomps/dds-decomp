@@ -1,7 +1,7 @@
 #ifndef DDS3_TASK_UPDATE_COUNT_H
 #define DDS3_TASK_UPDATE_COUNT_H
 
-#include "kwln.h"
+#include "kernel.h"
 
 /* Number of non-skipped scheduler update passes recorded for a task. */
 typedef u32 dds3TaskUpdateCount_t;

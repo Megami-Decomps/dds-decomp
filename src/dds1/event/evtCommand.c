@@ -24,7 +24,7 @@
 #include "fld_player_scene_state.h"
 #include "eff_inner_float_api.h"
 #include "pcp_vu0.h"
-#include "kwln.h"
+#include "kernel.h"
 #include "evt_task.h"
 #include "evt_world.h"
 #include "evt_path_direction.h"

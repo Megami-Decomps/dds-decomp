@@ -1,7 +1,7 @@
 #include "common.h"
 #include "sdf_chip.h"
 #include "sdf_packet_list.h"
-#include "kwln.h"
+#include "kernel.h"
 #include "sdf.h"
 #include "evt_picture.h"
 #include "itf_panel_draw.h"

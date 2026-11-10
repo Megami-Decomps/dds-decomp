@@ -20,7 +20,7 @@
 #include "fr_font_measure.h"
 #include "eff_resource_slots.h"
 #include "sdf_chip.h"
-#include "kwln.h"
+#include "kernel.h"
 #include "sdf_heap_api.h"
 #include "pcp_vu0.h"
 #include "btl_scene_fade.h"

@@ -9,7 +9,7 @@
 #include "dds3_world_selection.h"
 #include "evt_world_object_api.h"
 #include "sdf_packet_list.h"
-#include "kwln.h"
+#include "kernel.h"
 #include "dds3_task_runner.h"
 #include "dds3_task_create.h"
 #include "sdf_heap_api.h"

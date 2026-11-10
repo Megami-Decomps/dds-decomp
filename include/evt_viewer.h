@@ -6,7 +6,7 @@
 #include "evt_world.h"
 #include "evt_polygon_movie.h"
 #include "fld.h"
-#include "kwln.h"
+#include "kernel.h"
 
 struct dds3ProcessID_t;
 struct EffNodeDescriptor;

@@ -2,6 +2,7 @@
 #include "common.h"
 #include "dds3_draw_light_binding.h"
 #include "sdf_vu0.h"
+#include "kernel.h"
 #include "kwln.h"
 #include "gs_packet.h"
 #include "pcp_vu0.h"

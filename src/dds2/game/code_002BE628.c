@@ -30,7 +30,7 @@
 #include "dds3obj.h"
 #include "evt_world.h"
 #include "sdf.h"
-#include "kwln.h"
+#include "kernel.h"
 #include "dds3_task_create.h"
 #include "sdf_pac_state.h"
 #include "sdf_projection.h"

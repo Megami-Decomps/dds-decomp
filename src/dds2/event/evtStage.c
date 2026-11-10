@@ -16,6 +16,7 @@
 #include "dds3_task_lifecycle.h"
 #include "dds3_task_queue_query.h"
 #include "dds3_task_state.h"
+#include "kernel.h"
 #include "kwln.h"
 #include "dds3_draw_light_binding.h"
 #include "sdf_texture_offset_list.h"

@@ -1,7 +1,7 @@
 #ifndef DDS3_TASK_CREATE_H
 #define DDS3_TASK_CREATE_H
 
-#include "kwln.h"
+#include "kernel.h"
 
 /*
  * Allocate a task and place it in scheduler queues. Returns NULL on allocation

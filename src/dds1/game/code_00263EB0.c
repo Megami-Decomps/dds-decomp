@@ -5,7 +5,7 @@
 #include "evt_stage_test_api.h"
 #include "mnu_input.h"
 #include "ui_color.h"
-#include "kwln.h"
+#include "kernel.h"
 #include "mnu.h"
 #include "brs_level_progress_api.h"
 #include "mnu_result.h"
@@ -358,7 +358,7 @@ void mnuItemUpdateDisplay(BrsSkillPackageWork *scene) {
 
 #include "common.h"
 #include "fr_font_measure.h"
-#include "kwln.h"
+#include "kernel.h"
 #include "eff.h"
 #include "mnu_result.h"
 #include "itf.h"

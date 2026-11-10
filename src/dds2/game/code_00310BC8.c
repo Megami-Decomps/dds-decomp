@@ -6,7 +6,7 @@
 #include "sdf_packet_header.h"
 #include "fr_font_measure.h"
 #include "sdf_quaternion.h"
-#include "kwln.h"
+#include "kernel.h"
 #include "dds3_process_registration.h"
 #include "dds3_task_create.h"
 #include "sdf_heap_api.h"

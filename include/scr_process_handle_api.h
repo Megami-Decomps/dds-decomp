@@ -1,7 +1,7 @@
 #ifndef DDS_SCR_PROCESS_HANDLE_API_H
 #define DDS_SCR_PROCESS_HANDLE_API_H
 
-#include "kwln.h"
+#include "kernel.h"
 #include "scr_vm_integer.h"
 
 /* Script command operands and return values encode scheduler task pointers in

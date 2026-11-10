@@ -28,7 +28,7 @@
 #include "sdf_heap_api.h"
 #include "mnu.h"
 #include "mnu_list.h"
-#include "kwln.h"
+#include "kernel.h"
 #include "dds3_task_create.h"
 #include "dds3_fade.h"
 #include "dat_state.h"

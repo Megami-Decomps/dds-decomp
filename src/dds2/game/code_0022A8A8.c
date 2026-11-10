@@ -6,7 +6,7 @@
 #include "btl_event_pack_id_api.h"
 #include "btl_command.h"
 #include "pcp_vu0.h"
-#include "kwln.h"
+#include "kernel.h"
 #include "dds3_process_registration.h"
 #include "scr.h"
 #include "scr.h"

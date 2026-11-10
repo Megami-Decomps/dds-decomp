@@ -2,7 +2,7 @@
 #include "common.h"
 #include "sdf_vu0.h"
 #include "sdf_vu_color_transform.h"
-#include "kwln.h"
+#include "kernel.h"
 #include "sdf_asset_packets.h"
 #include "sdf_asset_state.h"
 #include "sdf_vu_lighting.h"

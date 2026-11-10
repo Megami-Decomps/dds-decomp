@@ -40,7 +40,7 @@ void evtChkEndProcess(void) {
 
 #ifdef NON_MATCHING
 #include "common.h"
-#include "kwln.h"
+#include "kernel.h"
 #include "sdf.h"
 #include "sdf_packet_list.h"
 #include "sdf_packet_alloc.h"

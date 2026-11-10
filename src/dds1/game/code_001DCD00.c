@@ -19,7 +19,7 @@
 #include "btl_effect_position.h"
 #include "sdf_chip.h"
 #include "snd_slot.h"
-#include "kwln.h"
+#include "kernel.h"
 #include "btl_task_state.h"
 #include "btl_task_condition.h"
 #include "sdf_heap_api.h"

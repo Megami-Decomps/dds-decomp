@@ -4,7 +4,7 @@
 #include "mnu_title_stream.h"
 #include "fr_font_measure.h"
 #include "eff_resource_slots.h"
-#include "kwln.h"
+#include "kernel.h"
 #include "dds3_task_create.h"
 #include "sdf_heap_api.h"
 #include "sdf_trig.h"

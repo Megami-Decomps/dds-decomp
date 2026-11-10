@@ -1,7 +1,7 @@
 #include "common.h"
 #include "dds3_task_add_child.h"
 #include "sdf_chip.h"
-#include "kwln.h"
+#include "kernel.h"
 #include "dds3_task_update_count.h"
 #include "dds3_process_registration.h"
 #include "dds3_task_queue_query.h"

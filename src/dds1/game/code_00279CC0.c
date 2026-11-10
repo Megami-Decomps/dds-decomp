@@ -4,7 +4,7 @@
 #include "eff_resource_slots.h"
 #include "eff_resource_source_lifetime.h"
 #include "mnu_input.h"
-#include "kwln.h"
+#include "kernel.h"
 #include "mnu.h"
 #include "mnu_list.h"
 #include "mnu_shop.h"

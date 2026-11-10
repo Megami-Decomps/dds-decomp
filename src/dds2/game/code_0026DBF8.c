@@ -25,7 +25,7 @@ extern void prfCopyMantraNamePart(u16 scriptId, s32 namePartMode, char *destinat
 /* Original-style implicit int, kept: matched code depends on it: mnuUpdateAndDrawMantraBackgroundBursts. */
 
 extern void effRequestResourceByMode(const char *, const char *, s32, u32 *);
-#include "kwln.h"
+#include "kernel.h"
 #include "dds3_task_create.h"
 #include "dat_state.h"
 #include "evt_world.h"

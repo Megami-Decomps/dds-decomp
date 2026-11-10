@@ -61,7 +61,7 @@
 #include "eff_offset_if_owner_flag_clear.h"
 #include "sdf_chip.h"
 #include "snd_slot.h"
-#include "kwln.h"
+#include "kernel.h"
 #include "btl_task_state.h"
 #include "btl_task_poll_result.h"
 #include "btl_task_condition.h"
