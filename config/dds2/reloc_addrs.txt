@@ -95,7 +95,6 @@ rom:0x2E1A78 reloc:MIPS_NONE symbol:none // 003E0A78 ascii: 0x0043494D, not D_00
 rom:0x2E1A8C reloc:MIPS_NONE symbol:none // 003E0A8C ascii: 0x00464153, not D_00464153
 rom:0x2E1ADC reloc:MIPS_NONE symbol:none // 003E0ADC ascii: 0x00464153, not D_00464153
 rom:0x3111D8 reloc:MIPS_NONE symbol:none // 004101D8 ascii: 0x00462821, not D_00462821
-rom:0x31486C reloc:MIPS_NONE symbol:none // 0041386C ascii: 0x00413848, not D_00413848
 rom:0x32459C reloc:MIPS_NONE symbol:none // 0042359C ascii: 0x00454D41, not D_00454D41
 rom:0x32477C reloc:MIPS_NONE symbol:none // 0042377C ascii: 0x00454741, not D_00454741
 rom:0x29AFF0 reloc:MIPS_NONE symbol:none // 00399FF0 round: 0x00400000, not D_00400000
@@ -120,7 +119,6 @@ rom:0x29B0B0 reloc:MIPS_NONE symbol:none // 0039A0B0 round: 0x00400000, not D_00
 rom:0x29B0B4 reloc:MIPS_NONE symbol:none // 0039A0B4 round: 0x00400000, not D_00400000
 rom:0x2BF8D4 reloc:MIPS_NONE symbol:none // 003BE8D4 round: 0x00400000, not D_00400000
 rom:0x2C14FC reloc:MIPS_NONE symbol:none // 003C04FC round: 0x00400000, not D_00400000
-rom:0x2C7108 reloc:MIPS_NONE symbol:none // 003C6108 round: 0x00420000, not D_00420000
 rom:0x2C7648 reloc:MIPS_NONE symbol:none // 003C6648 round: 0x00100000, not func_00100000
 rom:0x2CAEC8 reloc:MIPS_NONE symbol:none // 003C9EC8 round: 0x00100000, not func_00100000
 rom:0x2CB1E0 reloc:MIPS_NONE symbol:none // 003CA1E0 round: 0x00100000, not func_00100000

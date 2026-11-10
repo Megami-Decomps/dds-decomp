@@ -11556,3 +11556,13 @@
 0x00483558	mainCtorsDone	inferred	SMT3HD name via SLUS_209.11 0x0059AD58, __main static flag; was D_00483558
 0x00483560	frameObjectList	inferred	SMT3HD name via SLUS_209.11 0x0059AD60, __register_frame_info object list head; was D_00483560
 0x0039A028	fldSceneBgmTrackTable	inferred	MIDI bank ids << 16, read by the bgm mode switch; SMT3 twin D_0030A2D8 (fldSe.c case 2) named the same
+0x0040F6A8	execPs2Payload	inferred	SMT3 twin execPs2Payload (libkernl.c InitExecPS2 copies it to 0x80074000); was D_0040F6A8
+0x0040FE50	execEntryPairs	inferred	SMT3 twin execEntryPairs; was D_0040FE50
+0x0040FE68	setArgEntryPairs	inferred	SMT3 twin setArgEntryPairs; was D_0040FE68
+0x0040FE70	alarmPayload	inferred	SMT3 twin alarmPayload; was D_0040FE70
+0x004105B0	alarmSmallPayload	inferred	SMT3 twin alarmSmallPayload; was D_004105B0
+0x004105D8	alarmEntryPairs	inferred	SMT3 twin alarmEntryPairs; was D_004105D8
+0x00410618	TLBFunctionsImage	inferred	SMT3 twin TLBFunctionsImage; was D_00410618
+0x00410948	tlbHandler	inferred	SMT3 twin tlbHandler; was D_00410948
+0x00410990	execArgumentBlock	inferred	SMT3 twin execArgumentBlock; was D_00410990
+0x00410998	tlbEntryPairs	inferred	SMT3 twin tlbEntryPairs; was D_00410998
