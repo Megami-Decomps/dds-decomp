@@ -186,21 +186,21 @@ typedef enum ItfGlyphControlCode {
 #define ITF_GLYPH_WAIT_FOR_SOUND_SENTINEL 0xFFFF
 
 /* Encoded text cursor and pending glyph updates; distinct from a glyph (0x20). */
-typedef struct FrFontCtx {
-    s32 x;
-    s32 y;
-    s32 z;
-    s8 fontIndex;
-    s8 firstOption;
-    s8 secondOption;
-    u8 contextEncodedByte;
-    const u8 *encodedText; /* Borrowed source bytes; parsing advances the offset, not this data. */
-    _FRQ *glyphChain;
-    s32 encodedTextOffset;
-    s8 pendingCreate;
-    s8 pendingPosition;
+typedef struct frMsgInfo_t {
+    s32 X;
+    s32 Y;
+    s32 Z;
+    s8 Style;
+    s8 ColNo;
+    s8 Tp;
+    u8 Spd;
+    u8 *pMsg;
+    _FRQ *pFRQ;
+    s32 Ofs;
+    s8 FrqFlag;
+    s8 RetFlag;
     u8 pad1E[2];
-} FrFontCtx;
+} frMsgInfo_t;
 
 /* Serialized font-bank entries use byte offsets relative to their bank. */
 typedef struct FrFontTextIndex {

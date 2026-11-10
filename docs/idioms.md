@@ -1421,7 +1421,7 @@ declared or defined old-style (K&R), not as `f(void)`:
 
 ```c
 void func_00196390(ctx)
-    FrFontCtx *ctx;
+    frMsgInfo_t *ctx;
 { ... }
 ```
 
@@ -4374,7 +4374,7 @@ The font parent pool allocates `0x44`-byte `_FRQ` nodes. Their
 `previous` link is at `+0x24`, `next` at `+0x28`, and child chain at
 `+0x1C`. The packed word/halfword/byte members are the existing font
 owner's actual representations, not alternative controller views.
-`FrFontCtx` is a separate `0x20`-byte encoded-text draw controller:
+`frMsgInfo_t` is a separate `0x20`-byte encoded-text draw controller:
 input bytes at `+0x10`, glyph chain at `+0x14`, and cursor at `+0x18`.
 Glyph-only setters must receive the glyph, not a cast to that controller.
 
