@@ -11,8 +11,8 @@ enum {
 };
 
 EffEventSetupReadiness effUpdateCh72Params(void);
-EffEventSetupReadiness effEventAdvanceBlurTemplateSetup(void);
-EffEventSetupReadiness effEventAdvanceScatterBlurSetup(void);
+EffEventSetupReadiness mblurProcess(void);
+EffEventSetupReadiness dblurProcess(void);
 EffEventSetupReadiness effEventAdvanceScreenDrawSetup(void);
 EffEventSetupReadiness evtViewerCheckDirty(void);
 EffEventSetupReadiness mfilterRun(void);

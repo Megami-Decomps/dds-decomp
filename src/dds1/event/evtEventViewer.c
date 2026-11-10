@@ -54,11 +54,11 @@
 
 /* Declared before first use (were implicit int). */
 extern void campResolvePendingValue(evtViewerInfo_t *scene, EvtRuntimeChild *cue);
-extern void effEventSetBlurTemplateParameters(dds3Effect_PartialMultiBlurParam_t *parameters);
+extern void mblurSetParam(dds3Effect_PartialMultiBlurParam_t *parameters);
 extern void mfilterSetParam(dds3Effect_PartialMultiFilterParam_t *parameters);
 extern void rblurSetParam(dds3Effect_RippleBlurParam_t *parameters);
-extern void effEventSetScatterBlurParameters(dds3Effect_DistortionBlurParam_t *parameters);
-extern void effSetLoadDescA(const dds3Effect_Blur_t *parameters);
+extern void dblurSetParam(dds3Effect_DistortionBlurParam_t *parameters);
+extern void evtSetUnityCalcArea(const dds3Effect_Blur_t *parameters);
 extern void effSetLoadDescD(const dds3Effect_Blur_t *parameters);
 extern u8 fldTitleChk(void);
 extern s32 mnuGetSelectedTableValue(evtViewerInfo_t *runtime);
@@ -332,7 +332,7 @@ EvtRuntimeChild *evtAddFrameInfo(EvtRuntimeGroup *group, s32 frame, evtViewerInf
     case 13: {
         void *payload = sdfChipAllocDirect(0x28);
         key->payload = payload;
-        memcpy(payload, effGetLoadDescA(), 0x28);
+        memcpy(payload, evtGetUnityCalcArea(), 0x28);
         key->p08.h[0] = 1;
         break;
     }
@@ -1007,14 +1007,14 @@ extern u128 *dds3LightParam[];
 extern u128 dds3AmbientColor[];
 extern f32 sdfFaceDivSoften;
 extern f32 sdfFaceDivBias;
-extern dds3Effect_PartialMultiBlurParam_t *effEventGetBlurTemplateSetupParams(void);
-extern dds3Effect_DistortionBlurParam_t *effEventGetScatterBlurSetupParams(void);
+extern dds3Effect_PartialMultiBlurParam_t *mblurGetParam(void);
+extern dds3Effect_DistortionBlurParam_t *dblurGetParam(void);
 extern dds3Effect_RippleBlurParam_t *rblurGetParam(void);
 extern dds3Effect_PartialMultiFilterParam_t *mfilterGetParam(void);
 
 void evtEventViewerApplyEffectToggles(evtViewerInfo_t *viewer) {
     if (viewer->blurRectangleEnabled != 0) {
-        dds3EffectBlur(&effGetLoadDescA()->source);
+        dds3EffectBlur(&evtGetUnityCalcArea()->source);
     }
     if (viewer->texturedBlurEnabled != 0) {
         Eve_PartialMultiBlurON();
@@ -1334,7 +1334,7 @@ extern void evtHokanDistBlur(s32, f32, const dds3Effect_DistortionBlurParam_t *,
 extern void evtHokanRipBlur(s32, f32, const dds3Effect_RippleBlurParam_t *, const dds3Effect_RippleBlurParam_t *, dds3Effect_RippleBlurParam_t *);
 extern void evtBlendParamsG(s32, f32, const dds3Effect_Blur_t *, const dds3Effect_Blur_t *, dds3Effect_Blur_t *);
 extern void evtHokanFilter(s32, f32, const dds3Effect_Filter_t *, const dds3Effect_Filter_t *, dds3Effect_Filter_t *);
-extern void effSetLoadDescA(const dds3Effect_Blur_t *);
+extern void evtSetUnityCalcArea(const dds3Effect_Blur_t *);
 extern void Eve_PartialMultiBlurSetParam(dds3Effect_PartialMultiBlurParam_t *);
 extern void Eve_DistortionBlurSetParam(dds3Effect_DistortionBlurParam_t *);
 extern void Eve_RippleBlurSetParam(dds3Effect_RippleBlurParam_t *);
@@ -1549,7 +1549,7 @@ void evtViewerUpdateTimelineGroupState(EvtRuntimeGroup *group, EvtRuntimeChild *
         to = future != NULL ? future->payload : NULL;
         if (from != NULL || to != NULL) {
             evtHokanBlur2(enable, ratio, from, to, &D_003D7DF0);
-            effSetLoadDescA(&D_003D7DF0);
+            evtSetUnityCalcArea(&D_003D7DF0);
             if ((D_003D7DF0.color >> 24) == 0) {
                 viewer->blurRectangleEnabled = 0;
             } else {
@@ -3259,8 +3259,8 @@ extern char D_003BBF68[];
 extern char D_003BBF70[];
 extern u8 corePktSoftenBias;
 extern s32 mdlDebugPrintEffectScale2(dds3ProcessID_t *task);
-extern dds3TaskUpdateResult_t evtPollRuntimeControlReady(dds3ProcessID_t *task);
-extern dds3TaskUpdateResult_t evtSynchronizeSelectedEntry(dds3ProcessID_t *task);
+extern dds3TaskUpdateResult_t evtViewerExit(dds3ProcessID_t *task);
+extern dds3TaskUpdateResult_t mfilter_Process(dds3ProcessID_t *task);
 extern void dds3SetFogPara(s32 blendFrames, f32 x, f32 y, f32 z, f32 w);
 
 INCLUDE_RODATA(const s32, "event/evtEventViewer", D_003AD4B0);
@@ -3616,18 +3616,18 @@ s32 evtEventViewerHandleKeyEditCommand(s32 command, s32 unused, evtViewerInfo_t 
                         break;
                     }
                     case 13:
-                        effSetLoadDescA(key->payload);
+                        evtSetUnityCalcArea(key->payload);
                         viewer->blurRectangleEnabled = 0;
                         evtViewerPushCommandHistory(11, 0, 0, viewer);
                         break;
                     case 14:
-                        effEventSetBlurTemplateParameters(key->payload);
+                        mblurSetParam(key->payload);
                         viewer->texturedBlurEnabled = 0;
                         campResolvePendingValue(viewer, key);
                         evtViewerPushCommandHistory(11, 0, 0, viewer);
                         break;
                     case 15:
-                        effEventSetScatterBlurParameters(key->payload);
+                        dblurSetParam(key->payload);
                         viewer->filterBlurEnabled = 0;
                         campResolvePendingValue(viewer, key);
                         evtViewerPushCommandHistory(11, 0, 0, viewer);
@@ -3644,16 +3644,16 @@ s32 evtEventViewerHandleKeyEditCommand(s32 command, s32 unused, evtViewerInfo_t 
                         evtViewerPushCommandHistory(11, 0, 0, viewer);
                         break;
                     case 16:
-                        effEventSetSolidRectangleParameters(key->payload);
+                        dblurSetParam2(key->payload);
                         viewer->colorRectangleEnabled = 0;
-                        viewer->controlState = dds3StartProcess(D_003BBF68, 0x2AF9, 1, 1, evtPollRuntimeControlReady, NULL, (u32)viewer);
+                        viewer->controlState = dds3StartProcess(D_003BBF68, 0x2AF9, 1, 1, evtViewerExit, NULL, (u32)viewer);
                         evtViewerPushCommandHistory(11, 0, 0, viewer);
                         break;
                     case 17:
                         mfilterSetParam(key->payload);
                         viewer->texturedSquareEnabled = 0;
                         campResolvePendingValue(viewer, key);
-                        viewer->controlState = dds3StartProcess(D_003BBF70, 0x2AF9, 1, 1, evtSynchronizeSelectedEntry, NULL, (u32)viewer);
+                        viewer->controlState = dds3StartProcess(D_003BBF70, 0x2AF9, 1, 1, mfilter_Process, NULL, (u32)viewer);
                         evtViewerPushCommandHistory(11, 0, 0, viewer);
                         break;
                     case 24:
@@ -4142,7 +4142,7 @@ s32 evtViewCmdSetSlot(s32 unused0, s32 unused1, evtViewerInfo_t *viewer) {
 
 extern char D_003ADA98[]; /* "E%3d_%03d" */
 extern u16 D_003BBE7A;
-extern s32 evtViewerSaveTrackFiles(s32 mode, evtViewerInfo_t *runtime);
+extern s32 evtMakeViewerPath(s32 mode, evtViewerInfo_t *runtime);
 
 /* Apply one of three viewer selection modes to the selected slots. */
 s32 evtViewCmdSelectMode(u32 unused0, u32 unused1, evtViewerInfo_t *viewer) {
@@ -4153,12 +4153,12 @@ s32 evtViewCmdSelectMode(u32 unused0, u32 unused1, evtViewerInfo_t *viewer) {
         if (mode >= 0) {
             sprintf(viewer->eventName, D_003ADA98, D_003BBE78, D_003BBE7A);
             if (viewer->inputA == 0) {
-                evtViewerSaveTrackFiles(0, viewer);
-                evtViewerSaveTrackFiles(1, viewer);
+                evtMakeViewerPath(0, viewer);
+                evtMakeViewerPath(1, viewer);
             } else if (viewer->inputA == 1) {
-                evtReloadEventViewer(EVT_POLYGON_MOVIE_RESOURCE_MODE_LOAD_FILES, viewer);
+                evtViewerShutdown(EVT_POLYGON_MOVIE_RESOURCE_MODE_LOAD_FILES, viewer);
             } else if (viewer->inputA == 2) {
-                evtReloadEventViewer(EVT_POLYGON_MOVIE_RESOURCE_MODE_SYNTHESIZE, viewer);
+                evtViewerShutdown(EVT_POLYGON_MOVIE_RESOURCE_MODE_SYNTHESIZE, viewer);
             }
             applied = 1;
         }
@@ -4318,13 +4318,13 @@ s32 evtEventViewerCopyEffectSetupPayload(s32 unused0, s32 unused1, evtViewerInfo
         draw->parameters.vec[3] = dds3FogState.fogFar;
         break;
     case 13:
-        memcpy(entry->payload, effGetLoadDescA(), 0x28);
+        memcpy(entry->payload, evtGetUnityCalcArea(), 0x28);
         break;
     case 14:
-        memcpy(entry->payload, effEventGetBlurTemplateSetupParams(), 0x2C);
+        memcpy(entry->payload, mblurGetParam(), 0x2C);
         break;
     case 15:
-        memcpy(entry->payload, effEventGetScatterBlurSetupParams(), 0x2C);
+        memcpy(entry->payload, dblurGetParam(), 0x2C);
         break;
     case 23:
         memcpy(entry->payload, rblurGetParam(), 0x2C);
@@ -4333,7 +4333,7 @@ s32 evtEventViewerCopyEffectSetupPayload(s32 unused0, s32 unused1, evtViewerInfo
         memcpy(entry->payload, effGetLoadDescD(), 0x28);
         break;
     case 16:
-        memcpy(entry->payload, effEventGetSolidRectangleSetupParams(), 0x18);
+        memcpy(entry->payload, dblurGetParam2(), 0x18);
         break;
     case 17:
         memcpy(entry->payload, mfilterGetParam(), 0x24);
@@ -4482,7 +4482,7 @@ dds3TaskUpdateResult_t evtViewerAdvanceUpdate(dds3ProcessID_t *task) {
             dds3DrawFlag |= 0x2000000;
             return 0;
         }
-        evtPopulateViewerTimelineFromMovie(viewer->windowContext, viewer);
+        evtMakeMotionName(viewer->windowContext, viewer);
         dds3DrawFlag |= 0x2000000;
         return (s32)(u32)evtViewerScheduleFrameVariableTask;
     }

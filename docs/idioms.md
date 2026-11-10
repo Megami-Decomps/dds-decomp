@@ -5508,7 +5508,7 @@ field-store scheduling differences are independent of this repair.
 
 ## Event-viewer selected-label primary owners
 
-Both 228-byte `evtDrawSelectedEntryLabel` providers receive an
+Both 228-byte `evtObjectListSub` providers receive an
 `EvtRuntimeGroup *` and the owning `EvtRuntime *`. The signed word at
 group +8 is `entryHeader.word`; the name address is the corresponding
 `runtime->entryName[index]` row, not a second padded view or raw runtime
@@ -6712,7 +6712,7 @@ the address-word inputs and the local cast aliases, with no change to
 the playback or movie-track work. Every real caller supplies the pointer.
 
 Keep deliberate extra-argument calls through the existing unprototyped
-declarations: for example DDS2 `evtViewerFrameChangeUpdate` also supplies
+declarations: for example DDS2 `evtFrameChangeMenu` also supplies
 its step and input-table address. Likewise `0024C650` sets `a0=viewer`,
 `a1=value` and `a2=curFrame` for `mnuFxWorldScrollDelta`; do not invent its
 three additional incoming scratch values. The timeline provider's
@@ -11744,7 +11744,7 @@ party-record status mask, AI-counter threshold, device seek operation,
 power-off semaphore context and selected autoattack unit. These values
 belong in the wrapper's real formals and call expressions, not in an
 unprototyped call that depends on incoming `$a0`-`$a2` surviving.
-DDS2 `evtWriteOutputBytes` likewise passes all three arguments to the SDK
+DDS2 `evtWriteRecord` likewise passes all three arguments to the SDK
 `sceWrite`; its existing 32-bit address word is converted to `const void *`
 at that API boundary. The power-off callback receives its registered
 `void *` context and converts the semaphore ID to the SDK's `int`.

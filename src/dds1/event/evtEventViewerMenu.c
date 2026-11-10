@@ -41,9 +41,9 @@
 /* Declared before first use (were implicit int). */
 extern void evtViewerPushCommandHistory(s32 actionMode, s32 first, s32 second, evtViewerInfo_t *viewer);
 
-extern s32 evtDrawFrameListColumnHeadings(sdfDrawTag_t *list, s32 x, s32 y, evtViewerInfo_t *ctx);
+extern s32 evtFrameListHead(sdfDrawTag_t *list, s32 x, s32 y, evtViewerInfo_t *ctx);
 
-extern void evtWriteSerializedBytes(s32 output, void *data, s32 size);
+extern void evtWriteRecord(s32 output, void *data, s32 size);
 
 struct SoundMixer;
 extern void evtApplyViewerTimelineFrame(s32 time, evtViewerInfo_t *viewer);
@@ -127,7 +127,7 @@ void evtMenuDisp(sdfDrawTag_t *list, s32 x, s32 y, s32 width, s32 rows, s32 firs
 
 INCLUDE_RODATA(const s32, "event/evtEventViewerMenu", D_003ADDE0);
 
-s32 evtAppendValueChangeDebugLabel(sdfDrawTag_t *list, s32 x, s32 y) {
+s32 evtFloatChangeHead(sdfDrawTag_t *list, s32 x, s32 y) {
     sdfDrawTagLink(list, (u32)sdfDevPrintf(x, y, 0xFEFFFF, 0, "VALUE CHANGE."));
     return 2;
 }
@@ -148,7 +148,7 @@ INCLUDE_RODATA(const s32, "event/evtEventViewerMenu", D_003ADE40);
 
 INCLUDE_RODATA(const s32, "event/evtEventViewerMenu", D_003ADE50);
 
-void evtDrawFloatValueEditorRow(sdfDrawTag_t *list, s32 x, s32 y, s32 index, evtViewerInfo_t *ctx) {
+void evtFloatChangeItem(sdfDrawTag_t *list, s32 x, s32 y, s32 index, evtViewerInfo_t *ctx) {
     switch (index) {
     case 0:
         sdfDrawTagLink(list, (u32)sdfDevPrintf(x, y, 0xFEFFFF, 4, D_003ADE00,
@@ -172,16 +172,16 @@ void evtDrawFloatValueEditorRow(sdfDrawTag_t *list, s32 x, s32 y, s32 index, evt
 extern sdfGrOt_t sdfDebugGrOt;
 extern EvtPad dds3PadButtonState;
 
-extern void evtDrawFloatValueEditorRow();
+extern void evtFloatChangeItem();
 
 /* Edit the bounded float only in mode 8. Confirm precedes cancel; coarse steps
  * replace fine steps before the value is clamped to the runtime limits. */
-s32 evtViewerFloatValueUpdate(s32 x, s32 y, evtViewerInfo_t *ctx) {
+s32 evtFloatChangeMenu(s32 x, s32 y, evtViewerInfo_t *ctx) {
     sdfDrawTag_t *list;
     f32 step;
 
     list = dds3FontReqAllocDrawTag();
-    evtMenuDisp(list, x, y, 0x16, 9, 0, 1, ctx, evtAppendValueChangeDebugLabel, evtDrawFloatValueEditorRow);
+    evtMenuDisp(list, x, y, 0x16, 9, 0, 1, ctx, evtFloatChangeHead, evtFloatChangeItem);
     sdfDebugGrOt.regFunc(&sdfDebugGrOt, list);
     if (ctx->actionMode != 8) {
         return 0;
@@ -213,7 +213,7 @@ s32 evtViewerFloatValueUpdate(s32 x, s32 y, evtViewerInfo_t *ctx) {
     return 0;
 }
 
-s32 evtDrawValueChangeNoticeRow(sdfDrawTag_t *list, s32 x, s32 y) {
+s32 evtIntChangeHead(sdfDrawTag_t *list, s32 x, s32 y) {
     sdfDrawTagLink(list, (u32)sdfDevPrintf(x, y, 0xFEFFFF, 0, "VALUE CHANGE."));
     return 2;
 }
@@ -224,7 +224,7 @@ extern char D_003ADE78[];
 
 INCLUDE_RODATA(const s32, "event/evtEventViewerMenu", D_003ADE78);
 
-void evtDrawValueChangeInstructionRow(sdfDrawTag_t *list, s32 x, s32 y, u32 index, evtViewerInfo_t *ctx) {
+void evtIntChangeItem(sdfDrawTag_t *list, s32 x, s32 y, u32 index, evtViewerInfo_t *ctx) {
     switch (index) {
     case 0:
         sdfDrawTagLink(list, (u32)sdfDevPrintf(x, y, 0xFEFFFF, 4, D_003BC058, ctx->value));
@@ -244,12 +244,12 @@ void evtDrawValueChangeInstructionRow(sdfDrawTag_t *list, s32 x, s32 y, u32 inde
     }
 }
 
-s32 evtUpdateValueChangeDialog(s32 x, s32 y, evtViewerInfo_t *ctx) {
+s32 evtIntChangeMenu(s32 x, s32 y, evtViewerInfo_t *ctx) {
     sdfDrawTag_t *list;
     s32 step;
 
     list = dds3FontReqAllocDrawTag();
-    evtMenuDisp(list, x, y, 0x16, 9, 0, 1, ctx, evtDrawValueChangeNoticeRow, evtDrawValueChangeInstructionRow);
+    evtMenuDisp(list, x, y, 0x16, 9, 0, 1, ctx, evtIntChangeHead, evtIntChangeItem);
     sdfDebugGrOt.regFunc(&sdfDebugGrOt, list);
     if (ctx->actionMode != 7) {
         return 0;
@@ -287,7 +287,7 @@ s32 evtFrameChangeHead(sdfDrawTag_t *target, s32 x, s32 y) {
     return 2;
 }
 
-void evtViewerDrawFrameChangeRow(sdfDrawTag_t *list, s32 x, s32 y, u32 index, evtViewerInfo_t *ctx) {
+void evtFrameChangeItem(sdfDrawTag_t *list, s32 x, s32 y, u32 index, evtViewerInfo_t *ctx) {
     switch (index) {
     case 0:
         sdfDrawTagLink(list, (u32)sdfDevPrintf(x, y, 0xFEFFFF, 4, D_003BC058, ctx->value));
@@ -318,12 +318,12 @@ void evtViewerDrawFrameChangeRow(sdfDrawTag_t *list, s32 x, s32 y, u32 index, ev
     }
 }
 
-s32 evtViewerFrameChangeUpdate(s32 x, s32 y, evtViewerInfo_t *ctx) {
+s32 evtFrameChangeMenu(s32 x, s32 y, evtViewerInfo_t *ctx) {
     sdfDrawTag_t *list;
     s32 step;
 
     list = dds3FontReqAllocDrawTag();
-    evtMenuDisp(list, x, y, 0x16, 0xB, 0, 1, ctx, evtFrameChangeHead, evtViewerDrawFrameChangeRow);
+    evtMenuDisp(list, x, y, 0x16, 0xB, 0, 1, ctx, evtFrameChangeHead, evtFrameChangeItem);
     sdfDebugGrOt.regFunc(&sdfDebugGrOt, list);
     if (ctx->actionMode != 6) {
         return 0;
@@ -376,7 +376,7 @@ extern const char *D_003AE0D8[];
 extern char D_003BC080[];
 extern char D_003BC088[];
 /* Draw a project-menu command, including its current toggle/skip option. */
-void evtDrawProjectCommandRow(sdfDrawTag_t *list, s32 x, s32 y, s32 index, evtViewerInfo_t *ctx) {
+void evtMainMenuItem(sdfDrawTag_t *list, s32 x, s32 y, s32 index, evtViewerInfo_t *ctx) {
     char labels[11][30] = {
         "SAVE PROJ    >>",
         "LOAD PROJ    >>",
@@ -419,14 +419,14 @@ void evtDrawProjectCommandRow(sdfDrawTag_t *list, s32 x, s32 y, s32 index, evtVi
     }
 }
 
-extern void evtDrawEntrySelectionRow();
+extern void evtObjectListItem();
 extern s32 dds3SelectMenu(s32 padSet, s32 secondaryCount, s32 primaryCount, s32 secondaryVisible,
                                  s32 primaryVisible, s32 *secondaryScroll, s32 *primaryScroll,
                                  s32 *secondaryCursor, s32 *primaryCursor);
 
-s32 mnuDrawInfoWindowA(s32 x, s32 y, evtViewerInfo_t *work) {
+s32 evtMainMenu(s32 x, s32 y, evtViewerInfo_t *work) {
     sdfDrawTag_t *packets = dds3FontReqAllocDrawTag();
-    evtMenuDisp(packets, x, y, 0xF, 0xB, 0, 0xB, work, 0, evtDrawProjectCommandRow);
+    evtMenuDisp(packets, x, y, 0xF, 0xB, 0, 0xB, work, 0, evtMainMenuItem);
     sdfDebugGrOt.regFunc(&sdfDebugGrOt, packets);
     if (work->actionMode != 1) {
         return 0;
@@ -439,7 +439,7 @@ extern char D_003BC0A0[];
 extern s8 D_003688B8[][12];
 
 /* Draw the runtime title when present; return two rows used, or zero for no title. */
-s32 evtDrawStringEntry(sdfDrawTag_t *output, s32 x, s32 y, evtViewerInfo_t *work) {
+s32 evtSelectHead(sdfDrawTag_t *output, s32 x, s32 y, evtViewerInfo_t *work) {
     if (work->title == 0) {
         return 0;
     }
@@ -448,7 +448,7 @@ s32 evtDrawStringEntry(sdfDrawTag_t *output, s32 x, s32 y, evtViewerInfo_t *work
 }
 
 /* Draw an in-range item name, distinguishing selected active and inactive rows. */
-void evtDrawSelectableTextRow(sdfDrawTag_t *list, s32 x, s32 y, s32 index, evtViewerInfo_t *work) {
+void evtSelectItem(sdfDrawTag_t *list, s32 x, s32 y, s32 index, evtViewerInfo_t *work) {
     s32 color;
 
     if (index < work->itemCount) {
@@ -462,7 +462,7 @@ void evtDrawSelectableTextRow(sdfDrawTag_t *list, s32 x, s32 y, s32 index, evtVi
 }
 
 /* Draw a title-sized selection dialog; only action mode 2 advances its cursor. */
-s32 evtUpdateTextSelectionDialog(s32 x, s32 y, evtViewerInfo_t *work) {
+s32 evtSelectMenu(s32 x, s32 y, evtViewerInfo_t *work) {
     sdfDrawTag_t *packets = dds3FontReqAllocDrawTag();
     s32 width = 10;
 
@@ -472,7 +472,7 @@ s32 evtUpdateTextSelectionDialog(s32 x, s32 y, evtViewerInfo_t *work) {
             width = 6;
         }
     }
-    evtMenuDisp(packets, x, y, width, work->itemCount + 3, 0, work->itemCount, work, evtDrawStringEntry, evtDrawSelectableTextRow);
+    evtMenuDisp(packets, x, y, width, work->itemCount + 3, 0, work->itemCount, work, evtSelectHead, evtSelectItem);
     sdfDebugGrOt.regFunc(&sdfDebugGrOt, packets);
     if (work->actionMode != 2) {
         return 0;
@@ -480,7 +480,7 @@ s32 evtUpdateTextSelectionDialog(s32 x, s32 y, evtViewerInfo_t *work) {
     return dds3SelectMenu(0, 1, work->itemCount, 1, work->itemCount, 0, 0, 0, &work->cursor);
 }
 
-s32 evtDrawInputValueRow(sdfDrawTag_t *list, s32 x, s32 y, u8 *ctx) {
+s32 evtFileNameHead(sdfDrawTag_t *list, s32 x, s32 y, u8 *ctx) {
     char text[16];
     sprintf(text, D_003BC098, (s32)ctx + 0x22D4, (s32)ctx + 0x22E0);
     sdfDrawTagLink(list, (u32)sdfDevPrintf(x, y, 0xFEFFFF, 0, D_003BC088, text));
@@ -489,7 +489,7 @@ s32 evtDrawInputValueRow(sdfDrawTag_t *list, s32 x, s32 y, u8 *ctx) {
 
 /* Draw eleven characters from a twelve-byte keyboard row and highlight the
  * runtime character selection, using mode 3 for the active color. */
-void evtDrawKeyboardRow(sdfDrawTag_t *list, s32 xPosition, s32 y, s32 row, evtViewerInfo_t *work) {
+void evtFileNameItem(sdfDrawTag_t *list, s32 xPosition, s32 y, s32 row, evtViewerInfo_t *work) {
     s32 x = xPosition + 0xC0;
     s8 *table = D_003688B8[row];
     s32 i = 0;
@@ -511,7 +511,7 @@ void evtDrawKeyboardRow(sdfDrawTag_t *list, s32 xPosition, s32 y, s32 row, evtVi
 }
 
 /* Draw the keyboard and edit the eight-character name when input is active. */
-s32 evtUpdateNameEntryDialog(s32 x, s32 y, evtViewerInfo_t *ctx) {
+s32 evtFileNameMenu(s32 x, s32 y, evtViewerInfo_t *ctx) {
     sdfDrawTag_t *list;
     s32 input;
     s32 length;
@@ -519,7 +519,7 @@ s32 evtUpdateNameEntryDialog(s32 x, s32 y, evtViewerInfo_t *ctx) {
 
     list = dds3FontReqAllocDrawTag();
     evtMenuDisp(list, x, y, 14, 6, 0, 4, ctx,
-                     evtDrawInputValueRow, evtDrawKeyboardRow);
+                     evtFileNameHead, evtFileNameItem);
     sdfDebugGrOt.regFunc(&sdfDebugGrOt,
                                     list);
     if (ctx->actionMode != 3) {
@@ -567,14 +567,14 @@ INCLUDE_RODATA(const s32, "event/evtEventViewerMenu", D_003AE0C8);
 
 INCLUDE_RODATA(const s32, "event/evtEventViewerMenu", D_003AE0D8);
 
-s32 evtDrawEventFileNameRow(sdfDrawTag_t *list, s32 x, s32 y) {
+s32 evtFileName2Head(sdfDrawTag_t *list, s32 x, s32 y) {
     char text[32];
     sprintf(text, "[E%3d_%03d.PM1+2+3]", D_003BBE78, D_003BBE7A);
     sdfDrawTagLink(list, (u32)sdfDevPrintf(x, y, 0xFEFFFF, 0, D_003BC088, text));
     return 2;
 }
 
-void evtDrawEventCutSelectRow(sdfDrawTag_t *list, s32 x, s32 y, u32 index, evtViewerInfo_t *ctx) {
+void evtFileName2Item(sdfDrawTag_t *list, s32 x, s32 y, u32 index, evtViewerInfo_t *ctx) {
     s32 color = 0;
 
     if (ctx->charRow == index) {
@@ -607,12 +607,12 @@ void evtDrawEventCutSelectRow(sdfDrawTag_t *list, s32 x, s32 y, u32 index, evtVi
     }
 }
 
-s32 evtUpdateEventCutSelectDialog(s32 x, s32 y, evtViewerInfo_t *ctx) {
+s32 evtFileName2Menu(s32 x, s32 y, evtViewerInfo_t *ctx) {
     sdfDrawTag_t *list;
     u32 num;
 
     list = dds3FontReqAllocDrawTag();
-    evtMenuDisp(list, x, y, 0x12, 0xB, 0, 8, ctx, evtDrawEventFileNameRow, evtDrawEventCutSelectRow);
+    evtMenuDisp(list, x, y, 0x12, 0xB, 0, 8, ctx, evtFileName2Head, evtFileName2Item);
     sdfDebugGrOt.regFunc(&sdfDebugGrOt, list);
     if (ctx->actionMode != 9) {
         return 0;
@@ -697,7 +697,7 @@ s32 evtUpdateEventCutSelectDialog(s32 x, s32 y, evtViewerInfo_t *ctx) {
     return 0;
 }
 
-void evtDrawSelectedEntryLabel(sdfDrawTag_t *list, EvtRuntimeGroup *selected, s32 x,
+void evtObjectListSub(sdfDrawTag_t *list, EvtRuntimeGroup *selected, s32 x,
                                s32 unused, evtViewerInfo_t *runtime) {
     x += 0x6C0;
     dds3ConsPanelTagLink(list, (x - 0x7000) >> 4, 0x3C, 0x1C, 3);
@@ -709,7 +709,7 @@ void evtDrawSelectedEntryLabel(sdfDrawTag_t *list, EvtRuntimeGroup *selected, s3
     }
 }
 
-void evtDrawEntrySelectionRow(sdfDrawTag_t *list, s32 x, s32 y, s32 index, evtViewerInfo_t *ctx) {
+void evtObjectListItem(sdfDrawTag_t *list, s32 x, s32 y, s32 index, evtViewerInfo_t *ctx) {
     char names[33][30] = {
         "STAGE",
         "UNIT",
@@ -767,7 +767,7 @@ void evtDrawEntrySelectionRow(sdfDrawTag_t *list, s32 x, s32 y, s32 index, evtVi
             } else {
                 style = 5;
             }
-            evtDrawSelectedEntryLabel(list, group, x, y, ctx);
+            evtObjectListSub(list, group, x, y, ctx);
         } else {
             style = 0;
         }
@@ -775,12 +775,12 @@ void evtDrawEntrySelectionRow(sdfDrawTag_t *list, s32 x, s32 y, s32 index, evtVi
     }
 }
 
-s32 evtUpdateEntrySelectionDialog(s32 x, s32 y, evtViewerInfo_t *work) {
+s32 evtOjbectListMenu(s32 x, s32 y, evtViewerInfo_t *work) {
     sdfDrawTag_t *packets = dds3FontReqAllocDrawTag();
     s32 count;
     s32 shown;
 
-    evtMenuDisp(packets, x, y, 8, 0x1D, work->entryFirst, work->entryCount, work, 0, evtDrawEntrySelectionRow);
+    evtMenuDisp(packets, x, y, 8, 0x1D, work->entryFirst, work->entryCount, work, 0, evtObjectListItem);
     sdfDebugGrOt.regFunc(&sdfDebugGrOt, packets);
     if (work->actionMode != 4) {
         return 0;
@@ -801,7 +801,7 @@ extern s8 D_00368750[];
 extern char D_003BC0D0[];
 
 /* Header row of the frame list: one text cell per column of the selected group's table row. */
-s32 evtDrawFrameListColumnHeadings(sdfDrawTag_t *list, s32 x, s32 y, evtViewerInfo_t *ctx) {
+s32 evtFrameListHead(sdfDrawTag_t *list, s32 x, s32 y, evtViewerInfo_t *ctx) {
     s32 type = ctx->frameGroup->type;
     s32 i;
     s32 kind;
@@ -872,7 +872,7 @@ INCLUDE_RODATA(const s32, "event/evtEventViewerMenu", D_003AE570);
 
 INCLUDE_RODATA(const s32, "event/evtEventViewerMenu", D_003AE580);
 
-void evtDrawFrameListKeyValues(sdfDrawTag_t *list, s32 x, s32 y, s32 color,
+void evtFrameListItemSub(sdfDrawTag_t *list, s32 x, s32 y, s32 color,
                    EvtRuntimeChild *node, evtViewerInfo_t *ctx) {
     char name[32];
     s32 type;
@@ -1186,7 +1186,7 @@ void evtDrawFrameListKeyValues(sdfDrawTag_t *list, s32 x, s32 y, s32 color,
     }
 }
 
-extern void evtDrawFrameListKeyValues(sdfDrawTag_t *list, s32 x, s32 y, s32 color, EvtRuntimeChild *node, evtViewerInfo_t *ctx);
+extern void evtFrameListItemSub(sdfDrawTag_t *list, s32 x, s32 y, s32 color, EvtRuntimeChild *node, evtViewerInfo_t *ctx);
 
 /* Draw an indexed child of the selected group, or its trailing new-frame row. */
 s32 evtFrameListItem(sdfDrawTag_t *list, s32 x, s32 y, s32 index, evtViewerInfo_t *ctx) {
@@ -1212,14 +1212,14 @@ s32 evtFrameListItem(sdfDrawTag_t *list, s32 x, s32 y, s32 index, evtViewerInfo_
             color = 0;
         }
         if (node != NULL) {
-            evtDrawFrameListKeyValues(list, x, y, color, node, ctx);
+            evtFrameListItemSub(list, x, y, color, node, ctx);
         } else {
             sdfDrawTagLink(list, (u32)sdfDevPrintf(x, y, 0xFEFFFF, color ? color : 8, "----- NEW FRAME -----"));
         }
     }
 }
 
-s32 evtUpdateFrameListDialog(s32 x, s32 y, evtViewerInfo_t *ctx) {
+s32 evtFrameListMenu(s32 x, s32 y, evtViewerInfo_t *ctx) {
     sdfDrawTag_t *list;
     s32 shown = 20;
     s32 count;
@@ -1237,7 +1237,7 @@ s32 evtUpdateFrameListDialog(s32 x, s32 y, evtViewerInfo_t *ctx) {
     }
     list = dds3FontReqAllocDrawTag();
     evtMenuDisp(list, x, y, 28, 21, ctx->frameCursor,
-                 group->childCount + 1, ctx, evtDrawFrameListColumnHeadings, (EvtMenuRowFn)evtFrameListItem);
+                 group->childCount + 1, ctx, evtFrameListHead, (EvtMenuRowFn)evtFrameListItem);
     sdfDebugGrOt.regFunc(&sdfDebugGrOt, list);
     if (ctx->actionMode != 5) {
         return 0;
@@ -1275,7 +1275,7 @@ s32 evtUpdateFrameListDialog(s32 x, s32 y, evtViewerInfo_t *ctx) {
 
 #include "dds3_world_selection.h"
 
-void evtViewerDrawWorldNodeRow(sdfDrawTag_t *list, s32 x, s32 y, s32 index, evtViewerInfo_t *ctx) {
+void evtBasicListItem(sdfDrawTag_t *list, s32 x, s32 y, s32 index, evtViewerInfo_t *ctx) {
     s32 color;
     s32 count;
     s32 i;
@@ -1305,7 +1305,7 @@ void evtViewerDrawWorldNodeRow(sdfDrawTag_t *list, s32 x, s32 y, s32 index, evtV
     }
 }
 
-s32 evtUpdateWorldNodeListDialog(s32 x, s32 y, evtViewerInfo_t *ctx) {
+s32 evtBasicListMenu(s32 x, s32 y, evtViewerInfo_t *ctx) {
     s32 i;
     s32 count = 0;
     sdfDrawTag_t *list;
@@ -1325,7 +1325,7 @@ s32 evtUpdateWorldNodeListDialog(s32 x, s32 y, evtViewerInfo_t *ctx) {
     }
     count++;
     evtMenuDisp(list, x, y, 0x1A, 0x17, ctx->groupFirst, count, ctx,
-                     NULL, evtViewerDrawWorldNodeRow);
+                     NULL, evtBasicListItem);
     sdfDebugGrOt.regFunc(&sdfDebugGrOt,
                                     list);
     if (ctx->actionMode != 10) {
@@ -1341,7 +1341,7 @@ s32 evtUpdateWorldNodeListDialog(s32 x, s32 y, evtViewerInfo_t *ctx) {
 extern char D_003BC240[]; /* "P%d:" */
 extern char D_003BC248[]; /* "   %s" */
 
-void evtViewerDrawPendingNodeRow(sdfDrawTag_t *list, s32 x, s32 y, s32 index, evtViewerInfo_t *ctx) {
+void evtEventPosItem(sdfDrawTag_t *list, s32 x, s32 y, s32 index, evtViewerInfo_t *ctx) {
     dds3Basic_t *node;
     s32 color;
     s32 slot;
@@ -1363,10 +1363,10 @@ void evtViewerDrawPendingNodeRow(sdfDrawTag_t *list, s32 x, s32 y, s32 index, ev
     }
 }
 
-extern void evtViewerDrawPendingNodeRow();
+extern void evtEventPosItem();
 
 /* Draw the pending-node selector for group types 20/21; other types return -1. */
-s32 mnuDrawInfoWindowB(s32 x, s32 y, evtViewerInfo_t *work) {
+s32 evtEventPosMenu(s32 x, s32 y, evtViewerInfo_t *work) {
     sdfDrawTag_t *packets = dds3FontReqAllocDrawTag();
     s32 rows;
     switch (work->frameGroup->type) {
@@ -1379,7 +1379,7 @@ s32 mnuDrawInfoWindowB(s32 x, s32 y, evtViewerInfo_t *work) {
     default:
         return -1;
     }
-    evtMenuDisp(packets, x, y, 0x1C, rows, 0, rows, work, 0, evtViewerDrawPendingNodeRow);
+    evtMenuDisp(packets, x, y, 0x1C, rows, 0, rows, work, 0, evtEventPosItem);
     sdfDebugGrOt.regFunc(&sdfDebugGrOt, packets);
     if (work->actionMode != 0xC) {
         return 0;
@@ -2958,7 +2958,7 @@ extern s32 evtActiveEntryFlags;
 
 /* Cache nonzero selections and publish first-tick flags at timer zero. A zero
  * setup status clears runtime control and finishes the polling task. */
-dds3TaskUpdateResult_t evtSynchronizeSelectedEntry(dds3ProcessID_t *task) {
+dds3TaskUpdateResult_t mfilter_Process(dds3ProcessID_t *task) {
     evtViewerInfo_t *runtime = (evtViewerInfo_t *)dds3GetProcessData(task);
     if (mfilterRun() == EFF_EVENT_SETUP_NOT_READY) {
         runtime->controlState = 0;
@@ -2981,7 +2981,7 @@ dds3TaskUpdateResult_t evtSynchronizeSelectedEntry(dds3ProcessID_t *task) {
 }
 
 /* Poll solid-rectangle setup until it clears runtime control and finishes. */
-dds3TaskUpdateResult_t evtPollRuntimeControlReady(dds3ProcessID_t *task) {
+dds3TaskUpdateResult_t evtViewerExit(dds3ProcessID_t *task) {
     evtViewerInfo_t *runtime;
 
     runtime = (evtViewerInfo_t *)dds3GetProcessData(task);
@@ -3575,13 +3575,13 @@ s32 evtPollEffectFrameControl(s32 x, s32 y, evtViewerInfo_t *runtime) {
         status = effUpdateCh72Params();
         break;
     case 0xE:
-        status = effEventAdvanceBlurTemplateSetup();
+        status = mblurProcess();
         if (runtime->selectedEntry != 0) {
             *(s32 *)((u8 *)D_003BB0C0 + 0x2C) = runtime->selectedEntry;
         }
         break;
     case 0xF:
-        status = effEventAdvanceScatterBlurSetup();
+        status = dblurProcess();
         if (runtime->selectedEntry != 0) {
             *(s32 *)((u8 *)D_003BB14C + 0x2C) = runtime->selectedEntry;
         }
@@ -3626,7 +3626,7 @@ s32 evtPollEffectFrameControl(s32 x, s32 y, evtViewerInfo_t *runtime) {
 
 extern s32 (*D_00368B48[])(s32, s32, evtViewerInfo_t *);
 
-s32 evtDispatchActionByIndex(s32 actionIndex, s32 x, s32 y, evtViewerInfo_t *runtime) {
+s32 evtViewerDispatch(s32 actionIndex, s32 x, s32 y, evtViewerInfo_t *runtime) {
     s32 mode = runtime->actionMode;
     if (mode == 11 && actionIndex != mode) {
         return 0;
@@ -3634,11 +3634,11 @@ s32 evtDispatchActionByIndex(s32 actionIndex, s32 x, s32 y, evtViewerInfo_t *run
     return D_00368B48[actionIndex](x, y, runtime);
 }
 
-void evtWriteSerializedBytes(s32 output, void *data, s32 size) {
+void evtWriteRecord(s32 output, void *data, s32 size) {
     sceWrite(output, data, size);
 }
 
-s32 evtAssignRuntimeChildSequenceAndCount(evtViewerInfo_t *runtime) {
+s32 evtCountObjType10(evtViewerInfo_t *runtime) {
     s32 childIndex = 0;
     EvtRuntimeGroup *group;
     for (group = runtime->groups; group != NULL; group = group->next) {
@@ -3652,7 +3652,7 @@ s32 evtAssignRuntimeChildSequenceAndCount(evtViewerInfo_t *runtime) {
     return childIndex;
 }
 
-s32 evtIndexGroupTypeElevenChildren(evtViewerInfo_t *runtime) {
+s32 evtCountObjType11(evtViewerInfo_t *runtime) {
     s32 childIndex = 0;
     EvtRuntimeGroup *group;
     for (group = runtime->groups; group != NULL; group = group->next) {
@@ -3666,7 +3666,7 @@ s32 evtIndexGroupTypeElevenChildren(evtViewerInfo_t *runtime) {
     return childIndex;
 }
 
-s32 evtIndexGroupTypeThirteenChildren(evtViewerInfo_t *runtime) {
+s32 evtCountObjType13(evtViewerInfo_t *runtime) {
     s32 childIndex = 0;
     EvtRuntimeGroup *group;
     for (group = runtime->groups; group != NULL; group = group->next) {
@@ -3680,7 +3680,7 @@ s32 evtIndexGroupTypeThirteenChildren(evtViewerInfo_t *runtime) {
     return childIndex;
 }
 
-s32 evtIndexGroupTypeFourteenChildren(evtViewerInfo_t *runtime) {
+s32 evtCountObjType14(evtViewerInfo_t *runtime) {
     s32 childIndex = 0;
     EvtRuntimeGroup *group;
     for (group = runtime->groups; group != NULL; group = group->next) {
@@ -3694,7 +3694,7 @@ s32 evtIndexGroupTypeFourteenChildren(evtViewerInfo_t *runtime) {
     return childIndex;
 }
 
-s32 evtIndexGroupTypeFifteenChildren(evtViewerInfo_t *runtime) {
+s32 evtCountObjType15(evtViewerInfo_t *runtime) {
     s32 childIndex = 0;
     EvtRuntimeGroup *group;
     for (group = runtime->groups; group != NULL; group = group->next) {
@@ -3708,7 +3708,7 @@ s32 evtIndexGroupTypeFifteenChildren(evtViewerInfo_t *runtime) {
     return childIndex;
 }
 
-s32 evtIndexGroupTypeTwentyThreeChildren(evtViewerInfo_t *runtime) {
+s32 evtCountObjType23(evtViewerInfo_t *runtime) {
     s32 childIndex = 0;
     EvtRuntimeGroup *group;
     for (group = runtime->groups; group != NULL; group = group->next) {
@@ -3736,7 +3736,7 @@ s32 evtIndexGroupTypeTwentySevenChildren(evtViewerInfo_t *runtime) {
     return childIndex;
 }
 
-s32 evtIndexGroupTypeSixteenChildren(evtViewerInfo_t *runtime) {
+s32 evtCountObjType16(evtViewerInfo_t *runtime) {
     s32 childIndex = 0;
     EvtRuntimeGroup *group;
     for (group = runtime->groups; group != NULL; group = group->next) {
@@ -3750,7 +3750,7 @@ s32 evtIndexGroupTypeSixteenChildren(evtViewerInfo_t *runtime) {
     return childIndex;
 }
 
-s32 evtIndexGroupTypeSeventeenChildren(evtViewerInfo_t *runtime) {
+s32 evtCountObjType17(evtViewerInfo_t *runtime) {
     s32 index = 0;
     EvtRuntimeGroup *group;
     for (group = runtime->groups; group != NULL; group = group->next) {
@@ -3798,7 +3798,7 @@ typedef struct EvtPmdFilePrefix {
 typedef char EvtPmdFilePrefix_size_check[sizeof(EvtPmdFilePrefix) == 0x20 ? 1 : -1];
 
 /* Build the directory after assigning each payload its serialized index. */
-void evtViewerWriteTrackDirectory(s32 output, EvtViewerTrackFileFormat format, evtViewerInfo_t *runtime) {
+void evtSaveViewerHeader(s32 output, EvtViewerTrackFileFormat format, evtViewerInfo_t *runtime) {
     EvtPmdFilePrefix header;
     PmdEntry entry;
     s32 directoryCount = 0;
@@ -3847,21 +3847,21 @@ void evtViewerWriteTrackDirectory(s32 output, EvtViewerTrackFileFormat format, e
     nameBytes = nameCount * 0x20;
     id2Count = evtEventViewerCountEntriesById(2, runtime);
     id2Bytes = id2Count * 0x10;
-    typeACount = evtAssignRuntimeChildSequenceAndCount(runtime);
+    typeACount = evtCountObjType10(runtime);
     typeABytes = typeACount * 0x30;
-    typeBCount = evtIndexGroupTypeElevenChildren(runtime);
+    typeBCount = evtCountObjType11(runtime);
     typeBBytes = typeBCount * 0x20;
-    typeDCount = evtIndexGroupTypeThirteenChildren(runtime);
+    typeDCount = evtCountObjType13(runtime);
     typeDBytes = typeDCount * 0x28;
-    typeECount = evtIndexGroupTypeFourteenChildren(runtime);
+    typeECount = evtCountObjType14(runtime);
     typeEBytes = typeECount * 0x2C;
-    typeFCount = evtIndexGroupTypeFifteenChildren(runtime);
+    typeFCount = evtCountObjType15(runtime);
     typeFBytes = typeFCount * 0x2C;
-    type16Count = evtIndexGroupTypeSixteenChildren(runtime);
+    type16Count = evtCountObjType16(runtime);
     type16Bytes = type16Count * 0x18;
-    type17Count = evtIndexGroupTypeSeventeenChildren(runtime);
+    type17Count = evtCountObjType17(runtime);
     type17Bytes = type17Count * 0x24;
-    type23Count = evtIndexGroupTypeTwentyThreeChildren(runtime);
+    type23Count = evtCountObjType23(runtime);
     type23Bytes = type23Count * 0x2C;
     type27Count = evtIndexGroupTypeTwentySevenChildren(runtime);
     type27Bytes = type27Count * 0x28;
@@ -3911,7 +3911,7 @@ void evtViewerWriteTrackDirectory(s32 output, EvtViewerTrackFileFormat format, e
     header.kind = 9;
     header.reserved18 = 0;
     header.reserved1C = 0;
-    evtWriteSerializedBytes(output, &header, sizeof(header));
+    evtWriteRecord(output, &header, sizeof(header));
 
     for (i = 0; i < 26; i++) {
         entry.type = i;
@@ -4025,14 +4025,14 @@ void evtViewerWriteTrackDirectory(s32 output, EvtViewerTrackFileFormat format, e
         if (entry.elementSize != 0 || entry.value != 0) {
             entry.offset = payloadOffset;
             payloadOffset += (s32)entry.elementSize * (s32)entry.value;
-            evtWriteSerializedBytes(output, &entry, sizeof(entry));
+            evtWriteRecord(output, &entry, sizeof(entry));
         }
     }
 }
 
 /* Emit first, range, third and metadata words in file order. The range word
  * is written whole, not narrowed to the terminal halfword used by child spans. */
-void evtWriteRuntimeHeaderValues(s32 output, evtViewerInfo_t *state) {
+void evtSaveViewerInfo(s32 output, evtViewerInfo_t *state) {
     s32 first = state->headerFirst;
     s32 second = state->frameRange.word;
     s32 third = state->headerThird;
@@ -4043,12 +4043,12 @@ void evtWriteRuntimeHeaderValues(s32 output, evtViewerInfo_t *state) {
     buf[1] = second;
     buf[2] = third;
     buf[3] = metadata;
-    evtWriteSerializedBytes(output, buf, 0x10);
+    evtWriteRecord(output, buf, 0x10);
 }
 
 /* Filter groups by file format and serialize each child body. Type-8 spans use the
  * next start or terminal range halfword, unless their body marker disables them. */
-void evtViewerWriteChildRecords(s32 output, EvtViewerTrackFileFormat format, evtViewerInfo_t *runtime) {
+void evtSaveFrameList(s32 output, EvtViewerTrackFileFormat format, evtViewerInfo_t *runtime) {
     EvtRuntimeGroup *group;
 
     for (group = runtime->groups; group != NULL; group = group->next) {
@@ -4088,13 +4088,13 @@ void evtViewerWriteChildRecords(s32 output, EvtViewerTrackFileFormat format, evt
                     }
                 }
             }
-            evtWriteSerializedBytes(output, &record, sizeof(record));
+            evtWriteRecord(output, &record, sizeof(record));
         }
     }
 }
 
 /* Emit entryTotal consecutive thirty-two-byte names; nonpositive totals emit nothing. */
-void evtWriteFixedSizeEntries(s32 output, evtViewerInfo_t *table) {
+void evtSaveObjectList(s32 output, evtViewerInfo_t *table) {
     void *entry;
     s32 index;
 
@@ -4102,14 +4102,14 @@ void evtWriteFixedSizeEntries(s32 output, evtViewerInfo_t *table) {
     if (0 < table->entryTotal) {
         entry = table->entryName;
         do {
-            evtWriteSerializedBytes(output, entry, 0x20);
+            evtWriteRecord(output, entry, 0x20);
             index = index + 1;
             entry = (void *)((s32)entry + 0x20);
         } while (index < table->entryTotal);
     }
 }
 
-void evtWriteGroupHeader(s32 output, evtViewerInfo_t *runtime) {
+void evtSaveObjType2(s32 output, evtViewerInfo_t *runtime) {
     EvtRuntimeGroup *group;
     for (group = runtime->groups; group != NULL; group = group->next) {
         if (group->type == 2) {
@@ -4118,78 +4118,78 @@ void evtWriteGroupHeader(s32 output, evtViewerInfo_t *runtime) {
             header[1] = 0;
             header[2] = 0;
             header[3] = 0;
-            evtWriteSerializedBytes(output, header, 0x10);
+            evtWriteRecord(output, header, 0x10);
         }
     }
 }
 
-void evtCopyRuntimeChildPayloadsToBuffer(s32 output, evtViewerInfo_t *runtime) {
+void evtSaveObjType10(s32 output, evtViewerInfo_t *runtime) {
     EvtRuntimeGroup *group;
     for (group = runtime->groups; group != NULL; group = group->next) {
         if (group->type == 0xA) {
             EvtRuntimeChild *child;
             for (child = group->children; child != NULL; child = child->next) {
-                evtWriteSerializedBytes(output, child->payload, 0x30);
+                evtWriteRecord(output, child->payload, 0x30);
             }
         }
     }
 }
 
-void evtEmitGroupTypeElevenPayloads(s32 output, evtViewerInfo_t *runtime) {
+void evtSaveObjType11(s32 output, evtViewerInfo_t *runtime) {
     EvtRuntimeGroup *group;
     for (group = runtime->groups; group != NULL; group = group->next) {
         if (group->type == 0xB) {
             EvtRuntimeChild *child;
             for (child = group->children; child != NULL; child = child->next) {
-                evtWriteSerializedBytes(output, child->payload, 0x20);
+                evtWriteRecord(output, child->payload, 0x20);
             }
         }
     }
 }
 
-void evtEmitGroupTypeThirteenPayloads(s32 output, evtViewerInfo_t *runtime) {
+void evtSaveObjType13(s32 output, evtViewerInfo_t *runtime) {
     EvtRuntimeGroup *group;
     for (group = runtime->groups; group != NULL; group = group->next) {
         if (group->type == 0xD) {
             EvtRuntimeChild *child;
             for (child = group->children; child != NULL; child = child->next) {
-                evtWriteSerializedBytes(output, child->payload, 0x28);
+                evtWriteRecord(output, child->payload, 0x28);
             }
         }
     }
 }
 
-void evtEmitGroupTypeFourteenPayloads(s32 output, evtViewerInfo_t *runtime) {
+void evtSaveObjType14(s32 output, evtViewerInfo_t *runtime) {
     EvtRuntimeGroup *group;
     for (group = runtime->groups; group != NULL; group = group->next) {
         if (group->type == 0xE) {
             EvtRuntimeChild *child;
             for (child = group->children; child != NULL; child = child->next) {
-                evtWriteSerializedBytes(output, child->payload, 0x2C);
+                evtWriteRecord(output, child->payload, 0x2C);
             }
         }
     }
 }
 
-void evtEmitGroupTypeFifteenPayloads(s32 output, evtViewerInfo_t *runtime) {
+void evtSaveObjType15(s32 output, evtViewerInfo_t *runtime) {
     EvtRuntimeGroup *group;
     for (group = runtime->groups; group != NULL; group = group->next) {
         if (group->type == 0xF) {
             EvtRuntimeChild *child;
             for (child = group->children; child != NULL; child = child->next) {
-                evtWriteSerializedBytes(output, child->payload, 0x2C);
+                evtWriteRecord(output, child->payload, 0x2C);
             }
         }
     }
 }
 
-void evtEmitGroupTypeTwentyThreePayloads(s32 output, evtViewerInfo_t *runtime) {
+void evtSaveObjType23(s32 output, evtViewerInfo_t *runtime) {
     EvtRuntimeGroup *group;
     for (group = runtime->groups; group != NULL; group = group->next) {
         if (group->type == 0x17) {
             EvtRuntimeChild *child;
             for (child = group->children; child != NULL; child = child->next) {
-                evtWriteSerializedBytes(output, child->payload, 0x2C);
+                evtWriteRecord(output, child->payload, 0x2C);
             }
         }
     }
@@ -4201,31 +4201,31 @@ void evtEmitGroupTypeTwentySevenPayloads(s32 output, evtViewerInfo_t *runtime) {
         if (group->type == 0x1B) {
             EvtRuntimeChild *child;
             for (child = group->children; child != NULL; child = child->next) {
-                evtWriteSerializedBytes(output, child->payload, 0x28);
+                evtWriteRecord(output, child->payload, 0x28);
             }
         }
     }
 }
 
-void evtEmitGroupTypeSixteenPayloads(s32 output, evtViewerInfo_t *runtime) {
+void evtSaveObjType16(s32 output, evtViewerInfo_t *runtime) {
     EvtRuntimeGroup *group;
     for (group = runtime->groups; group != NULL; group = group->next) {
         if (group->type == 0x10) {
             EvtRuntimeChild *child;
             for (child = group->children; child != NULL; child = child->next) {
-                evtWriteSerializedBytes(output, child->payload, 0x18);
+                evtWriteRecord(output, child->payload, 0x18);
             }
         }
     }
 }
 
-void evtEmitGroupTypeSeventeenPayloads(s32 output, evtViewerInfo_t *runtime) {
+void evtSaveObjType17(s32 output, evtViewerInfo_t *runtime) {
     EvtRuntimeGroup *group;
     for (group = runtime->groups; group != NULL; group = group->next) {
         if (group->type == 0x11) {
             EvtRuntimeChild *child;
             for (child = group->children; child != NULL; child = child->next) {
-                evtWriteSerializedBytes(output, child->payload, 0x24);
+                evtWriteRecord(output, child->payload, 0x24);
             }
         }
     }
@@ -4241,7 +4241,7 @@ void evtWriteGroupMetadata(s32 output, evtViewerInfo_t *runtime) {
         *(u16 *)&header[4] = group->metadata.value;
         header[6] = group->metadata.option;
         header[7] = group->metadata.extra2;
-        evtWriteSerializedBytes(output, header, sizeof(header));
+        evtWriteRecord(output, header, sizeof(header));
     }
 }
 
@@ -4251,7 +4251,7 @@ void evtEmitGroupTypeTwentyFivePayloads(s32 output, evtViewerInfo_t *runtime) {
         if (group->type == 0x19) {
             EvtRuntimeChild *child;
             for (child = group->children; child != NULL; child = child->next) {
-                evtWriteSerializedBytes(output, child->payload, 0x40);
+                evtWriteRecord(output, child->payload, 0x40);
             }
         }
     }
@@ -4262,7 +4262,7 @@ extern void *sdfFileGetHostRoot(void);
 extern char D_003BC350[];
 extern char D_003BC358[];
 
-s32 evtViewerSaveTrackFiles(s32 mode, evtViewerInfo_t *runtime) {
+s32 evtMakeViewerPath(s32 mode, evtViewerInfo_t *runtime) {
     char pm2Path[64];
     char pm3Path[64];
     s32 pm2;
@@ -4311,21 +4311,21 @@ s32 evtViewerSaveTrackFiles(s32 mode, evtViewerInfo_t *runtime) {
         return 0;
     }
 
-    evtViewerWriteTrackDirectory(pm2, EVT_VIEWER_TRACK_FILE_FORMAT_PM2, runtime);
+    evtSaveViewerHeader(pm2, EVT_VIEWER_TRACK_FILE_FORMAT_PM2, runtime);
     for (section = 0; section < 26; section++) {
         switch (section) {
-        case 0: evtWriteRuntimeHeaderValues(pm2, runtime); break;
-        case 1: evtWriteFixedSizeEntries(pm2, runtime); break;
-        case 4: evtViewerWriteChildRecords(pm2, EVT_VIEWER_TRACK_FILE_FORMAT_PM2, runtime); break;
-        case 5: evtWriteGroupHeader(pm2, runtime); break;
-        case 13: evtCopyRuntimeChildPayloadsToBuffer(pm2, runtime); break;
-        case 14: evtEmitGroupTypeElevenPayloads(pm2, runtime); break;
-        case 15: evtEmitGroupTypeThirteenPayloads(pm2, runtime); break;
-        case 16: evtEmitGroupTypeFourteenPayloads(pm2, runtime); break;
-        case 17: evtEmitGroupTypeFifteenPayloads(pm2, runtime); break;
-        case 18: evtEmitGroupTypeSixteenPayloads(pm2, runtime); break;
-        case 19: evtEmitGroupTypeSeventeenPayloads(pm2, runtime); break;
-        case 20: evtEmitGroupTypeTwentyThreePayloads(pm2, runtime); break;
+        case 0: evtSaveViewerInfo(pm2, runtime); break;
+        case 1: evtSaveObjectList(pm2, runtime); break;
+        case 4: evtSaveFrameList(pm2, EVT_VIEWER_TRACK_FILE_FORMAT_PM2, runtime); break;
+        case 5: evtSaveObjType2(pm2, runtime); break;
+        case 13: evtSaveObjType10(pm2, runtime); break;
+        case 14: evtSaveObjType11(pm2, runtime); break;
+        case 15: evtSaveObjType13(pm2, runtime); break;
+        case 16: evtSaveObjType14(pm2, runtime); break;
+        case 17: evtSaveObjType15(pm2, runtime); break;
+        case 18: evtSaveObjType16(pm2, runtime); break;
+        case 19: evtSaveObjType17(pm2, runtime); break;
+        case 20: evtSaveObjType23(pm2, runtime); break;
         case 24: evtEmitGroupTypeTwentySevenPayloads(pm2, runtime); break;
         case 21:
             evtWriteGroupMetadata(pm2, runtime);
@@ -4339,10 +4339,10 @@ s32 evtViewerSaveTrackFiles(s32 mode, evtViewerInfo_t *runtime) {
     }
     sceClose(pm2);
     sceSync(D_003BC358, 0);
-    evtViewerWriteTrackDirectory(pm3, EVT_VIEWER_TRACK_FILE_FORMAT_PM3, runtime);
+    evtSaveViewerHeader(pm3, EVT_VIEWER_TRACK_FILE_FORMAT_PM3, runtime);
     for (section = 0; section < 26; section++) {
         if (section == 4) {
-            evtViewerWriteChildRecords(pm3, EVT_VIEWER_TRACK_FILE_FORMAT_PM3, runtime);
+            evtSaveFrameList(pm3, EVT_VIEWER_TRACK_FILE_FORMAT_PM3, runtime);
         }
     }
     sceClose(pm3);
@@ -4462,7 +4462,7 @@ extern EvtViewerNameIndex evtEventViewerAddName(const char *, evtViewerInfo_t *)
 extern void dds3CameraObjectBasicSetFovy(dds3Basic_t *, f32);
 extern EvtViewerNameIndex mnuCampFindMatchingEntryIndex(PolyMovieWork *, evtViewerInfo_t *, s32);
 
-s32 evtPopulateViewerTimelineFromMovie(PolyMovieWork *work, evtViewerInfo_t *runtime) {
+s32 evtMakeMotionName(PolyMovieWork *work, evtViewerInfo_t *runtime) {
     char motionName[64];
     evtWorldTable_t *worldTable;
     s32 soundRowsPresent;
@@ -5297,7 +5297,7 @@ extern u32 dds3DrawFlag;
 extern s32 evtFormatPolygonMoviePaths(s32 eventId, s32 sceneId, char *path0, char *path1, char *path2);
 extern void evtFreeStage(void);
 
-EvtViewerReloadResult evtReloadEventViewer(EvtPolygonMovieResourceMode resourceMode, evtViewerInfo_t *runtime) {
+EvtViewerReloadResult evtViewerShutdown(EvtPolygonMovieResourceMode resourceMode, evtViewerInfo_t *runtime) {
     char path0[0x80];
     char path1[0x80];
     char path2[0x80];
@@ -5342,7 +5342,7 @@ EvtViewerReloadResult evtReloadEventViewer(EvtPolygonMovieResourceMode resourceM
     work = evtGetPolygonMovieWorkData2(D_003BBE78, D_003BBE7A, resourceMode);
     if (work != NULL) {
         runtime->windowContext = work;
-        evtPopulateViewerTimelineFromMovie(work, runtime);
+        evtMakeMotionName(work, runtime);
         return EVT_VIEWER_RELOAD_SUCCEEDED;
     }
     return EVT_VIEWER_RELOAD_FAILED;

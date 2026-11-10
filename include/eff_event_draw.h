@@ -25,13 +25,13 @@ typedef char EffSolidRectParams_blend_offset_must_be_4[(u32)&((dds3Effect_Filter
 typedef char EffSolidRectParams_left_offset_must_be_8[(u32)&((dds3Effect_Filter_t *)0)->corners == 0x08 ? 1 : -1];
 typedef char EffSolidRectParams_bottom_offset_must_be_0x14[(u32)&((dds3Effect_Filter_t *)0)->corners[1][1] == 0x14 ? 1 : -1];
 
-EffScreenDrawParams *effGetLoadDescA(void);
+EffScreenDrawParams *evtGetUnityCalcArea(void);
 EffScreenDrawParams *effGetLoadDescD(void);
 EffScreenDrawParams *Eve_BlurGetParam(void);
 EffScreenDrawParams *effGetCh73Params(void);
 dds3Effect_Filter_t *Eve_FilterGetParams(void);
-dds3Effect_Filter_t *effEventGetSolidRectangleSetupParams(void);
-void effEventSetSolidRectangleParameters(dds3Effect_Filter_t *parameters);
+dds3Effect_Filter_t *dblurGetParam2(void);
+void dblurSetParam2(dds3Effect_Filter_t *parameters);
 void Eve_FilterSetParam(dds3Effect_Filter_t *parameters);
 
 /* Enable or disable each event-effect draw family. */

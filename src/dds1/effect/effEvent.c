@@ -299,7 +299,7 @@ void Eve_EffectInit(void) {
 }
 
 /* Dispatch enabled draw families independently, in their native order. */
-void effDispatchActive(void) {
+void Eve_EffectDraw(void) {
     if (Eve_BlurShow) {
         dds3EffectBlur(&Eve_Blur.source);
     }
@@ -368,12 +368,12 @@ EffEventSetupReadiness effUpdateCh72Params(void) {
 }
 
 /* Expose this screen-draw setup block; no parameter copy is made. */
-EffScreenDrawParams *effGetLoadDescA(void) {
+EffScreenDrawParams *evtGetUnityCalcArea(void) {
     return &D_003559A0;
 }
 
 /* Replace the screen-draw source prefix while preserving the trailing bytes. */
-void effSetLoadDescA(const dds3Effect_Blur_t *parameters) {
+void evtSetUnityCalcArea(const dds3Effect_Blur_t *parameters) {
     memcpy(&D_003559A0, parameters, EFF_EVENT_BLUR_SOURCE_BYTES);
 }
 
@@ -383,7 +383,7 @@ extern s8 mblurDone;
 
 /* Prepare the blur-template callback from its explicit parameter block,
  * then process the channel; its optional copy still uses source/destination. */
-EffEventSetupReadiness effEventAdvanceBlurTemplateSetup(void) {
+EffEventSetupReadiness mblurProcess(void) {
     u8 ready = mblurDone;
 
     if (mblurDone == 0) {
@@ -413,12 +413,12 @@ EffEventSetupReadiness effEventAdvanceBlurTemplateSetup(void) {
 }
 
 /* Expose the blur-template setup parameters by address. */
-dds3Effect_PartialMultiBlurParam_t *effEventGetBlurTemplateSetupParams(void) {
+dds3Effect_PartialMultiBlurParam_t *mblurGetParam(void) {
     return &effTexturedBlurSetupParameters;
 }
 
 /* Replace the setup template; this does not modify the active blur work. */
-void effEventSetBlurTemplateParameters(dds3Effect_PartialMultiBlurParam_t *parameters) {
+void mblurSetParam(dds3Effect_PartialMultiBlurParam_t *parameters) {
     effTexturedBlurSetupParameters = *parameters;
 }
 
@@ -427,7 +427,7 @@ extern EffEventSetupRecord dblurDebugMenu;
 extern s8 dblurDone;
 
 /* Prepare scatter setup from its explicit parameters, then process the channel. */
-EffEventSetupReadiness effEventAdvanceScatterBlurSetup(void) {
+EffEventSetupReadiness dblurProcess(void) {
     u8 ready = dblurDone;
 
     if (dblurDone == 0) {
@@ -457,12 +457,12 @@ EffEventSetupReadiness effEventAdvanceScatterBlurSetup(void) {
 }
 
 /* Expose the scatter-blur setup parameters by address. */
-dds3Effect_DistortionBlurParam_t *effEventGetScatterBlurSetupParams(void) {
+dds3Effect_DistortionBlurParam_t *dblurGetParam(void) {
     return &effScatterBlurSetupParameters;
 }
 
 /* Replace setup parameters without replacing the active filter-blur work. */
-void effEventSetScatterBlurParameters(dds3Effect_DistortionBlurParam_t *parameters) {
+void dblurSetParam(dds3Effect_DistortionBlurParam_t *parameters) {
     effScatterBlurSetupParameters = *parameters;
 }
 
@@ -545,12 +545,12 @@ EffEventSetupReadiness evtViewerCheckDirty(void) {
 }
 
 /* Expose the solid-rectangle setup parameters by address. */
-dds3Effect_Filter_t *effEventGetSolidRectangleSetupParams(void) {
+dds3Effect_Filter_t *dblurGetParam2(void) {
     return &D_00355F88;
 }
 
 /* Replace the setup block rather than the active solid-rectangle parameters. */
-void effEventSetSolidRectangleParameters(dds3Effect_Filter_t *parameters) {
+void dblurSetParam2(dds3Effect_Filter_t *parameters) {
     D_00355F88 = *parameters;
 }
 

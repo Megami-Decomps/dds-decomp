@@ -2830,7 +2830,7 @@
 0x00197248	Eve_RippleBlurGetParams	inferred	SMT3HD name via SLUS_209.11 0x001AD4A0, shared-hash-in-run; was effGetCh76Work
 0x00197250	Eve_RippleBlurSetTex	inferred	SMT3HD name via SLUS_209.11 0x001AD4A8, shared-hash-in-run; was effSetCh76Id
 0x00197260	Eve_RippleBlurSetDefTex	inferred	SMT3HD name via SLUS_209.11 0x001AD4B8, reloc-identical; was effInitCh76Id
-0x00197288	effEnableFramebufferQuad	inferred	confidence=high; matched-C; src/dds2/effect/effEvent.c:543:func_00197288; Enables the flag tested by effDispatchActive before drawing the framebuffer quad.; source=fresh-R_Names31-QP12 [names_qp12_apply.tsv]
+0x00197288	effEnableFramebufferQuad	inferred	confidence=high; matched-C; src/dds2/effect/effEvent.c:543:func_00197288; Enables the flag tested by Eve_EffectDraw before drawing the framebuffer quad.; source=fresh-R_Names31-QP12 [names_qp12_apply.tsv]
 0x00197298	effDisableFramebufferQuad	inferred	confidence=high; matched-C; src/dds2/effect/effEvent.c:547:func_00197298; Clears that framebuffer-quad dispatch enable flag.; source=fresh-R_Names31-QP12 [names_qp12_apply.tsv]
 0x001972A0	effCopyFramebufferQuadParameters	inferred	confidence=high; matched-C; src/dds2/effect/effEvent.c:551:func_001972A0; Copies the 0x28-byte framebuffer-quad draw parameter prefix without touching the trailing padding.; source=fresh-R_Names31-QP12 [names_qp12_apply.tsv]
 0x00197310	Eve_FilterON	inferred	SMT3HD name via SLUS_209.11 0x001AD4E0, shared-hash-in-run; was effEnableColorRectangle
@@ -2844,18 +2844,20 @@
 0x001973E8	Eve_PartialMultiFilterSetTex	inferred	SMT3HD name via SLUS_209.11 0x001AD5B8, shared-hash-in-run; was effSetCh75Id
 0x001973F8	Eve_PartialMultiFilterSetDefTex	inferred	SMT3HD name via SLUS_209.11 0x001AD5C8, reloc-identical; was effInitCh75Id
 0x00197420	Eve_EffectInit	inferred	SMT3HD name via SLUS_209.11 0x001AD5F0, reloc-identical; was effInitWorks
-0x001975F8	effSetLoadDescA	inferred	Copies the edited screen-draw source prefix from the event-viewer payload into the A descriptor; paired DDS1 0x0018F9C0.
-0x00197658	effEventAdvanceBlurTemplateSetup	inferred	confidence=high; matched-C; src/dds2/effect/effEvent.c:684:func_00197658; Initializes the blur-template channel using its template-body getter and optional copy, runs both callback stages, and resets readiness for a negative shared marker.; source=fresh-R_Names31-QP12 [names_qp12_apply.tsv]
-0x00197710	effEventGetBlurTemplateSetupParams	inferred	readability/matching review (QP16)
-0x00197720	effEventSetBlurTemplateParameters	inferred	confidence=high; matched-C; src/dds2/effect/effEvent.c:554:func_00197720; Copies the complete dds3Effect_PartialMultiBlurParam_t into the event blur-template parameter block used by its channel initializer; no allocation or active-owner replacement.; source=fresh-R_Names31-today [names_qp11.tsv]
-0x00197788	effEventAdvanceScatterBlurSetup	inferred	confidence=high; matched-C; src/dds2/effect/effEvent.c:717:func_00197788; Initializes the scatter-blur channel using its getter and optional source-to-destination copy, invokes both callback stages, and resets readiness for a negative shared marker.; source=fresh-R_Names31-QP12 [names_qp12_apply.tsv]
-0x00197840	effEventGetScatterBlurSetupParams	inferred	readability/matching review (QP16)
-0x00197850	effEventSetScatterBlurParameters	inferred	confidence=high; matched-C; src/dds2/effect/effEvent.c:587:func_00197850; Copies the complete dds3Effect_DistortionBlurParam_t into the event scatter-blur parameter block supplied to its channel initializer.; source=fresh-R_Names31-today [names_qp11.tsv]
+0x00197480	Eve_EffectDraw	inferred	SMT3HD name via SLUS_209.11 001AD650, SMT3 Eve_EffectDraw pairs with DDS1 effDispatchActive by unit position, size and body; was effDispatchActive
+0x001975E8	evtGetUnityCalcArea	inferred	SMT3HD name via SLUS_209.11 001AD7A0, SMT3 evtGetUnityCalcArea pairs with DDS1 effGetLoadDescA by unit position, size and body; was effGetLoadDescA
+0x001975F8	evtSetUnityCalcArea	inferred	SMT3HD name via SLUS_209.11 001AD7B0, SMT3 evtSetUnityCalcArea pairs with DDS1 effSetLoadDescA by unit position, size and body; was effSetLoadDescA
+0x00197658	mblurProcess	inferred	SMT3HD name via SLUS_209.11 001AD810, SMT3 mblurProcess pairs with DDS1 effEventAdvanceBlurTemplateSetup by unit position, size and body; was effEventAdvanceBlurTemplateSetup
+0x00197710	mblurGetParam	inferred	SMT3HD name via SLUS_209.11 001AD8C8, SMT3 mblurGetParam pairs with DDS1 effEventGetBlurTemplateSetupParams by unit position, size and body; was effEventGetBlurTemplateSetupParams
+0x00197720	mblurSetParam	inferred	SMT3HD name via SLUS_209.11 001AD8D8, SMT3 mblurSetParam pairs with DDS1 effEventSetBlurTemplateParameters by unit position, size and body; was effEventSetBlurTemplateParameters
+0x00197788	dblurProcess	inferred	SMT3HD name via SLUS_209.11 001AD940, SMT3 dblurProcess pairs with DDS1 effEventAdvanceScatterBlurSetup by unit position, size and body; was effEventAdvanceScatterBlurSetup
+0x00197840	dblurGetParam	inferred	SMT3HD name via SLUS_209.11 001AD9F8, SMT3 dblurGetParam pairs with DDS1 effEventGetScatterBlurSetupParams by unit position, size and body; was effEventGetScatterBlurSetupParams
+0x00197850	dblurSetParam	inferred	SMT3HD name via SLUS_209.11 001ADA08, SMT3 dblurSetParam pairs with DDS1 effEventSetScatterBlurParameters by unit position, size and body; was effEventSetScatterBlurParameters
 0x001978B8	effEventAdvanceScreenDrawSetup	inferred	Reads the screen-draw setup record, performs its optional copy and callback, runs the setup helpers while ready, then applies the shared reset control.
 0x00197980	effSetLoadDescD	inferred	Copies the edited screen-draw source prefix from the event-viewer payload into the D descriptor; paired DDS1 0x0018FD48.
 0x001979E0	evtViewerCheckDirty	inferred	SMT3HD name via SLUS_209.11 0x001ADA70, shared-hash-in-run; was effEventAdvanceSolidRectangleSetup
-0x00197A98	effEventGetSolidRectangleSetupParams	inferred	readability/matching review (QP16)
-0x00197AA8	effEventSetSolidRectangleParameters	inferred	confidence=high; matched-C; src/dds2/effect/effEvent.c:809:func_00197AA8; Copies the event-channel solid-rectangle parameter record: color, blend control, and four bounds.; source=fresh-R_Names31-QP12 [names_qp12_apply.tsv]
+0x00197A98	dblurGetParam2	inferred	SMT3HD name via SLUS_209.11 001ADB28, SMT3 dblurGetParam2 pairs with DDS1 effEventGetSolidRectangleSetupParams by unit position, size and body; was effEventGetSolidRectangleSetupParams
+0x00197AA8	dblurSetParam2	inferred	SMT3HD name via SLUS_209.11 001ADB38, SMT3 dblurSetParam2 pairs with DDS1 effEventSetSolidRectangleParameters by unit position, size and body; was effEventSetSolidRectangleParameters
 0x00197AE8	mfilterRun	inferred	SMT3HD name via SLUS_209.11 0x001ADB78, shared-hash-in-run; was effEventAdvanceResourceTemplateSetup
 0x00197BA0	mfilterGetParam	inferred	SMT3HD name via SLUS_209.11 0x001ADC30, shared-hash-in-run; was effEventGetResourceTemplateSetupParams
 0x00197BB0	mfilterSetParam	inferred	SMT3HD name via SLUS_209.11 0x001ADC40, reloc-identical; was effEventSetResourceTemplateParameters
@@ -5396,29 +5398,37 @@
 0x002502E0	FrameVarProcess	inferred	SMT3HD name via SLUS_209.11 0x001F4718, SMT3 name; was evtUpdateFrameVariableTask
 0x00250300	evtInitFrameVar	inferred	SMT3HD name via SLUS_209.11 0x001F4AF0, reloc-identical; was evtCreateFrameVariableTask
 0x00250338	evtMenuDisp	inferred	SMT3HD name via SLUS_209.11 0x001F4B28, SMT3 name; was evtDrawMenuFrame
-0x00250508	evtAppendValueChangeDebugLabel	inferred	Appends the literal VALUE CHANGE. via the formatted SIF command to the caller packet list. [names_reviewed19.tsv]
-0x00250558	evtDrawFloatValueEditorRow	inferred	DDS1 twin at 0x002357B8; renders the current float and value-editor key instructions through the callback passed to evtMenuDisp. [DDS2/DDS1 source analysis, 2026-10-13]
-0x00250718	evtViewerFloatValueUpdate	inferred	unified with DDS1 twin (was evtDrawFloatValueEntry)
-0x002508D0	evtDrawValueChangeInstructionRow	inferred	Draws configured value and directional adjustment instructions by row selection. [names_reviewed7.tsv]
-0x00250A08	evtUpdateValueChangeDialog	inferred	Draws value editor, reads action controls and adjusts displayed value by one or ten. [names_reviewed7.tsv]
+0x00250508	evtFloatChangeHead	inferred	SMT3HD name via SLUS_209.11 001F4CE8, SMT3 evtFloatChangeHead pairs with DDS1 evtAppendValueChangeDebugLabel by unit position, size and body; was evtAppendValueChangeDebugLabel
+0x00250558	evtFloatChangeItem	inferred	SMT3HD name via SLUS_209.11 001F4D38, SMT3 evtFloatChangeItem pairs with DDS1 evtDrawFloatValueEditorRow by unit position, size and body; was evtDrawFloatValueEditorRow
+0x00250718	evtFloatChangeMenu	inferred	SMT3HD name via SLUS_209.11 001F4EF8, SMT3 evtFloatChangeMenu pairs with DDS1 evtViewerFloatValueUpdate by unit position, size and body; was evtViewerFloatValueUpdate
+0x00250880	evtIntChangeHead	inferred	SMT3HD name via SLUS_209.11 001F5050, SMT3 evtIntChangeHead pairs with DDS1 evtDrawValueChangeNoticeRow by unit position, size and body; was evtDrawValueChangeNoticeRow
+0x002508D0	evtIntChangeItem	inferred	SMT3HD name via SLUS_209.11 001F50A0, SMT3 evtIntChangeItem pairs with DDS1 evtDrawValueChangeInstructionRow by unit position, size and body; was evtDrawValueChangeInstructionRow
+0x00250A08	evtIntChangeMenu	inferred	SMT3HD name via SLUS_209.11 001F51D8, SMT3 evtIntChangeMenu pairs with DDS1 evtUpdateValueChangeDialog by unit position, size and body; was evtUpdateValueChangeDialog
 0x00250B50	evtFrameChangeHead	inferred	Exact native retail literals and HD comment/xref identity: 'FRAME CHANGE.'. All matched game-function users converge on evtEventViewerMenu$$evtFrameChangeHead.
-0x00250F20	evtDrawProjectCommandRow	inferred	U2
-0x002512B0	evtDrawSelectableTextRow	inferred	Draws indexed item name with cursor-dependent highlight color. [names_reviewed7.tsv]
-0x00251340	evtUpdateTextSelectionDialog	inferred	Draws titled item list and handles cursor input when selection mode is active. [names_reviewed7.tsv]
-0x00251440	evtDrawInputValueRow	inferred	DDS1 twin 0x002366A0 [names_M95_Event.tsv]
-0x002514C8	evtDrawKeyboardRow	inferred	DDS1 twin 0x00236728 [names_M95_Event.tsv]
-0x002515C8	evtEditMovieToolName	inferred	confidence=high; matched-C; src/dds2/event/evtEventViewerMenu.c:527; Draws the movie-tool name keyboard, edits the eight-character name buffer, and returns accept/cancel status; the buffer supplies PMV tool movie paths. [code-quality cleanup, 2026-10-13]
-0x002517E0	evtDrawEventFileNameRow	inferred	DDS1 twin 0x00236A40 [names_M95_Event.tsv]
-0x00251868	evtDrawEventCutSelectRow	inferred	Draws event/cut row and key hints; DDS1 twin. [names_qp9.tsv]
-0x00251B20	evtUpdateEventCutSelectDialog	inferred	Updates selection; returns confirm or cancel state; DDS1 twin. [names_qp9.tsv]
-0x00251DE8	evtDrawSelectedEntryLabel	inferred	Draws selection indicator and optional entry label; viewer identity is not established. [names_reviewed12.tsv]
-0x00251ED0	evtDrawEntrySelectionRow	inferred	Draws an event-group entry row and updates the selected frame group and frame cursor state when the row is selected; registered by evtUpdateEntrySelectionDialog as its row callback. [code-quality cleanup, 2026-10-13]
-0x002520E8	evtUpdateEntrySelectionDialog	inferred	Draws scrollable entries and handles cursor input in selection mode. [names_reviewed7.tsv]
-0x002521C8	evtDrawFrameListColumnHeadings	inferred	Draws the frame editor header row by formatting one heading for each column in the selected group type; registered as evtUpdateFrameListDialog's menu header callback. [code-quality cleanup, 2026-10-13]
-0x00252378	evtDrawFrameListKeyValues	inferred	Renders each event timeline key's displayed column values using the selected group type and column descriptors, applying active-column highlighting; called for populated rows by evtFrameListItem. [code-quality cleanup, 2026-10-13]
+0x00250BA0	evtFrameChangeItem	inferred	SMT3HD name via SLUS_209.11 001F5360, SMT3 evtFrameChangeItem pairs with DDS1 evtViewerDrawFrameChangeRow by unit position, size and body; was evtViewerDrawFrameChangeRow
+0x00250D68	evtFrameChangeMenu	inferred	SMT3HD name via SLUS_209.11 001F54F8, SMT3 evtFrameChangeMenu pairs with DDS1 evtViewerFrameChangeUpdate by unit position, size and body; was evtViewerFrameChangeUpdate
+0x00250F20	evtMainMenuItem	inferred	SMT3HD name via SLUS_209.11 001F5678, SMT3 evtMainMenuItem pairs with DDS1 evtDrawProjectCommandRow by unit position, size and body; was evtDrawProjectCommandRow
+0x00251180	evtMainMenu	inferred	SMT3HD name via SLUS_209.11 001F57E0, SMT3 evtMainMenu pairs with DDS1 mnuDrawInfoWindowA by unit position, size and body; was mnuDrawInfoWindowA
+0x00251250	evtSelectHead	inferred	SMT3HD name via SLUS_209.11 001F58A0, SMT3 evtSelectHead pairs with DDS1 evtDrawStringEntry by unit position, size and body; was evtDrawStringEntry
+0x002512B0	evtSelectItem	inferred	SMT3HD name via SLUS_209.11 001F5908, SMT3 evtSelectItem pairs with DDS1 evtDrawSelectableTextRow by unit position, size and body; was evtDrawSelectableTextRow
+0x00251340	evtSelectMenu	inferred	SMT3HD name via SLUS_209.11 001F59A0, SMT3 evtSelectMenu pairs with DDS1 evtUpdateTextSelectionDialog by unit position, size and body; was evtUpdateTextSelectionDialog
+0x00251440	evtFileNameHead	inferred	SMT3HD name via SLUS_209.11 001F5A98, SMT3 evtFileNameHead pairs with DDS1 evtDrawInputValueRow by unit position, size and body; was evtDrawInputValueRow
+0x002514C8	evtFileNameItem	inferred	SMT3HD name via SLUS_209.11 001F5B20, SMT3 evtFileNameItem pairs with DDS1 evtDrawKeyboardRow by unit position, size and body; was evtDrawKeyboardRow
+0x002515C8	evtFileNameMenu	inferred	SMT3HD name via SLUS_209.11 001F5C20, SMT3 evtFileNameMenu pairs with DDS1 evtUpdateNameEntryDialog by unit position, size and body; was evtEditMovieToolName
+0x002517E0	evtFileName2Head	inferred	SMT3HD name via SLUS_209.11 001F5E18, SMT3 evtFileName2Head pairs with DDS1 evtDrawEventFileNameRow by unit position, size and body; was evtDrawEventFileNameRow
+0x00251868	evtFileName2Item	inferred	SMT3HD name via SLUS_209.11 001F5EA0, SMT3 evtFileName2Item pairs with DDS1 evtDrawEventCutSelectRow by unit position, size and body; was evtDrawEventCutSelectRow
+0x00251B20	evtFileName2Menu	inferred	SMT3HD name via SLUS_209.11 001F6158, SMT3 evtFileName2Menu pairs with DDS1 evtUpdateEventCutSelectDialog by unit position, size and body; was evtUpdateEventCutSelectDialog
+0x00251DE8	evtObjectListSub	inferred	SMT3HD name via SLUS_209.11 001F6418, SMT3 evtObjectListSub pairs with DDS1 evtDrawSelectedEntryLabel by unit position, size and body; was evtDrawSelectedEntryLabel
+0x00251ED0	evtObjectListItem	inferred	SMT3HD name via SLUS_209.11 001F64F0, SMT3 evtObjectListItem pairs with DDS1 evtDrawEntrySelectionRow by unit position, size and body; was evtDrawEntrySelectionRow
+0x002520E8	evtOjbectListMenu	inferred	SMT3HD name via SLUS_209.11 001F66E0, SMT3 evtOjbectListMenu pairs with DDS1 evtUpdateEntrySelectionDialog by unit position, size and body; was evtUpdateEntrySelectionDialog
+0x002521C8	evtFrameListHead	inferred	SMT3HD name via SLUS_209.11 001F67B8, SMT3 evtFrameListHead pairs with DDS1 evtDrawFrameListColumnHeadings by unit position, size and body; was evtDrawFrameListColumnHeadings
+0x00252378	evtFrameListItemSub	inferred	SMT3HD name via SLUS_209.11 001F68F0, SMT3 evtFrameListItemSub pairs with DDS1 evtDrawFrameListKeyValues by unit position, size and body; was evtDrawFrameListKeyValues
 0x002534B0	evtFrameListItem	inferred	DDS1 twin 0x00238600 [names_M95_Event.tsv]
-0x00253590	evtUpdateFrameListDialog	inferred	U1
-0x00253938	evtUpdateWorldNodeListDialog	inferred	Inferred from the current C implementation in event/evtEventViewerMenu.c; agent-proposed name checked against its owner, fields and callees (R1 finite names pass).
+0x00253590	evtFrameListMenu	inferred	SMT3HD name via SLUS_209.11 001F7248, SMT3 evtFrameListMenu pairs with DDS1 evtUpdateFrameListDialog by unit position, size and body; was evtUpdateFrameListDialog
+0x002537A8	evtBasicListItem	inferred	SMT3HD name via SLUS_209.11 001F7400, SMT3 evtBasicListItem pairs with DDS1 evtViewerDrawWorldNodeRow by unit position, size and body; was evtViewerDrawWorldNodeRow
+0x00253938	evtBasicListMenu	inferred	SMT3HD name via SLUS_209.11 001F7598, SMT3 evtBasicListMenu pairs with DDS1 evtUpdateWorldNodeListDialog by unit position, size and body; was evtUpdateWorldNodeListDialog
+0x00253A98	evtEventPosItem	inferred	SMT3HD name via SLUS_209.11 001F76F0, SMT3 evtEventPosItem pairs with DDS1 evtViewerDrawPendingNodeRow by unit position, size and body; was evtViewerDrawPendingNodeRow
+0x00253C08	evtEventPosMenu	inferred	SMT3HD name via SLUS_209.11 001F7850, SMT3 evtEventPosMenu pairs with DDS1 mnuDrawInfoWindowB by unit position, size and body; was mnuDrawInfoWindowB
 0x00253D80	evtDrawMessageDataRow	inferred	readability/matching review (QP16)
 0x00253FF8	evtUpdateMessageValueDialog	inferred	readability/matching review (QP16)
 0x00254250	evtDrawComparisonValueRow	inferred	readability/matching review (QP16)
@@ -5439,43 +5449,46 @@
 0x002569D0	evtViewerDrawGroupWindow	inferred	Light1d2
 0x00256AE0	evtViewerDrawShadowConfigRow	inferred	Callback registered by evtViewerEditShadowProperties; draws the shadow configuration heading, mode, alpha and parameter-gated Y offset rows. [LiteH-2]
 0x00256CF0	evtViewerEditShadowProperties	inferred	Inferred from the current C implementation in event/evtEventViewerMenu.c; agent-proposed name checked against its owner, fields and callees (R1 finite names pass).
-0x002570B8	evtPollRuntimeControlReady	inferred	Returns negative and clears runtime control state if external control poll is false. [names_reviewed7.tsv]
+0x00257028	mfilter_Process	inferred	SMT3HD name via SLUS_209.11 001F7948, SMT3 mfilter_Process pairs with DDS1 evtSynchronizeSelectedEntry by unit position, size and body; was evtSynchronizeSelectedEntry
+0x002570B8	evtViewerExit	inferred	SMT3HD name via SLUS_209.11 001F7978, SMT3 evtViewerExit pairs with DDS1 evtPollRuntimeControlReady by unit position, size and body; was evtPollRuntimeControlReady
 0x002570F8	evtEditEffectSpriteFrame	inferred	Edits the pending event key's position, color, blend mode and scale. [LiteH b29]
 0x00257910	evtEditCameraColorKeyFrame	inferred	Inferred from the current C implementation in event/evtEventViewerMenu.c; agent-proposed name checked against its owner, fields and callees (R1 finite names pass).
-0x00258700	evtUpdateEffectViewerGroup	inferred	Routes viewer group types to their editors and destroys the control task after the active editor completes. [LiteH b29]
-0x002588A0	evtWriteOutputBytes	inferred	Writes the supplied byte range to the event-viewer output descriptor through sceWrite. All 17 callsites serialize PMD track directories, fixed records, group metadata, or child payloads. [provider and caller context, 2026-10-14]
-0x002588B8	evtAssignRuntimeChildSequenceAndCount	inferred	Numbers children of the selected runtime group and returns their count. [names_reviewed17.tsv]
-0x00258920	evtIndexGroupTypeElevenChildren	inferred	confidence=high; src/dds2/event/evtEventViewerMenu.c:evtIndexGroupTypeElevenChildren; Assigns sequential child indices only for runtime group tag 0xB; returns the number indexed. Group meaning remains unresolved. [names_qp9.tsv]
-0x00258988	evtIndexGroupTypeThirteenChildren	inferred	confidence=high; src/dds2/event/evtEventViewerMenu.c:evtIndexGroupTypeThirteenChildren; Assigns sequential child indices only for runtime group tag 0xD; returns the number indexed. Group meaning remains unresolved. [names_qp9.tsv]
-0x002589F0	evtIndexGroupTypeFourteenChildren	inferred	confidence=high; src/dds2/event/evtEventViewerMenu.c:evtIndexGroupTypeFourteenChildren; Assigns sequential child indices only for runtime group tag 0xE; returns the number indexed. Group meaning remains unresolved. [names_qp9.tsv]
-0x00258A58	evtIndexGroupTypeFifteenChildren	inferred	confidence=high; src/dds2/event/evtEventViewerMenu.c:evtIndexGroupTypeFifteenChildren; Assigns sequential child indices only for runtime group tag 0xF; returns the number indexed. Group meaning remains unresolved. [names_qp9.tsv]
-0x00258AC0	evtIndexGroupTypeTwentyThreeChildren	inferred	confidence=high; src/dds2/event/evtEventViewerMenu.c:evtIndexGroupTypeTwentyThreeChildren; Assigns sequential child indices only for runtime group tag 0x17; returns the number indexed. Group meaning remains unresolved. [names_qp9.tsv]
+0x00258700	evtPollEffectFrameControl	inferred	SMT3HD name via SLUS_209.11 001F79A8, SMT3 func_001F79A8 pairs with DDS1 evtPollEffectFrameControl by unit position, size and body; was evtUpdateEffectViewerGroup
+0x00258850	evtViewerDispatch	inferred	SMT3HD name via SLUS_209.11 001F7A90, SMT3 evtViewerDispatch pairs with DDS1 evtDispatchActionByIndex by unit position, size and body; was evtDispatchActionByIndex
+0x002588A0	evtWriteRecord	inferred	SMT3HD name via SLUS_209.11 001F7AE0, SMT3 evtWriteRecord pairs with DDS1 evtWriteSerializedBytes by unit position, size and body; was evtWriteOutputBytes
+0x002588B8	evtCountObjType10	inferred	SMT3HD name via SLUS_209.11 001F7AF8, SMT3 evtCountObjType10 pairs with DDS1 evtAssignRuntimeChildSequenceAndCount by unit position, size and body; was evtAssignRuntimeChildSequenceAndCount
+0x00258920	evtCountObjType11	inferred	SMT3HD name via SLUS_209.11 001F7B60, SMT3 evtCountObjType11 pairs with DDS1 evtIndexGroupTypeElevenChildren by unit position, size and body; was evtIndexGroupTypeElevenChildren
+0x00258988	evtCountObjType13	inferred	SMT3HD name via SLUS_209.11 001F7BC8, SMT3 evtCountObjType13 pairs with DDS1 evtIndexGroupTypeThirteenChildren by unit position, size and body; was evtIndexGroupTypeThirteenChildren
+0x002589F0	evtCountObjType14	inferred	SMT3HD name via SLUS_209.11 001F7C30, SMT3 evtCountObjType14 pairs with DDS1 evtIndexGroupTypeFourteenChildren by unit position, size and body; was evtIndexGroupTypeFourteenChildren
+0x00258A58	evtCountObjType15	inferred	SMT3HD name via SLUS_209.11 001F7C98, SMT3 evtCountObjType15 pairs with DDS1 evtIndexGroupTypeFifteenChildren by unit position, size and body; was evtIndexGroupTypeFifteenChildren
+0x00258AC0	evtCountObjType23	inferred	SMT3HD name via SLUS_209.11 001F7D00, SMT3 evtCountObjType23 pairs with DDS1 evtIndexGroupTypeTwentyThreeChildren by unit position, size and body; was evtIndexGroupTypeTwentyThreeChildren
 0x00258B28	evtIndexGroupTypeTwentySevenChildren	inferred	confidence=high; src/dds2/event/evtEventViewerMenu.c:evtIndexGroupTypeTwentySevenChildren; Assigns sequential child indices only for runtime group tag 0x1B; returns the number indexed. Group meaning remains unresolved. [names_qp9.tsv]
-0x00258B90	evtIndexGroupTypeSixteenChildren	inferred	confidence=high; src/dds2/event/evtEventViewerMenu.c:evtIndexGroupTypeSixteenChildren; Assigns sequential child indices only for runtime group tag 0x10; returns the number indexed. Group meaning remains unresolved. [names_qp9.tsv]
-0x00258BF8	evtIndexGroupTypeSeventeenChildren	inferred	confidence=high; src/dds2/event/evtEventViewerMenu.c:evtIndexGroupTypeSeventeenChildren; Assigns sequential child indices only for runtime group tag 0x11; returns the number indexed. Group meaning remains unresolved. [names_qp9.tsv]
+0x00258B90	evtCountObjType16	inferred	SMT3HD name via SLUS_209.11 001F7D68, SMT3 evtCountObjType16 pairs with DDS1 evtIndexGroupTypeSixteenChildren by unit position, size and body; was evtIndexGroupTypeSixteenChildren
+0x00258BF8	evtCountObjType17	inferred	SMT3HD name via SLUS_209.11 001F7DD0, SMT3 evtCountObjType17 pairs with DDS1 evtIndexGroupTypeSeventeenChildren by unit position, size and body; was evtIndexGroupTypeSeventeenChildren
 0x00258C60	evtIndexGroupTypeTwentyFiveChildren	inferred	confidence=high; src/dds2/event/evtEventViewerMenu.c:evtIndexGroupTypeTwentyFiveChildren; Assigns sequential child indices only for runtime group tag 0x19; returns the number indexed. Group meaning remains unresolved. [names_qp9.tsv]
-0x00258CC8	evtViewerWriteTrackDirectory	inferred	Writes the mode-selected PMD directory and payload offsets.
-0x00259250	evtWriteRuntimeHeaderValues	inferred	Byte-identical DDS1 counterpart: Copies four selected event state words into a contiguous serialized header.
-0x00259298	evtViewerWriteChildRecords	inferred	Writes serialized child records, filtering groups by PM2/PM3 mode and deriving type-8 spans.
-0x00259428	evtWriteFixedSizeEntries	inferred	Byte-identical DDS1 counterpart: Copies each 0x20-byte table entry to the event output using the table's count.
-0x00259518	evtCopyRuntimeChildPayloadsToBuffer	inferred	Copies payloads for all children of the selected runtime group. [names_reviewed17.tsv]
-0x002595A0	evtEmitGroupTypeElevenPayloads	inferred	confidence=high; src/dds2/event/evtEventViewerMenu.c:evtEmitGroupTypeElevenPayloads; Walks runtime group tag 0xB and forwards each child payload with fixed size 0x20 to the output routine. Group meaning remains unresolved. [names_qp9.tsv]
-0x00259628	evtEmitGroupTypeThirteenPayloads	inferred	confidence=high; src/dds2/event/evtEventViewerMenu.c:evtEmitGroupTypeThirteenPayloads; Walks runtime group tag 0xD and forwards each child payload with fixed size 0x28 to the output routine. Group meaning remains unresolved. [names_qp9.tsv]
-0x002596B0	evtEmitGroupTypeFourteenPayloads	inferred	confidence=high; src/dds2/event/evtEventViewerMenu.c:evtEmitGroupTypeFourteenPayloads; Walks runtime group tag 0xE and forwards each child payload with fixed size 0x2C to the output routine. Group meaning remains unresolved. [names_qp9.tsv]
-0x00259738	evtEmitGroupTypeFifteenPayloads	inferred	confidence=high; src/dds2/event/evtEventViewerMenu.c:evtEmitGroupTypeFifteenPayloads; Walks runtime group tag 0xF and forwards each child payload with fixed size 0x2C to the output routine. Group meaning remains unresolved. [names_qp9.tsv]
-0x002597C0	evtEmitGroupTypeTwentyThreePayloads	inferred	confidence=high; src/dds2/event/evtEventViewerMenu.c:evtEmitGroupTypeTwentyThreePayloads; Walks runtime group tag 0x17 and forwards each child payload with fixed size 0x2C to the output routine. Group meaning remains unresolved. [names_qp9.tsv]
+0x00258CC8	evtSaveViewerHeader	inferred	SMT3HD name via SLUS_209.11 001F7E38, SMT3 evtSaveViewerHeader pairs with DDS1 evtViewerWriteTrackDirectory by unit position, size and body; was evtViewerWriteTrackDirectory
+0x00259250	evtSaveViewerInfo	inferred	SMT3HD name via SLUS_209.11 001F8238, SMT3 evtSaveViewerInfo pairs with DDS1 evtWriteRuntimeHeaderValues by unit position, size and body; was evtWriteRuntimeHeaderValues
+0x00259298	evtSaveFrameList	inferred	SMT3HD name via SLUS_209.11 001F8278, SMT3 evtSaveFrameList pairs with DDS1 evtViewerWriteChildRecords by unit position, size and body; was evtViewerWriteChildRecords
+0x00259428	evtSaveObjectList	inferred	SMT3HD name via SLUS_209.11 001F83A0, SMT3 evtSaveObjectList pairs with DDS1 evtWriteFixedSizeEntries by unit position, size and body; was evtWriteFixedSizeEntries
+0x002594A0	evtSaveObjType2	inferred	SMT3HD name via SLUS_209.11 001F8408, SMT3 evtSaveObjType2 pairs with DDS1 evtWriteGroupHeader by unit position, size and body; was evtWriteGroupHeader
+0x00259518	evtSaveObjType10	inferred	SMT3HD name via SLUS_209.11 001F8488, SMT3 evtSaveObjType10 pairs with DDS1 evtCopyRuntimeChildPayloadsToBuffer by unit position, size and body; was evtCopyRuntimeChildPayloadsToBuffer
+0x002595A0	evtSaveObjType11	inferred	SMT3HD name via SLUS_209.11 001F8510, SMT3 evtSaveObjType11 pairs with DDS1 evtEmitGroupTypeElevenPayloads by unit position, size and body; was evtEmitGroupTypeElevenPayloads
+0x00259628	evtSaveObjType13	inferred	SMT3HD name via SLUS_209.11 001F8598, SMT3 evtSaveObjType13 pairs with DDS1 evtEmitGroupTypeThirteenPayloads by unit position, size and body; was evtEmitGroupTypeThirteenPayloads
+0x002596B0	evtSaveObjType14	inferred	SMT3HD name via SLUS_209.11 001F8620, SMT3 evtSaveObjType14 pairs with DDS1 evtEmitGroupTypeFourteenPayloads by unit position, size and body; was evtEmitGroupTypeFourteenPayloads
+0x00259738	evtSaveObjType15	inferred	SMT3HD name via SLUS_209.11 001F86A8, SMT3 evtSaveObjType15 pairs with DDS1 evtEmitGroupTypeFifteenPayloads by unit position, size and body; was evtEmitGroupTypeFifteenPayloads
+0x002597C0	evtSaveObjType23	inferred	SMT3HD name via SLUS_209.11 001F8730, SMT3 evtSaveObjType23 pairs with DDS1 evtEmitGroupTypeTwentyThreePayloads by unit position, size and body; was evtEmitGroupTypeTwentyThreePayloads
 0x00259848	evtEmitGroupTypeTwentySevenPayloads	inferred	confidence=high; src/dds2/event/evtEventViewerMenu.c:evtEmitGroupTypeTwentySevenPayloads; Walks runtime group tag 0x1B and forwards each child payload with fixed size 0x28 to the output routine. Group meaning remains unresolved. [names_qp9.tsv]
-0x002598D0	evtEmitGroupTypeSixteenPayloads	inferred	confidence=high; src/dds2/event/evtEventViewerMenu.c:evtEmitGroupTypeSixteenPayloads; Walks runtime group tag 0x10 and forwards each child payload with fixed size 0x18 to the output routine. Group meaning remains unresolved. [names_qp9.tsv]
-0x00259958	evtEmitGroupTypeSeventeenPayloads	inferred	confidence=high; src/dds2/event/evtEventViewerMenu.c:evtEmitGroupTypeSeventeenPayloads; Walks runtime group tag 0x11 and forwards each child payload with fixed size 0x24 to the output routine. Group meaning remains unresolved. [names_qp9.tsv]
+0x002598D0	evtSaveObjType16	inferred	SMT3HD name via SLUS_209.11 001F87B8, SMT3 evtSaveObjType16 pairs with DDS1 evtEmitGroupTypeSixteenPayloads by unit position, size and body; was evtEmitGroupTypeSixteenPayloads
+0x00259958	evtSaveObjType17	inferred	SMT3HD name via SLUS_209.11 001F8840, SMT3 evtSaveObjType17 pairs with DDS1 evtEmitGroupTypeSeventeenPayloads by unit position, size and body; was evtEmitGroupTypeSeventeenPayloads
 0x00259A60	evtEmitGroupTypeTwentyFivePayloads	inferred	confidence=high; src/dds2/event/evtEventViewerMenu.c:evtEmitGroupTypeTwentyFivePayloads; Walks runtime group tag 0x19 and forwards each child payload with fixed size 0x40 to the output routine. Group meaning remains unresolved. [names_qp9.tsv]
-0x00259AE8	evtViewerSaveTrackFiles	inferred	Opens, writes, and closes the paired PM2 and PM3 track files; returns success status.
+0x00259AE8	evtMakeViewerPath	inferred	SMT3HD name via SLUS_209.11 001F88C8, SMT3 evtMakeViewerPath pairs with DDS1 evtViewerSaveTrackFiles by unit position, size and body; was evtViewerSaveTrackFiles
 0x00259FF8	evtGetRowValue	inferred	Selects compact or extended row layout to read its value field. [names_reviewed7.tsv]
 0x0025A048	evtGetRowVariant	inferred	Selects compact or extended row layout to read its signed variant field. [names_reviewed7.tsv]
 0x0025A098	evtGetRowParameter	inferred	Selects compact or extended row layout to read its parameter field. [names_reviewed7.tsv]
 0x0025A0E8	evtGetRowFlags	inferred	Selects compact or extended row layout to read its flags field. [names_reviewed7.tsv]
 0x0025A138	evtGetRowPayloadAddress	inferred	Returns payload pointer for selected row in compact or extended layout. [names_reviewed7.tsv]
-0x0025A280	evtPopulateViewerTimelineFromMovie	inferred	confidence=high; SetGameData strings; same movie-to-viewer group/key/world-object producer role as DDS1 0023EF90, including initial frame, BGM, title and fades. [PurC readability b2]
-0x0025CAF8	evtReloadEventViewer	inferred	DDS1 twin 0x002416E0 [names_M95_Event.tsv]
+0x0025A280	evtMakeMotionName	inferred	SMT3HD name via SLUS_209.11 001F8BA0, SMT3 evtMakeMotionName pairs with DDS1 evtPopulateViewerTimelineFromMovie by unit position, size and body; was evtPopulateViewerTimelineFromMovie
+0x0025CAF8	evtViewerShutdown	inferred	SMT3HD name via SLUS_209.11 001F9E50, SMT3 evtViewerShutdown pairs with DDS1 evtReloadEventViewer by unit position, size and body; was evtReloadEventViewer
 0x0025CC90	evtGetSoundIndex	inferred	SMT3HD name via SLUS_209.11 0x001F9EE8, byte-identical; was evtEncodeBgmSoundCode
 0x0025CCC8	evtLoadEventBgm	inferred	SMT3HD name via SLUS_209.11 0x001F9F20, reloc-identical; was evtPreloadBgm
 0x0025CD10	evtCheckEventBgmLoaded	inferred	SMT3HD name via SLUS_209.11 0x001F9F68, reloc-identical; was evtIsBgmLoaded
@@ -10174,9 +10187,9 @@
 0x003B21B0	Eve_Blur	inferred	SMT3HD data name via SLUS_209.11 0x003201D0, 2 agreeing references; was Eve_Blur
 0x003B2260	Eve_Filter	inferred	SMT3HD data name via SLUS_209.11 0x00320258, 2 agreeing references; was Eve_Filter
 0x003B23E8	effRectangleBlurSetupRecord	inferred	confidence=high; EffEventSetupRecord for the rectangle blur setup pass. Identifier-only; twin 0x00355AB8 in DDS1. [PurC data b14; matched-C evidence]
-0x003B2428	effTexturedBlurSetupParameters	inferred	confidence=high; dds3Effect_PartialMultiBlurParam_t setup parameters read by effEventGetBlurTemplateSetupParams and written by effEventSetBlurTemplateParameters. Identifier-only; twin 0x00355AF8 in DDS1. [PurC data b14; matched-C evidence]
+0x003B2428	effTexturedBlurSetupParameters	inferred	confidence=high; dds3Effect_PartialMultiBlurParam_t setup parameters read by mblurGetParam and written by mblurSetParam. Identifier-only; twin 0x00355AF8 in DDS1. [PurC data b14; matched-C evidence]
 0x003B2560	mblurDebugMenu	inferred	SMT3HD data name via SLUS_209.11 0x00320558, 2 agreeing references; was mblurDebugMenu
-0x003B25A0	effScatterBlurSetupParameters	inferred	confidence=high; dds3Effect_DistortionBlurParam_t setup parameters read by effEventGetScatterBlurSetupParams. Identifier-only; twin 0x00355C70 in DDS1. [PurC data b14; matched-C evidence]
+0x003B25A0	effScatterBlurSetupParameters	inferred	confidence=high; dds3Effect_DistortionBlurParam_t setup parameters read by dblurGetParam. Identifier-only; twin 0x00355C70 in DDS1. [PurC data b14; matched-C evidence]
 0x003B2738	dblurDebugMenu	inferred	SMT3HD data name via SLUS_209.11 0x00320730, 2 agreeing references; was dblurDebugMenu
 0x003B2878	effFramebufferQuadSetupRecord	inferred	confidence=high; EffEventSetupRecord for the framebuffer-quad setup pass. Identifier-only; twin 0x00355F48 in DDS1. [PurC data b14; matched-C evidence]
 0x003B2978	filterDebugMenu	inferred	SMT3HD data name via SLUS_209.11 0x00320830, 2 agreeing references; was filterDebugMenu
@@ -11285,7 +11298,7 @@
 0x00438FB2	skyamax	inferred	SMT3HD data name via SLUS_209.11 0x00551F0E, 3 agreeing references; was skyamax
 0x00438FB4	skyatarget	inferred	SMT3HD data name via SLUS_209.11 0x00551F10, 2 agreeing references; was skyatarget
 0x00438FB6	skyabase_par	inferred	SMT3HD data name via SLUS_209.11 0x00551F12, 2 agreeing references; was skyabase_par
-0x00438FB8	evtActiveEntryFlags	inferred	high confidence; src/dds2/game/code_00250010.c evtSynchronizeSelectedEntry(): D_00438FB8 = selected; Instruction-aligned data counterpart of DDS1 D_003BD8A0 in the matched evtSynchronizeSelectedEntry() twin. Entry-indexed active flags cleared and queried by the event display helpers. [names_reviewed26.tsv]
+0x00438FB8	evtActiveEntryFlags	inferred	high confidence; src/dds2/game/code_00250010.c mfilter_Process(): D_00438FB8 = selected; Instruction-aligned data counterpart of DDS1 D_003BD8A0 in the matched mfilter_Process() twin. Entry-indexed active flags cleared and queried by the event display helpers. [names_reviewed26.tsv]
 0x00438FC8	mnuCurrentTerminalContext	inferred	The terminal menu being drawn (MenuTerminalContext), set by mnuSetCurrentTerminalContext; its draws take sprites from its effect slots.
 0x00438FD8	sndStreamTransferIopHeapAddress	inferred	confidence=high; Paired sndInitializeStreamTransferBuffers assigns sceSifAllocIopHeap(wordCount*pairBytes), rejects nonpositive addresses, splits two destination bases from it, and submits the same address in the IOP audio command. Same role in DDS1 at0x003BD8C0. Identifier-only; existing signedness, width, per-game layouts, casts, pointer arithmetic and native interior aliases retained; no source-owned import or active ASM root/interior consumer. [Namer1 readability b85; matched-C/native-data evidence]
 0x00438FE8	mnuTitleStreamSemaphore	inferred	high confidence; src/dds2/game/code_002A05C0.c mnuCreateTitleStreamThread(): D_00438FE8 = sdfCreateSema(1, 0xff, 0); Instruction-aligned data counterpart of DDS1 D_003BD8D0 in the matched mnuCreateTitleStreamThread() twin. Semaphore protects title-stream updates and status reads/writes. [names_reviewed26.tsv]

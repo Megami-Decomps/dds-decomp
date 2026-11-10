@@ -73,7 +73,7 @@ dds3TaskUpdateResult_t effSubmitFieldBlendStateTask(dds3ProcessID_t *task) {
 extern void billFlushPendingChildPackets(void);
 extern void billFlushPendingRenderPairs(void);
 extern void dds3CrossfadeRun(void);
-extern void effDispatchActive(void);
+extern void Eve_EffectDraw(void);
 
 dds3TaskUpdateResult_t dds3EffectManagerRun(dds3ProcessID_t *task) {
     (void)task;
@@ -82,7 +82,7 @@ dds3TaskUpdateResult_t dds3EffectManagerRun(dds3ProcessID_t *task) {
     billFlushPendingChildPackets();
     billFlushPendingRenderPairs();
     dds3CrossfadeRun();
-    effDispatchActive();
+    Eve_EffectDraw();
     return DDS3_TASK_UPDATE_RETAIN_CALLBACK;
 }
 
