@@ -18,7 +18,7 @@
 #include "mdl.h"
 #include "bill_object_api.h"
 
-extern u16 D_003BB044;
+extern u16 effPartModelSerial;
 
 /* Allocate the copied head and its trailing cells as one block, then create
  * the cell system with native arguments groupDivisor=0 and kind=4.

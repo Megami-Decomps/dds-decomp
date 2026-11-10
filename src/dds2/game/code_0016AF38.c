@@ -19,7 +19,7 @@
 #include "btl_grouped_entity_api.h"
 #include "bill_object_api.h"
 
-extern u16 D_00436434;
+extern u16 effPartModelSerial;
 
 /* Allocate the copied head and its trailing cells as one block, then create
  * the cell system with native arguments groupDivisor=0 and kind=4.

@@ -5,11 +5,11 @@
 #include "ps2asm.h"
 
 /* DDS's names for the same objects. */
-#define D_0031DDD0 effParameterPresetBanks
-#define D_0031DF60 effModelDefaultPosition
-#define D_0031DF70 effModelDefaultQuaternion
-#define D_0031DF80 effModelDefaultScale
-#define D_0054F1E4 D_00436434
+#define D_0031DDD0 effPartPCPDataTable
+#define D_0031DF60 effPartModelPosInit
+#define D_0031DF70 effPartModelRotInit
+#define D_0031DF80 effPartModelScaleInit
+#define D_0054F1E4 effPartModelSerial
 
 extern u128 D_0031DF60;
 
@@ -449,5 +449,5 @@ effPartHandle_t *dds3EffectPCPDataPartCreate(dds3EffectPCPData_t *hPCPData, u32 
     return dds3EffectPartCreate(type, pData);
 }
 
-INCLUDE_SDATA(const s32, "effect/effPart", D_00436434);
+INCLUDE_SDATA(const s32, "effect/effPart", effPartModelSerial);
 

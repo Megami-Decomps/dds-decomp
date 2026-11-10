@@ -14393,15 +14393,15 @@ drawing. When no private streams exist, it uses twelve vertices from
 `dds3NeedleModelDrawSurfaces` bank. Keep the existing array views, shared descriptor
 reset and native color triplets; do not invent a new shape or normalize alpha.
 
-`effModelDefaultPosition`, `effModelDefaultQuaternion` and
-`effModelDefaultScale` feed the primary-vector, quaternion-to-basis and
+`effPartModelPosInit`, `effPartModelRotInit` and
+`effPartModelScaleInit` feed the primary-vector, quaternion-to-basis and
 tertiary-vector providers in `dds3EffectPartModelInit`. Matched transform updates use
 the primary and tertiary providers for position and scale. The first two
 native records are both four zero floats, at distinct addresses; the scale
 record is `(1,1,1,0)`. In particular, do not replace the native zero quaternion
 with a mathematical identity quaternion or change either W value.
 
-`effParameterPresetBanks` is the kind-then-table-index fallback used by
+`effPartPCPDataTable` is the kind-then-table-index fallback used by
 dispatched-work creation and cloning only when the kind lacks a duplicate
 callback. The full native bank is 0x70 bytes: twenty-eight pointer cells, eight
 non-null and twenty null. Retain its unsized `void **[]` declaration, its
