@@ -8,12 +8,10 @@
  * /tmp aside, their text is listed in docs/sdf-irx-modules.md. */
 
 /* DDS's driver is a later revision of SMT3's. The text and names here are
- * SMT3's, from smt3-decomp, for every function whose code is the same in both.
- * The functions DDS changed are INCLUDE_ASM of DDS's own code, keeping SMT3's
- * comment where it still describes the function: 13 bank kinds instead of 7
- * (SDF_SND_KINDS), a 0x44-byte sdfSndSlot_t, interrupt locks in the BGM paths,
- * and a stream player with less logging. The changed functions are listed in
- * docs/irx-modules.md. */
+ * SMT3's, from smt3-decomp, adapted where DDS changed the code: 13 bank kinds
+ * instead of 7 (SDF_SND_KINDS), a 0x44-byte sdfSndSlot_t, interrupt locks in
+ * the BGM paths, and a stream player with less logging. The functions still in
+ * DDS's asm are listed in docs/irx-modules.md. */
 extern const char aSdfsdmanIFThre[];
 extern const char aSdfsnddrvSOpen[];
 extern const char aSdfsndfileread[];
@@ -129,7 +127,57 @@ s32 sdfAdpcmSetVolume(s32 vol);
 s32 sdfAdpcmStreamPlay(const char *path, s32 vol, s8 onMemory);
 void sdfAdpcmStreamInit(void *arg);
 
-INCLUDE_ASM("SDFSDMAN", sdfSdManInit);
+s32 sdfSdManInit(void)
+{
+    iop_thread_t rpc;
+    iop_thread_t smg;
+    iop_thread_t adpcm;
+    s32 tid;
+    s32 ret;
+
+    if (sifman_SifSetIOPrcvaddr() == 0) {
+        sifman_SifSIF2Init();
+    }
+    sifcmd_SifInitRpc(0);
+
+    rpc.thread = sdfSndDrvRpcInit;
+    rpc.attr = 0;
+    rpc.priority = 40;
+    rpc.stacksize = 2048;
+    rpc.option = 0;
+    tid = thbase_CreateThread(&rpc);
+    if (tid <= 0) {
+        goto fail;
+    }
+    thbase_StartThread(tid, NULL);
+
+    smg.thread = sdfSndSmgLoadThread;
+    smg.attr = 0;
+    smg.priority = 41;
+    smg.stacksize = 2048;
+    smg.option = 0;
+    tid = thbase_CreateThread(&smg);
+    if (tid <= 0) {
+        goto fail;
+    }
+    thbase_StartThread(tid, NULL);
+
+    adpcm.thread = sdfAdpcmStreamInit;
+    adpcm.attr = 0;
+    adpcm.priority = 42;
+    adpcm.stacksize = 2048;
+    adpcm.option = 0;
+    tid = thbase_CreateThread(&adpcm);
+    if (tid <= 0) {
+fail:
+        stdio_printf(aSdfsdmanIFThre);
+        ret = 1;
+    } else {
+        thbase_StartThread(tid, NULL);
+        ret = 0;
+    }
+    return ret;
+}
 
 /* sdfSdManInit was a translation unit of its own: the linker aligned what
  * follows it to 16, leaving one nop behind. */
@@ -201,7 +249,39 @@ s32 sdfSndPostError(s32 code)
 
 /* Copy the synthesiser voice map into the work area the EE reads: 24 voices
  * per core, -1 where the voice is not in use. */
+#ifdef NON_MATCHING
+/* One instruction short: gcc fills the branch delay slot with the second
+ * arm instead of the address of the slot being written. */
+s32 sdfSndUpdateVoiceMap(void)
+{
+    s32 core;
+    s32 base;
+    s32 i;
+    u8 m;
+    u8 v;
+
+    core = 0;
+    base = 0;
+    do {
+        i = 0;
+        do {
+            m = sdfSndHsynVoiceMap[i + base];
+            if ((m & 0x80) != 0) {
+                v = m & 0x70;
+            } else {
+                v = -1;
+            }
+            sdfSndWorkArea->voiceMap[i + 32 * core] = v;
+            i++;
+        } while (i < 24);
+        core++;
+        base += 24;
+    } while (core < 2);
+    return p2sdIrxSpuIopMap();
+}
+#else
 INCLUDE_ASM("SDFSDMAN", sdfSndUpdateVoiceMap);
+#endif
 
 /* mode 1 reads through the EE instead of the file library. */
 s32 sdfSndFileOpen(const char *path, s32 mode)
@@ -605,7 +685,31 @@ s32 sdfSndQuitSynth(void)
     return ret;
 }
 /* ENDF sdfSndQuitSynth */
+#ifdef NON_MATCHING
+/* Matches instruction for instruction, but gcc chooses different
+ * registers. */
+/* FUNC sdfSndFindSlotById */
+/* The bank slot a packed sound id belongs to, or -1. */
+s32 sdfSndFindSlotById(s32 idPacked)
+{
+    s32 i;
+    s32 id;
+
+    id = idPacked >> 16;
+    if (idPacked < 0) {
+        return -1;
+    }
+    for (i = 0; i < SDF_SND_KINDS; i++) {
+        if (sdfSndWorkArea->stat[i].id == id) {
+            return i;
+        }
+    }
+    return -1;
+}
+/* ENDF sdfSndFindSlotById */
+#else
 INCLUDE_ASM("SDFSDMAN", sdfSndFindSlotById);
+#endif
 INCLUDE_ASM("SDFSDMAN", sdfSndBgmPlay);
 INCLUDE_ASM("SDFSDMAN", sdfSndSaveResumePoint);
 
@@ -870,11 +974,37 @@ INCLUDE_ASM("SDFSDMAN", sdfSndAllocSeSlot);
 INCLUDE_ASM("SDFSDMAN", sdfSndSetSeqVolume);
 
 /* FUNC sdfSndFadeOutAll */
-INCLUDE_ASM("SDFSDMAN", sdfSndFadeOutAll);
+s32 sdfSndFadeOutAll(void)
+{
+    s32 i;
+
+    for (i = 0; i < 3; i++) {
+        if (sdfSndSlots[i].id >= 0 &&
+            (sdfSndMidiWork.tbl->seq[i].slot->flags & 2) != 0 &&
+            sdfSndSlots[i].volStep >= 0) {
+            sdfSndSlots[i].volStep = -64;
+            sdfSndSlots[i].fadeIn = 1;
+            sdfSndSlots[i].unk34[0] = 1;
+        }
+    }
+}
 /* ENDF sdfSndFadeOutAll */
 
 /* FUNC sdfSndFadeInAll */
-INCLUDE_ASM("SDFSDMAN", sdfSndFadeInAll);
+s32 sdfSndFadeInAll(void)
+{
+    s32 i;
+
+    for (i = 0; i < 3; i++) {
+        if (sdfSndSlots[i].id >= 0 &&
+            (sdfSndMidiWork.tbl->seq[i].slot->flags & 2) != 0 &&
+            sdfSndSlots[i].unk34[0] == 1) {
+            sdfSndSlots[i].volStep = 64;
+            sdfSndSlots[i].fadeIn = 0;
+            sdfSndSlots[i].unk34[0] = 0;
+        }
+    }
+}
 /* ENDF sdfSndFadeInAll */
 
 #ifdef NON_MATCHING
@@ -1257,7 +1387,12 @@ s32 sdfAdpcmFadeTick(void)
 /* ENDF sdfAdpcmFadeTick */
 
 /* FUNC sdfAdpcmFadeOut */
-INCLUDE_ASM("SDFSDMAN", sdfAdpcmFadeOut);
+s32 sdfAdpcmFadeOut(s32 step)
+{
+    if (sdfAdpcm.playing) {
+        sdfAdpcm.fadeStep = step;
+    }
+}
 /* ENDF sdfAdpcmFadeOut */
 INCLUDE_ASM("SDFSDMAN", sdfAdpcmStop);
 
@@ -1322,7 +1457,17 @@ INCLUDE_ASM("SDFSDMAN", sdfAdpcmFillBuffer);
 INCLUDE_ASM("SDFSDMAN", sdfAdpcmSetVolume);
 
 /* FUNC sdfAdpcmStreamPlay */
-INCLUDE_ASM("SDFSDMAN", sdfAdpcmStreamPlay);
+s32 sdfAdpcmStreamPlay(const char *path, s32 vol, s8 onMemory)
+{
+    if (sdfAdpcm.playing) {
+        stdio_printf(aSdfadpcmAdpcmN);
+    } else {
+        sdfAdpcm.volume = vol;
+        sdfAdpcm.fadeStep = 0;
+        sdfAdpcm.onMemory = onMemory;
+        thsemap_SignalSema(sdfAdpcmPlaySema);
+    }
+}
 /* ENDF sdfAdpcmStreamPlay */
 INCLUDE_ASM("SDFSDMAN", sdfAdpcmStreamInit);
 
