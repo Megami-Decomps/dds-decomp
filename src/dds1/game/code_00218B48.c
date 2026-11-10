@@ -1852,7 +1852,7 @@ u32 mdlRunViewerIndexedLabelTask(void) {
     return 0;
 }
 
-extern f32 D_00398380[4];
+extern f32 sdfUnitXVector[4];
 extern f32 D_00398390[4];
 extern f32 D_003983A0[4];
 
@@ -1938,11 +1938,11 @@ void mdlUpdateViewerSelectedModelFromPad(void) {
             Mult();
         }
         if (dds3PadBitTable[6] != 0) {
-            SDF_VU0_LOADVECTOR_B(D_00398380);
+            SDF_VU0_LOADVECTOR_B(sdfUnitXVector);
             FromRotation_B(speed);
             Mult();
         } else if (dds3PadBitTable[7] != 0) {
-            SDF_VU0_LOADVECTOR_B(D_00398380);
+            SDF_VU0_LOADVECTOR_B(sdfUnitXVector);
             FromRotation_B(-speed);
             Mult();
         }

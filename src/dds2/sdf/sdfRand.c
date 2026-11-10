@@ -119,7 +119,7 @@ enum sdf_stream_playback {
 typedef union { f32 quaternion[4]; u16 monthDays[20]; } sdfMathConstants_t;
 
 /* Placeholders in all three games. */
-#define D_00529BB0 D_0040BAC0
+#define D_00529BB0 sdfMathConstants
 #define D_005519B8 D_00438B78
 
 extern sdfMathConstants_t D_00529BB0;

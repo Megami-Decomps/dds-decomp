@@ -56,10 +56,10 @@ enum sdf_stream_playback {
 
 typedef union { f32 quaternion[4]; u16 monthDays[20]; } sdfMathConstants_t;
 
-#define D_00529620 D_00398380
-#define D_00529B90 D_003988F0
-#define D_00529BA0 D_00398900
-#define D_00529BB0 D_00398910
+#define D_00529620 sdfUnitXVector
+#define D_00529B90 sdfQuatPoleDown
+#define D_00529BA0 sdfQuatPoleUp
+#define D_00529BB0 sdfMathConstants
 
 extern sdfMathConstants_t D_00529BB0;
 

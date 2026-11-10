@@ -9831,6 +9831,7 @@
 0x00398348	sdfMotMatMultiUvw2Table	inferred	SMT3HD name via SLUS_209.11 0x005295E8, sdfMotion data twin; was D_00398348
 0x00398360	sdfMotGenMorphTable	inferred	SMT3HD name via SLUS_209.11 0x00529600, sdfMotion morph generator table; was sdfMotionCommandHandlers
 0x00398368	sdfMotMorphTable	inferred	SMT3HD data name via SLUS_209.11 0x00529608, 1 agreeing references; was sdfMotMorphTable
+0x00398380	sdfUnitXVector	inferred	SMT3HD name via SLUS_209.11 0x00529620, sdf/sdfQuat SMT3 rename; was D_00398380
 0x003983D0	sdf3DScreenParam	inferred	The screen parameters sdf3DSetCamera copies whole (an SdfProjectionRecord, 0xA0 bytes). Named the original name, from Nocturne HD's sdf3D.c (sdf3DSetCamera's stores in order)
 0x00398470	sdf3DScreenTm	inferred	SMT3HD data name via SLUS_209.11 0x00529710, 9 agreeing references; was sdf3DScreenTm
 0x003984B0	sdfCameraTm	inferred	The camera matrix sdf3DSetCamera is given, kept as it stores it first. Named the original name, from Nocturne HD's sdf3D.c, whose sdf3DSetCamera stores sdfCameraTm, sdf3DScreenTm, sdf3DEyeOffset and the screen parameters in this order
@@ -9847,6 +9848,9 @@
 0x00398860	sdfFileDeviceCB	inferred	SMT3HD data name via SLUS_209.11 0x00529B00, 4 agreeing references; was sdfFileDeviceCB
 0x003988C0	sdfHddIrxArgs	inferred	SMT3HD name via SLUS_209.11 0x00529B60, sdf/sdfHdd SMT3 rename; was sdfDevHddModuleArguments
 0x003988D0	sdfHddPfsIrxArgs	inferred	SMT3HD name via SLUS_209.11 0x00529B70, sdf/sdfHdd SMT3 rename; was sdfDevPfsModuleArguments
+0x003988F0	sdfQuatPoleDown	inferred	SMT3HD name via SLUS_209.11 0x00529B90, sdf/sdfQuat SMT3 rename; was D_003988F0
+0x00398900	sdfQuatPoleUp	inferred	SMT3HD name via SLUS_209.11 0x00529BA0, sdf/sdfQuat SMT3 rename; was D_00398900
+0x00398910	sdfMathConstants	inferred	SMT3HD name via SLUS_209.11 0x00529BB0, sdf/sdfQuat SMT3 rename; was D_00398910
 0x00398938	sdfDefaultRandCB	inferred	SMT3HD data name via SLUS_209.11 0x00529BD8, sdfRandomize twin reference; was sdfDefaultRandCB
 0x00398968	sdfDmaTagNameTable	inferred	SMT3HD name via SLUS_209.11 0x00529C08, sdfSound data twin; was D_00398968
 0x00398A48	sdfIpuAudioModeIdecBits	inferred	Per stream audio mode, IDEC's OFM bit then its DTE bit, which sdfIpuDecode sets. DDS2 twin 0x0040BBF8.

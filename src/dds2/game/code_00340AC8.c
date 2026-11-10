@@ -14,7 +14,7 @@ extern EffRandState sdfDefaultRandCB;
 
 
 
-extern f32 D_0040B530[4];
+extern f32 sdfUnitXVector[4];
 
 extern f32 D_00435B38;
 
@@ -137,9 +137,9 @@ void FromEuler(f32 x, f32 y, f32 z) {
     SDF_VU0_LOADVECTOR((f32 *)quaternion);
 }
 
-extern f32 D_0040BAA0[4];
-extern f32 D_0040BAB0[4];
-extern f32 D_0040BAC0[4];
+extern f32 sdfQuatPoleDown[4];
+extern f32 sdfQuatPoleUp[4];
+extern f32 sdfMathConstants[4];
 
 /* vu0 routine: compose pitch and offset-adjusted planar direction quaternions. */
 void LookAt(f32 xOffset, f32 yOffset) {
@@ -166,9 +166,9 @@ void LookAt(f32 xOffset, f32 yOffset) {
     horizontalSquared = x * x + z * z;
     if (horizontalSquared < 0.000001f) {
         if (y < t) {
-            SDF_VU0_LOADVECTOR(D_0040BAA0);
+            SDF_VU0_LOADVECTOR(sdfQuatPoleDown);
         } else {
-            SDF_VU0_LOADVECTOR(D_0040BAB0);
+            SDF_VU0_LOADVECTOR(sdfQuatPoleUp);
         }
         return;
     }
@@ -190,7 +190,7 @@ void LookAt(f32 xOffset, f32 yOffset) {
     t = x + xOffset;
     offsetSquared = t * t + adjustedZ * adjustedZ;
     if (offsetSquared < 0.000001f) {
-        SDF_VU0_LOADVECTOR_B(D_0040BAC0);
+        SDF_VU0_LOADVECTOR_B(sdfMathConstants);
     } else {
         s = frsqrtf(1.0f, offsetSquared);
         quaternion[0] = 0.0f;
@@ -260,7 +260,7 @@ f32 EulerAngleAxisY(void)
     f32 rotatedX;
     ToMatrix();
     /* PEXEW exchanges words 0 and 2: output 0 is Z, while output 1 is X. */
-    SDF_VU0_LOADVECTOR_BARRIER(D_0040B530);
+    SDF_VU0_LOADVECTOR_BARRIER(sdfUnitXVector);
     SDF_VU0_APPLYMATRIX_XYZ();
     VU0_SEQ_EULER_ANGLE_AXIS_Y(rotatedZ, rotatedX);
     return sdfAtan2(rotatedZ, rotatedX);
