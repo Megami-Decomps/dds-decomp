@@ -73,7 +73,6 @@ extern void itfMesSetTextSlotFromValue(s32, s32, s32, s32);
 #include "sdf_debug_api.h"
 extern s8 dds3PadButtonState[];
 /* Name-record overwrite prompt: uses coordinates, selection, state and both text slices. */
-#ifdef NON_MATCHING
 #include "common.h"
 #include "btl_actor_resource_bank_api.h"
 #include "btl_effect_position.h"
@@ -113,15 +112,12 @@ extern char D_003BB838[];
  * does not exist it permits the write at once; when it exists it shows the
  * OVERWRITE OK? prompt, flips the OK/CANCEL choice on two pad buttons, and
  * returns 1 when OK is chosen with the confirming button, or closes the prompt
- * when the choice is cancelled. Upstream: INCLUDE_ASM in game/code_001FC7D8;
- * written from the retail routine. It differs from retail only in register
- * allocation and scheduling and in how the six string literals are addressed
- * (their text equals retail's). */
+ * when the choice is cancelled. The string literals the unit itself holds
+ * ("pfs:", "CANCEL" and the three in its rodata) are the body's literals;
+ * their text equals retail's. */
 BtlResourceWritePermissionResult btlPollResourceNameOverwrite(
     struct BtlResourceNameRecord *record, const char *directoryPath) {
     char path[0xD0];
-    s32 x;
-    s32 y;
     s32 fd;
 
     if (sdfHddValid) {
@@ -129,42 +125,45 @@ BtlResourceWritePermissionResult btlPollResourceNameOverwrite(
     } else {
         sprintf(path, "%s%s%s%s", sdfFileGetHostRoot(), directoryPath, record->resourceName, record->extension);
     }
-    x = record->x;
-    y = record->y;
-    if (record->overwritePromptActive == 0) {
-        fd = sceOpen(path, 1);
-        if (fd < 0) {
-            return BTL_RESOURCE_WRITE_PERMISSION_GRANTED;
+    /* These real prompt coordinates stay live through the draw calls.
+     * Localized callee-saved bindings preserve the native allocation;
+     * docs/compiler-trace-resource-overwrite.md records the ordinary controls
+     * and qualified compiler cause. No hardware register requirement is implied. */
+    {
+        register s32 x __asm__("$16") = record->x;
+        register s32 y __asm__("$17") = record->y;
+        if (record->overwritePromptActive == 0) {
+            fd = sceOpen(path, 1);
+            if (fd < 0) {
+                return BTL_RESOURCE_WRITE_PERMISSION_GRANTED;
+            }
+            record->selection = 0;
+            record->selectionStatus = BTL_RESOURCE_SELECTION_ACCEPTED;
+            record->overwritePromptActive = 1;
+            sceClose(fd);
+            sceSync("pfs:", 0);
+            return BTL_RESOURCE_WRITE_PERMISSION_NOT_GRANTED;
         }
-        record->selection = 0;
-        record->selectionStatus = BTL_RESOURCE_SELECTION_ACCEPTED;
-        record->overwritePromptActive = 1;
-        sceClose(fd);
-        sceSync("pfs:", 0);
+        if ((dds3PadBitTable[6] & 2) || (dds3PadBitTable[7] & 2)) {
+            record->selection ^= 1;
+        } else if (dds3PadBitTable[1] < 0) {
+            if (record->selection == 1) {
+                return BTL_RESOURCE_WRITE_PERMISSION_GRANTED;
+            }
+            record->selectionStatus = BTL_RESOURCE_SELECTION_PENDING;
+            record->overwritePromptActive = 0;
+            return BTL_RESOURCE_WRITE_PERMISSION_NOT_GRANTED;
+        } else if (dds3PadBitTable[3] < 0) {
+            record->selectionStatus = BTL_RESOURCE_SELECTION_PENDING;
+            record->overwritePromptActive = 0;
+            return BTL_RESOURCE_WRITE_PERMISSION_NOT_GRANTED;
+        }
+        btlDebugDrawText(x + 4, y + 0x1C, 0, "OVERWRITE OK?");
+        btlDebugDrawText(x + 0x2E, y + 0x3A, record->selection == 0 ? 4 : 0, "CANCEL");
+        btlDebugDrawText(x + 0x46, y + 0x46, record->selection == 1 ? 4 : 0, D_003BB838);
         return BTL_RESOURCE_WRITE_PERMISSION_NOT_GRANTED;
     }
-    if ((dds3PadBitTable[6] & 2) || (dds3PadBitTable[7] & 2)) {
-        record->selection ^= 1;
-    } else if (dds3PadBitTable[1] < 0) {
-        if (record->selection == 1) {
-            return BTL_RESOURCE_WRITE_PERMISSION_GRANTED;
-        }
-        record->selectionStatus = BTL_RESOURCE_SELECTION_PENDING;
-        record->overwritePromptActive = 0;
-        return BTL_RESOURCE_WRITE_PERMISSION_NOT_GRANTED;
-    } else if (dds3PadBitTable[3] < 0) {
-        record->selectionStatus = BTL_RESOURCE_SELECTION_PENDING;
-        record->overwritePromptActive = 0;
-        return BTL_RESOURCE_WRITE_PERMISSION_NOT_GRANTED;
-    }
-    btlDebugDrawText(x + 4, y + 0x1C, 0, "OVERWRITE OK?");
-    btlDebugDrawText(x + 0x2E, y + 0x3A, record->selection == 0 ? 4 : 0, "CANCEL");
-    btlDebugDrawText(x + 0x46, y + 0x46, record->selection == 1 ? 4 : 0, D_003BB838);
-    return BTL_RESOURCE_WRITE_PERMISSION_NOT_GRANTED;
 }
-#else
-INCLUDE_ASM(const s32, "game/code_001FC7D8", btlPollResourceNameOverwrite);
-#endif
 
 void func_001FC990(void) {
 }
@@ -1462,10 +1461,6 @@ void btlAddEffectActorTargetToCommand(BtlTask *context) {
 void btlPickCommandElementBlockTarget(BtlTask *actor, s32 mask) {
     btlSelectTargetsBlockingElement(actor, mask);
 }
-
-INCLUDE_SDATA(const s32, "game/code_001FC7D8", D_003BB840);
-
-INCLUDE_SDATA(const s32, "game/code_001FC7D8", D_003BB848);
 
 INCLUDE_SDATA(const s32, "game/code_001FC7D8", D_003BB850);
 
