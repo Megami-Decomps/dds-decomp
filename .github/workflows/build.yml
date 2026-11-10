@@ -80,6 +80,9 @@ jobs:
       - name: Compile non-matching C
         run: python3 tools/check_nonmatching.py
 
+      - name: Compile the IRX non-matching drafts
+        run: python3 tools/check_irx_nonmatching.py
+
       - name: Configure
         if: steps.orig.outputs.available == 'true'
         run: python3 configure.py dds1 dds2
