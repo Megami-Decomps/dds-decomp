@@ -2925,8 +2925,8 @@ extern s32 D_00436264;
 extern s32 D_00436260;
 extern s32 D_0043625C;
 extern s32 D_00436258;
-extern u128 kwlnOverlayEyeVector;
-extern u128 kwlnOverlayUpVector;
+extern u128 fldAutoMapEye;
+extern u128 fldAutoMapUp;
 extern KwlnDrawVectorParams kwlnOverlayFrustumParameters;
 
 /* Enter the field scene once: hide the world object, load the scene's map
@@ -2978,9 +2978,9 @@ void func_00149A00(void) {
     eye[0] = D_00436250;
     eye[1] = -24000.0f;
     eye[2] = D_00436254;
-    SDF_VU0_COPYVECTOR(&kwlnOverlayEyeVector, eye);
+    SDF_VU0_COPYVECTOR(&fldAutoMapEye, eye);
     SDF_VU0_COPYVECTOR(&D_0037FA20, focus);
-    SDF_VU0_COPYVECTOR(&kwlnOverlayUpVector, &up);
+    SDF_VU0_COPYVECTOR(&fldAutoMapUp, &up);
     kwlnOverlayFrustumParameters.fogNear = 255.0f;
     kwlnOverlayFrustumParameters.depthNear = 1000.0f;
     kwlnOverlayFrustumParameters.fogFar = 255.0f;
@@ -3064,9 +3064,9 @@ extern KwlnDrawVectorParams kwlnOverlayFrustumParameters;
 
 
 
-extern u128 kwlnOverlayEyeVector;
+extern u128 fldAutoMapEye;
 
-extern u128 kwlnOverlayUpVector;
+extern u128 fldAutoMapUp;
 
 extern s32 D_0043624C;
 
@@ -3133,9 +3133,9 @@ void fldEnterSceneCamera(void) {
     eye[0] = ix;
     eye[1] = -24000.0f;
     eye[2] = iz;
-    SDF_VU0_COPYVECTOR(&kwlnOverlayEyeVector, eye);
+    SDF_VU0_COPYVECTOR(&fldAutoMapEye, eye);
     SDF_VU0_COPYVECTOR(&D_0037FA20, focus);
-    SDF_VU0_COPYVECTOR(&kwlnOverlayUpVector, &up);
+    SDF_VU0_COPYVECTOR(&fldAutoMapUp, &up);
     kwlnOverlayFrustumParameters.fogNear = 255.0f;
     kwlnOverlayFrustumParameters.depthNear = 1000.0f;
     kwlnOverlayFrustumParameters.fogFar = 255.0f;
@@ -3189,9 +3189,9 @@ void fldLoadSceneModelsAndCamera(void) {
     eye[0] = ix;
     eye[1] = -24000.0f;
     eye[2] = iz;
-    SDF_VU0_COPYVECTOR(&kwlnOverlayEyeVector, eye);
+    SDF_VU0_COPYVECTOR(&fldAutoMapEye, eye);
     SDF_VU0_COPYVECTOR(&D_0037FA20, focus);
-    SDF_VU0_COPYVECTOR(&kwlnOverlayUpVector, &up);
+    SDF_VU0_COPYVECTOR(&fldAutoMapUp, &up);
     kwlnOverlayFrustumParameters.fogNear = 255.0f;
     kwlnOverlayFrustumParameters.depthNear = 1000.0f;
     kwlnOverlayFrustumParameters.fogFar = 255.0f;
@@ -3361,9 +3361,9 @@ void fldUpdateAutomapInput(void) {
     eye[0] = D_00436250;
     eye[1] = -24000.0f;
     eye[2] = D_00436254;
-    SDF_VU0_COPYVECTOR(&kwlnOverlayEyeVector, eye);
+    SDF_VU0_COPYVECTOR(&fldAutoMapEye, eye);
     SDF_VU0_COPYVECTOR(&D_0037FA20, focus);
-    SDF_VU0_COPYVECTOR(&kwlnOverlayUpVector, up);
+    SDF_VU0_COPYVECTOR(&fldAutoMapUp, up);
     kwlnOverlayFrustumParameters.fogNear = 255.0f;
     kwlnOverlayFrustumParameters.depthNear = 1000.0f;
     kwlnOverlayFrustumParameters.fogFar = 255.0f;
@@ -3400,9 +3400,9 @@ void fldCenterCameraOnEntry(void) {
     eye[0] = ix;
     eye[1] = -24000.0f;
     eye[2] = iz;
-    SDF_VU0_COPYVECTOR(&kwlnOverlayEyeVector, eye);
+    SDF_VU0_COPYVECTOR(&fldAutoMapEye, eye);
     SDF_VU0_COPYVECTOR(&D_0037FA20, focus);
-    SDF_VU0_COPYVECTOR(&kwlnOverlayUpVector, up);
+    SDF_VU0_COPYVECTOR(&fldAutoMapUp, up);
     kwlnOverlayFrustumParameters.fogNear = 255.0f;
     kwlnOverlayFrustumParameters.depthNear = 1000.0f;
     kwlnOverlayFrustumParameters.fogFar = 255.0f;

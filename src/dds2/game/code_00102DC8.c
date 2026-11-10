@@ -129,7 +129,7 @@ extern u8 dds3BackgroundFadeColor[4];
 
 extern s8 dds3BackgroundFadeMode;
 
-extern u8 kwlnLargeMotorTarget;
+extern u8 dds3PadVibrationMode;
 
 extern u8 dds3PadVibrationState[2];
 
@@ -315,7 +315,7 @@ s32 fclEncycFreeEntries(const char *name) {
 }
 
 
-s32 kwlnConfigureNamedSlotMode3(const char *name, void (*setState)(s32)) {
+s32 fclEncycConfigureMode3(const char *name, void (*setState)(s32)) {
     s32 index = fclEncycFindFreeSlot(name);
     if (index < 0) {
         return 0;
@@ -333,7 +333,7 @@ s32 fclEncycAllocEntry(const char *name, dds3ProcessFunc_t update, dds3ProcessSh
     return 1;
 }
 
-s32 kwlnConfigureNamedSlotMode2(const char *name, dds3ProcessFunc_t update, dds3ProcessShutdownFunc_t destroy, void *userValue) {
+s32 fclEncycConfigureMode2(const char *name, dds3ProcessFunc_t update, dds3ProcessShutdownFunc_t destroy, void *userValue) {
     s32 index = fclEncycFindFreeSlot(name);
     if (index < 0) {
         return 0;
@@ -521,7 +521,7 @@ INCLUDE_SDATA(const s32, "game/code_00102DC8", D_00435C2F);
 
 INCLUDE_SDATA(const s32, "game/code_00102DC8", D_00435C30);
 
-void kwlnUpdatePadInputState(void) {
+void dds3RunProcessList(void) {
     s8 buttons[2][16];
     u8 sticks[2][2];
     f32 v[4];
@@ -650,8 +650,8 @@ void kwlnUpdatePadInputState(void) {
     dds3UpdateVibrationSlots();
 }
 
-void kwlnPadStepLargeMotorLevel(void) {
-    u8 target = kwlnLargeMotorTarget;
+void dds3GetVibrationLevel(void) {
+    u8 target = dds3PadVibrationMode;
 
     if (dds3PadVibrationState[1] < target) {
         if (target - dds3PadVibrationState[1] > 0x20) {
@@ -688,7 +688,7 @@ void dds3PadVibrationSet(u32 motor, u8 level, s32 duration) {
         dds3PadVibrationState[DDS3_PAD_SMALL_MOTOR] = level;
     } else {
         D_00438D98[motor] = level;
-        kwlnPadStepLargeMotorLevel();
+        dds3GetVibrationLevel();
     }
     D_00438DA0[motor] = duration;
     if (motor == DDS3_PAD_SMALL_MOTOR) {
@@ -699,7 +699,7 @@ void dds3PadVibrationSet(u32 motor, u8 level, s32 duration) {
 }
 
 /* Clear motor levels and countdowns, then send both zero strengths to pad 0. */
-void kwlnPadResetMotorLevelsAndOutput(void) {
+void dds3PadVibrationReset(void) {
     dds3PadVibrationState[DDS3_PAD_SMALL_MOTOR] = 0;
     dds3PadVibrationState[DDS3_PAD_LARGE_MOTOR] = 0;
     D_00438DA0[DDS3_PAD_SMALL_MOTOR] = 0;
@@ -728,7 +728,7 @@ void dds3UpdateVibrationSlots(void) {
             } else if (motor == largeMotor) {
                 largeLevel = levels + DDS3_PAD_LARGE_MOTOR;
                 if (*largeLevel != targets[DDS3_PAD_LARGE_MOTOR]) {
-                    kwlnPadStepLargeMotorLevel();
+                    dds3GetVibrationLevel();
                     sdfPadSetAct1(0, *largeLevel);
                 }
             }
@@ -1355,7 +1355,7 @@ extern f32 D_00435D10[];
 extern f32 fabsf(f32 value);
 
 /* Advance the two bounded shake offsets and taper finite-duration amplitudes. */
-void kwlnAdvanceShakeOffsets(void) {
+void dds3RunQuake(void) {
     f32 limits[2];
     f32 weights[2];
     s32 axis;
@@ -1642,7 +1642,7 @@ void dds3DrawDistRipOverError(void) {
 
 extern s16 dds3BackgroundFadeFirstRamp; /* the background fade's band ramps */
 extern s16 dds3BackgroundFadeSecondRamp;
-extern u8 kwlnBackgroundFadeOverlayPackets[]; /* the overlay packet, one per draw buffer */
+extern u8 dds3FadePacket[]; /* the overlay packet, one per draw buffer */
 extern sdfGrOt_t sdfGrOtTable[];
 extern s32 dds3FadeIsBackgroundOverlayActive(void);
 
@@ -1686,7 +1686,7 @@ static u64 dds3OverlayVertex(u32 x, u32 y) {
  * keeps (128 - alpha) / 128 of what is drawn. An active background overlay
  * narrows it to the rows between its two bands. Upstream: INCLUDE_ASM in
  * both games; same packet as the retail routine. */
-void kwlnQueueBackgroundFadeOverlayPacket(void) {
+void dds3DrawFade(void) {
     u32 buffer = dds3GetFrameID();
     s32 overlayAlpha = DDS3_FADE_MAX_ALPHA - fadergba.a;
     dds3FadePacket_t *packet;
@@ -1699,7 +1699,7 @@ void kwlnQueueBackgroundFadeOverlayPacket(void) {
     if (overlayAlpha >= DDS3_FADE_MAX_ALPHA) {
         return;
     }
-    packet = (dds3FadePacket_t *)(kwlnBackgroundFadeOverlayPackets + buffer * sizeof(dds3FadePacket_t));
+    packet = (dds3FadePacket_t *)(dds3FadePacket + buffer * sizeof(dds3FadePacket_t));
     packet->header.dmaTag = 0x7000000A;              /* end, ten quadwords */
     packet->header.vifCommands = 0x5000000AULL << 32; /* NOP; DIRECT ten quadwords */
     packet->header.gifTag = 0x1000000000000004ULL;    /* NLOOP 4, NREG 1 */
@@ -1731,7 +1731,7 @@ void kwlnQueueBackgroundFadeOverlayPacket(void) {
     surface->regFunc(surface, packets);
 }
 #else
-INCLUDE_ASM(const s32, "game/code_00102DC8", kwlnQueueBackgroundFadeOverlayPacket);
+INCLUDE_ASM(const s32, "game/code_00102DC8", dds3DrawFade);
 #endif
 
 /* Cancel background direction, zero RGBA and restore the inactive ramp maxima.

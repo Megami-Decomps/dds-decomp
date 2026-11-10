@@ -8,7 +8,7 @@
 #include "dds3_process_main_result.h"
 #include "fld_file_io_priority_state.h"
 
-extern void kwlnUpdatePadInputState(void);
+extern void dds3RunProcessList(void);
 
 extern u8 D_003BA709;
 extern u32 D_003BA704;
@@ -98,7 +98,7 @@ extern void sdfResetChannels(void);
 extern void dds3AdminiCallSequence(s32 requestedMode, const void *requestData, u32 dataBytes, s32 markHistory);
 
 /* Kernel startup: create the frame/draw/font tasks and initialize every subsystem, logging each step. */
-void kwlnInitializeRuntime(void) {
+void dds3FirstInit(void) {
     printf(D_003BA738);
     dds3InitDrawEnv();
     printf(D_003BA740);
@@ -238,7 +238,7 @@ extern dds3ProcessMainResult_t dds3ProcessMain(void);
 void dds3KernelMain(void) {
     u32 startTick;
 
-    kwlnInitializeRuntime();
+    dds3FirstInit();
     D_003BD680 = 0;
     while (D_003BA708 == 0) {
         sdfWaitVblank(dds3VblanksPerFrame);
@@ -249,7 +249,7 @@ void dds3KernelMain(void) {
         }
         if (D_003BA70C == 0) {
             startTick = sdfGetRunTimeCountBase();
-            kwlnUpdatePadInputState();
+            dds3RunProcessList();
             if (dds3ProcessMain() == DDS3_PROCESS_MAIN_STOP) {
                 break;
             }

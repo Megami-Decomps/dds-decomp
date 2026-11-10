@@ -97,7 +97,7 @@ extern s32 evtSelStateCreate(s32 countLimit, s16 frames, s32 firstValue, s32 sec
 extern void fileReadRecordSecondVector(FileSlotTable *record, u128 *out);
 extern void fileReadVectorPtr20(FileSlotTable *record, u128 *out);
 extern void fileSetRecordSecondVector(FileSlotTable *record, const void *src);
-extern void kwlnPadResetMotorLevelsAndOutput(void);
+extern void dds3PadVibrationReset(void);
 extern void mnuRecordSetVector(FileSlotTable *record, const void *src);
 
 
@@ -12583,7 +12583,7 @@ void effResetSlots(void) {
     D_003BC9B8[1] = 0;
     D_003BC9C0[1] = 0;
     D_003BC9C8[1] = 0;
-    kwlnPadResetMotorLevelsAndOutput();
+    dds3PadVibrationReset();
 }
 
 void effTickSlotVolumeFade(void) {

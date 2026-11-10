@@ -26,7 +26,7 @@ extern void StartingProcess(void);
 
 extern dds3ProcessID_t* startinglistf;
 
-extern void kwlnTaskFinalizeDestroy(dds3ProcessID_t* task);
+extern void KillProcess(dds3ProcessID_t* task);
 
 extern void EndProcess(dds3ProcessID_t* task);
 
@@ -211,7 +211,7 @@ void RunningProcess(void)
     }
 }
 
-void kwlnTaskFinalizeDestroy(dds3ProcessID_t* task)
+void KillProcess(dds3ProcessID_t* task)
 {
     dds3ProcessID_t* child;
     dds3ProcessID_t* next;
@@ -246,7 +246,7 @@ void EndProcess(dds3ProcessID_t* task)
     task->flag = (task->flag & ~DDS3_TASK_STATE_MASK) | DDS3_TASK_DESTROY_PENDING;
     AddProcessList(task);
     if (task->shutdowntimer == 0) {
-        kwlnTaskFinalizeDestroy(task);
+        KillProcess(task);
     }
 }
 
@@ -263,7 +263,7 @@ void dds3EndingProcess(void)
         curr = node;
         node = node->next;
         if (curr->shutdowntimer == 0) {
-            kwlnTaskFinalizeDestroy(curr);
+            KillProcess(curr);
         }
     }
 }
@@ -374,7 +374,7 @@ dds3ProcessID_t *dds3SearchProcessNumber(dds3TaskState_t taskState, dds3TaskQueu
     return task;
 }
 
-void kwlnTraverseDiagnosticTaskQueue(dds3ProcessID_t* task, void* unused)
+void DebugProcess(dds3ProcessID_t* task, void* unused)
 {
     if (task == 0) {
         return;
@@ -388,12 +388,12 @@ void dds3PrintProcessList(void)
 {
     u8* queueCountFormat;
 
-    kwlnTraverseDiagnosticTaskQueue(startinglistf, D_00411008);
+    DebugProcess(startinglistf, D_00411008);
     queueCountFormat = D_00411038;
     printf(queueCountFormat, startinglistcnt);
-    kwlnTraverseDiagnosticTaskQueue(runninglistf, D_00411048);
+    DebugProcess(runninglistf, D_00411048);
     printf(queueCountFormat, runninglistcnt);
-    kwlnTraverseDiagnosticTaskQueue(endinglistf, D_00411078);
+    DebugProcess(endinglistf, D_00411078);
     printf(queueCountFormat, endinglistcnt);
     printf(D_00435BF8);
 }
@@ -525,7 +525,7 @@ dds3TaskKillRequestResult_t dds3KillProcess(dds3ProcessID_t* task, s32 delayTick
     case DDS3_TASK_DESTROY_PENDING:
         task->shutdowntimer = delayTicks;
         if (task->shutdowntimer == 0) {
-            kwlnTaskFinalizeDestroy(task);
+            KillProcess(task);
             return DDS3_TASK_KILL_REQUEST_ACCEPTED;
         }
         break;

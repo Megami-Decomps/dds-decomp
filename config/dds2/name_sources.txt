@@ -1,5 +1,6 @@
 # addr	name	evidence|inferred	note
 0x001001C8	_exit	inferred	SMT3HD name via SLUS_209.11 0x001001C8, crt0 _exit, tail-calls Exit(0); was func_001001C8
+0x001001D8	dds3FirstInit	inferred	was dds3FirstInit
 0x001003E8	dds3SoftReset	inferred	SMT3HD name via SLUS_209.11 0x00100400, shared-hash-in-run; was kwlnRequestMainLoopExit
 0x001003F8	dds3GetKernelCount	inferred	SMT3HD name via SLUS_209.11 0x00100410, shared-hash-in-run; was kwlnGetFrameCounter
 0x00100400	dds3GetFrameID	inferred	SMT3HD name via SLUS_209.11 0x00100418, shared-hash-in-run; was kwlnGetDrawBufferIndex
@@ -17,14 +18,14 @@
 0x001009C8	StartingProcess	inferred	SMT3HD name via SLUS_209.11 0x001009E8, reloc-identical; was kwlnTaskAdvanceStartDelays
 0x00100A28	RunProcess	inferred	SMT3HD name via SLUS_209.11 0x00100A48, unique-masked-hash; was kwlnTaskStep
 0x00100C28	RunningProcess	inferred	SMT3HD name via SLUS_209.11 0x00100C48, reloc-identical; was kwlnTaskRunScheduledUpdates
-0x00100D50	kwlnTaskFinalizeDestroy	inferred	Recursively destroys children, invokes destroy callback, detaches and frees task.
+0x00100D50	KillProcess	inferred	Recursively destroys children, invokes destroy callback, detaches and frees task.; was KillProcess
 0x00100DD8	EndProcess	inferred	SMT3HD name via SLUS_209.11 0x00100E08, reloc-identical; was kwlnTaskRequestDestroy
 0x00100E50	dds3EndingProcess	inferred	Counts down destruction delays and completes destruction on expiry.
 0x00100EB0	ChangeProcessFlagChild	inferred	SMT3HD name via SLUS_209.11 0x00100EE0, reloc-identical; was kwlnTaskUpdateFlagsRecursive
 0x00100F48	ChangeProcessFlag	inferred	SMT3HD name via SLUS_209.11 0x00100F78, reloc-identical; was kwlnTaskUpdateFlagsScoped
 0x001010A8	dds3GetProcessCount	inferred	Selects one of the three task-list pointers according to the low four state bits.
 0x00101100	dds3SearchProcessNumber	inferred	Selects one of the three task-state queues and returns its zero-based entry; counterpart 0x00101218.
-0x00101198	kwlnTraverseDiagnosticTaskQueue	inferred	confidence=high; matched-C; src/dds2/kernel/dds3KernelCore.c:181:func_00101198; Traverses listNext to the end of the supplied task queue; the queue-diagnostic caller supplies all three scheduler heads. The label argument is unused and this body does not print.; source=fresh-R_Names31-today [names_qp11.tsv]
+0x00101198	DebugProcess	inferred	confidence=high; matched-C; src/dds2/kernel/dds3KernelCore.c:181:func_00101198; Traverses listNext to the end of the supplied task queue; the queue-diagnostic caller supplies all three scheduler heads. The label argument is unused and this body does not print.; source=fresh-R_Names31-today [names_qp11.tsv]; was DebugProcess
 0x001011D0	dds3PrintProcessList	inferred	confidence=high; src/dds2/kernel/dds3KernelCore.c:func_001011D0; Prints delayed-start, middle, and delayed-destroy task lists and queue counters. [names_qp9.tsv]
 0x00101250	DebugProcessTree	inferred	SMT3HD name via SLUS_209.11 0x00101398, unique-masked-hash; was kwlnPrintTaskTreeRecursive
 0x00101328	dds3PrintProcessTree	inferred	confidence=high; matched-C; src/dds2/kernel/dds3KernelCore.c:211:func_00101328; Initializes the task-name scratch buffer, visits only parentless tasks in all three scheduler lists and dispatches the root handler with its second argument zero.; source=fresh-R_Names31-today [names_qp11.tsv]
@@ -69,9 +70,9 @@
 0x00102E88	fclEncycFindFreeSlot	inferred	SMT3HD name via SLUS_209.11 0x00102FB8, unique-masked-hash; was kwlnRegisterNamedSlot
 0x00103050	fclEncycFreeEntry	inferred	SMT3HD name via SLUS_209.11 0x00103180, reloc-identical; was kwlnFindNamedSlot
 0x00103108	fclEncycFreeEntries	inferred	SMT3HD name via SLUS_209.11 0x00103238, unique-masked-hash; was kwlnUnregisterNamedSlot
-0x001032F0	kwlnConfigureNamedSlotMode3	inferred	Finds the existing named-slot entry, sets kind 3, stores the supplied mode data, clears the other mode fields, and reports success; paired with DDS1 0x00103400. [code-quality cleanup, 2026-10-13]
+0x001032F0	fclEncycConfigureMode3	inferred	Finds the existing named-slot entry, sets kind 3, stores the supplied mode data, clears the other mode fields, and reports success; paired with DDS1 0x00103400. [code-quality cleanup, 2026-10-13]; was fclEncycConfigureMode3
 0x00103388	fclEncycAllocEntry	inferred	SMT3HD name via SLUS_209.11 0x001034B8, reloc-identical; was kwlnConfigureNamedSlotMode1
-0x00103430	kwlnConfigureNamedSlotMode2	inferred	Finds the existing named-slot entry, sets kind 2, stores the three mode arguments, clears the other mode fields, and reports success; paired with DDS1 0x00103540. [code-quality cleanup, 2026-10-13]
+0x00103430	fclEncycConfigureMode2	inferred	Finds the existing named-slot entry, sets kind 2, stores the three mode arguments, clears the other mode fields, and reports success; paired with DDS1 0x00103540. [code-quality cleanup, 2026-10-13]; was fclEncycConfigureMode2
 0x001034E0	dds3InitDebugSystem	inferred	SMT3HD name via SLUS_209.11 0x00103610, shared-hash-in-run; was kwlnRuntimeStartupHook
 0x001034E8	SelectSub	inferred	SMT3HD name via SLUS_209.11 0x00103618, reloc-identical; was kwlnStepListCursor
 0x001036B0	dds3SelectMenu	inferred	SMT3HD name via SLUS_209.11 0x001037E0, reloc-identical; was kwlnStepTwoListCursors
@@ -79,8 +80,10 @@
 0x001037F8	dds3ConsPanelTagLinkZ	inferred	SMT3HD name via SLUS_209.11 0x00103928, reloc-identical; was kwlnDrawSpriteCellZ
 0x00103860	dds3PadVibrationTest	inferred	SMT3HD name via SLUS_209.11 0x00103990, reloc-identical; was kwlnDebugPulsePadMotors
 0x001038D0	dds3PadInitialize	inferred	SMT3HD name via SLUS_209.11 0x00103A00, reloc-identical; was kwlnResetPadInputAndMotorState
+0x00103A00	dds3RunProcessList	inferred	was dds3RunProcessList
+0x00103EF8	dds3GetVibrationLevel	inferred	was dds3GetVibrationLevel
 0x00103F58	dds3PadVibrationSet	inferred	SMT3HD name via SLUS_209.11 0x001040A8, unique-masked-hash; was kwlnPadStartMotor
-0x00104020	kwlnPadResetMotorLevelsAndOutput	inferred	Zeroes both pad motor levels and queued outputs and clears the motor command pair. [names_reviewed11.tsv]
+0x00104020	dds3PadVibrationReset	inferred	Zeroes both pad motor levels and queued outputs and clears the motor command pair. [names_reviewed11.tsv]; was dds3PadVibrationReset
 0x00104058	dds3UpdateVibrationSlots	inferred	SMT3HD name via SLUS_209.11 0x001041A8, reloc-identical; was kwlnUpdatePadMotorDurations
 0x00104150	dds3TaskNoopCallback	inferred	confidence=high; Task update callback returns zero without using its task argument; registered by CallDebug for the StartSel task. DDS1 00104260 counterpart. [PurD readability b1]; was dds3TaskNoopCallback
 0x00104158	dds3InitRandCB	inferred	SMT3HD name via SLUS_209.11 0x00104670, reloc-identical; was kwlnInitMagicState
@@ -111,6 +114,7 @@
 0x00105538	dds3RenderTextureOFF	inferred	SMT3HD name via SLUS_209.11 0x00104B18, shared-hash-in-run; was kwlnTextureClearReferenceFlag
 0x00105540	dds3CheckRenderTexture	inferred	SMT3HD name via SLUS_209.11 0x00104B20, shared-hash-in-run; was kwlnTextureGetReferenceFlag
 0x00105548	dds3GetRenderTexture	inferred	SMT3HD name via SLUS_209.11 0x00104B28, shared-hash-in-run; was kwlnTextureGetHeldReference
+0x00105550	dds3RunQuake	inferred	was dds3RunQuake
 0x00105748	dds3SetQuake	inferred	SMT3HD name via SLUS_209.11 0x00104D38, reloc-identical; was kwlnFadeSetupFrames
 0x001057A8	dds3StopQuake	inferred	SMT3HD name via SLUS_209.11 0x00104D98, shared-hash-in-run; was kwlnCancelConfiguredFadeFrames
 0x001057B0	dds3InitZClearDrawTag	inferred	SMT3HD name via SLUS_209.11 0x00104DA0, reloc-identical; was evtInitializeFrameStatePacketTemplates
@@ -126,7 +130,7 @@
 0x00105B68	dds3FadeCheck	inferred	SMT3HD name via SLUS_209.11 0x00105148, reloc-identical; was kwlnFadeIsActive
 0x00105B78	dds3FadeUpdate	inferred	SMT3HD name via SLUS_209.11 0x00105158, reloc-identical; was kwlnFadeUpdate
 0x00105C20	dds3DrawDistRipOverError	inferred	SMT3HD name via SLUS_209.11 0x00105200, reloc-identical; was kwlnDrawBlurErrorCounters
-0x00105CF8	kwlnQueueBackgroundFadeOverlayPacket	inferred	Reads the active frame-buffer index and background-fade alpha; when visible, initializes and appends the current surface overlay packet. Paired DDS1 provider at 0x00105DD8.
+0x00105CF8	dds3DrawFade	inferred	Reads the active frame-buffer index and background-fade alpha; when visible, initializes and appends the current surface overlay packet. Paired DDS1 provider at 0x00105DD8.; was dds3DrawFade
 0x00105FA8	dds3FadeResetBackground	inferred	was dds3FadeResetBackground
 0x00105FE8	dds3FadeBackgroundStartOut	inferred	quiet3 twin unification; was dds3FadeBackgroundStartOut
 0x00106080	dds3FadeBackgroundStartIn	inferred	quiet3 twin unification; was dds3FadeBackgroundStartIn
@@ -9988,12 +9992,12 @@
 0x0037F790	kwlnDrawVector	inferred	confidence=high; matched_users=src/dds2/game/code_00107EF8.c:dds3SetFogPara, src/dds2/kernel/dds3KernelDraw.c:dds3SetFog; Current draw vector is assigned directly or used as the starting value of an interpolated target; copy API updates its record. Retail address correspondence is independently corroborated by at least two paired functions. [names_qp9.tsv]
 0x0037F850	dds3RenderTargetVector	inferred	SMT3HD name via SLUS_209.11 0x002F5C20, kwln rename; was kwlnHeldTextureTargetVector; was kwlnHeldTextureTargetVector
 0x0037F860	dds3RenderEyeVector	inferred	SMT3HD name via SLUS_209.11 0x002F5C30, kwln rename; was kwlnHeldTextureEyeVector; was kwlnHeldTextureEyeVector
-0x0037F870	kwlnHeldTextureUpVector	inferred	confidence=high; Existing f32[4] up vector, third argument of the held-texture LookAtMatrix call. All declarations and native payload unchanged. DDS1 twin 0x00324870; root/interior/addend instruction readers all current matched C, no import/active ASM reader. [PurD readability data b12; identifier-only]
+0x0037F870	effPCPBossTexRect	inferred	confidence=high; Existing f32[4] up vector, third argument of the held-texture LookAtMatrix call. All declarations and native payload unchanged. DDS1 twin 0x00324870; root/interior/addend instruction readers all current matched C, no import/active ASM reader. [PurD readability data b12; identifier-only]; was effPCPBossTexRect
 0x0037F940	dds3RenderLightParallel	inferred	SMT3HD name via SLUS_209.11 0x002F5D10, kwln rename; was kwlnHeldTextureLightSources; was kwlnHeldTextureLightSources
 0x0037F950	dds3RenderAmbientColor	inferred	SMT3HD name via SLUS_209.11 0x002F5D20, kwln rename; was kwlnHeldTextureAmbientColor; was kwlnHeldTextureAmbientColor
-0x0037F960	kwlnHeldTextureFrustumParameters	inferred	confidence=high; Existing0x14 KwlnDrawVectorParams input to held-texture frustum construction. All fields, declaration, native padding and source operations retained. DDS1 twin 0x00324960; explicit root/interior/addend native readers current matched frame builder only, no import/activeASM reader. [PurD readability data b14 folded into b13; identifier-only]
-0x0037FA30	kwlnOverlayEyeVector	inferred	confidence=high; Existing second look-at argument/eye origin for scene85 overlay; native provider copies second into vf31, and viewer copies its real eye workspace here. Existing u128/f32/aligned declarations and values unchanged. DDS1 twin 0x00324A30; selected root/interior/addend native readers all current C, no import/ASM reader; target vector/projection/view matrix expressly excluded. [PurD readability data b13; identifier-only]
-0x0037FA40	kwlnOverlayUpVector	inferred	confidence=high; Existing third look-at argument, populated from viewer up vectors and consumed by overlay basis construction. Existing u128/f32 declarations and alignment unchanged. DDS1 twin 0x00324A40; selected root/interior/addend native readers all current C, no import/ASM reader; target vector/projection/view matrix expressly excluded. [PurD readability data b13; identifier-only]
+0x0037F960	dds3RenderFogParam	inferred	confidence=high; Existing0x14 KwlnDrawVectorParams input to held-texture frustum construction. All fields, declaration, native padding and source operations retained. DDS1 twin 0x00324960; explicit root/interior/addend native readers current matched frame builder only, no import/activeASM reader. [PurD readability data b14 folded into b13; identifier-only]; was dds3RenderFogParam
+0x0037FA30	fldAutoMapEye	inferred	confidence=high; Existing second look-at argument/eye origin for scene85 overlay; native provider copies second into vf31, and viewer copies its real eye workspace here. Existing u128/f32/aligned declarations and values unchanged. DDS1 twin 0x00324A30; selected root/interior/addend native readers all current C, no import/ASM reader; target vector/projection/view matrix expressly excluded. [PurD readability data b13; identifier-only]; was fldAutoMapEye
+0x0037FA40	fldAutoMapUp	inferred	confidence=high; Existing third look-at argument, populated from viewer up vectors and consumed by overlay basis construction. Existing u128/f32 declarations and alignment unchanged. DDS1 twin 0x00324A40; selected root/interior/addend native readers all current C, no import/ASM reader; target vector/projection/view matrix expressly excluded. [PurD readability data b13; identifier-only]; was fldAutoMapUp
 0x0037FB10	kwlnOverlayLightSources	inferred	confidence=high; Existing SdfLightSources three-pointer bank passed to scene85 overlay lighting;12consumed bytes, native padding/pointee objects unchanged. DDS1 twin 0x00324B10; selected root/interior/addend native readers all current C, no import/ASM reader; target vector/projection/view matrix expressly excluded. [PurD readability data b13; identifier-only]
 0x0037FB20	kwlnOverlayAmbientColor	inferred	confidence=high; Existing scene85 overlay lighting ambient argument; real SDK formal is ambient. DDS2 btlInitLightParams also updates RGB through its existing BtlLightParams declaration; this pre-existing view/type is retained unchanged. DDS1 twin 0x00324B20; selected root/interior/addend native readers all current C, no import/ASM reader; target vector/projection/view matrix expressly excluded. [PurD readability data b13; identifier-only]
 0x0037FB30	kwlnOverlayFrustumParameters	inferred	confidence=high; Existing KwlnDrawVectorParams fogNear/fogFar/depthNear/depthFar/fogColor record passed to overlay frustum builder; actual owner size0x14. Native label/padding and existing type/source operations unchanged. DDS1 twin 0x00324B30; selected root/interior/addend native readers all current C, no import/ASM reader; target vector/projection/view matrix expressly excluded. [PurD readability data b13; identifier-only]
@@ -11132,6 +11136,7 @@
 0x00438D28	sdfMovieIpsExt	inferred	SMT3HD name via SLUS_209.11 0x00551B50, sdf/sdfMovie SMT3 data name; was D_00438D28
 0x00438D88	dds3KernelThread	inferred	SMT3HD name via SLUS_209.11 0x00551B88, sdf/sdfDefaultMain SMT3 rename; was kwlnMainLoopThreadNode
 0x00438D90	dds3PadVibrationState	inferred	SMT3HD data name via SLUS_209.11 0x00551B90, 3 agreeing references; was dds3PadVibrationState
+0x00438D99	dds3PadVibrationMode	inferred	was dds3PadVibrationMode
 0x00438DA8	dds3DebugGraphTask	inferred	The task handle created for DebugTimeGrph and passed to hierarchy destruction.; was dds3DebugGraphTask
 0x00438DB4	blurnow	inferred	SMT3HD data name via SLUS_209.11 0x00551BAC, 4 agreeing references; was blurnow
 0x00438DB6	blurmax	inferred	SMT3HD data name via SLUS_209.11 0x00551BAE, 3 agreeing references; was blurmax
@@ -11345,7 +11350,7 @@
 0x0043DD50	dds3BlurParam	inferred	SMT3HD data name via SLUS_209.11 0x00556C50, 2 agreeing references; was dds3BlurParam
 0x0043DD70	dds3MFilterCurrent	inferred	SMT3HD name via SLUS_209.11 0x00556C70, kwln rename; was kwlnTexturedSquareFrameParameters; was kwlnTexturedSquareFrameParameters
 0x0043DDA0	dds3ZClearDrawTag	inferred	SMT3HD data name via SLUS_209.11 0x00556CA0, 2 agreeing references; was dds3ZClearDrawTag
-0x0043E1C0	kwlnBackgroundFadeOverlayPackets	inferred	The background fade's overlay packet, one per draw buffer. DDS1 twin 0x003C2A40.
+0x0043E1C0	dds3FadePacket	inferred	The background fade's overlay packet, one per draw buffer. DDS1 twin 0x003C2A40.; was dds3FadePacket
 0x0043E3C0	dds3MultiBlurBuf	inferred	SMT3HD data name via SLUS_209.11 0x005572C0, 2 agreeing references; was dds3MultiBlurBuf
 0x0043E3F0	mulblurtarget	inferred	SMT3HD data name via SLUS_209.11 0x005572F0, 7 agreeing references; was mulblurtarget
 0x0043E420	dds3DistBlurBuf	inferred	SMT3HD name via SLUS_209.11 0x00557320, kwln rename; was kwlnFilterBlurTransitionStartParameters; was kwlnFilterBlurTransitionStartParameters

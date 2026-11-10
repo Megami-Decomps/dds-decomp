@@ -4,7 +4,7 @@
 #include "common.h"
 
 /* The screen fade's colour. Its setters store each component; the fade
- * overlay (kwlnQueueBackgroundFadeOverlayPacket) reads each one unsigned
+ * overlay (dds3DrawFade) reads each one unsigned
  * (lbu), and its alpha as 0x80 minus the component. */
 typedef struct {
     u8 r;

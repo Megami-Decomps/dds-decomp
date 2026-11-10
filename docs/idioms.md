@@ -215,7 +215,7 @@ after the helper in the matching game-code cases.
 Use the existing `ffabsf` helper when the surrounding instruction sequence
 supports it. DDS1/DDS2 `dds3BillboardGetDirectionScale` is the paired
 reference; DDS1 `func_001726E8` is a larger transfer. This is a module
-convention, not a global replacement rule: `kwlnAdvanceShakeOffsets` in the
+convention, not a global replacement rule: `dds3RunQuake` in the
 kernel uses builtin `fabsf` and changes code under the helper. Check the whole
 unit and preserve the kernel exception. Do not introduce another asm spelling
 or replace an unrelated arithmetic expression just to constrain scheduling.
@@ -8610,7 +8610,7 @@ extra geometry buffers or assembly is needed.
 
 ## Controller geometry uses scoped magnitudes and signed angle sectors
 
-`kwlnUpdatePadInputState` (DDS1 `0x00103B10`, DDS2 `0x00103A00`, 1268 bytes)
+`dds3RunProcessList` (DDS1 `0x00103B10`, DDS2 `0x00103A00`, 1268 bytes)
 uses separate direction-vector length, dot product and angle values, then a
 loop-local stick magnitude. The degree conversion, 22-degree bias, division
 by 45 and remainder modulo eight are genuine signed-integer stages. This
@@ -15416,7 +15416,7 @@ exactly (86 units, 4655 C functions). The complete manifest and receipts are
 
 ## Runtime startup does not return the admin request's scratch register
 
-`kwlnInitializeRuntime` is a `void` initializer in both games. Its only caller,
+`dds3FirstInit` is a `void` initializer in both games. Its only caller,
 `dds3KernelMain`, ignores the result; retail ends the initializer with a sibling
 jump to the administrative request API and never reads that API's `$v0`.
 A decompiler's `return dds3AdminiCallSequence(...)` is not evidence that either

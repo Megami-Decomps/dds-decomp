@@ -145,11 +145,11 @@ extern f32 kwlnOverlayAmbientColor[4];
 
 extern f32 kwlnDefaultColorVector[4];
 
-extern f32 dds3RenderTargetVector[4], dds3RenderEyeVector[4], kwlnHeldTextureUpVector[4];
+extern f32 dds3RenderTargetVector[4], dds3RenderEyeVector[4], effPCPBossTexRect[4];
 
-extern f32 D_0037FA20[4], kwlnOverlayEyeVector[4], kwlnOverlayUpVector[4];
+extern f32 D_0037FA20[4], fldAutoMapEye[4], fldAutoMapUp[4];
 
-extern KwlnDrawVectorParams kwlnHeldTextureFrustumParameters, kwlnOverlayFrustumParameters, kwlnDrawVector;
+extern KwlnDrawVectorParams dds3RenderFogParam, kwlnOverlayFrustumParameters, kwlnDrawVector;
 
 extern Matrix4 dds3RenderViewportMatrix;
 
@@ -163,7 +163,7 @@ extern Matrix4 sdfViewMatrix;
 
 extern sdfGrOt_t *kwlnSceneSurfaceSets[13][4];
 
-extern void kwlnAdvanceShakeOffsets(void);
+extern void dds3RunQuake(void);
 
 extern u32 evtCheckSelectionState(void);
 
@@ -192,7 +192,7 @@ s32 dds3DrawFirstProcess(dds3ProcessID_t *task) {
     const u32 bufferIndex = dds3GetFrameID();
     sdfGrOt_t *providerSurfaces;
 
-    kwlnAdvanceShakeOffsets();
+    dds3RunQuake();
     evtCheckSelectionState();
     dds3SceneLightUpdateFirst();
     if (dds3RenderTex != 0) {
@@ -204,7 +204,7 @@ s32 dds3DrawFirstProcess(dds3ProcessID_t *task) {
             sdfDrawTag_t *sceneList;
             u64 *sceneFrustum;
             sdf3DMakeScreenParam(&D_0037F7B0.camera);
-            LookAtMatrix(dds3RenderTargetVector, dds3RenderEyeVector, kwlnHeldTextureUpVector);
+            LookAtMatrix(dds3RenderTargetVector, dds3RenderEyeVector, effPCPBossTexRect);
             VU0_STORE_MATRIX_UNCLOBBERED(&dds3RenderViewportMatrix);
             sdf3DMakeViewportPacket((struct ConsMatrixPacket *)(dds3HeldTextureMatrixPackets + bufferIndex * DDS3_FRAME_BUFFER_BYTES),
                 &D_0037F7B0, &dds3RenderViewportMatrix);
@@ -213,7 +213,7 @@ s32 dds3DrawFirstProcess(dds3ProcessID_t *task) {
                 (sdfDrawTag_t *)(dds3HeldTextureMatrixPackets - 0x190 + bufferIndex * DDS3_FRAME_BUFFER_BYTES));
             sceneList = dds3FontReqAllocDrawTag();
             sceneFrustum = (u64 *)sdfGrAllocPacketBuff(0x50);
-            sdf3DMakeFogPacket((struct ConsFrustumPacket *)sceneFrustum, &kwlnHeldTextureFrustumParameters);
+            sdf3DMakeFogPacket((struct ConsFrustumPacket *)sceneFrustum, &dds3RenderFogParam);
             sdfDrawTagLink(sceneList, (u32)sceneFrustum);
             sceneNode->regFunc(sceneNode, sceneList);
         }
@@ -225,7 +225,7 @@ s32 dds3DrawFirstProcess(dds3ProcessID_t *task) {
         sdf3DMakeLightParallelPacket((sdf3DLightParallelPacket_t *)(dds3OverlayLightingPackets + bufferIndex * DDS3_FRAME_BUFFER_BYTES),
             kwlnOverlayLightSources, kwlnOverlayAmbientColor);
         sdf3DMakeScreenParam(&D_0037F980.camera);
-        LookAtMatrix(D_0037FA20, kwlnOverlayEyeVector, kwlnOverlayUpVector);
+        LookAtMatrix(D_0037FA20, fldAutoMapEye, fldAutoMapUp);
         VU0_STORE_MATRIX_UNCLOBBERED(&D_00384790);
         sdf3DMakeViewportPacket((struct ConsMatrixPacket *)(dds3OverlayMatrixPackets + bufferIndex * DDS3_FRAME_BUFFER_BYTES), &D_0037F980, &D_00384790);
         overlayNode = &sdfGrOtTable[85];
@@ -342,7 +342,7 @@ extern void dds3DrawBackgroundFadeBands(void);
 
 extern void dds3FadeUpdate(void);
 
-extern void kwlnQueueBackgroundFadeOverlayPacket(void);
+extern void dds3DrawFade(void);
 
 extern void dds3BlurUpdate(void);
 
@@ -391,7 +391,7 @@ s32 dds3DrawProcess(dds3ProcessID_t *task) {
     dds3StepBackgroundFade();
     dds3DrawBackgroundFadeBands();
     dds3FadeUpdate();
-    kwlnQueueBackgroundFadeOverlayPacket();
+    dds3DrawFade();
     dds3BlurUpdate();
     groupHeads = kwlnSceneSurfaceSets;
     packetGroups = dds3DrawEnv[bufferIndex].packetGroups;

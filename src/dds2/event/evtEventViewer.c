@@ -84,7 +84,7 @@ void Eve_RippleBlurSetDefTex(void);
 void Eve_PartialMultiFilterSetDefTex(void);
 void evtPolygonMovieFreeWork(PolyMovieWork *table);
 void mdlUnRegist(s32 group, s32 type);
-void kwlnPadResetMotorLevelsAndOutput(void);
+void dds3PadVibrationReset(void);
 EvtRuntimeChild *evtEventViewerGetPendingNode(evtViewerInfo_t *viewer);
 void evtEventViewerReleasePendingNode(evtViewerInfo_t *viewer);
 void evtEventViewerFreeSlot(s32 index, evtViewerInfo_t *viewer);
@@ -380,7 +380,7 @@ void evtEventViewerShutdown(evtViewerInfo_t *viewer) {
         evtPolygonMovieFreeWork(viewer->windowContext);
         viewer->windowContext = 0;
     }
-    kwlnPadResetMotorLevelsAndOutput();
+    dds3PadVibrationReset();
 }
 
 /* Destroy every grouped entity listed in the viewer's table. */

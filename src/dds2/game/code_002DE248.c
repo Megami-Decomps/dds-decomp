@@ -120,12 +120,12 @@ extern void fileReadRecordSecondVector(u8 *obj, void *dst);
 extern void fileReadVectorPtr20(u8 *obj, void *dst);
 extern void fileSetRecordSecondVector(void *record, const void *src);
 extern s32 itfGridLookupValueOrDefault(EffectSlotSet *resource, s32 resourceIndex);
-extern void kwlnPadResetMotorLevelsAndOutput(void);
 extern void mnuRecordSetVector(void *record, const void *src);
 extern s32 sdfModelGetMarkPosMatrix(sdfModelRootNode_t *model, s32 mapRecordId);
 extern u8 *effAllocateStripFromWorkAndRetainTexture(u8 *work);
 extern u8 *effCreateTexturedStripWithSharedTexture(u32 count, u32 repeat);
 
+extern void dds3PadVibrationReset(void);
 extern void btlBeginSceneLightColorTransition(f32 *, f32 *, s32);
 
 
@@ -13178,7 +13178,7 @@ void effResetSlots(void) {
     D_00437EA0[1] = 0;
     D_00437EA8[1] = 0;
     D_00437EB0[1] = 0;
-    kwlnPadResetMotorLevelsAndOutput();
+    dds3PadVibrationReset();
 }
 
 void effTickSlotVolumeFade(void) {
