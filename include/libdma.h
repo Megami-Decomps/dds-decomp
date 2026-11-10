@@ -14,4 +14,6 @@ typedef struct sceDmaChan {
     u32 sadr;
 } sceDmaChan;
 
+int sceDmaSync(sceDmaChan *chan, int mode, int unused);
+
 #endif

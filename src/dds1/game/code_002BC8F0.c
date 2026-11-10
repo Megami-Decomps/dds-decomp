@@ -9,8 +9,6 @@
 #include "itf_draw_grid.h"
 #include "eff_ref_obj.h"
 #include "sdf_heap_api.h"
-/* Retain the old enum context for sdfDrawTexturedQuad's full-unit match. */
-#include "file_request_cleanup_result.h"
 #include "file_request_api.h"
 #include "ee_mmi.h"
 #include "pcp_vu0.h"

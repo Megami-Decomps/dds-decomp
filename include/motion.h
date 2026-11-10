@@ -14,17 +14,6 @@ typedef struct sdfMotionNode_t sdfMotionNode_t;
 typedef struct sdfMotionNodeList_t sdfMotionNodeList_t;
 typedef struct sdfMotionPlayBook_t sdfMotionPlayBook_t;
 
-/* One animated channel. sdfMotionNodeVTBL_t's five slots are the only way the
- * controller reaches a node. */
-typedef struct
-{
-    void *destroy;
-    void *setCut;
-    void *seek;
-    void *initBlend;
-    void *blendSeek;
-} sdfMotionNodeVTBL_t;
-
 /* One channel's keys inside a cut: a header, then the key frame numbers as
  * halfwords, then the key data. sdfMotGetKey binary-searches the frame list
  * and indexes the data by keyElemSize; the data starts after the frame list
@@ -36,6 +25,17 @@ typedef struct
     u16 keyElemSize;
     u16 keyFrameList[1];
 } sdfMotionCutChunk_t;
+
+/* One animated channel. sdfMotionNodeVTBL_t's five slots are the only way the
+ * controller reaches a node. */
+typedef struct
+{
+    void (*destroy)(sdfMotionNode_t *);
+    void (*setCut)(sdfMotionNode_t *, sdfMotionCutChunk_t *);
+    void (*seek)(sdfMotionNode_t *, f32);
+    void (*initBlend)(sdfMotionNode_t *);
+    void (*blendSeek)(sdfMotionNode_t *, f32, f32);
+} sdfMotionNodeVTBL_t;
 
 /* One cut (one animation). sdfMotionChangeBlend reads frameLength, then walks
  * one chunk per node from +4. */

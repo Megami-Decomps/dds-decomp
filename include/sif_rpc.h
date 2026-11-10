@@ -38,10 +38,8 @@ struct sifRpcServerData_t {
     sifRpcDataQueue_t *queue;
 };
 
-typedef char sifRpcDataQueue_size_must_be_0x18[
-    sizeof(sifRpcDataQueue_t) == 0x18 ? 1 : -1];
-typedef char sifRpcServerData_size_must_be_0x44[
-    sizeof(sifRpcServerData_t) == 0x44 ? 1 : -1];
+SIZE_CHECK(sifRpcDataQueue_size_must_be_0x18, sifRpcDataQueue_t, 0x18);
+SIZE_CHECK(sifRpcServerData_size_must_be_0x44, sifRpcServerData_t, 0x44);
 
 extern void sceSifSetRpcQueue(sifRpcDataQueue_t *queue, s32 threadId);
 #include "sdk_libkernl.h"

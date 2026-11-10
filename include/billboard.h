@@ -236,7 +236,7 @@ typedef struct billHandle_t {
     f32 unk1C;
     f32 rot;   
     u32 abgr;    
-    void (*callback)();  
+    void (*callback)(struct billHandle_t *);  
     u16 type;          
     u16 mode;  
     union {

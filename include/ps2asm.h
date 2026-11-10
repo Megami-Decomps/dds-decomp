@@ -1763,4 +1763,17 @@ __asm__ volatile ( \
     "sqc2 vf6, 32(%0)\n\tsqc2 vf5, 48(%0)\n\t.set reorder" \
     : : "r" (node), "r" (next) : "memory")
 
+/* The EE's load/store ordering barrier. */
+#define EE_SYNC_L() __asm__ volatile ("sync.l")
+
+/* FBRST, COP2 control register 28: read it, set bits, write it back.
+ * aTmp is an output scratch register; its prior C value is not read. */
+#define EE_FBRST_SET(aTmp, aBits) __asm__ volatile ( \
+    ".set noreorder\n\tcfc2.ni %0, $vi28\n\tori %0, %0, " #aBits "\n\t" \
+    "ctc2.ni %0, $vi28\n\tsync.p\n\t.set reorder" : "=r" (aTmp))
+
+/* VPU_STAT, COP2 control register 29. */
+#define EE_GET_VPU_STAT(aOut) __asm__ volatile ( \
+    ".set noreorder\n\tcfc2.ni %0, $vi29\n\t.set reorder" : "=r" (aOut))
+
 #endif /* PS2ASM_H */

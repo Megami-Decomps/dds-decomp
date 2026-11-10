@@ -8,7 +8,8 @@
 
 /* The VU0 paths load and store these with lq/sq, so every instance the engine
  * touches that way sits on a 16-byte boundary by virtue of its offset. ee-gcc
- * aligns them to 4, which is what reproduces the verified layouts. */
+ * aligns them to 4, which is what reproduces the verified layouts. A host
+ * build defines QWORD_ALIGNED as aligned(16) so lq/sq becomes movaps safely. */
 typedef struct
 {
     f32 x;
@@ -22,7 +23,7 @@ typedef struct
     f32 z;
 } sdfVector3_t;
 
-typedef struct
+typedef struct QWORD_ALIGNED
 {
     f32 x;
     f32 y;
@@ -30,10 +31,18 @@ typedef struct
     f32 w;
 } sdfVector4_t;
 
-typedef struct
+typedef struct QWORD_ALIGNED
 {
     f32 m[16];
 } sdfMatrix4_t;
+
+/* A vector or matrix at a retail address that is not 16-aligned. Same type, so
+ * copies to and from sdfVector4_t compile as before; a host build lowers the
+ * alignment the typedef above raised, so the access is not a movaps. */
+#ifndef UNALIGNED_QWORD
+#define UNALIGNED_QWORD
+#endif
+typedef sdfVector4_t sdfVector4Unaligned_t UNALIGNED_QWORD;
 
 /* DMAC source-chain tag. id 0x20 is `ref`, written by sdfDrawTagLink. */
 typedef struct QWORD_ALIGNED

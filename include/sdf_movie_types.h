@@ -17,7 +17,7 @@ typedef struct sdfIpuDmaRegs_t
     u32 inputTagAddress;
     u32 inputQwords;
     u32 inputControl;
-    u32 outputAddress;
+    addr_t outputAddress;
     u32 outputQwords;
     u32 outputControl;
     u32 bitPointer;

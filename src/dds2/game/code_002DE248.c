@@ -49,6 +49,8 @@
 #include "eff_actor_transition_config.h"
 #include "eff_object_node.h"
 #include "btl_effect_position.h"
+/* Holds the declaration context sdfDrawTexturedQuad's full-unit match needs. */
+#include "sdf_texture_release.h"
 #include "eff_random.h"
 #include "sdf_trig.h"
 #include "btl_stage_task_cleanup.h"

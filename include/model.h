@@ -98,7 +98,7 @@ struct sdfModelMorphList_t
     sdfModelMorph_t *items;
 };
 
-/* One loaded model. sdfModelRootNew allocates 152 bytes (156 in DDS); the HD build's
+/* One loaded model. sdfModelRootNew allocates 152 bytes; the HD build's
  * modelobj, oData, effpos_type and reversePB past zBias do not exist here. */
 struct sdfModelRootNode_t
 {

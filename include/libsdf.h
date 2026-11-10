@@ -70,7 +70,7 @@ enum sdf_dma_tag_id
 
 /* A resource whose free is deferred to the end of the frame: the free function
  * plus the head of the list of blocks waiting for it. */
-typedef void (*sdfDelayedResrcFreeFunc)();
+typedef void (*sdfDelayedResrcFreeFunc)(void *);
 
 typedef struct
 {

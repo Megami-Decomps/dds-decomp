@@ -9,6 +9,6 @@ s32 sdfGrAllocPacketBuff(s32 size);
 
 /* Read the active packet cursor or restore it at a quadword boundary. */
 s32 sdfGrOpenPacketBuff(void);
-void sdfGrClosePacketBuff(s32 cursorAddress);
+void sdfGrClosePacketBuff(saddr_t cursorAddress);
 
 #endif /* SDF_PACKET_ALLOC_H */
