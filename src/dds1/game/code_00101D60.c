@@ -140,11 +140,11 @@ extern sdf3DLight_t *dds3LightParam2[3];
 
 extern sdf3DLight_t *dds3LightParam[3];
 
-extern f32 dds3RenderAmbientColor[4];
+extern sdfVector4_t dds3RenderAmbientColor;
 
-extern f32 dds3AmbientColor2[4];
+extern sdfVector4_t dds3AmbientColor2;
 
-extern f32 dds3AmbientColor[4];
+extern sdfVector4_t dds3AmbientColor;
 
 extern f32 dds3RenderTargetVector[4], dds3RenderEyeVector[4], effPCPBossTexRect[4];
 
@@ -198,7 +198,7 @@ s32 dds3DrawFirstProcess(dds3ProcessID_t *task) {
     dds3SceneLightUpdateFirst();
     if (dds3RenderTex != 0) {
         sdf3DMakeLightParallelPacket((sdf3DLightParallelPacket_t *)(dds3HeldTextureLightingPackets + bufferIndex * DDS3_FRAME_BUFFER_BYTES),
-            dds3RenderLightParallel, dds3RenderAmbientColor);
+            dds3RenderLightParallel, &dds3RenderAmbientColor);
         *(u32 *)(dds3HeldTextureLightingPackets - 0x140 + bufferIndex * DDS3_FRAME_BUFFER_BYTES) = dds3RenderDrawEnv;
         if (dds3RenderTex != 0) {
             sdfGrOt_t *sceneNode;
@@ -224,7 +224,7 @@ s32 dds3DrawFirstProcess(dds3ProcessID_t *task) {
         sdfDrawTag_t *overlayList;
         u64 *overlayFrustum;
         sdf3DMakeLightParallelPacket((sdf3DLightParallelPacket_t *)(dds3OverlayLightingPackets + bufferIndex * DDS3_FRAME_BUFFER_BYTES),
-            dds3LightParam2, dds3AmbientColor2);
+            dds3LightParam2, &dds3AmbientColor2);
         sdf3DMakeScreenParam(&D_00324980.camera);
         LookAtMatrix(D_00324A20, fldAutoMapEye, fldAutoMapUp);
         VU0_STORE_MATRIX_UNCLOBBERED(&D_00329790);
@@ -237,7 +237,7 @@ s32 dds3DrawFirstProcess(dds3ProcessID_t *task) {
         sdfDrawTagLink(overlayList, (u32)overlayFrustum);
         overlayNode->regFunc(overlayNode, overlayList);
 
-        sdf3DMakeLightParallelPacket((sdf3DLightParallelPacket_t *)(dds3OverlayMatrixPackets - 0x440 + bufferIndex * DDS3_FRAME_BUFFER_BYTES), dds3LightParam, dds3AmbientColor);
+        sdf3DMakeLightParallelPacket((sdf3DLightParallelPacket_t *)(dds3OverlayMatrixPackets - 0x440 + bufferIndex * DDS3_FRAME_BUFFER_BYTES), dds3LightParam, &dds3AmbientColor);
         *(u32 *)(dds3OverlayMatrixPackets - 0x620 + bufferIndex * DDS3_FRAME_BUFFER_BYTES) = D_003BA8EC;
     }
     sdf3DMakeScreenParam(&dds3ScreenParam.camera);
