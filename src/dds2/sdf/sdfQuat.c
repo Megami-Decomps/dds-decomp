@@ -56,18 +56,13 @@ enum sdf_stream_playback {
 
 typedef union { f32 quaternion[4]; u16 monthDays[20]; } sdfMathConstants_t;
 
-#define D_00529620 sdfUnitXVector
-#define D_00529B90 sdfQuatPoleDown
-#define D_00529BA0 sdfQuatPoleUp
-#define D_00529BB0 sdfMathConstants
+extern sdfMathConstants_t sdfMathConstants;
 
-extern sdfMathConstants_t D_00529BB0;
+extern f32 sdfQuatPoleDown[4];
 
-extern f32 D_00529B90[4];
+extern f32 sdfQuatPoleUp[4];
 
-extern f32 D_00529BA0[4];
-
-extern f32 D_00529620[4];
+extern f32 sdfUnitXVector[4];
 
 extern s32 (*p2sdSmgBuf)(void);
 
@@ -200,8 +195,8 @@ void FromEuler(f32 aRotateX, f32 aRotateY, f32 aRotateZ)
 
 /* vu0 routine: compose pitch and offset-adjusted planar direction quaternions. */
 void LookAt(f32 aFrontX, f32 aFrontZ) {
-    f32 input[4];
-    f32 quaternion[4];
+    sdfVector4_t input;
+    sdfVector4_t quaternion;
     f32 x;
     f32 y;
     f32 z;
@@ -211,33 +206,33 @@ void LookAt(f32 aFrontX, f32 aFrontZ) {
     f32 t;
     f32 offsetSquared;
     f32 adjustedZ;
-    SDF_VU0_STOREVECTOR(input);
+    SDF_VU0_STOREVECTOR(&input);
     t = 0.0f;
-    x = -input[0];
-    y = input[1];
+    x = -input.x;
+    y = input.y;
     if (aFrontZ < t) {
         y = -y;
     }
-    z = input[2];
+    z = input.z;
     horizontalSquared = x * x + z * z;
     if (horizontalSquared < 0.000001f) {
         if (y < t) {
-            SDF_VU0_LOADVECTOR(D_00529B90);
+            SDF_VU0_LOADVECTOR(sdfQuatPoleDown);
         } else {
-            SDF_VU0_LOADVECTOR(D_00529BA0);
+            SDF_VU0_LOADVECTOR(sdfQuatPoleUp);
         }
         return;
     }
     /* Pitch quaternion from the vertical and horizontal direction lengths. */
     s = y * y;
     horizontalLength = fsqrtf(horizontalSquared);
-    quaternion[1] = t;
-    quaternion[2] = t;
+    quaternion.y = t;
+    quaternion.z = t;
     t = fsqrtf(horizontalSquared + s) + horizontalLength;
     s = frsqrtf(1.0f, t * t + s);
-    quaternion[0] = y * s;
-    quaternion[3] = t * s;
-    SDF_VU0_LOADVECTOR(quaternion);
+    quaternion.x = y * s;
+    quaternion.w = t * s;
+    SDF_VU0_LOADVECTOR(&quaternion);
     /* Yaw quaternion from the normalized, offset-adjusted XZ direction. */
     s = 1.0f / horizontalLength;
     x *= s;
@@ -246,14 +241,14 @@ void LookAt(f32 aFrontX, f32 aFrontZ) {
     t = x + aFrontX;
     offsetSquared = t * t + adjustedZ * adjustedZ;
     if (offsetSquared < 0.000001f) {
-        SDF_VU0_LOADVECTOR_B(D_00529BB0.quaternion);
+        SDF_VU0_LOADVECTOR_B(sdfMathConstants.quaternion);
     } else {
         s = frsqrtf(1.0f, offsetSquared);
-        quaternion[0] = 0.0f;
-        quaternion[1] = t * s;
-        quaternion[2] = 0.0f;
-        quaternion[3] = adjustedZ * s;
-        SDF_VU0_LOADVECTOR_B(quaternion);
+        quaternion.x = 0.0f;
+        quaternion.y = t * s;
+        quaternion.z = 0.0f;
+        quaternion.w = adjustedZ * s;
+        SDF_VU0_LOADVECTOR_B(&quaternion);
     }
     Mult();
 }
@@ -312,7 +307,7 @@ f32 EulerAngleAxisY(void)
     f32 rotatedX;
     ToMatrix();
     /* PEXEW exchanges words 0 and 2: output 0 is Z, while output 1 is X. */
-    SDF_VU0_LOADVECTOR_BARRIER(D_00529620);
+    SDF_VU0_LOADVECTOR_BARRIER(sdfUnitXVector);
     SDF_VU0_APPLYMATRIX_XYZ();
     VU0_SEQ_EULER_ANGLE_AXIS_Y(rotatedZ, rotatedX);
     return sdfAtan2(rotatedZ, rotatedX);
