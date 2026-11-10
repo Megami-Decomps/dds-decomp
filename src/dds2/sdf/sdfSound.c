@@ -14,14 +14,6 @@ typedef void *(*sceSifRpcFunc)(s32 function, void *request, s32 size);
 
 #define SND_VOICE_IOP_BYTES 0x3B600
 
-#define D_0054A088 sdfGsMemInfoTitle
-#define D_0054A100 sdfGsMemNodeFmt
-#define D_00551B40 sdfGsMemTypeFmt
-#define D_005907C0 sdfSndCmdThreadParam
-#define D_005907F0 sdfSndListenerPrevState
-#define D_00590840 sdfSndCmdPacketRing
-#define D_00591840 sdfSndCmdThreadStack
-#define D_00592880 sdfSifRpcThreadStack
 #define sdfSndMakeFilename mnuBuildSoundResourcePath
 #define p2sd_2C1788 sndQueueNoPayloadCommand210
 #define p2sd_2C17D8 sndDispatchCommandWithoutPayload
@@ -43,30 +35,6 @@ typedef void *(*sceSifRpcFunc)(s32 function, void *request, s32 size);
 #define p2sd_2C22B0 sndSendChannelGroupCommand110Duplicate
 #define sdf_2C2618 sdfSoundSetTableEntry
 #define sdf_2C27F8 sdfSoundGetTableEntry
-#define D_00529BE8 sdfSndPcmFileName
-#define D_00529C68 sdfGrVifUnpackNames
-#define D_00529C88 sdfGrVifUnpackBits
-#define D_00529CC8 sdfGsMemTypeNames
-#define D_00529CD8 sdfGsMemTypeNamesTail
-#define D_00549B50 sdfDmaDumpStartFmt
-#define D_00549B70 sdfDmaNotQwordFmt
-#define D_00549B88 sdfDmaTagLineFmt
-#define D_00549BB0 sdfDmaNestOverflowMsg
-#define D_005519D4 sdfSifRpcThreadId
-#define D_00551A20 sdfDumpAddrFmt
-#define D_00551A28 sdfDumpPadStr
-#define D_00551A30 sdfDumpMidGapStr
-#define D_00551A38 sdfDumpByteSepStr
-#define D_00551A40 sdfDumpByteFmt
-#define D_00551A50 sdfDumpEndStr
-#define D_00551A58 sdfVifMaskedName
-#define D_00551A60 sdfVifXferOkName
-#define D_00551B10 sdfDumpIndentStr
-#define D_00551B18 sdfDumpWordFmt
-#define D_00552120 sdfSndPcmBufferAddr
-#define D_0055213C sdfSndIopWorkAddr
-#define D_00593890 D_0047AA50
-#define D_00593E20 sdfSndPcmRequest
 
 struct sdfGsMemSlice_t;
 
@@ -102,21 +70,25 @@ typedef struct
     u16 unk6;
 } p2sdLoadEntry_t;
 
-extern p2sdLoadEntry_t LastLoad[];
 
 s32 sdfSndSendCmd(s32 aCmd, s32 aParam, void *aExDataPtr, s32 aExDataSize);
 
 extern s32 SignalSema(s32 aSemaId);
 
+/* The PCM fill hook, held as an address and called through a cast. */
+typedef u8 *(*p2sdPcmFunc_t)(s32);
+
 extern u32 p2sdPcmCallback;
 
 extern u32 sdfSndMap[];
+/* DDS keeps the load table as its own symbol; SMT3 addresses it inside sdfSndMap. */
+extern p2sdLoadEntry_t LastLoad[];
 
 extern u32 p2sdPcmState;
 
 extern u32 p2sdPcmBusy;
 
-extern u8 D_00593890[];
+extern u8 D_0047AA50[];
 
 enum SdfFileIOCmdStat {
     SDF_FILE_CMD_STAT_INIT = 0,
@@ -256,14 +228,14 @@ enum sdf_stream_playback {
 
 extern void sdfSndTransToIOP(s32 aIOPAddr, void *aEEAddr, s32 aSize);
 
-extern void *memcpy(void *, const void *, unsigned int);
+extern void *memcpy(void *, const void *, size_t);
 
-extern void sdfDelayThread(s32 delay);
+extern void sdfDelayThread(u32 delay);
 
 extern char * strcpy(char *, const char *);
 
 
-extern sndRingPacket_t D_00590840[32];
+extern sndRingPacket_t sdfSndCmdPacketRing[32];
 
 extern u32 sdfSndSendCmd_cmd_id;
 
@@ -277,7 +249,7 @@ extern s32 WakeupThread(s32 thread);
 
 extern void FlushCache(s32);
 
-extern sndListenerState_t D_005907F0;
+extern sndListenerState_t sdfSndListenerPrevState;
 
 char *sdfSndMakeFilename(char *aDstName, const char *aSrcName);
 char *mnuBuildVoiceResourcePath(char *aDstName, const char *aSrcName);
@@ -288,35 +260,35 @@ extern s32 p2sdSmgHandle;
 
 #include "sdk_libc.h"
 
-extern sndFileRequestState_t D_00593E20;
+extern sndFileRequestState_t sdfSndPcmRequest;
 
-extern s32 D_00552120;
+extern s32 sdfSndPcmBufferAddr;
 
-extern char D_00529BE8[];
+extern char sdfSndPcmFileName[];
 
 extern s32 sifRpcServerSema;
 
-extern char D_00551A20[];
+extern char sdfDumpAddrFmt[];
 
-extern char D_00551A28[];
+extern char sdfDumpPadStr[];
 
-extern char D_00551A30[];
+extern char sdfDumpMidGapStr[];
 
-extern char D_00551A38[];
+extern char sdfDumpByteSepStr[];
 
-extern char D_00551A40[];
+extern char sdfDumpByteFmt[];
 
 extern char sdfDumpLineBuf[];
 
-extern char D_00551A50[];
+extern char sdfDumpEndStr[];
 
-extern char D_00549B50[];
+extern char sdfDmaDumpStartFmt[];
 
-extern char D_00549B70[];
+extern char sdfDmaNotQwordFmt[];
 
-extern char D_00549B88[];
+extern char sdfDmaTagLineFmt[];
 
-extern char D_00549BB0[];
+extern char sdfDmaNestOverflowMsg[];
 extern char D_0042E610[];
 
 
@@ -324,17 +296,17 @@ extern char *sdfDmaTagNameTable[];
 
 sdfGsMemSlice_t *sdfGsMemGetLinkHead(void);
 
-extern char D_0054A088[];
+extern char sdfGsMemInfoTitle[];
 
-extern char D_0054A100[];
+extern char sdfGsMemNodeFmt[];
 
-extern char D_00551B40[];
+extern char sdfGsMemTypeFmt[];
 
-extern char *D_00529CC8[];
+extern char *sdfGsMemTypeNames[];
 
 sdfGsMemSlice_t *sdfGsMemGetLinkTail(void);
 
-extern char *D_00529CD8[];
+extern char *sdfGsMemTypeNamesTail[];
 
 void sdfMemGetInfo(sdfMemInfo_t *aInfo);
 
@@ -361,7 +333,7 @@ extern void *sdfMemLock(sdfMemHandle_t *handle);
 extern void sdfMemFreeDirect(sdfMemHandle_t *handle);
 extern sdfFileCmdHandle_t *sdfFileCmdReadOpen(
     const char *path,
-    void (*callback)(sdfFileCmdHandle_t *, s32, s32, s32, s32),
+    void (*callback)(sdfFileCmdHandle_t *, s32, saddr_t, s32, s32),
     s32 callbackContext);
 extern s32 sdfFileCmdClearError(sdfFileCmd_t *handle);
 extern s32 sdfFileCmdFree(sdfFileCmd_t *handle);
@@ -393,7 +365,7 @@ s32 sdfSndCmdTrans(void)
     if (current == (s16)sdfSndCmdTailIndex) {
         return 1;
     }
-    packet = &D_00590840[current];
+    packet = &sdfSndCmdPacketRing[current];
     if (sceSifSendCmd(0, packet, (packet->command >> 24) & 0xF0, NULL, NULL, 0) == 0) {
         return 1;
     }
@@ -424,10 +396,10 @@ typedef struct sdfSndInitThreadParam_t {
     u8 reserved[0x18];
 } sdfSndInitThreadParam_t;
 
-extern sdfSndInitThreadParam_t D_005907C0;
-extern u8 D_00591840[];
-extern u8 D_00592880[];
-extern s32 D_005519D4;
+extern sdfSndInitThreadParam_t sdfSndCmdThreadParam;
+extern u8 sdfSndCmdThreadStack[];
+extern u8 sdfSifRpcThreadStack[];
+extern s32 sdfSifRpcThreadId;
 extern s32 _gp;
 extern s32 sceSifGetSreg(s32 index);
 extern s32 CreateThread(sdfSndInitThreadParam_t *parameter);
@@ -441,18 +413,18 @@ s32 sdfSndInitCmdIF(void)
 
     while (sceSifGetSreg(0x1F) == 0) {
     }
-    D_005907C0.entry = sdfSndCmdIFThread;
-    D_005907C0.stack = D_00591840;
-    D_005907C0.stackSize = 0x1000;
-    D_005907C0.priority = 0x42;
-    D_005907C0.gp = &_gp;
+    sdfSndCmdThreadParam.entry = sdfSndCmdIFThread;
+    sdfSndCmdThreadParam.stack = sdfSndCmdThreadStack;
+    sdfSndCmdThreadParam.stackSize = 0x1000;
+    sdfSndCmdThreadParam.priority = 0x42;
+    sdfSndCmdThreadParam.gp = &_gp;
     sdfSndCmdIndex = 0;
     sdfSndCmdTailIndex = 0;
-    threadId = CreateThread(&D_005907C0);
+    threadId = CreateThread(&sdfSndCmdThreadParam);
     sdfSndCmdBuf = threadId;
     _StartThread(threadId, 0);
-    threadId = CreateThreadSimple(SifRpcServerThreadProc, D_00592880, 0x1000, 0x43);
-    D_005519D4 = threadId;
+    threadId = CreateThreadSimple(SifRpcServerThreadProc, sdfSifRpcThreadStack, 0x1000, 0x43);
+    sdfSifRpcThreadId = threadId;
     return _StartThread(threadId, 0);
 }
 
@@ -473,7 +445,7 @@ s32 sdfSndSendCmd(s32 aCmd, s32 aParam, void *aExDataPtr, s32 aExDataSize) {
         }
         return 0;
     }
-    entry = &D_00590840[(s16)sdfSndCmdTailIndex];
+    entry = &sdfSndCmdPacketRing[(s16)sdfSndCmdTailIndex];
     entry->sequence = sdfSndSendCmd_cmd_id;
     if (aExDataSize != 0) {
         memcpy(entry->payload, aExDataPtr, aExDataSize);
@@ -524,7 +496,7 @@ void sdfSndTransToIOP(s32 aIOPAddr, void *aEEAddr, s32 aSize)
     s32 dmaId;
     s32 delay;
 
-    sdfSndTransBuf.source = (u32)aEEAddr;
+    sdfSndTransBuf.source = EE_ADDR(aEEAddr);
     sdfSndTransBuf.destination = aIOPAddr;
     sdfSndTransBuf.size = aSize;
     sdfSndTransBuf.attributes = 0;
@@ -559,8 +531,10 @@ void sdfSndLoadIRXModules(void) {
     SdfIopFileRpc(module, 0, NULL, NULL);
 }
 
-extern char D_00549A48[]; /* "SDF_SND_IOP_SIZE\n" */
-extern char D_00549A60[]; /* "sdfSndSeqMapInit\n" */
+extern char sdfSndIopSizeMsg[]; /* "SDF_SND_IOP_SIZE\n" */
+extern char sdfSndSeqMapInitMsg[]; /* "sdfSndSeqMapInit\n" */
+
+void sdfSndVoiceMapInit(char *aVoiceInfo, s32 aVoiceCount);
 
 void sdfSndVoiceMapInit(char *aVoiceInfo, s32 aVoiceCount)
 {
@@ -625,7 +599,7 @@ void sdfSndSeqMapInit(u32 *aSequenceInfo, s32 aSequenceCount)
 
 
 extern s32 sceSifInitIopHeap(void);
-extern s32 D_0055213C;
+extern s32 sdfSndIopWorkAddr;
 
 void sdfSndInit(char *aVoiceInfo, s32 aVoiceCount, char *aSequenceInfo, s32 aSequenceCount)
 {
@@ -637,11 +611,11 @@ void sdfSndInit(char *aVoiceInfo, s32 aVoiceCount, char *aSequenceInfo, s32 aSeq
     sdfSndWork.iopBufferBytes = 0x4000;
     sdfSndVoiceMapInit(aVoiceInfo, aVoiceCount);
     sdfSndSeqMapInit((u32 *)aSequenceInfo, aSequenceCount);
-    D_0055213C = sdfSndIopAlloc(sizeof(sndMergedWork_t));
+    sdfSndIopWorkAddr = sdfSndIopAlloc(sizeof(sndMergedWork_t));
     sdfSndWork.eeWorkAddress = &sdfSndWork;
     sdfSndWork.eeWorkByteCount = sizeof(sndMergedWork_t);
-    sdfSndTransToIOP(D_0055213C, &sdfSndWork, sizeof(sndMergedWork_t));
-    sdfSndSendSyncCmd(0, 0, &D_0055213C, 4);
+    sdfSndTransToIOP(sdfSndIopWorkAddr, &sdfSndWork, sizeof(sndMergedWork_t));
+    sdfSndSendSyncCmd(0, 0, &sdfSndIopWorkAddr, 4);
     sdfSndBurstReqMode = 0;
 }
 
@@ -781,11 +755,11 @@ void p2sdSetStandPos(f32 Cposx, f32 Cposy, f32 Cposz,
     state.scaledValues[3] = Pposx * 0.1f;
     state.scaledValues[4] = Pposy * 0.1f;
     state.scaledValues[5] = Pposz * 0.1f;
-    if (D_005907F0.scaledValues[0] != state.scaledValues[0] || D_005907F0.scaledValues[1] != state.scaledValues[1] ||
-        D_005907F0.scaledValues[2] != state.scaledValues[2] || D_005907F0.scaledValues[3] != state.scaledValues[3] ||
-        D_005907F0.scaledValues[4] != state.scaledValues[4] || D_005907F0.scaledValues[5] != state.scaledValues[5]) {
+    if (sdfSndListenerPrevState.scaledValues[0] != state.scaledValues[0] || sdfSndListenerPrevState.scaledValues[1] != state.scaledValues[1] ||
+        sdfSndListenerPrevState.scaledValues[2] != state.scaledValues[2] || sdfSndListenerPrevState.scaledValues[3] != state.scaledValues[3] ||
+        sdfSndListenerPrevState.scaledValues[4] != state.scaledValues[4] || sdfSndListenerPrevState.scaledValues[5] != state.scaledValues[5]) {
         sdfSndSendSyncCmd(0x160, 0, &state, 0x20);
-        D_005907F0 = state;
+        sdfSndListenerPrevState = state;
     }
 }
 
@@ -838,13 +812,13 @@ u64 p2sd_2C1D78(const char *aName)
     return sdfSndSendSyncCmd(0xA0, 0, (void *)aName, strlen(aName));
 }
 
-void p2sdSetPcmBuffer(s32 data, s32 size) {
+void p2sdSetPcmBuffer(saddr_t data, s32 size) {
     s32 *packet;
-    D_00593E20.size = size;
-    D_00593E20.pending = 1;
-    D_00593E20.data = data;
+    sdfSndPcmRequest.size = size;
+    sdfSndPcmRequest.pending = 1;
+    sdfSndPcmRequest.data = data;
     if (data != 0 && size > 0) {
-        packet = &D_00552120;
+        packet = &sdfSndPcmBufferAddr;
         *packet = data;
         sdfSndSendSyncCmd(0x1B0, 0, packet, 4);
     }
@@ -900,7 +874,7 @@ s32 p2sd_2C1F28(s32 aIndex)
 
 u8 *p2sd_2C1F50(void)
 {
-    return D_00593890;
+    return D_0047AA50;
 }
 
 p2sdLoadEntry_t *p2sd_2C1F60(void)
@@ -968,7 +942,7 @@ s32 p2sdLoadPcmFile(const char *name, u8 channel) {
     if (p2sdPcmState != 0) {
         return 1;
     }
-    strcpy(D_00529BE8, name);
+    strcpy(sdfSndPcmFileName, name);
     sdfSndSendSyncCmd((channel >> 3) | 0xF0, 0, 0, 0);
     return 0;
 }
@@ -998,7 +972,7 @@ s32 p2sd_2C21D8(u32 aCh)
     return sdfSndSendSyncCmd((aCh - 1) | 0x1D0, 0, NULL, 0);
 }
 
-u32 p2sdSetPcmCallback(u32 aCallback)
+u32 p2sdSetPcmCallback(addr_t aCallback)
 {
     if (p2sdPcmBusy != 0) {
         return 0;
@@ -1057,9 +1031,7 @@ s32 sdfFileRpcCallback(s32 unused, u32 event) {
 }
 
 /* Handle sound-file and PCM-buffer RPC commands. */
-#ifdef NON_MATCHING
 extern s32 WaitSema(s32 sema);
-#endif
 
 void *sdfFileRpcHandleCmd(s32 function, void *requestData, s32 requestSize)
 {
@@ -1071,14 +1043,14 @@ void *sdfFileRpcHandleCmd(s32 function, void *requestData, s32 requestSize)
     case 0: {
         sdfFileCmdHandle_t *state;
 
-        if (D_00529BE8[0] == 0) {
+        if (sdfSndPcmFileName[0] == 0) {
             sdfFileRpcQueue[0] = 0;
             break;
         }
         p2sdPcmState = 1;
-        mnuBuildVoiceResourcePath(path, D_00529BE8);
+        mnuBuildVoiceResourcePath(path, sdfSndPcmFileName);
         state = sdfFileCmdReadOpen(path,
-            (void (*)(sdfFileCmdHandle_t *, s32, s32, s32, s32))sdfFileRpcCallback, 0);
+            (void (*)(sdfFileCmdHandle_t *, s32, saddr_t, s32, s32))sdfFileRpcCallback, 0);
         sdfFileRpcArg = state;
         if (state != NULL) {
             WaitSema(sifRpcServerSema);
@@ -1090,7 +1062,7 @@ void *sdfFileRpcHandleCmd(s32 function, void *requestData, s32 requestSize)
                 state = NULL;
             }
         }
-        sdfFileRpcQueue[0] = (u32)state;
+        sdfFileRpcQueue[0] = EE_ADDR(state);
         break;
     }
     case 1: {
@@ -1150,7 +1122,7 @@ void *sdfFileRpcHandleCmd(s32 function, void *requestData, s32 requestSize)
         void *buffer;
 
         sdfFileRpcResult = request;
-        buffer = ((u8 *(*)(s32))p2sdPcmCallback)(request->byteCount);
+        buffer = EE_ADDR_AS(p2sdPcmFunc_t, p2sdPcmCallback)(request->byteCount);
         if (buffer != NULL) {
             sdfSndTransToIOP(sdfFileRpcResult->destination, buffer,
                              sdfFileRpcResult->byteCount);
@@ -1286,7 +1258,7 @@ void sdf_2C2618(u32 kind, const u8 *src)
         }
         break;
     }
-    sdfSndTransToIOP(D_0055213C, &sdfSndWork, sizeof(sndMergedWork_t));
+    sdfSndTransToIOP(sdfSndIopWorkAddr, &sdfSndWork, sizeof(sndMergedWork_t));
     sdfSndSendSyncCmd(0x1F0, 0, 0, 0);
 }
 
@@ -1398,17 +1370,17 @@ void sdfDumpHexLine(const u8 *data, s32 size) {
     s32 i;
     while (size > 0) {
         if (column == 0) {
-            sdfPrintf(D_00551A20, data);
-            column = (u32)data & 0xF;
+            sdfPrintf(sdfDumpAddrFmt, data);
+            column = EE_ADDR(data) & 0xF;
             for (i = column; i > 0; i--) {
-                sdfPrintf(D_00551A28);
+                sdfPrintf(sdfDumpPadStr);
             }
         } else if (column == 8) {
-            sdfPrintf(D_00551A30);
+            sdfPrintf(sdfDumpMidGapStr);
         } else {
-            sdfPrintf(D_00551A38);
+            sdfPrintf(sdfDumpByteSepStr);
         }
-        sdfPrintf(D_00551A40, *data++);
+        sdfPrintf(sdfDumpByteFmt, *data++);
         column++;
         if (column == 0x10) {
             column = 0;
@@ -1419,7 +1391,7 @@ void sdfDumpHexLine(const u8 *data, s32 size) {
     if (column == 0) {
         sdfPrintf(sdfDumpLineBuf);
     } else {
-        sdfPrintf(D_00551A50);
+        sdfPrintf(sdfDumpEndStr);
     }
 }
 
@@ -1442,18 +1414,18 @@ void sdfDumpDmaChain(sdfDmaDumpTag_t *source) {
     s32 tagCount;
     s32 depth = 0;
     s32 done = 0;
-    sdfPrintf(D_00549B50, source);
+    sdfPrintf(sdfDmaDumpStartFmt, source);
     cursor = source;
     for (;;) {
-        if ((u32)cursor & 0xF) {
-            sdfPrintf(D_00549B70, cursor);
+        if (EE_ADDR(cursor) & 0xF) {
+            sdfPrintf(sdfDmaNotQwordFmt, cursor);
             return;
         }
         tag = cursor->control;
         tagAddress = cursor->address;
         tagType = (tag >> 28) & 7;
         tagCount = tag & 0xFFFF;
-        sdfPrintf(D_00549B88, cursor, sdfDmaTagNameTable[tagType], tag, tagAddress, cursor->vifCode0, cursor->vifCode1);
+        sdfPrintf(sdfDmaTagLineFmt, cursor, sdfDmaTagNameTable[tagType], tag, tagAddress, cursor->vifCode0, cursor->vifCode1);
         cursor++;
         switch (tagType) {
         case 0:
@@ -1463,18 +1435,18 @@ void sdfDumpDmaChain(sdfDmaDumpTag_t *source) {
             cursor += tagCount;
             break;
         case 2:
-            cursor = (sdfDmaDumpTag_t *)tagAddress;
+            cursor = EE_ADDR_AS(sdfDmaDumpTag_t *, tagAddress);
             break;
         case 3:
         case 4:
             break;
         case 5:
             if (depth == 2) {
-                sdfPrintf(D_00549BB0);
+                sdfPrintf(sdfDmaNestOverflowMsg);
                 return;
             }
             callStack[depth++] = cursor;
-            cursor = (sdfDmaDumpTag_t *)tagAddress;
+            cursor = EE_ADDR_AS(sdfDmaDumpTag_t *, tagAddress);
             break;
         case 6:
             if (depth == 0) {
@@ -1495,12 +1467,12 @@ void sdfDumpDmaChain(sdfDmaDumpTag_t *source) {
     }
 }
 
-extern char *D_00529C68[];
-extern s32 D_00529C88[];
-extern char D_00551A58[];
-extern char D_00551A60[];
-extern char D_00551B10[];
-extern char D_00551B18[];
+extern char *sdfGrVifUnpackNames[];
+extern s32 sdfGrVifUnpackBits[];
+extern char sdfVifMaskedName[];
+extern char sdfVifXferOkName[];
+extern char sdfDumpIndentStr[];
+extern char sdfDumpWordFmt[];
 
 void sdfGrFlushOtChain(u32 *source) {
     u32 *returnStack[2];
@@ -1531,8 +1503,8 @@ void sdfGrFlushOtChain(u32 *source) {
             switch (phase) {
             case 0: {
                 u32 tag;
-                if ((u32)cursor & 0xF) {
-                    sdfPrintf(D_00549B70, cursor);
+                if (EE_ADDR(cursor) & 0xF) {
+                    sdfPrintf(sdfDmaNotQwordFmt, cursor);
                     return;
                 }
                 tag = cursor[0];
@@ -1553,7 +1525,7 @@ void sdfGrFlushOtChain(u32 *source) {
                 case 0:
                 case 3:
                 case 4:
-                    wordCursor = (u32 *)tagAddress;
+                    wordCursor = EE_ADDR_AS(u32 *, tagAddress);
                     break;
                 default:
                     wordCursor = cursor;
@@ -1571,7 +1543,7 @@ void sdfGrFlushOtChain(u32 *source) {
                     cursor += qwc * 4;
                     break;
                 case 2:
-                    cursor = (u32 *)tagAddress;
+                    cursor = EE_ADDR_AS(u32 *, tagAddress);
                     break;
                 case 3:
                 case 4:
@@ -1582,7 +1554,7 @@ void sdfGrFlushOtChain(u32 *source) {
                         return;
                     }
                     returnStack[depth++] = cursor + qwc * 4;
-                    cursor = (u32 *)tagAddress;
+                    cursor = EE_ADDR_AS(u32 *, tagAddress);
                     break;
                 case 6:
                     if (depth == 0) {
@@ -1609,7 +1581,7 @@ void sdfGrFlushOtChain(u32 *source) {
                 s32 format;
                 s32 unpackFormat;
 
-                sdfPrintf("%08X %c%08X : ", (u32)(wordCursor - 1),
+                sdfPrintf("%08X %c%08X : ", EE_ADDR((wordCursor - 1)),
                                            interrupt, value);
                 switch (opcode) {
                 case 0x00:
@@ -1633,7 +1605,7 @@ void sdfGrFlushOtChain(u32 *source) {
                     break;
                 case 0x06:
                     sdfPrintf("VIF MSKPATH3 (%s)\n",
-                                    (immediate & 0x8000) ? D_00551A58 : D_00551A60);
+                                    (immediate & 0x8000) ? sdfVifMaskedName : sdfVifXferOkName);
                     break;
                 case 0x07:
                     sdfPrintf("VIF MARK   (%04X)\n", immediate);
@@ -1706,10 +1678,10 @@ void sdfGrFlushOtChain(u32 *source) {
                         format = (((s32)immediate >> 13) & 6) | (((s32)opcode >> 4) & 1);
                         dataMode = 7;
                         sdfPrintf("VIF UNPACK%s %s,%04X,%04X\n",
-                                                   D_00529C68[format],
+                                                   sdfGrVifUnpackNames[format],
                                                    ((char **)((u8 *)sdfDmaTagNameTable + 0x20))[unpackFormat],
                                                    immediate & 0x3FF, num);
-                        bits = D_00529C88[unpackFormat];
+                        bits = sdfGrVifUnpackBits[unpackFormat];
                         n = (bits * (s32)num + 0x1F) >> 5;
                     } else {
                         sdfPrintf("unkown vif command\n");
@@ -1744,12 +1716,12 @@ void sdfGrFlushOtChain(u32 *source) {
                 break;
             case 5:
                 if (directRow == 0) {
-                    sdfPrintf(D_00551B10);
+                    sdfPrintf(sdfDumpIndentStr);
                 } else {
-                    sdfPrintf(D_00551A38);
+                    sdfPrintf(sdfDumpByteSepStr);
                 }
                 directRow++;
-                sdfPrintf(D_00551B18, value);
+                sdfPrintf(sdfDumpWordFmt, value);
                 if (directRow == 4) {
                     directRow = 0;
                     sdfPrintf(sdfDumpLineBuf);
@@ -1786,17 +1758,17 @@ void sdfDumpGsMemory(void) {
     sdfGsMemSlice_t *node;
     sdfGsMemSlice_t *walk;
     char *name;
-    sdfPrintf(D_0054A088);
+    sdfPrintf(sdfGsMemInfoTitle);
     head = sdfGsMemGetLinkHead();
     node = head;
     while (node != 0) {
         if ((u32)node->type < SDF_TEX_RESOURCE_KNOWN_MODE_COUNT) {
-            name = D_00529CC8[node->type];
+            name = sdfGsMemTypeNames[node->type];
         } else {
-            sdfPrintf(buf, D_00551B40, node->type);
+            sdfPrintf(buf, sdfGsMemTypeFmt, node->type);
             name = buf;
         }
-        sdfPrintf(D_0054A100, node, node->prev, node->next, name, node->addr, node->size);
+        sdfPrintf(sdfGsMemNodeFmt, node, node->prev, node->next, name, node->addr, node->size);
         walk = head;
         while (walk != node) {
             walk = walk->next;
@@ -1811,17 +1783,17 @@ void sdfDumpGsMemory2(void) {
     sdfGsMemSlice_t *node;
     sdfGsMemSlice_t *walk;
     char *name;
-    sdfPrintf(D_0054A088);
+    sdfPrintf(sdfGsMemInfoTitle);
     head = sdfGsMemGetLinkTail();
     node = head;
     while (node != 0) {
         if ((u32)node->type < SDF_TEX_RESOURCE_KNOWN_MODE_COUNT) {
-            name = D_00529CD8[node->type];
+            name = sdfGsMemTypeNamesTail[node->type];
         } else {
-            sdfPrintf(buf, D_00551B40, node->type);
+            sdfPrintf(buf, sdfGsMemTypeFmt, node->type);
             name = buf;
         }
-        sdfPrintf(D_0054A100, node, node->prev, node->next, name, node->addr, node->size);
+        sdfPrintf(sdfGsMemNodeFmt, node, node->prev, node->next, name, node->addr, node->size);
         walk = head;
         while (walk != node) {
             walk = walk->prev;
@@ -1967,3 +1939,4 @@ INCLUDE_SDATA(const s32, "sdf/sdfSound", D_00438CF0);
 INCLUDE_SDATA(const s32, "sdf/sdfSound", D_00438CF8);
 
 INCLUDE_SDATA(const s32, "sdf/sdfSound", sdfGsMemTypeFmt);
+
