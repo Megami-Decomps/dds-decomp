@@ -28,7 +28,6 @@
 #include "sdf_texture_file.h"
 #include "eff_random.h"
 #include "eff_transform.h"
-#include "eff_light.h"
 #include "mdl_flag_api.h"
 #include "mnu_event_flag_entries.h"
 #include "eff_event_draw.h"
@@ -325,6 +324,13 @@ u32 func_0024D608(void) {
     return 0xffffffff;
 }
 
+struct sdf3DLightParallelPacket_t;
+
+typedef struct evtLightDataView_t {
+    u8 pad00[0x78];
+    struct sdf3DLightParallelPacket_t *LightPacket;
+} evtLightDataView_t;
+
 /* Copy the source node's nested value only on a successful lookup.
  * The destination and both nested data pointers are caller-owned. */
 s32 evtCopyWorldObjectEntryValue(const char *objectName, s32 destination) {
@@ -336,7 +342,7 @@ s32 evtCopyWorldObjectEntryValue(const char *objectName, s32 destination) {
     if (source != NULL) {
         destinationNode = (dds3Basic_t *)destination;
         *(s32 *)((u8 *)destinationNode->workdata + 0x80) =
-            (s32)((EffLightData *)source->workdata)->buffer;
+            (s32)((evtLightDataView_t *)source->workdata)->LightPacket;
         return 1;
     }
     return 0;

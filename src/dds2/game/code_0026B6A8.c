@@ -11,7 +11,6 @@
 #include "dat_state.h"
 #include "eff.h"
 #include "eff_transform.h"
-#include "eff_light.h"
 #include "dds3obj.h"
 #include "eff_random.h"
 #include "mdl_flag_api.h"
@@ -363,6 +362,13 @@ u32 func_0026C168(void) {
     return 0xffffffff;
 }
 
+struct sdf3DLightParallelPacket_t;
+
+typedef struct evtLightDataView_t {
+    u8 pad00[0x78];
+    struct sdf3DLightParallelPacket_t *LightPacket;
+} evtLightDataView_t;
+
 s32 evtCopyWorldObjectEntryValue(const char *objectName, s32 dst) {
     dds3Basic_t *src;
     dds3Basic_t *destinationNode;
@@ -371,7 +377,7 @@ s32 evtCopyWorldObjectEntryValue(const char *objectName, s32 dst) {
                                                objectName);
     if (src != NULL) {
         destinationNode = (dds3Basic_t *)dst;
-        *(s32 *)((u8 *)destinationNode->workdata + 0x80) = (s32)((EffLightData *)src->workdata)->buffer;
+        *(s32 *)((u8 *)destinationNode->workdata + 0x80) = (s32)((evtLightDataView_t *)src->workdata)->LightPacket;
         return 1;
     }
     return 0;

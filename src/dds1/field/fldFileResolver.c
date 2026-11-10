@@ -79,7 +79,6 @@
 #include "dds3_world_counter.h"
 #include "sdf_vu_matrix.h"
 #include "dds3_world_secondary.h"
-#include "eff_light.h"
 #include "fld_area_work.h"
 #include "fld_spawn_collision.h"
 #include "evt_world.h"
@@ -223,6 +222,11 @@ dds3Basic_t *fldGetModelRange_From_MatterName(const char *resourceEntryName) {
     }
     return NULL;
 }
+
+typedef struct fldLightDataView_t {
+    u8 pad00[0x64];
+    u32 flags;
+} fldLightDataView_t;
 
 struct EffNodeDescriptor;
 
@@ -418,7 +422,7 @@ void fldMakeResouceBasicFL1(FldSpawnBatch *batch, u32 batchCount) {
                 dds3GetRadiusPoseSet(spawnedObject, ((fldResourceLight_t *)resource->data)->OutsideR);
                 dds3SetLightObjectResoruce(spawnedObject, resource->data);
                 if ((u32)fldGlobalBase.area - 200U < 300U) {
-                    ((EffLightData *)spawnedObject->workdata)->flags |= 8;
+                    ((fldLightDataView_t *)spawnedObject->workdata)->flags |= 8;
                     dds3SetUnitObjectId(spawnedObject, "BTL_DEF_LIGHT");
                 }
             }
@@ -1948,7 +1952,6 @@ const struct sdfMemHandle_t *fldLoadAreaRoomResources(const char *resourceName) 
 #include "dds3_world_counter.h"
 #include "sdf_vu_matrix.h"
 #include "dds3_world_secondary.h"
-#include "eff_light.h"
 #include "fld_area_work.h"
 #include "fld_spawn_collision.h"
 #include "evt_world.h"
@@ -4307,7 +4310,6 @@ void fldUpdateCameraViewFromPlayer(void) {
 #include "dds3_world_counter.h"
 #include "sdf_vu_matrix.h"
 #include "dds3_world_secondary.h"
-#include "eff_light.h"
 #include "fld_area_work.h"
 #include "fld_spawn_collision.h"
 #include "evt_world.h"
@@ -8465,7 +8467,6 @@ void fldHitChkUnitDamage(f32 *position) {
 #include "dds3_world_counter.h"
 #include "sdf_vu_matrix.h"
 #include "dds3_world_secondary.h"
-#include "eff_light.h"
 #include "fld_area_work.h"
 #include "fld_spawn_collision.h"
 #include "evt_world.h"
