@@ -37,7 +37,7 @@ enum {
     SDF_GS_TRXDIR = 0x53
 };
 
-extern u8 D_0055188A;
+extern u8 sdfGrBufferSlot;
 
 extern u16 sdfReqDrawDelaySleepCount;
 
@@ -118,7 +118,7 @@ struct sdfPreDrawTag_t;
 
 /* The frame worker passes the node and queued buffer index. The registered
  * handlers project the node into their distinct complete packet owners. */
-typedef void (*SdfPacketPatchCallback)();
+typedef void (*SdfPacketPatchCallback)(void *, s32);
 
 
 /* GIF REGLIST stream: PRIM, RGBAQ and two packed XYZ2 vertices. */
@@ -431,7 +431,7 @@ typedef struct sdfPreDrawTag_t {
 
 extern s32 sdfGrPacketBuffSize;
 
-extern s32 D_00551870[2];
+extern s32 sdfGrPacketBuffBase[2];
 
 extern s32 sdfGrPacketBuffPtr;
 
@@ -441,9 +441,7 @@ extern s32 sdfDelayedResrcSemaId;
 
 extern s32 sdfDrawReqQueueIndex;
 
-#define D_00529388 sdfGrFrameSet
-
-extern sdfGrFrameSet_t D_00529388;
+extern sdfGrFrameSet_t sdfGrFrameSet;
 
 typedef struct effDebugPolyParams_t {
     s16 parameterCount;
@@ -465,7 +463,7 @@ s32 sdfGrAllocPacketBuff(s32 aSize);
 
 void sdfDrawTagInit(sdfDrawTag_t *a);
 
-void sdfDrawTagLink(sdfDrawTag_t *aTag, u32 aPacket);
+void sdfDrawTagLink(sdfDrawTag_t *aTag, addr_t aPacket);
 
 void sdfPreDrawTagLink(sdfPreDrawTag_t *aTag, sdfPreDrawHook_t *aHook);
 
@@ -607,7 +605,7 @@ sdfDrawTag_t *sdfPrimAllocDrawTag(s32 (*aAllocator)(s32)) {
     if (aAllocator == NULL) {
         aAllocator = sdfGrAllocPacketBuff;
     }
-    list = (sdfDrawTag_t *)(u32)aAllocator(SDF_PACKET_LIST_BYTES);
+    list = (sdfDrawTag_t *)EE_ADDR_PTR(aAllocator(SDF_PACKET_LIST_BYTES));
     sdfDrawTagInit(list);
     return list;
 }
@@ -620,7 +618,7 @@ void sdfPrimLinkSimplePacket(s32 aTag, void (*aFunc)(s32), s32 aPacketSize, s32 
     }
     packetAddress = aAllocator(aPacketSize);
     aFunc(packetAddress);
-    sdfDrawTagLink(aTag, packetAddress);
+    sdfDrawTagLink(EE_ADDR_PTR(aTag), packetAddress);
 }
 
 void sdfPrimSetOpaqueElem(sdfPrimTransElem_t *aElem) {
@@ -799,16 +797,16 @@ void sdfPrimLinkBitBltPacket(s32 aTag, u32 aDstGsAddr, s32 aDstBuffWidth,
         aAllocator = sdfGrAllocPacketBuff;
     }
     packetAddress = aAllocator(0x60);
-    sdfPrimSetBitBltPacket((sdfPrimBitBltPacket_t *)packetAddress, aDstGsAddr, aDstBuffWidth,
+    sdfPrimSetBitBltPacket(EE_ADDR_AS(sdfPrimBitBltPacket_t *, packetAddress), aDstGsAddr, aDstBuffWidth,
                                     aDstPixelFormat, aDstX, aDstY, aSrcGsAddr, aSrcBuffWidth,
                                     aSrcPixelFormat, aSrcX, aSrcY, aWidth, aHeight, aDirMode);
-    sdfDrawTagLink(aTag, packetAddress);
+    sdfDrawTagLink(EE_ADDR_PTR(aTag), packetAddress);
 }
 
 void sdfPrimFrameMovePredraw(sdfPrimFrameMovePacket_t *aPre, s32 aEvenOdd) {
     aPre->packet.bitblt.bitbltbuf.data =
         (aPre->packet.bitblt.bitbltbuf.data & ~0x3FFF) |
-        (u64)(u32)(D_00529388.buffers[aEvenOdd ^ aPre->worker.option0]->addr >> 6);
+        (u64)(u32)(sdfGrFrameSet.buffers[aEvenOdd ^ aPre->worker.option0]->addr >> 6);
 }
 
 void sdfPrimLinkFrameMovePacket(sdfDrawTag_t *aDrawTag, sdfPreDrawTag_t *aPreDrawTag,
@@ -821,18 +819,18 @@ void sdfPrimLinkFrameMovePacket(sdfDrawTag_t *aDrawTag, sdfPreDrawTag_t *aPreDra
     if (aAllocator == NULL) {
         aAllocator = sdfGrAllocPacketBuff;
     }
-    packet = (sdfPrimFrameMovePacket_t *)aAllocator(0x70);
+    packet = EE_ADDR_AS(sdfPrimFrameMovePacket_t *, aAllocator(0x70));
     packet->worker.option0 = aFrameSw;
     packet->worker.predrawFunc = sdfPrimFrameMovePredraw;
     drawPacket = &packet->packet;
 
     sdfPrimSetBitBltPacket(
         drawPacket, aBuffHandle->addr, aBuffHandle->w,
-        aBuffHandle->pixelFormat, aDstX, aDstY, D_00529388.buffers[0]->addr,
-        D_00529388.width, D_00529388.bufferFormat, aSrcX, aSrcY, aWidth,
+        aBuffHandle->pixelFormat, aDstX, aDstY, sdfGrFrameSet.buffers[0]->addr,
+        sdfGrFrameSet.width, sdfGrFrameSet.bufferFormat, aSrcX, aSrcY, aWidth,
         aHeight, 2);
     sdfPreDrawTagLink(aPreDrawTag, &packet->worker);
-    sdfDrawTagLink(aDrawTag, (s32)drawPacket);
+    sdfDrawTagLink(aDrawTag, EE_ADDR_S(drawPacket));
 }
 
 void sdfPrimSetSpriteElem(sdfPrimSpriteElem_t *aElem, s32 aColor, s32 aPrim, s32 aX0, s32 aY0, s32 aU0, s32 aV0, s32 aX1, s32 aY1, s32 aU1, s32 aV1, s32 aZ) {
@@ -854,11 +852,11 @@ void sdfPrimLinkSprite(sdfDrawTag_t *aTag, s32 aColor, s32 aPrim, s32 aX0, s32 a
     if (aAllocator == NULL) {
         aAllocator = sdfGrAllocPacketBuff;
     }
-    packet = (sdfPrimSpritePacket_t *)aAllocator(0x50);
+    packet = EE_ADDR_AS(sdfPrimSpritePacket_t *, aAllocator(0x50));
     packet->dmaTag = 0x20000004;
     packet->vifCommands = (((u64)0x50000004 << 16) | 0x1000) << 16;
     sdfPrimSetSpriteElem(&packet->spr, aColor, aPrim, aX0, aY0, aU0, aV0, aX1, aY1, aU1, aV1, aZ);
-    sdfDrawTagLink(aTag, (s32)packet);
+    sdfDrawTagLink(aTag, EE_ADDR_S(packet));
 }
 
 void sdfPrimSetF3Elem(sdfPrimF3Elem_t *aElem, s32 aColor, s32 aPrim, s32 aX0, s32 aY0, s32 aX1, s32 aY1, s32 aX2, s32 aY2, s32 aZ) {
@@ -882,11 +880,11 @@ void sdfPrimLinkF3(sdfDrawTag_t *aTag, s32 aColor, s32 aPrim, s32 aX0, s32 aY0, 
     if (aAllocator == NULL) {
         aAllocator = sdfGrAllocPacketBuff;
     }
-    packet = (sdfPrimF3Packet_t *)aAllocator(0x50);
+    packet = EE_ADDR_AS(sdfPrimF3Packet_t *, aAllocator(0x50));
     packet->dmaTag = 0x20000004;
     packet->vifCommands = (((u64)0x50000004 << 16) | 0x1000) << 16;
     sdfPrimSetF3Elem(&packet->elem, aColor, aPrim, aX0, aY0, aX1, aY1, aX2, aY2, aZ);
-    sdfDrawTagLink(aTag, (s32)packet);
+    sdfDrawTagLink(aTag, EE_ADDR_S(packet));
 }
 
 void sdfPrimSetF4Elem(sdfPrimF4Elem_t *aElem, s32 aColor, s32 aPrim, s32 aX0, s32 aY0, s32 aX1, s32 aY1, s32 aX2, s32 aY2, s32 aX3, s32 aY3, s32 aZ) {
@@ -908,11 +906,11 @@ void sdfPrimLinkF4(sdfDrawTag_t *aTag, s32 aColor, s32 aPrim, s32 aX0, s32 aY0, 
     if (aAllocator == NULL) {
         aAllocator = sdfGrAllocPacketBuff;
     }
-    packet = (sdfPrimF4Packet_t *)aAllocator(0x50);
+    packet = EE_ADDR_AS(sdfPrimF4Packet_t *, aAllocator(0x50));
     packet->dmaTag = 0x20000004ULL;
     packet->vifCommands = 0x5000000410000000ULL;
     sdfPrimSetF4Elem(&packet->elem, aColor, aPrim, aX0, aY0, aX1, aY1, aX2, aY2, aX3, aY3, aZ);
-    sdfDrawTagLink(aTag, (s32)packet);
+    sdfDrawTagLink(aTag, EE_ADDR_S(packet));
 }
 
 void sdfPrimSetG3Elem(sdfPrimG3Elem_t *aElem, s32 aPrim, s32 aX0, s32 aY0, s32 aColor0, s32 aX1, s32 aY1, s32 aColor1, s32 aX2, s32 aY2, s32 aColor2, s32 aZ) {
@@ -935,11 +933,11 @@ void sdfPrimLinkG3(sdfDrawTag_t *aTag, s32 aPrim, s32 aX0, s32 aY0, s32 aColor0,
     if (aAllocator == NULL) {
         aAllocator = sdfGrAllocPacketBuff;
     }
-    packet = (sdfPrimG3Packet_t *)aAllocator(0x60);
+    packet = EE_ADDR_AS(sdfPrimG3Packet_t *, aAllocator(0x60));
     packet->dmaTag = 0x20000005ULL;
     packet->vifCommands = 0x5000000510000000ULL;
     sdfPrimSetG3Elem(&packet->elem, aPrim, aX0, aY0, aColor0, aX1, aY1, aColor1, aX2, aY2, aColor2, aZ);
-    sdfDrawTagLink(aTag, (s32)packet);
+    sdfDrawTagLink(aTag, EE_ADDR_S(packet));
 }
 
 void sdfPrimSetG4Elem(sdfPrimG4Elem_t *aElem, s32 aPrim, s32 aX0, s32 aY0, s32 aColor0, s32 aX1, s32 aY1, s32 aColor1, s32 aX2, s32 aY2, s32 aColor2, s32 aX3, s32 aY3, s32 aColor3, s32 aZ) {
@@ -965,11 +963,11 @@ void sdfPrimLinkG4(s32 aTag, s32 aPrim, s32 aX0, s32 aY0, s32 aColor0, s32 aX1,
     if (aAllocator == NULL) {
         aAllocator = sdfGrAllocPacketBuff;
     }
-    packet = (sdfPrimG4Packet_t *)aAllocator(0x70);
+    packet = EE_ADDR_AS(sdfPrimG4Packet_t *, aAllocator(0x70));
     packet->dmatag = 0x20000006;
     packet->vifCommands = (((u64)0x50000006 << 16) | 0x1000) << 16;
     sdfPrimSetG4Elem(&packet->elem, aPrim, aX0, aY0, aColor0, aX1, aY1, aColor1, aX2, aY2, aColor2, aX3, aY3, aColor3, aZ);
-    sdfDrawTagLink(aTag, (s32)packet);
+    sdfDrawTagLink(EE_ADDR_PTR(aTag), EE_ADDR_S(packet));
 }
 
 void sdfPrimSetFt3Elem(sdfPrimFt3Elem_t *aElem, s32 aColor, s32 aPrim, s32 aX0, s32 aY0, s32 aU0, s32 aV0, s32 aX1, s32 aY1, s32 aU1, s32 aV1, s32 aX2, s32 aY2, s32 aU2, s32 aV2, s32 aZ) {
@@ -994,11 +992,11 @@ void sdfPrimLinkFt3(s32 aTag, s32 aColor, s32 aPrim, s32 aX0, s32 aY0, s32 aU0,
     if (aAllocator == NULL) {
         aAllocator = sdfGrAllocPacketBuff;
     }
-    packet = (sdfPrimFt3Packet_t *)aAllocator(0x60);
+    packet = EE_ADDR_AS(sdfPrimFt3Packet_t *, aAllocator(0x60));
     packet->dmatag = 0x20000005;
     packet->vifCommands = (((u64)0x50000005 << 16) | 0x1000) << 16;
     sdfPrimSetFt3Elem(&packet->elem, aColor, aPrim, aX0, aY0, aU0, aV0, aX1, aY1, aU1, aV1, aX2, aY2, aU2, aV2, aZ);
-    sdfDrawTagLink(aTag, (s32)packet);
+    sdfDrawTagLink(EE_ADDR_PTR(aTag), EE_ADDR_S(packet));
 }
 
 void sdfPrimSetFt4Elem(sdfPrimFt4Elem_t *aElem, s32 aColor, s32 aPrim, s32 aX0, s32 aY0, s32 aU0, s32 aV0,
@@ -1028,11 +1026,11 @@ void sdfPrimLinkFt4(sdfDrawTag_t *aTag, s32 aColor, s32 aPrim, s32 aX0, s32 aY0,
     if (aAllocator == NULL) {
         aAllocator = sdfGrAllocPacketBuff;
     }
-    packet = (sdfPrimFt4Packet_t *)aAllocator(0x70);
+    packet = EE_ADDR_AS(sdfPrimFt4Packet_t *, aAllocator(0x70));
     packet->dmatag = 0x20000006;
     packet->vifCommands = (((u64)0x50000006 << 16) | 0x1000) << 16;
     sdfPrimSetFt4Elem(&packet->elem, aColor, aPrim, aX0, aY0, aU0, aV0, aX1, aY1, aU1, aV1, aX2, aY2, aU2, aV2, aX3, aY3, aU3, aV3, aZ);
-    sdfDrawTagLink(aTag, (s32)packet);
+    sdfDrawTagLink(aTag, EE_ADDR_S(packet));
 }
 
 void sdfPrimSetGt3Elem(sdfPrimGt3Elem_t *aElem, s32 aPrim, s32 aX0, s32 aY0, s32 aU0, s32 aV0, s32 aColor0,
@@ -1062,11 +1060,11 @@ void sdfPrimLinkGt3(s32 aTag, s32 aPrim, s32 aX0, s32 aY0, s32 aU0, s32 aV0,
     if (aAllocator == NULL) {
         aAllocator = sdfGrAllocPacketBuff;
     }
-    packet = (sdfPrimGt3Packet_t *)aAllocator(0x70);
+    packet = EE_ADDR_AS(sdfPrimGt3Packet_t *, aAllocator(0x70));
     packet->dmatag = 0x20000006;
     packet->vifCommands = (((u64)0x50000006 << 16) | 0x1000) << 16;
     sdfPrimSetGt3Elem(&packet->elem, aPrim, aX0, aY0, aU0, aV0, aColor0, aX1, aY1, aU1, aV1, aColor1, aX2, aY2, aU2, aV2, aColor2, aZ);
-    sdfDrawTagLink(aTag, (s32)packet);
+    sdfDrawTagLink(EE_ADDR_PTR(aTag), EE_ADDR_S(packet));
 }
 
 void sdfPrimSetGt4Elem(sdfPrimGt4Elem_t *aElem, s32 aPrim, s32 aX0, s32 aY0, s32 aU0, s32 aV0, s32 aColor0,
@@ -1099,11 +1097,11 @@ void sdfPrimLinkGt4(sdfDrawTag_t *aTag, s32 aPrim, s32 aX0, s32 aY0, s32 aU0, s3
     if (aAllocator == NULL) {
         aAllocator = sdfGrAllocPacketBuff;
     }
-    packet = (sdfPrimGt4Packet_t *)aAllocator(0x90);
+    packet = EE_ADDR_AS(sdfPrimGt4Packet_t *, aAllocator(0x90));
     packet->dmatag = 0x20000008;
     packet->vifCommands = (((u64)0x50000008 << 16) | 0x1000) << 16;
     sdfPrimSetGt4Elem(&packet->elem, aPrim, aX0, aY0, aU0, aV0, aColor0, aX1, aY1, aU1, aV1, aColor1, aX2, aY2, aU2, aV2, aColor2, aX3, aY3, aU3, aV3, aColor3, aZ);
-    sdfDrawTagLink(aTag, (s32)packet);
+    sdfDrawTagLink(aTag, EE_ADDR_S(packet));
 }
 
 void sdfPrimSetRectElem(sdfPrimRectElem_t *aElem, s32 aColor, s32 aPrim, s32 aX0, s32 aY0, s32 aX1, s32 aY1, s32 aZ) {
@@ -1125,11 +1123,11 @@ void sdfPrimLinkRect(sdfDrawTag_t *aTag, s32 aColor, s32 aPrim, s32 aX0, s32 aY0
     if (aAllocator == NULL) {
         aAllocator = sdfGrAllocPacketBuff;
     }
-    packet = (sdfPrimRectPacket_t *)aAllocator(0x40);
+    packet = EE_ADDR_AS(sdfPrimRectPacket_t *, aAllocator(0x40));
     packet->dmaTag = 0x20000003ULL;
     packet->vifCommands = 0x5000000310000000ULL;
     sdfPrimSetRectElem(&packet->elem, aColor, aPrim, aX0, aY0, aX1, aY1, aZ);
-    sdfDrawTagLink(aTag, (u32)packet);
+    sdfDrawTagLink(aTag, EE_ADDR(packet));
 }
 
 void sdfPrimSetLineElem(sdfPrimRectElem_t *aElem, s32 aColor, s32 aPrim, s32 aX0, s32 aY0, s32 aX1, s32 aY1, s32 aZ) {
@@ -1151,11 +1149,11 @@ void sdfPrimLinkLine(sdfDrawTag_t *aTag, s32 aColor, s32 aPrim, s32 aX0, s32 aY0
     if (aAllocator == NULL) {
         aAllocator = sdfGrAllocPacketBuff;
     }
-    packet = (sdfPrimRectPacket_t *)aAllocator(0x40);
+    packet = EE_ADDR_AS(sdfPrimRectPacket_t *, aAllocator(0x40));
     packet->dmaTag = 0x20000003ULL;
     packet->vifCommands = 0x5000000310000000ULL;
     sdfPrimSetLineElem(&packet->elem, aColor, aPrim, aX0, aY0, aX1, aY1, aZ);
-    sdfDrawTagLink(aTag, (u32)packet);
+    sdfDrawTagLink(aTag, EE_ADDR(packet));
 }
 
 void sdfPrimSetBoxLineElem(sdfPrimBoxLineElem_t *aElem, s32 aColor, s32 aPrim, s32 aX0, s32 aY0, s32 aX1, s32 aY1, s32 aZ) {
@@ -1182,10 +1180,10 @@ void sdfPrimLinkBoxLine(sdfDrawTag_t *aTag, s32 aColor, s32 aPrim, s32 aX0, s32 
     if (aAllocator == NULL) {
         aAllocator = sdfGrAllocPacketBuff;
     }
-    packet = (sdfPrimBoxLinePacket_t *)aAllocator(0x60);
+    packet = EE_ADDR_AS(sdfPrimBoxLinePacket_t *, aAllocator(0x60));
     packet->dmaTag = 0x20000005ULL;
     packet->vifCommands = 0x5000000510000000ULL;
     sdfPrimSetBoxLineElem(&packet->line, aColor, aPrim, aX0, aY0, aX1, aY1, aZ);
-    sdfDrawTagLink(aTag, (s32)packet);
+    sdfDrawTagLink(aTag, EE_ADDR_S(packet));
 }
 
