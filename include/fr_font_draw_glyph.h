@@ -3,8 +3,8 @@
 
 #include "common.h"
 
-struct _FRQ;
+struct frFontHandle_t;
 
-s32 frDrawFontOt(struct _FRQ *glyph, s8 mode, u32 flags);
+s32 frDrawFontOt(struct frFontHandle_t *glyph, s8 mode, u32 flags);
 
 #endif

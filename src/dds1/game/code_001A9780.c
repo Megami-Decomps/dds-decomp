@@ -2243,7 +2243,7 @@ s32 btlCreateSkillNamePanel(const u8 *text) {
     BtlState *battle = (BtlState *)btlGetRuntime();
     dds3ProcessID_t *task = btlGetTrackedProcess(BTL_TRACKED_PROCESS_SKILL_NAME_PANEL);
     BtlPanelTransitionWork *work;
-    struct _FRQ *glyph;
+    struct frFontHandle_t *glyph;
 
     if (btlHasRegisteredSkillNamePanelTask() != 0) {
         dds3KillProcess(task, 0);
@@ -2623,11 +2623,11 @@ extern void btlDrawAnalysisPanelSilhouette(BtlLinkedCommand *, BtlAnalysisPanelW
 extern void btlDrawCompositePanelSprites(void *, s32, s32, u32);
 extern void btlDrawAnalysisPanelVitalBars(BtlAnalysisPanelWork *, s32, s32, s32, s32);
 extern u16 *btlGatherEnemyCommands(BtlUnit *, s16 *);
-extern s32 frDrawFontOt(struct _FRQ *, s8, u32);
-extern s32 frDrawFontEx(struct _FRQ *, s8);
+extern s32 frDrawFontOt(struct frFontHandle_t *, s8, u32);
+extern s32 frDrawFontEx(struct frFontHandle_t *, s8);
 
 /* Shared text submission: choose the standard shared draw flags and enqueue. */
-static inline void btlSubmitSharedTextGlyph(struct _FRQ *glyph) {
+static inline void btlSubmitSharedTextGlyph(struct frFontHandle_t *glyph) {
     frDrawFontEx(glyph, 1);
     frDestroyFontRequestAfter(glyph);
 }
@@ -2645,7 +2645,7 @@ s32 btlUpdateAndDrawAnalysisPanel(dds3ProcessID_t *task) {
     BtlState *battle;
     BtlAnalysisPanelWork *work;
     s32 row;
-    struct _FRQ *glyph;
+    struct frFontHandle_t *glyph;
 
     battle = (BtlState *)btlGetRuntime();
     work = (BtlAnalysisPanelWork *)dds3GetProcessData(task);
@@ -2692,7 +2692,7 @@ s32 btlUpdateAndDrawAnalysisPanel(dds3ProcessID_t *task) {
                         break;
                     }
                     sprintf(text, D_003BB400, actor->partyRecord.level);
-                    glyph = (struct _FRQ *)itfCreateFont2TextGlyph((work->x + xOffset) << 4,
+                    glyph = (struct frFontHandle_t *)itfCreateFont2TextGlyph((work->x + xOffset) << 4,
                                           (work->y - 2) << 3, 0xFF0000,
                                           0x80808000 | (s32)work->alpha, text, 0);
                     frDrawFontOt(glyph, 1, 0x53);
@@ -2733,7 +2733,7 @@ s32 btlUpdateAndDrawAnalysisPanel(dds3ProcessID_t *task) {
                     sprintf(text, D_003BB408, actor->partyRecord.hp,
                                   actor->partyRecord.maxhp);
                     btlDrawAnalysisPanelVitalBars(work, 0, work->x, work->y, work->alpha);
-                    glyph = (struct _FRQ *)itfCreateFont2TextGlyph((work->x + xOffset) << 4,
+                    glyph = (struct frFontHandle_t *)itfCreateFont2TextGlyph((work->x + xOffset) << 4,
                                           (work->y + 17) << 3, 0xFF0000,
                                           0x80808000 | (s32)work->alpha, text, 0);
                     frDrawFontOt(glyph, 1, 0x53);
@@ -2754,7 +2754,7 @@ s32 btlUpdateAndDrawAnalysisPanel(dds3ProcessID_t *task) {
                     sprintf(text, D_003BB408, actor->partyRecord.mp,
                                   actor->partyRecord.maxMp);
                     btlDrawAnalysisPanelVitalBars(work, 1, work->x, work->y, work->alpha);
-                    glyph = (struct _FRQ *)itfCreateFont2TextGlyph((work->x + xOffset) << 4,
+                    glyph = (struct frFontHandle_t *)itfCreateFont2TextGlyph((work->x + xOffset) << 4,
                                           (work->y + 41) << 3, 0xFF0000,
                                           0x80808000 | (s32)work->alpha, text, 0);
                     frDrawFontOt(glyph, 1, 0x53);
@@ -4779,9 +4779,9 @@ extern const BattlePanelColors D_003A2A80;
 
 extern void btlUpdatePanelTransitionGradients(BtlPanelTransitionWork *);
 
-struct _FRQ;
+struct frFontHandle_t;
 
-extern s32 frDrawFontEx(struct _FRQ *, s8);
+extern s32 frDrawFontEx(struct frFontHandle_t *, s8);
 
 s32 btlUpdateSkillNamePanelTask(dds3ProcessID_t *task) {
     BattlePanelColors colors = D_003A2A80;
@@ -4789,7 +4789,7 @@ s32 btlUpdateSkillNamePanelTask(dds3ProcessID_t *task) {
     s16 *fade;
     s32 i;
     s32 width;
-    struct _FRQ *glyph;
+    struct frFontHandle_t *glyph;
 
     if (btlGetTrackedProcess(BTL_TRACKED_PROCESS_SKILL_NAME_PANEL) == 0) {
         return 0;
@@ -5054,11 +5054,11 @@ void btlCreateMessageWindow(void) {
 
 extern void itfSetTextDrawLimit(s32 limit);
 
-struct _FRQ;
-struct FrFontTextBank;
-extern struct _FRQ *itfDrawTextWithSelectedFontMode(s32, s32, s32, s8, u16, s32);
-extern u8 *MessageNumSearch(s32, struct FrFontTextBank *, s32);
-extern struct FrFontTextBank *datCommandHelpMessages;
+struct frFontHandle_t;
+struct frTextBank_t;
+extern struct frFontHandle_t *itfDrawTextWithSelectedFontMode(s32, s32, s32, s8, u16, s32);
+extern u8 *MessageNumSearch(s32, struct frTextBank_t *, s32);
+extern struct frTextBank_t *datCommandHelpMessages;
 /* Draw one hint text line at a battle window's top-left: kinds 0 and 9 draw
  * text id textId in a font mode (0 or 1), any other kind draws that entry of
  * the datCommandHelpMessages text bank, and the glyph chain is then tinted, drawn and
@@ -5068,7 +5068,7 @@ extern struct FrFontTextBank *datCommandHelpMessages;
  * queue calls between the three kinds. Otherwise it differs from retail only in
  * register allocation and scheduling. */
 void btlDrawWindowHelpLine(s32 x, s32 y, u32 unusedColor, u32 childColor, u16 textId, s16 kind) {
-    struct _FRQ *glyph;
+    struct frFontHandle_t *glyph;
 
     itfSetTextDrawLimit(0x13);
     switch (kind) {
@@ -8236,14 +8236,14 @@ void fldSubmitSceneObjectAtCoordinates(s32 x, s32 y, u32 color, char *text) {
     itfSetTextDrawLimit(0x13);
     glyph = itfCreateFont2TextGlyph(x << 4, y << 3, 0, color, text, 0);
     frDrawFontOt(glyph, 1, 0x53);
-    frDestroyFontRequestAfter((struct _FRQ *)(u32)glyph);
+    frDestroyFontRequestAfter((struct frFontHandle_t *)(u32)glyph);
     itfSetTextDrawLimit(-1);
 }
 
 extern u8 *D_003BAA8C;
 
 void btlDrawIndexedBattleEntryGlyphs(s32 x, s32 y, s32 z, s32 w, u16 index) {
-    struct _FRQ *handle;
+    struct frFontHandle_t *handle;
     itfSetTextDrawLimit(0x13);
     handle = itfCreateConvertedTextGlyph(x << 4, y << 3, z, w, D_003BAA8C + index * 17, 0);
     btlSubmitSharedTextGlyph(handle);
@@ -8253,7 +8253,7 @@ void btlDrawIndexedBattleEntryGlyphs(s32 x, s32 y, s32 z, s32 w, u16 index) {
 extern u8 *D_003BAA84;
 
 void btlQueueIndexedTextWithinDrawLimit(s32 x, s32 y, s32 z, s32 w, u16 index) {
-    struct _FRQ *handle;
+    struct frFontHandle_t *handle;
     itfSetTextDrawLimit(0x13);
     handle = itfCreateConvertedTextGlyph(x << 4, y << 3, z, w, D_003BAA84 + index * 25, 0);
     btlSubmitSharedTextGlyph(handle);
@@ -8767,7 +8767,7 @@ void btlDrawActorCommandRows(BattleSceneObject *ctx, u16 kind, u16 page, u16 col
     s32 y = 0x14C;
     u16 *list;
     u32 color;
-    struct _FRQ *glyph;
+    struct frFontHandle_t *glyph;
     BtlCommandUseError failure;
     BtlCommandVitalCostAmount cost;
     u32 iconColor;
@@ -8911,7 +8911,7 @@ void func_001BE590(BattleSceneObject *object) {
             u32 color;
             s32 x;
             s32 y;
-            struct _FRQ *glyph;
+            struct frFontHandle_t *glyph;
             BattleSelectionWork *selection;
 
             switch (row) {
@@ -9011,7 +9011,7 @@ void btlDrawRetreatCommandLabel(s32 unused) {
     u8 text[8];
     BtlState *battle;
     s32 color;
-    struct _FRQ *handle;
+    struct frFontHandle_t *handle;
 
     memcpy(text, D_003BB450, sizeof(text));
     battle = (BtlState *)btlGetRuntime();
@@ -9849,8 +9849,8 @@ extern void btlDrawCenteredPanelSegments(s32 width);
 /* Draw selected actor names and advance the battle scene's actor panels. */
 void btlUpdateAndDrawTargetActorPanels(SceneAiWork *work) {
     BtlUnit *unit;
-    struct _FRQ *glyph;
-    struct _FRQ *categoryGlyph;
+    struct frFontHandle_t *glyph;
+    struct frFontHandle_t *categoryGlyph;
     s32 width;
     s32 categoryWidth;
     s32 totalWidth;
@@ -9882,7 +9882,7 @@ void btlUpdateAndDrawTargetActorPanels(SceneAiWork *work) {
                 totalWidth = width + categoryWidth;
                 btlDrawCenteredPanelSegments(totalWidth);
                 frSetDrawPosition(categoryGlyph, (0x100 - (totalWidth >> 1)) << 4, 0x220);
-                frDrawFontEx((struct _FRQ *)categoryGlyph, 1);
+                frDrawFontEx((struct frFontHandle_t *)categoryGlyph, 1);
                 frDestroyFontRequestAfter(categoryGlyph);
                 if (categoryWidth == 0) {
                     s32 centeredNameX = -(width >> 1);

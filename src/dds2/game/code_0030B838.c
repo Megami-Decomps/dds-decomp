@@ -810,7 +810,7 @@ void sdfCounterDrawSelectedTimerFade(s32 unused, s32 x, f32 fade) {
 }
 
 s32 frMeasureAndQueueCounterText(const char *text) {
-    struct _FRQ *glyph;
+    struct frFontHandle_t *glyph;
     s32 width;
 
     glyph = itfCreateMeasuredTextGlyph(0, 0, 0, 0, text, NULL);

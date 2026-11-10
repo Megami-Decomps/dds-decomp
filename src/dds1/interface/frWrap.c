@@ -17,8 +17,8 @@ extern void frDelFontStyle(s32 slotId);
 #define ITF_NEUTRAL_COLOR 0x80808080
 extern sdfTexHandle_t *itfBackgroundSpriteTexture;
 extern u8 frWrapEmptyString[];
-extern _FRQ *frCombineFontRequest(_FRQ *, _FRQ *);
-extern _FRQ *frCombineFontRequestEx(_FRQ *, _FRQ *, s32);
+extern frFontHandle_t *frCombineFontRequest(frFontHandle_t *, frFontHandle_t *);
+extern frFontHandle_t *frCombineFontRequestEx(frFontHandle_t *, frFontHandle_t *, s32);
 extern void frSetWhiteSpaceW(s32 StyleNo, u64 Width); /* retail passes a 64-bit width here */
 extern void frEnableMode(s32 value);
 extern u8 frDisableMode(u8 value);
@@ -26,16 +26,16 @@ extern s32 D_003BD818;
 void frFontEnsureSlotLoaded(s32 id, const char *path);
 extern u16 itfGlyphDecodeTable[];
 extern void frDelFontStyle(s32 slotId);
-extern _FRQ *frCombineFontRequestEx(_FRQ *previous, _FRQ *next, s32 positionNext);
-_FRQ *frCombineFontRequest(_FRQ *previous, _FRQ *next);
-_FRQ *frSetFontString(const char *text, s8 fontIndex, s8 firstOption, s8 secondOption, _FRQ *existingGlyph);
+extern frFontHandle_t *frCombineFontRequestEx(frFontHandle_t *previous, frFontHandle_t *next, s32 positionNext);
+frFontHandle_t *frCombineFontRequest(frFontHandle_t *previous, frFontHandle_t *next);
+frFontHandle_t *frSetFontString(const char *text, s8 fontIndex, s8 firstOption, s8 secondOption, frFontHandle_t *existingGlyph);
 extern void frFontEnsureSlotLoaded(s32 slotId, const char *path);
 extern u8 *datSkillMessages;
 extern u8 *datItemMessages;
-extern _FRQ * frSetFontString(const char *text, s8 fontIndex, s8 firstOption, s8 secondOption, _FRQ *existingGlyph);
+extern frFontHandle_t * frSetFontString(const char *text, s8 fontIndex, s8 firstOption, s8 secondOption, frFontHandle_t *existingGlyph);
 
-_FRQ *frwGetStaffFontFRQ(u32 x, u32 y, s32 depth, s32 alt, s32 measureFlag, u64 entryFlag, u32 colors, const char *source) {
-    _FRQ *glyph;
+frFontHandle_t *frwGetStaffFontFRQ(u32 x, u32 y, s32 depth, s32 alt, s32 measureFlag, u64 entryFlag, u32 colors, const char *source) {
+    frFontHandle_t *glyph;
     s32 kind = 4;
 
     if (alt) {
@@ -103,8 +103,8 @@ void itfConvertText(u8 *output, const char *input) {
 
 /* Build a glyph with a fixed 16x18 cell, then attach it to its parent. */
 void frwGetSmallFont1FRQ(u32 x, u32 y, s32 depth, u32 colors,
-                                    void *glyphSource, _FRQ *parent) {
-    _FRQ *glyph;
+                                    void *glyphSource, frFontHandle_t *parent) {
+    frFontHandle_t *glyph;
 
     glyph = frLinkFontString(glyphSource, 0, 0, 0, 0);
     frSetFontSize(glyph, 0x10, 0x12);
@@ -115,13 +115,13 @@ void frwGetSmallFont1FRQ(u32 x, u32 y, s32 depth, u32 colors,
     frCombineFontRequestEx(parent, glyph, 0);
 }
 
-_FRQ *frwGetFontEx(s32 x, s32 y, s32 depth, u32 colors, const char *text,
-                         s8 glyphMode, s8 sharedFlag, _FRQ *previousGlyph) {
+frFontHandle_t *frwGetFontEx(s32 x, s32 y, s32 depth, u32 colors, const char *text,
+                         s8 glyphMode, s8 sharedFlag, frFontHandle_t *previousGlyph) {
     char glyphData[3];
     s32 length;
     s32 position = 0;
     s32 glyphLength;
-    _FRQ *chain = previousGlyph;
+    frFontHandle_t *chain = previousGlyph;
 
     length = strlen(text);
     if (sharedFlag == 0) {
@@ -132,7 +132,7 @@ _FRQ *frwGetFontEx(s32 x, s32 y, s32 depth, u32 colors, const char *text,
     if (length > 0) {
         do {
             const char *character = text + position;
-            _FRQ *glyph;
+            frFontHandle_t *glyph;
 
             if (character[0] >= 0) {
                 glyphData[0] = character[0];
@@ -164,32 +164,32 @@ _FRQ *frwGetFontEx(s32 x, s32 y, s32 depth, u32 colors, const char *text,
     return chain;
 }
 
-_FRQ *frwGetSmallFontFRQ(x, y, depth, colors, text, parent)
+frFontHandle_t *frwGetSmallFontFRQ(x, y, depth, colors, text, parent)
 s32 x;
 s32 y;
 s32 depth;
 s32 colors;
 const char *text;
-_FRQ *parent;
+frFontHandle_t *parent;
 {
-    _FRQ *handle = frwGetFontEx(x, y, depth, colors, text, 1, 0, parent);
+    frFontHandle_t *handle = frwGetFontEx(x, y, depth, colors, text, 1, 0, parent);
 
     frSetFontSpace(handle, 3);
     return handle;
 }
 
 /* Create positioned, colored text with measured spacing and link it to parent. */
-_FRQ *itfCreateMeasuredTextGlyph(s32 x, s32 y, s32 depth, s32 colors,
-                           const char *text, _FRQ *parent) {
+frFontHandle_t *itfCreateMeasuredTextGlyph(s32 x, s32 y, s32 depth, s32 colors,
+                           const char *text, frFontHandle_t *parent) {
     return frwGetSmallFontFRQ(x, y, depth, colors, text, parent);
 }
 
 /* Decode two-byte glyph codes before building and linking the text glyph. */
-_FRQ *itfCreateConvertedTextGlyph(s32 x, s32 y, s32 depth, u32 colors, const u8 *text, _FRQ *parent) {
+frFontHandle_t *itfCreateConvertedTextGlyph(s32 x, s32 y, s32 depth, u32 colors, const u8 *text, frFontHandle_t *parent) {
     u8 buffer[0x400];
     s32 i;
     s32 length = strlen((const char *)text);
-    _FRQ *glyph;
+    frFontHandle_t *glyph;
 
     buffer[length] = 0;
     for (i = 0; i < length; i++) {
@@ -222,8 +222,8 @@ _FRQ *itfCreateConvertedTextGlyph(s32 x, s32 y, s32 depth, u32 colors, const u8 
     return frCombineFontRequestEx(parent, glyph, 0);
 }
 
-_FRQ *itfCreateFont2TextGlyph(s32 x, s32 y, s32 depth, u32 colors, char *text, _FRQ *previousGlyph) {
-    _FRQ *glyph;
+frFontHandle_t *itfCreateFont2TextGlyph(s32 x, s32 y, s32 depth, u32 colors, char *text, frFontHandle_t *previousGlyph) {
+    frFontHandle_t *glyph;
 
     glyph = frLinkFontString((const char *)frWrapEmptyString, 0, 0, 0, previousGlyph);
     frDisableMode(2);
@@ -237,8 +237,8 @@ _FRQ *itfCreateFont2TextGlyph(s32 x, s32 y, s32 depth, u32 colors, char *text, _
 }
 
 /* Build text with font index 3; retain the existing glyph chain's spacing. */
-_FRQ *itfCreateFont3TextGlyph(s32 x, s32 y, s32 depth, u32 colors, const char *text, _FRQ *previousGlyph) {
-    _FRQ *glyph;
+frFontHandle_t *itfCreateFont3TextGlyph(s32 x, s32 y, s32 depth, u32 colors, const char *text, frFontHandle_t *previousGlyph) {
+    frFontHandle_t *glyph;
 
     glyph = frLinkFontString((const char *)frWrapEmptyString, 0, 0, 0, previousGlyph);
     frDisableMode(2);
@@ -251,8 +251,8 @@ _FRQ *itfCreateFont3TextGlyph(s32 x, s32 y, s32 depth, u32 colors, const char *t
 }
 
 /* Build font-index-3 text with signed spacing -2 and return its glyph chain. */
-_FRQ *itfCreateTightFont3TextGlyph(s32 x, s32 y, s32 depth, s32 colors, char *text, _FRQ *previousGlyph) {
-    _FRQ *glyph;
+frFontHandle_t *itfCreateTightFont3TextGlyph(s32 x, s32 y, s32 depth, s32 colors, char *text, frFontHandle_t *previousGlyph) {
+    frFontHandle_t *glyph;
 
     glyph = frLinkFontString((const char *)frWrapEmptyString, 0, 0, 0, previousGlyph);
     frDisableMode(2);
@@ -267,8 +267,8 @@ _FRQ *itfCreateTightFont3TextGlyph(s32 x, s32 y, s32 depth, s32 colors, char *te
 
 /* Attach the alternate font glyph, with a 12x16 cell, to its parent. */
 void itfAttachGlyph12x16(u32 x, u32 y, s32 depth, u32 colors,
-                                    void *glyphSource, _FRQ *parent) {
-    _FRQ *glyph;
+                                    void *glyphSource, frFontHandle_t *parent) {
+    frFontHandle_t *glyph;
 
     glyph = frSetFontString(glyphSource, 0, 0, 0, 0);
     frSetFontSize(glyph, 0xc, 0x10);
@@ -279,13 +279,13 @@ void itfAttachGlyph12x16(u32 x, u32 y, s32 depth, u32 colors,
     frCombineFontRequestEx(parent, glyph, 0);
 }
 
-extern const u8 *MessageNumSearch(s32 textId, const FrFontTextBank *bank, s32 mode);
-extern void frFontMoveChainTo(s32 x, s32 y, _FRQ *text);
+extern const u8 *MessageNumSearch(s32 textId, const frTextBank_t *bank, s32 mode);
+extern void frFontMoveChainTo(s32 x, s32 y, frFontHandle_t *text);
 
-_FRQ *itfDrawBankTextWithLayoutFlags(s32 x, s32 y, s32 depth, u16 textId, FrFontTextBank *bank, s32 flags) {
+frFontHandle_t *itfDrawBankTextWithLayoutFlags(s32 x, s32 y, s32 depth, u16 textId, frTextBank_t *bank, s32 flags) {
     const u8 *text = MessageNumSearch(textId, bank, 0);
     u32 mode;
-    _FRQ *handle;
+    frFontHandle_t *handle;
 
     if (text == 0) {
         return 0;
@@ -329,23 +329,23 @@ _FRQ *itfDrawBankTextWithLayoutFlags(s32 x, s32 y, s32 depth, u16 textId, FrFont
     return handle;
 }
 
-_FRQ *itfDrawTextWithSelectedFontMode(s32 x, s32 y, s32 depth, s8 fontMode, u16 textId, s32 flags) {
-    _FRQ *result = NULL;
+frFontHandle_t *itfDrawTextWithSelectedFontMode(s32 x, s32 y, s32 depth, s8 fontMode, u16 textId, s32 flags) {
+    frFontHandle_t *result = NULL;
 
     itfSetTextDrawLimit(0x13);
     switch (fontMode) {
     case 0:
-        result = itfDrawBankTextWithLayoutFlags(x, y, depth, textId, (FrFontTextBank *)datSkillMessages, flags);
+        result = itfDrawBankTextWithLayoutFlags(x, y, depth, textId, (frTextBank_t *)datSkillMessages, flags);
         break;
     case 1:
-        result = itfDrawBankTextWithLayoutFlags(x, y, depth, textId, (FrFontTextBank *)datItemMessages, flags);
+        result = itfDrawBankTextWithLayoutFlags(x, y, depth, textId, (frTextBank_t *)datItemMessages, flags);
         break;
     }
     itfSetTextDrawLimit(-1);
     return result;
 }
 
-_FRQ *itfDrawUnderscoreTextSegment(x, y, depth, color, text, segmentIndex)
+frFontHandle_t *itfDrawUnderscoreTextSegment(x, y, depth, color, text, segmentIndex)
     s32 x;
     s32 y;
     s32 depth;

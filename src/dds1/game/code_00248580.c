@@ -116,11 +116,11 @@ extern void mnuDrawStaffPageMarkerIcons(MenuPageWindow *window, StaffSlots *work
 extern void mnuDrawStaffPanelGridBackdrop(s32 flag, StaffSlots *work);
 extern void mnuDrawStageTestList(s32 x, s32 y, s32 z, s32 overrideValue, MenuPageWindow *menu, s32 surface);
 extern void mnuDrawPartyProfilePanelContents(s32, s32, s32, datUnitWork_t *, s32, MenuSimpleSpriteState *, s32);
-extern struct _FRQ *itfCreateFont2TextGlyph(s32, s32, s32, u32, char *, struct _FRQ *);
+extern struct frFontHandle_t *itfCreateFont2TextGlyph(s32, s32, s32, u32, char *, struct frFontHandle_t *);
 
 extern char mnuNumberSpriteFormat[];
 
-extern s32 frDrawFontOt(struct _FRQ *, s8, u32);
+extern s32 frDrawFontOt(struct frFontHandle_t *, s8, u32);
 extern EffectPair D_003BC400[];
 extern void mnuDrawTerminalAmountText(s32, s32);
 extern char D_003BC3F0[];
@@ -144,7 +144,7 @@ extern MenuTextEntry D_003482A8[];
  * The signed-byte slot is not bounds checked; DDS1 has no DDS2 x-origin adjustment. */
 void mnuQueueFontGlyphFromAtlasSlot(s32 gridX, s32 gridY, s32 depth, s32 colors, s8 slot, s8 alternate) {
     u8 *text;
-    struct _FRQ *handle;
+    struct frFontHandle_t *handle;
 
     if (alternate == 0) {
         text = D_00347C68[slot].encodedText;
@@ -202,7 +202,7 @@ void mnuRefreshThresholdNodeFlags(struct MenuList *owner) {
 /* Draw formatted numeric text using a blend toward the color with its low byte clear. */
 void mnuCreateNumberSprite(s32 x, s32 y, s32 layer, s32 blendWeight, s32 number, u32 color, s32 priority) {
     char text[16];
-    struct _FRQ *sprite;
+    struct frFontHandle_t *sprite;
 
     sprintf(text, mnuNumberSpriteFormat, number);
     sprite = itfCreateFont2TextGlyph(x, y, layer, fclBlendColor(color, color & ~MNU_COLOR_LOW_BYTE_MASK, blendWeight), text, 0);
@@ -223,7 +223,7 @@ void mnuDrawTerminalRecoveryListEntry(s32 unused, s32 rowY, s32 depth, struct Me
     MenuThresholdEntry *entry = &node->terminal;
     datUnitWork_t *record = &DDS3_GBWK->party[entry->entryId];
     s32 selected = 0;
-    struct _FRQ *glyph;
+    struct frFontHandle_t *glyph;
     MenuEffectPair *panels;
     s32 fade;
     MnuPartyStatusIconIndex status;
@@ -375,7 +375,7 @@ void mnuDrawTerminalListEntry(s32 x, s32 y, s32 unused, struct MenuList *list,
     s32 isCurrent = node == list->cursor;
     u32 chainFlags = 0;
     u32 color;
-    struct _FRQ *glyph;
+    struct frFontHandle_t *glyph;
 
     if (node->flags48 & 1) {
         width /= 2;
@@ -2025,7 +2025,7 @@ void mnuDrawTerminalAmountText(s32 fading, s32 state) {
     char text[16];
     s32 index;
     s32 color;
-    struct _FRQ *sprite;
+    struct frFontHandle_t *sprite;
 
     index = fldGetModeFrameRecordIndex(work);
     sprintf(text, D_003BC3F0, DDS3_GBWK->header.currency);

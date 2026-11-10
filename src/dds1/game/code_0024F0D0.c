@@ -2956,10 +2956,10 @@ void mnuDrawMantraPanelSprite(s32 x, s32 y, s32 z, s32 alpha,
 }
 
 extern const u8 mnuMantraDisplayParameterLabels[][0x18];
-extern struct FrFontTextBank *frFontGetColoredGlyphResource(void);
+extern struct frTextBank_t *frFontGetColoredGlyphResource(void);
 extern s32 prfGetMantraDisplayParameter(u16 profileId);
 extern s32 frFontDrawColoredGlyphChainAndMeasure(s32, s32, u32, u32, u8, u16,
-                                                  struct FrFontTextBank *, u32, s32, s32);
+                                                  struct frTextBank_t *, u32, s32, s32);
 extern s32 mnuGetMantraSourceValue(u16);
 
 /* Draw the selected mantra's label and remaining source cost. */
@@ -2976,7 +2976,7 @@ static inline void mnuDrawCostPlaceholderWith(
 }
 
 void mnuDrawMantraCostCounter(s32 x, s32 y, s32 z, s32 alpha, s32 sceneId, s32 drawContext) {
-    struct FrFontTextBank *glyphResource = frFontGetColoredGlyphResource();
+    struct frTextBank_t *glyphResource = frFontGetColoredGlyphResource();
     u32 textColor = alpha | MNU_DISPLAY_TEXT_RGB;
     u32 dimColor = (u32)((f32)alpha * 0.599999964237213134765625f) | MNU_DISPLAY_DIM_TEXT_RGB;
     u8 label;
@@ -2995,7 +2995,7 @@ void mnuDrawMantraCostCounter(s32 x, s32 y, s32 z, s32 alpha, s32 sceneId, s32 d
 
 /* Draw the profile label and placeholder for an unavailable mantra cost. */
 void mnuDrawMantraCostPlaceholder(s32 x, s32 y, s32 z, s32 alpha, s32 sceneId, s32 drawContext) {
-    struct FrFontTextBank *glyphResource = frFontGetColoredGlyphResource();
+    struct frTextBank_t *glyphResource = frFontGetColoredGlyphResource();
     u32 textColor = (u32)alpha | MNU_DISPLAY_TEXT_RGB;
     u32 dimColor = (u32)((f32)alpha * 0.599999964237213134765625f) | MNU_DISPLAY_DIM_TEXT_RGB;
     u8 label;

@@ -14,7 +14,7 @@
 
 extern void dds3ConfigProcessStart(s32 mode);
 
-typedef struct _FRQ _FRQ;
+typedef struct frFontHandle_t frFontHandle_t;
 extern u32 itfCreateFont2TextGlyph(s32, s32, s32, u32, char *, s32);
 extern char D_003BC6C8[];
 extern const char D_003BC6D0[];
@@ -175,19 +175,19 @@ void mnuDrawStaffItemListEntry(s32 x, s32 y, s32 z, struct MenuList *list,
     u32 color = 0xA09DC380;
 
     if (quantity != 0) {
-        _FRQ *label;
-        _FRQ *count;
+        frFontHandle_t *label;
+        frFontHandle_t *count;
         char buffer[0x20];
 
         if (node->flags48 & 1) {
             color = 0xA09DC340;
         }
-        label = (_FRQ *)itfCreateFont2TextGlyph(x + 0x810, y + 0x10, z, color,
+        label = (frFontHandle_t *)itfCreateFont2TextGlyph(x + 0x810, y + 0x10, z, color,
                                           D_003BC6C8, 0);
         frSetFontColorNo(label, 0);
         sprintf(buffer, D_003BC6D0,
                        DDS3_GBWK->inventory.counts[node->sortKeySecondary]);
-        count = (_FRQ *)itfCreateFont2TextGlyph(x + 0x910, y + 0x20, z, color,
+        count = (frFontHandle_t *)itfCreateFont2TextGlyph(x + 0x910, y + 0x20, z, color,
                                           buffer, (s32)label);
         frDrawFontOt(count, 1, drawArg);
         frDestroyFontRequestAfter(count);

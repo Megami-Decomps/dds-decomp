@@ -256,9 +256,9 @@ u8 mnuIsFadeIdle(void) {
 
 extern s32 itfCreateTightFont3TextGlyph(s32, s32, s32, u32, u32, s32);
 
-typedef struct _FRQ _FRQ;
+typedef struct frFontHandle_t frFontHandle_t;
 
-extern s32 frDrawFontOt(_FRQ *, s8, u32);
+extern s32 frDrawFontOt(frFontHandle_t *, s8, u32);
 
 extern char D_003BC6C0[];
 
@@ -271,15 +271,15 @@ void mnuDrawStaffCampSlotsAndCurrency(s32 unused0, s32 unused1, s32 z, s32 first
     itfDrawGridWithResolvedSlot(0x2B0, 0xCE8, 0, 1, (EffectSlotSet *)(u32)secondSlot, 3, drawFlags);
     sprintf(text, D_003BC6C0, DDS3_GBWK->header.currency);
     glyph = itfCreateTightFont3TextGlyph(0x4B0, 0xCD8, z, 0x80808080, (u32)text, 0);
-    frDrawFontOt((_FRQ *)glyph, 1, drawFlags);
-    frDestroyFontRequestAfter((_FRQ *)glyph);
+    frDrawFontOt((frFontHandle_t *)glyph, 1, drawFlags);
+    frDestroyFontRequestAfter((frFontHandle_t *)glyph);
 }
 
 extern u8 *mnuCampSelectionPromptTexts[];
 
 /* Create and queue the table-selected image sprite; imageIndex is unchecked. */
 void mnuCreateStaffImageSprite(s32 imageIndex) {
-    _FRQ *sprite = itfCreateConvertedTextGlyph(0x2F0, 0x1E0, 0, 0xa09dc35a,
+    frFontHandle_t *sprite = itfCreateConvertedTextGlyph(0x2F0, 0x1E0, 0, 0xa09dc35a,
                                       mnuCampSelectionPromptTexts[imageIndex], 0);
     frDrawFontOt(sprite, 1, 0x54);
     frDestroyFontRequestAfter(sprite);
@@ -301,12 +301,12 @@ void mnuDrawStaffGridLabelsForKind(s32 kind, struct EffectSlotSet *resources) {
 }
 
 
-extern struct _FRQ *itfDrawBankTextWithLayoutFlags(s32, s32, s32, u16, s32, s32);
+extern struct frFontHandle_t *itfDrawBankTextWithLayoutFlags(s32, s32, s32, u16, s32, s32);
 
 void mnuDrawCampGridAndLabel(s32 kind, s32 labelIndex, s32 textTable, s32 context,
                    s32 drawOption, s32 textOption, s32 layer) {
     StaffMenuWork *menu = (StaffMenuWork *)context;
-    struct _FRQ *glyph;
+    struct frFontHandle_t *glyph;
     if (kind == 0) {
         itfDrawGridWithResolvedSlot(0x1C0, 0xA20, 0, drawOption, menu->staffSlots.baseResources[5], 0x1E, layer);
     } else {

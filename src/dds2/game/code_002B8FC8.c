@@ -786,7 +786,7 @@ void mnuDispatchEntryWords(EffectSlotSet *menu, s32 entryIndex, MenuListNode *en
     }
 }
 
-extern struct _FRQ *itfCreateFont2TextGlyph(s32, s32, s32, u32, char *, struct _FRQ *);
+extern struct frFontHandle_t *itfCreateFont2TextGlyph(s32, s32, s32, u32, char *, struct frFontHandle_t *);
 extern const char D_00437C28[];
 
 /* Draw visible rows, preserving each row's glyph chain and callback state. */
@@ -800,7 +800,7 @@ void mnuDrawWindowListEntries(s32 x, s32 y, s32 depth, s32 xOffset, s32 yOffset,
     mnuDecreaseListNodeFadeCounters(list);
     while (node != NULL && row < list->visibleCount) {
         u32 color;
-        struct _FRQ *glyph = NULL;
+        struct frFontHandle_t *glyph = NULL;
         s32 chainFlag;
 
         if (node->flags48 & 1) {

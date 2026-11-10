@@ -3215,7 +3215,7 @@ void fldDrwZLoad(void) {
 }
 
 void fldKanjiDraw(s32 x, s32 y, u32 colors, const u8 *text) {
-    struct _FRQ *object;
+    struct frFontHandle_t *object;
 
     object = itfCreateConvertedTextGlyph(x << 4, y << 4, 0, colors, text, 0);
     frDrawFont(object);

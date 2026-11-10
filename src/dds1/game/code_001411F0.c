@@ -1358,8 +1358,8 @@ s32 fldAutoMapGetFloorMax(void) {
 }
 
 #include "field_stage.h"
-typedef struct _FRQ _FRQ;
-extern _FRQ *D_003BD7CC;
+typedef struct frFontHandle_t frFontHandle_t;
+extern frFontHandle_t *D_003BD7CC;
 extern s32 D_003BAEAC, D_003BAEB8, D_003BAEBC, D_003BAEC0;
 extern s32 D_003BAEF0, D_003BAEF4, D_003BAF00, D_003BAF04, D_003BAF08;
 extern f32 D_003BAEF8, D_003BAEFC, D_003BAF0C, D_003BAF10, D_003BAF14;
@@ -1381,9 +1381,9 @@ extern void fldAllIconDel(s32 index, f32 *x, f32 *z);
 extern void fldPoint3To2H(f32 *, f32 *, f32, f32, f32);
 extern void fldAutoMapDrawIconOfsRF(s32, f32, f32, f32);
 extern void fldAutoMapGetBBox(f32 *, f32 *, f32 *, f32 *);
-extern void frSetPriority(_FRQ *, u32);
-extern s32 frDrawFontEx(_FRQ *, s8);
-extern s32 frDestroyFontRequestAfter(_FRQ *);
+extern void frSetPriority(frFontHandle_t *, u32);
+extern s32 frDrawFontEx(frFontHandle_t *, s8);
+extern s32 frDestroyFontRequestAfter(frFontHandle_t *);
 
 
 void fldDrawAutomapScene(void) {

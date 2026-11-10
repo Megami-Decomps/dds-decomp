@@ -45,14 +45,14 @@ extern s32 mnuLookupRangeEntry(u16);
 extern u16 mnuGetAdjustedEntryValue(s32, datUnitWork_t *);
 extern u16 mnuGetAdjustedPartyRangeValue(s32);
 extern u8 mnuGetRangeEntryKind(u32);
-extern _FRQ *itfCreateFont2TextGlyph(s32, s32, s32, u32, char *, _FRQ *);
-extern s32 frDrawFontOt(_FRQ *, s8, u32);
+extern frFontHandle_t *itfCreateFont2TextGlyph(s32, s32, s32, u32, char *, frFontHandle_t *);
+extern s32 frDrawFontOt(frFontHandle_t *, s8, u32);
 extern void effDrawSpriteWithCornerFade(s32, s32, s32, u32, s32, EffectSlotSet *, s32, u32);
 extern s32 ptyGetCurrentProfileId(const datUnitWork_t *);
 extern s32 prfResolveMantraNameOrFallback(u16, u8 **);
 extern void mnuDrawAndAdvanceRatioPanel(s32, s32, s32, u32, s32, s32, MenuEffectPair *, u32);
 extern void mnuDrawCenteredLabel(s32, s32, s32, s32, s32, s32);
-extern void frFontCenterGlyphChainAt(s32 x, s32 y, _FRQ *glyphChain);
+extern void frFontCenterGlyphChainAt(s32 x, s32 y, frFontHandle_t *glyphChain);
 extern char D_003BC6F0[], D_003BC6F8[];
 extern char D_003BC700[];
 
@@ -197,7 +197,7 @@ extern EvtStageTestResourceWorkResult evtStageTestPollModelRequest(void);
 
 
 extern u8 *D_003BAA7C;
-extern _FRQ *itfDrawUnderscoreTextSegment(s32, s32, s32, u32, const u8 *, s32);
+extern frFontHandle_t *itfDrawUnderscoreTextSegment(s32, s32, s32, u32, const u8 *, s32);
 extern u8 *D_003BAA70;
 
 extern MenuPopupEntry mnuCampPartySelectionReturnPopupEntry[];
@@ -235,7 +235,7 @@ void mnuDrawPartySelectionListEntry(s32 x, s32 y, s32 z, struct MenuList *list, 
     CampMenuContext *context = list->context;
     u32 level = node->sortKeySecondary;
     char text[0x10];
-    _FRQ *glyph;
+    frFontHandle_t *glyph;
     s32 posX;
 
     switch (mnuIsFinalItemIndex(node->index, list)) {
@@ -566,7 +566,7 @@ void mnuDrawPartyVitalsAndProfile(EffectSlotSet **sets, MenuEffectPair *hpBar, M
     u8 *name;
     s32 profile = ptyGetCurrentProfileId(entry);
     u32 color = fclBlendColor(0xA09DC380, 0xA09DC300, opacity);
-    _FRQ *glyph;
+    frFontHandle_t *glyph;
     s32 i;
 
     effDrawSpriteWithCornerFade(0x350, 0x938, 0, opacity, 1, sets[0], 0x25, 0x53);
@@ -1120,7 +1120,7 @@ void mnuDrawSlotIcons(s32 x, MenuPageWindow *page) {
     datUnitWork_t *slot = &DDS3_GBWK->party[page->lists[0]->cursor->index];
     s32 i;
     s32 y;
-    _FRQ *handle;
+    frFontHandle_t *handle;
 
     itfSetTextDrawLimit(0x13);
     x = x * 8;
@@ -1178,7 +1178,7 @@ extern void frEnableMode(s32);
 extern u8 frDisableMode(u8);
 
 void mnuDrawTextSprite(s32 x, s32 y, s32 scale, s32 color, s32 textId, s32 param) {
-    _FRQ *item;
+    frFontHandle_t *item;
     s32 top = y - 0x10;
 
     frEnableMode(1);
@@ -1296,7 +1296,7 @@ void mnuDrawRangeCostAndIcon(s32 x, s32 y, s32 depth, s32 xOffset, u32 fade,
     char text[16];
     u32 color;
     s32 value;
-    _FRQ *glyph;
+    frFontHandle_t *glyph;
     u8 chainFlag;
 
     color = fclBlendColor(0xA09DC380, 0xA09DC300, fade);

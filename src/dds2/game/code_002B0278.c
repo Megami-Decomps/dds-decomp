@@ -120,7 +120,7 @@ extern s32 mnuLookupRangeEntry(u16);
 extern u16 mnuGetAdjustedEntryValue(s32, datUnitWork_t *);
 extern s32 mnuGetRangeEntryFlatValue(s32);
 extern u8 mnuGetRangeEntryKind(u32);
-extern _FRQ *itfCreateFont2TextGlyph(s32, s32, s32, u32, char *, _FRQ *);
+extern frFontHandle_t *itfCreateFont2TextGlyph(s32, s32, s32, u32, char *, frFontHandle_t *);
 extern void mnuDrawRepeatedPanelSprites(s32, s32, s32, s32, s32, EffectSlotSet *, s32, s32);
 extern char D_00437BF8[];
 
@@ -143,8 +143,8 @@ extern void mnuReleasePartyIconBundles(MenuPageWindow *);
 
 extern void mnuClearEntries(MenuPageWindow *);
 
-extern _FRQ *itfDrawUnderscoreTextSegment(s32, s32, s32, u32, const u8 *, s32);
-extern _FRQ *itfDrawTextWithSelectedFontMode(s32, s32, s32, s8, u16, s32);
+extern frFontHandle_t *itfDrawUnderscoreTextSegment(s32, s32, s32, u32, const u8 *, s32);
+extern frFontHandle_t *itfDrawTextWithSelectedFontMode(s32, s32, s32, s8, u16, s32);
 
 extern u8 *D_00435E54;
 
@@ -342,7 +342,7 @@ extern void ptyRecomputeMaxHpMp(datUnitWork_t *unit);
 
 extern void scrClearSecondaryScriptFlag(datUnitWork_t *unit, u16 flagId);
 
-extern s32 frDrawFontOt(_FRQ *, s8, u32);
+extern s32 frDrawFontOt(frFontHandle_t *, s8, u32);
 
 
 
@@ -372,7 +372,7 @@ void mnuDrawStaffPartySelectionPanel(dds3ProcessID_t *task) {
     MenuStaffChoices *choices = (MenuStaffChoices *)context->party;
     datUnitWork_t *unit = &DDS3_GBWK->party[context->partyWindow.lists[0]->cursor->index];
     s32 selection;
-    _FRQ *glyph;
+    frFontHandle_t *glyph;
 
     mnuDrawCampIconBackdropByKind(1, task);
     mnuCreateStaffImageSprite(12);
@@ -655,7 +655,7 @@ extern void mnuDrawPartySelectionListEntry(s32, s32, s32, MenuList *, MenuListNo
 #include "mnu_list.h"
 
 
-extern _FRQ *itfCreateFont2TextGlyph(s32, s32, s32, u32, char *, _FRQ *);
+extern frFontHandle_t *itfCreateFont2TextGlyph(s32, s32, s32, u32, char *, frFontHandle_t *);
 
 
 /* One row of the party-selection list: the camp row slot, then for a member
@@ -669,7 +669,7 @@ void mnuDrawPartySelectionListEntry(s32 x, s32 y, s32 depth, struct MenuList *li
     MenuStaffContext *context = list->context;
     u32 level = node->sortKeySecondary;
     char text[0x10];
-    _FRQ *glyph;
+    frFontHandle_t *glyph;
     s32 posX;
 
     mnuDrawCampGridResourceSlot(x, y, depth, (s32)list, (u32)node, texture);
@@ -1037,7 +1037,7 @@ void mnuDrawPartySelectionPreviewPanel(MenuContext *context, MenuPageBar *hpBar,
     s32 labelId;
     u32 textColor;
     s32 i;
-    _FRQ *glyph;
+    frFontHandle_t *glyph;
     EffectSlotSet **panelModels;
 
     labelId = ptyGetCurrentProfileId(entry);
@@ -1622,7 +1622,7 @@ void mnuDrawSlotIcons(s32 x, MenuPageWindow *page) {
     datUnitWork_t *slot = &DDS3_GBWK->party[page->lists[0]->cursor->index];
     s32 i;
     s32 y = 0xb40;
-    _FRQ *handle;
+    frFontHandle_t *handle;
     for (i = 0; i < 2; i++, y += 0xb8) {
         handle = itfDrawUnderscoreTextSegment(0x3c0, y, 0, 0xa09dc359, (const u8 *)(D_00435E54 + slot->unitId * 45), i);
         if (handle != 0) {
@@ -1642,7 +1642,7 @@ void mnuDrawSelectedPartySlotMarkers(s32 context, StaffSlots *resources) {
 
 void mnuDrawTextSprite(s32 x, s32 y, s32 width, u32 color, const char *text, s32 flags) {
     s32 top = y - 0x10;
-    _FRQ *handle;
+    frFontHandle_t *handle;
     frEnableMode(1);
     handle = frLinkFontString(text, 0, 0, 0, 0);
     frSetDrawPosition(handle, x, top);
@@ -1750,7 +1750,7 @@ void mnuDrawRangeCostAndIcon(s32 x, s32 y, s32 depth, s32 xOffset, u32 fade,
     char text[16];
     u32 color;
     s32 value;
-    _FRQ *glyph;
+    frFontHandle_t *glyph;
     u8 chainFlag;
     s32 kind;
     s32 hpOffset = 0;
@@ -2977,7 +2977,7 @@ s32 mnuStepSkillDetailControl(dds3ProcessID_t *callback) {
 }
 
 void mnuDrawSelectionLabel(u16 id) {
-    _FRQ *label = itfDrawTextWithSelectedFontMode(0x11B0, 0xA88, 0, 0, id, 1);
+    frFontHandle_t *label = itfDrawTextWithSelectedFontMode(0x11B0, 0xA88, 0, 0, id, 1);
 
     frSetFontColor(label, 0xA09DC35A);
     frDrawFontOt(label, 1, 0x53);
@@ -3003,7 +3003,7 @@ void mnuDrawAffinityParticipantLabels(u16 affinity, s32 resource, s32 labels) {
 
     for (i = 0; i < 3; i++, y += 0xC0) {
         s32 kind = ptyGetAffinityKind(affinity, i);
-        _FRQ *glyph = 0;
+        frFontHandle_t *glyph = 0;
 
         if (kind < 0) {
             if (kind == -1) {

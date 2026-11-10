@@ -75,11 +75,11 @@ extern s32 sdfApplyCommandResults(s32 channel, datUnitWork_t *sourceRecord, datU
 
 extern void sndDestroyFileQueueWrapper(struct SoundHandleNode *node);
 
-struct _FRQ;
+struct frFontHandle_t;
 
-extern struct _FRQ *itfCreateFont2TextGlyph(s32, s32, s32, u32, char *, struct _FRQ *);
+extern struct frFontHandle_t *itfCreateFont2TextGlyph(s32, s32, s32, u32, char *, struct frFontHandle_t *);
 
-extern s32 frDrawFontOt(struct _FRQ *, s8, u32);
+extern s32 frDrawFontOt(struct frFontHandle_t *, s8, u32);
 
 extern void effDrawSpriteWithCornerFade(s32, s32, s32, u32, s32, EffectSlotSet *, s32, s32);
 
@@ -635,7 +635,7 @@ void mnuDrawPartyInfoSprites(s32 x, s32 y, s32 depth, datUnitWork_t *entry,
     s32 vertical;
     s32 remainingRows;
     u16 skillId;
-    struct _FRQ *glyph;
+    struct frFontHandle_t *glyph;
 
     opacity = spriteState->initialValue;
     skillSlotCount = brsGetLevelStepForValue(entry->level);
@@ -748,7 +748,7 @@ void mnuDrawPartyProfilePanelContents(s32 x, s32 y, s32 depth, datUnitWork_t *ac
     u32 fade;
     u16 *skill;
     u16 skillId;
-    struct _FRQ *glyph;
+    struct frFontHandle_t *glyph;
 
     memcpy(&origin, D_003BC780, sizeof(origin));
     memcpy(headings, D_003B2450, sizeof(headings));
@@ -1055,7 +1055,7 @@ void mnuDrawRatioPanelContents(s32 x, s32 y, s32 depth, u32 color, u32 fade,
     s32 drawY;
     char text[16];
     u32 separatorColor;
-    struct _FRQ *glyph;
+    struct frFontHandle_t *glyph;
 
     color = fclBlendColor(color, color & ~0xFF, fade);
     separatorColor = fclBlendColor(0xA09DC380, 0xA09DC300, fade);
@@ -1280,7 +1280,7 @@ extern char D_003BC798[];
 void mnuDrawPanelItemDetail(s32 x, s32 y, s32 depth, u32 opacity, s32 mode,
                             MenuPanelItem *item, s32 layer) {
     char text[16];
-    struct _FRQ *glyph;
+    struct frFontHandle_t *glyph;
     EffectSlotSet *set;
     s32 index;
     s32 value;
@@ -1341,7 +1341,7 @@ void mnuDrawPanelItemDetail(s32 x, s32 y, s32 depth, u32 opacity, s32 mode,
 
 void mnuDrawPanelItemValue(s32 x, s32 y, s32 depth, s32 mode, MenuPanelItem *item, s32 layer) {
     char buffer[16];
-    struct _FRQ *glyph;
+    struct frFontHandle_t *glyph;
     s32 value;
     u32 opacity = item->initialValue;
     u32 color;

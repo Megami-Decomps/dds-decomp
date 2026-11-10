@@ -175,7 +175,7 @@ s8 mnuGetItemRequirementValue(MnuRequirementItemId itemId) {
 }
 
 /* Text builders return integer glyph handles; frFont consumes glyph pointers. */
-typedef struct _FRQ _FRQ;
+typedef struct frFontHandle_t frFontHandle_t;
 
 extern const u8 (*D_00435E5C)[25];
 extern char D_00437C38[];
@@ -202,15 +202,15 @@ void mnuDrawRemainingAndTotalCounts(s32 x, s32 y, s32 alpha, MnuRequirementItemI
         sprintf(text, D_00437C38, required - current);
         color = fclBlendColor(0xA09DC380, 0xA09DC300, alpha);
         glyph = itfCreateFont2TextGlyph(x, y, 0, color, text, 0);
-        frSetFontColorNo((_FRQ *)glyph, 4);
-        frDrawFontOt((_FRQ *)glyph, 1, 0x53);
-        frDestroyFontRequestAfter((_FRQ *)glyph);
+        frSetFontColorNo((frFontHandle_t *)glyph, 4);
+        frDrawFontOt((frFontHandle_t *)glyph, 1, 0x53);
+        frDestroyFontRequestAfter((frFontHandle_t *)glyph);
         effDrawTextureSlotWithBlendedCornerColors(x + 0x80, y, 0, alpha, 0, sprite, spriteArg, 0x53);
         sprintf(text, D_00437C38, required);
         color = fclBlendColor(0xA09DC340, 0xA09DC300, alpha);
         glyph = itfCreateFont2TextGlyph(thresholdX, y, 0, color, text, 0);
-        frDrawFontOt((_FRQ *)glyph, 1, 0x53);
-        frDestroyFontRequestAfter((_FRQ *)glyph);
+        frDrawFontOt((frFontHandle_t *)glyph, 1, 0x53);
+        frDestroyFontRequestAfter((frFontHandle_t *)glyph);
     }
 }
 
@@ -224,7 +224,7 @@ void mnuDrawPartyCommandPage(s32 unusedX, s32 unusedY, s32 depth, s32 partyIndex
     s32 showCurrent = evtBitCheck(0x901);
     s32 x = page->slideOffset * 16 + 0xC80;
     s32 value;
-    struct _FRQ *glyph;
+    struct frFontHandle_t *glyph;
 
     do {
         void *resource = *sprite++;
@@ -243,12 +243,12 @@ void mnuDrawPartyCommandPage(s32 unusedX, s32 unusedY, s32 depth, s32 partyIndex
     if (value != 0) {
         glyph = itfCreateConvertedTextGlyph(x + 0x630, 0x340, depth, color, D_00435E5C[value], 0);
         sprintf(text, D_00437C40, datCommandRecords[evtGetIndexedEventRecordId(value)].hpPower);
-        glyph = (struct _FRQ *)(u32)itfCreateFont2TextGlyph(x + 0x1050, 0x360, depth, color, text, (s32)(u32)glyph);
+        glyph = (struct frFontHandle_t *)(u32)itfCreateFont2TextGlyph(x + 0x1050, 0x360, depth, color, text, (s32)(u32)glyph);
         if (page->menuValueStyleOverride != 0) {
-            frSetFontColorNo((_FRQ *)glyph, 4);
+            frSetFontColorNo((frFontHandle_t *)glyph, 4);
         }
-        frDrawFontOt((_FRQ *)glyph, 1, surface);
-        frDestroyFontRequestAfter((_FRQ *)glyph);
+        frDrawFontOt((frFontHandle_t *)glyph, 1, surface);
+        frDestroyFontRequestAfter((frFontHandle_t *)glyph);
     } else {
         effDrawTextureSlotWithBlendedCornerColors(x, 0x20, depth, alpha, 0, page->cursor[0], 0, surface);
     }
@@ -261,12 +261,12 @@ void mnuDrawPartyCommandPage(s32 unusedX, s32 unusedY, s32 depth, s32 partyIndex
             glyph = itfCreateConvertedTextGlyph(x + 0x630, 0x418, depth, color, D_00435E5C[value], 0);
             style = page->currentValueStyle;
             if (style == 1 || (style == 2 && mnuGetItemRequirementCount(value) == 0)) {
-                frSetFontColorNo((_FRQ *)glyph, 4);
+                frSetFontColorNo((frFontHandle_t *)glyph, 4);
             } else if (style == 2) {
-                frSetFontColorNo((_FRQ *)glyph, 3);
+                frSetFontColorNo((frFontHandle_t *)glyph, 3);
             }
-            frDrawFontOt((_FRQ *)glyph, 1, surface);
-            frDestroyFontRequestAfter((_FRQ *)glyph);
+            frDrawFontOt((frFontHandle_t *)glyph, 1, surface);
+            frDestroyFontRequestAfter((frFontHandle_t *)glyph);
             if (page->flags & 1) {
                 effDrawTextureSlotWithBlendedCornerColors(x + 0xE30, 0x408, depth, alpha, 0, page->cursor[3], 0, surface);
                 mnuDrawRemainingAndTotalCounts(x + 0x1020, 0x438, alpha, value, page->cursor[2], 0);
@@ -307,7 +307,7 @@ void mnuDrawPartyCommandPage(s32 unusedX, s32 unusedY, s32 depth, s32 partyIndex
 extern void prfCopyMantraNamePart(u32 textId, s32 mode, char *destination);
 void mnuDrawMenuTextById(s32 x, s32 y, s32 unused, s32 color, s32 textId, s32 surface) {
     char text[0x40];
-    _FRQ *item;
+    frFontHandle_t *item;
 
     color = (color & 0xFF) | 0xD7ABFA00;
     prfCopyMantraNamePart(textId & 0xFFFF, 1, text);
@@ -327,7 +327,7 @@ void mnuDrawSelectedPartyProfileLabel(s32 unusedX, s32 unusedY, s32 depth, s32 f
     s32 profileId = ptyGetCurrentProfileId(&DDS3_GBWK->party[partyIndex]);
     s32 code;
     s32 texture;
-    struct _FRQ *item;
+    struct frFontHandle_t *item;
 
     texture = fclBlendColor(0xA09DC380, 0xA09DC300, fade);
     code = selectedCode != 0 ? selectedCode : profileId;
@@ -337,8 +337,8 @@ void mnuDrawSelectedPartyProfileLabel(s32 unusedX, s32 unusedY, s32 depth, s32 f
             return;
         }
         item = itfCreateConvertedTextGlyph(0x16B0, 0x4B8, depth, texture, outValue, 0);
-        frDrawFontOt((_FRQ *)item, 1, surface);
-        frDestroyFontRequestAfter((_FRQ *)item);
+        frDrawFontOt((frFontHandle_t *)item, 1, surface);
+        frDestroyFontRequestAfter((frFontHandle_t *)item);
     }
 }
 
@@ -353,7 +353,7 @@ void mnuDrawPartyProfileAndExpOverlay(s32 x, s32 y, s32 depth, MenuPageSlot *slo
     datUnitWork_t *unit = &DDS3_GBWK->party[partyIndex];
     u32 color;
     s32 remainingExp;
-    _FRQ *glyph;
+    frFontHandle_t *glyph;
 
     if (slot->iconBundle != NULL) {
         mnuDrawFadeIcons(x, y, depth, slot->kind,
@@ -363,7 +363,7 @@ void mnuDrawPartyProfileAndExpOverlay(s32 x, s32 y, s32 depth, MenuPageSlot *slo
         remainingExp = ptyComputeTotalExp(unit, 1) - unit->totalExp;
         if (remainingExp != 0) {
             sprintf(text, D_00437C48, remainingExp);
-            glyph = (_FRQ *)itfCreateFont2TextGlyph(0x1A50,
+            glyph = (frFontHandle_t *)itfCreateFont2TextGlyph(0x1A50,
                 0xD8, depth, color, text, 0);
             frSetFontColorNo(glyph, 3);
             frDrawFontOt(glyph, 1, surface);

@@ -18,11 +18,11 @@ extern f32 vecLength(f32 *);
 
 
 
-struct _FRQ;
-extern s32 frDrawFontEx(struct _FRQ *glyph, s8 mode);
+struct frFontHandle_t;
+extern s32 frDrawFontEx(struct frFontHandle_t *glyph, s8 mode);
 
 void sdfCounterDrawGlyphAtGridCell(s32 x, s32 y, u32 colors, const u8 *text) {
-    struct _FRQ *handle;
+    struct frFontHandle_t *handle;
 
     handle = itfCreateConvertedTextGlyph(x << 4, y << 3, 0, colors, text, 0);
     frDrawFontEx(handle, 1);

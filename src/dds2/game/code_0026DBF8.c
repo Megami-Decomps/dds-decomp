@@ -56,7 +56,7 @@ extern s32 mnuGetMantraSourceValue(u16);
 extern s32 frFontDrawTextVariantAAndMeasure(s32, s32, s32, u32, u8, char *, s32, s32);
 extern s32 frFontDrawTextVariantBAndMeasure(s32, s32, s32, u32, u8, char *, s32, s32);
 extern s32 frFontDrawStyledGlyphChainAndMeasure(s32, s32, s32, u32, u8, const u8 *, s32, s32);
-extern s32 frFontQueueTintedGlyphChainAndMeasure(s32, s32, s32, u32, u8, u16, FrFontTextBank *, s32, s32, s32);
+extern s32 frFontQueueTintedGlyphChainAndMeasure(s32, s32, s32, u32, u8, u16, frTextBank_t *, s32, s32, s32);
 /* GS TEST packets carry a full-width register value; kind selects the surface. */
 extern void sdfSubmitGsTestOneRegisterPacket(u64, u32);
 extern void uiDrawActiveSurfaceRegion(s32);
@@ -427,11 +427,11 @@ void mnuDrawOptionalMantraLabel(u32 x, u32 y, u32 depth, u32 fade, u16 entryId, 
     }
 }
 
-extern FrFontTextBank *frFontGetColoredGlyphResource(void);
+extern frTextBank_t *frFontGetColoredGlyphResource(void);
 
 /* Render a panel icon when it has an ID, or the corresponding empty art. */
 void mnuDrawMantraLabelA(u32 x, u32 y, u32 depth, s32 fade, u32 iconId, u32 drawArg) {
-    FrFontTextBank *handle = frFontGetColoredGlyphResource();
+    frTextBank_t *handle = frFontGetColoredGlyphResource();
     u32 flags = (u32)(fade * 0.6f) | 0xA09D7D00;
 
     mnuDrawMantraSprite(x, y, depth, fade, 0x4D, 0, drawArg);

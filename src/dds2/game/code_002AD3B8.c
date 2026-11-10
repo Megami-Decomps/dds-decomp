@@ -50,8 +50,8 @@ extern char D_00437BD0[];
 extern char D_00437BD8[];
 extern s32 mnuRingCustomizationStatLabels[];
 extern s32 itfCreateFont2TextGlyph(s32, s32, s32, s32, s32, s32);
-typedef struct _FRQ _FRQ;
-extern s32 frDrawFontOt(_FRQ *, s8, u32);
+typedef struct frFontHandle_t frFontHandle_t;
+extern s32 frDrawFontOt(frFontHandle_t *, s8, u32);
 extern DatCommandRecordIndex evtGetIndexedEventRecordId(s32);
 extern u8 *D_00435E5C;
 extern u8 *datUnitNames;
@@ -640,9 +640,9 @@ void mnuDrawStaffCaption(s32 entryId, u8 *panel) {
     if (entryId != 0) {
         sprintf(captionText, D_00437BD0, datCommandRecords[evtGetIndexedEventRecordId(entryId)].hpPower);
         fontHandle = itfCreateFont2TextGlyph(0x620, 0xA20, 0, 0xA09DC380, (s32)captionText, 0);
-        frSetFontColorNo((struct _FRQ *)(u32)fontHandle, 4);
-        frDrawFontOt((_FRQ *)fontHandle, 1, 0x53);
-        frDestroyFontRequestAfter((_FRQ *)fontHandle);
+        frSetFontColorNo((struct frFontHandle_t *)(u32)fontHandle, 4);
+        frDrawFontOt((frFontHandle_t *)fontHandle, 1, 0x53);
+        frDestroyFontRequestAfter((frFontHandle_t *)fontHandle);
     }
 }
 
@@ -958,10 +958,10 @@ void mnuDrawStaffValueGrid(s32 x, s32 y, s32 itemId, MenuStaffContext *context) 
         itfDrawGridWithResolvedSlot(labels[i].x + x, labels[i].y + y + 0x918, 0, 0,
                                     context->titleFrames[0], kind, 0x53);
         if (value != 0) {
-            _FRQ *glyph;
+            frFontHandle_t *glyph;
 
             sprintf(text, D_00437BC0, value);
-            glyph = (_FRQ *)itfCreateFont2TextGlyph(x + i * 0x3F0 + 0x490, y + 0xA20, 0, 0xA09DC380,
+            glyph = (frFontHandle_t *)itfCreateFont2TextGlyph(x + i * 0x3F0 + 0x490, y + 0xA20, 0, 0xA09DC380,
                                                            (s32)text, 0);
             if (bonus) {
                 frSetFontColorNo(glyph, 3);
@@ -984,7 +984,7 @@ s32 mnuDrawStaffValuePage(dds3ProcessID_t *task) {
     MenuList *list;
     s32 selectionId;
     s32 owned;
-    _FRQ *glyph;
+    frFontHandle_t *glyph;
 
     mnuDrawCampIconBackdropByKind(1, (s32)task);
     mnuCreateStaffImageSprite(10);

@@ -234,9 +234,9 @@ void mnuReleaseStaffRollText(void) {
     frwFreeStaffFont();
 }
 
-extern _FRQ *frwGetStaffFontFRQ();
+extern frFontHandle_t *frwGetStaffFontFRQ();
 s32 mnuDrawStaffRollText(f32 x, f32 y, s32 alternate, u32 color, const char *source) {
-    _FRQ *glyph;
+    frFontHandle_t *glyph;
 
     if (alternate == 0) {
         glyph = frwGetStaffFontFRQ(

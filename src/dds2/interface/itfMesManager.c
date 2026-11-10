@@ -105,11 +105,11 @@ void DestructFlow(ItfMesWindowIndex window);
 
 void CommitVarTable(u8 **table);
 
-s32 GetMessageWidth(_FRQ *glyph);
+s32 GetMessageWidth(frFontHandle_t *glyph);
 
 void SetVar(instanceMes_tag *mes, s32 slotIndex, const char *source, s32 byteCount);
 
-extern void frFontCenterGlyphChainAt(s32 x, s32 y, _FRQ *glyphChain);
+extern void frFontCenterGlyphChainAt(s32 x, s32 y, frFontHandle_t *glyphChain);
 
 void itfMesInitializePanelPlacementSprite(instanceMes_tag *panel);
 
@@ -687,7 +687,7 @@ ItfMesEntryStartResult itfMesStartEntry(ItfMesWindowIndex window, ItfMesEntryInd
     return ITF_MES_ENTRY_START_STARTED;
 }
 
-extern s32 itfInitTextDrawArgs(const u8 *encodedText, _FRQ *sub);
+extern s32 itfInitTextDrawArgs(const u8 *encodedText, frFontHandle_t *sub);
 
 /* Cache the selected table/item; report whether its text contains the F413 cue. */
 ItfMesVoiceCueResult itfMesSelectTableItemText(ItfMesWindowIndex window, ItfMesEntryIndex entryIndex, s32 itemIndex) {
@@ -786,7 +786,7 @@ void itfMesBuildOptionList(ItfMesWindowIndex window, ItfMesEntryIndex entryIndex
     if (mes->temporaryFontEntry != 0) {
         frSetExtDic(mes->temporaryFontEntry);
     }
-    optionBlock->glyphChain = (_FRQ *)itfMesBuildNodeRows(&table->items[1], table->bitCount, optionBlock->panelValue, optionBlock->x, firstRowY, mes->renderValue);
+    optionBlock->glyphChain = (frFontHandle_t *)itfMesBuildNodeRows(&table->items[1], table->bitCount, optionBlock->panelValue, optionBlock->x, firstRowY, mes->renderValue);
     optionBlock->rowCount = visibleRowCount;
     mes->flags = (mes->flags & ~ITF_MES_OPTION_STATE_MASK) | ITF_MES_OPTION_LIST_READY;
     if (mes->panelMode == ITF_MES_PANEL_MODE_NO_SPRITE_TRANSITION) {
@@ -841,7 +841,7 @@ void itfMesMngSetSelect(ItfMesWindowIndex window, ItfMesOptionBitIndex selectedB
     optionBlock->savedIndex = clearBitCount;
 }
 
-void ChangeFontPosition(_FRQ *glyph, s32 dx, s32 dy);
+void ChangeFontPosition(frFontHandle_t *glyph, s32 dx, s32 dy);
 
 /* Move primary text to an absolute position; an unchanged position is a no-op. */
 void itfMesMngSetSpeakerPosition(ItfMesWindowIndex window, s32 x, s32 y) {
@@ -1155,7 +1155,7 @@ s32 itfMesMngGetWidth(ItfMesWindowIndex window, ItfMesEntryIndex entryIndex, s32
     instanceMes_tag *mes = pinst[window].mes;
     ItfMesTable *table;
     u8 *encodedText;
-    _FRQ *glyphChain;
+    frFontHandle_t *glyphChain;
     s32 textExtent;
 
     table = GetTypeHeader(mes, entryIndex)->table;
@@ -1437,15 +1437,15 @@ u8 *GetMessagePagePtr(ItfMesTable *table, s32 itemIndex) {
     return (u8 *)table->items[itemIndex];
 }
 
-extern s32 frFontCountGlyphBands(_FRQ *glyph);
+extern s32 frFontCountGlyphBands(frFontHandle_t *glyph);
 extern u32 itfGetTextLipsUnitId(void);
 extern u32 itfGetTextLipsMotionId(void);
 /* Rebuild colored entry glyphs, synchronize interface flags/hooks and cache
  * the span count. Existing span helpers require a valid created chain. */
 void itfMesBuildEntryGlyph(instanceMes_tag *mes) {
     ItfMesEntryBlock *entryBlock = &mes->entryBlock;
-    _FRQ *glyph;
-    _FRQ *previousGlyph;
+    frFontHandle_t *glyph;
+    frFontHandle_t *previousGlyph;
     u32 lipsValue;
     u32 interfaceMask;
     void (*callback)(void);
@@ -1560,8 +1560,8 @@ s32 GetNumSelectItem(s32 bitCount, u32 remainingMask) {
 
 /* Append text for each clear mask bit. Masked items are still consumed, while
  * y advances only for built text. Return NULL if nothing was built. */
-_FRQ *itfMesBuildNodeRows(const u32 *items, s32 itemCount, u32 mask, s32 x, s32 y, s32 renderValue) {
-    _FRQ *glyphChain = NULL;
+frFontHandle_t *itfMesBuildNodeRows(const u32 *items, s32 itemCount, u32 mask, s32 x, s32 y, s32 renderValue) {
+    frFontHandle_t *glyphChain = NULL;
     s32 itemIndex;
 
     for (itemIndex = 0; itemIndex < itemCount; itemIndex++, items++) {
@@ -1586,12 +1586,12 @@ _FRQ *itfMesBuildNodeRows(const u32 *items, s32 itemCount, u32 mask, s32 x, s32 
 /* Discard (to - from - 1) preceding rows when positive, retain the next
  * complete y-group and queue everything after it. Requires non-NULL input;
  * return NULL if discarding preceding rows exhausts the chain. */
-_FRQ *UnchainFontHandleUnit(_FRQ *glyph, s32 from, s32 to) {
+frFontHandle_t *UnchainFontHandleUnit(frFontHandle_t *glyph, s32 from, s32 to) {
     s32 rowsToDiscard = to - from - 1;
     s32 rowY = glyph->y;
-    _FRQ *nextNode;
-    _FRQ *rowHead;
-    _FRQ *rowTail;
+    frFontHandle_t *nextNode;
+    frFontHandle_t *rowHead;
+    frFontHandle_t *rowTail;
 
     while (rowsToDiscard > 0) {
         while (rowY == glyph->y) {
@@ -1631,7 +1631,7 @@ _FRQ *UnchainFontHandleUnit(_FRQ *glyph, s32 from, s32 to) {
 }
 
 /* Return the final previous-linked glyph; input must be non-NULL. */
-_FRQ *GetLastLinkFontHandle(_FRQ *glyph) {
+frFontHandle_t *GetLastLinkFontHandle(frFontHandle_t *glyph) {
     while (glyph->previous != NULL) {
         glyph = glyph->previous;
     }
@@ -1639,8 +1639,8 @@ _FRQ *GetLastLinkFontHandle(_FRQ *glyph) {
 }
 
 /* Copy the auxiliary glyph's shade bytes; its encoded intensity is unsigned. */
-void GetLastMessagePara(_FRQ *glyph, ItfMesEntryBlock *entryBlock) {
-    _TEXT *shade = glyph->lastChild;
+void GetLastMessagePara(frFontHandle_t *glyph, ItfMesEntryBlock *entryBlock) {
+    frTextHandle_t *shade = glyph->lastChild;
     u8 encodedIntensity = glyph->glyphCodeOrContext.byteRoles.encodedContextByte;
 
     entryBlock->color[3] = encodedIntensity >> 1;
@@ -1651,14 +1651,14 @@ void GetLastMessagePara(_FRQ *glyph, ItfMesEntryBlock *entryBlock) {
 
 /* Inclusive step count from the y delta in eighths and the first row's height.
  * Both pointers and a nonzero first-row height are required. */
-s32 CountLineMessage(_FRQ *last, _FRQ *first) {
+s32 CountLineMessage(frFontHandle_t *last, frFontHandle_t *first) {
     s16 rowHeightUnits = first->parentDimensionsOrRenderWord.parentDimensions.cellHeight;
 
     return ((first->y - last->y) >> ITF_MES_TEXT_Y_SHIFT) / rowHeightUnits + 1;
 }
 
 /* Translate every linked node in text units; a NULL chain is a no-op. */
-void ChangeFontPosition(_FRQ *glyph, s32 dx, s32 dy) {
+void ChangeFontPosition(frFontHandle_t *glyph, s32 dx, s32 dy) {
     if (glyph == NULL) {
         return;
     }
@@ -1671,7 +1671,7 @@ void ChangeFontPosition(_FRQ *glyph, s32 dx, s32 dy) {
 
 /* Assign the render value across the complete chain; a NULL chain is a no-op. */
 /* Persona 4 func_0027a340 @ 0027A340 (src/itfMesManager.c), recompiled unchanged */
-void ChangeZBuffer(_FRQ *glyph, s32 renderValue) {
+void ChangeZBuffer(frFontHandle_t *glyph, s32 renderValue) {
     while (glyph != NULL) {
         glyph->renderValueOrSetupOrShade.renderValue = renderValue;
         glyph = glyph->previous;
@@ -1680,11 +1680,11 @@ void ChangeZBuffer(_FRQ *glyph, s32 renderValue) {
 
 /* Skip (rowCount - rowIndex - 1) preceding y-groups when positive, then set each
  * child's flag byte in the next row. Requires non-NULL input; past-end is a no-op. */
-void ChangeFontColor(_FRQ *glyph, s32 rowIndex, s32 rowCount, s32 requestedFlagValue) {
+void ChangeFontColor(frFontHandle_t *glyph, s32 rowIndex, s32 rowCount, s32 requestedFlagValue) {
     s32 rowsToSkip = rowCount - rowIndex - 1;
     s32 rowY = glyph->y;
     s32 currentY = rowY;
-    _TEXT *child;
+    frTextHandle_t *child;
     u8 flagValue;
 
     while (rowsToSkip > 0) {
@@ -1708,8 +1708,8 @@ void ChangeFontColor(_FRQ *glyph, s32 rowIndex, s32 rowCount, s32 requestedFlagV
 }
 
 /* Set every child's flag byte across the parent chain; NULL is a no-op. */
-void ChangeFontColorAll(_FRQ *glyph, u8 flagValue) {
-    _TEXT *child;
+void ChangeFontColorAll(frFontHandle_t *glyph, u8 flagValue) {
+    frTextHandle_t *child;
 
     for (; glyph != NULL; glyph = glyph->previous) {
         for (child = glyph->firstChild; child != NULL; child = child->next) {
@@ -1720,8 +1720,8 @@ void ChangeFontColorAll(_FRQ *glyph, u8 flagValue) {
 
 /* Clear each child's low color byte, then OR the unmasked input word.
  * High input bits can therefore also change the upper bytes. */
-void ChangeFontAlpha(_FRQ *glyph, u32 color) {
-    _TEXT *child;
+void ChangeFontAlpha(frFontHandle_t *glyph, u32 color) {
+    frTextHandle_t *child;
 
     for (; glyph != NULL; glyph = glyph->previous) {
         for (child = glyph->firstChild; child != NULL; child = child->next) {
@@ -1732,7 +1732,7 @@ void ChangeFontAlpha(_FRQ *glyph, u32 color) {
 
 /* Find the maximum summed advance of contiguous equal-y groups, scaled by 16.
  * NULL returns zero; the initial zero also excludes negative group totals. */
-s32 GetMessageWidth(_FRQ *glyph) {
+s32 GetMessageWidth(frFontHandle_t *glyph) {
     s32 maxAdvance = 0;
 
     while (glyph != NULL) {
@@ -1768,7 +1768,7 @@ ItfMesOptionBitIndex itfMesFindOptionBitIndex(ItfMesVisibleOptionOrdinal optionO
 
 /* Enable parent contexts whose first child's tested flag is zero.
  * NULL chain is allowed, but every visited node must have a first child. */
-void itfMesEnableUnflaggedNodeContexts(_FRQ *glyph) {
+void itfMesEnableUnflaggedNodeContexts(frFontHandle_t *glyph) {
     for (; glyph != NULL; glyph = glyph->previous) {
         if (glyph->firstChild->renderValueOrSetupOrShade.setupBytes.secondOption == 0) {
             frFontEnableContextMode(glyph);
@@ -1805,7 +1805,7 @@ extern void DestructFlow(ItfMesWindowIndex window);
 
 extern void itfMiscDrawAlphaPrim(sdfDrawTag_t *list, s32 context, s32 mode);
 
-extern void ChangeFontPosition(_FRQ *glyph, s32 dx, s32 dy);
+extern void ChangeFontPosition(frFontHandle_t *glyph, s32 dx, s32 dy);
 
 extern void ChangeFontColor();
 
@@ -1822,7 +1822,7 @@ extern void itfPnlDraw(itfpanel_t *sprite, sdfGrOt_t *surface);
 extern void DebugDrawWindowLine(itfpanel_t *sprite);
 
 /* Enable context rendering for every font object in the linked chain. */
-void frFontEnableNodeContextModes(_FRQ *fontObject) {
+void frFontEnableNodeContextModes(frFontHandle_t *fontObject) {
     for (; fontObject != NULL; fontObject = fontObject->previous) {
         frFontEnableContextMode(fontObject);
     }
@@ -2164,7 +2164,7 @@ void itfMesAdvanceEntryText(instanceMes_tag *mes) {
     mes->flags = flags & ~0x1000000;
 }
 
-extern void ChangeFontColorAll(_FRQ *glyph, u8 flagValue);
+extern void ChangeFontColorAll(frFontHandle_t *glyph, u8 flagValue);
 
 extern ItfMesOptionBitIndex itfMesFindOptionBitIndex(ItfMesVisibleOptionOrdinal optionOrdinal, u32 optionMask);
 
@@ -2380,7 +2380,7 @@ extern void itfDrawSelectedSoundRow(instanceMes_tag *);
 void DrawMesFlow(instanceMes_tag *panel) {
     u32 flags = panel->flags;
     ItfMesBlk40 *selection;
-    _FRQ *glyph;
+    frFontHandle_t *glyph;
 
     itfMesMngManager.flags &= ~2;
     DrawWindow(panel);
@@ -2538,7 +2538,7 @@ void itfDrawSelectedSoundRow(instanceMes_tag *panel) {
 extern ItfMesGlobals itfMesMngManager;
 extern sdfGrOt_t sdfGrOtTable[];
 extern DrawColorRec itfSoundSelectorBorderColor;
-extern s32 frFontCountGlyphBands(_FRQ *glyph);
+extern s32 frFontCountGlyphBands(frFontHandle_t *glyph);
 extern void itfDrawThreePanelBorderBands(DrawVertex *bounds, DrawColorRec *color, u32 tail, s32 borderWidth,
                                          sdfDrawTag_t *command);
 
@@ -3030,7 +3030,7 @@ void itfUpdateSoundSelectorOptions(void) {
     step = 1;
     x = 0xAF;
     for (digit = 7; digit >= 0; digit--) {
-        _FRQ *glyph;
+        frFontHandle_t *glyph;
         s32 left = x * 16;
 
         left += 0x9F0;

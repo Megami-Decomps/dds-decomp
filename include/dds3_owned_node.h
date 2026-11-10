@@ -3,7 +3,7 @@
 
 #include "common.h"
 
-struct _FRQ;
+struct frFontHandle_t;
 
 typedef struct Dds3IntrusiveNode Dds3IntrusiveNode;
 typedef struct Dds3IntrusiveNodeCallbacks Dds3IntrusiveNodeCallbacks;
@@ -32,7 +32,7 @@ struct Dds3IntrusiveNodeCallbacks {
 /* The font-owned node's payload is specifically a retained glyph pointer. */
 typedef struct Dds3FontNode {
     Dds3IntrusiveNode owner;
-    struct _FRQ *glyph;
+    struct frFontHandle_t *glyph;
 } Dds3FontNode;
 
 /* The L2D callback owner extends the intrusive prefix with a rectangle. */

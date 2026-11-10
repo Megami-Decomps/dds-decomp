@@ -783,7 +783,7 @@ extern void uiDrawActiveSurfaceRegion(s32);
 
 extern void sdfDispatchSurfaceWithPreparedTexturePacket(s32);
 
-extern struct _FRQ *itfCreateFont2TextGlyph(s32, s32, s32, u32, char *, struct _FRQ *);
+extern struct frFontHandle_t *itfCreateFont2TextGlyph(s32, s32, s32, u32, char *, struct frFontHandle_t *);
 
 u32 mnuGetPanelRatioColor(s32, s32, s32);
 
@@ -863,7 +863,7 @@ void mnuDrawPartyMemberCommandPanel(s32 x, s32 y, s32 z, MenuPageWindow *menu,
     sprintf(text, D_00437C68, level);
     if (panel->iconBundle != NULL) {
         u32 bundleFade = panel->iconBundle->fade;
-        struct _FRQ *glyph = itfCreateFont2TextGlyph(labelX + 0x140, labelY - 0x10, z,
+        struct frFontHandle_t *glyph = itfCreateFont2TextGlyph(labelX + 0x140, labelY - 0x10, z,
                           fclBlendColor(0xA09DC380, 0xA09DC300, bundleFade), text, NULL);
         frSetFontColorNo(glyph, 3);
         frDrawFontOt(glyph, 1, surface);
@@ -875,7 +875,7 @@ void mnuDrawPartyMemberCommandPanel(s32 x, s32 y, s32 z, MenuPageWindow *menu,
     effDrawTextureSlotWithBlendedCornerColors(labelX, labelY, z, alpha,
                   1, panel->icon[2], 0, surface);
     {
-        struct _FRQ *glyph = itfCreateFont2TextGlyph(labelX + 0x140, labelY - 0x10, z,
+        struct frFontHandle_t *glyph = itfCreateFont2TextGlyph(labelX + 0x140, labelY - 0x10, z,
                           fclBlendColor(0xA09DC380, 0xA09DC300, alpha), text, NULL);
         frDrawFontOt(glyph, 1, surface);
         frDestroyFontRequestAfter(glyph);
@@ -930,11 +930,11 @@ extern void mnuUpdateAndDrawPartyCommandQueue(s32, s32, s32, MenuQueuedCommand *
  * selection helper consumes only its first five arguments. */
 extern s32 mnuClearWindowPendingFlagAfterSelection();
 
-typedef struct _FRQ _FRQ;
+typedef struct frFontHandle_t frFontHandle_t;
 
-extern _FRQ *itfCreateFont2TextGlyph(s32, s32, s32, u32, char *, _FRQ *);
+extern frFontHandle_t *itfCreateFont2TextGlyph(s32, s32, s32, u32, char *, frFontHandle_t *);
 
-extern s32 frDrawFontOt(_FRQ *, s8, u32);
+extern s32 frDrawFontOt(frFontHandle_t *, s8, u32);
 
 /* Draw one party page: queued commands, level text, selection and HP/MP bars. */
 void mnuDrawPartyMemberStatusPanel(s32 x, s32 y, s32 z, MenuPageWindow *menu,
@@ -949,7 +949,7 @@ void mnuDrawPartyMemberStatusPanel(s32 x, s32 y, s32 z, MenuPageWindow *menu,
     u32 textColor = fclBlendColor(0x80808080, 0x80808000, alpha);
     s32 labelX;
     s32 labelY;
-    _FRQ *glyph;
+    frFontHandle_t *glyph;
     s32 selection;
     s32 level;
     s32 iconX;
@@ -1514,7 +1514,7 @@ void mnuDrawPartySkillListPanel(s32 x, s32 y, s32 depth, datUnitWork_t *record, 
     s32 rowOffset;
     u16 *skill;
     u16 skillId;
-    _FRQ *glyph;
+    frFontHandle_t *glyph;
 
     step = brsGetLevelStepForValue(record->level);
     rows = 2;
@@ -1634,7 +1634,7 @@ void mnuDrawPartyProfilePanelContents(s32 x, s32 y, s32 depth, datUnitWork_t *ac
     s32 rowOffset;
     u16 *skill;
     u16 skillId;
-    _FRQ *glyph;
+    frFontHandle_t *glyph;
 
     prfBuildRawSkillList(profile, &list.list);
 
@@ -1915,8 +1915,8 @@ extern char D_00437C88[];
 #include "mnu.h"
 #include "fr_font_draw_glyph.h"
 
-typedef struct _FRQ _FRQ;
-extern _FRQ *itfCreateFont2TextGlyph(s32, s32, s32, u32, char *, _FRQ *);
+typedef struct frFontHandle_t frFontHandle_t;
+extern frFontHandle_t *itfCreateFont2TextGlyph(s32, s32, s32, u32, char *, frFontHandle_t *);
 extern void effDrawTextureSlotWithBlendedCornerColors(s32, s32, s32, u32, s32, EffectSlotSet *, s32, s32);
 /* The ratio panel's figures. A negative value draws nothing. With a total,
  * draw its two marks (bar textures 5 and 6), the value in the faded color and
@@ -1925,7 +1925,7 @@ void mnuDrawRatioPanelContents(s32 x, s32 y, s32 depth, u32 color, u32 fade,
                   s32 value, s32 total, MenuPageBar *pair, u32 flags) {
     char text[16];
     u32 totalColor;
-    _FRQ *glyph;
+    frFontHandle_t *glyph;
 
     color = fclBlendColor(color, color & ~0xFF, fade);
     totalColor = fclBlendColor(0xA09DC380, 0xA09DC300, fade >> 1);
@@ -2102,7 +2102,7 @@ void mnuFreePanelItemWork(MenuPanelItem *item) {
 #include "mnu_panel_item.h"
 
 extern void effDrawTextureSlotWithBlendedCornerColors(s32, s32, s32, u32, s32, EffectSlotSet *, s32, s32);
-extern _FRQ *itfCreateFont2TextGlyph(s32, s32, s32, u32, char *, _FRQ *);
+extern frFontHandle_t *itfCreateFont2TextGlyph(s32, s32, s32, u32, char *, frFontHandle_t *);
 
 /* A stat panel item's meter. The value bar is cropped to value / max of the
  * item's pixel span; a selected item adds its marker and a ramp sprite (fading
@@ -2113,7 +2113,7 @@ extern _FRQ *itfCreateFont2TextGlyph(s32, s32, s32, u32, char *, _FRQ *);
  * unused, as in DDS1. */
 void mnuDrawPanelItemDetail(s32 x, s32 y, s32 depth, s32 opacity, s32 mode, MenuPanelItem *item, u32 layer) {
     char text[16];
-    _FRQ *glyph;
+    frFontHandle_t *glyph;
     EffectSlotSet *set;
     s32 index;
     s32 value;
@@ -2239,7 +2239,7 @@ void mnuDrawAndAdvancePanelItem(s32 x, s32 y, s32 depth, s32 mode, u32 textMode,
     s32 value;
     u32 fade = item->initialValue;
     u32 color;
-    _FRQ *glyph;
+    frFontHandle_t *glyph;
 
     effDrawTextureSlotWithBlendedCornerColors(x, y, depth, fade, 0, item->spriteGridSlots[0].set,
                   item->spriteGridSlots[0].index, flags);

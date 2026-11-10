@@ -1006,15 +1006,15 @@ void mnuReleaseStaffRollText(void) {
     frwFreeStaffFont();
 }
 
-struct _FRQ;
+struct frFontHandle_t;
 /* This legacy call supplies an unused ninth word to the eight-word builder. */
-extern struct _FRQ *frwGetStaffFontFRQ();
-extern s32 frDrawFontEx(struct _FRQ *, s8);
+extern struct frFontHandle_t *frwGetStaffFontFRQ();
+extern s32 frDrawFontEx(struct frFontHandle_t *, s8);
 s32 mnuDrawStaffRollText(f32 x, f32 y, s32 font, u32 color, const char *text) {
     s32 byteAlpha = color & 0xFF;
     f32 alpha = byteAlpha;
     f32 opacity = 1.0f;
-    struct _FRQ *glyph;
+    struct frFontHandle_t *glyph;
 
     if (y < 192.0f) {
         opacity = (y + 48.0f) / 240.0f;

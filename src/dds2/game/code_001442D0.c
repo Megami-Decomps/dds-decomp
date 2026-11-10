@@ -1707,8 +1707,8 @@ extern void evtSubmitPrimaryAlphaBlendMode(s32);
 extern void eglLinkPoly4(f32,f32,f32,f32,f32,f32,f32,f32,f32,f32,f32,f32,u32,u32,u32,u32);
 extern u8 fldIsStageExplorationCellMarked(s32 floor, f32 x, f32 z);
 extern void fldSubmitPrimaryFramePacket(void), fldSubmitAlternateFramePacket(void);
-typedef struct _FRQ _FRQ;
-extern _FRQ *D_00438ED4;
+typedef struct frFontHandle_t frFontHandle_t;
+extern frFontHandle_t *D_00438ED4;
 extern s32 D_00436240;
 extern s32 D_00436248;
 extern s32 D_00436250, D_00436254;
@@ -1725,9 +1725,9 @@ extern void fldPoint3To2H(f32 *, f32 *, f32, f32, f32);
 extern void func_00145A08(s32, f32, f32, f32);
 extern void fldAllIconDel(s32 index, f32 *x, f32 *z);
 extern void fldAutoMapGetBBox(f32 *, f32 *, f32 *, f32 *);
-extern void frSetPriority(_FRQ *, u32);
-extern s32 frDrawFontEx(_FRQ *, s8);
-extern s32 frDestroyFontRequestAfter(_FRQ *);
+extern void frSetPriority(frFontHandle_t *, u32);
+extern s32 frDrawFontEx(frFontHandle_t *, s8);
+extern s32 frDestroyFontRequestAfter(frFontHandle_t *);
 
 INCLUDE_RODATA(const s32, "game/code_001442D0", D_00413700);
 

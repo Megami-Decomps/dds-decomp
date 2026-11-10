@@ -197,7 +197,7 @@ extern u32 D_003BC888;
 
 extern void *fileSaveReadBuffer;
 
-extern struct _FRQ *fileMenuConvertedTextGlyph;
+extern struct frFontHandle_t *fileMenuConvertedTextGlyph;
 extern FileMenuContinuationCallback fileWaitContinuation;
 
 extern s32 fileWaitTicksRemaining;
@@ -317,9 +317,9 @@ extern struct sdfMemHandle_t *fileSaveIconResourceHandle;
 
 extern struct FileRequest *fileSaveIconRequest;
 
-extern struct _FRQ *itfCreateFont2TextGlyph(s32, s32, s32, u32, char *, struct _FRQ *);
+extern struct frFontHandle_t *itfCreateFont2TextGlyph(s32, s32, s32, u32, char *, struct frFontHandle_t *);
 
-extern struct _FRQ *fileMenuStringGlyph;
+extern struct frFontHandle_t *fileMenuStringGlyph;
 
 extern s32 D_003BC7FC;
 
@@ -567,7 +567,7 @@ void mnuDrawAndStoreTextGlyphHandle(s32 x, s32 y, u32 colors, const u8 *text) {
     frDestroyFontRequestAfter(fileMenuConvertedTextGlyph);
 }
 
-extern _FRQ * frSetFontString(const char *text, s8 fontIndex, s8 firstOption, s8 secondOption, _FRQ *existingGlyph);
+extern frFontHandle_t * frSetFontString(const char *text, s8 fontIndex, s8 firstOption, s8 secondOption, frFontHandle_t *existingGlyph);
 
 void mcdCreateFontDrawHandle(s32 x, s32 y, u32 color, const char *text) {
     frEnableMode(1);
@@ -582,7 +582,7 @@ void mcdCreateFontDrawHandle(s32 x, s32 y, u32 color, const char *text) {
 }
 
 void fileDrawMenuImageAtPoint(s32 x, s32 y, u32 colors, char *text) {
-    struct _FRQ *imageHandle;
+    struct frFontHandle_t *imageHandle;
 
     imageHandle = itfCreateFont2TextGlyph(x << 4, y << 3, 0, colors, text, 0);
     frDrawFontEx(imageHandle, 1);

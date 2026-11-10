@@ -108,7 +108,7 @@ void brsDrawProgressRowEntries(s32 x, s32 y, s32 z, BrsSkillPackageWork *work, B
 /* Shared gray palette retained for the still-ASM unit-info renderer. */
 #include "fr_font.h"
 #include "fr_font_draw_glyph.h"
-extern struct _FRQ *itfCreateFont2TextGlyph(s32, s32, s32, u32, char *, struct _FRQ *);
+extern struct frFontHandle_t *itfCreateFont2TextGlyph(s32, s32, s32, u32, char *, struct frFontHandle_t *);
 
 /* Both placement tables use the same coordinate-row type.  Their initialized
  * array bounds are inferred from the real rows, giving distinct aggregate copy
@@ -130,7 +130,7 @@ void brsDrawProgressRowUnitInfo(s32 x, s32 y, s32 depth, BrsSkillPackageWork *wo
     s32 placement;
     s32 px;
     s32 py;
-    struct _FRQ *glyph;
+    struct frFontHandle_t *glyph;
 
     colors[0] = color;
     colors[1] = color;
@@ -370,7 +370,7 @@ typedef struct BrsProgressBarCoordinates {
 } BrsProgressBarCoordinates;
 
 extern const char D_004379F0[];
-extern struct _FRQ *itfCreateFont2TextGlyph(s32, s32, s32, u32, char *, struct _FRQ *);
+extern struct frFontHandle_t *itfCreateFont2TextGlyph(s32, s32, s32, u32, char *, struct frFontHandle_t *);
 
 typedef struct { u32 values[4]; } BrsProgressBarPalette;
 extern const BrsProgressBarPalette D_004285B0;
@@ -406,7 +406,7 @@ void brsDrawLevelProgressDetails(s32 x, s32 y, s32 depth, BrsSkillPackageWork *w
     s32 range;
     s32 tailOrigin;
     u32 color = work->levelAnimation[index].alpha | 0x80808000;
-    struct _FRQ *glyph;
+    struct frFontHandle_t *glyph;
     EffectSlotSet *resources;
 
     palette.values[0] = color;
@@ -950,7 +950,7 @@ void brsDrawProfileProgressDetails(s32 x, s32 y, s32 depth, BrsSkillPackageWork 
     s32 tailPosition;
     u32 color = work->profileAnimation[index].alpha | 0x80808000;
     u32 barColor;
-    struct _FRQ *glyph;
+    struct frFontHandle_t *glyph;
     EffectSlotSet *resources;
     EffectSlotSet *restoreResources;
 

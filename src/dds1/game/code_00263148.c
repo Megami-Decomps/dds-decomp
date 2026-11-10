@@ -328,14 +328,14 @@ void mnuDrawItemPanelBackdrop(BrsSkillPackageWork *scene) {
 }
 
 extern void effDrawSpriteWithCornerFade(s32, s32, s32, s32, s32, u32, s32, s32);
-extern s32 frDrawFontOt(struct _FRQ *, s8, u32);
+extern s32 frDrawFontOt(struct frFontHandle_t *, s8, u32);
 void mnuDrawRemainingSelectionExtent(BrsSkillPackageWork *scene) {
     char text[16];
     datUnitWork_t *item = scene->selectedRewardRow->unit;
     s32 fade = scene->iconFade;
     s32 delta;
     s32 x;
-    struct _FRQ *glyph;
+    struct frFontHandle_t *glyph;
     u32 color;
 
     effDrawSpriteWithCornerFade(0x9A0, 0x348, 0, fade, 1, (u32)scene->unitResource, 8, 0x53);

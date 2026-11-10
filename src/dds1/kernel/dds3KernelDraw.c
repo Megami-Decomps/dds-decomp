@@ -2481,7 +2481,7 @@ void eglLinkPrint(s32 x, s32 y, s32 packetArg, s32 drawArg) {
 }
 
 void eglLinkKanji(s32 width, s32 height, s32 colors, const char *text) {
-    struct _FRQ *glyph;
+    struct frFontHandle_t *glyph;
 
     glyph = itfCreateMeasuredTextGlyph(width << 4, height << 3, 0, colors, text, NULL);
     frDrawFont(glyph);

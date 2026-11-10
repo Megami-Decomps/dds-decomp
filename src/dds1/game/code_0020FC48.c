@@ -2278,7 +2278,7 @@ s32 mnuListMoveCursor(BtlDebugMenuCursor *menuList) {
 
 /* Queue text at pixel coordinates, using the font's native X/Y scaling. */
 s32 mnuQueueColoredGlyphAtPosition(s32 x, s32 y, s32 text) {
-    struct _FRQ *textGlyph = itfCreateMeasuredTextGlyph(x << 4, y << 3, MNU_LIST_TEXT_DEPTH,
+    struct frFontHandle_t *textGlyph = itfCreateMeasuredTextGlyph(x << 4, y << 3, MNU_LIST_TEXT_DEPTH,
         MNU_LIST_NORMAL_COLOR, (const char *)(u32)text, NULL);
     frDrawFontOt(textGlyph, 0, 0x60);
     return frDestroyFontRequestAfter(textGlyph);
@@ -2299,7 +2299,7 @@ s32 btlDrawSelectableListRows(s32 x, s32 y, s32 unusedMode, BtlDebugMenuCursor *
     selectedIndex = selectionState->cursor;
     rowY = y;
     for (; itemIndex < endIndex; itemIndex++) {
-        struct _FRQ *textGlyph = itfCreateMeasuredTextGlyph(x << 4, rowY << 3,
+        struct frFontHandle_t *textGlyph = itfCreateMeasuredTextGlyph(x << 4, rowY << 3,
             MNU_LIST_TEXT_DEPTH,
             itemIndex == selectedIndex ? MNU_LIST_SELECTED_COLOR : MNU_LIST_NORMAL_COLOR,
             (const char *)(u32)rowTexts[itemIndex], NULL);
@@ -2998,7 +2998,7 @@ s32 btlUpdateDebugEncounterSelector(void) {
     BtlState *state = (BtlState *)btlGetRuntime();
     u32 i;
     u16 enemy;
-    struct _FRQ *glyph;
+    struct frFontHandle_t *glyph;
     s32 encounter;
 
     if (dds3PadBitTable[3] < 0) {

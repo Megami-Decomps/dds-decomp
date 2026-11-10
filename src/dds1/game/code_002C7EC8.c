@@ -21,11 +21,11 @@ extern float vecLength(float *vector);
 
 
 
-struct _FRQ;
-extern s32 frDrawFontEx(struct _FRQ *glyph, s8 mode);
+struct frFontHandle_t;
+extern s32 frDrawFontEx(struct frFontHandle_t *glyph, s8 mode);
 
 void sdfCounterDrawGlyphAtGridCell(s32 gridX, s32 gridY, u32 style, const u8 *text) {
-    struct _FRQ *glyph;
+    struct frFontHandle_t *glyph;
 
     glyph = itfCreateConvertedTextGlyph(gridX << 4, gridY << 3, 0, style, text, 0);
     frDrawFontEx(glyph, 1);

@@ -139,10 +139,10 @@ void dds3FontReqDrawFont(const Dds3IntrusiveNode *owner) {
     frDrawFont(node->glyph);
 }
 
-extern _FRQ * frSetFontString(const char *text, s8 fontIndex, s8 firstOption, s8 secondOption, _FRQ *existingGlyph);
+extern frFontHandle_t * frSetFontString(const char *text, s8 fontIndex, s8 firstOption, s8 secondOption, frFontHandle_t *existingGlyph);
 
 Dds3FontNode *dds3CreateFontNode(s32 x, s32 y, const char *text) {
-    struct _FRQ *glyph;
+    struct frFontHandle_t *glyph;
     Dds3FontNode *node;
 
     glyph = frSetFontString(text, 0, 0, 0, NULL);

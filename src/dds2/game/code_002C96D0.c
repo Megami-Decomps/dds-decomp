@@ -208,10 +208,10 @@ extern u32 D_00437D44;
 extern u32 D_00437D3C;
 
 extern u32 itfCreateFont2TextGlyph(s32, s32, s32, u32, char *, s32);
-extern struct _FRQ *fileMenuConvertedTextGlyph;
-extern struct _FRQ *fileMenuConfiguredTextGlyph;
+extern struct frFontHandle_t *fileMenuConvertedTextGlyph;
+extern struct frFontHandle_t *fileMenuConfiguredTextGlyph;
 
-extern struct _FRQ *fileMenuStringGlyph;
+extern struct frFontHandle_t *fileMenuStringGlyph;
 
 extern dds3ProcessID_t *D_00437CD8;
 
@@ -561,14 +561,14 @@ u8 fileIsLoadedWithActiveFlow(s32 condition) {
 }
 
 void mnuDrawAndStoreTextGlyphHandle(s32 x, s32 y, u32 colors, const u8 *text) {
-    struct _FRQ *handle = itfCreateConvertedTextGlyph(x << 4, y << 3, 0, colors, text, 0);
+    struct frFontHandle_t *handle = itfCreateConvertedTextGlyph(x << 4, y << 3, 0, colors, text, 0);
     fileMenuConvertedTextGlyph = handle;
     frDrawFontEx(handle, 1);
     frDestroyFontRequestAfter(fileMenuConvertedTextGlyph);
 }
 
 void mcdCreateConfiguredDrawHandle(s32 x, s32 y, u32 colors, const u8 *text) {
-    struct _FRQ *handle = itfCreateConvertedTextGlyph(x << 4, y << 3, 0, colors, text, 0);
+    struct frFontHandle_t *handle = itfCreateConvertedTextGlyph(x << 4, y << 3, 0, colors, text, 0);
     fileMenuConfiguredTextGlyph = handle;
     frSetFontColorNo(handle, 3);
     frDrawFontEx(fileMenuConfiguredTextGlyph, 1);
@@ -592,7 +592,7 @@ void fileDrawMenuImageAtPoint(s32 x, s32 y, u32 colors, char *text) {
 
     handle = itfCreateFont2TextGlyph(x << 4, y << 3, 0, colors, text, 0);
     frDrawFontEx(handle, 1);
-    frDestroyFontRequestAfter((struct _FRQ *)(u32)handle);
+    frDestroyFontRequestAfter((struct frFontHandle_t *)(u32)handle);
 }
 
 /* Animate the save-window highlight's alpha with a sinusoidal phase. */

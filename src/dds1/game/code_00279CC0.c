@@ -37,8 +37,8 @@ extern void itfSetGridEntryQuantizedAndRefresh(EffectSlotSet *, s32, s32, s32, s
 
 extern u8 *datSkillMessages;
 
-extern s32 frDrawFontOt(struct _FRQ *, s8, u32);
-extern _FRQ *itfDrawTextWithSelectedFontMode(s32, s32, s32, s8, u16, s32);
+extern s32 frDrawFontOt(struct frFontHandle_t *, s8, u32);
+extern frFontHandle_t *itfDrawTextWithSelectedFontMode(s32, s32, s32, s8, u16, s32);
 
 
 typedef struct MenuListNode MenuListNode;
@@ -227,7 +227,7 @@ s32 mnuStepSkillDetailControl(dds3ProcessID_t *callback) {
 }
 
 void mnuDrawSelectionLabel(s32 selection) {
-    _FRQ *item = itfDrawTextWithSelectedFontMode(0xCB0, 0xA80, 0, 0, selection & 0xFFFF, 1);
+    frFontHandle_t *item = itfDrawTextWithSelectedFontMode(0xCB0, 0xA80, 0, 0, selection & 0xFFFF, 1);
     frSetFontColor(item, 0xA09DC366);
     frDrawFontOt(item, 1, 0x53);
     frDestroyFontRequestAfter(item);
@@ -246,7 +246,7 @@ void mnuDrawAffinityParticipantLabels(u16 affinityId, s32 placeholderResource, s
 
     for (slot = 0; slot < 3; slot++, y += 0xC8) {
         s32 kind = ptyGetAffinityKind((s32)affinityId, slot);
-        _FRQ *glyph = 0;
+        frFontHandle_t *glyph = 0;
 
         if (kind < 0) {
             if (kind == -1) {

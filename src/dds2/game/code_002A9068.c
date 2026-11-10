@@ -39,8 +39,8 @@ extern u32 mnuMovieShutdownCounter;
 
 
 
-typedef struct _FRQ _FRQ;
-extern s32 frDrawFontOt(_FRQ *, s8, u32);
+typedef struct frFontHandle_t frFontHandle_t;
+extern s32 frDrawFontOt(frFontHandle_t *, s8, u32);
 extern char mnuCampInputTaskName[]; /* "camp" */
 
 extern char mnuCampDrawTaskName[]; /* "camp_draw" */
@@ -1031,8 +1031,8 @@ void mnuDrawCampTitleCurrencyAndFade(s32 unused0, s32 unused1, s32 textParam, st
     /* Keep the RGB channels fixed while the opacity byte fades from 0x80 to zero. */
     object = itfCreateTightFont3TextGlyph((visual->titleSlide + 0x33) << 4, 0xCD8, textParam,
                            fclBlendColor(0xA09DC380, 0xA09DC300, visual->titleOpacity), buffer, 0);
-    frDrawFontOt((_FRQ *)object, 1, layer);
-    frDestroyFontRequestAfter((_FRQ *)object);
+    frDrawFontOt((frFontHandle_t *)object, 1, layer);
+    frDestroyFontRequestAfter((frFontHandle_t *)object);
     offset = visual->titleSlide;
     magnitude = offset;
     if (offset < 0) {
@@ -1065,7 +1065,7 @@ extern u8 *mnuCampSelectionPromptTexts[];
 
 /* Create and queue the table-selected image sprite; imageIndex is unchecked. */
 void mnuCreateStaffImageSprite(s32 imageIndex) {
-    _FRQ *sprite = itfCreateConvertedTextGlyph(0x340, 0x148, 0, 0xa09dc35a,
+    frFontHandle_t *sprite = itfCreateConvertedTextGlyph(0x340, 0x148, 0, 0xa09dc35a,
                                       mnuCampSelectionPromptTexts[imageIndex], 0);
     frDrawFontOt(sprite, 1, 0x54);
     frDestroyFontRequestAfter(sprite);
@@ -1095,7 +1095,7 @@ void mnuDrawStaffGridLabelsForKind(s32 kind, struct EffectSlotSet *resources) {
 }
 
 
-extern struct _FRQ *itfDrawBankTextWithLayoutFlags(s32, s32, s32, u16, s32, s32);
+extern struct frFontHandle_t *itfDrawBankTextWithLayoutFlags(s32, s32, s32, u16, s32, s32);
 
 typedef struct StaffFramePiece {
     s32 gridId;
@@ -1114,7 +1114,7 @@ void mnuDrawCampGridFrameAndLabel(s32 kind, u32 labelIndex, u32 textTable, u32 c
     StaffFramePiece *pieces;
     MenuStaffContext *menu = (MenuStaffContext *)context;
     s32 i;
-    struct _FRQ *glyph;
+    struct frFontHandle_t *glyph;
     memcpy(primary, D_0042AC40, sizeof(primary));
     memcpy(alternate, D_0042AC70, sizeof(alternate));
     switch (kind) {

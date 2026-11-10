@@ -5,9 +5,9 @@
 #include "dds3_task_state_query.h"
 #include "itf.h"
 
-extern _FRQ * frDestroyFontRequest(_FRQ *glyph);
+extern frFontHandle_t * frDestroyFontRequest(frFontHandle_t *glyph);
 extern dds3ProcessID_t *itfFontTestScriptTask;
-extern _FRQ *frTestFontHandle;
+extern frFontHandle_t *frTestFontHandle;
 
 extern s32 test_font_Process(dds3ProcessID_t *task);
 extern void test_font_Shutdown(dds3ProcessID_t *task);

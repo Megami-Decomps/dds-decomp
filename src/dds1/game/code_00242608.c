@@ -859,20 +859,20 @@ void evtUpdateCameraColorTrackEffect(evtViewerInfo_t *scene) {
 }
 
 extern s32 D_00368BD8[];
-struct _FRQ;
-extern struct _FRQ * frSetFontString(const char *text, s8 fontIndex, s8 firstOption, s8 secondOption, struct _FRQ *existingGlyph);
+struct frFontHandle_t;
+extern struct frFontHandle_t * frSetFontString(const char *text, s8 fontIndex, s8 firstOption, s8 secondOption, struct frFontHandle_t *existingGlyph);
 
 void mnuCampInitFontResource(evtViewerInfo_t *scene) {
     s32 fontHandle;
     scene->glyph = 0;
     fontHandle = (s32)(u32)frSetFontString((const char *)D_00368BD8, 0, 0, 0, 0);
     scene->glyph = fontHandle;
-    frSetDrawPosition((struct _FRQ *)(u32)fontHandle,
+    frSetDrawPosition((struct frFontHandle_t *)(u32)fontHandle,
         CAMP_FONT_CONTEXT_WIDTH, CAMP_FONT_CONTEXT_HEIGHT);
 }
 
 void mnuCampLinkFontGlyph(evtViewerInfo_t *scene) {
-    frDestroyFontRequestAfter((struct _FRQ *)(u32)scene->glyph);
+    frDestroyFontRequestAfter((struct frFontHandle_t *)(u32)scene->glyph);
     scene->glyph = 0;
 }
 
@@ -2020,12 +2020,12 @@ s32 mnuBuildCampItemList(ShopScene *scene) {
     return scene->window->list->count;
 }
 
-extern struct _FRQ *itfDrawBankTextWithLayoutFlags(s32, s32, s32, s32, s32, s32);
+extern struct frFontHandle_t *itfDrawBankTextWithLayoutFlags(s32, s32, s32, s32, s32, s32);
 
 
-extern s32 frDrawFontOt(struct _FRQ *, s8, u32);
+extern s32 frDrawFontOt(struct frFontHandle_t *, s8, u32);
 void mnuQueueCampTextGlyphWithChildColor(s32 fontValue, s32 enabled, s32 unused2, s32 unused3, s32 fontArg, s32 flags) {
-    struct _FRQ *handle;
+    struct frFontHandle_t *handle;
 
     if (enabled != 0) {
         handle = itfDrawBankTextWithLayoutFlags(0x970, 0xB58, 1, (u16)fontValue, enabled, fontArg);

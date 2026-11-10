@@ -150,9 +150,9 @@ void itfMiscSetRatioRGB(DrawColorRec *output, s32 scaleX, s32 scaleY, s32 scaleZ
 }
 
 /* Replace each child color; parent color words are not modified. */
-void itfMiscChangeFontVertexColor(_FRQ *entry, u32 color) {
+void itfMiscChangeFontVertexColor(frFontHandle_t *entry, u32 color) {
     for (; entry != NULL; entry = entry->previous) {
-        _TEXT *child;
+        frTextHandle_t *child;
         for (child = entry->firstChild; child != NULL; child = child->next) {
             child->parentDimensionsOrRenderWord.renderWord = color;
         }
@@ -160,9 +160,9 @@ void itfMiscChangeFontVertexColor(_FRQ *entry, u32 color) {
 }
 
 /* Clear each child's low byte, then OR unmasked bits into the full color word. */
-void itfMiscChangeFontAlpha(_FRQ *entry, u32 colorBits) {
+void itfMiscChangeFontAlpha(frFontHandle_t *entry, u32 colorBits) {
     for (; entry != NULL; entry = entry->previous) {
-        _TEXT *child;
+        frTextHandle_t *child;
         for (child = entry->firstChild; child != NULL; child = child->next) {
             child->parentDimensionsOrRenderWord.renderWord = (child->parentDimensionsOrRenderWord.renderWord & ~ITF_BYTE_MASK) | colorBits;
         }
@@ -170,7 +170,7 @@ void itfMiscChangeFontAlpha(_FRQ *entry, u32 colorBits) {
 }
 
 /* Translate parent entries only; child coordinates are left unchanged. */
-void itfMiscMoveFontPosition(_FRQ *entry, u32 xOffset, u32 yOffset) {
+void itfMiscMoveFontPosition(frFontHandle_t *entry, u32 xOffset, u32 yOffset) {
     for (; entry != NULL; entry = entry->previous) {
         entry->x += xOffset;
         entry->y += yOffset;

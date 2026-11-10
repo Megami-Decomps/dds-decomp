@@ -182,10 +182,10 @@ extern u8 mnuIsSolarPricedItemId(s32);
 
 extern u8 mnuCampWideRewardEntries[];
 
-extern struct _FRQ *itfDrawBankTextWithLayoutFlags(s32 x, s32 y, s32 depth, u16 textId, struct FrFontTextBank *bank, s32 flags);
+extern struct frFontHandle_t *itfDrawBankTextWithLayoutFlags(s32 x, s32 y, s32 depth, u16 textId, struct frTextBank_t *bank, s32 flags);
 
 
-extern s32 frDrawFontOt(struct _FRQ *, s8, u32);
+extern s32 frDrawFontOt(struct frFontHandle_t *, s8, u32);
 
 extern f32 mnuShopSavedLastTransformVector[];
 extern f32 mnuShopSavedMiddleTransformVector[];
@@ -945,12 +945,12 @@ void mnuCampInitFontResource(evtViewerInfo_t *scene) {
     scene->glyph = 0;
     fontHandle = (s32)(u32)frSetFontString((const char *)D_003C99B8, 0, 0, 0, 0);
     scene->glyph = fontHandle;
-    frSetDrawPosition((struct _FRQ *)(u32)fontHandle,
+    frSetDrawPosition((struct frFontHandle_t *)(u32)fontHandle,
         CAMP_FONT_CONTEXT_WIDTH, CAMP_FONT_CONTEXT_HEIGHT);
 }
 
 void mnuCampLinkFontGlyph(evtViewerInfo_t *scene) {
-    frDestroyFontRequestAfter((struct _FRQ *)(u32)scene->glyph);
+    frDestroyFontRequestAfter((struct frFontHandle_t *)(u32)scene->glyph);
     scene->glyph = 0;
 }
 
@@ -2512,10 +2512,10 @@ s32 mnuRebuildCampSaleItemWindow(MenuTerminalContext *scene) {
 }
 
 void mnuQueueCampTextGlyphWithChildColor(s32 fontValue, s32 enabled, s32 unused2, s32 unused3, s32 fontArg, s32 flags) {
-    struct _FRQ *handle;
+    struct frFontHandle_t *handle;
 
     if (enabled != 0) {
-        handle = itfDrawBankTextWithLayoutFlags(0x970, 0xB58, 1, (u16)fontValue, (struct FrFontTextBank *)enabled, fontArg);
+        handle = itfDrawBankTextWithLayoutFlags(0x970, 0xB58, 1, (u16)fontValue, (struct frTextBank_t *)enabled, fontArg);
         frSetFontColor(handle, 0x80808040);
         frDrawFontOt(handle, 0, flags);
         frDestroyFontRequestAfter(handle);

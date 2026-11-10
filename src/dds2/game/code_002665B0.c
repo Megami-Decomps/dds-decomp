@@ -149,8 +149,8 @@ extern void mnuSnapshotCampTextureHandles(EffectSlotSet **);
 extern void mnuBuildEligibleSlotList();
 extern void mnuResetGradientFadeColor(MenuGradientFade *, s32);
 
-typedef struct _FRQ _FRQ;
-extern _FRQ *itfCreateFont2TextGlyph(s32, s32, s32, u32, char *, _FRQ *);
+typedef struct frFontHandle_t frFontHandle_t;
+extern frFontHandle_t *itfCreateFont2TextGlyph(s32, s32, s32, u32, char *, frFontHandle_t *);
 extern char mnuNumberSpriteFormat[];
 
 extern EffectPair D_00437878[];
@@ -344,7 +344,7 @@ extern MenuTextEntry D_003A47E8[];
  * The signed-byte slot is not bounds checked; DDS2 subtracts 0x120 from gridX. */
 void mnuQueueFontGlyphFromSelectedAtlasSlot(s32 gridX, s32 gridY, s32 depth, s32 colors, s8 slot, s8 alternate) {
     u8 *text;
-    _FRQ *handle;
+    frFontHandle_t *handle;
 
     if (alternate == 0) {
         text = D_003A41A8[slot].encodedText;
@@ -402,7 +402,7 @@ void mnuRefreshThresholdNodeFlags(MenuList *list) {
 /* Draw formatted numeric text using a blend toward the color with its low byte clear. */
 void mnuCreateNumberSprite(s32 x, s32 y, s32 layer, s32 blendWeight, s32 number, u32 color, s32 priority) {
     char text[16];
-    _FRQ *sprite;
+    frFontHandle_t *sprite;
 
     sprintf(text, mnuNumberSpriteFormat, number);
     sprite = itfCreateFont2TextGlyph(x, y, layer, fclBlendColor(color, color & ~MNU_COLOR_LOW_BYTE_MASK, blendWeight), text, 0);
@@ -424,7 +424,7 @@ void mnuDrawTerminalRecoveryListEntry(s32 unused, s32 rowY, s32 depth, MenuList 
     MenuThresholdEntry *entry = &node->terminal;
     datUnitWork_t *record = &DDS3_GBWK->party[entry->entryId];
     s32 selected = 0;
-    _FRQ *glyph;
+    frFontHandle_t *glyph;
     MenuTerminalPercentPanelPair *panels;
     s32 fade;
     MnuPartyStatusIconIndex status;
@@ -562,7 +562,7 @@ void mnuDrawEligibleTerminalSlotEntry(s32 x, s32 y, s32 unused, MenuList *list, 
     s32 isCurrent = node == list->cursor;
     u32 chainFlags = 0;
     u32 color;
-    _FRQ *glyph;
+    frFontHandle_t *glyph;
 
     if (node->flags48 & 1) {
         width /= 2;
@@ -2216,7 +2216,7 @@ extern char D_00437868[];
 void mnuQueueTerminalCurrencyLabel(s32 fading, s32 state) {
     MenuSlotState *work = (MenuSlotState *)state;
     s32 index;
-    _FRQ *font;
+    frFontHandle_t *font;
     u32 color;
     char text[16];
 

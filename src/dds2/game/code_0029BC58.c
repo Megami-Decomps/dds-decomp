@@ -341,7 +341,7 @@ void brsDrawRewardEntryRows(s32 x, s32 y, s32 z, u32 alpha, BrsRewardSummary *re
     MenuIconRef *icon = res->icons;
     u16 id;
     u8 param;
-    struct _FRQ *glyph;
+    struct frFontHandle_t *glyph;
     u32 packed;
     u32 i;
 
@@ -361,7 +361,7 @@ void brsDrawRewardEntryRows(s32 x, s32 y, s32 z, u32 alpha, BrsRewardSummary *re
             packed = (alpha & 0xFF) | 0x96FF9B00;
             glyph = itfCreateConvertedTextGlyph(x, y, z, packed, D_00435E5C[id], 0);
             frDrawFontOt(glyph, 1, surface);
-            frDestroyFontRequestAfter((struct _FRQ *)(u32)glyph);
+            frDestroyFontRequestAfter((struct frFontHandle_t *)(u32)glyph);
             effDrawSpriteWithCornerColors(x + 0x720, y + 0x20, 0, labelColor, 0, work->teardownResource, 0x20, 0x53);
             sprintf(name, D_004379C0, param);
             packed = (alpha & 0xFF) | 0xA09DC300;
@@ -382,7 +382,7 @@ extern u32 D_004379C8[];
 void mnuCampDrawMenuIconLayer(s32 x, s32 y, s32 z, u32 alpha, const BrsRewardSummary *res, s32 flags, BrsSkillPackageWork *work) {
     char name[32];
     u32 color[4];
-    struct _FRQ *sprite;
+    struct frFontHandle_t *sprite;
     u32 packed;
 
     packed = (alpha & 0xFF) | 0xA09DC300;
@@ -402,7 +402,7 @@ void mnuCampDrawMenuIconLayer(s32 x, s32 y, s32 z, u32 alpha, const BrsRewardSum
 void brsDrawMaccaRewardTotal(s32 x, s32 y, s32 z, u32 alpha, const BrsRewardSummary *res, s32 flags, BrsSkillPackageWork *work) {
     char name[32];
     u32 color[4];
-    struct _FRQ *sprite;
+    struct frFontHandle_t *sprite;
     u32 packed;
 
     if (evtBitCheck(0x290) != 0) {

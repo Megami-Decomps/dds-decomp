@@ -92,7 +92,7 @@ typedef struct Entry24W {
 
 extern Entry24W D_00404AA4[];
 
-extern FrFontTextBank frFontColoredGlyphResource;
+extern frTextBank_t frFontColoredGlyphResource;
 
 
 extern s32 ptyTestPrimaryProfileFlag(datUnitWork_t *, u16);
@@ -149,10 +149,10 @@ extern char sdfDebugLogPairFormat[];
 
 void ptyRebuildProfileSkills(s32 useCurrentProfile, datUnitWork_t *unit);
 
-extern _FRQ *itfDrawBankTextWithLayoutFlags(s32, s32, s32, u16, FrFontTextBank *, s32);
+extern frFontHandle_t *itfDrawBankTextWithLayoutFlags(s32, s32, s32, u16, frTextBank_t *, s32);
 
 
-extern s32 frDrawFontOt(_FRQ *, s8, u32);
+extern s32 frDrawFontOt(frFontHandle_t *, s8, u32);
 
 
 void sdfAppendFormattedDebugLogPair(s32 left, s32 right) {
@@ -1400,13 +1400,13 @@ u16 scrGetEntryLowFlags(datUnitWork_t *context, u16 entryId) {
 }
 
 void frFontQueueColoredGlyph(s32 x, s32 y, u32 first, u16 width, u32 second, s32 option) {
-    _FRQ *handle = itfDrawBankTextWithLayoutFlags(x, y, first, width, &frFontColoredGlyphResource, 0);
+    frFontHandle_t *handle = itfDrawBankTextWithLayoutFlags(x, y, first, width, &frFontColoredGlyphResource, 0);
     frSetFontColor(handle, second);
     frDrawFontOt(handle, 1, option);
     frDestroyFontRequestAfter(handle);
 }
 
-FrFontTextBank *frFontGetColoredGlyphResource(void) {
+frTextBank_t *frFontGetColoredGlyphResource(void) {
     return &frFontColoredGlyphResource;
 }
 

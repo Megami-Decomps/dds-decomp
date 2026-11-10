@@ -6,15 +6,15 @@
 
 
 extern u8 *datItemMessages;
-extern _FRQ *itfDrawBankTextWithLayoutFlags(s32, s32, s32, u16, FrFontTextBank *, s32);
-extern s32 frDrawFontOt(_FRQ *, s8, u32);
+extern frFontHandle_t *itfDrawBankTextWithLayoutFlags(s32, s32, s32, u16, frTextBank_t *, s32);
+extern s32 frDrawFontOt(frFontHandle_t *, s8, u32);
 
 
 void itfEmitSelectedGlyph(MenuTerminalContext *context, s32 unused, s32 layoutFlags,
                           u32 color, u32 renderFlags) {
     struct MenuList *list;
     CampWindowParams *data;
-    _FRQ *glyph;
+    frFontHandle_t *glyph;
     s32 y;
     u32 code;
 
@@ -27,7 +27,7 @@ void itfEmitSelectedGlyph(MenuTerminalContext *context, s32 unused, s32 layoutFl
         } else {
             y = 0xB08;
         }
-        glyph = itfDrawBankTextWithLayoutFlags(0x600, y, 1, code, (FrFontTextBank *)datItemMessages, layoutFlags);
+        glyph = itfDrawBankTextWithLayoutFlags(0x600, y, 1, code, (frTextBank_t *)datItemMessages, layoutFlags);
         frSetFontColor(glyph, color);
         frDrawFontOt(glyph, 1, renderFlags);
         frDestroyFontRequestAfter(glyph);

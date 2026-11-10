@@ -3,8 +3,8 @@
 
 #include "common.h"
 
-struct _FRQ;
+struct frFontHandle_t;
 
-s32 frFontCountGlyphChainNodes(const struct _FRQ *glyph);
+s32 frFontCountGlyphChainNodes(const struct frFontHandle_t *glyph);
 
 #endif /* FR_FONT_GLYPH_CHAIN_COUNT_H */

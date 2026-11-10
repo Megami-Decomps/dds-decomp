@@ -115,7 +115,7 @@ void brsDrawProgressRowEntries(s32 x, s32 y, s32 z, BrsSkillPackageWork *work,
 #include "sdk_libc.h"
 
 extern const u8 *D_003BAA70;
-extern struct _FRQ *itfCreateFont2TextGlyph(s32 x, s32 y, s32 depth, u32 colors, char *text, struct _FRQ *previousGlyph);
+extern struct frFontHandle_t *itfCreateFont2TextGlyph(s32 x, s32 y, s32 depth, u32 colors, char *text, struct frFontHandle_t *previousGlyph);
 extern void mnuSetFontChainDimensionsAndMeasure(u32 fontContext);
 extern void effDrawSpriteWithCornerColors(s32 x, s32 y, s32 z, u32 *palette, s32 flags, struct EffectSlotSet *set, s32 slot, s32 layer);
 /* Draws a party unit's status icon, level number and name in a result progress
@@ -133,7 +133,7 @@ void brsDrawProgressRowUnitInfo(s32 x, s32 y, s32 z, BrsSkillPackageWork *work,
     u32 color = work->fadeAnimation[index].backgroundOpacity | 0x80808000;
     u32 corners[4] = {color, color, color, color};
     datUnitWork_t *unit = row->unit;
-    struct _FRQ *glyph;
+    struct frFontHandle_t *glyph;
     s32 sprite;
 
     if (work->teardownResource == NULL) {
@@ -350,7 +350,7 @@ void brsUpdateLevelProgressAnimation(s32 x, s32 y, s32 z, BrsSkillPackageWork *w
 #include "eff.h"
 #include "fr_font.h"
 #include "fr_font_draw_glyph.h"
-extern struct _FRQ *itfCreateFont2TextGlyph(s32, s32, s32, u32, char *, struct _FRQ *);
+extern struct frFontHandle_t *itfCreateFont2TextGlyph(s32, s32, s32, u32, char *, struct frFontHandle_t *);
 extern void effDrawSpriteWithCornerColors(s32, s32, s32, u32 *, s32, EffectSlotSet *, s32, s32);
 extern const char D_003BC578[];
 
@@ -373,7 +373,7 @@ void brsDrawLevelProgressDetails(s32 x, s32 y, s32 z, BrsSkillPackageWork *work,
     s32 baseExp;
     s32 progress;
     s32 required;
-    struct _FRQ *glyph;
+    struct frFontHandle_t *glyph;
     s32 rawPercent;
     s32 displayPercent;
     EffectSlotSet *resource;
@@ -1008,7 +1008,7 @@ void brsDrawProfileProgressDetails(s32 x, s32 y, s32 depth, BrsSkillPackageWork 
     s32 frameX, frameY;
     u32 color = work->profileAnimation[index].alpha | 0x80808000;
     u32 barColor;
-    struct _FRQ *glyph;
+    struct frFontHandle_t *glyph;
     EffectSlotSet *resources;
     EffectSlotSet *restoreResources;
     BdWork *bar;

@@ -22,11 +22,11 @@ void mnuDrawItemPanelBackdrop(BrsSkillPackageWork *context) {
     mnuDrawCampIconBackdrop(&context->campEffect, 0x20);
 }
 
-struct _FRQ;
+struct frFontHandle_t;
 
 extern void effDrawTextureSlotWithBlendedCornerColors(s32, s32, s32, u32, s32,
                                                       struct EffectSlotSet *, s32, s32);
-extern s32 frDrawFontOt(struct _FRQ *, s8, u32);
+extern s32 frDrawFontOt(struct frFontHandle_t *, s8, u32);
 extern u32 mnuKindIsSelectable(u32);
 extern char D_004379B0[];
 
@@ -36,7 +36,7 @@ void mnuDrawRemainingSelectionExtent(BrsSkillPackageWork *context) {
     datUnitWork_t *item = context->selectedRewardRow->unit;
     s32 delta;
     s32 x;
-    struct _FRQ *glyph;
+    struct frFontHandle_t *glyph;
     u32 color;
 
     effDrawTextureSlotWithBlendedCornerColors(0x1710, 0x8C0, 0, iconFade, 1,
