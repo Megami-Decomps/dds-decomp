@@ -9446,9 +9446,13 @@
 0x0034E450	dds3TrackPolySixVectorFaceIndex	inferred	SMT3HD name via SLUS_209.11 0x00317470, effect/polyManager SMT3 rename; was D_0034E450
 0x0034E4D0	dds3TrackPolyDefaultFaceIndex	inferred	SMT3HD name via SLUS_209.11 0x003174F0, effect/polyManager SMT3 rename; was D_0034E4D0
 0x0034E520	dds3TrackPolyFiveVectorFaceIndex	inferred	SMT3HD name via SLUS_209.11 0x00317540, effect/polyManager SMT3 rename; was D_0034E520
+0x0034E580	dds3PolygonTriangleParam	inferred	SMT3HD name via SLUS_209.11 0x003175A0, effect/polyManager SMT3 rename; was D_0034E580
 0x0034E590	dds3TrackPolyVCType1Param	inferred	SMT3HD name via SLUS_209.11 0x003175B0, effect/polyManager SMT3 rename; was D_0034E590
+0x0034E5A0	dds3TrackPolyVCType2Param	inferred	SMT3HD name via SLUS_209.11 0x003175C0, effect/polyManager SMT3 rename; was D_0034E5A0
 0x0034E5B0	dds3TrackPolyVCSetAcuteParam	inferred	SMT3HD name via SLUS_209.11 0x003175D0, effect/polyManager SMT3 rename; was D_0034E5B0
 0x0034E5C0	dds3TrackPolyVCSetAcuteWParam	inferred	SMT3HD name via SLUS_209.11 0x003175E0, effect/polyManager SMT3 rename; was D_0034E5C0
+0x0034E5D0	dds3TrackPolyVCAcuteParam	inferred	SMT3HD name via SLUS_209.11 0x003175F0, effect/polyManager SMT3 rename; was D_0034E5D0
+0x0034E5E0	VCSetFunc	inferred	SMT3HD name via SLUS_209.11 0x00317600, effect/polyManager SMT3 rename; was D_0034E5E0
 0x0034E620	dds3TrackPolyOtTable	inferred	SMT3HD name via SLUS_209.11 0x00317640, effect/polyManager SMT3 rename; was D_0034E620
 0x0034E630	dds3SpPolyColorTo	inferred	SMT3HD name via SLUS_209.11 0x00317650, effect/polyManager SMT3 rename; was polyTimedTintEndColor
 0x0034E640	dds3SpPolyColorFrom	inferred	SMT3HD name via SLUS_209.11 0x00317660, effect/polyManager SMT3 rename; was polyTimedTintStartColor
@@ -10112,6 +10116,7 @@
 0x003BAFF4	fldWeatherLimitTexture	inferred	high confidence; src/dds1/game/code_001411F0.c fldLoadWeatherEffects(): D_003BAFF4 = func_002D3288(size); Texture reference created from retail limit_00.tmx and released with weather resources. [names_reviewed26.tsv]
 0x003BAFF8	fldRoomNameSentinel	inferred	confidence=medium; src/dds1/game/code_0014D110.c:fldCommand_GetHojiID; Special room-name string compared before parsing a numeric room suffix. [names_qp9.tsv]
 0x003BB010	hDrawListTop	inferred	SMT3HD data name via SLUS_209.11 0x0054F0B8, 5 agreeing references; was hDrawListTop
+0x003BB014	dds3TrackPolyTag	inferred	SMT3HD name via SLUS_209.11 0x0054F0BC, effect/polyManager SMT3 rename; was D_003BB014
 0x003BB024	effFieldColorFlags	inferred	confidence=high; matched_users=src/dds1/game/code_00161838.c:effBTLFieldColorClearFlags, src/dds1/game/code_00161838.c:effBTLFieldColorSetFlags; Field-color flag APIs add or remove requested bits in this shared word. [names_qp9.tsv]
 0x003BB028	effFieldColorOriginalSelector	inferred	confidence=high; data D_003BB028; matched-C-users=2; src/dds1/game/code_00161838.c:16:effBTLFieldColorSetSelectors; src/dds1/game/code_00161838.c:28:effBTLFieldColorGetOriginalSelector; Color selector setup captures the original base selector here; its getter returns it; data-twin=D_00436418, supported by 2 independently paired matched functions.; retail-data-start=asm/dds1/data/game/code_00161838.sdata.s:9.; seed-placeholder=D_003BB028; current asm label and source default identifier verified; source=names_reviewed36.tsv. [names_qp10_seed.tsv]
 0x003BB02C	effBTLSkillState	inferred	SMT3HD data name via SLUS_209.11 0x00551D80, 1 agreeing references; was effBTLSkillState

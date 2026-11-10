@@ -343,6 +343,8 @@ segments:
       # .ctors, .dtors, .reginfo
       - [0x280330, databin, ctors_dtors_reginfo]
       - [0x280380, data, data]
+      - [0x2ABC90, .data, effect/polyManager]
+      - [0x2ABFD0, data, data_after_polyManager]
       - [0x30C358, .data, sdf/sdfMotion]
       - [0x30C530, data, data_after_sdfMotion]
       - [0x30C810, .data, sdf/sdfDevCons]

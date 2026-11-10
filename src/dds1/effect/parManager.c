@@ -3398,7 +3398,7 @@ void dds3ParticleSetRotateMatrix(ParObj *effect, const Matrix4 *matrix) {
     VU0_STORE_MATRIX(effect->matrix);
 }
 
-extern void (*D_0034E5E0[])(ParSystem *, u32, u32);
+extern void (*VCSetFunc[])(ParSystem *, u32, u32);
 
 extern u16 dds3ParticleGetState(ParObj *obj);
 

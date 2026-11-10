@@ -10030,9 +10030,13 @@
 0x003AAD80	dds3TrackPolySixVectorFaceIndex	inferred	SMT3HD name via SLUS_209.11 0x00317470, effect/polyManager SMT3 rename; was D_003AAD80
 0x003AAE00	dds3TrackPolyDefaultFaceIndex	inferred	SMT3HD name via SLUS_209.11 0x003174F0, effect/polyManager SMT3 rename; was D_003AAE00
 0x003AAE50	dds3TrackPolyFiveVectorFaceIndex	inferred	SMT3HD name via SLUS_209.11 0x00317540, effect/polyManager SMT3 rename; was D_003AAE50
+0x003AAEB0	dds3PolygonTriangleParam	inferred	SMT3HD name via SLUS_209.11 0x003175A0, effect/polyManager SMT3 rename; was D_003AAEB0
 0x003AAEC0	dds3TrackPolyVCType1Param	inferred	SMT3HD name via SLUS_209.11 0x003175B0, effect/polyManager SMT3 rename; was D_003AAEC0
+0x003AAED0	dds3TrackPolyVCType2Param	inferred	SMT3HD name via SLUS_209.11 0x003175C0, effect/polyManager SMT3 rename; was D_003AAED0
 0x003AAEE0	dds3TrackPolyVCSetAcuteParam	inferred	SMT3HD name via SLUS_209.11 0x003175D0, effect/polyManager SMT3 rename; was D_003AAEE0
 0x003AAEF0	dds3TrackPolyVCSetAcuteWParam	inferred	SMT3HD name via SLUS_209.11 0x003175E0, effect/polyManager SMT3 rename; was D_003AAEF0
+0x003AAF00	dds3TrackPolyVCAcuteParam	inferred	SMT3HD name via SLUS_209.11 0x003175F0, effect/polyManager SMT3 rename; was D_003AAF00
+0x003AAF10	VCSetFunc	inferred	SMT3HD name via SLUS_209.11 0x00317600, effect/polyManager SMT3 rename; was D_003AAF10
 0x003AAF50	dds3TrackPolyOtTable	inferred	SMT3HD name via SLUS_209.11 0x00317640, effect/polyManager SMT3 rename; was D_003AAF50
 0x003AAF60	dds3SpPolyColorTo	inferred	SMT3HD name via SLUS_209.11 0x00317650, effect/polyManager SMT3 rename; was polyTimedTintEndColor
 0x003AAF70	dds3SpPolyColorFrom	inferred	SMT3HD name via SLUS_209.11 0x00317660, effect/polyManager SMT3 rename; was polyTimedTintStartColor
@@ -10775,6 +10779,7 @@
 0x00436398	fldYukEffectNode	inferred	high confidence; src/dds2/game/code_001442D0.c fldSetWeatherEffectPos(): if (D_00436398 != 0) { Instruction-aligned data counterpart of DDS1 D_003BAFE0 in the matched fldSetWeatherEffectPos() twin. Effect node constructed from retail YUK_2.EPL and positioned/updated by weather helpers. [names_reviewed26.tsv]
 0x0043639C	fldYukEffectPositioned	inferred	high confidence; src/dds2/game/code_001442D0.c fldSetWeatherEffectPos(): D_0043639C = 1; Instruction-aligned data counterpart of DDS1 D_003BAFE4 in the matched fldSetWeatherEffectPos() twin. Marks that the YUK effect was positioned; weather updates test it before updating the node. [names_reviewed26.tsv]
 0x00436400	hDrawListTop	inferred	SMT3HD data name via SLUS_209.11 0x0054F0B8, 5 agreeing references; was hDrawListTop
+0x00436404	dds3TrackPolyTag	inferred	SMT3HD name via SLUS_209.11 0x0054F0BC, effect/polyManager SMT3 rename; was D_00436404
 0x00436414	effFieldColorFlags	inferred	confidence=high; matched_users=src/dds2/game/code_00169418.c:effBTLFieldColorClearFlags, src/dds2/game/code_00169418.c:effBTLFieldColorSetFlags; Field-color APIs add and remove bits in this shared mask; same DDS1 role. [names_qp9.tsv]
 0x00436418	effFieldColorOriginalSelector	inferred	confidence=high; data D_00436418; matched-C-users=2; src/dds2/game/code_00169418.c:22:effBTLFieldColorSetSelectors; src/dds2/game/code_00169418.c:35:effBTLFieldColorGetOriginalSelector; Color selector setup captures the original base selector here; its getter returns it; data-twin=D_003BB028, supported by 2 independently paired matched functions.; retail-data-start=asm/dds2/data/game/code_00169418.sdata.s:15.; seed-placeholder=D_00436418; current asm label and source default identifier verified; source=names_reviewed36.tsv. [names_qp10_seed.tsv]
 0x0043641C	effBTLSkillState	inferred	SMT3HD data name via SLUS_209.11 0x00551D80, 1 agreeing references; was effBTLSkillState
