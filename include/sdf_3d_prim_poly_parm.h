@@ -2,20 +2,25 @@
 #define SDF_3D_PRIM_POLY_PARM_H
 
 #include "common.h"
+#include "sdf_types.h"
 
-typedef struct sdf3DPrimPolyParm_t {
+/* A polygon handed to sdf3DPrimMakePoly, which derives the VIF packet from it
+ * rather than keeping it. attr is the GS PRIM word; each non-null array below
+ * adds its own bit to it and its own UNPACK to the packet. */
+typedef struct
+{
     s16 faceCount;
     s16 pointCount;
     u16 attr;
-    u16 attrInhibit;
+    u16 attrInhibit; /* inverted and ANDed into attr */
     u32 color;
-    const u32 *faceIndex;
-    u128 *vertex;
-    u128 *normal;
-    f32 *uv;
-    u32 *multiUv;
+    u32 *faceIndex; /* null uses sdf3DPrimDefaultFaceIndex */
+    sdfVector4_t *vertex;
+    sdfVector4_t *normal;
+    sdfVector2_t *uv;
+    sdfVector2_t *multiUv;
     u32 *vertexColor;
-    void *(*allocator)(s32);
+    void *allocator; /* called instead of sdfGrAllocPacketBuff when set */
     f32 zBias;
 } sdf3DPrimPolyParm_t;
 

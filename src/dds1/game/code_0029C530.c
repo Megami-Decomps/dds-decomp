@@ -4688,7 +4688,7 @@ void effDrawTrackSet(EffTrackSet *track, const Matrix4 *matrix) {
             remaining -= 32;
             sdfDrawTagLink(list, effPkt3DPrimMakePoly(&D_003DC9E0));
             D_003DC9E0.vertex += 32;
-            D_003DC9E0.uv += 64;
+            D_003DC9E0.uv += 32;
             D_003DC9E0.vertexColor += 32;
         }
         if (remaining >= 4) {
@@ -9724,7 +9724,7 @@ void effDrawRibbon(EffRibbonWork *work, const Matrix4 *matrix) {
                     sdfDrawTagLink(list, effPkt3DPrimMakePoly(&D_003DCB00));
                     D_003DCB00.vertex += 8;
                     D_003DCB00.vertexColor += 8;
-                    D_003DCB00.uv += 16;
+                    D_003DCB00.uv += 8;
                 }
                 if (remaining >= 8) {
                     D_003DCB00.faceCount = 6;
@@ -10982,8 +10982,8 @@ void effDrawScalyTexturedStrip(EffStripWork *work, void *matrix) {
                 sdfDrawTagLink(list, effPkt3DPrimMakePoly(&D_003DCB30));
                 D_003DCB30.vertex += 8;
                 D_003DCB30.vertexColor += 8;
-                D_003DCB30.uv += 16;
-                D_003DCB30.multiUv += 16;
+                D_003DCB30.uv += 8;
+                D_003DCB30.multiUv += 8;
             }
             if (remaining >= 8) {
                 D_003DCB30.pointCount = remaining;
