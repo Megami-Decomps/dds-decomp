@@ -838,7 +838,7 @@ extern s32 mnuDrawLoadedProgressPanels(datUnitWork_t *resource, MenuProgressHost
 extern void mnuDrawCurrentProfilePanel(s32, s32, s32, MenuProgressHost *, s32);
 struct sdfGrOt_t;
 extern s8 evtStageTestUpdate(struct sdfGrOt_t **);
-extern struct sdfGrOt_t *kwlnSceneSurfaceSets[13][4];
+extern struct sdfGrOt_t *sdfModelOtTable[13][4];
 
 s32 mtrMantraEquipDraw(void) {
     MnuStatusResource *work = (MnuStatusResource *)sdfGetTaskValueByKey(mnuMantraSelectionResource, SDF_TASK_VALUE_USER_DATA_KEY);
@@ -865,7 +865,7 @@ s32 mtrMantraEquipDraw(void) {
         work->flags.profileReady = 1;
     }
     mnuDrawCurrentProfilePanel(0xE80, 0x5B8, 1, work->progressHost, 0x53);
-    if (evtStageTestUpdate(kwlnSceneSurfaceSets[9]) >= 2) {
+    if (evtStageTestUpdate(sdfModelOtTable[9]) >= 2) {
         work->flags.fadeProgress = 1;
     }
     return 0;

@@ -59,7 +59,7 @@ extern s32 effComputeLightDirectionVU(dds3ModelHandle_t *, sdf3DLightParallelPac
 extern void effFloorModelListRemove(EffectObjectNode *);
 
 #include "sdf_packet_alloc.h"
-extern sdfGrOt_t *kwlnSceneSurfaceSets[13][4];
+extern sdfGrOt_t *sdfModelOtTable[13][4];
 extern u64 D_003E9640[];
 
 extern u32 effSharedTextureReferenceCount;
@@ -184,7 +184,7 @@ void effRefreshModelLighting(EffModelOwner *work) {
     } else {
         model = work->model;
     }
-    mdlLink(model, kwlnSceneSurfaceSets[10]);
+    mdlLink(model, sdfModelOtTable[10]);
 }
 
 void effApplyModelPrimaryVector(EffModelOwner *owner, const f32 *position) {
@@ -318,7 +318,7 @@ void effRenderModelOwnerWithGsTests(EffModelOwner *owner) {
         }
         packet[5] = 0x47;
         sdfDrawTagLink(list, (u32)packet);
-        surface = kwlnSceneSurfaceSets[1][index];
+        surface = sdfModelOtTable[1][index];
         surface->regFunc(surface, list);
     }
 
@@ -326,7 +326,7 @@ void effRenderModelOwnerWithGsTests(EffModelOwner *owner) {
         owner->model->inner->lighting = owner->ownedBuffer;
     }
 
-    mdlLink(owner->model, kwlnSceneSurfaceSets[1]);
+    mdlLink(owner->model, sdfModelOtTable[1]);
 
     for (index = 1; index != 4; index++) {
         list = (sdfDrawTag_t *)sdfGrAllocPacketBuff(0x20);
@@ -339,7 +339,7 @@ void effRenderModelOwnerWithGsTests(EffModelOwner *owner) {
         packet[4] = D_003E9640[index];
         packet[5] = 0x47;
         sdfDrawTagLink(list, (u32)packet);
-        surface = kwlnSceneSurfaceSets[1][index];
+        surface = sdfModelOtTable[1][index];
         surface->regFunc(surface, list);
     }
 }
@@ -697,7 +697,7 @@ void func_002DD448(EffResourceOwner *owner) {
     }
     if (!(effModelUpdateControlFlags & EFF_MODEL_UPDATE_PAUSE_EFFECT_FRAME_ADVANCE)) {
         owner->model->first->frameStep = frameStep;
-        mdlLink(owner->model, kwlnSceneSurfaceSets[10]);
+        mdlLink(owner->model, sdfModelOtTable[10]);
     }
     frame = owner->currentFrame;
     count = owner->count;

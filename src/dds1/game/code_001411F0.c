@@ -1073,7 +1073,7 @@ void fldResetSceneResourceTables(void) {
 }
 
 
-extern struct sdfGrOt_t *kwlnSceneSurfaceSets[13][4];
+extern struct sdfGrOt_t *sdfModelOtTable[13][4];
 
 
 void fldAutoMapDrawMdl1(sdfModelRootNode_t *emitter, f32 x, f32 y, f32 z) {
@@ -1091,7 +1091,7 @@ void fldAutoMapDrawMdl1(sdfModelRootNode_t *emitter, f32 x, f32 y, f32 z) {
         SDF_VU0_STOREVECTOR(emitter->matrix[3]);
     sdfModelMakeLocalTm(handle);
     sdfModelEvalTm(emitter);
-    sdfBuildModelPacketsVia(sdfModelLinkOt, kwlnSceneSurfaceSets[11], emitter);
+    sdfBuildModelPacketsVia(sdfModelLinkOt, sdfModelOtTable[11], emitter);
 }
 
 extern FldProjectedSprite D_0033EBA0[];

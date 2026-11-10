@@ -160,7 +160,7 @@ void effModelAnimationStop(EffModelOwner *owner) {
 extern s32 effComputeLightDirectionVU(dds3ModelHandle_t *, sdf3DLightParallelPacket_t *);
 
 #include "sdf_packet_alloc.h"
-extern sdfGrOt_t *kwlnSceneSurfaceSets[13][4];
+extern sdfGrOt_t *sdfModelOtTable[13][4];
 extern u64 D_0037E5B0[];
 
 /* Attach the owner's lighting buffer when the direction update succeeds. */
@@ -172,7 +172,7 @@ void effRefreshModelLighting(EffModelOwner *work) {
     } else {
         model = work->model;
     }
-    mdlLink(model, kwlnSceneSurfaceSets[10]);
+    mdlLink(model, sdfModelOtTable[10]);
 }
 
 /* Pass a vector to the VU0 model helpers via vf10 (gcc cannot do this from plain C). */
@@ -300,7 +300,7 @@ void effRenderModelOwnerWithGsTests(EffModelOwner *owner) {
         }
         packet[5] = 0x47;
         sdfDrawTagLink(list, (u32)packet);
-        surface = kwlnSceneSurfaceSets[1][index];
+        surface = sdfModelOtTable[1][index];
         surface->regFunc(surface, list);
     }
 
@@ -308,7 +308,7 @@ void effRenderModelOwnerWithGsTests(EffModelOwner *owner) {
         owner->model->inner->lighting = owner->ownedBuffer;
     }
 
-    mdlLink(owner->model, kwlnSceneSurfaceSets[1]);
+    mdlLink(owner->model, sdfModelOtTable[1]);
 
     for (index = 1; index != 4; index++) {
         list = (sdfDrawTag_t *)sdfGrAllocPacketBuff(0x20);
@@ -321,7 +321,7 @@ void effRenderModelOwnerWithGsTests(EffModelOwner *owner) {
         packet[4] = D_0037E5B0[index];
         packet[5] = 0x47;
         sdfDrawTagLink(list, (u32)packet);
-        surface = kwlnSceneSurfaceSets[1][index];
+        surface = sdfModelOtTable[1][index];
         surface->regFunc(surface, list);
     }
 }
@@ -637,7 +637,7 @@ void func_0029B818(EffResourceOwner *owner) {
         SDF_VU0_STORE_ROW2_NOMEM(owner->model->inner->matrix[2]);
     }
     owner->model->first->frameStep = frameStep;
-    mdlLink(owner->model, kwlnSceneSurfaceSets[10]);
+    mdlLink(owner->model, sdfModelOtTable[10]);
     frame = owner->currentFrame;
     count = owner->count;
     limit = owner->plainEntry;

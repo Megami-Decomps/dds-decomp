@@ -162,7 +162,7 @@ extern u8 sdfViewShakeVector[];
 
 extern Matrix4 sdfViewMatrix;
 
-extern sdfGrOt_t *kwlnSceneSurfaceSets[13][4];
+extern sdfGrOt_t *sdfModelOtTable[13][4];
 
 extern void dds3RunQuake(void);
 
@@ -273,30 +273,30 @@ s32 dds3DrawFirstProcess(dds3ProcessID_t *task) {
         sdfPreDrawChainLink((SdfPacketChain *)D_00380860,
             (sdfPreDrawTag_t *)(D_003820F0 - 0x230 + bufferIndex * DDS3_FRAME_BUFFER_BYTES));
         providerSurfaces = &sdfGrOtTable[7];
-        sdfModelOtInit(kwlnSceneSurfaceSets[0], &providerSurfaces[32], &providerSurfaces[33],
+        sdfModelOtInit(sdfModelOtTable[0], &providerSurfaces[32], &providerSurfaces[33],
                                               &providerSurfaces[48], &providerSurfaces[49]);
         fldConfigureRenderCleanupMessage();
-        sdfModelOtInit(kwlnSceneSurfaceSets[8], &providerSurfaces[55], &providerSurfaces[56],
+        sdfModelOtInit(sdfModelOtTable[8], &providerSurfaces[55], &providerSurfaces[56],
                                               &providerSurfaces[57], &providerSurfaces[58]);
-        sdfModelOtInit(kwlnSceneSurfaceSets[9], &providerSurfaces[67], &providerSurfaces[68],
+        sdfModelOtInit(sdfModelOtTable[9], &providerSurfaces[67], &providerSurfaces[68],
                                               &providerSurfaces[69], &providerSurfaces[70]);
-        sdfModelOtInit(kwlnSceneSurfaceSets[1], &providerSurfaces[1], &providerSurfaces[2],
+        sdfModelOtInit(sdfModelOtTable[1], &providerSurfaces[1], &providerSurfaces[2],
                                               &providerSurfaces[3], &providerSurfaces[4]);
-        sdfModelOtInit(kwlnSceneSurfaceSets[2], &providerSurfaces[6], &providerSurfaces[7],
+        sdfModelOtInit(sdfModelOtTable[2], &providerSurfaces[6], &providerSurfaces[7],
                                               &providerSurfaces[8], &providerSurfaces[9]);
-        sdfModelOtInit(kwlnSceneSurfaceSets[3], &providerSurfaces[11], &providerSurfaces[12],
+        sdfModelOtInit(sdfModelOtTable[3], &providerSurfaces[11], &providerSurfaces[12],
                                               &providerSurfaces[13], &providerSurfaces[14]);
-        sdfModelOtInit(kwlnSceneSurfaceSets[4], &providerSurfaces[16], &providerSurfaces[17],
+        sdfModelOtInit(sdfModelOtTable[4], &providerSurfaces[16], &providerSurfaces[17],
                                               &providerSurfaces[18], &providerSurfaces[19]);
-        sdfModelOtInit(kwlnSceneSurfaceSets[5], &providerSurfaces[21], &providerSurfaces[22],
+        sdfModelOtInit(sdfModelOtTable[5], &providerSurfaces[21], &providerSurfaces[22],
                                               &providerSurfaces[23], &providerSurfaces[24]);
-        sdfModelOtInit(kwlnSceneSurfaceSets[6], &providerSurfaces[37], &providerSurfaces[38],
+        sdfModelOtInit(sdfModelOtTable[6], &providerSurfaces[37], &providerSurfaces[38],
                                               &providerSurfaces[39], &providerSurfaces[40]);
-        sdfModelOtInit(kwlnSceneSurfaceSets[10], &providerSurfaces[42], &providerSurfaces[43],
+        sdfModelOtInit(sdfModelOtTable[10], &providerSurfaces[42], &providerSurfaces[43],
                                               &providerSurfaces[46], &providerSurfaces[47]);
-        sdfModelOtInit(kwlnSceneSurfaceSets[11], &providerSurfaces[79], &providerSurfaces[80],
+        sdfModelOtInit(sdfModelOtTable[11], &providerSurfaces[79], &providerSurfaces[80],
                                               &providerSurfaces[81], &providerSurfaces[82]);
-        sdfModelOtInit(kwlnSceneSurfaceSets[12], &providerSurfaces[-5], &providerSurfaces[-4],
+        sdfModelOtInit(sdfModelOtTable[12], &providerSurfaces[-5], &providerSurfaces[-4],
                                               &providerSurfaces[-3], &providerSurfaces[-2]);
         sdf3DSetDefaultLight((const struct SdfDmaTagHeader *)(D_003820F0 + bufferIndex * 0x1F40 + 0xD0));
         sdf3DSetDefaultFog((u32)viewFrustum);
@@ -394,7 +394,7 @@ s32 dds3DrawProcess(dds3ProcessID_t *task) {
     dds3FadeUpdate();
     dds3DrawFade();
     dds3BlurUpdate();
-    groupHeads = kwlnSceneSurfaceSets;
+    groupHeads = sdfModelOtTable;
     packetGroups = dds3DrawEnv[bufferIndex].packetGroups;
     for (i = DDS3_FRAME_LAST_GROUP_INDEX; i >= 0; i--) {
         sdfModelDrawEnvLinkOt(*groupHeads, packetGroups);

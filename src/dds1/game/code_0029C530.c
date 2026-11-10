@@ -11225,7 +11225,7 @@ void effReleaseParticleList(EffSpanTable *list) {
 
 extern f32 effWorldUpVector[4];
 
-extern struct sdfGrOt_t *kwlnSceneSurfaceSets[13][4];
+extern struct sdfGrOt_t *sdfModelOtTable[13][4];
 /* Updates the span geometry of a model-attached particle effect after its model
  * is posed: for each map-position record it appends the model's look-at point
  * to the record's point set and rebuilds the tapered two-edge ribbon around the
@@ -11254,7 +11254,7 @@ void effUpdateParticleSpanGeometry(EffModelResource *work) {
     f32 taperStep;
     f32 pointHalfWidth;
 
-    mdlLink(model, kwlnSceneSurfaceSets[10]);
+    mdlLink(model, sdfModelOtTable[10]);
     VU0_STORE_VF_UNCLOBBERED(vf0, fallbackNormal);
     taperStep = -1.0f / (f32)frame;
     pointHalfWidth = config->pointHalfWidth;

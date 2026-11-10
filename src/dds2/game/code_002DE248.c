@@ -413,7 +413,7 @@ extern dds3ModelHandle_t *effLoadViewerModelWithVUState(void *modelData, u32 mod
 
 
 
-extern struct sdfGrOt_t *kwlnSceneSurfaceSets[13][4];
+extern struct sdfGrOt_t *sdfModelOtTable[13][4];
 
 
 typedef struct EffectObjectFlag {
@@ -11757,7 +11757,7 @@ void effReleaseParticleList(EffSpanTable *list) {
 
 extern f32 effWorldUpVector[4];
 
-extern struct sdfGrOt_t *kwlnSceneSurfaceSets[13][4];
+extern struct sdfGrOt_t *sdfModelOtTable[13][4];
 /* Updates the span geometry of a model-attached particle effect after its model
  * is posed: for each map-position record it appends the model's look-at point
  * to the record's point set and rebuilds the tapered two-edge ribbon around the
@@ -11786,7 +11786,7 @@ void effUpdateParticleSpanGeometry(EffModelResource *work) {
     f32 taperStep;
     f32 pointHalfWidth;
 
-    mdlLink(model, kwlnSceneSurfaceSets[10]);
+    mdlLink(model, sdfModelOtTable[10]);
     VU0_STORE_VF_UNCLOBBERED(vf0, fallbackNormal);
     taperStep = -1.0f / (f32)frame;
     pointHalfWidth = config->pointHalfWidth;
@@ -13554,7 +13554,7 @@ void effUpdateActorPoseFromModelResource(EffActiveResource *resource)
 
     model = *modelHandle;
     model->first->frameStep = config->frameStep;
-    mdlLink(model, kwlnSceneSurfaceSets[10]);
+    mdlLink(model, sdfModelOtTable[10]);
     elapsedFrame = (s32)resource->frame;
     duration = config->duration;
     inner = (*modelHandle)->inner;
@@ -13722,7 +13722,7 @@ void effApplyModelTransform(EffActiveResource *work) {
     mdlSetScale(modelContext->model);
     modelContext->model->first->frameStep =
         ((EffAimConfig *)animation)->modelParameter;
-    mdlLink(modelContext->model, kwlnSceneSurfaceSets[10]);
+    mdlLink(modelContext->model, sdfModelOtTable[10]);
     effDrawClassResourceWork(modelContext->material);
 }
 
@@ -14904,7 +14904,7 @@ void func_002FAD98(EffectSlotNode80 *node) {
                 VU0_STORE_VF(vf29, model->matrix[1]);
                 VU0_STORE_VF(vf30, model->matrix[2]);
                 sdfModelEvalTm(model);
-                sdfBuildModelPacketsVia(sdfModelLinkOt, kwlnSceneSurfaceSets[10], model);
+                sdfBuildModelPacketsVia(sdfModelLinkOt, sdfModelOtTable[10], model);
             }
         } else {
             fileReadRecordSecondVector((u8 *)record, rotation);
@@ -14946,7 +14946,7 @@ void func_002FAD98(EffectSlotNode80 *node) {
                 VU0_STORE_VF(vf29, model->matrix[1]);
                 VU0_STORE_VF(vf30, model->matrix[2]);
                 sdfModelEvalTm(model);
-                sdfBuildModelPacketsVia(sdfModelLinkOt, kwlnSceneSurfaceSets[10], model);
+                sdfBuildModelPacketsVia(sdfModelLinkOt, sdfModelOtTable[10], model);
             }
         }
         break;
@@ -15206,7 +15206,7 @@ void effSampleSharedEffectModelStartPose(EffSharedEffectWork *work) {
     }
 }
 
-extern sdfGrOt_t *kwlnSceneSurfaceSets[13][4];
+extern sdfGrOt_t *sdfModelOtTable[13][4];
 extern u64 D_003EA210[4];
 
 extern void mdlLinkEffect(dds3ModelHandle_t *owner, dds3ModelEffectCtrlr_t *anchorRecord);
@@ -15277,9 +15277,9 @@ void func_002FB998(EffSharedEffectWork *work) {
     }
     if (work->resource->deviceSlot == 0) {
         if (work->data.pad0B != 0) {
-            mdlLink(work->resource->model, kwlnSceneSurfaceSets[8]);
+            mdlLink(work->resource->model, sdfModelOtTable[8]);
         } else {
-            mdlLink(work->resource->model, kwlnSceneSurfaceSets[10]);
+            mdlLink(work->resource->model, sdfModelOtTable[10]);
         }
         return;
     }
@@ -15295,14 +15295,14 @@ void func_002FB998(EffSharedEffectWork *work) {
         packet->registerValue = 0x72801;
         packet->registerAddress = 0x47;
         sdfDrawTagLink(list, (u32)packet);
-        surface = kwlnSceneSurfaceSets[0][i];
+        surface = sdfModelOtTable[0][i];
         surface->regFunc(surface, list);
     }
     model = work->resource->model;
     model->flags |= MDL_SKIP_ANCHORS;
     savedFlags = model->inner->drawFlags;
     model->inner->drawFlags = 0x2000;
-    mdlLink(model, kwlnSceneSurfaceSets[0]);
+    mdlLink(model, sdfModelOtTable[0]);
     work->resource->model->flags &= ~MDL_SKIP_ANCHORS;
     work->resource->model->inner->drawFlags = savedFlags;
     for (i = 0; i != 4; i++) {
@@ -15316,7 +15316,7 @@ void func_002FB998(EffSharedEffectWork *work) {
         packet->registerValue = D_003EA210[i];
         packet->registerAddress = 0x47;
         sdfDrawTagLink(list, (u32)packet);
-        surface = kwlnSceneSurfaceSets[0][i];
+        surface = sdfModelOtTable[0][i];
         surface->regFunc(surface, list);
     }
     baseColor[0] = work->data.frame;
@@ -15343,7 +15343,7 @@ void func_002FB998(EffSharedEffectWork *work) {
         packet->registerValue = 0x51801;
         packet->registerAddress = 0x47;
         sdfDrawTagLink(list, (u32)packet);
-        surface = kwlnSceneSurfaceSets[8][i];
+        surface = sdfModelOtTable[8][i];
         surface->regFunc(surface, list);
     }
     sdfModelCopyStat((sdfModelRootNode_t *)work->resource->deviceSlot, work->resource->model->inner);
@@ -15352,7 +15352,7 @@ void func_002FB998(EffSharedEffectWork *work) {
     } else {
         ((sdfModelRootNode_t *)work->resource->deviceSlot)->lighting = NULL;
     }
-    sdfBuildModelPacketsVia(sdfModelLinkOt, kwlnSceneSurfaceSets[8],
+    sdfBuildModelPacketsVia(sdfModelLinkOt, sdfModelOtTable[8],
                            (sdfModelRootNode_t *)work->resource->deviceSlot);
     for (i = 0; i != 4; i++) {
         list = (sdfDrawTag_t *)sdfGrAllocPacketBuff(0x20);
@@ -15365,7 +15365,7 @@ void func_002FB998(EffSharedEffectWork *work) {
         packet->registerValue = D_003EA210[i];
         packet->registerAddress = 0x47;
         sdfDrawTagLink(list, (u32)packet);
-        surface = kwlnSceneSurfaceSets[8][i];
+        surface = sdfModelOtTable[8][i];
         surface->regFunc(surface, list);
     }
 }

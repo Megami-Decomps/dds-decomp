@@ -1150,7 +1150,7 @@ extern void itfDrawFullExtentWorkPanels(MnuShootingWork *work);
 extern void itfDispatchObjectFadeSequenceMode(MnuShootingWork *work);
 extern void mnuUpdateAndDrawPauseChoiceFade(MnuShootingWork *work);
 extern MnuModelNode *D_00438928;
-extern struct sdfGrOt_t *kwlnSceneSurfaceSets[13][4];
+extern struct sdfGrOt_t *sdfModelOtTable[13][4];
 
 s32 mnuDrawAndUpdateShootingScene(MnuShootingWork *work) {
     MenuProgressParameters *origin = mnuGetResourceProgressParameters();
@@ -1278,7 +1278,7 @@ s32 mnuDrawAndUpdateShootingScene(MnuShootingWork *work) {
             mnuBroadcastNodeModelState(D_00438928, 0x80664C4C);
             break;
         }
-        mdlLink(D_00438928->model, kwlnSceneSurfaceSets[0]);
+        mdlLink(D_00438928->model, sdfModelOtTable[0]);
     }
 
     itfDrawFullExtentWorkPanels(work);
@@ -1581,11 +1581,11 @@ void mnuPlaceShootingEntryObject(MenuWorkEntry *entry, MnuShootingWork *work) {
                 sdfSubmitGsTestOneRegisterPacket(0x30000, 0x4A);
                 uiDrawUniformColorRect(0, 0, 0, 0x2000, 0xE00, 0, 0x4A);
                 sdfSubmitGsTestOneRegisterPacket(0x5100D, 0x4A);
-                mdlLink(node->model, kwlnSceneSurfaceSets[9]);
+                mdlLink(node->model, sdfModelOtTable[9]);
             } else if (registry->parameterIndex == 0x22) {
-                mdlLink(node->model, kwlnSceneSurfaceSets[0]);
+                mdlLink(node->model, sdfModelOtTable[0]);
             } else {
-                mdlLink(node->model, kwlnSceneSurfaceSets[7]);
+                mdlLink(node->model, sdfModelOtTable[7]);
             }
             break;
         }

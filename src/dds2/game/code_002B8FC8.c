@@ -131,7 +131,7 @@ extern void frDisableMode();
 
 extern char mnuCampPartySelectionReturnPopupEntry[];
 
-extern struct sdfGrOt_t *kwlnSceneSurfaceSets[13][4];
+extern struct sdfGrOt_t *sdfModelOtTable[13][4];
 
 extern s8 evtStageTestUpdate(struct sdfGrOt_t **);
 

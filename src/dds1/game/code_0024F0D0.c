@@ -2260,7 +2260,7 @@ extern void mnuDrawAnimatedCurrencyCounter(s32, s32, s32, s32, MenuSceneMetadata
 extern s32 mnuDrawLoadedProgressPanels(datUnitWork_t *partyRecord, MenuProgressHost *work, s32 context);
 struct sdfGrOt_t;
 extern s8 evtStageTestUpdate(struct sdfGrOt_t **);
-extern struct sdfGrOt_t *kwlnSceneSurfaceSets[13][4];
+extern struct sdfGrOt_t *sdfModelOtTable[13][4];
 extern void uiDrawGradientColorRect(u32, u32, u32, u32, u32, const u32 *, u32);
 
 /* Update attached visuals and stage completion, then ramp the message-window shade over ten frames.
@@ -2282,7 +2282,7 @@ s32 mnuUpdateMantraSceneDisplay(void) {
         sceneMetadata->stageStarted = 1;
     }
     effUpdateAttached(0x1200, 0x730, 1, sceneMetadata->attachedEffect, MNU_SCENE_DRAW_CONTEXT);
-    if (evtStageTestUpdate(kwlnSceneSurfaceSets[9]) >= 2) {
+    if (evtStageTestUpdate(sdfModelOtTable[9]) >= 2) {
         sceneMetadata->stageFinished = 1;
     }
     if (fclChkMessage() != EVT_MESSAGE_WINDOW_CONTROL_RESULT_NO_ACTIVE_CONTROL) {

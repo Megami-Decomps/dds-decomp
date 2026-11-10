@@ -2594,7 +2594,7 @@ void mdlDrawMapPositionRecords(dds3ModelHandle_t *resource) {
 
 extern sdfGrOt_t D_003805A8;
 
-extern sdfGrOt_t *kwlnSceneSurfaceSets[13][4];
+extern sdfGrOt_t *sdfModelOtTable[13][4];
 
 s32 mdlViewerEnd(dds3ProcessID_t *task)
 {
@@ -2634,7 +2634,7 @@ s32 mdlViewerEnd(dds3ProcessID_t *task)
             }
           }
         }
-        mdlLink(mdlViewerState.resources[i], kwlnSceneSurfaceSets[0]);
+        mdlLink(mdlViewerState.resources[i], sdfModelOtTable[0]);
         if (((s8) mdlViewerState.unk0E) != 0)
         {
           mdlDrawMapPositionRecords(mdlViewerState.resources[i]);
@@ -2655,7 +2655,7 @@ s32 mdlViewerEnd(dds3ProcessID_t *task)
         {
           mdlViewerState.resources[i]->first->frameStep = step;
         }
-        mdlLink(mdlViewerState.resources[i], kwlnSceneSurfaceSets[0]);
+        mdlLink(mdlViewerState.resources[i], sdfModelOtTable[0]);
         if (((s8) mdlViewerState.unk0E) != 0)
         {
           mdlDrawMapPositionRecords(mdlViewerState.resources[i]);

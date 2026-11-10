@@ -283,7 +283,7 @@ extern void btlBuildTargetGroupFramingCameraPose(BtlLinkedCommand *, BtlCamState
 struct dds3ModelHandle_t;
 struct sdfGrOt_t;
 extern void btlDrawUnitTransparencyPasses(void *, void *, s32, u8 *, u32);
-extern struct sdfGrOt_t *kwlnSceneSurfaceSets[13][4];
+extern struct sdfGrOt_t *sdfModelOtTable[13][4];
 extern u8 btlUnitTransparencySurfaces[];
 
 

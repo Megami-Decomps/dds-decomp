@@ -79,7 +79,7 @@ void itfProjectScreenPointToFixedDepth(f32 *position, s32 screenX, s32 screenY) 
     position[2] = -300.0f;
 }
 
-extern struct sdfGrOt_t *kwlnSceneSurfaceSets[13][4];
+extern struct sdfGrOt_t *sdfModelOtTable[13][4];
 extern void mnuDeactivateModelNode(MnuModelNode *);
 extern void mnuTranslateNodePrimaryVector(MnuModelNode *, f32, f32, f32);
 
@@ -104,10 +104,10 @@ void mnuUpdateSectionModelWork(MnuSectionModelWork *work, u32 flags) {
                     alpha = ratio * 128.0f;
                     mnuSetNodeModelBroadcastByte(node, alpha);
                 }
-                mdlLink(node->model, kwlnSceneSurfaceSets[0]);
+                mdlLink(node->model, sdfModelOtTable[0]);
             } else {
                 mnuTranslateNodePrimaryVector(node, node->x, node->y, node->z);
-                mdlLink(node->model, kwlnSceneSurfaceSets[0]);
+                mdlLink(node->model, sdfModelOtTable[0]);
                 if (node->value48 != 0 && --node->value48 != 0) {
                     ratio = (f32)node->value48 / (f32)node->value4A;
                     alpha = ratio * 128.0f;

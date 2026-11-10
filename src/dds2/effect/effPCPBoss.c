@@ -171,7 +171,7 @@ void effPCPCrackDelete(effPCPCrack_t *work) {
 #include "eff_math.h"
 #include "sdf_quaternion.h"
 extern u32 effMagaCylinderCalcColor(u32, u32);
-extern struct sdfGrOt_t *kwlnSceneSurfaceSets[13][4];
+extern struct sdfGrOt_t *sdfModelOtTable[13][4];
 extern f32 D_003B1FE0[4];
 extern void dds3FlashPolyListSetABGR(dds3FlashPolyList_t *, u32);
 extern void dds3FlashPolyListDraw(dds3FlashPolyList_t *);
@@ -226,7 +226,7 @@ void effPCPCrackDraw(effPCPCrack_t *work) {
     scaleVector[3] = 0.0f;
     SDF_VU0_LOADVECTOR(scaleVector);
     mdlSetScale(model);
-    mdlLink(model, kwlnSceneSurfaceSets[10]);
+    mdlLink(model, sdfModelOtTable[10]);
     if (work->head.drawTrail) {
         colorStart = work->head.trailColorStartFrame;
         if (frame > colorStart) {

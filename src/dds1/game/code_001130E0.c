@@ -339,7 +339,7 @@ s32 effUpdateFollowModelTransform(dds3Basic_t *obj) {
 extern void effObjApplyTransformParameters(sdfGrOt_t **, dds3Basic_t *);
 extern void fldDrawEffectObjectShadow(dds3Basic_t *);
 extern void dds3DrawUnitObjectShadow(f32, f32, f32, f32, s32);
-extern sdfGrOt_t *kwlnSceneSurfaceSets[13][4];
+extern sdfGrOt_t *sdfModelOtTable[13][4];
 
 s32 dds3UnitObjectBasicDrawProcedure(dds3Basic_t *obj) {
     f32 vec[4];
@@ -358,9 +358,9 @@ s32 dds3UnitObjectBasicDrawProcedure(dds3Basic_t *obj) {
         fldDrawEffectObjectShadow(obj);
     }
     if (((EffectObjectData *)obj->workdata)->followParameterIndex == -1) {
-        effObjApplyTransformParameters(kwlnSceneSurfaceSets[0], obj);
+        effObjApplyTransformParameters(sdfModelOtTable[0], obj);
     } else {
-        effObjApplyTransformParameters(kwlnSceneSurfaceSets[((EffectObjectData *)obj->workdata)->followParameterIndex], obj);
+        effObjApplyTransformParameters(sdfModelOtTable[((EffectObjectData *)obj->workdata)->followParameterIndex], obj);
     }
     if (!dds3ObjectBaseCheckFlag(obj, 0x400)) {
         return 1;
@@ -721,7 +721,7 @@ s32 effObjSubmitTransformOpacityPasses(dds3Basic_t *object) {
     if (data->activeId == -1) {
         rsetOtOfs(0x27);
         rsetTest(1, 5, 0x60, 1, 0, 0, 1, 2);
-        effObjApplyTransformParameters(kwlnSceneSurfaceSets[0], object);
+        effObjApplyTransformParameters(sdfModelOtTable[0], object);
         rsetOtOfs(0x27);
         rsetTest(1, 5, 0x80, 1, 0, 0, 1, 2);
     } else {
@@ -735,17 +735,17 @@ s32 effObjSubmitTransformOpacityPasses(dds3Basic_t *object) {
                         u32 savedColor = object->color;
 
                         object->color = EFFECT_OPACITY_COLOR_NEUTRAL;
-                        effObjApplyTransformParameters(kwlnSceneSurfaceSets[data->activeId], object);
+                        effObjApplyTransformParameters(sdfModelOtTable[data->activeId], object);
                         object->color = savedColor;
                     } else {
-                        effObjApplyTransformParameters(kwlnSceneSurfaceSets[8], object);
+                        effObjApplyTransformParameters(sdfModelOtTable[8], object);
                     }
                 } else {
-                    effObjApplyTransformParameters(kwlnSceneSurfaceSets[data->activeId], object);
+                    effObjApplyTransformParameters(sdfModelOtTable[data->activeId], object);
                 }
             }
         }
-        effObjApplyTransformParameters(kwlnSceneSurfaceSets[data->activeId], object);
+        effObjApplyTransformParameters(sdfModelOtTable[data->activeId], object);
         rsetOtOfs(0x22);
         rsetTest(1, 5, 0x80, 1, 0, 0, 1, 2);
     }

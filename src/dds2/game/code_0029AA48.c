@@ -71,7 +71,7 @@ void mnuDrawRemainingSelectionExtent(BrsSkillPackageWork *context) {
 extern void uiDrawUniformColorRect(u32, u32, u32, u32, u32, u32, u32);
 struct sdfGrOt_t;
 extern s8 evtStageTestUpdate(struct sdfGrOt_t **);
-extern struct sdfGrOt_t *kwlnSceneSurfaceSets[13][4];
+extern struct sdfGrOt_t *sdfModelOtTable[13][4];
 
 void mnuDrawStatAssignmentPanel(BrsSkillPackageWork *context, s32 copyOptions) {
     datUnitWork_t *unit = context->selectedRewardRow->unit;
@@ -94,7 +94,7 @@ void mnuDrawStatAssignmentPanel(BrsSkillPackageWork *context, s32 copyOptions) {
     mnuDrawAndAdvancePanelGroup(0xEB0, 0x518, 0, unit, context->panelHandle, 0, 0x53);
     mnuDrawPartySkillListPanel(0, 0, 0, unit, context->spriteHandle, 0x53);
     mnuDrawRemainingSelectionExtent(context);
-    evtStageTestUpdate(kwlnSceneSurfaceSets[0]);
+    evtStageTestUpdate(sdfModelOtTable[0]);
 }
 
 s32 mnuAdvanceSkillPackageToItemPanel(dds3ProcessID_t *request) {

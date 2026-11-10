@@ -378,7 +378,7 @@ extern void evtSubmitPrimaryAlphaBlendMode(s32 blendMode);
 extern void evtSubmitPrimaryFramePacket(void);
 extern void evtSubmitAlternateFramePacket(void);
 struct sdfGrOt_t;
-extern struct sdfGrOt_t *kwlnSceneSurfaceSets[13][4];
+extern struct sdfGrOt_t *sdfModelOtTable[13][4];
 
 
 void dds3DrawObjectWithGradientOverlay(dds3Basic_t *object) {
@@ -403,7 +403,7 @@ void dds3DrawObjectWithGradientOverlay(dds3Basic_t *object) {
     context = dds3ObjectBaseBorrowModelContext(base);
     inner = context->inner;
     inner->flags |= 0x20;
-    mdlLink(context, kwlnSceneSurfaceSets[9]);
+    mdlLink(context, sdfModelOtTable[9]);
     inner->flags &= ~0x20;
     dds3ObjectBaseOnFlag(object, 0x10000);
 
@@ -459,7 +459,7 @@ void effObjApplyTransformParameters(struct sdfGrOt_t **surfaces, dds3Basic_t *ob
         if (dds3ObjectBaseCheckFlag(object, 0x10000)) {
             model = dds3ObjectBaseBorrowModelContext(base)->inner;
             model->flags |= SDF_MODEL_FORCE_ASSET_TEXTURE_REFRESH;
-            mdlLink(dds3ObjectBaseBorrowModelContext(base), kwlnSceneSurfaceSets[9]);
+            mdlLink(dds3ObjectBaseBorrowModelContext(base), sdfModelOtTable[9]);
             model->flags &= ~SDF_MODEL_FORCE_ASSET_TEXTURE_REFRESH;
             dds3ObjectBaseOffFlag(object, 0x10000);
             return;

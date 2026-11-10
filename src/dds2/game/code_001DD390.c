@@ -133,7 +133,7 @@ extern EffRandState effSharedRandomState[];
 extern void btlDrawUnitTransparencyPasses(BtlUnit *, dds3ModelHandle_t *, sdfModelRootNode_t *, sdfGrOt_t **, u32);
 
 
-extern struct sdfGrOt_t *kwlnSceneSurfaceSets[13][4];
+extern struct sdfGrOt_t *sdfModelOtTable[13][4];
 
 extern sdfGrOt_t *btlUnitTransparencySurfaces[];
 
@@ -3408,7 +3408,7 @@ void btlUpdateUnitTransparency(BtlUnit *unit) {
                         info->inner->lighting = 0;
                     }
                     mdlSetColor(info, color);
-                    mdlLink(info, kwlnSceneSurfaceSets[0]);
+                    mdlLink(info, sdfModelOtTable[0]);
                     dds3ObjectBaseOffFlag(unit->effectObject, 1);
                     btlBossDebugPrintf(D_00417940, unit);
                 }

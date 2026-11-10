@@ -170,7 +170,7 @@ extern void effPCPBreathSetPosition(EffPCPSpanWork *work, const f32 sourcePositi
 
 extern EffRandState effDefaultRandomState[];
 
-extern struct sdfGrOt_t *kwlnSceneSurfaceSets[13][4];
+extern struct sdfGrOt_t *sdfModelOtTable[13][4];
 
 /* The PCF callback receives one data pointer, then forwards slots 0 and 1. */
 extern EffPCPSpawnRangeWork *effPCPSpiralBEDCreate(
@@ -351,12 +351,12 @@ void effPCPHama01Draw(EffPCPTwinWork *work) {
         dds3EffectPartSetScale(work->pair[slotIndex][0], work->scale * 1.5f);
         dds3EffectPartSetScale(work->pair[slotIndex][1], 1.75f);
         mdlSetColor(obj[1], work->color);
-        mdlLink(obj[0], kwlnSceneSurfaceSets[10]);
+        mdlLink(obj[0], sdfModelOtTable[10]);
         sdfModelGetMarkPos(obj[0]->inner, 1);
         posp = &pos;
         SDF_VU0_STOREVECTOR_NOMEM(posp);
         mdlSetPosition(obj[1]);
-        mdlLink(obj[1], kwlnSceneSurfaceSets[10]);
+        mdlLink(obj[1], sdfModelOtTable[10]);
         if (work->frame > 0x18) {
             dds3EffectPartSetPosition(work->shared[slotIndex], posp);
             dds3EffectPartDraw(work->shared[slotIndex]);
@@ -469,10 +469,10 @@ void effPCPHama02Draw(EffPCPStaggered *work) {
             dds3EffectPartSetScale(work->handle[i * 2], work->scale * 1.5f);
             dds3EffectPartSetScale(work->handle[i * 2 + 1], 1.5f);
             mdlSetColor(obj[1], work->color);
-            mdlLink(obj[0], kwlnSceneSurfaceSets[10]);
+            mdlLink(obj[0], sdfModelOtTable[10]);
             sdfModelGetMarkPos(obj[0]->inner, 1);
             mdlSetPosition(obj[1]);
-            mdlLink(obj[1], kwlnSceneSurfaceSets[10]);
+            mdlLink(obj[1], sdfModelOtTable[10]);
         }
     }
 }
@@ -587,7 +587,7 @@ void effPCPHamaonDraw(EffPCPCrossWork *work) {
     SDF_VU0_LOADVECTOR(work);
     mdlSetPosition(anchor);
     dds3EffectPartSetScale(work->base, work->scale);
-    mdlLink(anchor, kwlnSceneSurfaceSets[10]);
+    mdlLink(anchor, sdfModelOtTable[10]);
     for (i = 0; i < 4; i++) {
         for (j = 0; j < 3; j++) {
             if (work->remainingDelay[i][j] != 0) {
@@ -598,7 +598,7 @@ void effPCPHamaonDraw(EffPCPCrossWork *work) {
             mdlSetColor(obj, work->color);
             sdfModelGetMarkPos(anchor->inner, i * 4 + j + 1);
             mdlSetPosition(obj);
-            mdlLink(obj, kwlnSceneSurfaceSets[10]);
+            mdlLink(obj, sdfModelOtTable[10]);
         }
     }
 }
@@ -695,11 +695,11 @@ void effPCPMHanma01Draw(EffPCPDelayedPairs *work) {
                         SDF_VU0_LOADVECTOR_BARRIER(work);
             mdlSetPosition(obj[0]);
             mdlSetColor(obj[1], work->color);
-            mdlLink(obj[0], kwlnSceneSurfaceSets[10]);
+            mdlLink(obj[0], sdfModelOtTable[10]);
             sdfModelGetMarkPos(obj[0]->inner, 1);
                         SDF_VU0_STOREVECTOR_NOMEM(&vec);
             mdlSetPosition(obj[1]);
-            mdlLink(obj[1], kwlnSceneSurfaceSets[10]);
+            mdlLink(obj[1], sdfModelOtTable[10]);
         }
     }
 }
@@ -796,7 +796,7 @@ void effPCPMudoDraw(EffPCPChargeWork *work) {
     scale = work->scale * 1.5f;
     dds3EffectPartSetScale(work->secondaryHandle, scale);
     dds3EffectPartSetPosition(work->secondaryHandle, work->vectorWords);
-    mdlLink(model, kwlnSceneSurfaceSets[10]);
+    mdlLink(model, sdfModelOtTable[10]);
     captureRow = work->historyCount;
     if (captureRow < 25) {
         for (point = 0; point < 7; point++) {
@@ -891,7 +891,7 @@ void effPCPHwave01Draw(EffPCPSpawnOnceWork *work) {
         SDF_VU0_LOADVECTOR_BARRIER(work->vector);
     mdlSetPosition(obj);
     dds3EffectPartSetColor(work->secondaryHandle, work->color);
-    mdlLink(obj, kwlnSceneSurfaceSets[10]);
+    mdlLink(obj, sdfModelOtTable[10]);
     sdfModelGetMarkPos(obj->inner, 1);
         VU0_STORE_VF_TO_MEMORY(vf10, vec);
     dds3EffectPartSetPosition(work->secondaryHandle, &vec);
@@ -3049,7 +3049,7 @@ void effPcpBlockSetUpdate(EffPCPBlockSetWork *work) {
     }
     dds3EffectPartSetRotateMatrix(work->headHandle, matrix);
     dds3EffectPartSetColor(work->headHandle, color);
-    mdlLink(model, kwlnSceneSurfaceSets[10]);
+    mdlLink(model, sdfModelOtTable[10]);
     SDF_VU0_COPYVECTOR(work->previousPosition, work->currentPosition);
     sdfModelGetMarkPos(model->inner, 1);
     SDF_VU0_STOREVECTOR(work->currentPosition);
@@ -4776,7 +4776,7 @@ void effPcpUpdateStaggeredPulseModels(EffPCPSprayWork *work) {
             SDF_VU0_LOADVECTOR(vec);
             effPCPMakkaUpdateNode(root);
             sdfModelEvalTm(model);
-            sdfBuildModelPacketsVia(sdfModelLinkOt, kwlnSceneSurfaceSets[10], model);
+            sdfBuildModelPacketsVia(sdfModelLinkOt, sdfModelOtTable[10], model);
         }
     }
     work->frame++;
@@ -5624,7 +5624,7 @@ void effPCPHelperBEDDraw(EffPCPMapEventWork *work) {
         mdlSetPosition(model);
         SDF_VU0_LOADVECTOR(scale);
         mdlSetScale(model);
-        mdlLink(model, kwlnSceneSurfaceSets[10]);
+        mdlLink(model, sdfModelOtTable[10]);
         count = work->count;
         fadeIn = work->params.fadeIn;
         fadeOut = work->params.fadeOut;

@@ -370,7 +370,7 @@ extern void uiDrawUniformColorRect(s32, s32, s32, s32, s32, s32, s32);
 extern void mnuDrawRemainingSelectionExtent(BrsSkillPackageWork *);
 struct sdfGrOt_t;
 extern s8 evtStageTestUpdate(struct sdfGrOt_t **);
-extern struct sdfGrOt_t *kwlnSceneSurfaceSets[13][4];
+extern struct sdfGrOt_t *sdfModelOtTable[13][4];
 
 void mnuDrawStatAssignmentPanel(BrsSkillPackageWork *scene, s32 copyOptions) {
     datUnitWork_t *item = scene->selectedRewardRow->unit;
@@ -391,7 +391,7 @@ void mnuDrawStatAssignmentPanel(BrsSkillPackageWork *scene, s32 copyOptions) {
     mnuDrawAndAdvancePanelGroup(0xEB0, 0x518, 0, item, scene->panelHandle, 0x53);
     mnuDrawPartyInfoSprites(0, 0, 0, item, scene->spriteHandle, 0x53);
     mnuDrawRemainingSelectionExtent(scene);
-    evtStageTestUpdate(kwlnSceneSurfaceSets[0]);
+    evtStageTestUpdate(sdfModelOtTable[0]);
 }
 
 

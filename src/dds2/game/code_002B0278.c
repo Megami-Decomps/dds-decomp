@@ -160,7 +160,7 @@ extern u8 frDisableMode(u8);
 
 extern MenuPopupEntry mnuCampPartySelectionReturnPopupEntry[];
 
-extern struct sdfGrOt_t *kwlnSceneSurfaceSets[13][4];
+extern struct sdfGrOt_t *sdfModelOtTable[13][4];
 
 extern s8 evtStageTestUpdate(struct sdfGrOt_t **);
 
@@ -1709,7 +1709,7 @@ s32 mnuDrawSelectedStaffPartyView(dds3ProcessID_t *callback) {
         mnuDrawIconPanelFullFade(0, 0, 0, menuWork->iconPanel, 0x53);
         mnuUpdateWindowPanelHandleStatesKindFourFive(menuWork->iconPanel);
     }
-    evtStageTestUpdate(kwlnSceneSurfaceSets[0]);
+    evtStageTestUpdate(sdfModelOtTable[0]);
     return menuSetHandler((void *)context, 1, (void *)callback);
 }
 

@@ -121,7 +121,7 @@ extern s32 D_0032E4DC[];
 
 extern sdfGrOt_t D_00324F88[];
 
-extern sdfGrOt_t *kwlnSceneSurfaceSets[13][4];
+extern sdfGrOt_t *sdfModelOtTable[13][4];
 
 extern u8 D_00324530[];
 
@@ -1617,7 +1617,7 @@ u8 fldEsutoMaChk(void) {
 }
 
 void fldConfigureRenderCleanupMessage(void) {
-    sdfModelOtInit(kwlnSceneSurfaceSets[7], &D_00324F88[0], &D_00324F88[6], &D_00324F88[8], &D_00324F88[7]);
+    sdfModelOtInit(sdfModelOtTable[7], &D_00324F88[0], &D_00324F88[6], &D_00324F88[8], &D_00324F88[7]);
 }
 
 #include "fld_encounter_roll_entry.h"

@@ -1211,7 +1211,7 @@ extern void mnuDrawIconPanelFullFade(s32, s32, s32, MenuPanelHandles *, s32);
 extern void mnuUpdateWindowPanelHandleStates(MenuPanelHandles *);
 struct sdfGrOt_t;
 extern s8 evtStageTestUpdate(struct sdfGrOt_t **);
-extern struct sdfGrOt_t *kwlnSceneSurfaceSets[13][4];
+extern struct sdfGrOt_t *sdfModelOtTable[13][4];
 
 s32 mnuDrawAndStepStaffPartyScene(dds3ProcessID_t *task) {
     CampMenuContext *context = (CampMenuContext *)dds3GetProcessData(task);
@@ -1251,7 +1251,7 @@ s32 mnuDrawAndStepStaffPartyScene(dds3ProcessID_t *task) {
         mnuDrawIconPanelFullFade(0, 0, 0, menu->resourceList, 0x53);
         mnuUpdateWindowPanelHandleStates(menu->resourceList);
     }
-    evtStageTestUpdate(kwlnSceneSurfaceSets[0]);
+    evtStageTestUpdate(sdfModelOtTable[0]);
     return menuRunPanel((void *)context, 1, (void *)task);
 }
 

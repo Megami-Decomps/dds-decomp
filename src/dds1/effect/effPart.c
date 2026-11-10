@@ -51,8 +51,8 @@ void mdlLoopMotion(mdlObj_t *aHandle, s32 aGroup, s32 aNumber);
 
 extern dds3EffectFunc_t dds3EffectFuncTable[7];
 
-extern void *kwlnSceneSurfaceSets[13][4];
-#define D_002F69B8 kwlnSceneSurfaceSets[10]
+extern void *sdfModelOtTable[13][4];
+#define D_002F69B8 sdfModelOtTable[10]
 
 extern u16 effPartModelSerial;
 

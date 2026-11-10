@@ -3301,7 +3301,7 @@ void btlCreateUnitTransparency(BtlUnit *unit) {
     btlBossDebugPrintf("btl:unit transparency create[%p]\n", unit);
 }
 
-extern struct sdfGrOt_t *kwlnSceneSurfaceSets[13][4];
+extern struct sdfGrOt_t *sdfModelOtTable[13][4];
 
 extern sdfGrOt_t *btlUnitTransparencySurfaces[];
 
@@ -3328,7 +3328,7 @@ void btlUpdateUnitTransparency(BtlUnit *unit) {
                         info->inner->lighting = 0;
                     }
                     mdlSetColor(info, color);
-                    mdlLink(info, kwlnSceneSurfaceSets[0]);
+                    mdlLink(info, sdfModelOtTable[0]);
                     dds3ObjectBaseOffFlag(unit->effectObject, 1);
                     btlBossDebugPrintf(D_003A3AD0, unit);
                 }
