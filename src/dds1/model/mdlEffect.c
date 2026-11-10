@@ -2700,7 +2700,7 @@ void mdlLoadViewerPresentationConfig(void) {
     resourceHandle = fileGetMemHandle(fileRequest);
     fileData = (char *)fileGetLoadPtr(fileRequest);
     fileSize = fileGetLoadSize(fileRequest);
-    fileRequestFreeIfComplete(fileRequest);
+    fileHandleFree(fileRequest);
     lineOffset = 0;
     while (lineOffset < fileSize) {
         nextLineOffset = lineOffset;
@@ -2759,7 +2759,7 @@ void mdlSaveViewerPresentationConfig(void) {
                         kwlnDrawVector.depthFar, kwlnDrawVector.fogColor);
     request = fileSave(D_00367AF8, buffer, size);
     fileSync(request);
-    fileRequestFreeIfComplete((struct FileRequest *)request);
+    fileHandleFree((struct FileRequest *)request);
 }
 
 extern s32 fclEncycFreeEntries(const char *);

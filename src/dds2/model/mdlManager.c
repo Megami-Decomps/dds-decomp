@@ -5,8 +5,6 @@
 #include "ps2asm.h"
 #include "sdfFrame.h"
 
-#define pacLoadEx fileCreatePacLoadWork
-#define fileHandleFree fileRequestFreeIfComplete
 #define mdl_1DD9C0 mdlProjectPoints
 
 #define MDL_GROUP_COUNT 8

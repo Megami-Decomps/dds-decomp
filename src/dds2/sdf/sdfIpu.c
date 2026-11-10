@@ -243,7 +243,6 @@ extern void sdfImageSetChainReleaseMem(saddr_t);
 extern void sdfGsMemFreeDelayed(sdfGsMemSlice_t *aHandle);
 
 /* DDS keeps its own name: the shorter one shifts DDS1 code_001DEFE0. */
-#define sdfIpuRunDecode sdfAdvanceStreamPlayback
 extern sdfIpuDecodeCb_t *sdfIpuPendingCb;
 
 extern s32 sdfIpuDecode(sdfIpuDecodeCb_t *);

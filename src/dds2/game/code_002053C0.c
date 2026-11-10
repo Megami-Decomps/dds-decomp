@@ -202,7 +202,7 @@ BtlTaskPollResult sndPollAtrac3SELoadTask(Atrac3LoadTaskArgs *args) {
         resource = fileGetMemHandle(args->request);
         data = sdfMemLock(resource);
         size = fileGetLoadSize(args->request);
-        fileRequestFreeIfComplete(args->request);
+        fileHandleFree(args->request);
         mnuInstallTitleSoundBufferFromData(data, size, D_003E0F60[args->entryIndex].format);
         sdfMemFreeDirect(resource);
         btlBossDebugPrintf("btl:atrac3 SE load end\n");
@@ -266,7 +266,7 @@ SndEarringPlaybackTaskResult sndDeadAtracPlaybackTask(BtlDeadLoadArgs *args) {
                 fileGetMemHandle(args->request);
             data = sdfMemLock(args->resourceAllocation);
             size = fileGetLoadSize(args->request);
-            fileRequestFreeIfComplete(args->request);
+            fileHandleFree(args->request);
             mnuInstallTitleSoundBufferFromData(data, size,
                                                MNU_TITLE_SOUND_FORMAT_MEDIUM_FRAME);
             mnuClearInactiveSoundBufferState();

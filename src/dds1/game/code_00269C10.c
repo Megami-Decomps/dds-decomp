@@ -357,7 +357,7 @@ s32 mnuCompleteTitleStreamFileLoad(TitleAudioStreamState *destinationState) {
         s32 fileBytes = fileGetLoadSize(mnuTitleStreamFileRequest);
         struct sdfMemHandle_t *allocation;
 
-        fileRequestFreeIfComplete(mnuTitleStreamFileRequest);
+        fileHandleFree(mnuTitleStreamFileRequest);
         allocation = sdfMemAllocFromTailDirect(fileBytes);
         mnuTitleStreamStatus.compressedData = (u8 *)sdfMemGetPtr(allocation);
         mnuTitleStreamStatus.allocation = allocation;

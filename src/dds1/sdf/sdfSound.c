@@ -14,7 +14,6 @@ typedef void *(*sceSifRpcFunc)(s32 function, void *request, s32 size);
 
 #define SND_VOICE_IOP_BYTES 0x21600
 
-#define sdfSndMakeFilename mnuBuildSoundResourcePath
 #define p2sd_2C1788 sndQueueNoPayloadCommand210
 #define p2sd_2C17D8 sndDispatchCommandWithoutPayload
 #define p2sd_2C1D78 sndSendFilenameCommand

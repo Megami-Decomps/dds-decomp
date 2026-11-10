@@ -597,7 +597,7 @@ LmapResourceLoadResult fldAdvanceLmapResourceLoad(LmapTaskState *task)
         datDebugPrintf(D_0042D2A8, files[load->entry].name);
         if (load->file != NULL) {
             sdfMemFreeDirect(fileGetMemHandle(load->file));
-            fileRequestFreeIfComplete(load->file);
+            fileHandleFree(load->file);
             datDebugPrintf(D_0042D2B8);
         }
         if (load->archive != NULL) {

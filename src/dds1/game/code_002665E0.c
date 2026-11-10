@@ -1191,7 +1191,7 @@ void func_00269418(void) {
 }
 
 /* Copy the packed eight-byte prefix, then append the caller's filename. */
-char *mnuBuildSoundResourcePath(char *pathBuffer, const char *filename) {
+char *sdfSndMakeFilename(char *pathBuffer, const char *filename) {
     *(u64p *)pathBuffer = *(u64p *)D_003BC590;
     return strcat(pathBuffer, filename);
 }

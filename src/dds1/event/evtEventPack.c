@@ -242,7 +242,7 @@ void evtCheckEventScriptLoaded(EvtPackLoadState *state) {
     if (state->pendingRequest != NULL) {
         if (pacFileCheckEnd(state->pendingRequest) != 0) {
             state->resourceAllocation = fileGetMemHandle(state->pendingRequest);
-            fileRequestFreeIfComplete(state->pendingRequest);
+            fileHandleFree(state->pendingRequest);
             state->pendingRequest = NULL;
             header = (const EvtPackHeader *)sdfMemLock(state->resourceAllocation);
             state->data = (u8 *)header;
@@ -308,7 +308,7 @@ void evtDestroyEventPackTask(dds3ProcessID_t *task) {
             sdfTexFreeDelayed(packState->effect75);
         }
         if (packState->pendingRequest != NULL) {
-            fileRequestFreeIfComplete(packState->pendingRequest);
+            fileHandleFree(packState->pendingRequest);
         }
         if (packState->resourceAllocation != NULL) {
             sdfMemFreeDelayedDirect(packState->resourceAllocation);

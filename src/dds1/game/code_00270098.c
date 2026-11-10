@@ -71,7 +71,7 @@ u8 mnuGetMoviePlaybackMode(void);
 void movieStop(void);
 
 KwlnTaskUpdateResult movieMan_Process(dds3ProcessID_t *task) {
-    sdfAdvanceStreamPlayback(0x3c / dds3VblanksPerFrame);
+    sdfIpuRunDecode(0x3c / dds3VblanksPerFrame);
     return KWLN_TASK_UPDATE_RETAIN_CALLBACK;
 }
 

@@ -413,7 +413,7 @@ s32 mtrAdvanceMantraResourceLoadState(MtrResourceLoadState *load, u16 mode) {
             if (files[load->entryIndex].kind == 3) {
                 sdfMemFreeDirect(fileGetMemHandle(load->fileEntry));
             }
-            fileRequestFreeIfComplete(load->fileEntry);
+            fileHandleFree(load->fileEntry);
             datDebugPrintf("FileHandle Free... OK!! \n");
         }
         if (load->archive != NULL) {

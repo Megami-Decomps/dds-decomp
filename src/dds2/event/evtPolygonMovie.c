@@ -749,10 +749,10 @@ void evtPolygonMovieFreeWork(PolyMovieWork *work) {
         }
         fileSyncAll();
         if (work->mainResource.request != 0) {
-            fileRequestFreeIfComplete(work->mainResource.request);
+            fileHandleFree(work->mainResource.request);
         }
         if (work->secondaryResource.request != 0) {
-            fileRequestFreeIfComplete(work->secondaryResource.request);
+            fileHandleFree(work->secondaryResource.request);
         }
         if (work->mainResource.handle != 0) {
             sdfMemFreeDirect(work->mainResource.handle);

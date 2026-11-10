@@ -17,7 +17,7 @@ u8 *fileGetLoadPtr(const struct FileRequest *request);
 /* Return the signed byte count recorded by the file transfer request. */
 s32 fileGetLoadSize(const struct FileRequest *request);
 /* Free a completed request wrapper; return one while it remains pending. */
-FileRequestCleanupResult fileRequestFreeIfComplete(struct FileRequest *request);
+FileRequestCleanupResult fileHandleFree(struct FileRequest *request);
 
 /* Each file/PAC request copies requestName into storage it owns until cleanup.
  * The caller keeps ownership of its input string and may modify or release it
@@ -26,7 +26,7 @@ FileRequestCleanupResult fileRequestFreeIfComplete(struct FileRequest *request);
 struct FileRequest *pacLoadEx(const char *requestName, u32 flags, void *packetCallbackAddress,
                                                 u32 onComplete, u32 userData);
 #else
-struct FilePacRequest *fileCreatePacLoadWork(const char *requestName, s32 flags, void *dispatchValue,
+struct FilePacRequest *pacLoadEx(const char *requestName, s32 flags, void *dispatchValue,
                                              s32 onComplete, s32 userData);
 #endif
 
@@ -34,7 +34,7 @@ struct FilePacRequest *fileCreatePacLoadWork(const char *requestName, s32 flags,
  * nonzero, the manager calls it once after the device request closes, passing
  * the completed request and userData. The context must remain valid until then;
  * callback delivery does not free the request wrapper, which callers release
- * with fileRequestFreeIfComplete. */
+ * with fileHandleFree. */
 #ifdef VERSION_DDS1
 struct FileRequest *fileLoadEx(const char *requestName, u32 allocationMode,
                                               u32 callbackAddress, u32 userData);

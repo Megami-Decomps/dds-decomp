@@ -4839,7 +4839,7 @@ BtlTaskPollResult btlPollGunLoad(GunLoadArgs *loadArgs) {
     }
     btlBossDebugPrintf("btl:gun & finish load end[%p]\n", loadArgs->request);
     unit->gunResource = (void *)sdfMemLock(fileGetMemHandle(loadArgs->request));
-    fileRequestFreeIfComplete(loadArgs->request);
+    fileHandleFree(loadArgs->request);
     unit->gunResourceFlags = (unit->gunResourceFlags & ~4) | 8;
     return BTL_TASK_POLL_END_DELAY;
 }

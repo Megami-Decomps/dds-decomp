@@ -9,7 +9,6 @@
 #include "itf_draw_grid.h"
 #include "eff_ref_obj.h"
 #include "sdf_heap_api.h"
-#include "file_request_api.h"
 #include "ee_mmi.h"
 #include "pcp_vu0.h"
 #include "eff.h"
@@ -20,6 +19,7 @@
 #include "sdf.h"
 #include "sdf_texture_file.h"
 #include "btl.h"
+#include "file_request_api.h"
 /* Declared before first use (were implicit int). */
 extern void * memset(void *, s32, u32);
 
@@ -198,7 +198,7 @@ void effCompleteTransientResourceJob(struct FileRequest *job, u32 *outInstance) 
     instance = effCreateResourceSlotSetFromAllocation(allocation, EFF_RESOURCE_TRANSIENT);
     *outInstance = (u32)instance;
     sdfMemFreeDirect(allocation);
-    fileRequestFreeIfComplete(job);
+    fileHandleFree(job);
 }
 
 /* Publish the instance without releasing its source allocation, then clean up the file job. */
@@ -209,7 +209,7 @@ void effCompleteRetainedResourceJob(struct FileRequest *job, u32 *outInstance) {
     allocation = fileGetMemHandle(job);
     instance = effCreateResourceSlotSetFromAllocation(allocation, EFF_RESOURCE_KEEP_ALLOCATION);
     *outInstance = (u32)instance;
-    fileRequestFreeIfComplete(job);
+    fileHandleFree(job);
 }
 
 extern s32 sprintf(char *, const char *, ...);
@@ -253,7 +253,7 @@ void effCompleteMappedResourceJob(struct FileRequest *job,
     mappedResource = effCreateMappedResource((const u8 *)sourceAddress);
     *outMappedResource = mappedResource;
     sdfMemFreeDirect(allocation);
-    fileRequestFreeIfComplete(job);
+    fileHandleFree(job);
 }
 
 /* Initialize the output to zero and schedule mapped-record completion. */

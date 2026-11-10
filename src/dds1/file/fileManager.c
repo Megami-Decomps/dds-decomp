@@ -3,7 +3,6 @@
 #include "kernel.h"
 #include "kwln.h"
 
-#define fileHandleFree fileRequestFreeIfComplete
 #include "fileManager.h"
 
 /* All three views share the 0x30-byte request header. Their differently

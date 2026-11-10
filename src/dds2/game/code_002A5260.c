@@ -137,7 +137,7 @@ extern void mnuSetMovieWorkFlag(MnuSlideBarPair *, s32, u8);
 
 extern void mnuCallInitWide(s32, s32, s32, s32, s32);
 
-extern void sdfMovieDrawFrame(movieStream_t *, sdfGrOt_t *);
+extern void release_movieobj2(movieStream_t *, sdfGrOt_t *);
 extern void mnuSubmitMovieDrawPacket(movieStream_t *, sdfGrOt_t *);
 extern u8 mnuIsAnyMenuInputPressed(void);
 extern void mnuDrawSprite(s32 x, s32 y, s32 depth, s32 alpha, s32 drawMode, s32 spriteIndex,
@@ -1693,7 +1693,7 @@ s32 mnuStopStaffTasks(void) {
 }
 
 s32 movieDrawProc(dds3ProcessID_t *task) {
-    sdfMovieDrawFrame(&mnuMovieDrawContext, &D_003803C8);
+    release_movieobj2(&mnuMovieDrawContext, &D_003803C8);
     return 0;
 }
 

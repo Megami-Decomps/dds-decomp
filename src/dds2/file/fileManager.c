@@ -3,8 +3,6 @@
 #include "kernel.h"
 #include "kwln.h"
 
-#define fileHandleFree fileRequestFreeIfComplete
-#define pacLoadEx fileCreatePacLoadWork
 #include "fileManager.h"
 
 /* All three views share the 0x30-byte request header. Their differently

@@ -2632,7 +2632,7 @@ s32 slCalc(dds3ProcessID_t *task) {
         fileSaveIconResourceHandle = fileGetMemHandle(job);
         fileSaveIconData = (u32)fileGetLoadPtr(job);
         fileSaveIconDataSize = fileGetLoadSize(job);
-        fileRequestFreeIfComplete(job);
+        fileHandleFree(job);
     }
     return 0;
 }
@@ -2842,7 +2842,7 @@ void fileReleaseMenuResources(void) {
         if (fileSaveIconRequest != 0) {
             fileSync(fileSaveIconRequest);
             fileSaveIconResourceHandle = fileGetMemHandle(fileSaveIconRequest);
-            fileRequestFreeIfComplete(fileSaveIconRequest);
+            fileHandleFree(fileSaveIconRequest);
             fileSaveIconRequest = 0;
         }
         sdfMemFreeHandleDirect(&fileSaveIconResourceHandle);

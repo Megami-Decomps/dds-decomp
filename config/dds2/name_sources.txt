@@ -6422,7 +6422,7 @@
 0x002A08D8	brsDrawProfileProgressDetails	inferred	confidence=high; result-row assembly reads profile/cap state, formats and queues its profile progress display. DDS1 twin0x00268D40. LiteH result-animation batch.
 0x002A0EE8	brsPollResultCounterCompletion	inferred	readability/matching review (QP16)
 0x002A1000	nbPlaySe	inferred	SMT3HD name via SLUS_209.11 0x0028D090, reloc-identical; was mnuSetTitleSequenceVolumePan
-0x002A1040	mnuBuildSoundResourcePath	inferred	src/dds2/game/code_002A05C0.c func_002A1040: Copies eight-byte /sound/ prefix from retail global and appends caller filename with strcat. Twin of DDS1 func_00269420. [names_reviewed24.tsv]
+0x002A1040	sdfSndMakeFilename	inferred	SMT3HD name via SLUS_209.11 0x002262E8, SMT3 name (was mnuBuildSoundResourcePath); was mnuBuildSoundResourcePath
 0x002A1070	mnuBuildVoiceResourcePath	inferred	src/dds2/game/code_002A05C0.c func_002A1070: Copies eight-byte /voice/ prefix from retail global and appends caller filename with strcat. Twin of DDS1 func_00269450. [names_reviewed24.tsv]
 0x002A10A0	mnuInitializeTitleAudioAndEffects	inferred	Initializes title sound resources and title-effect task once. [names_reviewed8.tsv]
 0x002A1248	mnuSetTitleVoicePrefixIndex	inferred	Stores index selecting the title voice filename prefix. [names_reviewed8.tsv]
@@ -7143,12 +7143,12 @@
 0x002C7C18	evtBattleStageTestStopTask	inferred	Destroys stage test hierarchy by name and disables debug graph. [names_reviewed5.tsv]
 0x002C7C88	pacFileHandleFree	inferred	SMT3HD name via SLUS_209.11 0x00296648, reloc-identical; was btlDestroyStageTask
 0x002C7CE8	pacFileHandleFree_	inferred	SMT3HD name via SLUS_209.11 0x002966A8, shared-hash-in-run; was btlStageTaskCleanupCallback
-0x002C7D00	fileRequestFreeIfComplete	inferred	Frees a completed request wrapper, returns one while an ordinary request is pending, and delegates PAC cleanup; does not free the loaded resource allocation. SMT3HD name via SLUS_209.11 0x002966C0, reloc-identical; was filePollEntryCleanup.
+0x002C7D00	fileHandleFree	inferred	SMT3HD name via SLUS_209.11 0x002966C0, SMT3 name (was fileRequestFreeIfComplete); was fileRequestFreeIfComplete
 0x002C7D78	fileLinkQueue	inferred	SMT3HD name via SLUS_209.11 0x00296738, reloc-identical; was fileManQueueNamedRequest
 0x002C7E28	fileUnlinkQueue	inferred	SMT3HD name via SLUS_209.11 0x002967E8, reloc-identical; was fileManCancelRequest
 0x002C7EE8	fileLinkCloseWait	inferred	SMT3HD name via SLUS_209.11 0x002968A8, byte-identical; was filePrependNode
 0x002C7EF8	fileUnlinkCloseWait	inferred	SMT3HD name via SLUS_209.11 0x002968B8, byte-identical; was fileUnlinkNode
-0x002C7F38	fileCreatePacLoadWork	inferred	confidence=high; src/dds2/file/fileManager.c:func_002C7F38; The native pac-load diagnostic accompanies allocation, packet setup and queued load-work initialization. [names_qp9.tsv]
+0x002C7F38	pacLoadEx	inferred	SMT3HD name via SLUS_209.11 0x002968F8, SMT3 name (was fileCreatePacLoadWork); was fileCreatePacLoadWork
 0x002C7FF0	pacLoad	inferred	SMT3HD name via SLUS_209.11 0x002969A0, reloc-identical; was fileQueuePlainDispatchRequest
 0x002C8018	pacLoadUseTail	inferred	SMT3HD name via SLUS_209.11 0x002969C8, reloc-identical; was fileQueueFlaggedDispatchRequest
 0x002C8040	fileLoadEx	inferred	SMT3HD name via SLUS_209.11 0x002969F0, same-old-name-as-dds1-0x00288AD0; was fileCreateCallbackRequest
@@ -9487,7 +9487,7 @@
 0x00345358	sdfIpuGetActiveFrame	inferred	SMT3HD name via SLUS_209.11 0x002C4C00, byte-identical; was sndGetSelectedChannelEntry
 0x00345380	sdfIpuFinishActiveFrame	inferred	SMT3HD name via SLUS_209.11 0x002C4C28, reloc-identical; was sdfAdvanceBufferedPlayback
 0x00345408	sdfIpuSetChainTag	inferred	SMT3HD name via SLUS_209.11 0x002C4CB0, reloc-identical; was sdfSubmitBufferedPlayback
-0x00345488	sdfAdvanceStreamPlayback	inferred	Called by the movie scheduler with a cadence; retries deferred input DMA, submits buffered frames on phase transitions, advances playback cadence, and refills active feeds.
+0x00345488	sdfIpuRunDecode	inferred	SMT3HD name via SLUS_209.11 0x002C4D30, SMT3 name (was sdfAdvanceStreamPlayback); was sdfAdvanceStreamPlayback
 0x003455F0	sdfIpuStartDecodeTask	inferred	SMT3HD name via SLUS_209.11 0x002C4E78, identical twin in its sdf unit run (sdf-decomp tools/twins.py renames); was sdfSoundInitAndAppendNode
 0x00345628	sdfIpuSetOutputTex	inferred	SMT3HD name via SLUS_209.11 0x002C4EB0, reloc-identical; was sdfStreamCreateWithParams
 0x003456C0	movieAttachDecodeTask	inferred	SMT3HD name via SLUS_209.11 0x002C4F48, identical twin in its sdf unit run (sdf-decomp tools/twins.py renames); was sdfSoundInitFormattedAndAppendNode
@@ -9498,7 +9498,7 @@
 0x003458E8	sdfSetStreamFrameDrawMode	inferred	confidence=high; stores unchanged u32 mode read at 0x00345BC8 by stream-frame draw consumer; value 1 selects alternate draw path, movie/title viewport callers set 1 and cleanup sets 0; DDS1 twin 0x002ECA40. No boolean narrowing. Namer1 batch 29.
 0x003458F0	sdfSetGridScaledDrawBounds	inferred	Stores grid-scaled draw bounds and the supplied mode. [names_reviewed10.tsv]
 0x00345928	sdfMovieQueueFrameSprite	inferred	Queues the decoded movie frame as a sprite over the movie's draw bounds, starting the PAC stream's sound once the ring holds a page. DDS1 twin 0x002ECA80.
-0x00345BA0	sdfMovieDrawFrame	inferred	Draws the movie frame after playback phase 2; queues the PAC channel-group command when buffered data reaches 0x1000, then allocates and appends the movie texture packet. Called each frame by movieDrawProc with the persistent movie context and graphics pool.
+0x00345BA0	release_movieobj2	inferred	SMT3HD name via SLUS_209.11 0x002C5170, SMT3 name (was sdfMovieDrawFrame); was sdfMovieDrawFrame
 0x00345E18	movieReadNextChunk	inferred	SMT3HD name via SLUS_209.11 0x002C53C8, reloc-identical; was sdfMovieScheduleLinearStreamRead
 0x00345EB0	movieGetStreamSize	inferred	SMT3HD name via SLUS_209.11 0x002C5460, reloc-identical; was sdfMovieHandleLinearDeviceEvent
 0x00346040	movieReadHeaderChunk	inferred	SMT3HD name via SLUS_209.11 0x002C55F0, reloc-identical; was sdfMovieProcessPendingData

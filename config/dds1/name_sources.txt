@@ -6178,7 +6178,7 @@
 0x00268D40	brsDrawProfileProgressDetails	inferred	confidence=high; result-row assembly reads profile/cap state, formats and queues its profile progress display. DDS2 twin0x002A08D8. LiteH result-animation batch.
 0x002692E0	brsPollResultCounterCompletion	inferred	readability/matching review (QP16)
 0x002693E0	nbPlaySe	inferred	SMT3HD name via SLUS_209.11 0x0028D090, twin-of-dds2-0x002A1000; was mnuSetTitleSequenceVolumePan
-0x00269420	mnuBuildSoundResourcePath	inferred	src/dds1/game/code_00268AB8.c func_00269420: Copies eight-byte /sound/ prefix from retail global and appends caller filename with strcat. [names_reviewed24.tsv]
+0x00269420	sdfSndMakeFilename	inferred	SMT3HD name via SLUS_209.11 0x002262E8, SMT3 name (was mnuBuildSoundResourcePath); was mnuBuildSoundResourcePath
 0x00269450	mnuBuildVoiceResourcePath	inferred	src/dds1/game/code_00268AB8.c func_00269450: Copies eight-byte /voice/ prefix from retail global and appends caller filename with strcat. [names_reviewed24.tsv]
 0x00269480	mnuInitializeTitleAudioAndEffects	inferred	Initializes title sound resources and title-effect task once. [names_reviewed8.tsv]
 0x00269500	mnuIncrementTitleEffectFrameCounter	inferred	Increments the frame counter at offset four in title effect state.
@@ -6833,12 +6833,12 @@
 0x002886E0	btlCreateStageTestTask	inferred	btl battle control and actor operations in game/code_00282850.c
 0x00288728	pacFileHandleFree	inferred	SMT3HD name via SLUS_209.11 0x00296648, reloc-identical; was btlDestroyStageTask
 0x00288788	pacFileHandleFree_	inferred	SMT3HD name via SLUS_209.11 0x002966A8, shared-hash-in-run; was btlStageTaskCleanupCallback
-0x002887A0	fileRequestFreeIfComplete	inferred	Frees a completed request wrapper, returns one while an ordinary request is pending, and delegates PAC cleanup; does not free the loaded resource allocation. SMT3HD name via SLUS_209.11 0x002966C0, reloc-identical; was filePollEntryCleanup.
+0x002887A0	fileHandleFree	inferred	SMT3HD name via SLUS_209.11 0x002966C0, SMT3 name (was fileRequestFreeIfComplete); was fileRequestFreeIfComplete
 0x00288818	fileLinkQueue	inferred	SMT3HD name via SLUS_209.11 0x00296738, reloc-identical; was fileManQueueNamedRequest
 0x002888C8	fileUnlinkQueue	inferred	SMT3HD name via SLUS_209.11 0x002967E8, reloc-identical; was fileManCancelRequest
 0x00288988	fileLinkCloseWait	inferred	SMT3HD name via SLUS_209.11 0x002968A8, byte-identical; was filePrependNode
 0x00288998	fileUnlinkCloseWait	inferred	SMT3HD name via SLUS_209.11 0x002968B8, byte-identical; was fileUnlinkNode
-0x002889D8	pacLoadEx	inferred	SMT3HD name via SLUS_209.11 0x002968F8, reloc-identical; was fileAllocateDispatchRequest
+0x002889D8	pacLoadEx	inferred	SMT3HD name via SLUS_209.11 0x002968F8, SMT3 name (was fileCreatePacLoadWork); was pacLoadEx
 0x00288A80	pacLoad	inferred	SMT3HD name via SLUS_209.11 0x002969A0, reloc-identical; was fileQueuePlainDispatchRequest
 0x00288AA8	pacLoadUseTail	inferred	SMT3HD name via SLUS_209.11 0x002969C8, reloc-identical; was fileQueueFlaggedDispatchRequest
 0x00288AD0	fileLoadEx	inferred	SMT3HD name via SLUS_209.11 0x002969F0, reloc-identical; was fileCreateCallbackRequest
@@ -8920,7 +8920,7 @@
 0x002EC4B0	sdfIpuGetActiveFrame	inferred	SMT3HD name via SLUS_209.11 0x002C4C00, byte-identical; was sndGetSelectedChannelEntry
 0x002EC4D8	sdfIpuFinishActiveFrame	inferred	SMT3HD name via SLUS_209.11 0x002C4C28, reloc-identical; was sdfAdvanceBufferedPlayback
 0x002EC560	sdfIpuSetChainTag	inferred	SMT3HD name via SLUS_209.11 0x002C4CB0, reloc-identical; was sdfSubmitBufferedPlayback
-0x002EC5E0	sdfAdvanceStreamPlayback	inferred	Called by the movie scheduler with a cadence; retries deferred input DMA, submits buffered frames on phase transitions, advances playback cadence, and refills active feeds.
+0x002EC5E0	sdfIpuRunDecode	inferred	SMT3HD name via SLUS_209.11 0x002C4D30, SMT3 name (was sdfAdvanceStreamPlayback); was sdfAdvanceStreamPlayback
 0x002EC748	sdfIpuStartDecodeTask	inferred	SMT3HD name via SLUS_209.11 0x002C4E78, identical twin in its sdf unit run (sdf-decomp tools/twins.py renames); was sdfSoundInitAndAppendNode
 0x002EC780	sdfIpuSetOutputTex	inferred	SMT3HD name via SLUS_209.11 0x002C4EB0, reloc-identical; was sdfStreamCreateWithParams
 0x002EC818	movieAttachDecodeTask	inferred	SMT3HD name via SLUS_209.11 0x002C4F48, identical twin in its sdf unit run (sdf-decomp tools/twins.py renames); was sdfSoundInitFormattedAndAppendNode
@@ -8931,7 +8931,7 @@
 0x002ECA40	sdfSetStreamFrameDrawMode	inferred	confidence=high; stores unchanged u32 mode read at 0x002ECD20 by stream-frame draw consumer; value 1 selects alternate draw path, movie viewport callers set 1 and cleanup sets 0; DDS2 twin 0x003458E8. No boolean narrowing. Namer1 batch 29.
 0x002ECA48	sdfSetGridScaledDrawBounds	inferred	Stores grid-scaled draw bounds and the supplied mode. [names_reviewed10.tsv]
 0x002ECA80	sdfMovieQueueFrameSprite	inferred	Queues the decoded movie frame as a sprite over the movie's draw bounds, starting the PAC stream's sound once the ring holds a page. DDS2 twin 0x00345928.
-0x002ECCF8	sdfMovieDrawFrame	inferred	Draws the movie frame after playback phase 2; queues the PAC channel-group command when buffered data reaches 0x1000, then allocates and appends the movie texture packet. Called each frame by movieDrawProc with the persistent movie context and graphics pool.
+0x002ECCF8	release_movieobj2	inferred	SMT3HD name via SLUS_209.11 0x002C5170, SMT3 name (was sdfMovieDrawFrame); was sdfMovieDrawFrame
 0x002ECF70	movieReadNextChunk	inferred	SMT3HD name via SLUS_209.11 0x002C53C8, reloc-identical; was sdfMovieScheduleLinearStreamRead
 0x002ED008	movieGetStreamSize	inferred	SMT3HD name via SLUS_209.11 0x002C5460, reloc-identical; was sdfMovieHandleLinearDeviceEvent
 0x002ED198	movieReadHeaderChunk	inferred	SMT3HD name via SLUS_209.11 0x002C55F0, reloc-identical; was sdfMovieProcessPendingData

@@ -265,7 +265,7 @@ typedef char SdfStreamFrameNode_readContext_offset_must_be_0x60[
     ((u32)&((sdfIpuDecodeCb_t *)0)->readContext == 0x60) ? 1 : -1];
 
 void sdfIpuMakeToIpuDmaTag(sdfIpuDecodeCb_t *, u8 *, s32);
-void sdfAdvanceStreamPlayback(s32 cadence);
+void sdfIpuRunDecode(s32 cadence);
 /* Store the stream-frame draw-path word unchanged; 1 selects the alternate path. */
 void sdfSetStreamFrameDrawMode(u32 mode);
 

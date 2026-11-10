@@ -37,7 +37,6 @@ extern sdfMovieCb_t *movieSemaId;
 extern const char sdfMovieIpsExt[];
 
 #define movie_2C5080 sdfPrintTextLine
-#define release_movieobj2 sdfMovieDrawFrame
 
 extern u32 movieDrawMode;
 extern s32 sdfMovieDrawLeft;
@@ -161,7 +160,7 @@ static inline u64 movieVertexWord(s32 x, s32 y, u32 depth) {
 
 /* Queue the decoded movie frame as a sprite over the viewport bounds and color
  * set by sdfSetGridScaledDrawBounds, once playback has begun; with the PAC
- * stream enabled, start its sound once the ring holds a page. sdfMovieDrawFrame
+ * stream enabled, start its sound once the ring holds a page. release_movieobj2
  * calls it when the stream-frame draw mode is 1. Upstream: INCLUDE_ASM in
  * both games; written from the retail routine. It differs from retail
  * only in register allocation, scheduling, the way the color word is masked,

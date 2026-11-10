@@ -520,7 +520,7 @@ s32 mnuAdvanceShootingPackageLoad(u8 *workBytes) {
         if (D_0040A970[work->packageEntryIndex].kind == 0) {
             sdfMemFreeDirect(
                 fileGetMemHandle(work->packageRequest));
-            fileRequestFreeIfComplete(work->packageRequest);
+            fileHandleFree(work->packageRequest);
             datDebugPrintf(D_0042D6C8);
         }
 
