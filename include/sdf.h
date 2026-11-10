@@ -574,7 +574,7 @@ typedef struct sdfMat_t {
     u16 flags; /* Halfword from the serialized asset-parameter header. */
     u8 duty; /* 0x06: pending state-group changes for the two draw entries */
     u8 pad;
-    struct SdfAssetEntry *packet[2]; /* 0x08: owned 0xA0-byte draw entries */
+    struct sdfMatPacket_t *packet[2]; /* 0x08: owned 0xA0-byte draw entries */
     u32 ambient; /* 0x10: first word set by primary-state updates */
     u32 diffuse; /* 0x14: second word set by primary-state updates */
     u32 multiTexDiffuse; /* 0x18 */
@@ -593,79 +593,78 @@ typedef struct sdfMat_t {
 
 typedef char SdfAsset_size_must_be_0x48[
     (sizeof(sdfMat_t) == 0x48) ? 1 : -1];
-typedef char sdfMat_t_flags_at_0x04[
-    ((u32)&((sdfMat_t *)0)->flags == 0x04) ? 1 : -1];
+typedef char sdfMat_t_id_at_0x00[
+    ((u32)&((sdfMat_t *)0)->id == 0x00) ? 1 : -1];
+typedef char sdfMat_t_duty_at_0x06[
+    ((u32)&((sdfMat_t *)0)->duty == 0x06) ? 1 : -1];
+typedef char sdfMat_t_packet_at_0x08[
+    ((u32)&((sdfMat_t *)0)->packet == 0x08) ? 1 : -1];
 typedef char sdfMat_t_ambient_at_0x10[
     ((u32)&((sdfMat_t *)0)->ambient == 0x10) ? 1 : -1];
 typedef char sdfMat_t_diffuse_at_0x14[
     ((u32)&((sdfMat_t *)0)->diffuse == 0x14) ? 1 : -1];
+typedef char sdfMat_t_multiTexDiffuse_at_0x18[
+    ((u32)&((sdfMat_t *)0)->multiTexDiffuse == 0x18) ? 1 : -1];
+typedef char sdfMat_t_constant_at_0x1C[
+    ((u32)&((sdfMat_t *)0)->constant == 0x1C) ? 1 : -1];
+typedef char sdfMat_t_specular_at_0x20[
+    ((u32)&((sdfMat_t *)0)->specular == 0x20) ? 1 : -1];
 typedef char sdfMat_t_specularParm_at_0x24[
     ((u32)&((sdfMat_t *)0)->specularParm == 0x24) ? 1 : -1];
 typedef char sdfMat_t_refmap_at_0x28[
     ((u32)&((sdfMat_t *)0)->refmap == 0x28) ? 1 : -1];
 typedef char sdfMat_t_texHandle_at_0x2C[
     ((u32)&((sdfMat_t *)0)->texHandle == 0x2C) ? 1 : -1];
-typedef char sdfMat_t_multiTexHandle_at_0x30[
-    ((u32)&((sdfMat_t *)0)->multiTexHandle == 0x30) ? 1 : -1];
+typedef char sdfMat_t_multiTexMethod_at_0x34[
+    ((u32)&((sdfMat_t *)0)->multiTexMethod == 0x34) ? 1 : -1];
 typedef char sdfMat_t_uvwParm_at_0x38[
     ((u32)&((sdfMat_t *)0)->uvwParm == 0x38) ? 1 : -1];
 typedef char sdfMat_t_multiTexUvwParm_at_0x3C[
     ((u32)&((sdfMat_t *)0)->multiTexUvwParm == 0x3C) ? 1 : -1];
-typedef char sdfMat_t_fdBias_at_0x40[
-    ((u32)&((sdfMat_t *)0)->fdBias == 0x40) ? 1 : -1];
+typedef char sdfMat_t_fdSoften_at_0x44[
+    ((u32)&((sdfMat_t *)0)->fdSoften == 0x44) ? 1 : -1];
 
-/* Draw entries store six transform floats and expose the same bytes as three qwords. */
-typedef union SdfDrawTransform {
+/* A texture coordinate transform in a material packet. sdfMatSetUvwParm fills
+ * it either as six floats or, for the identity case, as three quadword halves. */
+typedef union
+{
     f32 m[6];
-    u64 words[3];
-} SdfDrawTransform;
+    u64 q[3];
+} sdfMatTexTm_t;
 
-/* The cached GS TEX1, TEX0 and CLAMP values shared by texture draw records. */
-typedef struct SdfGsTextureStateValues {
-    u64 sampling;
-    u64 texture;
-    u64 clamp;
-} SdfGsTextureStateValues;
-
-typedef char SdfGsTextureStateValues_size_must_be_0x18[
-    (sizeof(SdfGsTextureStateValues) == 0x18) ? 1 : -1];
-
-/* Native 0xA0-byte draw-entry block allocated by SDF_ASSET_DRAW_ENTRY_BYTES. */
-typedef struct SdfAssetEntry {
-    u32 pad00;             /* 0x00 */
-    u32 unk04;             /* 0x04 */
-    u32 unk08;             /* 0x08 */
-    u32 secondaryColor;    /* 0x0C: packed color applied by the secondary draw state */
-    u32 primaryStateWordThird; /* 0x10: copied from the owning asset, or forced to zero. */
-    u32 unk14;             /* 0x14 */
-    u32 pad18;             /* 0x18 */
-    f32 unk1C;             /* 0x1C */
-    u32 alphaState;        /* 0x20: packed GS ALPHA_2 state emitted by the VU transfer builder */
-    u32 secondaryMode;     /* 0x24: secondary packet mode copied from sdfMat_t */
-    f32 y;                 /* 0x28 */
-    f32 x;                 /* 0x2C */
-    u8 pad30[8];           /* 0x30 */
-    SdfGsTextureStateValues primaryTextureState; /* 0x38 */
-    SdfGsTextureStateValues secondaryTextureState; /* 0x50 */
-    SdfDrawTransform transforms[2]; /* 0x68 */
-    u32 vifItopCommand;    /* 0x98: VIF ITOP with immediate 0xC */
-    u32 vifMscalCommand;   /* 0x9C: VIF MSCAL with microprogram index zero */
-} SdfAssetEntry;
-
-typedef char SdfAssetEntry_size_must_be_0xA0[
-    (sizeof(SdfAssetEntry) == 0xA0) ? 1 : -1];
-typedef char SdfAssetEntry_primaryStateWordThird_offset_must_be_0x10[
-    ((u32)&((SdfAssetEntry *)0)->primaryStateWordThird == 0x10) ? 1 : -1];
-typedef char SdfAssetEntry_primaryTextureState_offset_must_be_0x38[
-    ((u32)&((SdfAssetEntry *)0)->primaryTextureState == 0x38) ? 1 : -1];
-typedef char SdfAssetEntry_secondaryTextureState_offset_must_be_0x50[
-    ((u32)&((SdfAssetEntry *)0)->secondaryTextureState == 0x50) ? 1 : -1];
-typedef char SdfAssetEntry_transforms_offset_must_be_0x68[
-    ((u32)&((SdfAssetEntry *)0)->transforms == 0x68) ? 1 : -1];
-typedef char SdfAssetEntry_vifItopCommand_offset_must_be_0x98[
-    ((u32)&((SdfAssetEntry *)0)->vifItopCommand == 0x98) ? 1 : -1];
-typedef char SdfAssetEntry_vifMscalCommand_offset_must_be_0x9C[
-    ((u32)&((SdfAssetEntry *)0)->vifMscalCommand == 0x9C) ? 1 : -1];
+/* The VIF packet a material keeps per context: the GS registers
+ * sdfMatUpdatePacketBasic copies out of the texture handle, interleaved with
+ * the VIF codes that upload them. sdfMatNew allocates 0xA0 for it and writes
+ * VIF codes at 0x98 and 0x9C, which is the tail sdfhook's 128-byte version
+ * does not model. */
+typedef struct sdfMatPacket_t
+{
+    u32 vifcode0;
+    u32 ambient;
+    u32 diffuse;
+    u32 mtexDiffuse;
+    u32 specularColor;
+    u32 refmapColor;
+    u32 vifcode1;
+    f32 constant;
+    u32 mtexAlpha;
+    u32 mtexAlgo;
+    f32 fdBias;
+    f32 fdSoften;
+    u32 pad;
+    u32 vifcode2;
+    u64 tex1Data;
+    u64 tex0Data;
+    u64 clampData;
+    u64 mtexTex1Data;
+    u64 mtexTex0Data;
+    u64 mtexClampData;
+    /* sdfMatSetUvwParm writes one transform per texture: a 2x2 then an offset. */
+    sdfMatTexTm_t texTm;
+    sdfMatTexTm_t mtexTexTm;
+    u32 cmd_call_spec;
+    u32 cmd_call_kind;
+} sdfMatPacket_t;
 
 extern s32 sdfThreadSema;
 extern SdfThreadNode *sdfVblankThreadId;

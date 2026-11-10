@@ -11393,7 +11393,7 @@ void effDrawScalyTexturedStrip(u8 *owner, void *matrix) {
     sdfGrOt_t *surface;
     void *list;
     sdfTexHandle_t *texture;
-    SdfAssetEntry *entry;
+    sdfMatPacket_t *entry;
     u128 *referencePacket;
     void *dmaPacket;
     EffGsPairPacket *packet;
@@ -11453,11 +11453,11 @@ void effDrawScalyTexturedStrip(u8 *owner, void *matrix) {
     sdfMatSetMultiMethod((sdfMat_t *)work->handle, mode);
     row = 0;
     sdfMatUpdatePacket((sdfMat_t *)work->handle, (s8)sdfFrameId);
-    entry = (SdfAssetEntry *)((sdfMat_t *)work->handle)->packet[(s8)sdfFrameId];
-    entry->secondaryTextureState.clamp = 0x7F000FFF;
-    entry->primaryTextureState.clamp = 0x02007F000FFFULL;
-    entry->secondaryMode = mode;
-    entry->alphaState = registerId;
+    entry = ((sdfMat_t *)work->handle)->packet[(s8)sdfFrameId];
+    entry->mtexClampData = 0x7F000FFF;
+    entry->clampData = 0x02007F000FFFULL;
+    entry->mtexAlgo = mode;
+    entry->mtexAlpha = registerId;
     referencePacket = sdfGrAllocPacketBuff(0x20);
     sdfMatMakePacket((sdfMat_t *)work->handle, (SdfDmaTagHeader *)referencePacket,
                                        (s8)sdfFrameId);
