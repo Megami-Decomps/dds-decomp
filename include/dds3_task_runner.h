@@ -1,5 +1,5 @@
-#ifndef KWLN_TASK_RUNNER_H
-#define KWLN_TASK_RUNNER_H
+#ifndef DDS3_TASK_RUNNER_H
+#define DDS3_TASK_RUNNER_H
 
 #include "common.h"
 #include "kwln.h"
@@ -23,4 +23,4 @@ typedef enum dds3TaskCursorAction_t {
  */
 dds3TaskCursorAction_t RunProcess(dds3ProcessID_t *task);
 
-#endif /* KWLN_TASK_RUNNER_H */
+#endif /* DDS3_TASK_RUNNER_H */

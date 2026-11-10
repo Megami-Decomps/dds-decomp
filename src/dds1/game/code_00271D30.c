@@ -9,14 +9,14 @@
 #include "evt_stage_test_resource_work_result.h"
 #include "dds3_admin_control_api.h"
 #include "staff_grid_label_row.h"
-#include "kwln_task_add_child.h"
+#include "dds3_task_add_child.h"
 #include "fr_font.h"
 #include "itf_draw_grid.h"
 #include "mnu_staff.h"
 #include "mnu_camp_state_ack_api.h"
 #include "kwln.h"
-#include "kwln_task_create.h"
-#include "kwln_fade.h"
+#include "dds3_task_create.h"
+#include "dds3_fade.h"
 #include "sdf_heap_api.h"
 #include "dat_state.h"
 #include "mnu.h"
@@ -24,7 +24,7 @@
 #include "mnu_shop.h"
 #include "mnu_camp_work.h"
 #include "mnu_list.h"
-#include "kwln_task_lifecycle.h"
+#include "dds3_task_lifecycle.h"
 
 extern void mnuDestroyWindowContainer(MenuWindowContainer *);
 

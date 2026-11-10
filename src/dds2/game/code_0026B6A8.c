@@ -4,7 +4,7 @@
 #include "dsp_active_api.h"
 #include "dsp_entry_api.h"
 #include "kwln.h"
-#include "kwln_fade.h"
+#include "dds3_fade.h"
 #include "itf_draw_grid.h"
 #include "dsp_name.h"
 #include "mnu.h"

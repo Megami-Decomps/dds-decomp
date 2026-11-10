@@ -1,6 +1,6 @@
 #include "sdk_ps2.h"
 #include "common.h"
-#include "kwln_draw_light_binding.h"
+#include "dds3_draw_light_binding.h"
 #include "sdf_vu0.h"
 #include "kwln.h"
 #include "gs_packet.h"

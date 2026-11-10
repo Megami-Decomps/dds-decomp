@@ -1,5 +1,5 @@
-#ifndef KWLN_FADE_COLOR_H
-#define KWLN_FADE_COLOR_H
+#ifndef DDS3_FADE_COLOR_H
+#define DDS3_FADE_COLOR_H
 
 #include "common.h"
 
@@ -15,4 +15,4 @@ typedef struct {
 
 extern dds3FadeColor_t fadergba;
 
-#endif /* KWLN_FADE_COLOR_H */
+#endif /* DDS3_FADE_COLOR_H */

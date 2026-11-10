@@ -4,11 +4,11 @@
 #include "common.h"
 #include "file_config_option_api.h"
 #include "sdf_vu0.h"
-#include "kwln_background_fade_api.h"
+#include "dds3_background_fade_api.h"
 #include "sdf_pad_motor_api.h"
 #include "dds3Admin.h"
 #include "kernel.h"
-#include "kwln_draw_buffer.h"
+#include "dds3_draw_buffer.h"
 #include "eff_random_mod.h"
 #include "eff_random.h"
 #include "sdf_cons_matrix_packet.h"
@@ -19,13 +19,13 @@
 #include "sdf_texture_draw_packet.h"
 #include "sdf_tex_packet.h"
 #include "kwln.h"
-#include "kwln_task_update_count.h"
-#include "kwln_process_registration.h"
-#include "kwln_named_slot.h"
-#include "kwln_task_create.h"
-#include "kwln_task_runner.h"
-#include "kwln_fade.h"
-#include "kwln_fade_timing.h"
+#include "dds3_task_update_count.h"
+#include "dds3_process_registration.h"
+#include "dds3_named_slot.h"
+#include "dds3_task_create.h"
+#include "dds3_task_runner.h"
+#include "dds3_fade.h"
+#include "dds3_fade_timing.h"
 #include "sdf.h"
 #include "sdf_texture_lists.h"
 #include "sdf_texture_registry.h"
@@ -35,7 +35,7 @@
 #include "sdf_draw.h"
 #include "sdf_gs_blend.h"
 #include "sdf_sif_command.h"
-#include "kwln_task_lifecycle.h"
+#include "dds3_task_lifecycle.h"
 #include "btl.h"
 /* Declared before first use (were implicit int). */
 extern void eglSetOt(u32 surfaceIndex);
@@ -72,7 +72,7 @@ extern u16 D_00435CEE;
 extern void dds3PadVibrationSet(u32, u8, s32);
 
 #include "sdf_packet_alloc.h"
-#include "kwln_fade_color.h"
+#include "dds3_fade_color.h"
 #include "evt_frame_state_packet.h"
 
 
@@ -1179,7 +1179,7 @@ s32 dds3EnsureDefaultResource(void) {
 }
 
 /* Two fixed frame banks: thirteen draw groups and their scene/overlay packets. */
-#include "kwln_frame_draw_bank.h"
+#include "dds3_frame_draw_bank.h"
 typedef char dds3FrameDrawBank_size_check[sizeof(dds3FrameDrawBank_t) == 0x1F40 ? 1 : -1];
 
 extern dds3FrameDrawBank_t dds3DrawEnv[2];
@@ -1245,7 +1245,7 @@ void dds3InitDrawEnv(void) {
 
 
 /* One 0x1F40-byte draw bank of the held-texture render target. */
-#include "kwln_texture_bank.h"
+#include "dds3_texture_bank.h"
 
 extern sdfGrFrameSet_t dds3RenderTexId;
 extern u16 D_00435CCC;
@@ -1326,7 +1326,7 @@ void dds3FreeRenderTexture(void) {
 }
 
 /* Set the flag and return 1 when a held handle exists; otherwise leave it and return 0. */
-#include "kwln_texture_reference_flag_api.h"
+#include "dds3_texture_reference_flag_api.h"
 
 s32 dds3RenderTextureON(void) {
     s32 result = 0;
@@ -1637,8 +1637,8 @@ void dds3DrawDistRipOverError(void) {
 #include "sdf.h"
 #include "sdf_gs_packet.h"
 #include "sdf_packet_list.h"
-#include "kwln_fade_color.h"
-#include "kwln_draw_buffer.h"
+#include "dds3_fade_color.h"
+#include "dds3_draw_buffer.h"
 
 extern s16 dds3BackgroundFadeFirstRamp; /* the background fade's band ramps */
 extern s16 dds3BackgroundFadeSecondRamp;

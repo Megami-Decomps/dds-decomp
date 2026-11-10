@@ -14,7 +14,7 @@
 #include "mnu.h"
 #include "prf_profile_cap.h"
 #include "dsp_name.h"
-#include "kwln_fade.h"
+#include "dds3_fade.h"
 #include "prf_current_record_view.h"
 
 extern void ptyRecomputeMaxVitals(datUnitWork_t *, const s32 *);

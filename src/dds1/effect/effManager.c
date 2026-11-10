@@ -10,7 +10,7 @@
 #include "sdf_packet_list.h"
 #include "sdf_gs_packet.h"
 #include "eff_manager_task.h"
-#include "kwln_task_runner.h"
+#include "dds3_task_runner.h"
 #include "eff_legacy_node_instance.h"
 
 extern sdfGrOt_t sdfGrOtTable[];

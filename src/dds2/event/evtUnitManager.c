@@ -1117,7 +1117,7 @@ void evtCopyUnitTargetVector(evtUnitHandle_t *work, const f32 src[4]) {
 #include "sdf_trig.h"
 #include "scr_integer_return_value_api.h"
 #include "sdf_unique_chunk_value_api.h"
-#include "kwln_task_add_child.h"
+#include "dds3_task_add_child.h"
 #include "fpu.h"
 #include "mdl_motion_api.h"
 #include "mdl_motion_end_status.h"

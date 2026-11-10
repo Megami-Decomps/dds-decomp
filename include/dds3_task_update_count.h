@@ -1,5 +1,5 @@
-#ifndef KWLN_TASK_UPDATE_COUNT_H
-#define KWLN_TASK_UPDATE_COUNT_H
+#ifndef DDS3_TASK_UPDATE_COUNT_H
+#define DDS3_TASK_UPDATE_COUNT_H
 
 #include "kwln.h"
 
@@ -10,4 +10,4 @@ typedef u32 dds3TaskUpdateCount_t;
  * after callback handling, except when an active callback finishes immediately. */
 dds3TaskUpdateCount_t dds3GetProcessRunTime(const dds3ProcessID_t *task);
 
-#endif /* KWLN_TASK_UPDATE_COUNT_H */
+#endif /* DDS3_TASK_UPDATE_COUNT_H */

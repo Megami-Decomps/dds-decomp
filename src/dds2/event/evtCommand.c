@@ -10,7 +10,7 @@
 #include "sdf_vu0.h"
 #include "dds3_admin_control_api.h"
 #include "evt_stage_anime_control_api.h"
-#include "kwln_task_add_child.h"
+#include "dds3_task_add_child.h"
 #include "sdf_vu_matrix.h"
 #include "evt_world_object_api.h"
 #include "evt_polygon_movie_flags_api.h"

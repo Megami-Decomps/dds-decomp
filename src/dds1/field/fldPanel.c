@@ -3,8 +3,8 @@
 #include "sdf_chip.h"
 
 #include "kwln.h"
-#include "kwln_task_create.h"
-#include "kwln_task_lifecycle.h"
+#include "dds3_task_create.h"
+#include "dds3_task_lifecycle.h"
 extern dds3ProcessID_t *inputpanel_id;
 
 

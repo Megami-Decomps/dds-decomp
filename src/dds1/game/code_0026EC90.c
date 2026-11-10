@@ -5,7 +5,7 @@
 #include "fr_font_measure.h"
 #include "eff_resource_slots.h"
 #include "kwln.h"
-#include "kwln_task_create.h"
+#include "dds3_task_create.h"
 #include "sdf_heap_api.h"
 #include "sdf_trig.h"
 #include "mnu.h"
@@ -14,8 +14,8 @@
 #include "mnu_movie_playback_api.h"
 #include "mnu_movie_resource.h"
 #include "itf.h"
-#include "kwln_task_lifecycle.h"
-#include "kwln_fade.h"
+#include "dds3_task_lifecycle.h"
+#include "dds3_fade.h"
 
 extern u8 D_0037B8BC[];
 

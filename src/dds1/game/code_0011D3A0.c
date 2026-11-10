@@ -8,7 +8,7 @@
 #include "sdf_packet_list.h"
 #include "ee_mmi.h"
 #include "kwln.h"
-#include "kwln_task_create.h"
+#include "dds3_task_create.h"
 #include "pcp_vu0.h"
 #include "sdf_vu_matrix.h"
 #include "common.h"
@@ -41,7 +41,7 @@
 #include "mdl.h"
 #include "dat_state.h"
 #include "dat_new_cycle_state.h"
-#include "kwln_task_lifecycle.h"
+#include "dds3_task_lifecycle.h"
 /* Declared before first use (were implicit int). */
 extern s32 fldDoor_ElvTakasaToFloor(s32 index);
 
@@ -2288,7 +2288,7 @@ void fldMarkStageExplorationCellsAroundPosition(s32 room, s32 stage, f32 x, f32 
 #include "sdf_packet_list.h"
 #include "ee_mmi.h"
 #include "kwln.h"
-#include "kwln_task_create.h"
+#include "dds3_task_create.h"
 #include "pcp_vu0.h"
 #include "common.h"
 #include "fld_scene_ready_api.h"
@@ -2309,7 +2309,7 @@ void fldMarkStageExplorationCellsAroundPosition(s32 room, s32 stage, f32 x, f32 
 #include "dds3obj.h"
 #include "mdl.h"
 #include "dat_state.h"
-#include "kwln_task_lifecycle.h"
+#include "dds3_task_lifecycle.h"
 #include "dds3_world_secondary.h"
 #include "sdf_packet_alloc.h"
 #include "fld_camera_tracking.h"

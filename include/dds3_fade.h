@@ -1,5 +1,5 @@
-#ifndef KWLN_FADE_H
-#define KWLN_FADE_H
+#ifndef DDS3_FADE_H
+#define DDS3_FADE_H
 
 #include "common.h"
 
@@ -15,4 +15,4 @@ void dds3FadeOut2(s32 duration);
 /* Select the background fade visibility mode used by scene transitions. */
 void dds3FadeSetMode(s32 visibilityMode);
 
-#endif /* KWLN_FADE_H */
+#endif /* DDS3_FADE_H */

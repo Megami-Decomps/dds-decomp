@@ -18,8 +18,8 @@
 #include "sdf_pac_packet.h"
 #include "sdf_packet_list.h"
 #include "kwln.h"
-#include "kwln_task_runner.h"
-#include "kwln_task_create.h"
+#include "dds3_task_runner.h"
+#include "dds3_task_create.h"
 #include "sdf_heap_api.h"
 #include "sdf.h"
 #include "itf_grid_text.h"
@@ -28,9 +28,9 @@
 #include "fld_lmap_task.h"
 #include "fld_lmap_task_presence.h"
 #include "sdf_sif_command.h"
-#include "kwln_task_lifecycle.h"
+#include "dds3_task_lifecycle.h"
 #include "mdl_flag_api.h"
-#include "kwln_fade.h"
+#include "dds3_fade.h"
 #include "sdf_counter_display.h"
 
 typedef struct SdfSlotSet SdfSlotSet;

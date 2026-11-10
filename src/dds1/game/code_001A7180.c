@@ -46,7 +46,7 @@
 #include "btl_actor_attribute_api.h"
 #include "pty_roster_api.h"
 #include "dat_command.h"
-#include "kwln_task_lifecycle.h"
+#include "dds3_task_lifecycle.h"
 /* Declared before first use (were implicit int). */
 extern u8 btlTestSelectedItemCategoryMask(BtlUnit *unit, s32 actorIndex);
 extern s32 fldCountSceneSlots(void);
@@ -257,7 +257,7 @@ u32 btlGetAdjustedSlotAffinity(BtlUnit *unit, s32 unused, DatAffinitySelector se
 #include "dat_state.h"
 #include "pty_roster_api.h"
 #include "dat_command.h"
-#include "kwln_task_lifecycle.h"
+#include "dds3_task_lifecycle.h"
 #include "sdf_debug_api.h"
 #include "btl_actor_command_selector_value_api.h"
 #include "evt_run_context_api.h"

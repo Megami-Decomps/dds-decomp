@@ -1,5 +1,5 @@
-#ifndef KWLN_TASK_FLAGS_H
-#define KWLN_TASK_FLAGS_H
+#ifndef DDS3_TASK_FLAGS_H
+#define DDS3_TASK_FLAGS_H
 
 #include "kwln.h"
 
@@ -30,4 +30,4 @@ void ChangeProcessFlag(dds3TaskFlagUpdateAction_t action, dds3ProcessID_t *task,
 void dds3SetProcessFlag(dds3ProcessID_t *object, u32 mask, dds3TaskFlagScope_t scope);
 void dds3ResetProcessFlag(dds3ProcessID_t *object, u32 mask, dds3TaskFlagScope_t scope);
 
-#endif /* KWLN_TASK_FLAGS_H */
+#endif /* DDS3_TASK_FLAGS_H */

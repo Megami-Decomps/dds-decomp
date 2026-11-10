@@ -15,7 +15,7 @@
 #include "brs_ui_update_allowed_api.h"
 #include "dsp_name.h"
 #include "mdl_flag_api.h"
-#include "kwln_fade.h"
+#include "dds3_fade.h"
 #include "prf_current_record_view.h"
 
 

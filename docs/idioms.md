@@ -15689,7 +15689,7 @@ Their per-frame `memcpy` uses `sizeof` the real body and preserves the
 retail aligned doubleword copy without an over-aligned nominal alias.
 The dynamic-work snapshots still use their real leading `params` member.
 
-The complete cutover removes the obsolete `kwln_draw_params.h`, its
+The complete cutover removes the obsolete draw parameter header, its
 tautological cross-view layout checks, and the unused scalar/bounds field
 aliases from C. Both kernel units gate at 42/0, both effect-event
 units at 103/0, and both complete linked games pass their retail SHA-1.

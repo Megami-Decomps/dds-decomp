@@ -9,7 +9,7 @@
 #include "sdf_delayed_resource_check_api.h"
 #include "sdf_vu0.h"
 #include "scr_integer_return_value_api.h"
-#include "kwln_task_add_child.h"
+#include "dds3_task_add_child.h"
 #include "sdf_vu_matrix.h"
 #include "evt_world_object_api.h"
 #include "evt_polygon_movie_flags_api.h"

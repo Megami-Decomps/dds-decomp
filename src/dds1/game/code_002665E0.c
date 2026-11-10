@@ -795,7 +795,7 @@ s32 brsCalcProgressAnimationStep(BrsSkillPackageWork *work, BrsProgressRow *prog
 #include "dds3_world_value.h"
 #include "sdf_heap_api.h"
 #include "kwln.h"
-#include "kwln_task_create.h"
+#include "dds3_task_create.h"
 #include "mnu_title_effect.h"
 #include "file.h"
 #include "file_request_api.h"

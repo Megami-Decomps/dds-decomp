@@ -37,10 +37,10 @@
 #include "dds3_basic_array_cursor.h"
 #include "dds3_world_primary.h"
 #include "kwln.h"
-#include "kwln_task_create.h"
+#include "dds3_task_create.h"
 #include "dat_state.h"
 #include "dat_new_cycle_state.h"
-#include "kwln_task_lifecycle.h"
+#include "dds3_task_lifecycle.h"
 /* Declared before first use (were implicit int). */
 extern s32 fldDoor_ElvTakasaToFloor(s32 index);
 extern void fldResetViewState(void);

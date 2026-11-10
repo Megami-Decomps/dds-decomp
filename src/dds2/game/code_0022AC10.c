@@ -15,9 +15,9 @@
 #include "btl_script_resource_api.h"
 #include "btl_event_asset_api.h"
 #include "btl_event_sequence_api.h"
-#include "kwln_background_fade_api.h"
+#include "dds3_background_fade_api.h"
 #include "btl_skill_max_api.h"
-#include "kwln_task_add_child.h"
+#include "dds3_task_add_child.h"
 #include "btl_actor_transform_parameters.h"
 #include "btl_select_transform_parameters_api.h"
 #include "btl_effect_position.h"
@@ -191,7 +191,7 @@ extern sdfTexHandle_t *dds3RenderTexture;
 
 extern s32 dds3AllocRenderTexture(u16 width, u16 height, f32 value);
 
-#include "kwln_texture_reference_flag_api.h"
+#include "dds3_texture_reference_flag_api.h"
 
 extern void func_0022D040(void);
 

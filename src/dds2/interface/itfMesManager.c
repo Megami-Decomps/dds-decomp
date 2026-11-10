@@ -25,7 +25,7 @@
 #include "eff_resource_slots.h"
 #include "sdf_chip.h"
 #include "kwln.h"
-#include "kwln_task_create.h"
+#include "dds3_task_create.h"
 #include "pcp_vu0.h"
 #include "btl_scene_fade.h"
 #include "btl_resource.h"
@@ -42,7 +42,7 @@
 #include "dat_command.h"
 #include "sdf_sif_command.h"
 #include "mdl_resource_table.h"
-#include "kwln_task_lifecycle.h"
+#include "dds3_task_lifecycle.h"
 
 #ifdef NON_MATCHING
 #include "fr_font_draw_glyph.h"

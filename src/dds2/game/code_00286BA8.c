@@ -7,7 +7,7 @@
 #include "mnu_mantra_position_api.h"
 #include "snd_sequence_volume_pan.h"
 #include "kwln.h"
-#include "kwln_process_registration.h"
+#include "dds3_process_registration.h"
 #include "sdf_heap_api.h"
 #include "mnu.h"
 #include "mnu_staff.h"
@@ -17,7 +17,7 @@
 #include "dsp_name.h"
 #include "sdf_task_work.h"
 #include "mdl_flag_api.h"
-#include "kwln_fade.h"
+#include "dds3_fade.h"
 #include "btl.h"
 #include "mnu.h"
 /* Original-style implicit int, kept: matched code depends on it: mnuDrawMantraPhaseOpacity. */

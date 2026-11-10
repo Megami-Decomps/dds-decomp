@@ -1,5 +1,5 @@
-#ifndef KWLN_FRAME_DRAW_BUFFER_H
-#define KWLN_FRAME_DRAW_BUFFER_H
+#ifndef DDS3_FRAME_DRAW_BUFFER_H
+#define DDS3_FRAME_DRAW_BUFFER_H
 
 #include "common.h"
 
@@ -19,4 +19,4 @@ typedef char dds3FrameDrawBuffer_baseBytes_offset_must_be_0[
 typedef char dds3FrameDrawBuffer_unknown40_offset_must_be_0x40[
     ((u32)&((dds3FrameDrawBuffer_t *)0)->unknown40 == KWLN_FRAME_DRAW_BASE_BYTES) ? 1 : -1];
 
-#endif /* KWLN_FRAME_DRAW_BUFFER_H */
+#endif /* DDS3_FRAME_DRAW_BUFFER_H */

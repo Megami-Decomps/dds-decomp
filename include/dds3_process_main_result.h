@@ -1,5 +1,5 @@
-#ifndef KWLN_PROCESS_MAIN_RESULT_H
-#define KWLN_PROCESS_MAIN_RESULT_H
+#ifndef DDS3_PROCESS_MAIN_RESULT_H
+#define DDS3_PROCESS_MAIN_RESULT_H
 
 #include "common.h"
 
@@ -9,4 +9,4 @@ typedef s32 dds3ProcessMainResult_t;
 #define KWLN_PROCESS_MAIN_STOP 0
 #define KWLN_PROCESS_MAIN_CONTINUE 1
 
-#endif /* KWLN_PROCESS_MAIN_RESULT_H */
+#endif /* DDS3_PROCESS_MAIN_RESULT_H */

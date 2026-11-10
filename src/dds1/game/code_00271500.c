@@ -15,7 +15,7 @@
 #include "mnu_shop.h"
 #include "mnu_camp_work.h"
 #include "mnu_list.h"
-#include "kwln_task_lifecycle.h"
+#include "dds3_task_lifecycle.h"
 #include "mdl_flag_api.h"
 
 extern u32 mnuCampMainResourceNamePairs[][2];
@@ -164,7 +164,7 @@ s64 mnuReleaseStaffResourceSlotGroups(StaffMenuWork *menu) {
 #include "mnu_shop.h"
 #include "mnu_camp_work.h"
 #include "mnu_list.h"
-#include "kwln_task_lifecycle.h"
+#include "dds3_task_lifecycle.h"
 #include "mdl_flag_api.h"
 extern void mnuCreateStaffPanelSet(StaffMenuWork *menu);
 extern void mnuInitializeStaffPageWindows(MenuPageWindow *container, StaffSlots *resources, u32 unused, PartyPanel *partyPanel);

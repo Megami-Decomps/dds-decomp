@@ -16,14 +16,14 @@
 #include "btl_event_asset_api.h"
 #include "btl_event_sequence_api.h"
 #include "btl_skill_max_api.h"
-#include "kwln_background_fade_api.h"
-#include "kwln_task_add_child.h"
+#include "dds3_background_fade_api.h"
+#include "dds3_task_add_child.h"
 #include "btl_actor_transform_parameters.h"
 #include "btl_select_transform_parameters_api.h"
 #include "btl_effect_position.h"
 #include "btl_affinity_row.h"
-#include "kwln_draw_buffer.h"
-#include "kwln_frame_draw_buffer.h"
+#include "dds3_draw_buffer.h"
+#include "dds3_frame_draw_buffer.h"
 #include "snd_sequence_volume_pan.h"
 #include "btl_stage_task_cleanup.h"
 #include "sdf_motion.h"
@@ -1330,14 +1330,14 @@ void btlBuildOverlayQuadPacket(sdfDrawTag_t *list, s32 primitive, s32 color, s32
 #include "btl_actor_resource_bank_api.h"
 #include "btl_event_asset_api.h"
 #include "btl_skill_max_api.h"
-#include "kwln_background_fade_api.h"
-#include "kwln_task_add_child.h"
+#include "dds3_background_fade_api.h"
+#include "dds3_task_add_child.h"
 #include "btl_actor_transform_parameters.h"
 #include "btl_select_transform_parameters_api.h"
 #include "btl_effect_position.h"
 #include "btl_affinity_row.h"
-#include "kwln_draw_buffer.h"
-#include "kwln_frame_draw_buffer.h"
+#include "dds3_draw_buffer.h"
+#include "dds3_frame_draw_buffer.h"
 #include "snd_sequence_volume_pan.h"
 #include "btl_stage_task_cleanup.h"
 #include "sdf_motion.h"
@@ -1843,7 +1843,7 @@ extern s32 dds3AllocRenderTexture(u16 width, u16 height, f32 value);
 
 extern u8 dds3DrawEnv[];
 
-#include "kwln_texture_reference_flag_api.h"
+#include "dds3_texture_reference_flag_api.h"
 
 void btlClearOverlayBuffers(void) {
     u8 *entry;

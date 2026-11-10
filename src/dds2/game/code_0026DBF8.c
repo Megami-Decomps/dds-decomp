@@ -26,7 +26,7 @@ extern void prfCopyMantraNamePart(u16 scriptId, s32 namePartMode, char *destinat
 
 extern void effRequestResourceByMode(const char *, const char *, s32, u32 *);
 #include "kwln.h"
-#include "kwln_task_create.h"
+#include "dds3_task_create.h"
 #include "dat_state.h"
 #include "evt_world.h"
 #include "itf.h"

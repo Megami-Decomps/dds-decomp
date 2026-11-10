@@ -1,10 +1,10 @@
 #include "sdk_ps2.h"
 #include "common.h"
-#include "kwln_background_fade_api.h"
+#include "dds3_background_fade_api.h"
 #include "sdf_heap_api.h"
 #include "kwln.h"
-#include "kwln_task_runner.h"
-#include "kwln_task_create.h"
+#include "dds3_task_runner.h"
+#include "dds3_task_create.h"
 #include "mnu.h"
 #include "mnu_sprite_resource.h"
 

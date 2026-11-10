@@ -7,7 +7,7 @@
 #include "eff_resource_slots.h"
 #include "eff_resource_source_lifetime.h"
 #include "kwln.h"
-#include "kwln_process_registration.h"
+#include "dds3_process_registration.h"
 #include "sdf_heap_api.h"
 #include "eff.h"
 #include "mnu_list.h"

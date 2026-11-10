@@ -41,7 +41,7 @@
 #include "dat_command.h"
 #include "sdf_sif_command.h"
 #include "mdl_resource_table.h"
-#include "kwln_task_lifecycle.h"
+#include "dds3_task_lifecycle.h"
 /* Declared before first use (were implicit int). */
 extern u8 btlTestSelectedItemCategoryMask(BtlUnit *unit, s32 actorIndex);
 extern u32 sdfQueryChannelBits(s32 channel, datUnitWork_t *sourceRecord, datUnitWork_t *item);

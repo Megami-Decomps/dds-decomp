@@ -57,7 +57,7 @@
 #include "sdf_vu_transform_api.h"
 #include "sdf_vu_matrix.h"
 #include "sdf_vu_matrix_multiply_api.h"
-#include "kwln_task_lifecycle.h"
+#include "dds3_task_lifecycle.h"
 #include "eff_expanded_list.h"
 #include "file_request_api.h"
 #include "sdf_texture_file.h"
@@ -138,8 +138,8 @@ extern MdlFlagPair fileRareItemNoticeFlagRows[];
 extern FileStatBonus ptyUnlockedUnitStatBonusRows[24];
 extern s32 mnuAdvanceTitleStateUnderSemaphore(void);
 #include "kwln.h"
-#include "kwln_task_create.h"
-#include "kwln_fade.h"
+#include "dds3_task_create.h"
+#include "dds3_fade.h"
 #include "fpu.h"
 struct MenuListNode;
 extern void mnuClearListFlagsOneAndTwo(u32 *flags);

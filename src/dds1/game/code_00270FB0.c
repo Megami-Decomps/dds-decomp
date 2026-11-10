@@ -15,7 +15,7 @@
 #include "mnu_shop.h"
 #include "mnu_camp_work.h"
 #include "mnu_list.h"
-#include "kwln_task_lifecycle.h"
+#include "dds3_task_lifecycle.h"
 
 extern struct EffectSlotSet *mnuCampResourceHandles[];
 

@@ -10,7 +10,7 @@
 #include "btl_event_sequence_api.h"
 #include "btl_active_units_ready_api.h"
 #include "fld_scene_ready_api.h"
-#include "kwln_background_fade_api.h"
+#include "dds3_background_fade_api.h"
 #include "brs_primary_panel_update_api.h"
 #include "brs_ui_update_allowed_api.h"
 #include "btl_special_ability.h"
@@ -33,7 +33,7 @@
 #include "btl_scene_initializer.h"
 #include "fld_encounter_runtime_api.h"
 #include "mdl_flag_api.h"
-#include "kwln_fade.h"
+#include "dds3_fade.h"
 #include "evt_solar.h"
 
 void btlSetSceneTaskActiveFlag(ActionStateLink *task);

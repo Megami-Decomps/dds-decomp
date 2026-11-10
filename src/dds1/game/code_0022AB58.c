@@ -4,11 +4,11 @@
 #include "sdf_file_existence_api.h"
 #include "mdl_flag_api.h"
 #include "kwln.h"
-#include "kwln_task_create.h"
+#include "dds3_task_create.h"
 #include "sdf_packet_list.h"
 #include "sdf.h"
 #include "sdf_sif_command.h"
-#include "kwln_task_lifecycle.h"
+#include "dds3_task_lifecycle.h"
 #include "sdf_packet_alloc.h"
 
 extern void scrAllReleaseScript(void);

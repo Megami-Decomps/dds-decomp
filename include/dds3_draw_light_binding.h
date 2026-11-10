@@ -1,5 +1,5 @@
-#ifndef KWLN_DRAW_LIGHT_BINDING_H
-#define KWLN_DRAW_LIGHT_BINDING_H
+#ifndef DDS3_DRAW_LIGHT_BINDING_H
+#define DDS3_DRAW_LIGHT_BINDING_H
 
 #include "common.h"
 
@@ -25,4 +25,4 @@ typedef char dds3LightSourceTable_size_must_be_0x10[
  * may write through it. The source must remain valid while it is installed. */
 void dds3SetLight(f32 (*lightSource)[4], dds3LightSourceSlot_t slot);
 
-#endif /* KWLN_DRAW_LIGHT_BINDING_H */
+#endif /* DDS3_DRAW_LIGHT_BINDING_H */

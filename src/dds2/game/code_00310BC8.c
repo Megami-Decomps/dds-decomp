@@ -7,15 +7,15 @@
 #include "fr_font_measure.h"
 #include "sdf_quaternion.h"
 #include "kwln.h"
-#include "kwln_process_registration.h"
-#include "kwln_task_create.h"
+#include "dds3_process_registration.h"
+#include "dds3_task_create.h"
 #include "sdf_heap_api.h"
 
 #include "fpu.h"
 #include "sdf.h"
 #include "sdf_task_work.h"
 #include "itf.h"
-#include "kwln_task_lifecycle.h"
+#include "dds3_task_lifecycle.h"
 #include "fr_font.h"
 
 extern s8 dds3PadButtonState[];

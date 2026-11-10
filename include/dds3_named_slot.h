@@ -1,5 +1,5 @@
-#ifndef KWLN_NAMED_SLOT_H
-#define KWLN_NAMED_SLOT_H
+#ifndef DDS3_NAMED_SLOT_H
+#define DDS3_NAMED_SLOT_H
 
 #include "common.h"
 #include "kwln.h"
@@ -26,4 +26,4 @@ typedef char fclNamedSlot_previous_offset_must_be_3C[
 typedef char fclNamedSlot_next_offset_must_be_40[
     ((u32)&((fclNamedSlot_t *)0)->next == 0x40) ? 1 : -1];
 
-#endif /* KWLN_NAMED_SLOT_H */
+#endif /* DDS3_NAMED_SLOT_H */

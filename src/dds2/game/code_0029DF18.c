@@ -760,11 +760,11 @@ s32 brsCalcProgressAnimationStep(BrsSkillPackageWork *work, BrsProgressRow *prog
 #include "sdf_chip.h"
 #include "sdf_heap_api.h"
 #include "kwln.h"
-#include "kwln_task_create.h"
+#include "dds3_task_create.h"
 #include "mnu_title_effect.h"
 #include "mnu.h"
 #include "file.h"
-#include "kwln_task_lifecycle.h"
+#include "dds3_task_lifecycle.h"
 #include "file_request_api.h"
 #include "sdf_thread.h"
 

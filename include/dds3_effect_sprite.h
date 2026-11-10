@@ -1,5 +1,5 @@
-#ifndef KWLN_SPRITE_H
-#define KWLN_SPRITE_H
+#ifndef DDS3_EFFECT_SPRITE_H
+#define DDS3_EFFECT_SPRITE_H
 
 #include "common.h"
 
@@ -21,4 +21,4 @@ typedef struct dds3EffectSpriteVertex_t {
 typedef char dds3EffectSpriteCorner_size[(sizeof(dds3EffectSpriteCorner_t) == 0x20) ? 1 : -1];
 typedef char dds3EffectSpriteVertex_size[(sizeof(dds3EffectSpriteVertex_t) == 0x50) ? 1 : -1];
 
-#endif /* KWLN_SPRITE_H */
+#endif /* DDS3_EFFECT_SPRITE_H */

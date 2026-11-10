@@ -1,5 +1,5 @@
-#ifndef KWLN_FADE_TIMING_H
-#define KWLN_FADE_TIMING_H
+#ifndef DDS3_FADE_TIMING_H
+#define DDS3_FADE_TIMING_H
 
 #include "common.h"
 
@@ -8,4 +8,4 @@ void dds3SetQuake(s32 mode, s32 frames);
 /* Disable configured timing while retaining the stored parameters. */
 void dds3StopQuake(void);
 
-#endif /* KWLN_FADE_TIMING_H */
+#endif /* DDS3_FADE_TIMING_H */

@@ -5,7 +5,7 @@
 #include "sdf_vu0.h"
 #include "sdf_vu_matrix.h"
 #include "sdf_chip.h"
-#include "kwln_sprite.h"
+#include "dds3_effect_sprite.h"
 #include "sdf_packet_list.h"
 #include "sdf_column_packet_api.h"
 #include "eff_event_setup.h"

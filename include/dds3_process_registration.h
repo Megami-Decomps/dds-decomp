@@ -1,5 +1,5 @@
-#ifndef KWLN_PROCESS_REGISTRATION_H
-#define KWLN_PROCESS_REGISTRATION_H
+#ifndef DDS3_PROCESS_REGISTRATION_H
+#define DDS3_PROCESS_REGISTRATION_H
 
 #include "common.h"
 
@@ -17,4 +17,4 @@ dds3ProcessRegistrationResult_t dds3ExistProcess(const struct dds3ProcessID_t *t
 /* Test name membership in the scheduler's registered task queues. */
 dds3ProcessRegistrationResult_t sdfTaskExists(const char *name);
 
-#endif /* KWLN_PROCESS_REGISTRATION_H */
+#endif /* DDS3_PROCESS_REGISTRATION_H */

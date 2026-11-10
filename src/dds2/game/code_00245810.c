@@ -1,6 +1,6 @@
 #include "common.h"
-#include "kwln_task_create.h"
-#include "kwln_task_lifecycle.h"
+#include "dds3_task_create.h"
+#include "dds3_task_lifecycle.h"
 
 extern void scrAllReleaseScript(void);
 

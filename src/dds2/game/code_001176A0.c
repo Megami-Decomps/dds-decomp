@@ -8,7 +8,7 @@
 #include "dat_save_words.h"
 #include "sdf_float_counter.h"
 #include "eff_random_mod.h"
-#include "kwln_task_create.h"
+#include "dds3_task_create.h"
 #include "dds3obj.h"
 #include "sdf_heap_api.h"
 #include "sdf_dev_state.h"
@@ -27,7 +27,7 @@
 #include "dat_unit_has_skill_api.h"
 #include "evt_randomize_entry_api.h"
 #include "dat_command.h"
-#include "kwln_task_lifecycle.h"
+#include "dds3_task_lifecycle.h"
 #include "fld_runtime_reset_api.h"
 #include "mdl_flag_api.h"
 

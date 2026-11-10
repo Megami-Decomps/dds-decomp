@@ -27,7 +27,7 @@
 #include "snd_slot.h"
 #include "active_sound_node.h"
 #include "kwln.h"
-#include "kwln_process_registration.h"
+#include "dds3_process_registration.h"
 #include "btl_task_state.h"
 #include "btl_task_condition.h"
 #include "sdf_heap_api.h"

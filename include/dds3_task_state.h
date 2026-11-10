@@ -1,5 +1,5 @@
-#ifndef KWLN_TASK_STATE_H
-#define KWLN_TASK_STATE_H
+#ifndef DDS3_TASK_STATE_H
+#define DDS3_TASK_STATE_H
 
 /* The low flag nibble selects a scheduler queue; upper flag bits are independent. */
 #define KWLN_TASK_STATE_MASK 0xF
@@ -12,4 +12,4 @@ typedef enum dds3TaskState_t {
     KWLN_TASK_STATE_LIMIT = 4 /* Exclusive bound for registered states. */
 } dds3TaskState_t;
 
-#endif /* KWLN_TASK_STATE_H */
+#endif /* DDS3_TASK_STATE_H */

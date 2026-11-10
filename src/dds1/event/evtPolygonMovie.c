@@ -8,7 +8,7 @@
 #include "sdf_chip.h"
 #include "file_request_api.h"
 #include "kwln.h"
-#include "kwln_task_create.h"
+#include "dds3_task_create.h"
 #include "sdf_heap_api.h"
 #include "ee_mmi.h"
 #include "pcp_vu0.h"
@@ -826,7 +826,7 @@ sdfMemHandle_t *evtAllocMovieWork(PmdHeader **out)
 #include "evt_polygon_movie.h"
 #include "file.h"
 #include "file_request_api.h"
-#include "kwln_task_lifecycle.h"
+#include "dds3_task_lifecycle.h"
 
 
 

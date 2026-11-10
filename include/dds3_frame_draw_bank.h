@@ -1,5 +1,5 @@
-#ifndef KWLN_FRAME_DRAW_BANK_H
-#define KWLN_FRAME_DRAW_BANK_H
+#ifndef DDS3_FRAME_DRAW_BANK_H
+#define DDS3_FRAME_DRAW_BANK_H
 
 #include "sdf.h"
 #include "sdf_dma_packet_header.h"
@@ -7,7 +7,7 @@
 #include "sdf_scene_packet.h"
 #include "sdf_cons_matrix_packet.h"
 #include "sdf_draw.h"
-#include "kwln_texture_bank.h"
+#include "dds3_texture_bank.h"
 #include "sdf_draw_packet_groups.h"
 
 /* Two frame banks for the main scene and overlay packet chains. */

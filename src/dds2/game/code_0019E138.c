@@ -12,9 +12,9 @@
 #include "fr_font.h"
 #include "fr_font_measure.h"
 #include "kwln.h"
-#include "kwln_task_create.h"
-#include "kwln_task_state.h"
-#include "kwln_task_state_query.h"
+#include "dds3_task_create.h"
+#include "dds3_task_state.h"
+#include "dds3_task_state_query.h"
 #include "sdf_heap_api.h"
 #include "itf.h"
 #include "itf_panel_api.h"
@@ -396,8 +396,8 @@ u32 itfGetTextLipsMotionId(void) {
 #include "itf_gs_state_packet.h"
 #include "fr_font.h"
 #include "kwln.h"
-#include "kwln_task_create.h"
-#include "kwln_task_state.h"
+#include "dds3_task_create.h"
+#include "dds3_task_state.h"
 #include "sdf_heap_api.h"
 #include "itf.h"
 #include "fr_font_glyph_chain_count.h"
@@ -410,7 +410,7 @@ u32 itfGetTextLipsMotionId(void) {
 #include "fr_font.h"
 #include "sdf_debug_api.h"
 #include "fr_font_atlas_packet.h"
-#include "kwln_draw_buffer.h"
+#include "dds3_draw_buffer.h"
 extern void frCreateDrawEnvPacket(FrFontGsPacket *packet);
 
 extern FrFontSystem frFontWork;

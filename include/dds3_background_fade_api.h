@@ -1,5 +1,5 @@
-#ifndef KWLN_BACKGROUND_FADE_API_H
-#define KWLN_BACKGROUND_FADE_API_H
+#ifndef DDS3_BACKGROUND_FADE_API_H
+#define DDS3_BACKGROUND_FADE_API_H
 
 #include "common.h"
 
@@ -14,4 +14,4 @@ enum {
 void dds3FadeBackgroundStartOut(s32 duration);
 dds3BackgroundOverlayActivity_t dds3FadeIsBackgroundOverlayActive(void);
 
-#endif /* KWLN_BACKGROUND_FADE_API_H */
+#endif /* DDS3_BACKGROUND_FADE_API_H */

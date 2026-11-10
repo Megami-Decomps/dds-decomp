@@ -1,5 +1,5 @@
-#ifndef KWLN_TASK_LIFECYCLE_H
-#define KWLN_TASK_LIFECYCLE_H
+#ifndef DDS3_TASK_LIFECYCLE_H
+#define DDS3_TASK_LIFECYCLE_H
 
 #include "kwln.h"
 
@@ -16,4 +16,4 @@ typedef s32 dds3TaskKillRequestResult_t;
 dds3TaskKillRequestResult_t dds3KillProcess(dds3ProcessID_t *task, s32 delayTicks);
 dds3TaskKillRequestResult_t dds3KillProcessName(const char *name, s32 delayTicks);
 
-#endif /* KWLN_TASK_LIFECYCLE_H */
+#endif /* DDS3_TASK_LIFECYCLE_H */

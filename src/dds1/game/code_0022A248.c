@@ -3,7 +3,7 @@
 #include "common.h"
 #include "mdl_flag_api.h"
 #include "kwln.h"
-#include "kwln_task_create.h"
+#include "dds3_task_create.h"
 #include "sdf_chip.h"
 #include "sdf_packet_list.h"
 #include "evt_viewer.h"
@@ -14,7 +14,7 @@
 #include "eff_blur.h"
 #include "eff_event_draw.h"
 #include "eff_event_work_api.h"
-#include "kwln_task_lifecycle.h"
+#include "dds3_task_lifecycle.h"
 #include "btl.h"
 
 #define SOLAR_FADE_DRAW_ENABLED 1

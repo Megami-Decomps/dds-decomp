@@ -1,9 +1,9 @@
-#ifndef KWLN_TASK_QUEUE_QUERY_H
-#define KWLN_TASK_QUEUE_QUERY_H
+#ifndef DDS3_TASK_QUEUE_QUERY_H
+#define DDS3_TASK_QUEUE_QUERY_H
 
 #include "common.h"
 #include "kwln.h"
-#include "kwln_task_state.h"
+#include "dds3_task_state.h"
 
 /* Zero-based position in the current linked order of one scheduler queue. */
 typedef s32 dds3TaskQueueIndex_t;
@@ -18,4 +18,4 @@ dds3TaskQueueCount_t dds3GetProcessCount(dds3TaskState_t state);
  * indexes. */
 dds3ProcessID_t *dds3SearchProcessNumber(dds3TaskState_t taskState, dds3TaskQueueIndex_t queueIndex);
 
-#endif /* KWLN_TASK_QUEUE_QUERY_H */
+#endif /* DDS3_TASK_QUEUE_QUERY_H */

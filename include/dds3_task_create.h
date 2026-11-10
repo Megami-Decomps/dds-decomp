@@ -1,5 +1,5 @@
-#ifndef KWLN_TASK_CREATE_H
-#define KWLN_TASK_CREATE_H
+#ifndef DDS3_TASK_CREATE_H
+#define DDS3_TASK_CREATE_H
 
 #include "kwln.h"
 
@@ -12,4 +12,4 @@ dds3ProcessID_t *dds3StartProcess(const char *name, u32 priority, s32 startDelay
                          s32 destroyDelay, dds3ProcessFunc_t update,
                          dds3ProcessShutdownFunc_t destroy, u32 userValue);
 
-#endif /* KWLN_TASK_CREATE_H */
+#endif /* DDS3_TASK_CREATE_H */

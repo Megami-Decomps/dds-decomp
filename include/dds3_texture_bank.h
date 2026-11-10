@@ -1,5 +1,5 @@
-#ifndef KWLN_TEXTURE_BANK_H
-#define KWLN_TEXTURE_BANK_H
+#ifndef DDS3_TEXTURE_BANK_H
+#define DDS3_TEXTURE_BANK_H
 
 #include "sdf.h"
 #include "sdf_scene_packet.h"

@@ -7,7 +7,7 @@
 #include "sdf_chip.h"
 #include "sdf_column_packet_api.h"
 #include "sdf_packet_list.h"
-#include "kwln_sprite.h"
+#include "dds3_effect_sprite.h"
 #include "eff_event_setup.h"
 #include "sdf_heap_api.h"
 #include "sdf.h"
