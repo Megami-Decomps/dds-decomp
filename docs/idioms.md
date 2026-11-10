@@ -3327,7 +3327,7 @@ it executes always, on the taken path, or on the not-taken path. Compare
 CFG or register assignment is a different experiment.
 
 A matched nullable-pointer example is DDS1 `func_002BE4B8` (624 bytes,
-`game/code_002BC8F0`) and its DDS2 twin `func_00305C40`. Their natural
+`game/code_002BE448`) and its DDS2 twin `func_00305C40`. Their natural
 `if (color == NULL) { defaults; } else { color->rgba; ... }` becomes a
 `bnezl` with the first color-word load in its taken-only slot. That load
 must not execute for the null/default arm. Both complete units passed

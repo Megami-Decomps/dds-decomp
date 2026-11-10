@@ -132,7 +132,7 @@ The second row needs its names as a set: reverting any eleven of the twelve
 leaves the function differing. The first five were enough until main changed
 the headers that unit sees, at which point the other seven had to join them,
 and holding those back then tipped the DDS1 function in the third row. DDS1's
-own `sdfDrawTexturedQuad` (`game/code_002BC8F0`) needs no exclusion, but it
+own `sdfDrawTexturedQuad` (`game/code_002BE448`) needs no exclusion, but it
 does break if a header gains a second declaration to cover a one-sided rename,
 which is why `tools/rename_refs.py` never adds one.
 
