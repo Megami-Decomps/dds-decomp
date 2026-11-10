@@ -48,14 +48,19 @@ source:
   native locations and order above.
 
 The continuation is causal, not decorative. Repeating only the list-address
-calculation lets `02.jump` delete the decision and `13.life` delete the compare;
-that control is eight bytes short. The call-only control (`unit-panel-equal.c`)
-leaves a terminal-call boundary that prevents the required late merge and grows
-to 832 bytes. Duplicating the full status switch and optional sprite draw as
-well (`unit-panel-equal-draw.c`) instead grows to 864 bytes. The
-actual post-call status continuation allows the late merge and produces 792
-bytes. This uses the documented equal-arm residual rule, not a general allowance
-for invented dead source.
+calculation (`unit-panel-equal-list.c`) lets `02.jump` delete the decision and
+`13.life` delete the compare; that control is eight bytes short. Repeating only
+`mnuDrawMantraSelectionListAndCost` in the arms (`unit-panel-equal.c`), with the
+status switch after the conditional, leaves a terminal-call boundary that
+prevents the required late merge and grows to 832 bytes. Repeating the draw,
+full status switch and optional sprite draw (`unit-panel-equal-draw.c`) instead
+grows to 864 bytes. The actual post-call status continuation
+(`unit-panel-equal-status.c`) allows the late merge and produces 792 bytes.
+The first two diagnostic controls spell the constant one ULP below native under
+the pinned compiler; the later full-draw and status controls use native bits.
+They are preserved diagnostics, not single-change final controls. This uses the
+documented equal-arm residual rule, not a general allowance for invented dead
+source.
 
 ## Minimal allocation constraints
 
