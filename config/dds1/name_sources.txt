@@ -9112,6 +9112,9 @@
 0x002F9A34	at3decRotateButterflyPair	inferred	libat3dec: the two-word form of at3decRotateButterfly used by the last butterfly stage. DDS2 twin 0x003528B4.
 0x002F9A98	at3decCopyBlock	inferred	libat3dec: copies 0x200 bytes (32 quadwords) from one buffer to another. DDS2 twin 0x00352918.
 0x002F9AC0	at3decInitDefaults	inferred	libat3dec: stores the format, unit size and channel count in the work buffer, sets unity mixing pointers and writes the 'no gain point' terminator (location 0xFF, level 4) at the head of every band's gain table. DDS2 twin 0x00352940.
+0x002F9B88	at3decModeChannels	inferred	libat3dec: returns the channel count of a mode code (code & 0xF). DDS2 twin 0x00352A08; was func_002F9B88
+0x002F9B90	at3decModeFromName	inferred	libat3dec: maps a mode name (MONO, STEREO, 4CH, 8CH, JOINT) to its code 1, 2, 4, 8 or 0x12, else 0. DDS2 twin 0x00352A10; was func_002F9B90
+0x002F9C48	at3decModeName	inferred	libat3dec: maps a mode code back to its name, UNKNOWN for any other. DDS2 twin 0x00352AC8; was func_002F9C48
 0x002F9F60	cosf	inferred	Returns the cosine of its radian angle. Paired rotation callers store this result as c; model and battle geometry callers use it for projected extents. DDS2 counterpart 0x00353040 is used the same way. [paired DDS1/DDS2 callers, exact-unit audit, 2026-10-14]
 0x002FA038	fabsf	inferred	newlib sf_fabs.c fabsf: clears the sign bit of the float. DDS2 twin 0x00353118.
 0x002FA060	sinf	inferred	Returns the sine of its radian angle. Paired rotation callers store this result as s; interpolation callers use sine weights, and geometry callers use it for projected extents. DDS2 counterpart 0x00353140 is used the same way. [paired DDS1/DDS2 callers, exact-unit audit, 2026-10-14]
@@ -9980,6 +9983,12 @@
 0x003B6D70	at3decOverlapOrder	inferred	libat3dec: the overlap stage's output order, a permutation of 0..127; read by its routines. DDS2 twin 0x00430AC0.
 0x003B6F70	at3decOverlapWindows	inferred	libat3dec: the overlap stage's two 128-entry windows; read by its routines. DDS2 twin 0x00430CC0.
 0x003B7170	at3decFallingWindow	inferred	libat3dec: 128-entry falling window, the overlap stage's and at3decCarrySilentBand's; read by its routines. DDS2 twin 0x00430EC0.
+0x003B7270	at3decModeNameMono	inferred	libat3dec: mode name string read by at3decModeFromName and at3decModeName. DDS2 twin 0x00430FC0; was D_003B7270
+0x003B7278	at3decModeNameStereo	inferred	libat3dec: mode name string read by at3decModeFromName and at3decModeName. DDS2 twin 0x00430FC8; was D_003B7278
+0x003B7280	at3decModeName4ch	inferred	libat3dec: mode name string read by at3decModeFromName and at3decModeName. DDS2 twin 0x00430FD0; was D_003B7280
+0x003B7288	at3decModeName8ch	inferred	libat3dec: mode name string read by at3decModeFromName and at3decModeName. DDS2 twin 0x00430FD8; was D_003B7288
+0x003B7290	at3decModeNameJoint	inferred	libat3dec: mode name string read by at3decModeFromName and at3decModeName. DDS2 twin 0x00430FE0; was D_003B7290
+0x003B7298	at3decModeNameUnknown	inferred	libat3dec: mode name string read by at3decModeFromName and at3decModeName. DDS2 twin 0x00430FE8; was D_003B7298
 0x003B8378	localeconvData	inferred	SMT3HD name via SLUS_209.11 0x0054B8D8, newlib lconv data _localeconv_r returns; was D_003B8378
 0x003BA72C	dds3VblanksPerFrame	inferred	SMT3HD data name via SLUS_209.11 0x0054E82C, 1 agreeing references; was dds3VblanksPerFrame
 0x003BA800	startinglistf	inferred	SMT3HD data name via SLUS_209.11 0x0054E850, 11 agreeing references; was startinglistf

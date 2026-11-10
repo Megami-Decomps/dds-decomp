@@ -96,9 +96,16 @@ extern const u16 at3decOverlapWindow[128];
 extern const s32 at3decOverlapOrder[128];
 extern const s16 at3decOverlapWindows[256];
 extern const s16 at3decFallingWindow[128];
+extern const char at3decModeNameMono[];
+extern const char at3decModeNameStereo[];
+extern const char at3decModeName4ch[];
+extern const char at3decModeName8ch[];
+extern const char at3decModeNameJoint[];
+extern const char at3decModeNameUnknown[];
 
 extern void *memset(void *s, s32 c, u32 n);
 extern void *memcpy(void *dst, const void *src, u32 n);
+extern s32 strcmp(const char *a, const char *b);
 extern void __assert(const char *file, s32 line, const char *expr);
 
 void at3decReset(at3decState_t *state);
@@ -124,6 +131,9 @@ void at3decRotateButterfly(s32 *a, s32 *b, const s32 *tw, const s32 *mask);
 void at3decRotateButterflyPair(s32 *a, s32 *b, const s32 *tw, const s32 *mask);
 void at3decCopyBlock(const void *src, void *dst);
 void at3decInitDefaults(s32 nch, s32 format, s32 unit, at3decWork_t *w);
+s32 at3decModeChannels(s32 mode);
+s32 at3decModeFromName(const char *name);
+const char *at3decModeName(s32 mode);
 
 /* mode: 0, 1 and 5 up stereo (2 x 0xC0 bytes), 2 joint stereo (2 x 0x60),
  * 3 mono 0xC0, 4 mono 0x60. */
@@ -539,23 +549,21 @@ s32 at3decReadBits(s32 nbits, at3decWork_t *w)
 s32 at3decDecodeSpectrumLines(at3decChannel_t *chan, u32 mode, s32 qstep, s32 first, s32 last, s32 sfindex,
                               at3decWork_t *w)
 {
-    s32 idx, nbits, shift, count;
-    const s8 *lookup;
-    const s8 *lens;
+    s32 idx = qstep * 2 + mode;
+    const s8 *lens = at3decCodeLengthTables[idx - 2];
+    s32 nbits = at3decLookaheadBits[idx];
+    const s8 *lookup = at3decSymbolLookupTables[idx - 2];
+    s32 shift;
     const s32 *deq;
     s32 *out;
 
     if (mode >= 2 || (u32)(qstep - 1) >= 7 || last == first) {
         return -1;
     }
-    idx = qstep * 2 + mode;
-    nbits = at3decLookaheadBits[idx];
-    lookup = at3decSymbolLookupTables[idx - 2];
-    lens = at3decCodeLengthTables[idx - 2];
     shift = at3decScaleFactorShifts[sfindex];
     deq = at3decDequantTables[7 * (sfindex - 3 * (21 - shift)) + qstep];
     out = (s32 *)chan->spectrum + first;
-    count = last - first;
+    last -= first;
 
     if (qstep == 1) {
         do {
@@ -563,18 +571,18 @@ s32 at3decDecodeSpectrumLines(at3decChannel_t *chan, u32 mode, s32 qstep, s32 fi
 
             w->bitPos += lens[sym];
             *out++ += deq[sym * 2] >> shift;
-            if (count != 1) {
+            if (last != 1) {
                 *out++ += deq[sym * 2 + 1] >> shift;
             }
-            count -= 2;
-        } while (count > 0);
+            last -= 2;
+        } while (last > 0);
     } else {
         do {
             s32 sym = lookup[at3decPeekBits(nbits, w)];
 
             w->bitPos += lens[sym];
             *out++ += deq[sym] >> shift;
-        } while (--count > 0);
+        } while (--last > 0);
     }
     return 0;
 }
@@ -653,20 +661,27 @@ s32 at3decDecodeSpectrum(at3decChannel_t *chan, s32 nsub, at3decWork_t *w)
         return -1;
     }
     mode = at3decReadBits(1, w);
-    for (i = 0; i < nsub; i++) {
+    i = 0;
+    do {
         step[i] = at3decReadBits(3, w);
-    }
-    for (i = 0; i < nsub; i++) {
+    } while (++i < nsub);
+    i = 0;
+    do {
         if (step[i] != 0) {
             s32 v = at3decReadBits(6, w);
 
             sf[i] = v;
             if (w->atten > 0) {
-                sf[i] = w->atten < v ? v - w->atten : 0;
+                if (w->atten < v) {
+                    sf[i] = v - w->atten;
+                } else {
+                    sf[i] = 0;
+                }
             }
         }
-    }
-    for (i = 0; i < nsub; i++) {
+    } while (++i < nsub);
+    i = 0;
+    do {
         if (step[i] != 0) {
             if ((u32)i >= 0x21) {
                 __assert("libat3dec.c", 0x421, "(unsigned int)iqt < AT2_NQUS+1");
@@ -679,15 +694,16 @@ s32 at3decDecodeSpectrum(at3decChannel_t *chan, s32 nsub, at3decWork_t *w)
                 return -1;
             }
         }
-    }
-    if ((u32)nsub >= 0x21) {
+        i++;
+    } while (i < nsub);
+    if ((u32)i >= 0x21) {
         __assert("libat3dec.c", 0x427, "(unsigned int)iqt < AT2_NQUS+1");
     }
-    if (w->maxLine < at3decSubbandStartLines[nsub]) {
-        if ((u32)nsub >= 0x21) {
+    if (w->maxLine < at3decSubbandStartLines[i]) {
+        if ((u32)i >= 0x21) {
             __assert("libat3dec.c", 0x428, "(unsigned int)iqt < AT2_NQUS+1");
         }
-        w->maxLine = at3decSubbandStartLines[nsub];
+        w->maxLine = at3decSubbandStartLines[i];
     }
     return 0;
 }
@@ -1071,8 +1087,49 @@ void at3decInitDefaults(s32 nch, s32 format, s32 unit, at3decWork_t *w)
     w->prev = w->cur;
 }
 
-INCLUDE_ASM(const s32, "hand/at3dec", func_002F9B88);
+/* Mode codes: 1 mono, 2 stereo, 4 and 8 channels, 0x12 joint stereo. */
+s32 at3decModeChannels(s32 mode)
+{
+    return mode & 0xF;
+}
 
-INCLUDE_ASM(const s32, "hand/at3dec", func_002F9B90);
+s32 at3decModeFromName(const char *name)
+{
+    if (strcmp(name, at3decModeNameMono) == 0) {
+        return 1;
+    }
+    if (strcmp(name, at3decModeNameStereo) == 0) {
+        return 2;
+    }
+    if (strcmp(name, at3decModeName4ch) == 0) {
+        return 4;
+    }
+    if (strcmp(name, at3decModeName8ch) == 0) {
+        return 8;
+    }
+    if (strcmp(name, at3decModeNameJoint) == 0) {
+        return 0x12;
+    }
+    return 0;
+}
 
-INCLUDE_ASM(const s32, "hand/at3dec", func_002F9C48);
+#ifdef NON_MATCHING
+const char *at3decModeName(s32 mode)
+{
+    switch (mode) {
+    case 1:
+        return at3decModeNameMono;
+    case 2:
+        return at3decModeNameStereo;
+    case 4:
+        return at3decModeName4ch;
+    case 8:
+        return at3decModeName8ch;
+    case 0x12:
+        return at3decModeNameJoint;
+    }
+    return at3decModeNameUnknown;
+}
+#else
+INCLUDE_ASM(const s32, "hand/at3dec", at3decModeName);
+#endif

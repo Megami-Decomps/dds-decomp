@@ -9699,6 +9699,9 @@
 0x003528B4	at3decRotateButterflyPair	inferred	libat3dec: the two-word form of at3decRotateButterfly used by the last butterfly stage. DDS1 twin 0x002F9A34.
 0x00352918	at3decCopyBlock	inferred	libat3dec: copies 0x200 bytes (32 quadwords) from one buffer to another. DDS1 twin 0x002F9A98.
 0x00352940	at3decInitDefaults	inferred	libat3dec: stores the format, unit size and channel count in the work buffer, sets unity mixing pointers and writes the 'no gain point' terminator (location 0xFF, level 4) at the head of every band's gain table. DDS1 twin 0x002F9AC0.
+0x00352A08	at3decModeChannels	inferred	libat3dec: returns the channel count of a mode code (code & 0xF). DDS1 twin 0x002F9B88; was func_00352A08
+0x00352A10	at3decModeFromName	inferred	libat3dec: maps a mode name (MONO, STEREO, 4CH, 8CH, JOINT) to its code 1, 2, 4, 8 or 0x12, else 0. DDS1 twin 0x002F9B90; was func_00352A10
+0x00352AC8	at3decModeName	inferred	libat3dec: maps a mode code back to its name, UNKNOWN for any other. DDS1 twin 0x002F9C48; was func_00352AC8
 0x00352B50	cos	inferred	fdlibm s_cos: |x|<=pi/4 calls __kernel_cos, quadrant switch after __ieee754_rem_pio2
 0x00352C78	sin	inferred	fdlibm s_sin: |x|<=pi/4 calls __kernel_sin(x,0,0)
 0x00352DB0	atanf	inferred	newlib's atanf: an exact twin of DDS1's atanf 0x002F9CD0, just before cosf as there; called with a ratio for an angle.
@@ -10668,6 +10671,12 @@
 0x00430AC0	at3decOverlapOrder	inferred	libat3dec: the overlap stage's output order, a permutation of 0..127; read by its routines. DDS1 twin 0x003B6D70.
 0x00430CC0	at3decOverlapWindows	inferred	libat3dec: the overlap stage's two 128-entry windows; read by its routines. DDS1 twin 0x003B6F70.
 0x00430EC0	at3decFallingWindow	inferred	libat3dec: 128-entry falling window, the overlap stage's and at3decCarrySilentBand's; read by its routines. DDS1 twin 0x003B7170.
+0x00430FC0	at3decModeNameMono	inferred	libat3dec: mode name string read by at3decModeFromName and at3decModeName. DDS1 twin 0x003B7270; was D_00430FC0
+0x00430FC8	at3decModeNameStereo	inferred	libat3dec: mode name string read by at3decModeFromName and at3decModeName. DDS1 twin 0x003B7278; was D_00430FC8
+0x00430FD0	at3decModeName4ch	inferred	libat3dec: mode name string read by at3decModeFromName and at3decModeName. DDS1 twin 0x003B7280; was D_00430FD0
+0x00430FD8	at3decModeName8ch	inferred	libat3dec: mode name string read by at3decModeFromName and at3decModeName. DDS1 twin 0x003B7288; was D_00430FD8
+0x00430FE0	at3decModeNameJoint	inferred	libat3dec: mode name string read by at3decModeFromName and at3decModeName. DDS1 twin 0x003B7290; was D_00430FE0
+0x00430FE8	at3decModeNameUnknown	inferred	libat3dec: mode name string read by at3decModeFromName and at3decModeName. DDS1 twin 0x003B7298; was D_00430FE8
 0x004324B8	localeconvData	inferred	SMT3HD name via SLUS_209.11 0x0054B8D8, newlib lconv data _localeconv_r returns; was D_004324B8
 0x00435BAC	dds3VblanksPerFrame	inferred	SMT3HD data name via SLUS_209.11 0x0054E82C, 1 agreeing references; was dds3VblanksPerFrame
 0x00435BD0	startinglistf	inferred	SMT3HD data name via SLUS_209.11 0x0054E850, 11 agreeing references; was startinglistf
