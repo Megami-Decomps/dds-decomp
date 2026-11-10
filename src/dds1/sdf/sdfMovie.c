@@ -801,7 +801,7 @@ INCLUDE_SDATA(const s32, "sdf/sdfMovie", sdfMovieDrawBottom);
 
 INCLUDE_SDATA(const s32, "sdf/sdfMovie", sdfMovieDrawColor);
 
-INCLUDE_SDATA(const s32, "sdf/sdfMovie", D_003BD634);
+SDATA_PAD(4);
 
 INCLUDE_SDATA(const s32, "sdf/sdfMovie", sdfMovieIpsExt);
 

@@ -1962,7 +1962,7 @@ INCLUDE_SDATA(const s32, "game/code_00102DC8", D_00435CEE);
 
 INCLUDE_SDATA(const s32, "game/code_00102DC8", fadergba);
 
-INCLUDE_SDATA(const s32, "game/code_00102DC8", D_00435CF4);
+SDATA_PAD(4);
 
 INCLUDE_SDATA(const s32, "game/code_00102DC8", kwlnBackgroundFadeColor);
 
@@ -1974,7 +1974,7 @@ INCLUDE_SDATA(const s32, "game/code_00102DC8", kwlnBackgroundFadeFirstRamp);
 
 INCLUDE_SDATA(const s32, "game/code_00102DC8", kwlnBackgroundFadeSecondRamp);
 
-INCLUDE_SDATA(const s32, "game/code_00102DC8", D_00435D02);
+SDATA_PAD(2);
 
 INCLUDE_SDATA(const s32, "game/code_00102DC8", distblurovercnt);
 

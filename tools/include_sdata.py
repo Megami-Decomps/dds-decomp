@@ -13,7 +13,9 @@ between exactly where ee-gcc put it:
 - a short string literal (up to 7 bytes: -G8 puts it in .sdata) a C function
   writes instead of naming the retail D_ symbol goes with that function;
 - a variable the C file defines (`s32 D_003BD1F0 = 5;`, `static` or not, or
-  under its symbol_addrs.txt name) sits at its definition.
+  under its symbol_addrs.txt name) sits at its definition;
+- a pad label spimdisasm made for zero bytes that only align the next object
+  becomes SDATA_PAD(n) rather than a D_ symbol.
 
 Everything else is included. Placement is recomputed on every run
 (configure.py runs this after each split).
@@ -26,7 +28,9 @@ from nonmatching import matching_source
 from c_aliases import function_aliases
 
 ROOT = Path(__file__).resolve().parent.parent
-LINE = re.compile(r'^INCLUDE_SDATA\([^,]+,\s*"[^"]+",\s*(\w+)\);\n\n?', re.M)
+LINE = re.compile(r'^(?:INCLUDE_SDATA\([^,]+,\s*"[^"]+",\s*(\w+)\)|SDATA_PAD\(\d+\));\n\n?', re.M)
+PAD_NOTE = "/* Automatically generated and unreferenced pad */\n"
+VALUE = re.compile(r"\.(?:byte|short|word) (0x[0-9A-Fa-f]+)")
 DEF = re.compile(r"^[A-Za-z_][\w \t\*]*?\b(\w+)\s*\([^;{]*\)\s*\{?[ \t]*$", re.M)
 DATA_DEF = re.compile(
     r"^(?!extern\b|typedef\b)(?:static\s+)?(?:const\s+)?"
@@ -81,6 +85,15 @@ def names_symbol(code, sym, aliases):
     return any(re.search(rf"\b{n}\b", code) for n in (sym, *aliases.get(sym, ())))
 
 
+def alignment_pad(addr, end, body):
+    """Whether zero bytes [addr, end) only align the object at `end`."""
+    body = re.sub(r'^\s*\.(?:align \d+|asciz "")\s*$', "", body, flags=re.M)
+    if any(int(v, 16) for v in VALUE.findall(body)) or re.search(r"^\s*\.(?!byte|short|word)\w", body, re.M):
+        return False
+    a = next(a for a in (8, 4, 2, 1) if end % a == 0)
+    return end - addr < a
+
+
 def place(version):
     names = {n: int(a, 16) for n, a in ROW.findall((ROOT / "config" / version / "symbol_addrs.txt").read_text())}
     added = 0
@@ -103,10 +116,20 @@ def place(version):
         first = ADDR.search(blocks[0].group(4))
         start = int(first.group(1), 16) if first else int(blocks[0].group(3)[-8:], 16)
         cap = next(k for k in (3, 2, 1, 0) if start % (1 << k) == 0)
+        source = data.read_text()
+        starts = []
         for m in blocks:
-            sym = m.group(3)
             a = ADDR.search(m.group(4))
-            addr = int(a.group(1), 16) if a else int(sym[-8:], 16)
+            starts.append(int(a.group(1), 16) if a else int(m.group(3)[-8:], 16))
+        for i, m in enumerate(blocks):
+            sym = m.group(3)
+            addr = starts[i]
+            if source[: source.index(f"dlabel {sym}\n")].endswith(PAD_NOTE):
+                end = starts[i + 1] if i + 1 < len(blocks) else addr + sum(
+                    {"byte": 1, "short": 2, "word": 4}[w] for w in re.findall(r"\.(byte|short|word) ", m.group(4)))
+                if alignment_pad(addr, end, m.group(4)):
+                    syms.append((addr, f"SDATA_PAD({end - addr})"))
+                    continue
             k = next(k for k in (3, 2, 1, 0) if addr % (1 << k) == 0)
             if m.group(1):
                 k = min(k, int(re.findall(r"\d+", m.group(1))[-1]))
@@ -157,11 +180,11 @@ def place(version):
             if sym not in compiled:
                 placed.append((pos, sym))
         for pos, sym in sorted(placed, key=lambda p: -p[0]):
-            text = text[:pos] + ("\n" if pos == len(text) else "") + \
-                f'INCLUDE_SDATA(const s32, "{unit}", {sym});\n\n' + text[pos:]
+            line = f"{sym};" if sym.startswith("SDATA_PAD(") else f'INCLUDE_SDATA(const s32, "{unit}", {sym});'
+            text = text[:pos] + ("\n" if pos == len(text) else "") + line + "\n\n" + text[pos:]
             added += 1
         # One blank line before each included item, however often this reruns.
-        text = re.sub(r"\n{3,}(?=INCLUDE_(?:RODATA|SDATA)\()", "\n\n", text)
+        text = re.sub(r"\n{3,}(?=INCLUDE_(?:RODATA|SDATA)\(|SDATA_PAD\()", "\n\n", text)
         write_text_if_changed(c, text)
     print(f"{version}: {added} INCLUDE_SDATA lines")
 
