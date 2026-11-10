@@ -2984,7 +2984,7 @@
 0x00193FD0	frCreateUserFontPacket	inferred	SMT3HD name via SLUS_209.11 0x001C6698, reloc-identical; was frFontDrawCachedGlyphRelative
 0x00194038	frCopyFontClutToVram	inferred	SMT3HD name via SLUS_209.11 0x001C6700, reloc-identical; was sdfUploadGsImageUnderSemaphore
 0x001940B8	frFontUploadClearedTexture	inferred	confidence=high; src/dds1/game/code_00193C08.c:func_001940B8; Allocates a zeroed font texture image, uploads it to GS under semaphore protection and releases the temporary buffer. [names_qp9.tsv]
-0x00194190	frFontEnsureSlotLoaded	inferred	src/dds1/game/code_00193C08.c func_00194190: Loads font slot once; special slot uses existing entry buffer, others load requested resource path. [names_reviewed24.tsv]
+0x00194190	frFontEnsureSlotLoaded	inferred	src/dds1/interface/frFont.c func_00194190: Loads font slot once; special slot uses existing entry buffer, others load requested resource path. [names_reviewed24.tsv]
 0x00194228	frInitFontTable	inferred	SMT3HD name via SLUS_209.11 0x001C68F0, unique-masked-hash; was frFontInitializeSystem
 0x00194440	frDestroyFontTable	inferred	SMT3HD name via SLUS_209.11 0x001C6B08, reloc-identical; was frFontReleaseAll
 0x001944A0	frAddFontStyle	inferred	SMT3HD name via SLUS_209.11 0x001C6B68, reloc-identical; was frFontBindResourceSections

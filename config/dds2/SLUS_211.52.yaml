@@ -146,10 +146,8 @@ segments:
       - [0x96E50, c, effect/effDebug]  # Nocturne __FILE__
       - [0x97FD8, c, effect/effEvent]  # Nocturne __FILE__
       - [0x9B900, c, effect/effSpline]  # Nocturne __FILE__
-      - [0x9C538, c, game/code_0019B538]
-      - [0x9C7A8, c, interface/fmGslCont]  # Nocturne __FILE__
-      - [0x9C840, c, game/code_0019B840]
-      - [0x9D2A8, c, interface/frFont]  # Nocturne __FILE__
+      - [0x9C538, c, interface/fmGslCont]  # Nocturne __FILE__; SMT3 unit start
+      - [0x9C870, c, interface/frFont]  # Nocturne __FILE__; SMT3 unit start
       - [0x9F138, c, game/code_0019E138]
       - [0xA2930, c, interface/itfPanel]  # Nocturne __FILE__
       - [0xA2B08, c, game/code_001A1B08]
@@ -615,7 +613,7 @@ segments:
       - [0x337440, .sdata, game/code_00194700]
       - [0x337458, .sdata, effect/effDebug]
       - [0x337460, .sdata, effect/effEvent]
-      - [0x337540, .sdata, game/code_0019B538]
+      - [0x337540, .sdata, interface/fmGslCont]
       - [0x337550, .sdata, interface/frFont]
       - [0x337584, .sdata, game/code_0019E138]  # D_00436580 is frFont's: code_0019E138 reaches it with lui/addiu, not gp_rel
       - [0x3375A8, .sdata, game/code_001A1B08]
@@ -708,7 +706,7 @@ segments:
       - { start: 0x339D2C, type: .sbss, vram: 0x439108, name: sdf/sdfChip }
       - { start: 0x339D2C, type: sbss, vram: 0x439128, name: sbss_after_sdfChip }
       - { start: 0x339D2C, type: bss, vram: 0x439280, name: bss_before_frFontTextSlots }
-      - { start: 0x339D2C, type: .bss, vram: 0x452720, name: game/code_0019B840 }
+      - { start: 0x339D2C, type: .bss, vram: 0x452720, name: interface/frFont }
       - { start: 0x339D2C, type: .bss, vram: 0x452940, name: interface/itfMesManager }
       - { start: 0x339D2C, type: bss, vram: 0x452E60, name: bss_before_fileManager }
       - { start: 0x339D2C, type: .bss, vram: 0x457F28, name: file/fileManager }

@@ -146,10 +146,8 @@ segments:
       - [0x8F218, c, effect/effDebug]  # Nocturne __FILE__
       - [0x903A0, c, effect/effEvent]  # Nocturne __FILE__
       - [0x93CC8, c, effect/effSpline]  # Nocturne __FILE__
-      - [0x94900, c, game/code_00193900]
-      - [0x94B70, c, interface/fmGslCont]  # Nocturne __FILE__
-      - [0x94C08, c, game/code_00193C08]
-      - [0x95618, c, interface/frFont]  # Nocturne __FILE__
+      - [0x94900, c, interface/fmGslCont]  # Nocturne __FILE__; SMT3 unit start
+      - [0x94C38, c, interface/frFont]  # Nocturne __FILE__; SMT3 unit start
       - [0x97478, c, game/code_00196478]
       - [0x9A900, c, interface/itfPanel]  # Nocturne __FILE__
       - [0x9AAD8, c, game/code_00199AD8]
@@ -586,7 +584,7 @@ segments:
       - [0x2BC050, .sdata, game/code_0018CAC8]
       - [0x2BC068, .sdata, effect/effDebug]
       - [0x2BC070, .sdata, effect/effEvent]
-      - [0x2BC150, .sdata, game/code_00193900]
+      - [0x2BC150, .sdata, interface/fmGslCont]
       - [0x2BC160, .sdata, interface/frFont]
       - [0x2BC188, .sdata, game/code_00196478]
       - [0x2BC1A8, .sdata, game/code_00199AD8]
@@ -677,7 +675,7 @@ segments:
       - { start: 0x2BE63C, type: .sbss, vram: 0x3BD9A8, name: sdf/sdfChip }
       - { start: 0x2BE63C, type: sbss, vram: 0x3BD9C8, name: sbss_after_sdfChip }
       - { start: 0x2BE63C, type: bss, vram: 0x3BDB00, name: bss_before_frFontTextSlots }
-      - { start: 0x2BE63C, type: .bss, vram: 0x3D6C80, name: game/code_00193C08 }
+      - { start: 0x2BE63C, type: .bss, vram: 0x3D6C80, name: interface/frFont }
       - { start: 0x2BE63C, type: .bss, vram: 0x3D6EA0, name: interface/itfMesManager }
       - { start: 0x2BE63C, type: bss, vram: 0x3D73C0, name: bss_before_fileManager }
       - { start: 0x2BE63C, type: .bss, vram: 0x3DC658, name: file/fileManager }
