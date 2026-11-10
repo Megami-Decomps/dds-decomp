@@ -108,31 +108,12 @@ void sdfSetGridScaledDrawBounds(s32 column, s32 row, s32 width, s32 height, u32 
 }
 
 #ifdef NON_MATCHING
-#include "common.h"
-#include "eeregs.h"
-#include "snd_command_packet.h"
-#include "mnu_voice_resource_path_api.h"
 #include "ee_mmi.h"
-#include "sdf_resource.h"
-#include "sdf_packed_resource.h"
-#include "sdf_pac_reloc.h"
-#include "sdf.h"
-#include "sdf_texture_lists.h"
-#include "sdf_draw.h"
-#include "sdf_resource_list_item.h"
-#include "sdf_stream_read.h"
-#include "sdf_dev_event.h"
-#include "sdf_dev_state.h"
-#include "mdl_object_stream.h"
-#include "sdf_texture_offset_list.h"
-#include "sdf_texture_file.h"
-#include "sdf_texture_queue.h"
-#include "sdf_stream_input_dma.h"
-#include "sdf_sound_rpc_records.h"
-#include "snd_midi_state_views.h"
-#include "sdf_movie_stream.h"
-#include "sdf_packet_alloc.h"
-#include "sdf_packet_list.h"
+
+extern s32 sdfGrAllocPacketBuff(s32 size);
+extern sdfDrawTag_t *sdfPrimAllocDrawTag(s32 (*allocator)(s32));
+extern void sdfDrawTagLink(sdfDrawTag_t *tag, addr_t packet);
+extern u32 p2sdSetPcmCallback(addr_t callback);
 extern s32 p2sdPlayPcm(u8 channel);
 
 extern s32 sdfMovieDrawLeft;
@@ -141,7 +122,7 @@ extern s32 sdfMovieDrawRight;
 extern s32 sdfMovieDrawBottom;
 extern u32 sdfMovieDrawColor;
 
-extern movieStream_t *movieSemaId;
+extern sdfMovieCb_t *movieSemaId;
 
 
 /* The bit length of x > 0: 31 - plzcw(x). For x = size - 1 it is the size's
@@ -164,7 +145,7 @@ static inline u64 movieVertexWord(s32 x, s32 y, u32 depth) {
  * both games; written from the retail routine. It differs from retail
  * only in register allocation, scheduling, the way the color word is masked,
  * and the handwritten addi that loads 31 for the texture sizes. */
-void sdfMovieQueueFrameSprite(movieStream_t *movie, sdfGrOt_t *pool) {
+void sdfMovieQueueFrameSprite(sdfMovieCb_t *movie, sdfGrOt_t *pool) {
     u64 *packet;
     sdfDrawTag_t *packetList;
     u32 width;
@@ -175,16 +156,16 @@ void sdfMovieQueueFrameSprite(movieStream_t *movie, sdfGrOt_t *pool) {
     u64 pageBase;
     u64 textureWord;
 
-    if (movie->soundNode.playbackPhase < 2) {
+    if (movie->decodeCb.playbackPhase < 2) {
         return;
     }
 
-    if (movie->pacEnabled != 0 && movie->pad21 == 0 &&
-        movie->stream.pac->ringLength >= 0x1000) {
-        movie->pad21 = 1;
+    if (movie->sndActive != 0 && movie->sndPlaying == 0 &&
+        movie->readCb.pac->ringLength >= 0x1000) {
+        movie->sndPlaying = 1;
         movieSemaId = movie;
         p2sdSetPcmCallback(movieWaitSema);
-        p2sdPlayPcm(movie->packetLimit);
+        p2sdPlayPcm(movie->sndVolume);
     }
 
     packet = (u64 *)(u32)sdfGrAllocPacketBuff(0xC0);
@@ -195,18 +176,18 @@ void sdfMovieQueueFrameSprite(movieStream_t *movie, sdfGrOt_t *pool) {
     packet[4] = 0x21;
     packet[5] = 0x14;
 
-    height = movie->soundNode.height;
-    width = movie->soundNode.width;
+    height = movie->decodeCb.height;
+    width = movie->decodeCb.width;
     heightLog2 = bitLength(height - 1);
     widthLog2 = bitLength(width - 1);
     pageCount = width >> 6;
     if (pageCount == 0) {
         pageCount = 1;
     }
-    pageBase = (u32)movie->soundNode.resourceWord >> 6;
+    pageBase = (u32)movie->decodeCb.resourceWord >> 6;
     textureWord = ((u64)pageCount << 14) | ((u64)heightLog2 << 30) |
                   (u64)(widthLog2 << 26) | (1ULL << 34);
-    if (movie->soundNode.audioMode != 0) {
+    if (movie->decodeCb.rgbMode != 0) {
         textureWord |= pageBase;
         pageBase = 0x200000;
     }
@@ -223,16 +204,16 @@ void sdfMovieQueueFrameSprite(movieStream_t *movie, sdfGrOt_t *pool) {
     packet[15] = 1;
     packet[16] = 0;
     packet[17] = 3;
-    packet[18] = movieVertexWord(sdfMovieDrawLeft, sdfMovieDrawTop, movie->drawZ);
+    packet[18] = movieVertexWord(sdfMovieDrawLeft, sdfMovieDrawTop, movie->z);
     packet[19] = 5;
     packet[20] = (u64)(s64)(s32)((height << 20) | (width << 4));
     packet[21] = 3;
-    packet[22] = movieVertexWord(sdfMovieDrawRight, sdfMovieDrawBottom, movie->drawZ);
+    packet[22] = movieVertexWord(sdfMovieDrawRight, sdfMovieDrawBottom, movie->z);
     packet[23] = 5;
 
     packetList = sdfPrimAllocDrawTag(NULL);
     sdfDrawTagLink(packetList, (u32)packet);
-    pool->append(pool, packetList);
+    pool->regFunc(pool, packetList);
 }
 #else
 INCLUDE_ASM(const s32, "sdf/sdfMovie", sdfMovieQueueFrameSprite);
