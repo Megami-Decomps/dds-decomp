@@ -11,12 +11,12 @@ struct BillSnapshot;
 struct sdfTexHandle_t;
 struct SdfDrawPacket;
 struct SdfTextureFileHeader;
-struct BlurPacketQuad;
+struct effBlurPrimTriStrip_t;
 
 void dds3BillboardDelete(struct billHandle_t *obj);
 struct sdfTexHandle_t *dds3BillboardGetGeneralTex(s32 index);
 struct billHandle_t *dds3BillboardGeneral(s32 index);
-struct BlurPacketQuad *effPkt2DGetPrimPtr(struct SdfDrawPacket *packet);
+struct effBlurPrimTriStrip_t *effPkt2DGetPrimPtr(struct SdfDrawPacket *packet);
 
 /* The selected kind interprets the opaque payload word. */
 struct billHandle_t *dds3BillboardCreate(s32 kind, u32 data);

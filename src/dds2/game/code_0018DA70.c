@@ -100,142 +100,142 @@ extern void sdfGrSetFrameMaskReset(const u8 *source, SdfDmaReferenceChainPacket 
 extern u32 dds3NullDrawProc(void);
 
 
-void dds3EffectBlurDrawQuad(const BlurSource *source, BlurPacketQuad *quad, u8 fixedPointCoordinates)
+void dds3EffectBlurDrawQuad(const BlurSource *source, effBlurPrimTriStrip_t *quad, u8 fixedPointCoordinates)
 {
     f32 centerX, centerY, scale, cosine, sine;
     f32 scaledU, scaledV, u, v;
 
     /* Scratch coordinates first normalize the center, then rotate each sample. */
 
-    quad->color[0] = ((u8 *)&source->color)[0];
-    quad->color[1] = ((u8 *)&source->color)[1];
-    quad->color[2] = ((u8 *)&source->color)[2];
-    quad->color[3] = ((u8 *)&source->color)[3];
+    quad->r = ((u8 *)&source->abgr)[0];
+    quad->g = ((u8 *)&source->abgr)[1];
+    quad->b = ((u8 *)&source->abgr)[2];
+    quad->a = ((u8 *)&source->abgr)[3];
     if (fixedPointCoordinates == 0) {
-        quad->vertices[0].x = (source->corners[0][0] << 4) + 0x7000;
-        quad->vertices[0].y = (source->corners[0][1] << 3) + 0x7900;
-        quad->vertices[1].x = quad->vertices[0].x;
-        quad->vertices[1].y = (source->corners[1][1] << 3) + 0x7900;
-        quad->vertices[2].x = (source->corners[1][0] << 4) + 0x7000;
-        quad->vertices[2].y = quad->vertices[0].y;
-        quad->vertices[3].x = quad->vertices[2].x;
-        quad->vertices[3].y = quad->vertices[1].y;
-        quad->vertices[0].s = source->corners[0][0] * (1.0f / 512.0f);
-        quad->vertices[0].t = source->corners[0][1] * (1.0f / 512.0f);
-        quad->vertices[1].s = quad->vertices[0].s;
-        quad->vertices[1].t = source->corners[1][1] * (1.0f / 512.0f);
-        quad->vertices[2].s = source->corners[1][0] * (1.0f / 512.0f);
-        quad->vertices[2].t = quad->vertices[0].t;
-        quad->vertices[3].s = quad->vertices[2].s;
-        quad->vertices[3].t = quad->vertices[1].t;
+        quad->vtx[0].x = (source->xy[0][0] << 4) + 0x7000;
+        quad->vtx[0].y = (source->xy[0][1] << 3) + 0x7900;
+        quad->vtx[1].x = quad->vtx[0].x;
+        quad->vtx[1].y = (source->xy[1][1] << 3) + 0x7900;
+        quad->vtx[2].x = (source->xy[1][0] << 4) + 0x7000;
+        quad->vtx[2].y = quad->vtx[0].y;
+        quad->vtx[3].x = quad->vtx[2].x;
+        quad->vtx[3].y = quad->vtx[1].y;
+        quad->vtx[0].s = source->xy[0][0] * (1.0f / 512.0f);
+        quad->vtx[0].t = source->xy[0][1] * (1.0f / 512.0f);
+        quad->vtx[1].s = quad->vtx[0].s;
+        quad->vtx[1].t = source->xy[1][1] * (1.0f / 512.0f);
+        quad->vtx[2].s = source->xy[1][0] * (1.0f / 512.0f);
+        quad->vtx[2].t = quad->vtx[0].t;
+        quad->vtx[3].s = quad->vtx[2].s;
+        quad->vtx[3].t = quad->vtx[1].t;
     } else {
-        quad->vertices[0].x = source->corners[0][0] + 0x7000;
-        quad->vertices[0].y = source->corners[0][1] + 0x7900;
-        quad->vertices[1].x = quad->vertices[0].x;
-        quad->vertices[1].y = source->corners[1][1] + 0x7900;
-        quad->vertices[2].x = source->corners[1][0] + 0x7000;
-        quad->vertices[2].y = quad->vertices[0].y;
-        quad->vertices[3].x = quad->vertices[2].x;
-        quad->vertices[3].y = quad->vertices[1].y;
-        quad->vertices[0].s = source->corners[0][0] * (1.0f / 8192.0f);
-        quad->vertices[0].t = source->corners[0][1] * (1.0f / 4096.0f);
-        quad->vertices[1].s = quad->vertices[0].s;
-        quad->vertices[1].t = source->corners[1][1] * (1.0f / 4096.0f);
-        quad->vertices[2].s = source->corners[1][0] * (1.0f / 8192.0f);
-        quad->vertices[2].t = quad->vertices[0].t;
-        quad->vertices[3].s = quad->vertices[2].s;
-        quad->vertices[3].t = quad->vertices[1].t;
+        quad->vtx[0].x = source->xy[0][0] + 0x7000;
+        quad->vtx[0].y = source->xy[0][1] + 0x7900;
+        quad->vtx[1].x = quad->vtx[0].x;
+        quad->vtx[1].y = source->xy[1][1] + 0x7900;
+        quad->vtx[2].x = source->xy[1][0] + 0x7000;
+        quad->vtx[2].y = quad->vtx[0].y;
+        quad->vtx[3].x = quad->vtx[2].x;
+        quad->vtx[3].y = quad->vtx[1].y;
+        quad->vtx[0].s = source->xy[0][0] * (1.0f / 8192.0f);
+        quad->vtx[0].t = source->xy[0][1] * (1.0f / 4096.0f);
+        quad->vtx[1].s = quad->vtx[0].s;
+        quad->vtx[1].t = source->xy[1][1] * (1.0f / 4096.0f);
+        quad->vtx[2].s = source->xy[1][0] * (1.0f / 8192.0f);
+        quad->vtx[2].t = quad->vtx[0].t;
+        quad->vtx[3].s = quad->vtx[2].s;
+        quad->vtx[3].t = quad->vtx[1].t;
     }
-    quad->vertices[0].depth = 0;
-    quad->vertices[0].xyzControl = 0;
-    quad->vertices[1].depth = 0;
-    quad->vertices[1].xyzControl = 0;
-    quad->vertices[2].depth = 0;
-    quad->vertices[2].xyzControl = 0;
-    quad->vertices[3].depth = 0;
-    quad->vertices[3].xyzControl = 0;
+    quad->vtx[0].z = 0;
+    quad->vtx[0].adc = 0;
+    quad->vtx[1].z = 0;
+    quad->vtx[1].adc = 0;
+    quad->vtx[2].z = 0;
+    quad->vtx[2].adc = 0;
+    quad->vtx[3].z = 0;
+    quad->vtx[3].adc = 0;
     if (fixedPointCoordinates == 0) {
-        u = source->position[0] + 256.0f;
-        v = source->position[1] + 224.0f;
+        u = source->center[0] + 256.0f;
+        v = source->center[1] + 224.0f;
         centerX = u * (1.0f / 512.0f);
         centerY = v * (1.0f / 448.0f);
     } else {
-        u = source->position[0] + 4096.0f;
-        v = source->position[1] + 1792.0f;
+        u = source->center[0] + 4096.0f;
+        v = source->center[1] + 1792.0f;
         centerX = u * (1.0f / 8192.0f);
         centerY = v * (1.0f / 3584.0f);
     }
-    scale = source->displacement;
-    cosine = sdfCos(source->angle);
-    sine = sdfSin(source->angle);
-    scaledU = (quad->vertices[0].s - centerX) * scale;
-    scaledV = (quad->vertices[0].t - centerY) * scale;
+    scale = source->scale;
+    cosine = sdfCos(source->rotate);
+    sine = sdfSin(source->rotate);
+    scaledU = (quad->vtx[0].s - centerX) * scale;
+    scaledV = (quad->vtx[0].t - centerY) * scale;
     u = scaledU * cosine - scaledV * sine;
     v = scaledU * sine + scaledV * cosine;
-    quad->vertices[0].s = u + centerX;
-    quad->vertices[0].t = v + centerY;
-    scaledU = (quad->vertices[1].s - centerX) * scale;
-    scaledV = (quad->vertices[1].t - centerY) * scale;
+    quad->vtx[0].s = u + centerX;
+    quad->vtx[0].t = v + centerY;
+    scaledU = (quad->vtx[1].s - centerX) * scale;
+    scaledV = (quad->vtx[1].t - centerY) * scale;
     u = scaledU * cosine - scaledV * sine;
     v = scaledU * sine + scaledV * cosine;
-    quad->vertices[1].s = u + centerX;
-    quad->vertices[1].t = v + centerY;
-    scaledU = (quad->vertices[2].s - centerX) * scale;
-    scaledV = (quad->vertices[2].t - centerY) * scale;
+    quad->vtx[1].s = u + centerX;
+    quad->vtx[1].t = v + centerY;
+    scaledU = (quad->vtx[2].s - centerX) * scale;
+    scaledV = (quad->vtx[2].t - centerY) * scale;
     u = scaledU * cosine - scaledV * sine;
     v = scaledU * sine + scaledV * cosine;
-    quad->vertices[2].s = u + centerX;
-    quad->vertices[2].t = v + centerY;
-    scaledU = (quad->vertices[3].s - centerX) * scale;
-    scaledV = (quad->vertices[3].t - centerY) * scale;
+    quad->vtx[2].s = u + centerX;
+    quad->vtx[2].t = v + centerY;
+    scaledU = (quad->vtx[3].s - centerX) * scale;
+    scaledV = (quad->vtx[3].t - centerY) * scale;
     u = scaledU * cosine - scaledV * sine;
     v = scaledU * sine + scaledV * cosine;
-    quad->vertices[3].s = u + centerX;
-    quad->vertices[3].t = v + centerY;
+    quad->vtx[3].s = u + centerX;
+    quad->vtx[3].t = v + centerY;
 }
 
 
-void effBuildBlurUnitTextureQuad(const BlurSource *source, BlurPacketQuad *quad, u8 fixedPointCoordinates)
+void effBuildBlurUnitTextureQuad(const BlurSource *source, effBlurPrimTriStrip_t *quad, u8 fixedPointCoordinates)
 {
-    quad->color[0] = 0x80;
-    quad->color[1] = 0x80;
-    quad->color[2] = 0x80;
-    quad->color[3] = ((u8 *)&source->color)[3];
+    quad->r = 0x80;
+    quad->g = 0x80;
+    quad->b = 0x80;
+    quad->a = ((u8 *)&source->abgr)[3];
     if (fixedPointCoordinates == 0) {
-        quad->vertices[0].x = (source->corners[0][0] << 4) + 0x7000;
-        quad->vertices[0].y = (source->corners[0][1] << 3) + 0x7900;
-        quad->vertices[1].x = quad->vertices[0].x;
-        quad->vertices[1].y = (source->corners[1][1] << 3) + 0x7900;
-        quad->vertices[2].x = (source->corners[1][0] << 4) + 0x7000;
-        quad->vertices[2].y = quad->vertices[0].y;
-        quad->vertices[3].x = quad->vertices[2].x;
-        quad->vertices[3].y = quad->vertices[1].y;
+        quad->vtx[0].x = (source->xy[0][0] << 4) + 0x7000;
+        quad->vtx[0].y = (source->xy[0][1] << 3) + 0x7900;
+        quad->vtx[1].x = quad->vtx[0].x;
+        quad->vtx[1].y = (source->xy[1][1] << 3) + 0x7900;
+        quad->vtx[2].x = (source->xy[1][0] << 4) + 0x7000;
+        quad->vtx[2].y = quad->vtx[0].y;
+        quad->vtx[3].x = quad->vtx[2].x;
+        quad->vtx[3].y = quad->vtx[1].y;
     } else {
-        quad->vertices[0].x = source->corners[0][0] + 0x7000;
-        quad->vertices[0].y = source->corners[0][1] + 0x7900;
-        quad->vertices[1].x = quad->vertices[0].x;
-        quad->vertices[1].y = source->corners[1][1] + 0x7900;
-        quad->vertices[2].x = source->corners[1][0] + 0x7000;
-        quad->vertices[2].y = quad->vertices[0].y;
-        quad->vertices[3].x = quad->vertices[2].x;
-        quad->vertices[3].y = quad->vertices[1].y;
+        quad->vtx[0].x = source->xy[0][0] + 0x7000;
+        quad->vtx[0].y = source->xy[0][1] + 0x7900;
+        quad->vtx[1].x = quad->vtx[0].x;
+        quad->vtx[1].y = source->xy[1][1] + 0x7900;
+        quad->vtx[2].x = source->xy[1][0] + 0x7000;
+        quad->vtx[2].y = quad->vtx[0].y;
+        quad->vtx[3].x = quad->vtx[2].x;
+        quad->vtx[3].y = quad->vtx[1].y;
     }
-    quad->vertices[0].s = 0.0f;
-    quad->vertices[0].t = 0.0f;
-    quad->vertices[1].s = 0.0f;
-    quad->vertices[1].t = 1.0f;
-    quad->vertices[2].s = 1.0f;
-    quad->vertices[2].t = 0.0f;
-    quad->vertices[3].s = 1.0f;
-    quad->vertices[3].t = 1.0f;
-    quad->vertices[0].depth = 0;
-    quad->vertices[0].xyzControl = 0;
-    quad->vertices[1].depth = 0;
-    quad->vertices[1].xyzControl = 0;
-    quad->vertices[2].depth = 0;
-    quad->vertices[2].xyzControl = 0;
-    quad->vertices[3].depth = 0;
-    quad->vertices[3].xyzControl = 0;
+    quad->vtx[0].s = 0.0f;
+    quad->vtx[0].t = 0.0f;
+    quad->vtx[1].s = 0.0f;
+    quad->vtx[1].t = 1.0f;
+    quad->vtx[2].s = 1.0f;
+    quad->vtx[2].t = 0.0f;
+    quad->vtx[3].s = 1.0f;
+    quad->vtx[3].t = 1.0f;
+    quad->vtx[0].z = 0;
+    quad->vtx[0].adc = 0;
+    quad->vtx[1].z = 0;
+    quad->vtx[1].adc = 0;
+    quad->vtx[2].z = 0;
+    quad->vtx[2].adc = 0;
+    quad->vtx[3].z = 0;
+    quad->vtx[3].adc = 0;
 }
 
 
@@ -276,7 +276,7 @@ void dds3EffectBlur(const dds3Effect_Blur_t *source)
         blendPacket[3] = 0xE;
         blendPacket[4] = 0x31001;
         blendPacket[5] = 0x47;
-        blendPacket[6] = source->blendControl;
+        blendPacket[6] = source->blend;
         blendPacket[7] = 0x42;
         sdfDrawTagLink(list, (u32)blendPacket);
         clampPacket = (void *)sdfGrAllocPacketBuff(0x30);
@@ -406,29 +406,29 @@ void dds3EffectBlurDraw(const BlurSource *source, sdfTexHandle_t *resource, u8 f
     if (dds3NullDrawProc() == 0) {
         list = (void *)sdfGrAllocPacketBuff(0x20);
         sdfDrawTagInit(list);
-        dds3EffectBlurDrawFrameMask(list, source->blendControl, resource);
+        dds3EffectBlurDrawFrameMask(list, source->blend, resource);
         dds3EffectBlurDrawAlphaMulti(list, source, fixedPointCoordinates);
         dds3EffectBlurDrawFrameMaskReset(list);
     }
 }
 
 void dds3EffectBlurSetRect(dds3Effect_PartialMultiBlurParam_t *work) {
-    s32 x = work->source.position[0] + 0x100;
-    s32 y = work->source.position[1] + 0xE0;
-    s32 extent = work->extent;
+    s32 x = work->Blur.center[0] + 0x100;
+    s32 y = work->Blur.center[1] + 0xE0;
+    s32 extent = work->area;
 
-    work->source.corners[0][0] = x - extent;
-    work->source.corners[0][1] = y - extent;
-    work->source.corners[1][0] = x + extent;
-    work->source.corners[1][1] = y + extent;
-    dds3EffectBlur(&work->source);
+    work->Blur.xy[0][0] = x - extent;
+    work->Blur.xy[0][1] = y - extent;
+    work->Blur.xy[1][0] = x + extent;
+    work->Blur.xy[1][1] = y + extent;
+    dds3EffectBlur(&work->Blur);
 }
 
 
 
 /* Clone a blur template into a fresh allocation. */
-EffBlurTemplate *dds3EffectPartialMultiBlurCreate(const dds3Effect_PartialMultiBlurParam_t *src) {
-    EffBlurTemplate *dst = sdfChipAllocDirect(sizeof(EffBlurTemplate));
+effBlurTemplate_t *dds3EffectPartialMultiBlurCreate(const dds3Effect_PartialMultiBlurParam_t *src) {
+    effBlurTemplate_t *dst = sdfChipAllocDirect(sizeof(effBlurTemplate_t));
 
     dst->texture = dds3BillboardGetGeneralTex(2);
     memcpy(&dst->body, src, sizeof(*src));

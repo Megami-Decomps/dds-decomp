@@ -132,7 +132,7 @@ effPCPCrack_t *effPCPCrackCreate(EffBossParams *bossParams, void *effectParams) 
 }
 
 /* Apply the first two packed parameter blocks to the boss effect. */
-effPCPCrack_t *effPCPCrackCreatePCF(const EffParamTable *parameterTable) {
+effPCPCrack_t *effPCPCrackCreatePCF(const dds3EffectPCPData_t *parameterTable) {
     EffBossParams *bossParams;
     void *effectParams;
 
@@ -488,7 +488,7 @@ EffPCPBossWork *effPCPBossBaelCreate(const f32 vector[4], void *paramA, void *pa
 }
 
 /* Apply three packed parameter blocks to the boss effect. */
-EffPCPBossWork *effPCPBossBaelCreatePCF(const EffParamTable *parameterTable) {
+EffPCPBossWork *effPCPBossBaelCreatePCF(const dds3EffectPCPData_t *parameterTable) {
     void *firstBlock;
     void *secondBlock;
     void *thirdBlock;
@@ -760,7 +760,7 @@ effPCPCrack_t *effPCPCrack2Create(EffBossParams *bossParams, void *effectParams)
     return work;
 }
 
-effPCPCrack_t *effPCPCrack2CreatePCF(const EffParamTable *data) {
+effPCPCrack_t *effPCPCrack2CreatePCF(const dds3EffectPCPData_t *data) {
     EffBossParams *bossParams;
     void *effectParams;
 
@@ -815,7 +815,7 @@ PairedEffectResources *effPCPBossMETATOBeamCreate(PairedEffectParams *src)
     return work;
 }
 
-PairedEffectResources *effPCPBossMETATOBeamCreatePCF(const EffParamTable *data) {
+PairedEffectResources *effPCPBossMETATOBeamCreatePCF(const dds3EffectPCPData_t *data) {
     void *work;
 
     work = dds3EffectPCPDataGetData(data, 0);

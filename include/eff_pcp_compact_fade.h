@@ -41,8 +41,8 @@ typedef struct EffPCPCompactFadeWork {
     s32 endExtent;
     f32 unk34;
     union {
-        EffResourceRectWork *rectangle;
-        EffBlurTemplate *blur;
+        dds3Effect_PartialMultiFilter_t *rectangle;
+        effBlurTemplate_t *blur;
     } resource;
 } EffPCPCompactFadeWork;
 

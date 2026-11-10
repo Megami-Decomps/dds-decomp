@@ -5,7 +5,7 @@
 #include "eff_blur.h"
 
 /* Return the live work blocks owned by the corresponding event effect. */
-EffBlurScaleWork *Eve_RippleBlurGetParams(void);
-EffResourceRectWork *Eve_PartialMultiFilterGetParams(void);
+effBlurScaleWork_t *Eve_RippleBlurGetParams(void);
+dds3Effect_PartialMultiFilter_t *Eve_PartialMultiFilterGetParams(void);
 
 #endif

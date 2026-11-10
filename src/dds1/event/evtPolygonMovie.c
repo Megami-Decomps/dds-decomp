@@ -263,16 +263,16 @@ void evtHokanBlur2(s32 enable, f32 t, const dds3Effect_Blur_t *a, const dds3Effe
     if (b == NULL) {
         b = &D_00368590;
     }
-    out->color = evtHokanColor(enable, t, a->color, b->color);
-    out->blendControl = a->blendControl;
-    out->angle = evtHokanFloat(enable, t, a->angle, b->angle);
-    out->displacement = evtHokanFloat(enable, t, a->displacement, b->displacement);
+    out->abgr = evtHokanColor(enable, t, a->abgr, b->abgr);
+    out->blend = a->blend;
+    out->rotate = evtHokanFloat(enable, t, a->rotate, b->rotate);
+    out->scale = evtHokanFloat(enable, t, a->scale, b->scale);
     for (positionOrCornerIndex = 0; positionOrCornerIndex < 2; positionOrCornerIndex++) {
-        out->position[positionOrCornerIndex] = evtHokanInt(enable, t, a->position[positionOrCornerIndex], b->position[positionOrCornerIndex]);
+        out->center[positionOrCornerIndex] = evtHokanInt(enable, t, a->center[positionOrCornerIndex], b->center[positionOrCornerIndex]);
     }
     for (positionOrCornerIndex = 0; positionOrCornerIndex < 2; positionOrCornerIndex++) {
         for (coordinateIndex = 0; coordinateIndex < 2; coordinateIndex++) {
-            out->corners[positionOrCornerIndex][coordinateIndex] = evtHokanInt(enable, t, a->corners[positionOrCornerIndex][coordinateIndex], b->corners[positionOrCornerIndex][coordinateIndex]);
+            out->xy[positionOrCornerIndex][coordinateIndex] = evtHokanInt(enable, t, a->xy[positionOrCornerIndex][coordinateIndex], b->xy[positionOrCornerIndex][coordinateIndex]);
         }
     }
 }
@@ -291,17 +291,17 @@ void evtHokanMultBlur(s32 enable, f32 t, const dds3Effect_PartialMultiBlurParam_
     if (b == NULL) {
         b = &evtMovieDefaultBlurTemplate;
     }
-    out->extent = evtHokanUInt(enable, t, a->extent, b->extent);
-    out->source.color = evtHokanColor(enable, t, a->source.color, b->source.color);
-    out->source.blendControl = a->source.blendControl;
-    out->source.angle = evtHokanFloat(enable, t, a->source.angle, b->source.angle);
-    out->source.displacement = evtHokanFloat(enable, t, a->source.displacement, b->source.displacement);
+    out->area = evtHokanUInt(enable, t, a->area, b->area);
+    out->Blur.abgr = evtHokanColor(enable, t, a->Blur.abgr, b->Blur.abgr);
+    out->Blur.blend = a->Blur.blend;
+    out->Blur.rotate = evtHokanFloat(enable, t, a->Blur.rotate, b->Blur.rotate);
+    out->Blur.scale = evtHokanFloat(enable, t, a->Blur.scale, b->Blur.scale);
     for (positionOrCornerIndex = 0; positionOrCornerIndex < 2; positionOrCornerIndex++) {
-        out->source.position[positionOrCornerIndex] = evtHokanInt(enable, t, a->source.position[positionOrCornerIndex], b->source.position[positionOrCornerIndex]);
+        out->Blur.center[positionOrCornerIndex] = evtHokanInt(enable, t, a->Blur.center[positionOrCornerIndex], b->Blur.center[positionOrCornerIndex]);
     }
     for (positionOrCornerIndex = 0; positionOrCornerIndex < 2; positionOrCornerIndex++) {
         for (coordinateIndex = 0; coordinateIndex < 2; coordinateIndex++) {
-            out->source.corners[positionOrCornerIndex][coordinateIndex] = evtHokanInt(enable, t, a->source.corners[positionOrCornerIndex][coordinateIndex], b->source.corners[positionOrCornerIndex][coordinateIndex]);
+            out->Blur.xy[positionOrCornerIndex][coordinateIndex] = evtHokanInt(enable, t, a->Blur.xy[positionOrCornerIndex][coordinateIndex], b->Blur.xy[positionOrCornerIndex][coordinateIndex]);
         }
     }
 }
@@ -322,11 +322,11 @@ void evtHokanFilter(s32 enable, f32 t, const dds3Effect_Filter_t *a, const dds3E
     }
     for (cornerIndex = 0; cornerIndex < 2; cornerIndex++) {
         for (coordinateIndex = 0; coordinateIndex < 2; coordinateIndex++) {
-            out->corners[cornerIndex][coordinateIndex] = evtHokanInt(enable, t, a->corners[cornerIndex][coordinateIndex], b->corners[cornerIndex][coordinateIndex]);
+            out->xy[cornerIndex][coordinateIndex] = evtHokanInt(enable, t, a->xy[cornerIndex][coordinateIndex], b->xy[cornerIndex][coordinateIndex]);
         }
     }
-    out->color = evtHokanColor(enable, t, a->color, b->color);
-    out->blendControl = a->blendControl;
+    out->abgr = evtHokanColor(enable, t, a->abgr, b->abgr);
+    out->blend = a->blend;
 }
 
 void evtHokanMultFilter(s32 enable, f32 t, const dds3Effect_PartialMultiFilterParam_t *a, const dds3Effect_PartialMultiFilterParam_t *b, dds3Effect_PartialMultiFilterParam_t *out)
@@ -342,13 +342,13 @@ void evtHokanMultFilter(s32 enable, f32 t, const dds3Effect_PartialMultiFilterPa
     if (b == NULL) {
         b = &evtMovieDefaultResourceRect;
     }
-    out->extent = evtHokanUInt(enable, t, a->extent, b->extent);
+    out->area = evtHokanUInt(enable, t, a->area, b->area);
     for (centerCoordinateIndex = 0; centerCoordinateIndex < 2; centerCoordinateIndex++) {
         out->center[centerCoordinateIndex] = evtHokanInt(
             enable, t, a->center[centerCoordinateIndex], b->center[centerCoordinateIndex]);
     }
-    out->draw.rgba = evtHokanColor(enable, t, a->draw.rgba, b->draw.rgba);
-    out->draw.blendControl = a->draw.blendControl;
+    out->Filter.rgba = evtHokanColor(enable, t, a->Filter.rgba, b->Filter.rgba);
+    out->Filter.blendControl = a->Filter.blendControl;
 }
 
 void evtHokanDistBlur(s32 enable, f32 t, const dds3Effect_DistortionBlurParam_t *a, const dds3Effect_DistortionBlurParam_t *b, dds3Effect_DistortionBlurParam_t *out)
@@ -364,18 +364,18 @@ void evtHokanDistBlur(s32 enable, f32 t, const dds3Effect_DistortionBlurParam_t 
     if (b == NULL) {
         b = &evtMovieDefaultBlurScatter;
     }
-    out->count = evtHokanUInt(enable, t, a->count, b->count);
-    out->delaySpread = evtHokanUInt(enable, t, a->delaySpread, b->delaySpread);
-    out->angleStep = evtHokanFloat(enable, t, a->angleStep, b->angleStep);
-    out->color = evtHokanColor(enable, t, a->color, b->color);
-    out->blendControl = a->blendControl;
-    out->uvDisplacementAngleDegrees = evtHokanFloat(enable, t, a->uvDisplacementAngleDegrees, b->uvDisplacementAngleDegrees);
-    out->uvDisplacementAmplitude = evtHokanFloat(enable, t, a->uvDisplacementAmplitude, b->uvDisplacementAmplitude);
-    out->positionSpread = evtHokanUInt(enable, t, a->positionSpread, b->positionSpread);
+    out->number = evtHokanUInt(enable, t, a->number, b->number);
+    out->interval = evtHokanUInt(enable, t, a->interval, b->interval);
+    out->speed = evtHokanFloat(enable, t, a->speed, b->speed);
+    out->abgr = evtHokanColor(enable, t, a->abgr, b->abgr);
+    out->blend = a->blend;
+    out->rotate = evtHokanFloat(enable, t, a->rotate, b->rotate);
+    out->distortion = evtHokanFloat(enable, t, a->distortion, b->distortion);
+    out->area = evtHokanUInt(enable, t, a->area, b->area);
     for (positionAxisIndex = 0; positionAxisIndex < 2; positionAxisIndex++) {
-        out->position[positionAxisIndex] = evtHokanInt(enable, t, a->position[positionAxisIndex], b->position[positionAxisIndex]);
+        out->center[positionAxisIndex] = evtHokanInt(enable, t, a->center[positionAxisIndex], b->center[positionAxisIndex]);
     }
-    out->size = evtHokanUInt(enable, t, a->size, b->size);
+    out->width = evtHokanUInt(enable, t, a->width, b->width);
 }
 
 void evtHokanRipBlur(s32 enable, f32 t, const dds3Effect_RippleBlurParam_t *a, const dds3Effect_RippleBlurParam_t *b, dds3Effect_RippleBlurParam_t *out)
@@ -391,18 +391,18 @@ void evtHokanRipBlur(s32 enable, f32 t, const dds3Effect_RippleBlurParam_t *a, c
     if (b == NULL) {
         b = &evtMovieDefaultBlurScale;
     }
-    out->count = evtHokanUInt(enable, t, a->count, b->count);
-    out->phaseStep = evtHokanFloat(enable, t, a->phaseStep, b->phaseStep);
-    out->spacing = evtHokanFloat(enable, t, a->spacing, b->spacing);
-    out->color = evtHokanColor(enable, t, a->color, b->color);
-    out->blendControl = a->blendControl;
-    out->uvDisplacementAngleDegrees = evtHokanFloat(enable, t, a->uvDisplacementAngleDegrees, b->uvDisplacementAngleDegrees);
-    out->uvDisplacementAmplitude = evtHokanFloat(enable, t, a->uvDisplacementAmplitude, b->uvDisplacementAmplitude);
-    out->angleStep = evtHokanFloat(enable, t, a->angleStep, b->angleStep);
+    out->number = evtHokanUInt(enable, t, a->number, b->number);
+    out->speed = evtHokanFloat(enable, t, a->speed, b->speed);
+    out->interval = evtHokanFloat(enable, t, a->interval, b->interval);
+    out->abgr = evtHokanColor(enable, t, a->abgr, b->abgr);
+    out->blend = a->blend;
+    out->rotate = evtHokanFloat(enable, t, a->rotate, b->rotate);
+    out->power = evtHokanFloat(enable, t, a->power, b->power);
+    out->frequency = evtHokanFloat(enable, t, a->frequency, b->frequency);
     for (positionAxisIndex = 0; positionAxisIndex < 2; positionAxisIndex++) {
-        out->position[positionAxisIndex] = evtHokanInt(enable, t, a->position[positionAxisIndex], b->position[positionAxisIndex]);
+        out->center[positionAxisIndex] = evtHokanInt(enable, t, a->center[positionAxisIndex], b->center[positionAxisIndex]);
     }
-    out->size = evtHokanUInt(enable, t, a->size, b->size);
+    out->area = evtHokanUInt(enable, t, a->area, b->area);
 }
 
 void evtBlendParamsG(s32 enable, f32 t, const dds3Effect_Blur_t *a, const dds3Effect_Blur_t *b, dds3Effect_Blur_t *out)
@@ -419,16 +419,16 @@ void evtBlendParamsG(s32 enable, f32 t, const dds3Effect_Blur_t *a, const dds3Ef
     if (b == NULL) {
         b = &D_003686A0;
     }
-    out->color = evtHokanColor(enable, t, a->color, b->color);
-    out->blendControl = a->blendControl;
-    out->angle = evtHokanFloat(enable, t, a->angle, b->angle);
-    out->displacement = evtHokanFloat(enable, t, a->displacement, b->displacement);
+    out->abgr = evtHokanColor(enable, t, a->abgr, b->abgr);
+    out->blend = a->blend;
+    out->rotate = evtHokanFloat(enable, t, a->rotate, b->rotate);
+    out->scale = evtHokanFloat(enable, t, a->scale, b->scale);
     for (positionOrCornerIndex = 0; positionOrCornerIndex < 2; positionOrCornerIndex++) {
-        out->position[positionOrCornerIndex] = evtHokanInt(enable, t, a->position[positionOrCornerIndex], b->position[positionOrCornerIndex]);
+        out->center[positionOrCornerIndex] = evtHokanInt(enable, t, a->center[positionOrCornerIndex], b->center[positionOrCornerIndex]);
     }
     for (positionOrCornerIndex = 0; positionOrCornerIndex < 2; positionOrCornerIndex++) {
         for (coordinateIndex = 0; coordinateIndex < 2; coordinateIndex++) {
-            out->corners[positionOrCornerIndex][coordinateIndex] = evtHokanInt(enable, t, a->corners[positionOrCornerIndex][coordinateIndex], b->corners[positionOrCornerIndex][coordinateIndex]);
+            out->xy[positionOrCornerIndex][coordinateIndex] = evtHokanInt(enable, t, a->xy[positionOrCornerIndex][coordinateIndex], b->xy[positionOrCornerIndex][coordinateIndex]);
         }
     }
 }

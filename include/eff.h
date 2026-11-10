@@ -3,6 +3,7 @@
 
 #include "common.h"
 #include "sdf.h"
+#include "effect.h"
 
 struct EffNode;
 struct EffMappedRecord;
@@ -171,43 +172,11 @@ typedef struct {
     u32 edgeColorWord;      /* 0x50: packed edge color used by symmetric cell ramps */
 } EffThunderFragmentParams;
 
-typedef struct {
-    s32 left;
-    s32 top;
-    s32 right;
-    s32 bottom;
-} EffResourceRectBounds;
-
-/* Passed directly to the quad renderer, independently of the extent/center. */
-typedef struct {
-    /* The movie blender stores packed RGBA; the renderer samples channels. */
-    union { u8 color[4]; u32 rgba; };
-    s32 blendControl;
-    EffResourceRectBounds bounds;
-} EffResourceRectDrawParams;
-
-/* Nine copied words; the selected source texture belongs to the owner. */
-typedef struct {
-    s32 extent;
-    /* The native movie blender interpolates both center coordinates in one loop. */
-    s32 center[2];
-    EffResourceRectDrawParams draw;
-} dds3Effect_PartialMultiFilterParam_t; /* 0x24 */
-
 void Eve_PartialMultiFilterSetParam(dds3Effect_PartialMultiFilterParam_t *parameters);
 
-typedef struct {
-    dds3Effect_PartialMultiFilterParam_t params;
-    sdfTexHandle_t *texture;
-} EffResourceRectWork; /* 0x28 */
+dds3Effect_PartialMultiFilter_t *dds3EffectPartialMultiFilterCreate(dds3Effect_PartialMultiFilterParam_t *params);
+void dds3EffectPartialMultiFilterDelete(dds3Effect_PartialMultiFilter_t *work);
 
-EffResourceRectWork *dds3EffectPartialMultiFilterCreate(dds3Effect_PartialMultiFilterParam_t *params);
-void dds3EffectPartialMultiFilterDelete(EffResourceRectWork *work);
-
-typedef char EffResourceRectDrawParams_size_must_be_0x18[(sizeof(EffResourceRectDrawParams) == 0x18) ? 1 : -1];
-typedef char EffResourceRectParams_size_must_be_0x24[(sizeof(dds3Effect_PartialMultiFilterParam_t) == 0x24) ? 1 : -1];
-typedef char EffResourceRectWork_size_must_be_0x28[(sizeof(EffResourceRectWork) == 0x28) ? 1 : -1];
-typedef char EffResourceRectDrawParams_layout[((u32)&((dds3Effect_PartialMultiFilterParam_t *)0)->draw == 0xC && (u32)&((EffResourceRectDrawParams *)0)->blendControl == 4 && (u32)&((EffResourceRectDrawParams *)0)->bounds == 8) ? 1 : -1];
 
 /* Random slot index and associated release id (0x8); DDS1/2 effect and panel views. */
 typedef struct EffCntRec {

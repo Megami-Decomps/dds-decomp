@@ -16,36 +16,36 @@
 
 
 /* Reset every slot, then stagger its initial phase by -spacing * index. */
-void dds3EffectRippleBlurReset(EffBlurScaleWork *work) {
-    EffBlurScaleSlot *slot = work->slots;
-    s32 count = work->params.count;
+void dds3EffectRippleBlurReset(effBlurScaleWork_t *work) {
+    effBlurScaleSlot_t *slot = work->slots;
+    s32 count = work->params.number;
     s32 i;
 
     for (i = 0; i < count; i++, slot++) {
         dds3EffectRipBlurPartInit(work, slot);
-        slot->phase = -(work->params.spacing * (f32)i);
+        slot->phase = -(work->params.interval * (f32)i);
     }
 }
 
 
 /* Allocate an owner and slot array from only the serialized parameter prefix. */
-EffBlurScaleWork *dds3EffectRippleBlurCreate(dds3Effect_RippleBlurParam_t *src) {
-    s32 count = src->count;
+effBlurScaleWork_t *dds3EffectRippleBlurCreate(dds3Effect_RippleBlurParam_t *src) {
+    s32 count = src->number;
     struct sdfMemHandle_t *allocation = sdfMemAllocDirect(count * 0x30 + 0x38);
-    EffBlurScaleWork *work = (EffBlurScaleWork *)sdfMemLock(allocation);
-    EffBlurScaleSlot *slot;
+    effBlurScaleWork_t *work = (effBlurScaleWork_t *)sdfMemLock(allocation);
+    effBlurScaleSlot_t *slot;
     s32 i = 0;
 
     /* Copy through size, leaving the source handle, allocation and slots owned
        by this new work rather than reading a live-work tail from src. */
     memcpy(work, src, 0x2C);
     work->allocation = allocation;
-    work->slots = (EffBlurScaleSlot *)(work + 1);
+    work->slots = (effBlurScaleSlot_t *)(work + 1);
     work->texture = dds3BillboardGetGeneralTex(3);
     slot = work->slots;
     while (i < count) {
         dds3EffectRipBlurPartInit(work, slot);
-        slot->phase = -(work->params.spacing * (f32)i);
+        slot->phase = -(work->params.interval * (f32)i);
         i++;
         slot++;
     }
@@ -53,7 +53,7 @@ EffBlurScaleWork *dds3EffectRippleBlurCreate(dds3Effect_RippleBlurParam_t *src) 
 }
 
 /* Release the scale variant's allocation, including its inline slot array. */
-void dds3EffectRippleBlurDelete(EffBlurScaleWork *work) {
+void dds3EffectRippleBlurDelete(effBlurScaleWork_t *work) {
     sdfMemFreeDirect(work->allocation);
 }
 
@@ -66,11 +66,11 @@ extern u64 *effPkt2DAllocF4(u32 flags);
 
 extern void dds3EffectBlurDrawFrameMask(void *list, s32 blendControl, sdfTexHandle_t *resource);
 extern void dds3EffectBlurDrawFrameMaskReset(struct sdfDrawTag_t *);
-extern void effBlurSecondUpdateSlotRect(EffBlurScaleWork *, EffBlurScaleSlot *);
+extern void effBlurSecondUpdateSlotRect(effBlurScaleWork_t *, effBlurScaleSlot_t *);
 
-void dds3EffectRippleBlurDraw(EffBlurScaleWork *work) {
+void dds3EffectRippleBlurDraw(effBlurScaleWork_t *work) {
     struct sdfDrawTag_t *list;
-    EffBlurScaleSlot *slot;
+    effBlurScaleSlot_t *slot;
     s32 count;
     u32 sourceColor;
     u32 alpha;
@@ -78,26 +78,26 @@ void dds3EffectRippleBlurDraw(EffBlurScaleWork *work) {
     if (dds3NullDrawProc() == 0) {
         list = (void *)sdfGrAllocPacketBuff(0x20);
         sdfDrawTagInit(list);
-        dds3EffectBlurDrawFrameMask(list, work->params.blendControl, work->texture);
+        dds3EffectBlurDrawFrameMask(list, work->params.blend, work->texture);
         slot = work->slots;
-        if (work->params.count > 0) {
-            count = work->params.count;
+        if (work->params.number > 0) {
+            count = work->params.number;
             do {
                 if (slot->phase >= 0.0f) {
-                    slot->quad.displacement = work->params.uvDisplacementAmplitude * sdfSin(slot->angle) *
+                    slot->quad.scale = work->params.power * sdfSin(slot->angle) *
                                               (1.0f - slot->phase) + 1.0f;
-                    sourceColor = work->params.color;
+                    sourceColor = work->params.abgr;
                     alpha = (u32)((f32)(sourceColor >> 24) * (1.0f - slot->phase));
-                    slot->quad.color = (sourceColor & 0xFFFFFF) | (alpha << 24);
+                    slot->quad.abgr = (sourceColor & 0xFFFFFF) | (alpha << 24);
                     effBlurSecondUpdateSlotRect(work, slot);
                     dds3EffectBlurDrawAlphaMulti(list, &slot->quad, 1);
-                    slot->angle += work->params.angleStep;
-                    slot->phase += work->params.phaseStep;
+                    slot->angle += work->params.frequency;
+                    slot->phase += work->params.speed;
                     if (slot->phase > 1.0f) {
                         dds3EffectRipBlurPartInit(work, slot);
                     }
                 } else {
-                    slot->phase += work->params.phaseStep;
+                    slot->phase += work->params.speed;
                 }
                 count--;
                 slot++;
@@ -109,46 +109,46 @@ void dds3EffectRippleBlurDraw(EffBlurScaleWork *work) {
 
 void effBlurBuildSamplingQuad(const dds3Effect_Blur_t *source, EffBlurDrawData *data,
                              u8 fixedPoint) {
-    f32 phase = source->angle * 0.017453292519943295f;
-    f32 amplitude = source->displacement;
+    f32 phase = source->rotate * 0.017453292519943295f;
+    f32 amplitude = source->scale;
     f32 dx = sdfSin(phase) * amplitude;
     f32 dy = sdfCos(phase) * amplitude;
 
-    data->color[0] = ((u8 *)&source->color)[0];
-    data->color[1] = ((u8 *)&source->color)[1];
-    data->color[2] = ((u8 *)&source->color)[2];
-    data->color[3] = ((u8 *)&source->color)[3];
+    data->color[0] = ((u8 *)&source->abgr)[0];
+    data->color[1] = ((u8 *)&source->abgr)[1];
+    data->color[2] = ((u8 *)&source->abgr)[2];
+    data->color[3] = ((u8 *)&source->abgr)[3];
     if (fixedPoint == 0) {
-        data->vertices[0].x = (source->corners[0][0] << 4) + 0x7000;
-        data->vertices[0].y = (source->corners[0][1] << 3) + 0x7900;
+        data->vertices[0].x = (source->xy[0][0] << 4) + 0x7000;
+        data->vertices[0].y = (source->xy[0][1] << 3) + 0x7900;
         data->vertices[1].x = data->vertices[0].x;
-        data->vertices[1].y = (source->corners[1][1] << 3) + 0x7900;
-        data->vertices[2].x = (source->corners[1][0] << 4) + 0x7000;
+        data->vertices[1].y = (source->xy[1][1] << 3) + 0x7900;
+        data->vertices[2].x = (source->xy[1][0] << 4) + 0x7000;
         data->vertices[2].y = data->vertices[0].y;
         data->vertices[3].x = data->vertices[2].x;
         data->vertices[3].y = data->vertices[1].y;
-        data->vertices[0].u = (source->corners[0][0] + dx) * 0.001953125f;
-        data->vertices[0].v = (source->corners[0][1] + dy) * 0.001953125f;
+        data->vertices[0].u = (source->xy[0][0] + dx) * 0.001953125f;
+        data->vertices[0].v = (source->xy[0][1] + dy) * 0.001953125f;
         data->vertices[1].u = data->vertices[0].u;
-        data->vertices[1].v = (source->corners[1][1] + dy) * 0.001953125f;
-        data->vertices[2].u = (source->corners[1][0] + dx) * 0.001953125f;
+        data->vertices[1].v = (source->xy[1][1] + dy) * 0.001953125f;
+        data->vertices[2].u = (source->xy[1][0] + dx) * 0.001953125f;
         data->vertices[2].v = data->vertices[0].v;
         data->vertices[3].u = data->vertices[2].u;
         data->vertices[3].v = data->vertices[1].v;
     } else {
-        data->vertices[0].x = source->corners[0][0] + 0x7000;
-        data->vertices[0].y = source->corners[0][1] + 0x7900;
+        data->vertices[0].x = source->xy[0][0] + 0x7000;
+        data->vertices[0].y = source->xy[0][1] + 0x7900;
         data->vertices[1].x = data->vertices[0].x;
-        data->vertices[1].y = source->corners[1][1] + 0x7900;
-        data->vertices[2].x = source->corners[1][0] + 0x7000;
+        data->vertices[1].y = source->xy[1][1] + 0x7900;
+        data->vertices[2].x = source->xy[1][0] + 0x7000;
         data->vertices[2].y = data->vertices[0].y;
         data->vertices[3].x = data->vertices[2].x;
         data->vertices[3].y = data->vertices[1].y;
-        data->vertices[0].u = (source->corners[0][0] + dx) * 0.0001220703125f;
-        data->vertices[0].v = (source->corners[0][1] + dy) * 0.000244140625f;
+        data->vertices[0].u = (source->xy[0][0] + dx) * 0.0001220703125f;
+        data->vertices[0].v = (source->xy[0][1] + dy) * 0.000244140625f;
         data->vertices[1].u = data->vertices[0].u;
-        data->vertices[1].v = (source->corners[1][1] + dy) * 0.000244140625f;
-        data->vertices[2].u = (source->corners[1][0] + dx) * 0.0001220703125f;
+        data->vertices[1].v = (source->xy[1][1] + dy) * 0.000244140625f;
+        data->vertices[2].u = (source->xy[1][0] + dx) * 0.0001220703125f;
         data->vertices[2].v = data->vertices[0].v;
         data->vertices[3].u = data->vertices[2].u;
         data->vertices[3].v = data->vertices[1].v;
@@ -201,7 +201,7 @@ void effBlurDrawFramebufferQuad(const dds3Effect_Blur_t *source)
         blendPacket[3] = 0xE;
         blendPacket[4] = 0x31001;
         blendPacket[5] = 0x47;
-        blendPacket[6] = source->blendControl;
+        blendPacket[6] = source->blend;
         blendPacket[7] = 0x42;
         sdfDrawTagLink(list, (u32)blendPacket);
         clampPacket = (u64 *)sdfGrAllocPacketBuff(0x30);
@@ -245,16 +245,16 @@ void dds3EffectFilter(dds3Effect_Filter_t *source) {
     blendPacket[3] = 0xE;
     blendPacket[4] = 0x31001;
     blendPacket[5] = 0x47;
-    blendPacket[6] = source->blendControl;
+    blendPacket[6] = source->blend;
     blendPacket[7] = 0x42;
     sdfDrawTagLink(list, (u32)blendPacket);
 
     drawPacket = effPkt2DAllocF4(0);
-    color = source->color | 0x3F80000000000000ULL;
-    x[0] = (source->corners[0][0] << 4) + 0x7000;
-    x[1] = (source->corners[1][0] << 4) + 0x7000;
-    y[0] = (source->corners[0][1] << 3) + 0x7900;
-    y[1] = (source->corners[1][1] << 3) + 0x7900;
+    color = source->abgr | 0x3F80000000000000ULL;
+    x[0] = (source->xy[0][0] << 4) + 0x7000;
+    x[1] = (source->xy[1][0] << 4) + 0x7000;
+    y[0] = (source->xy[0][1] << 3) + 0x7900;
+    y[1] = (source->xy[1][1] << 3) + 0x7900;
     topLeft = (u16)x[0] | ((u32)(u16)y[0] << 16);
     bottomLeft = (u16)x[0] | ((u32)(u16)y[1] << 16);
     topRight = (u16)x[1] | ((u32)(u16)y[0] << 16);

@@ -1695,7 +1695,7 @@ void evtViewerUpdateTimelineGroupState(EvtRuntimeGroup *group, EvtRuntimeChild *
         if (from != NULL || to != NULL) {
             evtHokanBlur2(enable, ratio, from, to, &D_004539B0);
             evtSetUnityCalcArea(&D_004539B0);
-            if ((D_004539B0.color >> 24) == 0) {
+            if ((D_004539B0.abgr >> 24) == 0) {
                 viewer->blurRectangleEnabled = 0;
             } else {
                 viewer->blurRectangleEnabled = 1;
@@ -1715,7 +1715,7 @@ void evtViewerUpdateTimelineGroupState(EvtRuntimeGroup *group, EvtRuntimeChild *
         if (from != NULL || to != NULL) {
             evtHokanMultBlur(enable, ratio, from, to, &D_004539E0);
             Eve_PartialMultiBlurSetParam(&D_004539E0);
-            if ((D_004539E0.source.color >> 24) == 0) {
+            if ((D_004539E0.Blur.abgr >> 24) == 0) {
                 viewer->texturedBlurEnabled = 0;
             } else {
                 viewer->texturedBlurEnabled = 1;
@@ -1735,7 +1735,7 @@ void evtViewerUpdateTimelineGroupState(EvtRuntimeGroup *group, EvtRuntimeChild *
         if (from != NULL || to != NULL) {
             evtHokanDistBlur(enable, ratio, from, to, &D_00453A60);
             Eve_DistortionBlurSetParam(&D_00453A60);
-            if ((D_00453A60.color >> 24) == 0) {
+            if ((D_00453A60.abgr >> 24) == 0) {
                 viewer->filterBlurEnabled = 0;
             } else {
                 viewer->filterBlurEnabled = 1;
@@ -1755,7 +1755,7 @@ void evtViewerUpdateTimelineGroupState(EvtRuntimeGroup *group, EvtRuntimeChild *
         if (from != NULL || to != NULL) {
             evtHokanRipBlur(enable, ratio, from, to, &D_00453A90);
             Eve_RippleBlurSetParam(&D_00453A90);
-            if ((D_00453A90.color >> 24) == 0) {
+            if ((D_00453A90.abgr >> 24) == 0) {
                 viewer->staggeredBlurEnabled = 0;
             } else {
                 viewer->staggeredBlurEnabled = 1;
@@ -1775,7 +1775,7 @@ void evtViewerUpdateTimelineGroupState(EvtRuntimeGroup *group, EvtRuntimeChild *
         if (from != NULL || to != NULL) {
             evtBlendParamsG(enable, ratio, from, to, &D_00453AC0);
             effCopyFramebufferQuadParameters(&D_00453AC0);
-            if ((D_00453AC0.color >> 24) == 0) {
+            if ((D_00453AC0.abgr >> 24) == 0) {
                 viewer->framebufferQuadEnabled = 0;
             } else {
                 viewer->framebufferQuadEnabled = 1;
@@ -1795,7 +1795,7 @@ void evtViewerUpdateTimelineGroupState(EvtRuntimeGroup *group, EvtRuntimeChild *
         if (from != NULL || to != NULL) {
             evtHokanFilter(enable, ratio, from, to, &D_00453A10);
             Eve_FilterSetParam(&D_00453A10);
-            if ((D_00453A10.color >> 24) == 0) {
+            if ((D_00453A10.abgr >> 24) == 0) {
                 viewer->colorRectangleEnabled = 0;
             } else {
                 viewer->colorRectangleEnabled = 1;
@@ -1815,7 +1815,7 @@ void evtViewerUpdateTimelineGroupState(EvtRuntimeGroup *group, EvtRuntimeChild *
         if (from != NULL || to != NULL) {
             evtHokanMultFilter(enable, ratio, from, to, &D_00453A30);
             Eve_PartialMultiFilterSetParam(&D_00453A30);
-            if (D_00453A30.draw.color[3] == 0) {
+            if (D_00453A30.Filter.color[3] == 0) {
                 viewer->texturedSquareEnabled = 0;
             } else {
                 viewer->texturedSquareEnabled = 1;

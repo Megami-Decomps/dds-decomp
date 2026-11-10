@@ -66,19 +66,19 @@
 
 #define EFF_EVENT_JITTER_BASE 0.7f
 
-extern EffScreenDrawParams Eve_Blur;
+extern effScreenDrawParams_t Eve_Blur;
 
-extern EffScreenDrawParams D_00355908;
+extern effScreenDrawParams_t D_00355908;
 
 extern dds3Effect_Filter_t Eve_Filter;
 
-extern EffScreenDrawParams evtUnityCalcArea;
+extern effScreenDrawParams_t evtUnityCalcArea;
 
 extern dds3Effect_PartialMultiBlurParam_t mblurParam;
 
 extern dds3Effect_DistortionBlurParam_t dblurParam;
 
-extern EffScreenDrawParams D_00355E48;
+extern effScreenDrawParams_t D_00355E48;
 
 extern dds3Effect_Filter_t D_00355F88;
 
@@ -86,7 +86,7 @@ extern dds3Effect_PartialMultiFilterParam_t mfilterParam;
 
 extern dds3Effect_RippleBlurParam_t rblurParam;
 
-extern EffResourceRectWork *hEve_PartialMultiFilter;
+extern dds3Effect_PartialMultiFilter_t *hEve_PartialMultiFilter;
 
 extern s8 Eve_PartialMultiFilterShow;
 
@@ -94,15 +94,15 @@ extern s8 Eve_FilterShow;
 
 extern s8 D_003BB073;
 
-extern EffBlurScaleWork *hEve_RippleBlur;
+extern effBlurScaleWork_t *hEve_RippleBlur;
 
 extern s8 Eve_RippleBlurShow;
 
-extern EffBlurScatterWork *hEve_DistortionBlur;
+extern effBlurScatterWork_t *hEve_DistortionBlur;
 
 extern s8 Eve_DistortionBlurShow;
 
-extern EffBlurTemplate *hEve_PartialMultiBlur;
+extern effBlurTemplate_t *hEve_PartialMultiBlur;
 
 extern s8 Eve_PartialMultiBlurShow;
 
@@ -116,7 +116,7 @@ extern u8 D_00355948[];
 
 extern u8 D_00355970[];
 
-extern void dds3EffectRippleBlurDraw(EffBlurScaleWork *arg);
+extern void dds3EffectRippleBlurDraw(effBlurScaleWork_t *arg);
 
 extern void dds3EffectFilter(dds3Effect_Filter_t *arg);
 
@@ -140,7 +140,7 @@ void Eve_BlurSetParam(const dds3Effect_Blur_t *parameters) {
 }
 
 /* Expose the rectangle-blur parameter block by address. */
-EffScreenDrawParams *Eve_BlurGetParam(void) {
+effScreenDrawParams_t *Eve_BlurGetParam(void) {
     return &Eve_Blur;
 }
 
@@ -158,7 +158,7 @@ void Eve_PartialMultiBlurSetParam(dds3Effect_PartialMultiBlurParam_t *parameters
 }
 
 /* Return the current textured-blur work without retaining it. */
-EffBlurTemplate *Eve_PartialMultiBlurGetParams(void) {
+effBlurTemplate_t *Eve_PartialMultiBlurGetParams(void) {
     return hEve_PartialMultiBlur;
 }
 
@@ -185,7 +185,7 @@ void Eve_DistortionBlurSetParam(dds3Effect_DistortionBlurParam_t *parameters) {
 }
 
 /* Return the current filter-blur work without retaining it. */
-EffBlurScatterWork *Eve_DistortionBlurGetParams(void) {
+effBlurScatterWork_t *Eve_DistortionBlurGetParams(void) {
     return hEve_DistortionBlur;
 }
 
@@ -212,7 +212,7 @@ void Eve_RippleBlurSetParam(dds3Effect_RippleBlurParam_t *parameters) {
 }
 
 /* Return the current staggered-blur work without retaining it. */
-EffBlurScaleWork *Eve_RippleBlurGetParams(void) {
+effBlurScaleWork_t *Eve_RippleBlurGetParams(void) {
     return hEve_RippleBlur;
 }
 
@@ -239,7 +239,7 @@ void effCopyFramebufferQuadParameters(const dds3Effect_Blur_t *source) {
 }
 
 /* Expose the framebuffer-quad parameter block by address. */
-EffScreenDrawParams *effGetCh73Params(void) {
+effScreenDrawParams_t *effGetCh73Params(void) {
     return &D_00355908;
 }
 
@@ -271,21 +271,21 @@ void Eve_PartialMultiFilterOFF(void) {
 
 /* Copy the resource template body while preserving its selected resource. */
 void Eve_PartialMultiFilterSetParam(dds3Effect_PartialMultiFilterParam_t *parameters) {
-    hEve_PartialMultiFilter->params = *parameters;
+    hEve_PartialMultiFilter->param = *parameters;
 }
 
 /* Return the current textured-square work without retaining it. */
-EffResourceRectWork *Eve_PartialMultiFilterGetParams(void) {
+dds3Effect_PartialMultiFilter_t *Eve_PartialMultiFilterGetParams(void) {
     return hEve_PartialMultiFilter;
 }
 
 void Eve_PartialMultiFilterSetTex(sdfTexHandle_t *texture) {
-    hEve_PartialMultiFilter->texture = texture;
+    hEve_PartialMultiFilter->hAlphaTex = texture;
 }
 
 /* Install the textured-square resource-table texture while retaining its body. */
 void Eve_PartialMultiFilterSetDefTex(void) {
-    hEve_PartialMultiFilter->texture = dds3BillboardGetGeneralTex(EFF_EVENT_SQUARE_RESOURCE_INDEX);
+    hEve_PartialMultiFilter->hAlphaTex = dds3BillboardGetGeneralTex(EFF_EVENT_SQUARE_RESOURCE_INDEX);
 }
 
 /* Clone the four default work templates; only the staggered slot count is overridden. */
@@ -294,7 +294,7 @@ void Eve_EffectInit(void) {
     hEve_DistortionBlur = dds3EffectDistortionBlurCreate((dds3Effect_DistortionBlurParam_t *)D_003558A8);
     hEve_PartialMultiFilter = dds3EffectPartialMultiFilterCreate((dds3Effect_PartialMultiFilterParam_t *)D_00355948);
     hEve_RippleBlur = dds3EffectRippleBlurCreate((dds3Effect_RippleBlurParam_t *)D_00355970);
-    Eve_RippleBlurGetParams()->params.count = EFF_EVENT_STAGGERED_SLOT_COUNT;
+    Eve_RippleBlurGetParams()->params.number = EFF_EVENT_STAGGERED_SLOT_COUNT;
 }
 
 /* Dispatch enabled draw families independently, in their native order. */
@@ -367,7 +367,7 @@ s32 effUpdateCh72Params(void) {
 }
 
 /* Expose this screen-draw setup block; no parameter copy is made. */
-EffScreenDrawParams *evtGetUnityCalcArea(void) {
+effScreenDrawParams_t *evtGetUnityCalcArea(void) {
     return &evtUnityCalcArea;
 }
 
@@ -500,7 +500,7 @@ s32 effEventAdvanceScreenDrawSetup(void) {
 }
 
 /* Expose the other screen-draw setup block by address. */
-EffScreenDrawParams *effGetLoadDescD(void) {
+effScreenDrawParams_t *effGetLoadDescD(void) {
     return &D_00355E48;
 }
 

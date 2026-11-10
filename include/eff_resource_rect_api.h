@@ -3,6 +3,6 @@
 
 #include "eff.h"
 
-void effResourceRectDrawPixels(EffResourceRectWork *work);
+void effResourceRectDrawPixels(dds3Effect_PartialMultiFilter_t *work);
 
 #endif

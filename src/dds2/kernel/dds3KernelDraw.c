@@ -991,12 +991,12 @@ void setdraw_xy(s32 corners[2][2]) {
 
 /* Stage the solid rectangle's blend control word. */
 void dds3SetFilter2Para(u32 blendControl) {
-    filter2target.blendControl = blendControl;
+    filter2target.blend = blendControl;
 }
 
 /* Stage the solid rectangle's packed RGBA color. */
 void dds3SetFilter2RGBA(u32 rgba) {
-    filter2target.color = rgba;
+    filter2target.abgr = rgba;
 }
 
 extern u16 filter2swapnow;
@@ -1012,7 +1012,7 @@ void dds3Filter2Swap(s32 duration) {
     filter2swapmax = duration;
     if (duration == 0) {
         dds3DrawFlag &= ~DDS3_DRAW_COLOR_TRANSITION_BIT;
-        setdraw_xy(filter2target.corners);
+        setdraw_xy(filter2target.xy);
         Eve_FilterSetParam(&filter2target);
     } else {
         dds3DrawFlag |= DDS3_DRAW_COLOR_TRANSITION_BIT;
@@ -1026,11 +1026,11 @@ void dds3Filter2On(s32 duration) {
 
     filter2abase = 0;
     filter2now = 0;
-    filter2atarget = (params->color >> 24);
+    filter2atarget = (params->abgr >> 24);
     filter2max = requestedDuration;
     if (requestedDuration == 0) {
         dds3DrawFlag &= ~DDS3_DRAW_COLOR_FADE_BIT;
-        setdraw_xy(params->corners);
+        setdraw_xy(params->xy);
         Eve_FilterSetParam(params);
         Eve_FilterON();
     }
@@ -1042,7 +1042,7 @@ void dds3Filter2On(s32 duration) {
 /* Fade staged solid-rectangle alpha toward zero; zero disables it immediately. */
 void dds3Filter2Off(s32 duration) {
     filter2atarget = 0;
-    filter2abase = (filter2target.color >> 24);
+    filter2abase = (filter2target.abgr >> 24);
     filter2now = 0;
     filter2max = duration;
     if (duration == 0) {
@@ -1057,17 +1057,17 @@ void dds3Filter2Off(s32 duration) {
 
 /* Stage the textured square's blend control word. */
 void dds3SetMFilterPara(u32 blendControl) {
-    mfiltertarget.draw.blendControl = blendControl;
+    mfiltertarget.Filter.blendControl = blendControl;
 }
 
 /* Stage the textured square's packed RGBA color. */
 void dds3SetMFilterRGBA(u32 rgba) {
-    mfiltertarget.draw.rgba = rgba;
+    mfiltertarget.Filter.rgba = rgba;
 }
 
 /* Stage textured-square extent and center coordinates. */
 void dds3SetMFilterArea(s32 extent, s32 centerX, s32 centerY) {
-    mfiltertarget.extent = extent;
+    mfiltertarget.area = extent;
     mfiltertarget.center[0] = centerX;
     mfiltertarget.center[1] = centerY;
 }
@@ -1078,7 +1078,7 @@ extern u16 mfilterswapmax;
 
 /* Save the live textured-square params; zero copies the staged body immediately. */
 void dds3MFilterSwap(s32 duration) {
-    dds3MFilterBuf = Eve_PartialMultiFilterGetParams()->params;
+    dds3MFilterBuf = Eve_PartialMultiFilterGetParams()->param;
     mfilterswapnow = 0;
     mfilterswapmax = duration;
     if (duration == 0) {
@@ -1096,7 +1096,7 @@ void dds3MFilterOn(s32 duration) {
 
     mfilterabase = 0;
     mfilternow = 0;
-    mfilteratarget = params->draw.color[DDS3_DRAW_ALPHA_CHANNEL];
+    mfilteratarget = params->Filter.color[DDS3_DRAW_ALPHA_CHANNEL];
     mfiltermax = requestedDuration;
     if (requestedDuration == 0) {
         dds3DrawFlag &= ~DDS3_DRAW_SQUARE_FADE_BIT;
@@ -1111,7 +1111,7 @@ void dds3MFilterOn(s32 duration) {
 /* Fade staged square alpha toward zero, or disable it now when duration is zero. */
 void dds3MFilterOff(s32 duration) {
     mfilteratarget = 0;
-    mfilterabase = mfiltertarget.draw.color[DDS3_DRAW_ALPHA_CHANNEL];
+    mfilterabase = mfiltertarget.Filter.color[DDS3_DRAW_ALPHA_CHANNEL];
     mfilternow = 0;
     mfiltermax = duration;
     if (duration == 0) {
@@ -1157,20 +1157,20 @@ void dds3SetBlur(s32 duration, s32 alpha, s32 scale) {
 
 /* Stage rectangle-blur rotation, scale and blend control, in the original order. */
 void dds3SetBlur2Para(f32 rotation, f32 scale, u32 blendControl) {
-    blur2target.angle = rotation;
-    blur2target.displacement = scale;
-    blur2target.blendControl = blendControl;
+    blur2target.rotate = rotation;
+    blur2target.scale = scale;
+    blur2target.blend = blendControl;
 }
 
 /* Stage the rectangle blur's packed RGBA color. */
 void dds3SetBlur2RGBA(u32 rgba) {
-    blur2target.color = rgba;
+    blur2target.abgr = rgba;
 }
 
 /* Stage the rectangle blur's center coordinates. */
 void dds3SetBlur2Area(s32 centerX, s32 centerY) {
-    blur2target.position[0] = centerX;
-    blur2target.position[1] = centerY;
+    blur2target.center[0] = centerX;
+    blur2target.center[1] = centerY;
 }
 
 extern dds3Effect_Blur_t dds3RectangleBlurTransitionStartParameters;
@@ -1184,7 +1184,7 @@ void dds3Blur2Swap(s32 duration) {
     blur2swapmax = duration;
     if (duration == 0) {
         dds3DrawFlag &= DDS3_DRAW_CLEAR_RECT_TRANSITION;
-        setdraw_xy(blur2target.corners);
+        setdraw_xy(blur2target.xy);
         Eve_BlurSetParam(&blur2target);
     } else {
         dds3DrawFlag |= DDS3_DRAW_RECT_TRANSITION_BIT;
@@ -1198,11 +1198,11 @@ void dds3Blur2On(s32 duration) {
 
     blur2abase = 0;
     blur2now = 0;
-    blur2atarget = (params->color >> 24);
+    blur2atarget = (params->abgr >> 24);
     blur2max = requestedDuration;
     if (requestedDuration == 0) {
         dds3DrawFlag &= ~DDS3_DRAW_RECT_FADE_BIT;
-        setdraw_xy(params->corners);
+        setdraw_xy(params->xy);
         Eve_BlurSetParam(params);
         Eve_BlurON();
     }
@@ -1214,7 +1214,7 @@ void dds3Blur2On(s32 duration) {
 /* Fade staged rectangle-blur alpha toward zero; zero disables it immediately. */
 void dds3Blur2Off(s32 duration) {
     blur2atarget = 0;
-    blur2abase = (blur2target.color >> 24);
+    blur2abase = (blur2target.abgr >> 24);
     blur2now = 0;
     blur2max = duration;
     if (duration == 0) {
@@ -1229,21 +1229,21 @@ void dds3Blur2Off(s32 duration) {
 
 /* Stage textured-blur source rotation, scale and blend control. */
 void dds3SetMultiBlurPara(f32 rotation, f32 scale, u32 blendControl) {
-    mulblurtarget.source.angle = rotation;
-    mulblurtarget.source.displacement = scale;
-    mulblurtarget.source.blendControl = blendControl;
+    mulblurtarget.Blur.rotate = rotation;
+    mulblurtarget.Blur.scale = scale;
+    mulblurtarget.Blur.blend = blendControl;
 }
 
 /* Stage the textured blur's packed source RGBA color. */
 void dds3SetMultiBlurRGBA(u32 rgba) {
-    mulblurtarget.source.color = rgba;
+    mulblurtarget.Blur.abgr = rgba;
 }
 
 /* Stage textured-blur extent and source center coordinates. */
 void dds3SetMultiBlurArea(s32 extent, s32 centerX, s32 centerY) {
-    mulblurtarget.extent = extent;
-    mulblurtarget.source.position[0] = centerX;
-    mulblurtarget.source.position[1] = centerY;
+    mulblurtarget.area = extent;
+    mulblurtarget.Blur.center[0] = centerX;
+    mulblurtarget.Blur.center[1] = centerY;
 }
 
 extern dds3Effect_PartialMultiBlurParam_t dds3MultiBlurBuf;
@@ -1270,7 +1270,7 @@ void dds3MultiBlurOn(s32 duration) {
 
     mulblurabase = 0;
     mulblurnow = 0;
-    mulbluratarget = (params->source.color >> 24);
+    mulbluratarget = (params->Blur.abgr >> 24);
     mulblurmax = requestedDuration;
     if (requestedDuration == 0) {
         dds3DrawFlag &= ~DDS3_DRAW_TEXTURE_FADE_BIT;
@@ -1289,7 +1289,7 @@ void dds3MultiBlurOff(s32 duration) {
 
     mulbluratarget = 0;
     mulblurnow = 0;
-    mulblurabase = (params->source.color >> 24);
+    mulblurabase = (params->Blur.abgr >> 24);
     mulblurmax = requestedDuration;
     if (requestedDuration == 0) {
         dds3DrawFlag &= ~DDS3_DRAW_TEXTURE_FADE_BIT;
@@ -1322,25 +1322,25 @@ void dds3SetDistBlurPara(s32 filterCount, s32 size, s32 delaySpread, f32 angleSt
         distblurovercnt++;
         filterCount = DDS3_DRAW_FILTER_MAX_COUNT;
     }
-    distblurtarget.count = filterCount;
-    distblurtarget.size = size;
-    distblurtarget.delaySpread = delaySpread;
-    distblurtarget.angleStep = angleStep;
-    distblurtarget.uvDisplacementAngleDegrees = uvDisplacementAngleDegrees;
-    distblurtarget.uvDisplacementAmplitude = uvDisplacementAmplitude;
-    distblurtarget.blendControl = blendControl;
+    distblurtarget.number = filterCount;
+    distblurtarget.width = size;
+    distblurtarget.interval = delaySpread;
+    distblurtarget.speed = angleStep;
+    distblurtarget.rotate = uvDisplacementAngleDegrees;
+    distblurtarget.distortion = uvDisplacementAmplitude;
+    distblurtarget.blend = blendControl;
 }
 
 /* Stage the filter blur's packed RGBA color. */
 void dds3SetDistBlurRGBA(u32 rgba) {
-    distblurtarget.color = rgba;
+    distblurtarget.abgr = rgba;
 }
 
 /* Stage filter-blur position spread and coordinates. */
 void dds3SetDistBlurArea(s32 positionSpread, s32 x, s32 y) {
-    distblurtarget.positionSpread = positionSpread;
-    distblurtarget.position[0] = x;
-    distblurtarget.position[1] = y;
+    distblurtarget.area = positionSpread;
+    distblurtarget.center[0] = x;
+    distblurtarget.center[1] = y;
 }
 
 extern dds3Effect_DistortionBlurParam_t dds3DistBlurBuf;
@@ -1368,7 +1368,7 @@ void dds3DistBlurOn(s32 duration) {
 
     distblurabase = 0;
     distblurnow = 0;
-    distbluratarget = (params->color >> 24);
+    distbluratarget = (params->abgr >> 24);
     distblurmax = requestedDuration;
     if (requestedDuration == 0) {
         dds3DrawFlag &= ~DDS3_DRAW_FILTER_FADE_BIT;
@@ -1385,7 +1385,7 @@ void dds3DistBlurOn(s32 duration) {
 /* Fade staged filter alpha toward zero; zero disables it immediately. */
 void dds3DistBlurOff(s32 duration) {
     distbluratarget = 0;
-    distblurabase = (distblurtarget.color >> 24);
+    distblurabase = (distblurtarget.abgr >> 24);
     distblurnow = 0;
     distblurmax = duration;
     if (duration == 0) {
@@ -1407,25 +1407,25 @@ void dds3SetRipBlurPara(s32 count, f32 phaseStep, f32 spacing,
         ripblurovercnt++;
         count = DDS3_DRAW_STAGGERED_MAX_COUNT;
     }
-    ripblurtarget.count = count;
-    ripblurtarget.phaseStep = phaseStep;
-    ripblurtarget.spacing = spacing;
-    ripblurtarget.uvDisplacementAngleDegrees = uvDisplacementAngleDegrees;
-    ripblurtarget.uvDisplacementAmplitude = uvDisplacementAmplitude;
-    ripblurtarget.angleStep = angleStep;
-    ripblurtarget.blendControl = blendControl;
+    ripblurtarget.number = count;
+    ripblurtarget.speed = phaseStep;
+    ripblurtarget.interval = spacing;
+    ripblurtarget.rotate = uvDisplacementAngleDegrees;
+    ripblurtarget.power = uvDisplacementAmplitude;
+    ripblurtarget.frequency = angleStep;
+    ripblurtarget.blend = blendControl;
 }
 
 /* Stage the staggered blur's packed RGBA color. */
 void dds3SetRipBlurRGBA(u32 rgba) {
-    ripblurtarget.color = rgba;
+    ripblurtarget.abgr = rgba;
 }
 
 /* Stage staggered-blur size and coordinates. */
 void dds3SetRipBlurArea(s32 size, s32 x, s32 y) {
-    ripblurtarget.size = size;
-    ripblurtarget.position[0] = x;
-    ripblurtarget.position[1] = y;
+    ripblurtarget.area = size;
+    ripblurtarget.center[0] = x;
+    ripblurtarget.center[1] = y;
 }
 
 extern dds3Effect_RippleBlurParam_t dds3RipBlurBuf __attribute__((aligned(8)));
@@ -1453,7 +1453,7 @@ void dds3RipBlurOn(s32 duration) {
 
     ripblurabase = 0;
     ripblurnow = 0;
-    ripbluratarget = (params->color >> 24);
+    ripbluratarget = (params->abgr >> 24);
     ripblurmax = requestedDuration;
     if (requestedDuration == 0) {
         dds3DrawFlag &= ~DDS3_DRAW_STAGGERED_FADE_BIT;
@@ -1470,7 +1470,7 @@ void dds3RipBlurOn(s32 duration) {
 /* Fade staged staggered alpha toward zero; zero disables it immediately. */
 void dds3RipBlurOff(s32 duration) {
     ripbluratarget = 0;
-    ripblurabase = (ripblurtarget.color >> 24);
+    ripblurabase = (ripblurtarget.abgr >> 24);
     ripblurnow = 0;
     ripblurmax = duration;
     if (duration == 0) {
@@ -1531,9 +1531,9 @@ void dds3BlurUpdate(void) {
         }
         evtHokanBlur2(1, (f32)blur2swapnow / (f32)blur2swapmax, &dds3RectangleBlurTransitionStartParameters,
                         &blur2target, &dds3RectangleBlurFrameParameters);
-        setdraw_xy(dds3RectangleBlurFrameParameters.corners);
+        setdraw_xy(dds3RectangleBlurFrameParameters.xy);
         Eve_BlurSetParam(&dds3RectangleBlurFrameParameters);
-        if ((dds3RectangleBlurFrameParameters.color >> 24) != 0) {
+        if ((dds3RectangleBlurFrameParameters.abgr >> 24) != 0) {
             Eve_BlurON();
         }
         else {
@@ -1551,8 +1551,8 @@ void dds3BlurUpdate(void) {
         alpha = blur2abase + blur2now *
                 (blur2atarget - blur2abase) /
                 blur2max;
-        dds3RectangleBlurFrameParameters.color = (dds3RectangleBlurFrameParameters.color & 0xFFFFFF) | (alpha << 24);
-        setdraw_xy(dds3RectangleBlurFrameParameters.corners);
+        dds3RectangleBlurFrameParameters.abgr = (dds3RectangleBlurFrameParameters.abgr & 0xFFFFFF) | (alpha << 24);
+        setdraw_xy(dds3RectangleBlurFrameParameters.xy);
         Eve_BlurSetParam(&dds3RectangleBlurFrameParameters);
         if (alpha == 0) {
             Eve_BlurOFF();
@@ -1571,7 +1571,7 @@ void dds3BlurUpdate(void) {
         evtHokanMultBlur(1, (f32)mulblurswapnow / (f32)mulblurswapmax, &dds3MultiBlurBuf,
                         &mulblurtarget, &key2);
         Eve_PartialMultiBlurSetParam(&key2);
-        if ((key2.source.color >> 24) != 0) {
+        if ((key2.Blur.abgr >> 24) != 0) {
             Eve_PartialMultiBlurON();
         }
         else {
@@ -1589,7 +1589,7 @@ void dds3BlurUpdate(void) {
         alpha = mulblurabase + mulblurnow *
                 (mulbluratarget - mulblurabase) /
                 mulblurmax;
-        key2.source.color = (key2.source.color & 0xFFFFFF) | (alpha << 24);
+        key2.Blur.abgr = (key2.Blur.abgr & 0xFFFFFF) | (alpha << 24);
         Eve_PartialMultiBlurSetParam(&key2);
         if (alpha == 0) {
             Eve_PartialMultiBlurOFF();
@@ -1608,7 +1608,7 @@ void dds3BlurUpdate(void) {
         evtHokanDistBlur(1, (f32)distblurswapnow / (f32)distblurswapmax, &dds3DistBlurBuf,
                         &distblurtarget, &dds3DistBlurCurrent);
         Eve_DistortionBlurSetParam(&dds3DistBlurCurrent);
-        if ((dds3DistBlurCurrent.color >> 24) != 0) {
+        if ((dds3DistBlurCurrent.abgr >> 24) != 0) {
             Eve_DistortionBlurON();
         }
         else {
@@ -1626,7 +1626,7 @@ void dds3BlurUpdate(void) {
         alpha = distblurabase + distblurnow *
                 (distbluratarget - distblurabase) /
                 distblurmax;
-        dds3DistBlurCurrent.color = (dds3DistBlurCurrent.color & 0xFFFFFF) | (alpha << 24);
+        dds3DistBlurCurrent.abgr = (dds3DistBlurCurrent.abgr & 0xFFFFFF) | (alpha << 24);
         Eve_DistortionBlurSetParam(&dds3DistBlurCurrent);
         if (alpha == 0) {
             Eve_DistortionBlurOFF();
@@ -1645,7 +1645,7 @@ void dds3BlurUpdate(void) {
         evtHokanRipBlur(1, (f32)ripblurswapnow / (f32)ripblurswapmax, &dds3RipBlurBuf,
                         &ripblurtarget, &dds3BlurState);
         Eve_RippleBlurSetParam(&dds3BlurState);
-        if ((dds3BlurState.color >> 24) != 0) {
+        if ((dds3BlurState.abgr >> 24) != 0) {
             Eve_RippleBlurON();
         }
         else {
@@ -1664,7 +1664,7 @@ void dds3BlurUpdate(void) {
         alpha = ripblurabase + ripblurnow *
                 (ripbluratarget - ripblurabase) /
                 ripblurmax;
-        dds3BlurState.color = (dds3BlurState.color & 0xFFFFFF) | (alpha << 24);
+        dds3BlurState.abgr = (dds3BlurState.abgr & 0xFFFFFF) | (alpha << 24);
         Eve_RippleBlurSetParam(&dds3BlurState);
         if (alpha == 0) {
             Eve_RippleBlurOFF();
@@ -1682,9 +1682,9 @@ void dds3BlurUpdate(void) {
         }
         evtHokanFilter(1, (f32)filter2swapnow / (f32)filter2swapmax, &dds3Filter2Buf,
                                         &filter2target, &dds3BlurParam);
-        setdraw_xy(dds3BlurParam.corners);
+        setdraw_xy(dds3BlurParam.xy);
         Eve_FilterSetParam(&dds3BlurParam);
-        if ((dds3BlurParam.color >> 24) != 0) {
+        if ((dds3BlurParam.abgr >> 24) != 0) {
             Eve_FilterON();
         }
         else {
@@ -1702,8 +1702,8 @@ void dds3BlurUpdate(void) {
         alpha = filter2abase + filter2now *
                 (filter2atarget - filter2abase) /
                 filter2max;
-        dds3BlurParam.color = (dds3BlurParam.color & 0xFFFFFF) | (alpha << 24);
-        setdraw_xy(dds3BlurParam.corners);
+        dds3BlurParam.abgr = (dds3BlurParam.abgr & 0xFFFFFF) | (alpha << 24);
+        setdraw_xy(dds3BlurParam.xy);
         Eve_FilterSetParam(&dds3BlurParam);
         if (alpha == 0) {
             Eve_FilterOFF();
@@ -1722,7 +1722,7 @@ void dds3BlurUpdate(void) {
         evtHokanMultFilter(1, (f32)mfilterswapnow / (f32)mfilterswapmax, &dds3MFilterBuf,
                         &mfiltertarget, &dds3MFilterCurrent);
         Eve_PartialMultiFilterSetParam(&dds3MFilterCurrent);
-        if (dds3MFilterCurrent.draw.color[DDS3_DRAW_ALPHA_CHANNEL] != 0) {
+        if (dds3MFilterCurrent.Filter.color[DDS3_DRAW_ALPHA_CHANNEL] != 0) {
             Eve_PartialMultiFilterON();
         }
         else {
@@ -1740,7 +1740,7 @@ void dds3BlurUpdate(void) {
         alpha = mfilterabase + mfilternow *
                 (mfilteratarget - mfilterabase) /
                 mfiltermax;
-        dds3MFilterCurrent.draw.rgba = (dds3MFilterCurrent.draw.rgba & 0xFFFFFF) | (alpha << 24);
+        dds3MFilterCurrent.Filter.rgba = (dds3MFilterCurrent.Filter.rgba & 0xFFFFFF) | (alpha << 24);
         Eve_PartialMultiFilterSetParam(&dds3MFilterCurrent);
         if (alpha == 0) {
             Eve_PartialMultiFilterOFF();

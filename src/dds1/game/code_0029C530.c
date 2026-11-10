@@ -522,12 +522,12 @@ void effUpdateFadeBlendA(EffKindWork *work) {
     if (duration < frame) {
         return;
     }
-    out->position[0] = 0;
-    out->position[1] = 0;
-    out->corners[0][0] = 0;
-    out->corners[0][1] = 0;
-    out->corners[1][0] = 0x200;
-    out->corners[1][1] = 0x1C0;
+    out->center[0] = 0;
+    out->center[1] = 0;
+    out->xy[0][0] = 0;
+    out->xy[0][1] = 0;
+    out->xy[1][0] = 0x200;
+    out->xy[1][1] = 0x1C0;
     second = effSampleColorAlphaTracks(&config->blendA, &config->blendB2, frame, duration);
     color1[0] = work->color;
     unit = 0x3C000000;
@@ -538,10 +538,10 @@ void effUpdateFadeBlendA(EffKindWork *work) {
     SDF_VU0_MULVECTOR();
     SDF_VU0_dds3ColorFtoI(packed, 128.0f);
     blended[0] = packed;
-    out->color = blended[0];
-    out->displacement = effSampleScalarCurve(&config->blendB, frame, duration) * 0.01f + 1.0f;
-    out->angle = effSampleScalarCurve(&config->rateA.curve, frame, duration) * 0.01f;
-    out->blendControl = work->mode;
+    out->abgr = blended[0];
+    out->scale = effSampleScalarCurve(&config->blendB, frame, duration) * 0.01f + 1.0f;
+    out->rotate = effSampleScalarCurve(&config->rateA.curve, frame, duration) * 0.01f;
+    out->blend = work->mode;
     dds3EffectBlur(out);
 }
 
@@ -550,14 +550,14 @@ void *effCreateFadeBlendWorkFromOutput(void *work) {
 }
 
 void effReleaseFadeBlendWork(void *resourceHandle) {
-    dds3EffectPartialMultiBlurDelete((EffBlurTemplate *)resourceHandle);
+    dds3EffectPartialMultiBlurDelete((effBlurTemplate_t *)resourceHandle);
 }
 
 /* Draw the fade in fixed subpixel units, either centered or at the projected position.
  * Projected X/Y use sixteen units per pixel; output Y is doubled. */
 void effUpdateProjectedBlurFadeRectangle(EffKindWork *work) {
     EffRateConfig *config = (EffRateConfig *)work->payload;
-    EffBlurTemplate *out = (EffBlurTemplate *)work->handle;
+    effBlurTemplate_t *out = (effBlurTemplate_t *)work->handle;
     s32 duration = config->duration;
     s32 frame = 0;
     f32 rate;
@@ -577,9 +577,9 @@ void effUpdateProjectedBlurFadeRectangle(EffKindWork *work) {
     }
     rate = effSampleScalarCurve(&config->rateB.curve, frame, duration);
     if (config->fixedMode != 0) {
-        out->body.source.position[0] = 0;
-        out->body.source.position[1] = 0;
-        out->body.extent = (s32)(rate * 16.0f);
+        out->body.Blur.center[0] = 0;
+        out->body.Blur.center[1] = 0;
+        out->body.area = (s32)(rate * 16.0f);
     } else {
         s32 mode;
         s32 px;
@@ -588,15 +588,15 @@ void effUpdateProjectedBlurFadeRectangle(EffKindWork *work) {
         rate *= work->scale;
         SDF_VU0_LOADVECTOR(work);
         mode = (s32)(mnuMeasureProjectedPerpendicularDistance(rate) * 16.0f);
-        out->body.extent = mode;
+        out->body.area = mode;
         if (mode == 0) {
             return;
         }
         SDF_VU0_STOREVECTOR_NOMEM(pos);
         py = (s32)(pos[1] * 16.0f) - 0x8000;
         px = (s32)(pos[0] * 16.0f) - 0x8000;
-        out->body.source.position[0] = px;
-        out->body.source.position[1] = py << 1;
+        out->body.Blur.center[0] = px;
+        out->body.Blur.center[1] = py << 1;
     }
     second = effSampleColorAlphaTracks(&config->blendA, &config->blendB2, frame, duration);
     color1[0] = work->color;
@@ -608,10 +608,10 @@ void effUpdateProjectedBlurFadeRectangle(EffKindWork *work) {
     SDF_VU0_MULVECTOR();
     SDF_VU0_dds3ColorFtoI(packed, 128.0f);
     blended[0] = packed;
-    out->body.source.color = blended[0];
-    out->body.source.displacement = effSampleScalarCurve(&config->blendB, frame, duration) * 0.01f + 1.0f;
-    out->body.source.angle = effSampleScalarCurve(&config->rateA.curve, frame, duration) * 0.01f;
-    out->body.source.blendControl = work->mode;
+    out->body.Blur.abgr = blended[0];
+    out->body.Blur.scale = effSampleScalarCurve(&config->blendB, frame, duration) * 0.01f + 1.0f;
+    out->body.Blur.rotate = effSampleScalarCurve(&config->rateA.curve, frame, duration) * 0.01f;
+    out->body.Blur.blend = work->mode;
     effDrawBlurFixedPointRectangle(out);
 }
 
@@ -623,14 +623,14 @@ void effUpdateTarget(EffKindWork *work, sdfTexHandle_t *target) {
         }
         work->target = target;
     }
-    ((EffBlurTemplate *)work->handle)->texture = target;
+    ((effBlurTemplate_t *)work->handle)->texture = target;
 }
 
 void *effCreateFixedSlotBlurWorkFromFadeOutput(void *source) {
     return dds3EffectDistortionBlurCreate((dds3Effect_DistortionBlurParam_t *)((u8 *)source + 0xC0));
 }
 
-void effReleaseFixedSlotBlurWork(EffBlurScatterWork *handle) {
+void effReleaseFixedSlotBlurWork(effBlurScatterWork_t *handle) {
     dds3EffectDistortionBlurDelete(handle);
 }
 
@@ -638,7 +638,7 @@ void effReleaseFixedSlotBlurWork(EffBlurScatterWork *handle) {
  * Zero projected mode suppresses drawing; the origin and Y scaling differ from subpixels. */
 void effUpdateFadeMapA(EffKindWork *work) {
     EffRateConfig *config = (EffRateConfig *)work->payload;
-    EffBlurScatterWork *out = (EffBlurScatterWork *)work->handle;
+    effBlurScatterWork_t *out = (effBlurScatterWork_t *)work->handle;
     s32 duration = config->duration;
     s32 frame = 0;
     f32 rate;
@@ -658,22 +658,22 @@ void effUpdateFadeMapA(EffKindWork *work) {
     }
     rate = effSampleScalarCurve(&config->rateB.curve, frame, duration);
     if (config->fixedMode != 0) {
-        out->params.positionSpread = (s32)rate;
-        out->params.position[0] = 0;
-        out->params.position[1] = 0;
+        out->params.area = (s32)rate;
+        out->params.center[0] = 0;
+        out->params.center[1] = 0;
     } else {
         s32 mode;
 
         rate *= work->scale;
         SDF_VU0_LOADVECTOR(work);
         mode = (s32)mnuMeasureProjectedPerpendicularDistance(rate);
-        out->params.positionSpread = mode;
+        out->params.area = mode;
         if (mode == 0) {
             return;
         }
         SDF_VU0_STOREVECTOR(pos);
-        out->params.position[0] = (s32)pos[0] - 0x800;
-        out->params.position[1] = ((s32)pos[1] - 0x800) << 1;
+        out->params.center[0] = (s32)pos[0] - 0x800;
+        out->params.center[1] = ((s32)pos[1] - 0x800) << 1;
     }
     second = effSampleColorAlphaTracks(&config->blendA, &config->blendB2, frame, duration);
     color1[0] = work->color;
@@ -685,10 +685,10 @@ void effUpdateFadeMapA(EffKindWork *work) {
     SDF_VU0_MULVECTOR();
     SDF_VU0_dds3ColorFtoI(packed, 128.0f);
     blended[0] = packed;
-    out->params.color = blended[0];
-    out->params.uvDisplacementAmplitude = effSampleScalarCurve(&config->blendB, frame, duration) * 0.01f;
-    out->params.uvDisplacementAngleDegrees = effSampleScalarCurve(&config->rateA.curve, frame, duration) * 0.01f;
-    out->params.blendControl = work->mode;
+    out->params.abgr = blended[0];
+    out->params.distortion = effSampleScalarCurve(&config->blendB, frame, duration) * 0.01f;
+    out->params.rotate = effSampleScalarCurve(&config->rateA.curve, frame, duration) * 0.01f;
+    out->params.blend = work->mode;
     dds3EffectDistortionBlurDraw(out);
 }
 
@@ -700,14 +700,14 @@ void effTextureReferenceRelease(EffKindWork *work, sdfTexHandle_t *target) {
         }
         work->target = target;
     }
-    ((EffBlurScatterWork *)work->handle)->texture = target;
+    ((effBlurScatterWork_t *)work->handle)->texture = target;
 }
 
 void *effCreateVariableSlotBlurWorkFromFadeOutput(void *source) {
     return dds3EffectRippleBlurCreate((dds3Effect_RippleBlurParam_t *)((u8 *)source + 0xc0));
 }
 
-void effReleaseVariableSlotBlurWork(EffBlurScaleWork *work) {
+void effReleaseVariableSlotBlurWork(effBlurScaleWork_t *work) {
     dds3EffectRippleBlurDelete(work);
 }
 
@@ -715,7 +715,7 @@ void effReleaseVariableSlotBlurWork(EffBlurScaleWork *work) {
  * The native work header and duration gate remain shared with the other kind callbacks. */
 void effUpdateFadeMapB(EffKindWork *work) {
     EffRateConfig *config = (EffRateConfig *)work->payload;
-    EffBlurScaleWork *out = (EffBlurScaleWork *)work->handle;
+    effBlurScaleWork_t *out = (effBlurScaleWork_t *)work->handle;
     s32 duration = config->duration;
     s32 frame = 0;
     f32 rate;
@@ -735,22 +735,22 @@ void effUpdateFadeMapB(EffKindWork *work) {
     }
     rate = effSampleScalarCurve(&config->rateB.curve, frame, duration);
     if (config->fixedMode != 0) {
-        out->params.size = (s32)rate;
-        out->params.position[0] = 0;
-        out->params.position[1] = 0;
+        out->params.area = (s32)rate;
+        out->params.center[0] = 0;
+        out->params.center[1] = 0;
     } else {
         s32 mode;
 
         rate *= work->scale;
         SDF_VU0_LOADVECTOR(work);
         mode = (s32)mnuMeasureProjectedPerpendicularDistance(rate);
-        out->params.size = mode;
+        out->params.area = mode;
         if (mode == 0) {
             return;
         }
         SDF_VU0_STOREVECTOR(pos);
-        out->params.position[0] = (s32)pos[0] - 0x800;
-        out->params.position[1] = ((s32)pos[1] - 0x800) << 1;
+        out->params.center[0] = (s32)pos[0] - 0x800;
+        out->params.center[1] = ((s32)pos[1] - 0x800) << 1;
     }
     second = effSampleColorAlphaTracks(&config->blendA, &config->blendB2, frame, duration);
     color1[0] = work->color;
@@ -762,10 +762,10 @@ void effUpdateFadeMapB(EffKindWork *work) {
     SDF_VU0_MULVECTOR();
     SDF_VU0_dds3ColorFtoI(packed, 128.0f);
     blended[0] = packed;
-    out->params.color = blended[0];
-    out->params.angleStep = effSampleScalarCurve(&config->blendB, frame, duration) * 0.01f;
-    out->params.uvDisplacementAngleDegrees = effSampleScalarCurve(&config->rateA.curve, frame, duration) * 0.01f;
-    out->params.blendControl = work->mode;
+    out->params.abgr = blended[0];
+    out->params.frequency = effSampleScalarCurve(&config->blendB, frame, duration) * 0.01f;
+    out->params.rotate = effSampleScalarCurve(&config->rateA.curve, frame, duration) * 0.01f;
+    out->params.blend = work->mode;
     dds3EffectRippleBlurDraw(out);
 }
 
@@ -777,7 +777,7 @@ void effReplaceKindLinkedTarget(EffKindWork *work, sdfTexHandle_t *target) {
         }
         work->target = target;
     }
-    ((EffBlurScaleWork *)work->handle)->texture = target;
+    ((effBlurScaleWork_t *)work->handle)->texture = target;
 }
 
 /* Draw a framebuffer fade using raw curve rates rather than percent-scaled rates.
@@ -800,12 +800,12 @@ void effUpdateFadeBlendB(EffKindWork *work) {
     if (duration < frame) {
         return;
     }
-    out->position[0] = 0;
-    out->position[1] = 0;
-    out->corners[0][0] = 0;
-    out->corners[0][1] = 0;
-    out->corners[1][0] = 0x200;
-    out->corners[1][1] = 0x1C0;
+    out->center[0] = 0;
+    out->center[1] = 0;
+    out->xy[0][0] = 0;
+    out->xy[0][1] = 0;
+    out->xy[1][0] = 0x200;
+    out->xy[1][1] = 0x1C0;
     second = effSampleColorAlphaTracks(&config->blendA, &config->blendB2, frame, duration);
     color1[0] = work->color;
     unit = 0x3C000000;
@@ -816,10 +816,10 @@ void effUpdateFadeBlendB(EffKindWork *work) {
     SDF_VU0_MULVECTOR();
     SDF_VU0_dds3ColorFtoI(packed, 128.0f);
     blended[0] = packed;
-    out->color = blended[0];
-    out->displacement = effSampleScalarCurve(&config->blendB, frame, duration) + 1.0f;
-    out->angle = effSampleScalarCurve(&config->rateA.curve, frame, duration);
-    out->blendControl = work->mode;
+    out->abgr = blended[0];
+    out->scale = effSampleScalarCurve(&config->blendB, frame, duration) + 1.0f;
+    out->rotate = effSampleScalarCurve(&config->rateA.curve, frame, duration);
+    out->blend = work->mode;
     effBlurDrawFramebufferQuad(out);
 }
 
@@ -841,10 +841,10 @@ void effUpdateFadeBlendC(EffKindWork *work) {
     if (duration < frame) {
         return;
     }
-    out->corners[0][0] = 0;
-    out->corners[0][1] = 0;
-    out->corners[1][0] = 0x200;
-    out->corners[1][1] = 0x1C0;
+    out->xy[0][0] = 0;
+    out->xy[0][1] = 0;
+    out->xy[1][0] = 0x200;
+    out->xy[1][1] = 0x1C0;
     second = effSampleColorAlphaTracks(&config->blendA, &config->blendB2, frame, duration);
     /* Capture the base word before the unit: see docs/idioms.md,
      * "Trace-justified base color capture: effUpdateFadeBlendC". */
@@ -855,8 +855,8 @@ void effUpdateFadeBlendC(EffKindWork *work) {
     UnpackRGBAWord(second, unit);
     SDF_VU0_MULVECTOR();
     packed = PackRGBAWord(128.0f);
-    out->color = packed;
-    out->blendControl = work->mode;
+    out->abgr = packed;
+    out->blend = work->mode;
     dds3EffectFilter(out);
 }
 
@@ -864,17 +864,17 @@ void *effCreateFadeColorWorkFromOutput(void *work) {
     return dds3EffectPartialMultiFilterCreate((dds3Effect_PartialMultiFilterParam_t *)((u8 *)work + 0xc0));
 }
 
-void effReleaseFadeColorWork(EffResourceRectWork *work) {
+void effReleaseFadeColorWork(dds3Effect_PartialMultiFilter_t *work) {
     dds3EffectPartialMultiFilterDelete(work);
 }
 
 /* This projected fade also consumes EffKindWork: position, handle and payload. */
-extern void effComputeBlurRectBounds(EffResourceRectWork *work);
+extern void effComputeBlurRectBounds(dds3Effect_PartialMultiFilter_t *work);
 
 /* Update the fade rectangle's projected extent, center and multiplied tint. */
 void effUpdateProjectedFadeColor(EffKindWork *work) {
     EffRateConfig *config = (EffRateConfig *)work->payload;
-    EffResourceRectWork *out = (EffResourceRectWork *)work->handle;
+    dds3Effect_PartialMultiFilter_t *out = (dds3Effect_PartialMultiFilter_t *)work->handle;
     s32 duration = config->duration;
     s32 frame = 0;
     f32 rate;
@@ -893,9 +893,9 @@ void effUpdateProjectedFadeColor(EffKindWork *work) {
     }
     rate = effSampleScalarCurve(&config->rateB.curve, frame, duration);
     if (config->fixedMode != 0) {
-        out->params.center[0] = 0;
-        out->params.center[1] = 0;
-        out->params.extent = (s32)(rate * 16.0f);
+        out->param.center[0] = 0;
+        out->param.center[1] = 0;
+        out->param.area = (s32)(rate * 16.0f);
     } else {
         s32 mode;
         s32 px;
@@ -904,15 +904,15 @@ void effUpdateProjectedFadeColor(EffKindWork *work) {
         rate *= work->scale;
         SDF_VU0_LOADVECTOR(work);
         mode = (s32)(mnuMeasureProjectedPerpendicularDistance(rate) * 16.0f);
-        out->params.extent = mode;
+        out->param.area = mode;
         if (mode == 0) {
             return;
         }
         SDF_VU0_STOREVECTOR_NOMEM(pos);
         py = (s32)(pos[1] * 16.0f) - 0x8000;
         px = (s32)(pos[0] * 16.0f) - 0x8000;
-        out->params.center[0] = px;
-        out->params.center[1] = py << 1;
+        out->param.center[0] = px;
+        out->param.center[1] = py << 1;
     }
     second = effSampleColorAlphaTracks(&config->blendA, &config->blendB2, frame, duration);
     color1[0] = work->color;
@@ -923,8 +923,8 @@ void effUpdateProjectedFadeColor(EffKindWork *work) {
     SDF_VU0_MULVECTOR();
     MMI_RGBA_PACK_128_S2(packed);
     blended[0] = packed;
-    *(u32 *)out->params.draw.color = blended[0];
-    out->params.draw.blendControl = work->mode;
+    *(u32 *)out->param.Filter.color = blended[0];
+    out->param.Filter.blendControl = work->mode;
     effComputeBlurRectBounds(out);
 }
 
@@ -936,7 +936,7 @@ void effReplaceLinkedKindWorkTarget(EffKindWork *work, sdfTexHandle_t *target) {
         }
         work->target = target;
     }
-    ((EffResourceRectWork *)work->handle)->texture = target;
+    ((dds3Effect_PartialMultiFilter_t *)work->handle)->hAlphaTex = target;
 }
 
 EffKindWork *effAllocateKindWork(u16 kind, u8 *source) {

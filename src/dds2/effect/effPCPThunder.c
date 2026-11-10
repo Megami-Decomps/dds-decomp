@@ -61,7 +61,7 @@ extern EffRandState effDefaultRandomState[];
 #define EFF_THUNDER_MIN_ACTIVE_FRAMES 1
 
 /* Create the first vector variant from the first packed parameter block. */
-void *effPCPThunderSpherePolyCreatePCF(const EffParamTable *parameterTable) {
+void *effPCPThunderSpherePolyCreatePCF(const dds3EffectPCPData_t *parameterTable) {
     void *parameters;
 
     parameters = dds3EffectPCPDataGetData(parameterTable, EFF_THUNDER_PARAMETER_BLOCK);
@@ -2156,7 +2156,7 @@ EffPcpThunderGroup *effPCPBezierBillCreate(const EffPcpThunderGroupParams *src, 
 }
 
 /* Forward the first two parameter-table blocks as one effect-handler pair. */
-EffPcpThunderGroup *effPCPBezierBillCreatePCF(const EffParamTable *table) {
+EffPcpThunderGroup *effPCPBezierBillCreatePCF(const dds3EffectPCPData_t *table) {
     void *firstBlock;
     void *secondBlock;
 

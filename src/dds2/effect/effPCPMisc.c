@@ -136,9 +136,9 @@ typedef struct {
     dds3Effect_RippleBlurParam_t res;
 } EffPCPCompactScaleParams;
 
-extern void dds3EffectRippleBlurReset(EffBlurScaleWork *work);
+extern void dds3EffectRippleBlurReset(effBlurScaleWork_t *work);
 
-extern void dds3EffectRippleBlurDraw(EffBlurScaleWork *work);
+extern void dds3EffectRippleBlurDraw(effBlurScaleWork_t *work);
 
 extern u8 effOffsetMuzzleThunderRayParams[];
 
@@ -1752,7 +1752,7 @@ EffPCPSharedTrailRef *effPCPBlinkMultiBlurCreate(EffPCPTrailParams *params) {
     if (D_00436438 == 0) {
         pBlinkMultiBlurBase = sdfChipAllocDirect(sizeof(EffPCPSharedTrail));
         pBlinkMultiBlurBase->obj = dds3EffectPartialMultiBlurCreate(&params->res);
-        pBlinkMultiBlurBase->color = params->res.source.color;
+        pBlinkMultiBlurBase->color = params->res.Blur.abgr;
         pBlinkMultiBlurBase->frame = 0;
         pBlinkMultiBlurBase->flags = 0x80808080;
         pBlinkMultiBlurBase->pos[0] = 0;
@@ -1790,7 +1790,7 @@ typedef struct EffPCPTrailWork {
     u32 colors[2];
     f32 scale; /* multiplies the computed trail size */
     s32 minSize;
-    EffBlurTemplate *obj;
+    effBlurTemplate_t *obj;
 } EffPCPTrailWork;
 
 typedef char EffPCPTrailWork_size_must_be_0x38[
@@ -1807,7 +1807,7 @@ void effPCPBlinkMultiBlurDraw(ref)
     EffPCPSharedTrailRef *ref;
 {
     EffPCPSharedTrail *work;
-    EffBlurTemplate *obj;
+    effBlurTemplate_t *obj;
     f32 pos[4];
 
     if (ref->frame == 0) {
@@ -1827,14 +1827,14 @@ void effPCPBlinkMultiBlurDraw(ref)
     if (work->frame < work->limit) {
         work->color = work->colors[work->frame & 1];
         SDF_VU0_LOADVECTOR(work);
-        obj->body.extent = (s32)((f32)effPCPBlurScreenOffset(EFF_SHARED_TRAIL->sizeInput) * EFF_SHARED_TRAIL->scale);
+        obj->body.area = (s32)((f32)effPCPBlurScreenOffset(EFF_SHARED_TRAIL->sizeInput) * EFF_SHARED_TRAIL->scale);
         SDF_VU0_STOREVECTOR(pos);
-        obj->body.source.position[0] = (s32)pos[0] - 0x800;
-        obj->body.source.position[1] = ((s32)pos[1] - 0x800) << 1;
-        if (obj->body.extent < EFF_SHARED_TRAIL->minSize) {
-            obj->body.extent = EFF_SHARED_TRAIL->minSize;
+        obj->body.Blur.center[0] = (s32)pos[0] - 0x800;
+        obj->body.Blur.center[1] = ((s32)pos[1] - 0x800) << 1;
+        if (obj->body.area < EFF_SHARED_TRAIL->minSize) {
+            obj->body.area = EFF_SHARED_TRAIL->minSize;
         }
-        obj->body.source.color = effMagaCylinderCalcColor(EFF_SHARED_TRAIL->flags, EFF_SHARED_TRAIL->color);
+        obj->body.Blur.abgr = effMagaCylinderCalcColor(EFF_SHARED_TRAIL->flags, EFF_SHARED_TRAIL->color);
         dds3EffectPartialMultiBlurDraw(obj);
         EFF_SHARED_TRAIL->frame++;
     }
@@ -1856,7 +1856,7 @@ EffPCPTrailWork *effPCPMultiBlurExpCreate(EffPCPTrailParams *params) {
     EffPCPTrailWork *work = sdfChipAllocDirect(sizeof(EffPCPTrailWork));
 
     work->obj = dds3EffectPartialMultiBlurCreate(&params->res);
-    work->color = params->res.source.color;
+    work->color = params->res.Blur.abgr;
     work->frame = 0;
     work->flags = 0x80808080;
     work->pos[0] = 0.0f;
@@ -1879,17 +1879,17 @@ void effPCPMultiBlurExpDelete(EffPCPTrailWork *work) {
 /* Per-frame update: places the trail object from the work position and
  * alternates its colour between two entries until the count runs out. */
 void effPCPMultiBlurExpDraw(EffPCPTrailWork *work) {
-    EffBlurTemplate *obj;
+    effBlurTemplate_t *obj;
     f32 pos[4];
 
     obj = work->obj;
     SDF_VU0_LOADVECTOR(work->pos);
-    obj->body.extent = (s32)((f32)effPCPBlurScreenOffset(work->sizeInput) * work->scale);
+    obj->body.area = (s32)((f32)effPCPBlurScreenOffset(work->sizeInput) * work->scale);
     SDF_VU0_STOREVECTOR(pos);
-    obj->body.source.position[0] = (s32)pos[0] - 0x800;
-    obj->body.source.position[1] = ((s32)pos[1] - 0x800) << 1;
-    if (obj->body.extent < work->minSize) {
-        obj->body.extent = work->minSize;
+    obj->body.Blur.center[0] = (s32)pos[0] - 0x800;
+    obj->body.Blur.center[1] = ((s32)pos[1] - 0x800) << 1;
+    if (obj->body.area < work->minSize) {
+        obj->body.area = work->minSize;
     }
     if (work->frame < work->count) {
         work->color = work->colors[work->frame & 1];
@@ -1897,7 +1897,7 @@ void effPCPMultiBlurExpDraw(EffPCPTrailWork *work) {
         work->color = work->colors[0];
     }
     work->frame++;
-    obj->body.source.color = effMagaCylinderCalcColor(work->flags, work->color);
+    obj->body.Blur.abgr = effMagaCylinderCalcColor(work->flags, work->color);
     dds3EffectPartialMultiBlurDraw(obj);
 }
 
@@ -1926,7 +1926,7 @@ EffPCPCompactFadeWork *effPCPMultiFilterExpCreate(EffPCPCompactRectParams *param
     work->fadeOut = params->timeline.fadeOut;
     work->startExtent = params->timeline.startExtent;
     work->endExtent = params->timeline.endExtent;
-    work->baseColor = params->res.draw.rgba;
+    work->baseColor = params->res.Filter.rgba;
     return work;
 }
 
@@ -1946,7 +1946,7 @@ EffPCPCompactFadeWork *effPCPMultiFilterExpCopy(EffPCPCompactFadeWork *work) {
     params.timeline.fadeOut = work->fadeOut;
     params.timeline.startExtent = work->startExtent;
     params.timeline.endExtent = work->endExtent;
-    memcpy(&params.res, &work->resource.rectangle->params, sizeof(params.res));
+    memcpy(&params.res, &work->resource.rectangle->param, sizeof(params.res));
     return effPCPMultiFilterExpCreate(&params);
 }
 
@@ -1968,7 +1968,7 @@ void effPCPMultiFilterExpDraw(EffPCPCompactFadeWork *work) {
     f32 projected[4];
     s32 frame = work->frame;
     s32 duration = work->duration;
-    EffResourceRectWork *rect = work->resource.rectangle;
+    dds3Effect_PartialMultiFilter_t *rect = work->resource.rectangle;
     s32 fadeIn;
     s32 fadeOut;
     f32 opacity;
@@ -1981,13 +1981,13 @@ void effPCPMultiFilterExpDraw(EffPCPCompactFadeWork *work) {
             SDF_VU0_LOADVECTOR(work->position);
             effScreenOffset();
             SDF_VU0_STOREVECTOR(projected);
-            rect->params.center[0] = (s32)projected[0] - 2048;
-            rect->params.center[1] = ((s32)projected[1] - 2048) << 1;
+            rect->param.center[0] = (s32)projected[0] - 2048;
+            rect->param.center[1] = ((s32)projected[1] - 2048) << 1;
         } else {
-            rect->params.center[0] = 0;
-            rect->params.center[1] = 0;
+            rect->param.center[0] = 0;
+            rect->param.center[1] = 0;
         }
-        rect->params.extent = effPcpInterpolateCompactExtent(
+        rect->param.area = effPcpInterpolateCompactExtent(
             work->startExtent, work->endExtent, frame, duration);
         if (frame < fadeIn && fadeIn != 0) {
             opacity = (f32)frame / (f32)fadeIn;
@@ -1997,7 +1997,7 @@ void effPCPMultiFilterExpDraw(EffPCPCompactFadeWork *work) {
             opacity = 1.0f;
         }
         color = work->color;
-        rect->params.draw.rgba = effMagaCylinderCalcColor(
+        rect->param.Filter.rgba = effMagaCylinderCalcColor(
             effColorBlend(color & 0xFFFFFF, color, opacity), work->baseColor);
         effResourceRectDrawPixels(rect);
         work->frame++;
@@ -2030,7 +2030,7 @@ EffPCPCompactFadeWork *effPCPMultiBlurExp2Create(EffPCPCompactTexturedBlurParams
     work->fadeOut = params->timeline.fadeOut;
     work->startExtent = params->timeline.startExtent;
     work->endExtent = params->timeline.endExtent;
-    work->baseColor = params->res.source.color;
+    work->baseColor = params->res.Blur.abgr;
     return work;
 }
 
@@ -2064,7 +2064,7 @@ void effPCPMultiBlurExp2Draw(EffPCPCompactFadeWork *work) {
     f32 projected[4];
     s32 frame = work->frame;
     s32 duration = work->duration;
-    EffBlurTemplate *rect = work->resource.blur;
+    effBlurTemplate_t *rect = work->resource.blur;
     s32 fadeIn;
     s32 fadeOut;
     f32 opacity;
@@ -2077,13 +2077,13 @@ void effPCPMultiBlurExp2Draw(EffPCPCompactFadeWork *work) {
             SDF_VU0_LOADVECTOR(work->position);
             effScreenOffset();
             SDF_VU0_STOREVECTOR(projected);
-            rect->body.source.position[0] = (s32)projected[0] - 2048;
-            rect->body.source.position[1] = ((s32)projected[1] - 2048) << 1;
+            rect->body.Blur.center[0] = (s32)projected[0] - 2048;
+            rect->body.Blur.center[1] = ((s32)projected[1] - 2048) << 1;
         } else {
-            rect->body.source.position[0] = 0;
-            rect->body.source.position[1] = 0;
+            rect->body.Blur.center[0] = 0;
+            rect->body.Blur.center[1] = 0;
         }
-        rect->body.extent = effPcpInterpolateCompactExtent(
+        rect->body.area = effPcpInterpolateCompactExtent(
             work->startExtent, work->endExtent, frame, duration);
         if (frame < fadeIn && fadeIn != 0) {
             opacity = (f32)frame / (f32)fadeIn;
@@ -2093,7 +2093,7 @@ void effPCPMultiBlurExp2Draw(EffPCPCompactFadeWork *work) {
             opacity = 1.0f;
         }
         color = work->color;
-        rect->body.source.color = effMagaCylinderCalcColor(
+        rect->body.Blur.abgr = effMagaCylinderCalcColor(
             effColorBlend(color & 0xFFFFFF, color, opacity), work->baseColor);
         dds3EffectPartialMultiBlurDraw(rect);
         work->frame++;
@@ -2182,7 +2182,7 @@ EffPCPFadeTimerLong *effPCPBlurExpCreate(const EffPCPFadeTimerLongParams *src) {
     dst->params = *src;
     dst->colorFrom = 0x80808080;
     dst->frame = 0;
-    dst->colorTo = src->source.color;
+    dst->colorTo = src->source.abgr;
     return dst;
 }
 
@@ -2213,12 +2213,12 @@ void effPCPBlurExpDraw(EffPCPFadeTimerLong *work) {
         return;
     }
     fadeIn = work->params.fadeIn;
-    work->params.source.position[0] = 0;
-    work->params.source.position[1] = 0;
-    work->params.source.corners[0][0] = 0;
-    work->params.source.corners[0][1] = 0;
-    work->params.source.corners[1][0] = 0x200;
-    work->params.source.corners[1][1] = 0x1C0;
+    work->params.source.center[0] = 0;
+    work->params.source.center[1] = 0;
+    work->params.source.xy[0][0] = 0;
+    work->params.source.xy[0][1] = 0;
+    work->params.source.xy[1][0] = 0x200;
+    work->params.source.xy[1][1] = 0x1C0;
     fadeOut = work->params.fadeOut;
     if (frame < fadeIn && fadeIn != 0) {
         t = (f32)frame / (f32)fadeIn;
@@ -2227,7 +2227,7 @@ void effPCPBlurExpDraw(EffPCPFadeTimerLong *work) {
     } else {
         t = 1.0f;
     }
-    work->params.source.color = effMagaCylinderCalcColor(effColorBlend(work->colorFrom & 0xFFFFFF, work->colorFrom, t), work->colorTo);
+    work->params.source.abgr = effMagaCylinderCalcColor(effColorBlend(work->colorFrom & 0xFFFFFF, work->colorFrom, t), work->colorTo);
     dds3EffectBlur(&work->params.source);
     work->frame++;
 }
@@ -2249,7 +2249,7 @@ EffPCPCompactWork *effPCPDistortionBlurExpCreate(EffPCPCompactScatterParams *par
     work->endExtent = params->timeline.endExtent;
     work->color = 0x80808080;
     work->frame = 0;
-    work->baseColor = params->res.color;
+    work->baseColor = params->res.abgr;
     return work;
 }
 
@@ -2280,7 +2280,7 @@ void effPCPDistortionBlurExpDelete(EffPCPCompactWork *work) {
 
 /* vu0 routine: grow the scatter region and project its optional world center. */
 void effPCPDistortionBlurExpDraw(EffPCPCompactWork *work) {
-    EffBlurScatterWork *resource;
+    effBlurScatterWork_t *resource;
     f32 projected[4] __attribute__((aligned(16)));
     s32 frame = work->frame;
     s32 duration = work->duration;
@@ -2299,18 +2299,18 @@ void effPCPDistortionBlurExpDraw(EffPCPCompactWork *work) {
                    (f32)frame / (f32)duration;
     displacement = (s32)displacement;
     resource = work->resource.scatter;
-    resource->params.positionSpread =
+    resource->params.area =
         (f32)work->startExtent + displacement;
     if (work->flags == 0) {
         SDF_VU0_LOADVECTOR(work->position);
         effScreenOffset();
         SDF_VU0_STOREVECTOR(projected);
         resource = work->resource.scatter;
-        resource->params.position[0] = (s32)projected[0] - 2048;
-        resource->params.position[1] = (u32)((s32)projected[1] - 2048) << 1;
+        resource->params.center[0] = (s32)projected[0] - 2048;
+        resource->params.center[1] = (u32)((s32)projected[1] - 2048) << 1;
     } else {
-        resource->params.position[0] = 0;
-        resource->params.position[1] = 0;
+        resource->params.center[0] = 0;
+        resource->params.center[1] = 0;
     }
     if (frame < fadeIn && fadeIn != 0) {
         opacity = (f32)frame / (f32)fadeIn;
@@ -2323,7 +2323,7 @@ void effPCPDistortionBlurExpDraw(EffPCPCompactWork *work) {
     color = effMagaCylinderCalcColor(
         effColorBlend(color & 0xFFFFFF, color, opacity), work->baseColor);
     resource = work->resource.scatter;
-    resource->params.color = color;
+    resource->params.abgr = color;
     dds3EffectDistortionBlurDraw(resource);
     work->frame++;
 }
@@ -2349,7 +2349,7 @@ EffPCPCompactWork *effPCPRippleBlurExpCreate(EffPCPCompactScaleParams *params) {
     work->endExtent = params->timeline.endExtent;
     work->color = 0x80808080;
     work->frame = 0;
-    work->baseColor = params->res.color;
+    work->baseColor = params->res.abgr;
     return work;
 }
 
@@ -2380,7 +2380,7 @@ void effPCPRippleBlurExpDelete(EffPCPCompactWork *work) {
 
 /* vu0 routine: grow the scale slots and restart looping world-space bursts. */
 void effPCPRippleBlurExpDraw(EffPCPCompactWork *work) {
-    EffBlurScaleWork *resource;
+    effBlurScaleWork_t *resource;
     f32 projected[4] __attribute__((aligned(16)));
     s32 frame = work->frame;
     s32 duration = work->duration;
@@ -2405,18 +2405,18 @@ void effPCPRippleBlurExpDraw(EffPCPCompactWork *work) {
                    (f32)frame / (f32)duration;
     displacement = (s32)displacement;
     resource = work->resource.scale;
-    resource->params.size =
+    resource->params.area =
         (f32)work->startExtent + displacement;
     if (flags == 0 || flags == 2) {
         SDF_VU0_LOADVECTOR(work->position);
         effScreenOffset();
         SDF_VU0_STOREVECTOR(projected);
         resource = work->resource.scale;
-        resource->params.position[0] = (s32)projected[0] - 2048;
-        resource->params.position[1] = (u32)((s32)projected[1] - 2048) << 1;
+        resource->params.center[0] = (s32)projected[0] - 2048;
+        resource->params.center[1] = (u32)((s32)projected[1] - 2048) << 1;
     } else {
-        resource->params.position[0] = 0;
-        resource->params.position[1] = 0;
+        resource->params.center[0] = 0;
+        resource->params.center[1] = 0;
     }
     if (frame < fadeIn && fadeIn != 0) {
         opacity = (f32)frame / (f32)fadeIn;
@@ -2429,7 +2429,7 @@ void effPCPRippleBlurExpDraw(EffPCPCompactWork *work) {
     color = effMagaCylinderCalcColor(
         effColorBlend(color & 0xFFFFFF, color, opacity), work->baseColor);
     resource = work->resource.scale;
-    resource->params.color = color;
+    resource->params.abgr = color;
     dds3EffectRippleBlurDraw(resource);
     work->frame++;
 }

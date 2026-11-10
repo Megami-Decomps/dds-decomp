@@ -363,7 +363,7 @@ extern void evtKillFieldScript(void);
 extern void func_00150800(void);
 
 extern s32 D_00435F84;
-extern EffBlurScatterWork *D_00435F74;
+extern effBlurScatterWork_t *D_00435F74;
 
 extern char D_00412FD0[], D_00412FE0[];
 
@@ -2271,30 +2271,30 @@ dds3TaskUpdateResult_t fldUpdateFieldSceneTask(dds3ProcessID_t *task) {
         if (fldGlobalBase.specialEventActive == FLD_SPECIAL_EVENT_INACTIVE) fldRunDanteClear();
         coordinateFlags = fldGetLocationCoordinateFlags(fldGlobalBase.area, fldGlobalBase.floor + 1);
         if (coordinateFlags & FLD_LOCATION_COORDINATE_FLAG_FIELD_EFFECT_TEXTURES) {
-            blur.count = 15;
-            blur.delaySpread = 15;
-            blur.angleStep = 0.1999999881f;
-            blur.color = 0x3C989884;
-            blur.blendControl = 0x44;
-            blur.uvDisplacementAngleDegrees = 0.005f;
-            blur.uvDisplacementAmplitude = 0.13f;
-            blur.position[0] = 0;
-            blur.position[1] = 0;
-            blur.positionSpread = 0x100;
-            blur.size = 200;
+            blur.number = 15;
+            blur.interval = 15;
+            blur.speed = 0.1999999881f;
+            blur.abgr = 0x3C989884;
+            blur.blend = 0x44;
+            blur.rotate = 0.005f;
+            blur.distortion = 0.13f;
+            blur.center[0] = 0;
+            blur.center[1] = 0;
+            blur.area = 0x100;
+            blur.width = 200;
             D_00435F74 = dds3EffectDistortionBlurCreate(&blur);
         } else if (coordinateFlags & 0x80) {
-            blur.count = 60;
-            blur.delaySpread = 15;
-            blur.angleStep = 0.221999988f;
-            blur.color = 0x28848484;
-            blur.blendControl = 0x44;
-            blur.uvDisplacementAngleDegrees = 0.005f;
-            blur.uvDisplacementAmplitude = 0.13f;
-            blur.position[0] = 0;
-            blur.position[1] = 0;
-            blur.positionSpread = 0x100;
-            blur.size = 136;
+            blur.number = 60;
+            blur.interval = 15;
+            blur.speed = 0.221999988f;
+            blur.abgr = 0x28848484;
+            blur.blend = 0x44;
+            blur.rotate = 0.005f;
+            blur.distortion = 0.13f;
+            blur.center[0] = 0;
+            blur.center[1] = 0;
+            blur.area = 0x100;
+            blur.width = 136;
             D_00435F74 = dds3EffectDistortionBlurCreate(&blur);
         }
         dds3FadeOut2(0);

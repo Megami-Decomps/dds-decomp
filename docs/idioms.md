@@ -1848,7 +1848,7 @@ word input instead of erasing its alignment with a byte-blob pointer.
 
 The event manager's former nine-word `EffTemplateBody` is the same
 0x24-byte `dds3Effect_PartialMultiFilterParam_t` consumed by `dds3EffectPartialMultiFilterCreate`.
-The live textured-square work is the canonical 0x28-byte `EffResourceRectWork`,
+The live textured-square work is the canonical 0x28-byte `dds3Effect_PartialMultiFilter_t`,
 not a second body-plus-word layout. Its selected source handle follows `params`.
 The event setup table, its whole-parameter setters and the viewer's 0x24-byte
 parameter copies all use the same canonical record.
@@ -3419,7 +3419,7 @@ a distinct failed shape here: it produced `movn` and a shorter function.
 
 The resource-rectangle family has two real parameter records. The `0x24`
 `dds3Effect_PartialMultiFilterParam_t` stores extent and center in its first three words,
-then embeds an `0x18` `EffResourceRectDrawParams` at `+0xC`. That inner
+then embeds an `0x18` `effResourceRectDrawParams_t` at `+0xC`. That inner
 record contains four color bytes, signed blend control, and four signed
 bounds. The `0x28` owner appends its source handle at `+0x24`.
 
@@ -3433,7 +3433,7 @@ and pass `&work->params.draw`.
 These renderers finish with the canonical `SdfPoolNode.append` callback,
 which returns `void`; the four effect dispatch consumers also ignore any
 result. The pixel-bound generator therefore has a real
-`void (EffResourceRectWork *)` contract, not an invented scalar result.
+`void (dds3Effect_PartialMultiFilter_t *)` contract, not an invented scalar result.
 Changing the nested layout and provider contract preserves the native
 nine-word clone and both bound generators.
 
@@ -6591,7 +6591,7 @@ selection controller `001C08B8`.
 ## Field scatter effects retain their actual work pointer
 
 DDS2 `code_00124040` stores `dds3EffectDistortionBlurCreate`'s returned
-`EffBlurScatterWork *` in `D_00435F74` and later passes it to
+`effBlurScatterWork_t *` in `D_00435F74` and later passes it to
 `dds3EffectDistortionBlurDelete`. The retained global is a work pointer,
 not an arithmetic handle; the two pointer-to-integer stores and the
 integer-to-pointer destruction cast are unnecessary. The serialized
@@ -7492,8 +7492,8 @@ loads and pending/frame/message stores without artificial temporaries.
 
 ## Blur and rectangle sources retain CPU texture pointers
 
-`EffBlurTemplate`, `EffBlurScatterWork` and `EffBlurScaleWork` store the
-selected `sdfTexHandle_t *` at `+0x2C`; `EffResourceRectWork` stores it at `+0x24`.
+`effBlurTemplate_t`, `effBlurScatterWork_t` and `effBlurScaleWork_t` store the
+selected `sdfTexHandle_t *` at `+0x2C`; `dds3Effect_PartialMultiFilter_t` stores it at `+0x24`.
 The four viewer channel caches carry the same pointers selected from
 `EvtRuntimeGroup.texture`, not resource indices or DMA address words.
 DDS1 kind work retains a direct texture. DDS2 retains the existing
@@ -8064,7 +8064,7 @@ migrate to those same arrays, with sizes and offsets unchanged.
 `evtHokanMultFilter` writes only the resource rectangle's 0x14-byte prefix,
 leaving its existing bounds untouched. Its packed RGBA word and the
 renderer's four channel reads justify the documented color union in
-`EffResourceRectDrawParams`. Other packed colors remain plain `u32`.
+`effResourceRectDrawParams_t`. Other packed colors remain plain `u32`.
 The blender units are exact at 32/0 each; the private owner proof also gates
 all 147 existing header consumers with no changed retail words.
 
