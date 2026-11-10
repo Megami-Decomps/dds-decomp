@@ -318,7 +318,7 @@ s32 btlCalculateHpActionAmount(BtlUnit *source, BtlUnit *target, BtlCommandId co
         case 12:
         case 14:
             parameters = datBattleParameters;
-            phase = evtGetMirroredSolarPhase();
+            phase = evtGetAgeOfMoon();
             solar = parameters->solarScale[
                 (source->status.flags & 0x200) ? 0 : 1][phase];
             break;
@@ -533,7 +533,7 @@ s32 btlCalculateMpActionAmount(BtlUnit *source, BtlUnit *target, BtlCommandId co
         case 12:
         case 14:
             parameters = datBattleParameters;
-            phase = evtGetMirroredSolarPhase();
+            phase = evtGetAgeOfMoon();
             solar = parameters->solarScale[
                 (source->status.flags & 0x200) ? 0 : 1][phase];
             break;

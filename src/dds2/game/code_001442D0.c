@@ -192,7 +192,7 @@ extern struct sdfMemHandle_t *D_004363C4;
 
 extern void mnuAdvanceTitleStateUnderSemaphore(void);
 
-extern void evtSetSolarOverlayFullyVisible(void);
+extern void evtEnableMoonDraw(void);
 
 extern u32 D_00436330[];
 
@@ -3106,7 +3106,7 @@ void fldEnterSceneCamera(void) {
     AutoMapSeq = FLD_SCENE_NOT_READY;
     fldAutoMapSeqClearFlag(1);
     fldPreparePlayerSceneCameraTarget();
-    evtSetSolarOverlayFullyVisible();
+    evtEnableMoonDraw();
     fldApplySkyLightSetToPlayerVU();
     cam->sceneTransitionCooldown = 4;
     frSetFontDrawOT(0x54);
@@ -6083,7 +6083,7 @@ void fldFinishEventFieldState(void) {
         work->specialEventActive = FLD_SPECIAL_EVENT_INACTIVE;
         fldSparkControlState.state.phase = FLD_SPARK_CONTROLLER_PHASE_IDLE;
         fldSparkControlState.state.countdown = 0;
-        evtSetSolarOverlayFullyVisible();
+        evtEnableMoonDraw();
     }
 }
 
@@ -6114,7 +6114,7 @@ void fldUpdateDevilizeEventSequence(void) {
             fclDestroyMessage();
             fldSparkControlState.state.dialogPhase = FLD_SPARK_DIALOG_PHASE_CANCELLED;
             fldGlobalBase.specialEventActive = FLD_SPECIAL_EVENT_INACTIVE;
-            evtSetSolarOverlayFullyVisible();
+            evtEnableMoonDraw();
         }
         break;
     case FLD_SPARK_DIALOG_PHASE_ENTRY_PROMPT:
@@ -6131,7 +6131,7 @@ void fldUpdateDevilizeEventSequence(void) {
                 fclDestroyMessage();
                 fldSparkControlState.state.dialogPhase = FLD_SPARK_DIALOG_PHASE_CANCELLED;
                 fldGlobalBase.specialEventActive = FLD_SPECIAL_EVENT_INACTIVE;
-                evtSetSolarOverlayFullyVisible();
+                evtEnableMoonDraw();
             } else {
                 evtFinishMessageWindowAndNotify();
                 fclDestroyMessage();
@@ -6348,7 +6348,7 @@ void fldUpdateSparkEncounterScene(void) {
         p2sdPlaySE(0x680011, 0x7F, 0x3F);
         fldTogglePlayerModel();
         fldStartSceneBgmAlternate();
-        evtSetSolarOverlayFullyVisible();
+        evtEnableMoonDraw();
         fldGlobalBase.unk138 = 1;
         fldSparkControlState.state.phase = FLD_SPARK_CONTROLLER_PHASE_RETURN_TO_FIELD;
         fldSparkControlState.state.frame = 0;
@@ -6409,7 +6409,7 @@ void fldResetAfterEvent(void) {
     fldGlobalBase.specialEventActive = FLD_SPECIAL_EVENT_INACTIVE;
     fldSparkControlState.state.phase = FLD_SPARK_CONTROLLER_PHASE_IDLE;
     fldGlobalBase.unk138 = 1;
-    evtSetSolarOverlayFullyVisible();
+    evtEnableMoonDraw();
 }
 
 void fldStartDeferredFieldExit(void) {

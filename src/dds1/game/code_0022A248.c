@@ -211,7 +211,7 @@ void evtUpdateSolarPhaseTransition(SolarOverlayWork *overlay) {
         state->transitionTimer = 20;
         state->solarPhase = solarPhase;
         state->flags = flags | 1;
-        evtSetSolarPointActiveCount(overlay, evtGetMirroredSolarPhase());
+        evtSetSolarPointActiveCount(overlay, evtGetAgeOfMoon());
     }
     remaining = state->transitionTimer;
     if (remaining != 0) {
@@ -227,7 +227,7 @@ void evtUpdateSolarPhaseTransition(SolarOverlayWork *overlay) {
 void evtAdvanceSolarOverlayFadeAndDraw(s32 x, s32 y, s32 z, s32 alpha, SolarOverlayWork *overlay, s32 renderContext) {
     s32 mirroredPhase;
     /* Preserve signed-byte narrowing before forwarding the mirrored phase. */
-    mirroredPhase = (s8)evtGetMirroredSolarPhase();
+    mirroredPhase = (s8)evtGetAgeOfMoon();
     evtUpdateSolarPhaseTransition(overlay);
     if ((evtSolarOverlayFadeFlags & SOLAR_FADE_DRAW_ENABLED) != 0) {
         if ((evtSolarOverlayFadeFlags & SOLAR_FADE_IN) != 0) {

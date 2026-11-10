@@ -960,7 +960,7 @@ ScrCommandResult evtCommand_MOON_STOP(void) {
 
 ScrCommandResult evtCommand_GET_MOON(void)
 {
-    scrSetIntReturnValue(evtGetMirroredSolarPhase());
+    scrSetIntReturnValue(evtGetAgeOfMoon());
     return SCR_COMMAND_RESULT_COMPLETE;
 }
 

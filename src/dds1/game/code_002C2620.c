@@ -467,7 +467,7 @@ s32 fldStartAndPollLocalMapTrack(void) {
     return 0;
 }
 
-extern void evtSetSolarOverlayFullyVisible(void);
+extern void evtEnableMoonDraw(void);
 
 void fldInitializeLocalMapScene(void) {
     s32 mask;
@@ -497,7 +497,7 @@ void fldInitializeLocalMapScene(void) {
     fclDestroyMessage();
     D_003BD254 = sdfDevLoadFileEx("/lmap/lmpmsg.bmd", &D_003BD258, NULL);
     fclInitMessage((struct ItfMesSub *)D_003BD258);
-    evtSetSolarOverlayFullyVisible();
+    evtEnableMoonDraw();
     fldApplyLightSetIndex(1);
     fldInitializeCameraColorResource();
     sdfEnableFlagListViewTargetRelativeMode();

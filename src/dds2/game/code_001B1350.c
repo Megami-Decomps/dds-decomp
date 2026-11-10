@@ -335,10 +335,10 @@ BtlCommandHitResult btlResolveCommandHitResult(BtlUnit *source, BtlUnit *target,
             evtScriptArgumentFromPointer(targetRecord), command, 0);
         switch (command) {
         case 0xE7:
-            if (evtGetMirroredSolarPhase() != 8) autoMultiplier *= 0.2f;
+            if (evtGetAgeOfMoon() != 8) autoMultiplier *= 0.2f;
             break;
         case 0xE8:
-            if (evtGetMirroredSolarPhase() != 0) autoMultiplier *= 0.2f;
+            if (evtGetAgeOfMoon() != 0) autoMultiplier *= 0.2f;
             break;
         }
         if (target->status.flags & 0x2000000) chance += 30;

@@ -677,7 +677,7 @@ s32 fldCmdSetSolarOverlayMode(void) {
         evtDisableMoonDraw();
         break;
     case FLD_SOLAR_OVERLAY_MODE_SHOW_MOON:
-        evtSetSolarOverlayFullyVisible();
+        evtEnableMoonDraw();
         fldGlobalBase.unk138 = 1;
         break;
     case FLD_SOLAR_OVERLAY_MODE_MOON_FADE_OUT:
@@ -1782,7 +1782,7 @@ s32 fldCommand_FLD_GET_KIRETA(void) {
 
 /* Roll against the threshold associated with the mirrored solar phase. */
 s32 fldCmdRollMirroredSolarThreshold(void) {
-    s32 solarPhaseThreshold = fldMirroredSolarThresholds[evtGetMirroredSolarPhase()];
+    s32 solarPhaseThreshold = fldMirroredSolarThresholds[evtGetAgeOfMoon()];
     s32 roll = (s32)dds3GetRandIntA(0, 100);
     if (solarPhaseThreshold >= roll) {
         scrSetIntReturnValue(1);

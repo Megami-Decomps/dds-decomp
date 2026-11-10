@@ -269,7 +269,7 @@ u32 evtCommand_BGM_VOL_UP(void) {
 
 extern EvtPackedSoundTrackId evtPlaySe(s32 eventId, EvtSoundVariation variation);
 
-u32 evtOpcodeSetBgmVolumePan(void) {
+u32 evtCommand_SE_PLAY_E(void) {
     s32 id;
     EvtSoundVariation variation;
 
@@ -325,7 +325,7 @@ u32 evtCommandSetDrawFlagWhileWaiting(void) {
 
 
 /* Fold phases 9-15 back toward zero for the symmetric solar animation. */
-EvtMirroredSolarPhase evtGetMirroredSolarPhase(void) {
+EvtMirroredSolarPhase evtGetAgeOfMoon(void) {
     EvtSolarCyclePhase phase;
 
     phase = DDS3_GBWK->world.phase;
@@ -352,7 +352,7 @@ void evtDisableMoonCalc(void) {
     DDS3_GBWK->world.flags = DDS3_GBWK->world.flags & ~SOLAR_PHASE_ADVANCE_FLAG;
 }
 
-void evtSetSolarOverlayFullyVisible(void) {
+void evtEnableMoonDraw(void) {
     DDS3_GBWK->world.flags = DDS3_GBWK->world.flags | SOLAR_ALPHA_ENABLED_FLAG;
     gMoonCnt = 1.0f;
     evtBeginSolarOverlayFadeIn(0);
@@ -427,7 +427,7 @@ void evtAdvanceSolarClockAndExpireControls(f32 travelDistance) {
             DDS3_GBWK->world.phaseTimer = 0;
             evtSetAgeOfMoon((DDS3_GBWK->world.phase + 1) & 0xF);
             D_003BBDBC = 30;
-            if (evtGetMirroredSolarPhase() == 0) {
+            if (evtGetAgeOfMoon() == 0) {
                 fldEsutoMaClearMsg();
                 fldRiberaMaClearMsg();
                 fldRifutoMaClearMsg();

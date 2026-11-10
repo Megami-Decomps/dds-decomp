@@ -169,7 +169,7 @@ extern char D_004366F8[];
 
 extern void itfMesMngRelease(ItfMesWindowIndex window);
 
-extern s32 evtGetMirroredSolarPhase(void);
+extern s32 evtGetAgeOfMoon(void);
 
 extern s32 btlRollAiBucket(void);
 
@@ -243,7 +243,7 @@ s32 btlTryEscapeWithPhaseAdjustment(BtlUnit *actor) {
         ratio *= ((BattleEscapeParameters *)datBattleParameters)->specialScale;
     }
     chance = chance * ratio;
-    phase = evtGetMirroredSolarPhase();
+    phase = evtGetAgeOfMoon();
     chance += ((BattleEscapeParameters *)datBattleParameters)->solarPhaseBias[phase];
     if (chance > 95) {
         chance = 95;
@@ -1010,7 +1010,7 @@ s32 btlRollMajinEncounter(void) {
     if (sceneFlags & 0x200) {
         return 0;
     }
-    rate = datBattleParameters->specialEncounterChance[evtGetMirroredSolarPhase()];
+    rate = datBattleParameters->specialEncounterChance[evtGetAgeOfMoon()];
     threshold = rate;
     if (DDS3_GBWK->world.specialEncounterAttemptCount != 0) {
         threshold = rate * datBattleParameters->specialEncounterScale;

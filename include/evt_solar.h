@@ -114,7 +114,7 @@ typedef char SolarOverlayState_pulseFrame_offset_check[
     ((u32)&((SolarOverlayState *)0)->pulseFrame == 0xFC) ? 1 : -1];
 
 EvtSolarCyclePhase evtGetAgeOfMoon16(void);
-EvtMirroredSolarPhase evtGetMirroredSolarPhase(void);
+EvtMirroredSolarPhase evtGetAgeOfMoon(void);
 void evtInitializeVisualData(SolarOverlayWork *overlay);
 void evtUpdateSolarPhaseTransition(SolarOverlayWork *overlay);
 void evtDrawFadingSolarOverlayFrame(s32 x, s32 y, s32 z, s32 alpha,
@@ -129,7 +129,7 @@ void evtDeactivateLastSolarPoint(SolarOverlayWork *overlay);
 void evtSetSolarPointActiveCount(
     SolarOverlayWork *overlay, EvtMirroredSolarPhase mirroredPhase);
 void evtUpdateSolarPointTimers(SolarOverlayWork *overlay);
-void evtSetSolarOverlayFullyVisible(void);
+void evtEnableMoonDraw(void);
 void evtLoadSolarNoiseSprite(struct EffectSlotSet **sprite);
 void evtReleaseSolarNoiseSprite(struct EffectSlotSet **sprite);
 

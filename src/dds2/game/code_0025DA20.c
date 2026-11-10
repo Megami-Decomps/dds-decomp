@@ -1955,7 +1955,7 @@ u32 mnuCampChooseSolarWeightedOption(s32 listedItemIndex) {
     s32 total = 0;
     u32 optionIndex = 0;
     do {
-        if (evtGetMirroredSolarPhase() == 8) {
+        if (evtGetAgeOfMoon() == 8) {
             total += item[-3];
         } else {
             total += item[0];

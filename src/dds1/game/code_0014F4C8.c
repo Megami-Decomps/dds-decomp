@@ -60,7 +60,7 @@ extern s32 fldMirroredSolarThresholds[];
 
 /* Roll against the threshold associated with the mirrored solar phase. */
 s32 fldCmdRollMirroredSolarThreshold(void) {
-    s32 solarPhaseThreshold = fldMirroredSolarThresholds[evtGetMirroredSolarPhase()];
+    s32 solarPhaseThreshold = fldMirroredSolarThresholds[evtGetAgeOfMoon()];
     if (solarPhaseThreshold >= (s32)dds3GetRandIntA(0, 100)) {
         scrSetIntReturnValue(1);
     } else {

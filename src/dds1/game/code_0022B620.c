@@ -115,7 +115,7 @@ extern void mnuSampleCampListLayoutTrack(evtViewerInfo_t *viewer, EvtRuntimeGrou
 extern sdf3DFogParam_t dds3FogState;
 
 /* Capture kind-specific defaults before adding a new key to its track. */
-EvtRuntimeChild *evtCreateTrackKeyAtFrame(EvtRuntimeGroup *group, s32 frame, evtViewerInfo_t *viewer) {
+EvtRuntimeChild *evtAddFrameInfo(EvtRuntimeGroup *group, s32 frame, evtViewerInfo_t *viewer) {
     CampDisplayDefaults display;
     EvtBlendKey layout;
     f32 first, second;

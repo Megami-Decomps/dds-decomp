@@ -156,7 +156,7 @@ extern void mnuDrawCampScaledTexture(sdfTexHandle_t *texture, CampDisplayDefault
 
 
 void UnlinkFrameInfo(EvtRuntimeGroup *entry, EvtRuntimeChild *node);
-EvtRuntimeChild *evtCreateTrackKeyAtFrame(EvtRuntimeGroup *group, s32 frame, evtViewerInfo_t *viewer);
+EvtRuntimeChild *evtAddFrameInfo(EvtRuntimeGroup *group, s32 frame, evtViewerInfo_t *viewer);
 void Eve_PartialMultiBlurSetDefTex(void);
 void Eve_DistortionBlurSetDefTex(void);
 void Eve_RippleBlurSetDefTex(void);
@@ -171,7 +171,7 @@ void DelBED(EvtRuntimeChild *node);
 
 EvtRuntimeChild *AddFrameInfo2(EvtRuntimeGroup *group, s32 frame, evtViewerInfo_t *viewer)
 {
-    return evtCreateTrackKeyAtFrame(group, frame, viewer);
+    return evtAddFrameInfo(group, frame, viewer);
 }
 
 /* Return the pending node at position (count A + count B) in the queue entry, or NULL. */

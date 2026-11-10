@@ -189,7 +189,7 @@ extern void dds3MultiBlurOff();
 extern void dds3DistBlurOff();
 extern void dds3RipBlurOff();
 extern void btlMarkRuntimeUpdatePending();
-extern void evtSetSolarOverlayFullyVisible();
+extern void evtEnableMoonDraw();
 extern void btlSyncModelFlagFromEventThresholds();
 extern void btlResetTitleStreamOnBattleFlag();
 extern void btlInitializeWorldCamera();

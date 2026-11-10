@@ -248,7 +248,7 @@ s32 evtAdvanceSolarLongLayerTimer(SolarNoiseLayer *timer) {
 
 
 void evtAdvanceShortSolarNoiseLayers(SolarNoiseState *state) {
-    u8 phase = evtGetMirroredSolarPhase();
+    u8 phase = evtGetAgeOfMoon();
     s32 spawnLimit = (s32)((f32)phase * 10.0f * 0.125f + 5.0f);
     SolarNoiseLayer *layer;
     s8 *active;
@@ -288,7 +288,7 @@ void evtAdvanceShortSolarNoiseLayers(SolarNoiseState *state) {
 INCLUDE_SDATA(const s32, "game/code_002437F0", D_00437210);
 
 void evtAdvanceLongSolarNoiseLayers(SolarNoiseState *state) {
-    u8 phase = evtGetMirroredSolarPhase();
+    u8 phase = evtGetAgeOfMoon();
     u16 spawns[15][3] = {
         {57, 62, 50}, {50, 66, 20}, {52, 62, 50}, {52, 60, 100},
         {45, 58, 50}, {41, 50, 50}, {41, 50, 100}, {42, 42, 50},

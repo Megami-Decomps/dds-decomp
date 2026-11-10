@@ -2069,7 +2069,7 @@ s32 fldUpdateCampMenuTransition(void) {
     if (fldEncountTestFlag(0x20) == 0 && fldProcCampChk() == FLD_CAMP_CHECK_STATE_IDLE) {
         fldAutoMapSeqClearFlag(1);
         fldPreparePlayerSceneCameraTarget();
-        evtSetSolarOverlayFullyVisible();
+        evtEnableMoonDraw();
         /* Retail retains both branches of this shared scene-state gate. */
         if (D_00389898[0] != 0) {
             fldApplySkyLightSetToPlayerVU();
@@ -2260,7 +2260,7 @@ dds3TaskUpdateResult_t fldUpdateFieldSceneTask(dds3ProcessID_t *task) {
         fldRebuildFieldScene();
         dds3SetActiveScene(dds3GetControlScene());
         fldInitInputPanel();
-        if (fldGlobalBase.specialEventActive == FLD_SPECIAL_EVENT_INACTIVE) evtSetSolarOverlayFullyVisible();
+        if (fldGlobalBase.specialEventActive == FLD_SPECIAL_EVENT_INACTIVE) evtEnableMoonDraw();
         fldInitAddressProcess();
         if (fldGlobalBase.area >= 200) {
             fldRunDanteGunFlag[0x2C / 4] = 0;

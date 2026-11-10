@@ -1147,10 +1147,10 @@ BtlSpecialAbilityAvailability btlCheckSpecialAbility(
     }
     switch (skillId) {
     case 0x227:
-        return evtGetMirroredSolarPhase() == 8 ? BTL_SPECIAL_ABILITY_AVAILABLE
+        return evtGetAgeOfMoon() == 8 ? BTL_SPECIAL_ABILITY_AVAILABLE
                                                : BTL_SPECIAL_ABILITY_UNAVAILABLE;
     case 0x228:
-        return evtGetMirroredSolarPhase() == 0 ? BTL_SPECIAL_ABILITY_AVAILABLE
+        return evtGetAgeOfMoon() == 0 ? BTL_SPECIAL_ABILITY_AVAILABLE
                                                : BTL_SPECIAL_ABILITY_UNAVAILABLE;
     default:
         return BTL_SPECIAL_ABILITY_AVAILABLE;

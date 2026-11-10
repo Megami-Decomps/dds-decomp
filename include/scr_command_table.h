@@ -144,7 +144,7 @@ s32 evtCommand_MODEL_MOVE2(void);
 s32 btlCmdRememberActorActionGate(void);
 s32 evtCommand_LOAD_SOUND_E(void);
 s32 evtCommand_BGM_PLAY_E(void);
-s32 evtOpcodeSetBgmVolumePan(void);
+s32 evtCommand_SE_PLAY_E(void);
 s32 evtCommand_FADEOUT_E(void);
 s32 evtCommand_BGM_VOL_DOWN(void);
 s32 evtCommand_BGM_VOL_UP(void);
@@ -655,7 +655,7 @@ s32 fldCmdSetStateFlag(void);
     { btlCmdRememberActorActionGate, 0 },             \
     { evtCommand_LOAD_SOUND_E, 1 },                   \
     { evtCommand_BGM_PLAY_E, 2 },                     \
-    { evtOpcodeSetBgmVolumePan, 2 },                  \
+    { evtCommand_SE_PLAY_E, 2 },                  \
     { evtCommand_FADEOUT_E, 2 },                      \
     { evtCommand_BGM_VOL_DOWN, 0 },                   \
     { evtCommand_BGM_VOL_UP, 0 },                     \
@@ -1201,7 +1201,7 @@ s32 evtCommand_MODEL_MOVE2(void);
 s32 btlCmdRememberActorActionGate(void);
 s32 evtCommand_LOAD_SOUND_E(void);
 s32 evtCommand_BGM_PLAY_E(void);
-s32 evtOpcodeSetBgmVolumePan(void);
+s32 evtCommand_SE_PLAY_E(void);
 s32 evtCommand_FADEOUT_E(void);
 s32 evtCommand_BGM_VOL_DOWN(void);
 s32 evtCommand_BGM_VOL_UP(void);
@@ -1742,7 +1742,7 @@ s32 fldCmdSetStateFlag(void);
     { btlCmdRememberActorActionGate, 0 },               \
     { evtCommand_LOAD_SOUND_E, 1 },                     \
     { evtCommand_BGM_PLAY_E, 2 },                       \
-    { evtOpcodeSetBgmVolumePan, 2 },                    \
+    { evtCommand_SE_PLAY_E, 2 },                    \
     { evtCommand_FADEOUT_E, 2 },                        \
     { evtCommand_BGM_VOL_DOWN, 0 },                     \
     { evtCommand_BGM_VOL_UP, 0 },                       \

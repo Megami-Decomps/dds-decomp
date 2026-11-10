@@ -5231,15 +5231,17 @@
 0x00243140	evtCommand_FADEOUT_E	inferred	SMT3HD name via SLUS_209.11 0x001E9098, shared-hash-in-run; was evtCommandQueueBgmWithFade
 0x00243180	evtCommand_BGM_VOL_DOWN	inferred	SMT3HD name via SLUS_209.11 0x001E90D8, same-old-name-as-dds1-0x00228520; was evtOpcodeStartReducedBgm
 0x002431A0	evtCommand_BGM_VOL_UP	inferred	SMT3HD name via SLUS_209.11 0x001E9100, same-old-name-as-dds1-0x00228548; was evtOpcodeStopReducedBgm
+0x002431C0	evtCommand_SE_PLAY_E	inferred	SMT3HD name via SLUS_209.11 0x001E9128, same slot and code (smt3units =), was evtOpcodeSetBgmVolumePan; was evtOpcodeSetBgmVolumePan
 0x00243200	evtCommandStartBgmWithFade	inferred	confidence=high; src/dds2/game/code_00242CB8.c:func_00243200; Reads sound-id and fade script parameters and starts the requested BGM. [names_qp9.tsv]
 0x002432A0	evtCommandSetDrawFlagWhileWaiting	inferred	confidence=high; src/dds2/game/code_00242CB8.c:func_002432A0; Sets draw-control bit 0x02000000 while the script command timer is below the requested duration; returns pending until elapsed. [names_qp9.tsv]
 0x00243310	evtClearSolarOverlayControl	inferred	Clears the byte at solar-world-state offset 0xA43 while leaving the adjacent phase byte intact.
 0x00243320	evtResetFieldTransitionCounter	inferred	Clears the world-state counter at +0xA4C; the solar-clock update increments this counter while field-transition flag bit 4 is set and consumes that transition after six ticks, then resets the counter. fldRifutoMaClear also calls this reset. [provider, timer update, and caller, 2026-10-13]
-0x00243330	evtGetMirroredSolarPhase	inferred	Reads the solar-world phase byte at +0xA41 and mirrors phases 9..15 around phase 8.
+0x00243330	evtGetAgeOfMoon	inferred	SMT3HD name via SLUS_209.11 0x001E9998, same code in IDA, was evtGetMirroredSolarPhase; was evtGetMirroredSolarPhase
 0x00243358	evtGetAgeOfMoon16	inferred	SMT3HD name via SLUS_209.11 0x001E99C0, shared-hash-in-run; was evtGetSolarPhase
 0x00243368	evtSetAgeOfMoon	inferred	SMT3HD name via SLUS_209.11 0x001E99D0, reloc-identical; was evtSetSolarPhase
 0x00243380	evtEnableMoonCalc	inferred	SMT3HD name via SLUS_209.11 0x001E99E8, reloc-identical; was evtEnableSolarPhaseAdvance
 0x00243398	evtDisableMoonCalc	inferred	SMT3HD name via SLUS_209.11 0x001E9A00, reloc-identical; was evtDisableSolarPhaseAdvance
+0x002433B0	evtEnableMoonDraw	inferred	SMT3HD name via SLUS_209.11 0x001E9A18, same slot, DDS adds fade resets, was evtSetSolarOverlayFullyVisible; was evtSetSolarOverlayFullyVisible
 0x002433E8	evtDisableMoonDraw	inferred	SMT3HD name via SLUS_209.11 0x001E9A38, reloc-identical; was evtSetSolarOverlayFullyTransparent
 0x00243400	evtEnableMoonDraw2	inferred	SMT3HD name via SLUS_209.11 0x001E9A50, reloc-identical; was evtEnableSolarOverlayAlpha
 0x00243418	evtDisableMoonDraw2	inferred	SMT3HD name via SLUS_209.11 0x001E9A68, reloc-identical; was evtDisableSolarOverlayAlpha
@@ -5269,6 +5271,7 @@
 0x002457A8	evtHasSolarOverlayTransitionState	inferred	Returns whether solar-overlay transition mode cell is nonzero, including completed suppressed state. [names_reviewed19.tsv]
 0x002457B8	evtBeginSolarOverlayFadeIn	inferred	Nonzero duration initializes overlay transition mode three and counter zero; zero clears all fade cells. [names_reviewed19.tsv]
 0x002457E0	evtBeginSolarOverlayFadeOut	inferred	Starts transition mode five with countdown from supplied value, or immediately from zero. [names_reviewed19.tsv]
+0x00245810	evtDebugPrintCamera	inferred	SMT3HD name via SLUS_209.11 0x001EB068, called by evtDebugCameraStep in both, DDS body empty, was func_0022AB58; was func_00245810
 0x00245818	evtDebugCameraStep	inferred	SMT3HD name via SLUS_209.11 0x001EB1D8, same-old-name-as-dds1-0x0022AB60; was evtUpdateIdleTestTask
 0x00245820	EventDebugShutdown	inferred	SMT3HD name via SLUS_209.11 0x001EB530, shared-hash-in-run; was evtDestroyTestTaskScripts
 0x00245838	evtInitEventTest	inferred	SMT3HD name via SLUS_209.11 0x001EB548, reloc-identical; was evtStartTestTask
@@ -5277,7 +5280,7 @@
 0x00245F88	LinkFrameInfo	inferred	SMT3HD name via SLUS_209.11 0x001EBC98, unique-masked-hash; was evtInsertListNodeByOrderKey
 0x00246028	UnlinkFrameInfo	inferred	SMT3HD name via SLUS_209.11 0x001EBD38, unique-masked-hash; was evtUnlinkListNode
 0x00246078	SortFrameInfo	inferred	SMT3HD name via SLUS_209.11 0x001EBD88, unique-masked-hash; was evtReorderListNodes
-0x00246108	evtCreateViewerTimelineKey	inferred	Inferred from the current C implementation in game/code_00244F00.c; agent-proposed name checked against its owner, fields and callees (R1 finite names pass).
+0x00246108	evtAddFrameInfo	inferred	SMT3HD name via SLUS_209.11 0x001EBE18, same slot and callee set (LinkFrameInfo, Eve_*GetParams, memset), was evtCreateTrackKeyAtFrame; was evtCreateViewerTimelineKey
 0x002467A0	AddFrameInfo2	inferred	SMT3HD name via SLUS_209.11 0x001EC358, shared-hash-in-run; was evtEventViewerCreateTrackKeyAtFrame
 0x002467B8	evtEventViewerGetPendingNode	inferred	twin of DDS1 0x0022BE40 [names_M34_SmallSweep3.tsv]
 0x00246820	DelFrameInfo	inferred	SMT3HD name via SLUS_209.11 0x001EC3D8, unique-masked-hash; was evtEventViewerReleaseNode

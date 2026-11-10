@@ -1807,7 +1807,7 @@ u8 evtTestSolarPhaseOrModelFlag(DatBattleAdjustmentCondition condition) {
     case DAT_BATTLE_ADJUSTMENT_CONDITION_NONE:
         break;
     case DAT_BATTLE_ADJUSTMENT_CONDITION_SOLAR_PHASE_MASK:
-        if (condition & (1 << evtGetMirroredSolarPhase()) & 0xFFFF) {
+        if (condition & (1 << evtGetAgeOfMoon()) & 0xFFFF) {
             return 1;
         }
         break;

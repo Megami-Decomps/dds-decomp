@@ -14,7 +14,7 @@ extern u32 D_00435CBC;
 
 extern s32 dpy;
 
-void func_00245810(void) {
+void evtDebugPrintCamera(void) {
 }
 
 /* Retail test-task update is idle from creation; return 0 each tick. */

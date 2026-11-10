@@ -23,12 +23,12 @@ extern char D_003ACD18[]; /* "EventTest" */
 
 void evtFreeStage(void);
 
-void func_0022AB58(void) {
+void evtDebugPrintCamera(void) {
 }
 
 /* After launching a test script, keep the test task idle and return 0. */
 s32 evtDebugCameraStep(dds3ProcessID_t *task) {
-    func_0022AB58();
+    evtDebugPrintCamera();
     return 0;
 }
 

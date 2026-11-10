@@ -107,7 +107,7 @@ extern void fldSetCameraNodeModeWithTen(void);
 
 extern void fldPreparePlayerSceneCameraTarget(void);
 
-extern void evtSetSolarOverlayFullyVisible(void);
+extern void evtEnableMoonDraw(void);
 
 extern void fldResetPlayerSceneObjectState(void);
 
@@ -182,7 +182,7 @@ extern s32 D_003BAF9C;
 
 extern void fldPreparePlayerSceneCameraTarget(void);
 
-extern void evtSetSolarOverlayFullyVisible(void);
+extern void evtEnableMoonDraw(void);
 
 
 void fldNpcHojiRefresh(void);
@@ -509,7 +509,7 @@ s32 fldCmdSetSolarOverlayMode(void) {
         evtDisableMoonDraw();
         break;
     case FLD_SOLAR_OVERLAY_MODE_SHOW_MOON:
-        evtSetSolarOverlayFullyVisible();
+        evtEnableMoonDraw();
         fldGlobalBase.unk138 = 1;
         break;
     case FLD_SOLAR_OVERLAY_MODE_MOON_FADE_OUT:

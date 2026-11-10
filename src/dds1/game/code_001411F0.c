@@ -183,7 +183,7 @@ extern void fldPreparePlayerSceneCameraTarget(void);
 
 extern void fldReleaseCameraModel(u32 enabled);
 
-extern void evtSetSolarOverlayFullyVisible(void);
+extern void evtEnableMoonDraw(void);
 
 struct FileRequest;
 
@@ -2654,7 +2654,7 @@ void fldEnterSceneCamera(void) {
     AutoMapSeq = FLD_SCENE_NOT_READY;
     fldAutoMapSeqClearFlag(1);
     fldPreparePlayerSceneCameraTarget();
-    evtSetSolarOverlayFullyVisible();
+    evtEnableMoonDraw();
     fldApplySkyLightSetToPlayerVU();
     cam->sceneTransitionCooldown = 4;
     frSetFontDrawOT(0x54);
@@ -5573,7 +5573,7 @@ extern void fldStartSceneBgmAlternate(void);
 
 extern void fldPreparePlayerSceneCameraTarget(void);
 
-extern void evtSetSolarOverlayFullyVisible(void);
+extern void evtEnableMoonDraw(void);
 
 /* Restores field presentation once an active event finishes, then clears the
  * event latch. An already-cleared latch leaves field resources untouched. */
@@ -5590,7 +5590,7 @@ void fldFinishEventFieldState(void) {
         state->specialEventActive = FLD_SPECIAL_EVENT_INACTIVE;
         fldSparkControlState.state.phase = FLD_SPARK_CONTROLLER_PHASE_IDLE;
         fldSparkControlState.state.countdown = 0;
-        evtSetSolarOverlayFullyVisible();
+        evtEnableMoonDraw();
     }
 }
 
@@ -5621,7 +5621,7 @@ void fldUpdateSparkMessageSequence(void) {
             fclDestroyMessage();
             fldSparkControlState.state.dialogPhase = FLD_SPARK_DIALOG_PHASE_CANCELLED;
             fldGlobalBase.specialEventActive = FLD_SPECIAL_EVENT_INACTIVE;
-            evtSetSolarOverlayFullyVisible();
+            evtEnableMoonDraw();
         }
         break;
     case FLD_SPARK_DIALOG_PHASE_ENTRY_PROMPT:
@@ -5638,7 +5638,7 @@ void fldUpdateSparkMessageSequence(void) {
                 fclDestroyMessage();
                 fldSparkControlState.state.dialogPhase = FLD_SPARK_DIALOG_PHASE_CANCELLED;
                 fldGlobalBase.specialEventActive = FLD_SPECIAL_EVENT_INACTIVE;
-                evtSetSolarOverlayFullyVisible();
+                evtEnableMoonDraw();
             } else {
                 evtFinishMessageWindowAndNotify();
                 fclDestroyMessage();
@@ -5883,7 +5883,7 @@ void fldUpdateSparkEncounterScene(void) {
         p2sdPlaySE(0x670011, 0x7F, 0x3F);
         fldTogglePlayerModel();
         fldStartSceneBgmAlternate();
-        evtSetSolarOverlayFullyVisible();
+        evtEnableMoonDraw();
         D_0032E4E8[0] = 1;
         fldSparkControlState.state.phase = FLD_SPARK_CONTROLLER_PHASE_RETURN_TO_FIELD;
         fldSparkControlState.state.frame = 0;
@@ -5922,7 +5922,7 @@ void fldResetEventSceneState(void) {
     fldGlobalBase.specialEventActive = FLD_SPECIAL_EVENT_INACTIVE;
     D_003D62A8[0] = 0;
     fldGlobalBase.unk138 = 1;
-    evtSetSolarOverlayFullyVisible();
+    evtEnableMoonDraw();
 }
 
 void fldStartDeferredFieldExit(void) {

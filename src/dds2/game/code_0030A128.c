@@ -647,7 +647,7 @@ void fldInitializeLocalMapScene(void) {
     fclDestroyMessage();
     D_004388A4 = sdfDevLoadFileEx("/lmap/lmpmsg.bmd", &D_004388A8, NULL);
     fclInitMessage((struct ItfMesSub *)D_004388A8);
-    evtSetSolarOverlayFullyVisible();
+    evtEnableMoonDraw();
     fldInitializeCameraColorResource();
     sdfEnableFlagListViewTargetRelativeMode();
     p2sdPlayBGM(0x400001);

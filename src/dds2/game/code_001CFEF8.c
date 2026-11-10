@@ -154,7 +154,7 @@ extern s32 btlSelectSerialEncounter(void);
 extern void btlAddItemDrop(u16);
 
 
-extern void evtSetSolarOverlayFullyVisible();
+extern void evtEnableMoonDraw();
 
 extern void btlSyncModelFlagFromEventThresholds();
 
@@ -444,7 +444,7 @@ s32 fldSceneStateRestoreDisplay(BtlState *scene) {
             if (fldGetEncounterRuntimeResult() != FLD_ENCOUNTER_RESULT_NONE) {
                 fldSetEncounterPendingValue(1);
             }
-            evtSetSolarOverlayFullyVisible();
+            evtEnableMoonDraw();
         }
         if (scene->sceneStatus == 0) {
             fldCreateSceneCleanupTask();

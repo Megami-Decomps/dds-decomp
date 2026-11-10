@@ -4619,7 +4619,7 @@ extern void mdlPackDecode(s32 packageId, s32 partId, s32 flags, const u8 *data, 
 extern s32 evtSetRegistUnit(s32 packageId, s32 partId);
 extern evtUnitHandle_t *evtGetUnitHandle(EvtUnitObjectKey worldObjectKey);
 extern EvtPathLinkResult evtPathLinkAndMake(dds3Basic_t *object, dds3Basic_t *owner);
-extern EvtRuntimeChild *evtCreateTrackKeyAtFrame(EvtRuntimeGroup *group, s32 frame, evtViewerInfo_t *runtime);
+extern EvtRuntimeChild *evtAddFrameInfo(EvtRuntimeGroup *group, s32 frame, evtViewerInfo_t *runtime);
 extern EvtPackedSoundTrackId evtLoadEventBgm(s32 eventId);
 extern EvtEventBgmReadiness evtCheckEventBgmLoaded(s32 eventId);
 extern u8 fldTitleChk(void);
@@ -4634,7 +4634,7 @@ typedef struct { u8 bytes[0x2C]; } EvtRowPayload2C;
 typedef struct { u8 bytes[0x30]; } EvtRowPayload30;
 typedef struct { u8 bytes[0x40]; } EvtRowPayload40;
 
-extern EvtRuntimeChild *evtCreateTrackKeyAtFrame(EvtRuntimeGroup *, s32, evtViewerInfo_t *);
+extern EvtRuntimeChild *evtAddFrameInfo(EvtRuntimeGroup *, s32, evtViewerInfo_t *);
 extern EvtRuntimeGroup *evtEventViewerCreateEntry(s32, evtViewerInfo_t *);
 extern EvtViewerNameIndex evtEventViewerAddName(const char *, evtViewerInfo_t *);
 extern void dds3CameraObjectBasicSetFovy(dds3Basic_t *, f32);
@@ -4832,7 +4832,7 @@ s32 evtPopulateViewerTimelineFromMovie(PolyMovieWork *work, evtViewerInfo_t *run
                 nameIndex = evtGetRowVariant(work, row);
                 rowName = (char *)work->subEntry1Data + nameIndex * 32;
                 if (strcmp(runtime->entryName[group->entryHeader], rowName) == 0) {
-                    key = evtCreateTrackKeyAtFrame(group, evtGetRowParameter(work, row), runtime);
+                    key = evtAddFrameInfo(group, evtGetRowParameter(work, row), runtime);
                     key->p08.b[0] = *(const u8 *)(evtGetRowPayloadAddress(work, row) + 0x0);
                     key->p0C.i = *(const s32 *)(evtGetRowPayloadAddress(work, row) + 0x4);
                     nameIndex = evtGetRowVariant(work, row);
@@ -4875,7 +4875,7 @@ s32 evtPopulateViewerTimelineFromMovie(PolyMovieWork *work, evtViewerInfo_t *run
                 nameIndex = evtGetRowVariant(work, row);
                 rowName = (char *)work->subEntry1Data + nameIndex * 32;
                 if (strcmp(runtime->entryName[group->entryHeader], rowName) == 0) {
-                    key = evtCreateTrackKeyAtFrame(group, evtGetRowParameter(work, row), runtime);
+                    key = evtAddFrameInfo(group, evtGetRowParameter(work, row), runtime);
                     key->p08.f = ((const EvtCameraFovRowPayload *)evtGetRowPayloadAddress(work, row))->cameraFieldOfView;
                     key->p0C.h[0] = ((const EvtCameraFovRowPayload *)evtGetRowPayloadAddress(work, row))->opaque04;
                     {
@@ -4904,7 +4904,7 @@ s32 evtPopulateViewerTimelineFromMovie(PolyMovieWork *work, evtViewerInfo_t *run
                 nameIndex = evtGetRowVariant(work, row);
                 rowName = (char *)work->subEntry1Data + nameIndex * 32;
                 if (strcmp(runtime->entryName[group->entryHeader], rowName) == 0) {
-                    key = evtCreateTrackKeyAtFrame(group, evtGetRowParameter(work, row), runtime);
+                    key = evtAddFrameInfo(group, evtGetRowParameter(work, row), runtime);
                     switch (evtGetRowValue(work, row)) {
                     case 3: case 0x1A:
                         key->p08.h[1] = *(const u16 *)(evtGetRowPayloadAddress(work, row) + 0x2);
@@ -4970,7 +4970,7 @@ s32 evtPopulateViewerTimelineFromMovie(PolyMovieWork *work, evtViewerInfo_t *run
                 nameIndex = evtGetRowVariant(work, row);
                 rowName = (char *)work->subEntry1Data + nameIndex * 32;
                 if (strcmp(runtime->entryName[group->entryHeader], rowName) == 0) {
-                    key = evtCreateTrackKeyAtFrame(group, evtGetRowParameter(work, row), runtime);
+                    key = evtAddFrameInfo(group, evtGetRowParameter(work, row), runtime);
                     key->duration = evtGetRowFlags(work, row);
                     key->p08.h[1] = *(const u16 *)(evtGetRowPayloadAddress(work, row) + 0x2);
                     if (*(const s16 *)(evtGetRowPayloadAddress(work, row) + 0x0) < 0) {
@@ -4993,7 +4993,7 @@ s32 evtPopulateViewerTimelineFromMovie(PolyMovieWork *work, evtViewerInfo_t *run
         for (row = 0; row < (s32)work->subEntry4Count; row++) {
             if (evtGetRowValue(work, row) == 0xA &&
                 *(const s16 *)(evtGetRowPayloadAddress(work, row) + 0x8) == secondaryIndex) {
-                key = evtCreateTrackKeyAtFrame(group, evtGetRowParameter(work, row), runtime);
+                key = evtAddFrameInfo(group, evtGetRowParameter(work, row), runtime);
                 key->p08.f = *(const f32 *)(evtGetRowPayloadAddress(work, row) + 0x0);
                 key->p0C.f = *(const f32 *)(evtGetRowPayloadAddress(work, row) + 0x4);
                 key->p10.h[0] = *(const u16 *)(evtGetRowPayloadAddress(work, row) + 0x8);
@@ -5030,7 +5030,7 @@ s32 evtPopulateViewerTimelineFromMovie(PolyMovieWork *work, evtViewerInfo_t *run
     for (row = 0; row < (s32)work->subEntry4Count; row++) {
         if (evtGetRowValue(work, row) == 0xB) {
             s32 ordinal;
-            key = evtCreateTrackKeyAtFrame(group, evtGetRowParameter(work, row), runtime);
+            key = evtAddFrameInfo(group, evtGetRowParameter(work, row), runtime);
             data = (const u8 *)evtGetRowPayloadAddress(work, row);
             payload = key->payload;
             key->p08.h[0] = *(const u16 *)data;
@@ -5044,7 +5044,7 @@ s32 evtPopulateViewerTimelineFromMovie(PolyMovieWork *work, evtViewerInfo_t *run
     group = evtEventViewerCreateEntry(0xC, runtime);
     for (row = 0; row < (s32)work->subEntry4Count; row++) {
         if (evtGetRowValue(work, row) == 0xC) {
-            key = evtCreateTrackKeyAtFrame(group, evtGetRowParameter(work, row), runtime);
+            key = evtAddFrameInfo(group, evtGetRowParameter(work, row), runtime);
             key->duration = evtGetRowFlags(work, row);
             key->p08.h[0] = *(const u16 *)(evtGetRowPayloadAddress(work, row) + 0x0);
             key->p08.h[1] = *(const u16 *)(evtGetRowPayloadAddress(work, row) + 0x2);
@@ -5069,7 +5069,7 @@ s32 evtPopulateViewerTimelineFromMovie(PolyMovieWork *work, evtViewerInfo_t *run
     group = evtEventViewerCreateEntry(0x16, runtime);
     for (row = 0; row < (s32)work->subEntry4Count; row++) {
         if (evtGetRowValue(work, row) == 0x16) {
-            key = evtCreateTrackKeyAtFrame(group, evtGetRowParameter(work, row), runtime);
+            key = evtAddFrameInfo(group, evtGetRowParameter(work, row), runtime);
             key->p08.h[0] = *(const u16 *)(evtGetRowPayloadAddress(work, row) + 0x0);
         }
     }
@@ -5079,7 +5079,7 @@ s32 evtPopulateViewerTimelineFromMovie(PolyMovieWork *work, evtViewerInfo_t *run
     for (row = 0; row < (s32)work->subEntry4Count; row++) {
         if (evtGetRowValue(work, row) == 0xD) {
             s32 ordinal;
-            key = evtCreateTrackKeyAtFrame(group, evtGetRowParameter(work, row), runtime);
+            key = evtAddFrameInfo(group, evtGetRowParameter(work, row), runtime);
             data = (const u8 *)evtGetRowPayloadAddress(work, row);
             payload = key->payload;
             key->p08.h[0] = *(const u16 *)data;
@@ -5094,7 +5094,7 @@ s32 evtPopulateViewerTimelineFromMovie(PolyMovieWork *work, evtViewerInfo_t *run
     for (row = 0; row < (s32)work->subEntry4Count; row++) {
         if (evtGetRowValue(work, row) == 0xE) {
             s32 ordinal;
-            key = evtCreateTrackKeyAtFrame(group, evtGetRowParameter(work, row), runtime);
+            key = evtAddFrameInfo(group, evtGetRowParameter(work, row), runtime);
             data = (const u8 *)evtGetRowPayloadAddress(work, row);
             payload = key->payload;
             key->p08.h[0] = *(const u16 *)data;
@@ -5118,7 +5118,7 @@ s32 evtPopulateViewerTimelineFromMovie(PolyMovieWork *work, evtViewerInfo_t *run
     for (row = 0; row < (s32)work->subEntry4Count; row++) {
         if (evtGetRowValue(work, row) == 0xF) {
             s32 ordinal;
-            key = evtCreateTrackKeyAtFrame(group, evtGetRowParameter(work, row), runtime);
+            key = evtAddFrameInfo(group, evtGetRowParameter(work, row), runtime);
             data = (const u8 *)evtGetRowPayloadAddress(work, row);
             payload = key->payload;
             key->p08.h[0] = *(const u16 *)data;
@@ -5142,7 +5142,7 @@ s32 evtPopulateViewerTimelineFromMovie(PolyMovieWork *work, evtViewerInfo_t *run
     for (row = 0; row < (s32)work->subEntry4Count; row++) {
         if (evtGetRowValue(work, row) == 0x17) {
             s32 ordinal;
-            key = evtCreateTrackKeyAtFrame(group, evtGetRowParameter(work, row), runtime);
+            key = evtAddFrameInfo(group, evtGetRowParameter(work, row), runtime);
             data = (const u8 *)evtGetRowPayloadAddress(work, row);
             payload = key->payload;
             key->p08.h[0] = *(const u16 *)data;
@@ -5166,7 +5166,7 @@ s32 evtPopulateViewerTimelineFromMovie(PolyMovieWork *work, evtViewerInfo_t *run
     for (row = 0; row < (s32)work->subEntry4Count; row++) {
         if (evtGetRowValue(work, row) == 0x1B) {
             s32 ordinal;
-            key = evtCreateTrackKeyAtFrame(group, evtGetRowParameter(work, row), runtime);
+            key = evtAddFrameInfo(group, evtGetRowParameter(work, row), runtime);
             data = (const u8 *)evtGetRowPayloadAddress(work, row);
             payload = key->payload;
             key->p08.h[0] = *(const u16 *)data;
@@ -5181,7 +5181,7 @@ s32 evtPopulateViewerTimelineFromMovie(PolyMovieWork *work, evtViewerInfo_t *run
     for (row = 0; row < (s32)work->subEntry4Count; row++) {
         if (evtGetRowValue(work, row) == 0x10) {
             s32 ordinal;
-            key = evtCreateTrackKeyAtFrame(group, evtGetRowParameter(work, row), runtime);
+            key = evtAddFrameInfo(group, evtGetRowParameter(work, row), runtime);
             data = (const u8 *)evtGetRowPayloadAddress(work, row);
             payload = key->payload;
             key->p08.h[0] = *(const u16 *)data;
@@ -5197,7 +5197,7 @@ s32 evtPopulateViewerTimelineFromMovie(PolyMovieWork *work, evtViewerInfo_t *run
     for (row = 0; row < (s32)work->subEntry4Count; row++) {
         if (evtGetRowValue(work, row) == 0x11) {
             s32 ordinal;
-            key = evtCreateTrackKeyAtFrame(group, evtGetRowParameter(work, row), runtime);
+            key = evtAddFrameInfo(group, evtGetRowParameter(work, row), runtime);
             data = (const u8 *)evtGetRowPayloadAddress(work, row);
             payload = key->payload;
             key->p08.h[0] = *(const u16 *)data;
@@ -5223,7 +5223,7 @@ s32 evtPopulateViewerTimelineFromMovie(PolyMovieWork *work, evtViewerInfo_t *run
         group = evtEventViewerCreateEntry(4, runtime);
         for (row = 0; row < (s32)work->subEntry4Count; row++) {
             if (evtGetRowValue(work, row) == 4) {
-                key = evtCreateTrackKeyAtFrame(group, evtGetRowParameter(work, row), runtime);
+                key = evtAddFrameInfo(group, evtGetRowParameter(work, row), runtime);
                 key->duration = evtGetRowFlags(work, row);
                 key->p08.h[0] = *(const u16 *)(evtGetRowPayloadAddress(work, row) + 0x0);
                 key->p08.h[1] = *(const u16 *)(evtGetRowPayloadAddress(work, row) + 0x2);
@@ -5243,12 +5243,12 @@ s32 evtPopulateViewerTimelineFromMovie(PolyMovieWork *work, evtViewerInfo_t *run
         if (work->sub->kind < 6) {
             if (evtGetRowValue(work, row) == 5) {
                 soundRowsPresent = 1;
-                key = evtCreateTrackKeyAtFrame(group, evtGetRowParameter(work, row), runtime);
+                key = evtAddFrameInfo(group, evtGetRowParameter(work, row), runtime);
                 key->p08.h[0] = *(const u16 *)evtGetRowPayloadAddress(work, row);
             }
         } else if (work->secondEntry4Data[row].value == 5) {
             soundRowsPresent = 1;
-            key = evtCreateTrackKeyAtFrame(group, work->secondEntry4Data[row].parameter, runtime);
+            key = evtAddFrameInfo(group, work->secondEntry4Data[row].parameter, runtime);
             key->p08.h[0] = *(const u16 *)work->secondEntry4Data[row].payload;
         }
     }
@@ -5262,13 +5262,13 @@ s32 evtPopulateViewerTimelineFromMovie(PolyMovieWork *work, evtViewerInfo_t *run
         if (work->sub->kind < 6) {
             if (evtGetRowValue(work, row) == 0x13) {
                 soundRowsPresent = 1;
-                key = evtCreateTrackKeyAtFrame(group, evtGetRowParameter(work, row), runtime);
+                key = evtAddFrameInfo(group, evtGetRowParameter(work, row), runtime);
                 key->p08.h[0] = *(const u16 *)evtGetRowPayloadAddress(work, row);
                 key->p08.h[1] = *(const u16 *)(evtGetRowPayloadAddress(work, row) + 2);
             }
         } else if (work->secondEntry4Data[row].value == 0x13) {
             soundRowsPresent = 1;
-            key = evtCreateTrackKeyAtFrame(group, work->secondEntry4Data[row].parameter, runtime);
+            key = evtAddFrameInfo(group, work->secondEntry4Data[row].parameter, runtime);
             key->p08.h[0] = *(const u16 *)work->secondEntry4Data[row].payload;
             key->p08.h[1] = *(const u16 *)(work->secondEntry4Data[row].payload + 2);
         }
@@ -5278,7 +5278,7 @@ s32 evtPopulateViewerTimelineFromMovie(PolyMovieWork *work, evtViewerInfo_t *run
     group = evtEventViewerCreateEntry(0x6, runtime);
     for (row = 0; row < (s32)work->subEntry4Count; row++) {
         if (evtGetRowValue(work, row) == 0x6) {
-            key = evtCreateTrackKeyAtFrame(group, evtGetRowParameter(work, row), runtime);
+            key = evtAddFrameInfo(group, evtGetRowParameter(work, row), runtime);
             key->duration = evtGetRowFlags(work, row);
             key->p08.h[0] = *(const u16 *)(evtGetRowPayloadAddress(work, row) + 0x0);
         }
@@ -5288,7 +5288,7 @@ s32 evtPopulateViewerTimelineFromMovie(PolyMovieWork *work, evtViewerInfo_t *run
     group = evtEventViewerCreateEntry(0x7, runtime);
     for (row = 0; row < (s32)work->subEntry4Count; row++) {
         if (evtGetRowValue(work, row) == 0x7) {
-            key = evtCreateTrackKeyAtFrame(group, evtGetRowParameter(work, row), runtime);
+            key = evtAddFrameInfo(group, evtGetRowParameter(work, row), runtime);
             key->duration = evtGetRowFlags(work, row);
             key->p08.h[0] = *(const u16 *)(evtGetRowPayloadAddress(work, row) + 0x0);
         }
@@ -5298,7 +5298,7 @@ s32 evtPopulateViewerTimelineFromMovie(PolyMovieWork *work, evtViewerInfo_t *run
     group = evtEventViewerCreateEntry(0x8, runtime);
     for (row = 0; row < (s32)work->subEntry4Count; row++) {
         if (evtGetRowValue(work, row) == 0x8) {
-            key = evtCreateTrackKeyAtFrame(group, evtGetRowParameter(work, row), runtime);
+            key = evtAddFrameInfo(group, evtGetRowParameter(work, row), runtime);
             key->p08.h[0] = *(const u16 *)(evtGetRowPayloadAddress(work, row) + 0x0);
             key->p08.h[1] = *(const u16 *)(evtGetRowPayloadAddress(work, row) + 0x2);
             key->p0C.h[0] = *(const u16 *)(evtGetRowPayloadAddress(work, row) + 0x4);
@@ -5314,7 +5314,7 @@ s32 evtPopulateViewerTimelineFromMovie(PolyMovieWork *work, evtViewerInfo_t *run
                 nameIndex = evtGetRowVariant(work, row);
                 rowName = (char *)work->subEntry1Data + nameIndex * 32;
                 if (strcmp(runtime->entryName[group->entryHeader], rowName) == 0) {
-                    key = evtCreateTrackKeyAtFrame(group, evtGetRowParameter(work, row), runtime);
+                    key = evtAddFrameInfo(group, evtGetRowParameter(work, row), runtime);
                     key->p08.b[0] = *(const u8 *)(evtGetRowPayloadAddress(work, row) + 0x0);
                     key->p08.b[1] = *(const u8 *)(evtGetRowPayloadAddress(work, row) + 0x1);
                     key->p0C.h[0] = *(const u16 *)(evtGetRowPayloadAddress(work, row) + 0x4);
@@ -5334,7 +5334,7 @@ s32 evtPopulateViewerTimelineFromMovie(PolyMovieWork *work, evtViewerInfo_t *run
     group = evtEventViewerCreateEntry(0x19, runtime);
     for (row = 0; row < (s32)work->subEntry4Count; row++) {
         if (evtGetRowValue(work, row) == 0x19) {
-            key = evtCreateTrackKeyAtFrame(group, evtGetRowParameter(work, row), runtime);
+            key = evtAddFrameInfo(group, evtGetRowParameter(work, row), runtime);
             key->p08.h[0] = *(const u16 *)(evtGetRowPayloadAddress(work, row) + 0x0);
             key->p08.h[1] = *(const u16 *)(evtGetRowPayloadAddress(work, row) + 0x2);
             key->p0C.h[0] = *(const u16 *)(evtGetRowPayloadAddress(work, row) + 0x4);
@@ -5358,7 +5358,7 @@ s32 evtPopulateViewerTimelineFromMovie(PolyMovieWork *work, evtViewerInfo_t *run
     group = evtEventViewerCreateEntry(0x1C, runtime);
     for (row = 0; row < (s32)work->subEntry4Count; row++) {
         if (evtGetRowValue(work, row) == 0x1C) {
-            key = evtCreateTrackKeyAtFrame(group, evtGetRowParameter(work, row), runtime);
+            key = evtAddFrameInfo(group, evtGetRowParameter(work, row), runtime);
             key->duration = evtGetRowFlags(work, row);
             key->p08.h[0] = *(const u16 *)(evtGetRowPayloadAddress(work, row) + 0x0);
             key->p08.h[1] = *(const u16 *)(evtGetRowPayloadAddress(work, row) + 0x2);
@@ -5369,7 +5369,7 @@ s32 evtPopulateViewerTimelineFromMovie(PolyMovieWork *work, evtViewerInfo_t *run
     group = evtEventViewerCreateEntry(0x1D, runtime);
     for (row = 0; row < (s32)work->subEntry4Count; row++) {
         if (evtGetRowValue(work, row) == 0x1D) {
-            key = evtCreateTrackKeyAtFrame(group, evtGetRowParameter(work, row), runtime);
+            key = evtAddFrameInfo(group, evtGetRowParameter(work, row), runtime);
             key->duration = evtGetRowFlags(work, row);
             key->p08.h[0] = *(const u16 *)(evtGetRowPayloadAddress(work, row) + 0x0);
         }
@@ -5381,7 +5381,7 @@ s32 evtPopulateViewerTimelineFromMovie(PolyMovieWork *work, evtViewerInfo_t *run
     timeiId = -1;
     for (row = 0; row < (s32)work->subEntry4Count; row++) {
         if (evtGetRowValue(work, row) == 0x1E) {
-            key = evtCreateTrackKeyAtFrame(group, evtGetRowParameter(work, row), runtime);
+            key = evtAddFrameInfo(group, evtGetRowParameter(work, row), runtime);
             key->p08.h[0] = *(const u16 *)(evtGetRowPayloadAddress(work, row) + 0x0);
             data = (const u8 *)evtGetRowPayloadAddress(work, row);
             timeiId = key->p08.sh[0];
@@ -5394,7 +5394,7 @@ s32 evtPopulateViewerTimelineFromMovie(PolyMovieWork *work, evtViewerInfo_t *run
     group = evtEventViewerCreateEntry(0x20, runtime);
     for (row = 0; row < (s32)work->subEntry4Count; row++) {
         if (evtGetRowValue(work, row) == 0x20) {
-            key = evtCreateTrackKeyAtFrame(group, evtGetRowParameter(work, row), runtime);
+            key = evtAddFrameInfo(group, evtGetRowParameter(work, row), runtime);
             key->duration = evtGetRowFlags(work, row);
             key->p08.h[0] = *(const u16 *)(evtGetRowPayloadAddress(work, row) + 0x0);
         }

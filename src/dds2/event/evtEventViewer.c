@@ -90,10 +90,10 @@ void evtEventViewerReleasePendingNode(evtViewerInfo_t *viewer);
 void evtEventViewerFreeSlot(s32 index, evtViewerInfo_t *viewer);
 void DelBED(EvtRuntimeChild *node);
 
-extern EvtRuntimeChild *evtCreateViewerTimelineKey(EvtRuntimeGroup *group, s32 frame, evtViewerInfo_t *viewer);
+extern EvtRuntimeChild *evtAddFrameInfo(EvtRuntimeGroup *group, s32 frame, evtViewerInfo_t *viewer);
 
 EvtRuntimeChild *AddFrameInfo2(EvtRuntimeGroup *group, s32 frame, evtViewerInfo_t *viewer) {
-    return evtCreateViewerTimelineKey(group, frame, viewer);
+    return evtAddFrameInfo(group, frame, viewer);
 }
 
 /* Return the pending node at position (count A + count B) in the queue entry, or NULL. */

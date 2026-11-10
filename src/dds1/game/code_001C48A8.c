@@ -393,7 +393,7 @@ extern void dds3RipBlurOff(s32);
 extern void btlMarkRuntimeUpdatePending(void);
 
 
-extern void evtSetSolarOverlayFullyVisible(void);
+extern void evtEnableMoonDraw(void);
 
 extern s64 btlArrangeOpponentFormationSlots(void);
 
@@ -428,7 +428,7 @@ s32 fldSceneStateRestoreDisplay(u8 *scene) {
             if (fldGetEncounterRuntimeResult() != FLD_ENCOUNTER_RESULT_NONE) {
                 fldSetEncounterPendingValue(1);
             }
-            evtSetSolarOverlayFullyVisible();
+            evtEnableMoonDraw();
         }
         if (state->cleanupTask == 0) {
             fldCreateSceneCleanupTask();
