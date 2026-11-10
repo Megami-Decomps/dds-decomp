@@ -191,7 +191,13 @@ s32 sdfSndAtan2Deg(s32 x, s32 y)
 #else
 INCLUDE_ASM("SDFSDMAN", sdfSndAtan2Deg);
 #endif
-INCLUDE_ASM("SDFSDMAN", sdfSndPostError);
+
+s32 sdfSndPostError(s32 code)
+{
+    sdfSndWorkArea->errCode = code;
+    sdfSndWorkArea->errCount++;
+    return p2sdIrxSpuIopMap();
+}
 
 /* Copy the synthesiser voice map into the work area the EE reads: 24 voices
  * per core, -1 where the voice is not in use. */
@@ -741,7 +747,36 @@ INCLUDE_ASM("SDFSDMAN", sdfSndSetListener);
 INCLUDE_ASM("SDFSDMAN", sdfSndSePlay3d);
 
 /* FUNC sdfSndIsBankLoaded */
-INCLUDE_ASM("SDFSDMAN", sdfSndIsBankLoaded);
+s32 sdfSndIsBankLoaded(s32 kind)
+{
+    s32 i;
+
+#ifdef FIX_BUGS
+    for (i = 0; i < SDF_SND_KINDS; i++) {
+        s32 id;
+
+        /* Past the last stat retail reads eeAddr, then size and unk1D0 as ids. */
+        if (kind + i < SDF_SND_KINDS) {
+            id = sdfSndWorkArea->stat[kind + i].id;
+        } else if (kind + i == SDF_SND_KINDS) {
+            id = (s32)sdfSndWorkArea->eeAddr;
+        } else {
+            id = (s32)sdfSndWorkArea->unk1D0;
+        }
+        if (id >= 0) {
+            return 1;
+        }
+    }
+    return 0;
+#else
+    for (i = 0; i < SDF_SND_KINDS; i++) {
+        if (sdfSndWorkArea->stat[kind + i].id >= 0) {
+            return 1;
+        }
+    }
+    return 0;
+#endif
+}
 /* ENDF sdfSndIsBankLoaded */
 INCLUDE_ASM("SDFSDMAN", sdfSndLoadSmg);
 
@@ -792,7 +827,44 @@ s32 sdfSndRequestBgmSwitch(s32 midi)
 /* FUNC sdfSndAllocBgmSlot */
 /* An idle one of the three sequence slots, else the one playing the oldest
  * sound. The slot used last time is skipped so a restart is audible. */
-INCLUDE_ASM("SDFSDMAN", sdfSndAllocBgmSlot);
+s32 sdfSndAllocBgmSlot(void)
+{
+    s32 i;
+    s32 slot;
+    u32 serial;
+    s32 state;
+
+    slot = -1;
+    serial = -1;
+    for (i = 0; i < 3; i++) {
+        if ((sdfSndMidiWork.tbl->seq[i].slot->flags & 2) == 0 && i != sdfSndLastBgmSlot &&
+            serial >= sdfSndSlots[i].serial) {
+            serial = sdfSndSlots[i].serial;
+            slot = i;
+        }
+    }
+    if (slot >= 0) {
+        sdfSndLastBgmSlot = slot;
+        return slot;
+    }
+    serial = -1;
+    slot = -1;
+    for (i = 0; i < 3; i++) {
+        if (sdfSndSlots[i].serial < serial && i != sdfSndLastBgmSlot &&
+            sdfSndSlots[i].is3d == 0) {
+            serial = sdfSndSlots[i].serial;
+            slot = i;
+        }
+    }
+    if (slot < 0) {
+        return -1;
+    }
+    intrman_CpuSuspendIntr(&state);
+    modmidi_sceMidi_MidiPlaySwitch(&sdfSndMidiWork, slot, 0);
+    intrman_CpuResumeIntr(state);
+    sdfSndLastBgmSlot = slot;
+    return slot;
+}
 /* ENDF sdfSndAllocBgmSlot */
 INCLUDE_ASM("SDFSDMAN", sdfSndAllocSeSlot);
 INCLUDE_ASM("SDFSDMAN", sdfSndSetSeqVolume);
@@ -858,11 +930,62 @@ INCLUDE_ASM("SDFSDMAN", sdfSndCreateRpcSema);
 
 /* FUNC sdfSndLoadVolTables */
 /* The EE writes the volume tables into the work area; take a copy. */
-INCLUDE_ASM("SDFSDMAN", sdfSndLoadVolTables);
+s32 sdfSndLoadVolTables(void)
+{
+    s32 i;
+
+    for (i = 0; i < 32; i++) {
+        sdfSndVolTblSeq[i] = sdfSndWorkArea->volTable[0][i];
+    }
+    for (i = 0; i < 128; i++) {
+        sdfSndVolTblBgm[i] = sdfSndWorkArea->volTable[1][i];
+        sdfSndVolTblSe[i] = sdfSndWorkArea->volTable[2][i];
+    }
+    for (i = 0; i < 32; i++) {
+        sdfSndVolTblVoice[i] = sdfSndWorkArea->volTable[3][i];
+        sdfSndVolTblKind4[i] = sdfSndWorkArea->volTable[4][i];
+    }
+    for (i = 0; i < 2; i++) {
+        sdfSndVolTblCore0[i] = sdfSndWorkArea->volTable[5][i];
+        sdfSndVolTblCore1[i] = sdfSndWorkArea->volTable[6][i];
+        sdfSndVolTblKind7[0][i] = sdfSndWorkArea->volTable[7][i];
+        sdfSndVolTblKind7[1][i] = sdfSndWorkArea->volTable[8][i];
+        sdfSndVolTblKind7[2][i] = sdfSndWorkArea->volTable[9][i];
+        sdfSndVolTblKind7[3][i] = sdfSndWorkArea->volTable[10][i];
+        sdfSndVolTblKind7[4][i] = sdfSndWorkArea->volTable[11][i];
+        sdfSndVolTblKind7[5][i] = sdfSndWorkArea->volTable[12][i];
+    }
+}
 /* ENDF sdfSndLoadVolTables */
 
 /* FUNC sdfSndStoreVolTables */
-INCLUDE_ASM("SDFSDMAN", sdfSndStoreVolTables);
+s32 sdfSndStoreVolTables(void)
+{
+    s32 i;
+
+    for (i = 0; i < 32; i++) {
+        sdfSndWorkArea->volTable[0][i] = sdfSndVolTblSeq[i];
+    }
+    for (i = 0; i < 128; i++) {
+        sdfSndWorkArea->volTable[1][i] = sdfSndVolTblBgm[i];
+        sdfSndWorkArea->volTable[2][i] = sdfSndVolTblSe[i];
+    }
+    for (i = 0; i < 32; i++) {
+        sdfSndWorkArea->volTable[3][i] = sdfSndVolTblVoice[i];
+        sdfSndWorkArea->volTable[4][i] = sdfSndVolTblKind4[i];
+    }
+    for (i = 0; i < 2; i++) {
+        sdfSndWorkArea->volTable[5][i] = sdfSndVolTblCore0[i];
+        sdfSndWorkArea->volTable[6][i] = sdfSndVolTblCore1[i];
+        sdfSndWorkArea->volTable[7][i] = sdfSndVolTblKind7[0][i];
+        sdfSndWorkArea->volTable[8][i] = sdfSndVolTblKind7[1][i];
+        sdfSndWorkArea->volTable[9][i] = sdfSndVolTblKind7[2][i];
+        sdfSndWorkArea->volTable[10][i] = sdfSndVolTblKind7[3][i];
+        sdfSndWorkArea->volTable[11][i] = sdfSndVolTblKind7[4][i];
+        sdfSndWorkArea->volTable[12][i] = sdfSndVolTblKind7[5][i];
+    }
+    return p2sdIrxSpuIopMap();
+}
 /* ENDF sdfSndStoreVolTables */
 
 /* FUNC sdfSndKeepAliveThread */

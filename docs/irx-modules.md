@@ -46,22 +46,22 @@ DDS's sound driver is a later revision of SMT3's. Its symbols are SMT3's,
 mapped onto DDS's file by aligning the two `.text` sections, and
 `src/irx/SDFSDMAN.c` keeps SMT3's text for every function whose code is the
 same in both. Of the 72 functions, 22 are SMT3's matching C, 13 are SMT3's
-drafts under `NON_MATCHING`, and 37 are `INCLUDE_ASM` of DDS's own code
-because DDS changed them:
+drafts under `NON_MATCHING`, 5 are SMT3's C adjusted for DDS's layout
+(`sdfSndPostError`, `sdfSndAllocBgmSlot`, `sdfSndIsBankLoaded`,
+`sdfSndLoadVolTables`, `sdfSndStoreVolTables`), and 32 are `INCLUDE_ASM` of
+DDS's own code because DDS changed them:
 
-`sdfSdManInit`, `sdfSndPostError`, `sdfSndUpdateVoiceMap`,
-`sdfSndGetVolTable`, `sdfSndMidiCbMessage`, `sdfSndSeqThread`,
-`sdfSndStopAll`, `sdfSndInitSynth`, `sdfSndFindSlotById`,
-`sdfSndBgmPlay`, `sdfSndSaveResumePoint`, `sdfSndBgmResume`,
-`sdfSndBgmStop`, `sdfSndHsynLoad`, `sdfSndSePlay`,
-`sdfSndUpdate3dVoice`, `sdfSndSePlay3d`, `sdfSndIsBankLoaded`,
-`sdfSndLoadSmg`, `sdfSndSetBankAddr`, `sdfSndStopByGroup`,
-`sdfSndUnloadBank`, `p2sdIrxSpuIopMap`, `sdfSndFadeOutById`,
-`sdfSndAllocBgmSlot`, `sdfSndAllocSeSlot`, `sdfSndSetSeqVolume`,
-`sdfSndFadeOutAll`, `sdfSndFadeInAll`, `sdfSndLoadVolTables`,
-`sdfSndStoreVolTables`, `sdfAdpcmFadeOut`, `sdfAdpcmStop`,
-`sdfAdpcmFillBuffer`, `sdfAdpcmSetVolume`, `sdfAdpcmStreamPlay`,
-`sdfAdpcmStreamInit`.
+`sdfSdManInit`, `sdfSndUpdateVoiceMap`, `sdfSndGetVolTable`,
+`sdfSndMidiCbMessage`, `sdfSndSeqThread`, `sdfSndStopAll`,
+`sdfSndInitSynth`, `sdfSndFindSlotById`, `sdfSndBgmPlay`,
+`sdfSndSaveResumePoint`, `sdfSndBgmResume`, `sdfSndBgmStop`,
+`sdfSndHsynLoad`, `sdfSndSePlay`, `sdfSndUpdate3dVoice`,
+`sdfSndSePlay3d`, `sdfSndLoadSmg`, `sdfSndSetBankAddr`,
+`sdfSndStopByGroup`, `sdfSndUnloadBank`, `p2sdIrxSpuIopMap`,
+`sdfSndFadeOutById`, `sdfSndAllocSeSlot`, `sdfSndSetSeqVolume`,
+`sdfSndFadeOutAll`, `sdfSndFadeInAll`, `sdfAdpcmFadeOut`,
+`sdfAdpcmStop`, `sdfAdpcmFillBuffer`, `sdfAdpcmSetVolume`,
+`sdfAdpcmStreamPlay`, `sdfAdpcmStreamInit`.
 
 What changed, as far as the differences show:
 
