@@ -1,0 +1,20 @@
+# MODHSYN.IRX, Sony's SPU2 synthesiser: it owns the voices and the envelopes,
+# and a .SMG's bank is loaded into it. See docs/irx-modules.md.
+name: MODHSYN.IRX
+sha1: dd8732e32abf1f8d3e2f854a75a78f2e566c4cd6
+
+# Two builds of this module are usually open at once, Nocturne's and the later
+# one shipped with Persona 3 FES, so the IDB is named by path and not by module.
+idb: DDS3_IRX/MODHSYN
+
+module:
+  name: SPU2_Synthesizer_Module
+  version: 0x0105
+  entry: modhsyn_e30
+
+paths:
+  target: orig/irx/MODHSYN.IRX
+  asm: asm/irx/MODHSYN
+  src: src/irx/MODHSYN.c
+  build: build/irx/MODHSYN
+  symbols: config/irx/MODHSYN/symbol_addrs.txt

@@ -1,0 +1,21 @@
+# MODMIDI.IRX, Sony's MIDI sequencer: it reads a bank's SCEIMidi block and
+# turns it into the channel messages the synthesiser plays. See
+# docs/irx-modules.md.
+name: MODMIDI.IRX
+sha1: 9a845de2c5623027b13ca0e93688a09051a11323
+
+# Two builds of this module are usually open at once, Nocturne's and the later
+# one shipped with Persona 3 FES, so the IDB is named by path and not by module.
+idb: DDS3_IRX/MODMIDI
+
+module:
+  name: Midi_Sequencer_Module
+  version: 0x0202
+  entry: modmidi_e26
+
+paths:
+  target: orig/irx/MODMIDI.IRX
+  asm: asm/irx/MODMIDI
+  src: src/irx/MODMIDI.c
+  build: build/irx/MODMIDI
+  symbols: config/irx/MODMIDI/symbol_addrs.txt

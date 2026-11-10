@@ -1,0 +1,20 @@
+# MODMSIN.IRX, Sony's MIDI message input module: the queue sceMSIn_PutMsg
+# writes into, which the synthesiser drains. See docs/irx-modules.md.
+name: MODMSIN.IRX
+sha1: 86c97b4e02047818a84b9ea1f751a6c3593fa3ed
+
+# Two builds of this module are usually open at once, Nocturne's and the later
+# one shipped with Persona 3 FES, so the IDB is named by path and not by module.
+idb: DDS3_IRX/MODMSIN
+
+module:
+  name: Midi_Message_Input_Module
+  version: 0x0101
+  entry: modmsin_e10
+
+paths:
+  target: orig/irx/MODMSIN.IRX
+  asm: asm/irx/MODMSIN
+  src: src/irx/MODMSIN.c
+  build: build/irx/MODMSIN
+  symbols: config/irx/MODMSIN/symbol_addrs.txt
