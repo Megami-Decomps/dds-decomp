@@ -54,7 +54,7 @@ void effPCPCrackSizeInit(effPCPCrack_t *work, EffBossCell *cell) {
 /* Create a draw pool and delayed cells for each model map-position group. */
 void effPCPCrackInit(effPCPCrack_t *work)
 {
-    dds3ModelHandle_t *model = effParamWorkGetData(work->paramWork);
+    dds3ModelHandle_t *model = dds3EffectPartGetHandle(work->paramWork);
     EffBossGroup *group;
     EffBossCell *nextCells;
     u32 groupIndex;
@@ -218,7 +218,7 @@ void effPCPCrackDraw(effPCPCrack_t *work) {
 
     frame = work->frame;
     mode = work->head.directionMode;
-    model = effParamWorkGetData(work->paramWork);
+    model = dds3EffectPartGetHandle(work->paramWork);
     map = model->inner;
     SDF_VU0_LOADVECTOR(work->head.position);
     mdlSetPosition(model);

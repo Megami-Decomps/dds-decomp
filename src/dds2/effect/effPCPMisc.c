@@ -258,8 +258,8 @@ void effPCPHama01PartInit(EffPCPTwinWork *work, s32 slotIndex) {
 ;
     dds3EffectPartSetRotateMatrix(work->pair[slotIndex][0], mtx);
     dds3EffectPartSetRotateMatrix(work->pair[slotIndex][1], mtx);
-    mdlSingleMotion(effParamWorkGetData(work->pair[slotIndex][0]), 0, 0);
-    mdlSingleMotion(effParamWorkGetData(work->pair[slotIndex][1]), 0, 0);
+    mdlSingleMotion(dds3EffectPartGetHandle(work->pair[slotIndex][0]), 0, 0);
+    mdlSingleMotion(dds3EffectPartGetHandle(work->pair[slotIndex][1]), 0, 0);
     work->counter[slotIndex] = dds3GetRandA((EffRandState *)effDefaultRandomState) % 10;
 }
 
@@ -344,8 +344,8 @@ void effPCPHama01Draw(EffPCPTwinWork *work) {
             work->counter[slotIndex]--;
             continue;
         }
-        obj[0] = effParamWorkGetData(work->pair[slotIndex][0]);
-        obj[1] = effParamWorkGetData(work->pair[slotIndex][1]);
+        obj[0] = dds3EffectPartGetHandle(work->pair[slotIndex][0]);
+        obj[1] = dds3EffectPartGetHandle(work->pair[slotIndex][1]);
         SDF_VU0_LOADVECTOR(work);
         mdlSetPosition(obj[0]);
         dds3EffectPartSetScale(work->pair[slotIndex][0], work->scale * 1.5f);
@@ -388,8 +388,8 @@ void effPCPHama02PartInit(EffPCPStaggered *work, s32 index) {
 ;
     dds3EffectPartSetRotateMatrix(work->handle[index * 2], mtx);
     dds3EffectPartSetRotateMatrix(work->handle[index * 2 + 1], mtx);
-    mdlSingleMotion(effParamWorkGetData(work->handle[index * 2]), 0, 0);
-    mdlSingleMotion(effParamWorkGetData(work->handle[index * 2 + 1]), 0, 0);
+    mdlSingleMotion(dds3EffectPartGetHandle(work->handle[index * 2]), 0, 0);
+    mdlSingleMotion(dds3EffectPartGetHandle(work->handle[index * 2 + 1]), 0, 0);
     work->verticalOffset[index] = dds3GetRandFloatA(effDefaultRandomState) * 150.0f;
     work->remainingDelay[index] = dds3GetRandA((EffRandState *)effDefaultRandomState) % 10;
 }
@@ -459,8 +459,8 @@ void effPCPHama02Draw(EffPCPStaggered *work) {
         if (work->remainingDelay[i] != 0) {
             work->remainingDelay[i]--;
         } else {
-            obj[0] = effParamWorkGetData(work->handle[i * 2]);
-            obj[1] = effParamWorkGetData(work->handle[i * 2 + 1]);
+            obj[0] = dds3EffectPartGetHandle(work->handle[i * 2]);
+            obj[1] = dds3EffectPartGetHandle(work->handle[i * 2 + 1]);
             pos[0] = work->position[0];
             pos[2] = work->position[2];
             pos[1] = (work->position[1] - work->verticalOffset[i] + 100.0f) * work->scale;
@@ -494,7 +494,7 @@ void effPCPHamaonPartInit(EffPCPCrossWork *work, u32 i, u32 j) {
     u128 mtx[4];
     f32 angle;
 
-    mdlSingleMotion(effParamWorkGetData(work->handle[i][j]), 0, 0);
+    mdlSingleMotion(dds3EffectPartGetHandle(work->handle[i][j]), 0, 0);
     angle = (f32)j * -1.0471974f;
     if (i == 0) {
         SetRotateMatrixY(angle);
@@ -521,7 +521,7 @@ EffPCPCrossWork *effPCPHamaonCreate(void *src) {
     s32 j;
 
     work->base = dds3EffectPCPDataPartCreate(src, 0);
-    mdlSingleMotion(effParamWorkGetData(work->base), 0, 0);
+    mdlSingleMotion(dds3EffectPartGetHandle(work->base), 0, 0);
     for (i = 0; i < 4; i++) {
         for (j = 0; j < 3; j++) {
             if (j == 0) {
@@ -560,7 +560,7 @@ EffPCPCrossWork *effPCPHamaonCopy(EffPCPCrossWork *src) {
     s32 j;
 
     work->base = dds3EffectPartCopy(src->base);
-    mdlSingleMotion(effParamWorkGetData(work->base), 0, 0);
+    mdlSingleMotion(dds3EffectPartGetHandle(work->base), 0, 0);
     for (i = 0; i < 4; i++) {
         for (j = 0; j < 3; j++) {
             work->handle[i][j] = dds3EffectPartCopy(src->handle[i][0]);
@@ -583,7 +583,7 @@ void effPCPHamaonDraw(EffPCPCrossWork *work) {
     s32 i;
     s32 j;
 
-    anchor = effParamWorkGetData(work->base);
+    anchor = dds3EffectPartGetHandle(work->base);
     SDF_VU0_LOADVECTOR(work);
     mdlSetPosition(anchor);
     dds3EffectPartSetScale(work->base, work->scale);
@@ -594,7 +594,7 @@ void effPCPHamaonDraw(EffPCPCrossWork *work) {
                 work->remainingDelay[i][j]--;
                 continue;
             }
-            obj = effParamWorkGetData(work->handle[i][j]);
+            obj = dds3EffectPartGetHandle(work->handle[i][j]);
             mdlSetColor(obj, work->color);
             sdfModelGetMarkPos(anchor->inner, i * 4 + j + 1);
             mdlSetPosition(obj);
@@ -619,8 +619,8 @@ void effPCPHamaonSetColor(EffPCPCrossWork *work, u32 value) {
  * random countdown. */
 void effPCPMHanma01PartInit(EffPCPDelayedPairs *work, s32 index) {
 
-    mdlSingleMotion(effParamWorkGetData(work->handle[index * 2]), 0, 0);
-    mdlSingleMotion(effParamWorkGetData(work->handle[index * 2 + 1]), 0, index & 1);
+    mdlSingleMotion(dds3EffectPartGetHandle(work->handle[index * 2]), 0, 0);
+    mdlSingleMotion(dds3EffectPartGetHandle(work->handle[index * 2 + 1]), 0, index & 1);
     work->remainingDelay[index] = dds3GetRandA((EffRandState *)effDefaultRandomState) % 10;
 }
 
@@ -690,8 +690,8 @@ void effPCPMHanma01Draw(EffPCPDelayedPairs *work) {
         if (work->remainingDelay[i] != 0) {
             work->remainingDelay[i]--;
         } else {
-            obj[0] = effParamWorkGetData(work->handle[i * 2]);
-            obj[1] = effParamWorkGetData(work->handle[i * 2 + 1]);
+            obj[0] = dds3EffectPartGetHandle(work->handle[i * 2]);
+            obj[1] = dds3EffectPartGetHandle(work->handle[i * 2 + 1]);
                         SDF_VU0_LOADVECTOR_BARRIER(work);
             mdlSetPosition(obj[0]);
             mdlSetColor(obj[1], work->color);
@@ -791,8 +791,8 @@ void effPCPMudoDraw(EffPCPChargeWork *work) {
     }
     work->updateCount++;
     color = effMagaCylinderCalcColor(work->color, work->baseColor);
-    bill = effParamWorkGetData(work->primaryHandle);
-    model = effParamWorkGetData(work->secondaryHandle);
+    bill = dds3EffectPartGetHandle(work->primaryHandle);
+    model = dds3EffectPartGetHandle(work->secondaryHandle);
     scale = work->scale * 1.5f;
     dds3EffectPartSetScale(work->secondaryHandle, scale);
     dds3EffectPartSetPosition(work->secondaryHandle, work->vectorWords);
@@ -887,7 +887,7 @@ void effPCPHwave01Draw(EffPCPSpawnOnceWork *work) {
     dds3ModelHandle_t *obj;
     u128 vec;
 
-    obj = effParamWorkGetData(work->primaryHandle);
+    obj = dds3EffectPartGetHandle(work->primaryHandle);
         SDF_VU0_LOADVECTOR_BARRIER(work->vector);
     mdlSetPosition(obj);
     dds3EffectPartSetColor(work->secondaryHandle, work->color);
@@ -2864,7 +2864,7 @@ EffPCPBlockSetWork *effPCPAgiFireballCreate(const EffPCPBlockSetParams *params, 
     work->handleA[2] = dds3EffectPartCreate(EFF_PARAM_WORK_KIND_EFFECT_NODE, blocks[3]);
     work->handleA[3] = dds3EffectPartCreate(EFF_PARAM_WORK_KIND_EFFECT_NODE, blocks[4]);
     work->handleA[4] = dds3EffectPartCreate(EFF_PARAM_WORK_KIND_VIEWER_CONTEXT, blocks[5]);
-    model = effParamWorkGetData(work->headHandle);
+    model = dds3EffectPartGetHandle(work->headHandle);
     work->count = model->first->frameCount;
     for (i = 0; i < 3; i++) {
         if (work->params.groupSize[i] > 0) {
@@ -2919,7 +2919,7 @@ void effPCPAgiFireballCopySub(EffPCPBlockSetWork *work, EffPCPBlockSetWork *src)
     for (handleIndex = 0; handleIndex < ARRAY_COUNT(work->handleA); handleIndex++) {
         work->handleA[handleIndex] = dds3EffectPartCopy(src->handleA[handleIndex]);
     }
-    headModel = effParamWorkGetData(work->headHandle);
+    headModel = dds3EffectPartGetHandle(work->headHandle);
     work->count = headModel->first->frameCount;
     for (groupIndex = 0; groupIndex < ARRAY_COUNT(work->list); groupIndex++) {
         if (work->params.groupSize[groupIndex] > 0) {
@@ -3031,7 +3031,7 @@ void effPcpBlockSetUpdate(EffPCPBlockSetWork *work) {
     }
     color = work->color;
     color = effColorBlend(color & 0xFFFFFF, color, fade);
-    model = effParamWorkGetData(work->headHandle);
+    model = dds3EffectPartGetHandle(work->headHandle);
     if (work->mode == EFF_PCP_BLOCK_SET_MODE_DEFAULT) {
         dds3EffectPartSetPosition(work->headHandle, work->params.position);
         if (effBTLFieldColorUsesActorSelectors()) {
@@ -4749,7 +4749,7 @@ void effPcpUpdateStaggeredPulseModels(EffPCPSprayWork *work) {
         if (work->handle[i] == 0) {
             continue;
         }
-        data = effParamWorkGetData(work->handle[i]);
+        data = dds3EffectPartGetHandle(work->handle[i]);
         FromEuler(0.0f, work->rotationY[i], 0.0f);
         if (effBTLFieldColorUsesActorSelectors() && (((BtlUnit *)effBTLFieldColorGetVariantSelector())->status.flags & 0x400)) {
             SDF_VU0_LOADVECTOR_B(D_00414610);
@@ -5489,7 +5489,7 @@ void effPCPHelperInit(EffPCPMapEventWork *work) {
     dds3ModelHandle_t *model;
     EffPCPMapEventEntry *entry;
 
-    model = effParamWorkGetData(work->modelResource);
+    model = dds3EffectPartGetHandle(work->modelResource);
     model->first->frameStep = work->params.frameStep;
     mdlSingleMotion(model, 0, 0);
     work->frameLimit = model->first->frameCount;
@@ -5618,7 +5618,7 @@ void effPCPHelperBEDDraw(EffPCPMapEventWork *work) {
     place.payload[9] = 100.0f;
     place.payload[10] = 1.0f;
     if (frameLimit >= frame) {
-        model = effParamWorkGetData(work->modelResource);
+        model = dds3EffectPartGetHandle(work->modelResource);
         mapModel = model->inner;
         SDF_VU0_LOADVECTOR(work->params.position);
         mdlSetPosition(model);

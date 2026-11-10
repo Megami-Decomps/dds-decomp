@@ -1,353 +1,448 @@
 #include "common.h"
-#include "sdf_vu0.h"
-#include "sdf_chip.h"
-#include "eff_param.h"
-#include "eff_param_operations.h"
-#include "eff_thunder_vector.h"
-#include "par_cell_api.h"
-#include "sdf_heap_api.h"
-#include "btl_state.h"
-#include "eff.h"
-#include "eff_battle_color_keyframe.h"
-#include "eff_battle_transition_duration.h"
-#include "ee_mmi.h"
-#include "evt_unit.h"
-#include "evt_unit_color_transition.h"
-#include "pcp_vu0.h"
-#include "eff_matrix4.h"
-#include "mdl.h"
-#include "bill_object_api.h"
+#include "motion.h"
+#include "model.h"
+#include "effPCPData.h"
+#include "ps2asm.h"
 
-#define EFF_VIEWER_RESOURCE_GROUP 7
+/* DDS's names for the same objects. */
+#define D_0031DDD0 effParameterPresetBanks
+#define D_0031DF60 effModelDefaultPosition
+#define D_0031DF70 effModelDefaultQuaternion
+#define D_0031DF80 effModelDefaultScale
+#define D_0054F1E4 D_003BB044
 
-#define EFF_VIEWER_LOAD_FLAGS 0x101
+extern u128 D_0031DF60;
 
-extern u8 effModelDefaultPosition[];
+extern u128 D_0031DF70;
 
-extern u8 effModelDefaultQuaternion[];
+extern u128 D_0031DF80;
 
-extern u8 effModelDefaultScale[];
+typedef struct
+{
+    u16 type;
+    void *pHandle;
+} effPartHandle_t;
 
-extern struct sdfGrOt_t *kwlnSceneSurfaceSets[13][4];
+typedef struct
+{
+    u32 kateg;
+    u32 param;
+    void *pHandle;
+} dds3EffectPCP_t;
 
-extern u16 D_003BB044;
 
-extern void mdlPackDecode(s32 resourceGroup, u16 resourceId, s32 flags, const u8 *packageData, s32 packageSize);
 
-/* Return the compact work's payload address without changing its ownership. */
-void *effParamWorkGetData(effPartHandle_t *work) {
-    return work->payload;
+typedef struct
+{
+    void *(*create)(void *);
+    void (*draw)(void *);
+    void (*destroy)(void *);
+    void *(*copy)(void *);
+    void (*setPosition)(void *, void *);
+    void (*setScale)(void *, f32);
+    void (*setRotateMatrix)(void *, void *);
+    void (*setColor)(void *, u32);
+    void (*setDirection)(void *, void *);
+    void (*setArea)(void *, f32);
+} dds3EffectFunc_t;
+
+void mdlSetPosition(mdlObj_t *aHandle);
+
+void mdlSetRotate(mdlObj_t *aHandle);
+
+void mdlSetScale(mdlObj_t *aHandle);
+
+void mdlSetColor(mdlObj_t *aHandle, u32 aColor);
+
+void mdlLoopMotion(mdlObj_t *aHandle, s32 aGroup, s32 aNumber);
+
+extern dds3EffectFunc_t dds3EffectFuncTable[7];
+
+extern void *kwlnSceneSurfaceSets[13][4];
+#define D_002F69B8 kwlnSceneSurfaceSets[10]
+
+extern u16 D_0054F1E4;
+
+extern s32 effBTLCutCount;
+
+/* Header of a packed model an effect part carries, followed by the pack data. */
+typedef struct
+{
+    u32 size;
+    u8 reserve[0xC];
+    u8 data[1];
+} dds3EffectPartModelData_t;
+
+void *dds3BillboardCreate(s32 kind, u32 data);
+
+void mdlPackDecode(s32 major, s32 minor, s32 regFlags, const u8 *buff, s32 leng);
+
+void mdlLink(mdlObj_t *aHandle, void **aModelOt);
+
+void mdlFree(mdlObj_t *aHandle);
+
+extern dds3EffectFunc_t EffectPCPFuncTable[];
+
+extern void **D_0031DDD0[];
+
+void *sdfChipAllocDirect(s32 aSize);
+
+void sdfChipFreeDirect(void *aPtr);
+
+void dds3BillboardSetScale(void *hBillboard, f32 x, f32 y);
+
+s32 mdlGetMajorNum(mdlObj_t *aHandle);
+
+s32 mdlGetMinorNum(mdlObj_t *aHandle);
+
+mdlObj_t *mdlLoad(u32 aMajor, u32 aMinor);
+
+void dds3EffectPartModelInit(mdlObj_t *hModel);
+
+effPartHandle_t *dds3EffectPartCreate(u16 type, void *pData);
+
+
+
+
+
+extern u32 effBTLPointLightProcess;
+
+extern s8 effBTLFieldColorOn;
+
+extern s8 D_0054F0F1;
+
+extern s32 D_0054F0F4;
+
+extern u8 effBTLDebugCameraAllEdit;
+
+extern u8 effBTLDebugCameraAllTable;
+
+extern u8 D_0054F1C3;
+
+extern s32 D_0054F130;
+
+extern s8 D_0054F134;
+
+extern char D_0054F100[];
+
+void *dds3EffectPartGetHandle(effPartHandle_t *hEffPart);
+
+u16 dds3EffectPartGetType(effPartHandle_t *hEffPart);
+
+
+void dds3EffectPartDelete(effPartHandle_t *hEffPart);
+
+effPartHandle_t *dds3EffectPartCopy(effPartHandle_t *hEffPartSrc);
+
+void dds3EffectPartDraw(effPartHandle_t *hEffPart);
+
+void dds3EffectPartSetPosition(effPartHandle_t *hEffPart, sdfVector4_t *pPos);
+
+void dds3EffectPartSetScale(effPartHandle_t *hEffPart, f32 scale);
+
+void dds3EffectPartSetColor(effPartHandle_t *hEffPart, u32 abgr);
+
+void *dds3EffectPartGetHandle(effPartHandle_t *hEffPart)
+{
+    return hEffPart->pHandle;
 }
 
-/* Return the compact work's halfword effect kind. */
-u16 effParamWorkGetId(effPartHandle_t *work) {
-    return work->kind;
+u16 dds3EffectPartGetType(effPartHandle_t *hEffPart)
+{
+    return hEffPart->type;
 }
 
-/* Allocate compact work and create its payload through the required kind factory. */
-effPartHandle_t *dds3EffectPartCreate(u16 kind, void *source) {
-    effPartHandle_t *work;
+effPartHandle_t *dds3EffectPartCreate(u16 type, void *pData)
+{
+    effPartHandle_t *hEffPart;
 
-    work = sdfChipAllocDirect(sizeof(effPartHandle_t));
-    work->kind = kind;
-    work->payload = dds3EffectFuncTable[kind].create(source);
-    return work;
+    hEffPart = sdfChipAllocDirect(sizeof(effPartHandle_t));
+    hEffPart->type = type;
+    hEffPart->pHandle = dds3EffectFuncTable[type].create(pData);
+    return hEffPart;
 }
 
-/* Dispatch the payload before freeing its compact owner; this callback is required. */
-void dds3EffectPartDelete(effPartHandle_t *work) {
-    dds3EffectFuncTable[work->kind].release(work->payload);
-    sdfChipFreeDirect(work);
+void dds3EffectPartDelete(effPartHandle_t *hEffPart)
+{
+    dds3EffectFuncTable[hEffPart->type].destroy(hEffPart->pHandle);
+    sdfChipFreeDirect(hEffPart);
 }
 
-/* Invoke the kind-specific callback on this parameter block. */
-void dds3EffectPartDraw(effPartHandle_t *work) {
-    u16 kind = work->kind;
-
-    dds3EffectFuncTable[kind].dispatch(work->payload);
+void dds3EffectPartDraw(effPartHandle_t *hEffPart)
+{
+    dds3EffectFuncTable[hEffPart->type].draw(hEffPart->pHandle);
 }
 
-/* Allocate a second compact owner and duplicate the source payload by kind. */
-effPartHandle_t *dds3EffectPartCopy(effPartHandle_t *source) {
-    effPartHandle_t *work;
+effPartHandle_t *dds3EffectPartCopy(effPartHandle_t *hEffPartSrc)
+{
+    effPartHandle_t *hEffPart;
 
-    work = sdfChipAllocDirect(sizeof(effPartHandle_t));
-    work->kind = source->kind;
-    work->payload = dds3EffectFuncTable[source->kind].duplicate(source->payload);
-    return work;
+    hEffPart = sdfChipAllocDirect(sizeof(effPartHandle_t));
+    hEffPart->type = hEffPartSrc->type;
+    hEffPart->pHandle = dds3EffectFuncTable[hEffPartSrc->type].copy(hEffPartSrc->pHandle);
+    return hEffPart;
 }
 
-/* Optional compact-work operations, indexed by effect kind. */
-void dds3EffectPartSetPosition(effPartHandle_t *work, void *source) {
-    if (dds3EffectFuncTable[work->kind].setPosition != NULL) {
-        dds3EffectFuncTable[work->kind].setPosition(work->payload, source);
+void dds3EffectPartSetPosition(effPartHandle_t *hEffPart, sdfVector4_t *pPos)
+{
+    if (dds3EffectFuncTable[hEffPart->type].setPosition != NULL) {
+        dds3EffectFuncTable[hEffPart->type].setPosition(hEffPart->pHandle, pPos);
     }
 }
 
-void dds3EffectPartSetScale(effPartHandle_t *work, f32 scale) {
-    if (dds3EffectFuncTable[work->kind].setScale != NULL) {
-        dds3EffectFuncTable[work->kind].setScale(work->payload, scale);
+void dds3EffectPartSetScale(effPartHandle_t *hEffPart, f32 scale)
+{
+    if (dds3EffectFuncTable[hEffPart->type].setScale != NULL) {
+        dds3EffectFuncTable[hEffPart->type].setScale(hEffPart->pHandle, scale);
     }
 }
 
-void dds3EffectPartSetRotateMatrix(effPartHandle_t *work, void *matrix) {
-    if (dds3EffectFuncTable[work->kind].setRotationMatrix != NULL) {
-        dds3EffectFuncTable[work->kind].setRotationMatrix(work->payload, matrix);
+void dds3EffectPartSetRotateMatrix(effPartHandle_t *hEffPart, void *pMatrix)
+{
+    if (dds3EffectFuncTable[hEffPart->type].setRotateMatrix != NULL) {
+        dds3EffectFuncTable[hEffPart->type].setRotateMatrix(hEffPart->pHandle, pMatrix);
     }
 }
 
-void dds3EffectPartSetColor(effPartHandle_t *work, u32 value) {
-    if (dds3EffectFuncTable[work->kind].setColor != NULL) {
-        dds3EffectFuncTable[work->kind].setColor(work->payload, value);
+void dds3EffectPartSetColor(effPartHandle_t *hEffPart, u32 abgr)
+{
+    if (dds3EffectFuncTable[hEffPart->type].setColor != NULL) {
+        dds3EffectFuncTable[hEffPart->type].setColor(hEffPart->pHandle, abgr);
     }
 }
 
-void dds3EffectPartSetDirection(effPartHandle_t *work, void *matrix) {
-    if (dds3EffectFuncTable[work->kind].setDirection != NULL) {
-        dds3EffectFuncTable[work->kind].setDirection(work->payload, matrix);
+void dds3EffectPartSetDirection(effPartHandle_t *hEffPart, void *pMatrix)
+{
+    if (dds3EffectFuncTable[hEffPart->type].setDirection != NULL) {
+        dds3EffectFuncTable[hEffPart->type].setDirection(hEffPart->pHandle, pMatrix);
     }
 }
 
-void dds3EffectPartSetArea(effPartHandle_t *work, f32 sizeInput) {
-    if (dds3EffectFuncTable[work->kind].setArea != NULL) {
-        dds3EffectFuncTable[work->kind].setArea(work->payload, sizeInput);
+void dds3EffectPartSetArea(effPartHandle_t *hEffPart, f32 area)
+{
+    if (dds3EffectFuncTable[hEffPart->type].setArea != NULL) {
+        dds3EffectFuncTable[hEffPart->type].setArea(hEffPart->pHandle, area);
     }
 }
 
-/* Create a child billboard from its resource data. */
-billHandle_t *dds3EffectPartTMXBillboardCreate(void *resourceData) {
-    return dds3BillboardCreate(0, (u32)resourceData);
+void *dds3EffectPartTMXBillboardCreate(u32 data)
+{
+    return dds3BillboardCreate(0, data);
 }
 
-/* Create an animated billboard from its serialized resource data. */
-billHandle_t *dds3EffectPartP2ABillboardCreate(void *resourceData) {
-    return dds3BillboardCreate(1, (u32)resourceData);
+void *dds3EffectPartP2ABillboardCreate(u32 data)
+{
+    return dds3BillboardCreate(1, data);
 }
 
-/* Use the same floating value for both billboard child-scale components. */
-void dds3EffectPartBillboardScale(void *payload, f32 scale) {
-    dds3BillboardSetScale((billHandle_t *)payload, scale, scale);
+void dds3EffectPartBillboardScale(void *hBillboard, f32 scale)
+{
+    dds3BillboardSetScale(hBillboard, scale, scale);
 }
 
-/* Load the default primary/rotation/tertiary vectors and packed broadcast value.
- * Reset the first motion node's float to 1.0f, then clear flag bit zero. */
-void dds3EffectPartModelInit(dds3ModelHandle_t *work) {
-    SDF_VU0_LOADVECTOR(&effModelDefaultPosition);
-    mdlSetPosition(work);
-    SDF_VU0_LOADVECTOR(&effModelDefaultQuaternion);
-    mdlSetRotate(work);
-    SDF_VU0_LOADVECTOR(&effModelDefaultScale);
-    mdlSetScale(work);
-    mdlSetColor(work, 0x80808080);
-    if (work->first != NULL) {
-        mdlLoopMotion(work, 0, 0);
-        work->first->frameStep = 1.0f;
+void dds3EffectPartModelInit(mdlObj_t *hModel)
+{
+    SDF_VU0_LOADVECTOR(&D_0031DF60);
+    mdlSetPosition(hModel);
+    SDF_VU0_LOADVECTOR(&D_0031DF70);
+    mdlSetRotate(hModel);
+    SDF_VU0_LOADVECTOR(&D_0031DF80);
+    mdlSetScale(hModel);
+    mdlSetColor(hModel, 0x80808080);
+    if (hModel->first != NULL) {
+        mdlLoopMotion(hModel, 0, 0);
+        hModel->first->speed = 1.0f;
     }
-    work->flags &= ~MDL_SKIP_TRANSFORMS;
+    hModel->flags &= ~1;
 }
 
-/* Create and initialize a viewer-package context in the fixed effect group.
- * DDS1 consumes the current halfword id directly; it does not scan occupied ids. */
-void *effParamCreateInitWork(void *package) {
-    dds3ModelHandle_t *work;
+mdlObj_t *dds3EffectPartModelCreate(dds3EffectPartModelData_t *pData)
+{
+    mdlObj_t *hModel;
 
-    mdlPackDecode(EFF_VIEWER_RESOURCE_GROUP, D_003BB044, EFF_VIEWER_LOAD_FLAGS, (u8 *)package + 0x10, *(u32 *)package);
-    work = mdlLoad(EFF_VIEWER_RESOURCE_GROUP, D_003BB044);
-    dds3EffectPartModelInit(work);
-    D_003BB044++;
-    return work;
+    mdlPackDecode(7, D_0054F1E4, 0x101, pData->data, pData->size);
+    hModel = mdlLoad(7, D_0054F1E4);
+    dds3EffectPartModelInit(hModel);
+    D_0054F1E4++;
+    return hModel;
 }
 
-/* Run the context/node update with this game's fixed global argument. */
-void dds3EffectPartModelDraw(dds3ModelHandle_t *work) {
-    mdlLink(work, kwlnSceneSurfaceSets[10]);
+void dds3EffectPartModelDraw(mdlObj_t *hData)
+{
+    mdlLink(hData, D_002F69B8);
 }
 
-/* Release the model context owned by parameter work. */
-void dds3EffectPartModelDelete(dds3ModelHandle_t *work) {
-    mdlFree(work);
+void dds3EffectPartModelDelete(mdlObj_t *hData)
+{
+    mdlFree(hData);
 }
 
-/* Resolve the source's resource group/id, obtain its context, and initialize it. */
-dds3ModelHandle_t *dds3EffectPartModelCopy(dds3ModelHandle_t *source) {
-    s32 resourceGroup;
-    s32 resourceId;
-    dds3ModelHandle_t *work;
+mdlObj_t *dds3EffectPartModelCopy(void *hData)
+{
+    s32 major;
+    s32 minor;
+    mdlObj_t *hModel;
 
-    resourceGroup = mdlGetMajorNum(source);
-    resourceId = mdlGetMinorNum(source);
-    work = mdlLoad(resourceGroup, resourceId);
-    dds3EffectPartModelInit(work);
-    return work;
+    major = mdlGetMajorNum(hData);
+    minor = mdlGetMinorNum(hData);
+    hModel = mdlLoad(major, minor);
+    dds3EffectPartModelInit(hModel);
+    return hModel;
 }
 
-/* Load a full source quadword into vf10 and store it as the primary vector. */
-void dds3EffectPartModelSetPosition(dds3ModelHandle_t *work, const f32 vector[4]) {
-    SDF_VU0_LOADVECTOR_BARRIER(vector);
-    mdlSetPosition(work);
+void dds3EffectPartModelSetPosition(mdlObj_t *hData, sdfVector4_t *pPos)
+{
+    SDF_VU0_LOADVECTOR(pPos);
+    mdlSetPosition(hData);
 }
 
-/* Initialize only three components before the quadword VU load.
- * The fourth component is not initialized here; retain the native array size. */
-void dds3EffectPartModelSetScale(dds3ModelHandle_t *work, f32 scalar) {
-    f32 components[4];
+void dds3EffectPartModelSetScale(void *hData, f32 scale)
+{
+    sdfVector4_t v;
 
-    components[0] = components[1] = components[2] = scalar;
-    SDF_VU0_LOADVECTOR_BARRIER(components);
-    mdlSetScale(work);
+    v.x = v.y = v.z = scale;
+#ifdef NON_MATCHING
+    v.w = 1.0f;
+#endif
+    SDF_VU0_LOADVECTOR_MEMOPS(v);
+    mdlSetScale(hData);
 }
 
-/* Load four source quadwords, then scatter only vf28-vf30 to the destination block. */
-void dds3EffectPartModelSetRotateMatrix(dds3ModelHandle_t *work, const Matrix4 *matrix) {
-    void *firstVector;
-    void *secondVector;
-    void *thirdVector;
-
-    VU0_LOAD_MATRIX(matrix);
-    firstVector = work->inner->matrix[0];
-    SDF_VU0_STORE_ROW0(firstVector);
-    secondVector = work->inner->matrix[1];
-    SDF_VU0_STORE_ROW1(secondVector);
-    thirdVector = work->inner->matrix[2];
-    SDF_VU0_STORE_ROW2(thirdVector);
+void dds3EffectPartModelSetRotateMatrix(mdlObj_t *hData, sdfMatrix4_t *pMatrix)
+{
+    SDF_VU0_LOADMATRIX(pMatrix);
+    SDF_VU0_STORE_ROW0(&hData->inner->tm.m[0]);
+    SDF_VU0_STORE_ROW1(&hData->inner->tm.m[4]);
+    SDF_VU0_STORE_ROW2(&hData->inner->tm.m[8]);
 }
 
-/* Set model color and broadcast its alpha with neutral RGB to the resources. */
-void dds3EffectPartModelSetColor(dds3ModelHandle_t *work, u32 color) {
-    mdlSetColor(work, color);
+void dds3EffectPartModelSetColor(mdlObj_t *hData, u32 abgr)
+{
+    mdlSetColor(hData, abgr);
 }
 
-extern void **effParameterPresetBanks[];
+dds3EffectPCP_t *dds3EffectPCPCreate(dds3EffectPCPData_t *hPCPData)
+{
+    dds3EffectPCP_t *hPCP;
 
-extern u32 dds3EffectPCPDataGetKateg(const u32 *descriptor);
-
-extern u32 dds3EffectPCPDataGetParam(const u32 *descriptor);
-
-/* Create extended work from a kind/index descriptor. Kinds with a duplicate
- * callback consume the raw descriptor; other kinds use the fallback table. */
-EffParamWorkEx *dds3EffectPCPCreate(u32 *source) {
-    EffParamWorkEx *work;
-
-    work = sdfChipAllocDirect(sizeof(EffParamWorkEx));
-    work->kind = dds3EffectPCPDataGetKateg(source);
-    work->tableIndex = dds3EffectPCPDataGetParam(source);
-    if (EffectPCPFuncTable[work->kind].duplicate == NULL) {
-        work->payload = EffectPCPFuncTable[work->kind].create(effParameterPresetBanks[work->kind][work->tableIndex]);
+    hPCP = sdfChipAllocDirect(sizeof(dds3EffectPCP_t));
+    hPCP->kateg = dds3EffectPCPDataGetKateg(hPCPData);
+    hPCP->param = dds3EffectPCPDataGetParam(hPCPData);
+    if (EffectPCPFuncTable[hPCP->kateg].copy == NULL) {
+        hPCP->pHandle = EffectPCPFuncTable[hPCP->kateg].create(D_0031DDD0[hPCP->kateg][hPCP->param]);
     } else {
-        work->payload = EffectPCPFuncTable[work->kind].create(source);
+        hPCP->pHandle = EffectPCPFuncTable[hPCP->kateg].create(hPCPData);
     }
-    return work;
+    return hPCP;
 }
 
-/* Release the extended payload through its required kind callback, then its owner. */
-void dds3EffectPCPDelete(EffParamWorkEx *work) {
-    EffectPCPFuncTable[work->kind].release(work->payload);
-    sdfChipFreeDirect(work);
+void dds3EffectPCPDelete(dds3EffectPCP_t *hData)
+{
+    EffectPCPFuncTable[hData->kateg].destroy(hData->pHandle);
+    sdfChipFreeDirect(hData);
 }
 
-/* Invoke the extended work's required dispatch callback. */
-void dds3EffectPCPDraw(EffParamWorkEx *work) {
-    EffectPCPFuncTable[work->kind].dispatch(work->payload);
+void dds3EffectPCPDraw(dds3EffectPCP_t *hData)
+{
+    EffectPCPFuncTable[hData->kateg].draw(hData->pHandle);
 }
 
-/* Recreate table-backed payloads; duplicate payloads only for raw-source kinds. */
-EffParamWorkEx *dds3EffectPCPCopy(EffParamWorkEx *source) {
-    EffParamWorkEx *work;
+dds3EffectPCP_t *dds3EffectPCPCopy(dds3EffectPCP_t *hPCPSrc)
+{
+    dds3EffectPCP_t *hPCP;
 
-    work = sdfChipAllocDirect(sizeof(EffParamWorkEx));
-    work->kind = source->kind;
-    work->tableIndex = source->tableIndex;
-    if (EffectPCPFuncTable[work->kind].duplicate == NULL) {
-        work->payload = EffectPCPFuncTable[work->kind].create(effParameterPresetBanks[work->kind][work->tableIndex]);
+    hPCP = sdfChipAllocDirect(sizeof(dds3EffectPCP_t));
+    hPCP->kateg = hPCPSrc->kateg;
+    hPCP->param = hPCPSrc->param;
+    if (EffectPCPFuncTable[hPCP->kateg].copy == NULL) {
+        hPCP->pHandle = EffectPCPFuncTable[hPCP->kateg].create(D_0031DDD0[hPCP->kateg][hPCP->param]);
     } else {
-        work->payload = EffectPCPFuncTable[work->kind].duplicate(source->payload);
+        hPCP->pHandle = EffectPCPFuncTable[hPCP->kateg].copy(hPCPSrc->pHandle);
     }
-    return work;
+    return hPCP;
 }
 
-/* Optional extended-work dispatches; preserve the native column order,
- * including the reversed fourth/fifth column addresses. */
-void dds3EffectPCPSetPosition(EffParamWorkEx *work, void *source) {
-    if (EffectPCPFuncTable[work->kind].setPosition != NULL) {
-        EffectPCPFuncTable[work->kind].setPosition(work->payload, source);
-    }
-}
-
-void dds3EffectPCPSetScale(EffParamWorkEx *work, f32 scale) {
-    if (EffectPCPFuncTable[work->kind].setScale != NULL) {
-        EffectPCPFuncTable[work->kind].setScale(work->payload, scale);
+void dds3EffectPCPSetPosition(dds3EffectPCP_t *hData, void *pPos)
+{
+    if (EffectPCPFuncTable[hData->kateg].setPosition != NULL) {
+        EffectPCPFuncTable[hData->kateg].setPosition(hData->pHandle, pPos);
     }
 }
 
-void dds3EffectPCPSetRotateMatrix(EffParamWorkEx *work, void *matrix) {
-    if (EffectPCPFuncTable[work->kind].setRotationMatrix != NULL) {
-        EffectPCPFuncTable[work->kind].setRotationMatrix(work->payload, matrix);
+void dds3EffectPCPSetScale(dds3EffectPCP_t *hData, f32 scale)
+{
+    if (EffectPCPFuncTable[hData->kateg].setScale != NULL) {
+        EffectPCPFuncTable[hData->kateg].setScale(hData->pHandle, scale);
     }
 }
 
-void dds3EffectPCPSetDirection(EffParamWorkEx *work, void *matrix) {
-    if (EffectPCPFuncTable[work->kind].setDirection != NULL) {
-        EffectPCPFuncTable[work->kind].setDirection(work->payload, matrix);
+void dds3EffectPCPSetRotateMatrix(dds3EffectPCP_t *hData, void *pMatrix)
+{
+    if (EffectPCPFuncTable[hData->kateg].setRotateMatrix != NULL) {
+        EffectPCPFuncTable[hData->kateg].setRotateMatrix(hData->pHandle, pMatrix);
     }
 }
 
-void dds3EffectPCPSetColor(EffParamWorkEx *work, u32 value) {
-    if (EffectPCPFuncTable[work->kind].setColor != NULL) {
-        EffectPCPFuncTable[work->kind].setColor(work->payload, value);
+void dds3EffectPCPSetDirection(dds3EffectPCP_t *hData, void *pMatrix)
+{
+    if (EffectPCPFuncTable[hData->kateg].setDirection != NULL) {
+        EffectPCPFuncTable[hData->kateg].setDirection(hData->pHandle, pMatrix);
     }
 }
 
-void dds3EffectPCPSetArea(EffParamWorkEx *work, f32 sizeInput) {
-    if (EffectPCPFuncTable[work->kind].setArea != NULL) {
-        EffectPCPFuncTable[work->kind].setArea(work->payload, sizeInput);
+void dds3EffectPCPSetColor(dds3EffectPCP_t *hData, u32 abgr)
+{
+    if (EffectPCPFuncTable[hData->kateg].setColor != NULL) {
+        EffectPCPFuncTable[hData->kateg].setColor(hData->pHandle, abgr);
     }
 }
 
-/* Read the descriptor's first word as the extended-work kind. */
-u32 dds3EffectPCPDataGetKateg(const u32 *descriptor) {
-    return descriptor[0];
+void dds3EffectPCPSetArea(dds3EffectPCP_t *hData, f32 area)
+{
+    if (EffectPCPFuncTable[hData->kateg].setArea != NULL) {
+        EffectPCPFuncTable[hData->kateg].setArea(hData->pHandle, area);
+    }
 }
 
-/* Read the descriptor's second word as its fallback table index. */
-u32 dds3EffectPCPDataGetParam(const u32 *descriptor) {
-    return descriptor[1];
+u32 dds3EffectPCPDataGetKateg(dds3EffectPCPData_t *hPCPData)
+{
+    return hPCPData->kateg;
 }
 
-/* Records follow a 16-byte header and have a 16-byte stride. Block offsets
- * are signed and relative to the whole table, not to individual records.
- * Neither the index nor the resulting target address is validated here. */
-void *dds3EffectPCPDataGetData(const EffParamTable *table, s32 recordIndex) {
-    const EffParamTableRecord *record = &table->records[recordIndex];
-
-    return (u8 *)table + record->blockOffset;
+u32 dds3EffectPCPDataGetParam(dds3EffectPCPData_t *hPCPData)
+{
+    return hPCPData->param;
 }
 
-/* Return the record's first word without interpreting its meaning. */
-u32 dds3EffectPCPDataGetSize(const EffParamTable *table, s32 recordIndex) {
-    const u8 *bytes = (const u8 *)table;
+void *dds3EffectPCPDataGetData(dds3EffectPCPData_t *hPCPData, u32 number)
+{
+    dds3EffectPCPData_Part_t *part = &hPCPData->pcpData[number];
 
-    bytes += recordIndex * sizeof(EffParamTableRecord);
-    return *(const u32 *)(bytes + sizeof(table->header));
+    return (u8 *)hPCPData + part->offset;
 }
 
-/* Return the full record word whose low halfword selects a compact-work factory. */
-u32 dds3EffectPCPDataGetType(const EffParamTable *table, s32 recordIndex) {
-    const u8 *bytes = (const u8 *)table;
+u32 dds3EffectPCPDataGetSize(dds3EffectPCPData_t *hPCPData, u32 number)
+{
+    dds3EffectPCPData_Part_t *part = &hPCPData->pcpData[number];
 
-    bytes += recordIndex * sizeof(EffParamTableRecord);
-    return *(const u32 *)(bytes + sizeof(table->header) +
-                          sizeof(table->records[0].word0) +
-                          sizeof(table->records[0].blockOffset));
+    return part->size;
 }
 
-/* Create compact work from a serialized table record. */
-effPartHandle_t *dds3EffectPCPDataPartCreate(const EffParamTable *table, s32 recordIndex) {
-    u16 kind;
-    void *source;
+u32 dds3EffectPCPDataGetType(dds3EffectPCPData_t *hPCPData, u32 number)
+{
+    dds3EffectPCPData_Part_t *part = &hPCPData->pcpData[number];
 
-    kind = (u16)dds3EffectPCPDataGetType(table, recordIndex);
-    source = dds3EffectPCPDataGetData(table, recordIndex);
-    return dds3EffectPartCreate(kind, source);
+    return part->type;
+}
+
+effPartHandle_t *dds3EffectPCPDataPartCreate(dds3EffectPCPData_t *hPCPData, u32 number)
+{
+    u16 type;
+    void *pData;
+
+    type = (u16)dds3EffectPCPDataGetType(hPCPData, number);
+    pData = dds3EffectPCPDataGetData(hPCPData, number);
+    return dds3EffectPartCreate(type, pData);
 }
 
 INCLUDE_SDATA(const s32, "effect/effPart", D_003BB044);

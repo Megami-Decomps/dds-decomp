@@ -1805,8 +1805,8 @@
 0x0016A100	effBattleApplyUnitColorDirection	inferred	confidence=high; same 824-byte implementation as DDS1 effBattleApplyUnitColorDirection at 0x001624D0; applies/restores selected-group two-color and normalized-direction keyframes. Namer1 batch 27.
 0x0016A438	effBattleApplyUnitRgbKeyframe	inferred	Byte-identical DDS1 twin; applies and restores the command RGB transition at its two keyframes
 0x0016A578	dds3AdminSubmitEmptyModeRequest	inferred	Paired zero-argument wrapper submits dds3AdminiCallSequence(0, 0, 0, 0), with no higher-level effect inferred.
-0x0016A5A0	effParamWorkGetData	inferred	Returns the parameter-work data pointer from offset four.
-0x0016A5A8	effParamWorkGetId	inferred	Returns the parameter-work kind ID at offset zero.
+0x0016A5A0	dds3EffectPartGetHandle	inferred	SMT3HD name via SLUS_209.11 0x00175988, effect/effPart SMT3 rename; was effParamWorkGetData
+0x0016A5A8	dds3EffectPartGetType	inferred	SMT3HD name via SLUS_209.11 0x00175990, effect/effPart SMT3 rename; was effParamWorkGetId
 0x0016A5B0	dds3EffectPartCreate	inferred	SMT3HD name via SLUS_209.11 0x00175998, reloc-identical; was effParamWorkCreate
 0x0016A620	dds3EffectPartDelete	inferred	SMT3HD name via SLUS_209.11 0x00175A08, reloc-identical; was effDispatchParameterDataAndFreeWork
 0x0016A668	dds3EffectPartDraw	inferred	SMT3HD name via SLUS_209.11 0x00175A50, reloc-identical; was effParamWorkInvokeCallback
@@ -1821,7 +1821,7 @@
 0x0016A8B0	dds3EffectPartP2ABillboardCreate	inferred	SMT3HD name via SLUS_209.11 0x00175C98, shared-hash-in-run; was effParamCreateAnimatedBillboard
 0x0016A8D0	dds3EffectPartBillboardScale	inferred	SMT3HD name via SLUS_209.11 0x00175CB8, reloc-identical; was effParamDispatchFloat
 0x0016A8E8	dds3EffectPartModelInit	inferred	SMT3HD name via SLUS_209.11 0x00175CD0, reloc-identical; was effParamInitWork
-0x0016A990	effParamCreateViewerWork	inferred	readability/matching review (QP16)
+0x0016A990	dds3EffectPartModelCreate	inferred	SMT3HD name via SLUS_209.11 0x00175D78, effect/effPart SMT3 rename; was effParamCreateViewerWork
 0x0016AA18	dds3EffectPartModelDraw	inferred	SMT3HD name via SLUS_209.11 0x00175DD8, shared-hash-in-run; was effParamInitFromGlobal
 0x0016AA38	dds3EffectPartModelDelete	inferred	SMT3HD name via SLUS_209.11 0x00175DF8, shared-hash-in-run; was effParamReleaseModelWork
 0x0016AA50	dds3EffectPartModelCopy	inferred	SMT3HD name via SLUS_209.11 0x00175E10, shared-hash-in-run; was effParamAssembleWork

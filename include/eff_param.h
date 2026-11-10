@@ -64,7 +64,7 @@ u32 dds3EffectPCPDataGetType(const EffParamTable *table, s32 recordIndex);
 effPartHandle_t *dds3EffectPartCreate(u16 kind, void *source);
 effPartHandle_t *dds3EffectPCPDataPartCreate(const EffParamTable *table, s32 recordIndex);
 effPartHandle_t *dds3EffectPartCopy(effPartHandle_t *source);
-void *effParamWorkGetData(effPartHandle_t *work);
+void *dds3EffectPartGetHandle(effPartHandle_t *work);
 void dds3EffectPartDraw(effPartHandle_t *work);
 /* Optional source and matrix operations retain their generic pointer domains. */
 void dds3EffectPartSetPosition(effPartHandle_t *work, void *source);
