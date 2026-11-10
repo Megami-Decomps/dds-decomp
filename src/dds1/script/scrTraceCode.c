@@ -52,7 +52,7 @@ void PushFloat(scrProcessWork_s *pw, f32 value)
 void PushStr(scrProcessWork_s *pwork, u8 *data)
 {
     pwork->StackType[pwork->SP] = SCR_STACK_TYPE_STRING;
-    pwork->StackData[pwork->SP].i = (s32)data;
+    pwork->StackData[pwork->SP].i = EE_ADDR_S(data);
     pwork->SP++;
 }
 
@@ -657,7 +657,7 @@ u8 *scrGetStrPara(s32 n)
     if (stackType >= 0) {
         if (stackType >= SCR_STACK_TYPE_STRING) {
             if (stackType == SCR_STACK_TYPE_STRING) {
-                return (u8 *)pw->StackData[stackIndex].i;
+                return EE_ADDR_AS(u8 *, pw->StackData[stackIndex].i);
             }
         }
     }
