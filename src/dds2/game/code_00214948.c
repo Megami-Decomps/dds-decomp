@@ -6487,7 +6487,7 @@ u64 btlCreateLinkedActorTransformTasks(u64 prerequisiteHandle) {
     return load->handle;
 }
 
-extern f32 *D_0037F770[];
+extern f32 *dds3LightParam[];
 
 void btlRestoreLinkedActorSceneColor(void) {
     BattleEffectPayload *effect = ((BtlState *)btlGetRuntime())->effect;
@@ -6497,7 +6497,7 @@ void btlRestoreLinkedActorSceneColor(void) {
     if (effect != NULL) {
         actor = effect->action.actor;
         if (actor != NULL && (actor->status.flags & 2)) {
-            SDF_VU0_LOADVECTOR(D_0037F770[0]);
+            SDF_VU0_LOADVECTOR(dds3LightParam[0]);
             EE_MMI_RGBA_PACK(packed[0]);
             evtSetUnitColorRGB(actor->ext, 0, packed[0]);
         }

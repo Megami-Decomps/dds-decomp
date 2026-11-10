@@ -630,13 +630,13 @@ extern EffTrackSet *effDuplicateResourceRefs(const EffTrackSet *);
 
 
 
-extern u128 *D_0037F770[];
+extern u128 *dds3LightParam[];
 
 extern u128 D_00458460[];
 
 extern u128 D_004584A0[];
 
-extern u128 kwlnDefaultColorVector[];
+extern u128 dds3AmbientColor[];
 
 extern s8 D_00437E94;
 
@@ -12729,12 +12729,12 @@ s32 effComputeLightDirectionVU(dds3ModelHandle_t *model, sdf3DLightParallelPacke
 
 void effResetDefaultColorTables(void) {
     u128 *dst = D_00458460;
-    u128 *src = D_0037F770[0];
+    u128 *src = dds3LightParam[0];
     SDF_VU0_COPYVECTOR(dst, src);
     dst++;
     src++;
     SDF_VU0_COPYVECTOR(dst, src);
-    SDF_VU0_COPYVECTOR(D_004584A0, kwlnDefaultColorVector);
+    SDF_VU0_COPYVECTOR(D_004584A0, dds3AmbientColor);
     D_00437E94 = 0;
 }
 

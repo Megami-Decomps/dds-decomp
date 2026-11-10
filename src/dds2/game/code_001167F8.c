@@ -10,8 +10,8 @@
 #include "pcp_vu0.h"
 #include "ee_mmi.h"
 
-extern f32 *D_0037F770[];
-extern u8 kwlnDefaultColorVector[];
+extern f32 *dds3LightParam[];
+extern u8 dds3AmbientColor[];
 
 struct evtUnitHandle_t;
 
@@ -51,11 +51,11 @@ void dds3LinkSceneLight(dds3Basic_t *lightNode, s32 blendFrames) {
     } else {
         lightData->flags |= EFF_LIGHT_FLAG_BLEND_COLOR_VECTORS;
         lightData->blendFrames = blendFrames;
-        SDF_VU0_LOADVECTOR(D_0037F770[0]);
+        SDF_VU0_LOADVECTOR(dds3LightParam[0]);
         EE_MMI_RGBA_PACK_F128(packed1);
         color1[0] = packed1;
         lightData->packedColorA = color1[0];
-        SDF_VU0_LOADVECTOR(kwlnDefaultColorVector);
+        SDF_VU0_LOADVECTOR(dds3AmbientColor);
         EE_MMI_RGBA_PACK(packed2);
         color2[0] = packed2;
         lightData->packedColorB = color2[0];

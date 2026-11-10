@@ -4501,9 +4501,9 @@ BtlRuntimeTask *btlCreateNoOpTask(void) {
     return task;
 }
 
-extern f32 *D_00324770[];
+extern f32 *dds3LightParam[];
 
-extern u8 kwlnDefaultColorVector[];
+extern u8 dds3AmbientColor[];
 
 u32 btlUnitBaseLightTask(BtlUnitBaseLightArgs *work) {
     BtlUnit *unit = work->unit;
@@ -4521,9 +4521,9 @@ u32 btlUnitBaseLightTask(BtlUnitBaseLightArgs *work) {
                 SDF_VU0_COPYVECTOR(unit->colorEnd, info->secondColor);
                 SDF_VU0_COPYVECTOR(unit->lightDirection, info->direction);
             } else {
-                f32 *defaultLight = D_00324770[0];
+                f32 *defaultLight = dds3LightParam[0];
                 SDF_VU0_COPYVECTOR(unit->colorStart, defaultLight);
-                SDF_VU0_COPYVECTOR(unit->colorEnd, kwlnDefaultColorVector);
+                SDF_VU0_COPYVECTOR(unit->colorEnd, dds3AmbientColor);
                 SDF_VU0_COPYVECTOR(unit->lightDirection, defaultLight + 4);
                 btlBossDebugPrintf("btl:base light error[%p]\n", unit);
             }

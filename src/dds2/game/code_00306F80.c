@@ -633,8 +633,8 @@ extern DmaPacketHeader D_0045C3C0[2];
 extern sdfDrawTag_t D_0045C400[2];
 extern sdf3DLightParallelPacket_t D_0045C440[2];
 extern ConsMatrixPacket D_0045C600[2];
-extern sdf3DLight_t *D_0037F770[3];
-extern f32 kwlnDefaultColorVector[4];
+extern sdf3DLight_t *dds3LightParam[3];
+extern f32 dds3AmbientColor[4];
 extern Matrix4 sdfViewMatrix;
 extern f32 aViewTarget[4];
 extern f32 aViewEye[4];
@@ -654,7 +654,7 @@ void itfInitDoubleBufferedScenePackets(void) {
         sdf3DMakeViewportPacket((struct ConsMatrixPacket *)&D_0045C600[i], &dds3ScreenParam, &sdfViewMatrix);
         sdfDrawTagLink(&D_0045C380[i], (u32)&D_0045C600[i]);
         sdfDrawTagInit(&D_0045C400[i]);
-        sdf3DMakeLightParallelPacket(&D_0045C440[i], D_0037F770, kwlnDefaultColorVector);
+        sdf3DMakeLightParallelPacket(&D_0045C440[i], dds3LightParam, dds3AmbientColor);
         sdfDrawTagLink(&D_0045C400[i], (u32)&D_0045C440[i]);
     }
 }

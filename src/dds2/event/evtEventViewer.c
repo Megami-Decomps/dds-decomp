@@ -668,9 +668,9 @@ void evtViewerApplyParameterKeyTracks(evtViewerInfo_t *viewer) {
 }
 
 
-extern sdf3DFogParam_t kwlnDrawVector;
-extern u128 *D_0037F770[];
-extern u128 kwlnDefaultColorVector[];
+extern sdf3DFogParam_t dds3FogParamMain;
+extern u128 *dds3LightParam[];
+extern u128 dds3AmbientColor[];
 extern f32 sdfFaceDivSoften;
 extern f32 sdfFaceDivBias;
 extern dds3Effect_PartialMultiBlurParam_t *effEventGetBlurTemplateSetupParams(void);
@@ -1052,9 +1052,9 @@ extern void mnuDrawCampScaledTexture(sdfTexHandle_t *texture, CampDisplayDefault
 
 
 /* Timeline payloads store fogFar before fogNear. */
-extern sdf3DFogParam_t kwlnDrawVector;
-extern u128 *D_0037F770[];
-extern u128 kwlnDefaultColorVector[];
+extern sdf3DFogParam_t dds3FogParamMain;
+extern u128 *dds3LightParam[];
+extern u128 dds3AmbientColor[];
 extern f32 sdfFaceDivSoften;
 extern f32 sdfFaceDivBias;
 extern dds3Effect_PartialMultiBlurParam_t *effEventGetBlurTemplateSetupParams(void);
@@ -1439,7 +1439,7 @@ void evtViewerUpdateTimelineGroupState(EvtRuntimeGroup *group, EvtRuntimeChild *
         if (from != NULL || to != NULL) {
             evtHokanSceneFog(enable, ratio, from, to, &D_00453990);
             dds3SetFogPara(0, D_00453990.vec[1], D_00453990.vec[0], D_00453990.vec[2], D_00453990.vec[3]);
-            kwlnDrawVector.color = D_00453990.color;
+            dds3FogParamMain.color = D_00453990.color;
         }
         break;
     }
@@ -3703,7 +3703,7 @@ s32 evtEventViewerHandleKeyEditCommand(s32 command, s32 unused, evtViewerInfo_t 
                     case 11: {
                         EvtViewerDrawPayload *parameters = key->payload;
                         dds3SetFogPara(0, parameters->parameters.vec[1], parameters->parameters.vec[0], parameters->parameters.vec[2], parameters->parameters.vec[3]);
-                        kwlnDrawVector.color = parameters->parameters.color;
+                        dds3FogParamMain.color = parameters->parameters.color;
                         viewer->controlState = dds3StartProcess(D_004373A0, 0x2AF9, 1, 1, mdlDebugPrintEffectScale2, NULL, 1);
                         evtViewerPushCommandHistory(11, 0, 0, viewer);
                         break;
@@ -4461,10 +4461,10 @@ s32 evtEventViewerCopyEffectSetupPayload(s32 unused0, s32 unused1, evtViewerInfo
         switch (viewer->commandCategory) {
         case 13:
             destination = entry->payload;
-            source = D_0037F770[0];
+            source = dds3LightParam[0];
             SDF_VU0_COPYVECTOR(destination, source);
             SDF_VU0_COPYVECTOR(destination + 1, source + 1);
-            SDF_VU0_COPYVECTOR(destination + 2, kwlnDefaultColorVector);
+            SDF_VU0_COPYVECTOR(destination + 2, dds3AmbientColor);
             break;
         case 14:
             entry->p08.f = sdfFaceDivSoften;
@@ -4474,11 +4474,11 @@ s32 evtEventViewerCopyEffectSetupPayload(s32 unused0, s32 unused1, evtViewerInfo
         break;
     case 11:
         draw = entry->payload;
-        draw->parameters.vec[0] = kwlnDrawVector.fogMin;
-        draw->parameters.color = kwlnDrawVector.color;
-        draw->parameters.vec[1] = kwlnDrawVector.fogMax;
-        draw->parameters.vec[2] = kwlnDrawVector.fogNear;
-        draw->parameters.vec[3] = kwlnDrawVector.fogFar;
+        draw->parameters.vec[0] = dds3FogParamMain.fogMin;
+        draw->parameters.color = dds3FogParamMain.color;
+        draw->parameters.vec[1] = dds3FogParamMain.fogMax;
+        draw->parameters.vec[2] = dds3FogParamMain.fogNear;
+        draw->parameters.vec[3] = dds3FogParamMain.fogFar;
         break;
     case 13:
         memcpy(entry->payload, effGetLoadDescA(), 0x28);

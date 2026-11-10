@@ -2511,7 +2511,7 @@ extern s32 D_003BAED4;
 extern u8 fldAutoMapSeqTestFlag(u32 mask);
 extern void fldAutoMapSeqSetFlag(u32);
 extern void evtDisableMoonDraw(void);
-extern sdf3DFogParam_t kwlnDrawVector;
+extern sdf3DFogParam_t dds3FogParamMain;
 extern SdfMathVector4 D_003A05D8[];
 
 /* Enter the field scene once: hide the world object, load the scene's two
@@ -2571,11 +2571,11 @@ void func_00145B18(void) {
     kwlnOverlayFrustumParameters.color = 0x108010;
     D_00324980.camera.offsetX = 2048.0f;
     D_00324980.camera.offsetY = 2048.0f;
-    kwlnDrawVector.fogMax = 255.0f;
-    kwlnDrawVector.fogNear = 1000.0f;
-    kwlnDrawVector.fogMin = 255.0f;
-    kwlnDrawVector.fogFar = 20000.0f;
-    kwlnDrawVector.color = 0x108010;
+    dds3FogParamMain.fogMax = 255.0f;
+    dds3FogParamMain.fogNear = 1000.0f;
+    dds3FogParamMain.fogMin = 255.0f;
+    dds3FogParamMain.fogFar = 20000.0f;
+    dds3FogParamMain.color = 0x108010;
 }
 extern void frSetFontDrawOT(u32);
 

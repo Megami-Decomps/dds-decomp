@@ -109,7 +109,7 @@ typedef struct BattleEffectParams {
 
 
 
-extern f32 *D_0037F770[];
+extern f32 *dds3LightParam[];
 
 extern BtlRuntimeTask *btlCreateEffectTaskWithSourceParams(const void *sourceParams, u32 value);
 
@@ -259,7 +259,7 @@ s32 fldSceneStateStartTileEffect(BtlState *scene) {
             params.scale[0] = 0.19607843f;
             params.scale[1] = 0.19607843f;
             params.scale[2] = 0.19607843f;
-            origin = D_0037F770[0];
+            origin = dds3LightParam[0];
             params.position[0] = origin[4];
             params.position[1] = origin[5];
             params.position[2] = origin[6];

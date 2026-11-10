@@ -995,7 +995,7 @@ extern s8 D_0043EF50[26][26][2];
 extern f32 D_0043F4A0[26][26][4];
 extern f32 D_00441EE0[26][26][4];
 extern f32 aViewTarget[4], aViewEye[4];
-extern sdf3DLight_t *D_0037F770[3];
+extern sdf3DLight_t *dds3LightParam[3];
 
 extern f32 D_0038BB10[16];
 extern f32 D_0037F6B0[16];
@@ -1154,9 +1154,9 @@ void fldDrawEffectObjectShadow(dds3Basic_t *object) {
                 D_0043E5E0[2] = transition->vec10[2];
                 length = 200.0f;
             } else {
-                D_0043E5E0[0] = D_0037F770[0]->v.x;
+                D_0043E5E0[0] = dds3LightParam[0]->v.x;
                 D_0043E5E0[1] = 2.0f;
-                D_0043E5E0[2] = D_0037F770[0]->v.z;
+                D_0043E5E0[2] = dds3LightParam[0]->v.z;
             }
         }
     } else {

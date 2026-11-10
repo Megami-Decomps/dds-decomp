@@ -12129,20 +12129,20 @@ s32 effComputeLightDirectionVU(dds3ModelHandle_t *vector, sdf3DLightParallelPack
     return result;
 }
 
-extern u128 *D_00324770[];
+extern u128 *dds3LightParam[];
 
 extern u128 D_003DCB90[];
 
-extern u128 kwlnDefaultColorVector[];
+extern u128 dds3AmbientColor[];
 
 void effResetDefaultColorTables(void) {
     u128 *dst = D_003DCB90;
-    u128 *src = D_00324770[0];
+    u128 *src = dds3LightParam[0];
     SDF_VU0_COPYVECTOR(dst, src);
     dst++;
     src++;
     SDF_VU0_COPYVECTOR(dst, src);
-    SDF_VU0_COPYVECTOR(D_003DCBD0, kwlnDefaultColorVector);
+    SDF_VU0_COPYVECTOR(D_003DCBD0, dds3AmbientColor);
     D_003BC9AC = 0;
 }
 

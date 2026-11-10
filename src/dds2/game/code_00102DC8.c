@@ -1185,8 +1185,8 @@ typedef char dds3FrameDrawBank_size_check[sizeof(dds3FrameDrawBank_t) == 0x1F40 
 extern dds3FrameDrawBank_t dds3DrawEnv[2];
 extern u32 D_00435CBC;
 extern sdfGrFrameSet_t sdfGrFrameSet;
-extern sdf3DLight_t *D_0037F770[3];
-extern f32 kwlnDefaultColorVector[4];
+extern sdf3DLight_t *dds3LightParam[3];
+extern f32 dds3AmbientColor[4];
 extern Matrix4 sdfViewMatrix;
 extern Matrix4 D_00384790;
 extern sdf3DLight_t *kwlnOverlayLightSources[3];
@@ -1215,7 +1215,7 @@ void dds3InitializeFrameDrawPackets(s32 bufferIndex) {
     sdf3DMakeViewportPacket(&dds3DrawEnv[bufferIndex].sceneMatrix,
                              &dds3ScreenParam, &sdfViewMatrix);
     sdfDrawTagLink(&dds3DrawEnv[bufferIndex].sceneList, (u32)&dds3DrawEnv[bufferIndex].sceneMatrix);
-    sdf3DMakeLightParallelPacket(&dds3DrawEnv[bufferIndex].scenePacketStorage, D_0037F770, kwlnDefaultColorVector);
+    sdf3DMakeLightParallelPacket(&dds3DrawEnv[bufferIndex].scenePacketStorage, dds3LightParam, dds3AmbientColor);
     sdfDrawTagLink(&dds3DrawEnv[bufferIndex].sceneList, (u32)&dds3DrawEnv[bufferIndex].scenePacketStorage);
 
     sdfDrawTagInit(&dds3DrawEnv[bufferIndex].thirdList);

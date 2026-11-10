@@ -266,13 +266,13 @@ extern char D_00418C58[];
 
 extern void p2sdSetPcmBuffer(const void *, s32);
 
-extern f32 *D_0037F770[];
+extern f32 *dds3LightParam[];
 
-extern u8 kwlnDefaultColorVector[];
+extern u8 dds3AmbientColor[];
 
 extern void fldSkyBattle(void);
 
-extern f32 *D_0037F770[];
+extern f32 *dds3LightParam[];
 
 struct FileQueue;
 
@@ -9746,13 +9746,13 @@ void btlInitializeSceneLightingAndTint(void) {
     u8 *context = (u8 *)btlGetRuntime();
     fldSkyBattle();
     btlInitTintTransitionResource(0x80, 0);
-    SDF_VU0_LOADVECTOR((u8 *)D_0037F770[0] + 0x10);
+    SDF_VU0_LOADVECTOR((u8 *)dds3LightParam[0] + 0x10);
     SDF_VU0_STOREVECTOR_NOMEM(context + 0x10);
     SDF_VU0_STOREVECTOR_NOMEM(context + 0x40);
-    SDF_VU0_LOADVECTOR(D_0037F770[0]);
+    SDF_VU0_LOADVECTOR(dds3LightParam[0]);
     SDF_VU0_STOREVECTOR_NOMEM(context + 0x20);
     SDF_VU0_STOREVECTOR_NOMEM(context + 0x50);
-    SDF_VU0_LOADVECTOR(kwlnDefaultColorVector);
+    SDF_VU0_LOADVECTOR(dds3AmbientColor);
     SDF_VU0_STOREVECTOR_NOMEM(context + 0x30);
     SDF_VU0_STOREVECTOR_NOMEM(context + 0x60);
     ((BtlState *)context)->tint71C = 0x807E5C5E;
@@ -9777,8 +9777,8 @@ void btlBuildActionLightParameters(s32 skillIndex, BtlSceneLightParams *light) {
             light->secondaryColor[1] = action->lightColor[1];
             light->secondaryColor[2] = action->lightColor[2];
         } else {
-            vector = D_0037F770[0];
-            defaultColor = (f32 *)kwlnDefaultColorVector;
+            vector = dds3LightParam[0];
+            defaultColor = (f32 *)dds3AmbientColor;
             light->color[0] = vector[0];
             light->color[1] = vector[1];
             light->color[2] = vector[2];
@@ -9795,9 +9795,9 @@ void btlBuildActionLightParameters(s32 skillIndex, BtlSceneLightParams *light) {
         light->secondaryColor[1] = light->color[1];
         light->secondaryColor[2] = light->color[2];
     }
-    light->position[0] = D_0037F770[0][4];
-    light->position[1] = D_0037F770[0][5];
-    light->position[2] = D_0037F770[0][6];
+    light->position[0] = dds3LightParam[0][4];
+    light->position[1] = dds3LightParam[0][5];
+    light->position[2] = dds3LightParam[0][6];
 }
 
 s32 btlGetActionDefaultOrOverride(s32 skillIndex) {
@@ -9922,7 +9922,7 @@ void btlClearTintAndEnableCamera(void) {
 
 void btlUpdateTintAndWorldLight(void) {
     u8 *context = (u8 *)btlGetRuntime();
-    f32 *position = D_0037F770[0];
+    f32 *position = dds3LightParam[0];
 
     if (position[0] == 0.0f && position[1] == 0.0f &&
         position[2] == 0.0f) {
@@ -10190,9 +10190,9 @@ u32 btlApplySceneLightingTransition(SceneLightTransitionArgs *args) {
         }
     }
     transitionCount = D_00436AD4;
-    D_0037F770[0][4] = args->direction[0];
-    D_0037F770[0][5] = args->direction[1];
-    D_0037F770[0][6] = args->direction[2];
+    dds3LightParam[0][4] = args->direction[0];
+    dds3LightParam[0][5] = args->direction[1];
+    dds3LightParam[0][6] = args->direction[2];
     D_00436AD4 = transitionCount + 1;
     return 1;
 }
@@ -10234,8 +10234,8 @@ s32 btlRestoreSceneTransformLighting(SceneLightRestoreArgs *args) {
         if (work->battleFlags & 0x20000000) {
             return 1;
         }
-        if (D_0037F770[0][0] == 0.0f && D_0037F770[0][1] == 0.0f && D_0037F770[0][2] == 0.0f) {
-            VEC3_SPLAT(D_0037F770[0], 0.0078125f);
+        if (dds3LightParam[0][0] == 0.0f && dds3LightParam[0][1] == 0.0f && dds3LightParam[0][2] == 0.0f) {
+            VEC3_SPLAT(dds3LightParam[0], 0.0078125f);
         }
         listener = work->sceneLightNode;
         D_00452F50.transform.position[0] = work->baselineLightColor[0];
@@ -10276,9 +10276,9 @@ s32 btlRestoreSceneTransformLighting(SceneLightRestoreArgs *args) {
                 evtSetUnitLightDir(unit->ext, args->value);
             }
         }
-        D_0037F770[0][4] = work->baselineLightDirection[0];
-        D_0037F770[0][5] = work->baselineLightDirection[1];
-        D_0037F770[0][6] = work->baselineLightDirection[2];
+        dds3LightParam[0][4] = work->baselineLightDirection[0];
+        dds3LightParam[0][5] = work->baselineLightDirection[1];
+        dds3LightParam[0][6] = work->baselineLightDirection[2];
     }
     return 1;
 }

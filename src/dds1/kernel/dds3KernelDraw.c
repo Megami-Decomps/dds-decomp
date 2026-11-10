@@ -23,7 +23,7 @@ extern s16 blurscalebase;
 extern s16 bluralphatarget;
 extern s16 blurscaletarget;
 
-extern dds3LightSourceTable_t D_00324770;
+extern dds3LightSourceTable_t dds3LightParam;
 
 /* Pending, saved, and frame blocks share the effect owner's parameter type.
  * dds3DrawFlag tracks each family's running fades and transitions. */
@@ -38,8 +38,8 @@ extern dds3Effect_DistortionBlurParam_t distblurtarget;
 extern dds3Effect_RippleBlurParam_t ripblurtarget __attribute__((aligned(8)));
 extern dds3Effect_DistortionBlurParam_t dds3DistBlurBuf;
 extern dds3Effect_RippleBlurParam_t dds3RipBlurBuf __attribute__((aligned(8)));
-extern u128 kwlnDefaultColorVector;
-extern sdf3DFogParam_t kwlnDrawVector;
+extern u128 dds3AmbientColor;
+extern sdf3DFogParam_t dds3FogParamMain;
 extern u16 filter2abase;
 extern u16 filter2now;
 extern u16 filter2atarget;
@@ -84,18 +84,18 @@ extern void Normalize(void);
 
 /* Copy one complete vector into the default draw color state; retain no source pointer. */
 void dds3SetAmbient(const u128 *source) {
-    SDF_VU0_COPYVECTOR(&kwlnDefaultColorVector, source);
+    SDF_VU0_COPYVECTOR(&dds3AmbientColor, source);
 }
 
 
 /* Copy the five-word draw vector parameter body without interpreting or retaining it. */
 void dds3SetFog(const sdf3DFogParam_t *source) {
-    memcpy(&kwlnDrawVector, source, DDS3_DRAW_VECTOR_PARAM_BYTES);
+    memcpy(&dds3FogParamMain, source, DDS3_DRAW_VECTOR_PARAM_BYTES);
 }
 
 /* Retain the caller-owned light-data pointer in its draw slot. */
 void dds3SetLight(f32 (*lightSource)[4], dds3LightSourceSlot_t slot) {
-    D_00324770[slot] = lightSource;
+    dds3LightParam[slot] = lightSource;
 }
 
 /* Initialize bounds covering the default 512-by-448 draw viewport. */

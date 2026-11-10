@@ -2670,7 +2670,7 @@ extern char D_003BBCD0[]; /* "%f" */
 
 extern char D_003BBCD8[]; /* "fog=" */
 
-extern sdf3DFogParam_t kwlnDrawVector;
+extern sdf3DFogParam_t dds3FogParamMain;
 
 /* Read the viewer's config text file: bg-color=, eye-position=, target-position=, fovy=, fog= lines. */
 INCLUDE_RODATA(const s32, "model/mdlEffect", D_003ABEB0);
@@ -2733,11 +2733,11 @@ void mdlLoadViewerPresentationConfig(void) {
             }
         } else if (memcmp(lineStart, D_003BBCD8, 4) == 0) {
             if (sscanf(lineStart + 4, "%d,%f,%d,%f,%x", &fogNear, &fogValue, &fogFar, &fogFarB, &color) == 5) {
-                kwlnDrawVector.fogMax = fogNear;
-                kwlnDrawVector.fogNear = fogValue;
-                kwlnDrawVector.fogMin = fogFar;
-                kwlnDrawVector.fogFar = fogFarB;
-                kwlnDrawVector.color = color;
+                dds3FogParamMain.fogMax = fogNear;
+                dds3FogParamMain.fogNear = fogValue;
+                dds3FogParamMain.fogMin = fogFar;
+                dds3FogParamMain.fogFar = fogFarB;
+                dds3FogParamMain.color = color;
             }
         }
         lineOffset = nextLineOffset;
@@ -2755,9 +2755,9 @@ void mdlSaveViewerPresentationConfig(void) {
     size = sprintf(buffer, D_003ABF18, D_003BA8EC,
                         D_003D7B20.x, D_003D7B20.y, D_003D7B20.z,
                         D_003D7B30.x, D_003D7B30.y, D_003D7B30.z,
-                        dds3ScreenParam.camera.fov, (s32)kwlnDrawVector.fogMax,
-                        kwlnDrawVector.fogNear, (s32)kwlnDrawVector.fogMin,
-                        kwlnDrawVector.fogFar, kwlnDrawVector.color);
+                        dds3ScreenParam.camera.fov, (s32)dds3FogParamMain.fogMax,
+                        dds3FogParamMain.fogNear, (s32)dds3FogParamMain.fogMin,
+                        dds3FogParamMain.fogFar, dds3FogParamMain.color);
     request = fileSave(D_00367AF8, buffer, size);
     fileSync(request);
     fileHandleFree((struct FileRequest *)request);
@@ -2843,9 +2843,9 @@ extern u16 D_00367D10[16];
 
 extern s8 D_00324520[16];
 
-extern sdf3DLight_t *D_00324770[3];
+extern sdf3DLight_t *dds3LightParam[3];
 
-extern f32 kwlnDefaultColorVector[4];
+extern f32 dds3AmbientColor[4];
 
 extern char D_003BBCF8[]; /* ">" in .sdata */
 
@@ -2927,10 +2927,10 @@ s32 mdlDebugPrintEffectScale(dds3ProcessID_t *task) {
         state->pad = (MdlPadState *)D_00324520;
     }
     if (state->lights == NULL) {
-        state->lights = D_00324770;
+        state->lights = dds3LightParam;
     }
     if (state->ambient == NULL) {
-        state->ambient = kwlnDefaultColorVector;
+        state->ambient = dds3AmbientColor;
     }
     state->packetList = dds3FontReqAllocDrawTag();
     if (state->editing == 0) {
@@ -3200,7 +3200,7 @@ s32 mdlDebugPrintEffectScale2(dds3ProcessID_t *task) {
         } else if (mdlDebugScaleWork.selection < 4) {
             mdlGetDebugEntry(mdlDebugScaleWork.selection);
         } else {
-            dds3DebugColorEditEx(&kwlnDrawVector.color, mdlDebugScaleWork.selection - 4, (s8 *)mdlDebugScaleWork.pad);
+            dds3DebugColorEditEx(&dds3FogParamMain.color, mdlDebugScaleWork.selection - 4, (s8 *)mdlDebugScaleWork.pad);
         }
     }
     sdfDrawTagLink(mdlDebugScaleWork.packetList,
@@ -3227,7 +3227,7 @@ s32 mdlDebugPrintEffectScale2(dds3ProcessID_t *task) {
                                                           (mdlDebugScaleWork.unk04 == 1 && mdlDebugScaleWork.selection == i) ? 6 : 0,
                                                           D_00367D58[i].format, value));
     }
-    mdlDebugTextBox(0x8680, 0x7C60, kwlnDrawVector.color, mdlDebugScaleWork.selection - 4);
+    mdlDebugTextBox(0x8680, 0x7C60, dds3FogParamMain.color, mdlDebugScaleWork.selection - 4);
     D_00325708.regFunc(&D_00325708, mdlDebugScaleWork.packetList);
     return 0;
 }

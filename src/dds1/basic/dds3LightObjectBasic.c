@@ -9,8 +9,8 @@
 
 void dds3FreePoseSet(dds3Basic_t *object);
 void dds3ObjectBaseFreeControlWorkData(dds3ObjectBaseControlWorkData_t *object);
-extern dds3LightSourceTable_t D_00324770;
-extern f32 kwlnDefaultColorVector[4];
+extern dds3LightSourceTable_t dds3LightParam;
+extern f32 dds3AmbientColor[4];
 
 
 /* Releases the light's buffer and resource before freeing the object itself. */
@@ -77,8 +77,8 @@ s32 lightmainprocedure(dds3Basic_t *lightObject) {
             SDF_VU0_LOADVECTOR(data->sourceVectors.named.color);
             SDF_VU0_LOADVECTOR_B(data->ambientColor);
         }
-        SDF_VU0_STOREVECTOR(D_00324770[0]);
-        SDF_VU0_STOREVECTOR_B(kwlnDefaultColorVector);
+        SDF_VU0_STOREVECTOR(dds3LightParam[0]);
+        SDF_VU0_STOREVECTOR_B(dds3AmbientColor);
     }
     sources[0] = (sdf3DLight_t *)data->sourceVectors.vectors;
     sdf3DMakeLightParallelPacket(data->buffer, sources, data->ambientColor);

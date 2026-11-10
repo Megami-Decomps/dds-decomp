@@ -12,7 +12,7 @@
 #include "eff_event_work_api.h"
 #include "eff.h"
 
-extern dds3LightSourceTable_t D_0037F770;
+extern dds3LightSourceTable_t dds3LightParam;
 
 extern u32 dds3DrawFlag;
 
@@ -107,9 +107,9 @@ extern u16 blur2atarget;
 extern u16 blur2max;
 
 
-extern u128 kwlnDefaultColorVector;
+extern u128 dds3AmbientColor;
 
-extern sdf3DFogParam_t kwlnDrawVector;
+extern sdf3DFogParam_t dds3FogParamMain;
 
 #define DDS3_DRAW_VECTOR_PARAM_BYTES 0x14
 #define DDS3_DRAW_ALPHA_CHANNEL 3
@@ -123,18 +123,18 @@ extern sdf3DFogParam_t kwlnDrawVector;
 
 /* Copy one complete vector into the default draw color state; retain no source pointer. */
 void dds3SetAmbient(const u128 *source) {
-    SDF_VU0_COPYVECTOR(&kwlnDefaultColorVector, source);
+    SDF_VU0_COPYVECTOR(&dds3AmbientColor, source);
 }
 
 
 /* Copy the five-word draw vector parameter body without interpreting or retaining it. */
 void dds3SetFog(const sdf3DFogParam_t *source) {
-    memcpy(&kwlnDrawVector, source, DDS3_DRAW_VECTOR_PARAM_BYTES);
+    memcpy(&dds3FogParamMain, source, DDS3_DRAW_VECTOR_PARAM_BYTES);
 }
 
 /* Retain the caller-owned light-data pointer in its draw slot. */
 void dds3SetLight(f32 (*lightSource)[4], dds3LightSourceSlot_t slot) {
-    D_0037F770[slot] = lightSource;
+    dds3LightParam[slot] = lightSource;
 }
 
 /* Initialize bounds covering the default 512-by-448 draw viewport. */

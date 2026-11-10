@@ -44,8 +44,8 @@ struct EffNodeDescriptor;
 #include "eff_quaternion_nlerp.h"
 
 
-extern f32 *D_0037F770[];
-extern u8 kwlnDefaultColorVector[];
+extern f32 *dds3LightParam[];
+extern u8 dds3AmbientColor[];
 
 extern void evtGetUnitDirVector(evtUnitHandle_t *unit);
 
@@ -281,7 +281,7 @@ void evtAdvanceUnitVisualTransitions(evtUnitHandle_t *unit) {
         } else if (ownVector) {
             SDF_VU0_LOADVECTOR_B(target->direction);
         } else {
-            SDF_VU0_LOADVECTOR_B(D_0037F770[0] + 4);
+            SDF_VU0_LOADVECTOR_B(dds3LightParam[0] + 4);
         }
         dds3RotationArc();
         SDF_VU0_COPYVECTOR_A_TO_B();
@@ -306,7 +306,7 @@ void evtAdvanceUnitVisualTransitions(evtUnitHandle_t *unit) {
         if (ownVector) {
             SDF_VU0_LOADVECTOR(target->direction);
         } else {
-            SDF_VU0_LOADVECTOR(D_0037F770[0] + 4);
+            SDF_VU0_LOADVECTOR(dds3LightParam[0] + 4);
         }
         SDF_VU0_STOREVECTOR_NOMEM(unit->vec40);
     }
@@ -369,7 +369,7 @@ void evtAdvanceUnitVisualTransitions(evtUnitHandle_t *unit) {
         } else if (ownVector) {
             SDF_VU0_LOADVECTOR(target);
         } else {
-            SDF_VU0_LOADVECTOR(D_0037F770[0]);
+            SDF_VU0_LOADVECTOR(dds3LightParam[0]);
         }
         VU0_SCALE_VF(vf10, factor);
         SDF_VU0_ADDVECTOR();
@@ -388,7 +388,7 @@ void evtAdvanceUnitVisualTransitions(evtUnitHandle_t *unit) {
         } else if (ownVector) {
             SDF_VU0_LOADVECTOR(target->secondColor);
         } else {
-            SDF_VU0_LOADVECTOR(kwlnDefaultColorVector);
+            SDF_VU0_LOADVECTOR(dds3AmbientColor);
         }
         VU0_SCALE_VF(vf10, factor);
         SDF_VU0_ADDVECTOR();
@@ -412,7 +412,7 @@ void evtAdvanceUnitVisualTransitions(evtUnitHandle_t *unit) {
             if (ownVector) {
                 SDF_VU0_LOADVECTOR(target);
             } else {
-                SDF_VU0_LOADVECTOR(D_0037F770[0]);
+                SDF_VU0_LOADVECTOR(dds3LightParam[0]);
             }
             EE_MMI_RGBA_PACK_UNIT(firstPacked, 128.0f);
             defaultFirst[0] = firstPacked;
@@ -422,7 +422,7 @@ void evtAdvanceUnitVisualTransitions(evtUnitHandle_t *unit) {
             if (ownVector) {
                 SDF_VU0_LOADVECTOR(target->secondColor);
             } else {
-                SDF_VU0_LOADVECTOR(kwlnDefaultColorVector);
+                SDF_VU0_LOADVECTOR(dds3AmbientColor);
             }
             EE_MMI_RGBA_PACK_UNIT(secondPacked, 128.0f);
             defaultSecond[0] = secondPacked;
@@ -539,7 +539,7 @@ void GetBaseLightRGB(evtUnitHandle_t *unit) {
     } else if (ownVector) {
         SDF_VU0_LOADVECTOR(info);
     } else {
-        SDF_VU0_LOADVECTOR(D_0037F770[0]);
+        SDF_VU0_LOADVECTOR(dds3LightParam[0]);
     }
 }
 
@@ -563,7 +563,7 @@ void GetBaseAmbientRGB(evtUnitHandle_t *unit) {
     } else if (ownVector) {
         SDF_VU0_LOADVECTOR(info->secondColor);
     } else {
-        SDF_VU0_LOADVECTOR(kwlnDefaultColorVector);
+        SDF_VU0_LOADVECTOR(dds3AmbientColor);
     }
 }
 
@@ -581,7 +581,7 @@ void GetBaseLightDir(evtUnitHandle_t *unit) {
     } else if (ownVector) {
         SDF_VU0_LOADVECTOR(unit->vec10);
     } else {
-        SDF_VU0_LOADVECTOR(D_0037F770[0] + 4);
+        SDF_VU0_LOADVECTOR(dds3LightParam[0] + 4);
     }
 }
 

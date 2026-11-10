@@ -2919,7 +2919,7 @@ INCLUDE_ASM(const s32, "game/code_001442D0", func_00148A98);
 extern u8 fldAutoMapSeqTestFlag(u32);
 extern void fldAutoMapSeqSetFlag(u32);
 extern void evtDisableMoonDraw(void);
-extern sdf3DFogParam_t kwlnDrawVector;
+extern sdf3DFogParam_t dds3FogParamMain;
 extern SdfMathVector4 D_00413788[];
 extern s32 D_00436268;
 extern s32 D_00436264;
@@ -2989,11 +2989,11 @@ void func_00149A00(void) {
     kwlnOverlayFrustumParameters.color = 0x108010;
     D_0037F980.camera.offsetX = 2048.0f;
     D_0037F980.camera.offsetY = 2048.0f;
-    kwlnDrawVector.fogMax = 255.0f;
-    kwlnDrawVector.fogNear = 1000.0f;
-    kwlnDrawVector.fogMin = 255.0f;
-    kwlnDrawVector.fogFar = 20000.0f;
-    kwlnDrawVector.color = 0x108010;
+    dds3FogParamMain.fogMax = 255.0f;
+    dds3FogParamMain.fogNear = 1000.0f;
+    dds3FogParamMain.fogMin = 255.0f;
+    dds3FogParamMain.fogFar = 20000.0f;
+    dds3FogParamMain.color = 0x108010;
 }
 
 void fldReleaseResourceSlots(void) {

@@ -148,7 +148,7 @@ typedef struct SceneScriptState {
 extern SceneControl *btlCommandPanelWork;
 extern BattleSelectionWork *btlLinkedSelectionTaskBuffer;
 extern f32 D_00433724;
-extern f32 *D_0037F770[];
+extern f32 *dds3LightParam[];
 extern u32 btlGetActorCommandClass(BattleSceneObject *, s8);
 extern BtlRuntimeTask *btlCreateEffectTaskWithSourceParams(const void *, u32);
 extern s32 btlCountTasksForOwner(u64);
@@ -518,9 +518,9 @@ extern void p2sdSetPcmBuffer(const void *, s32);
 
 
 
-extern f32 *D_0037F770[];
+extern f32 *dds3LightParam[];
 
-extern u8 kwlnDefaultColorVector[];
+extern u8 dds3AmbientColor[];
 
 extern void fldSkyBattle(void);
 

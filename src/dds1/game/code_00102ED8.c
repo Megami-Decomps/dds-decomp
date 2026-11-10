@@ -1165,8 +1165,8 @@ s32 dds3EnsureDefaultResource(void) {
 extern dds3FrameDrawBank_t dds3DrawEnv[2];
 extern u32 D_003BA8EC;
 extern sdfGrFrameSet_t sdfGrFrameSet;
-extern sdf3DLight_t *D_00324770[3];
-extern f32 kwlnDefaultColorVector[4];
+extern sdf3DLight_t *dds3LightParam[3];
+extern f32 dds3AmbientColor[4];
 extern Matrix4 sdfViewMatrix;
 extern Matrix4 D_00329790;
 extern sdf3DLight_t *kwlnOverlayLightSources[3];
@@ -1197,7 +1197,7 @@ void dds3InitializeFrameDrawPackets(s32 bufferIndex) {
     sdfDrawTagLink(&dds3DrawEnv[bufferIndex].sceneList,
                     (u32)&dds3DrawEnv[bufferIndex].sceneMatrix);
     sdf3DMakeLightParallelPacket(&dds3DrawEnv[bufferIndex].scenePacketStorage,
-                  D_00324770, kwlnDefaultColorVector);
+                  dds3LightParam, dds3AmbientColor);
     sdfDrawTagLink(&dds3DrawEnv[bufferIndex].sceneList,
                     (u32)&dds3DrawEnv[bufferIndex].scenePacketStorage);
 

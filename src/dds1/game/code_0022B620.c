@@ -112,7 +112,7 @@ extern void mnuSampleCampPanelVisualTrack(evtViewerInfo_t *runtime, EvtRuntimeGr
 extern void mnuSampleCampDisplayTrack(evtViewerInfo_t *viewer, EvtRuntimeGroup *track, s32 value,
                                       CampDisplayDefaults *display);
 extern void mnuSampleCampListLayoutTrack(evtViewerInfo_t *viewer, EvtRuntimeGroup *track, EvtBlendKey *out);
-extern sdf3DFogParam_t kwlnDrawVector;
+extern sdf3DFogParam_t dds3FogParamMain;
 
 /* Capture kind-specific defaults before adding a new key to its track. */
 EvtRuntimeChild *evtCreateTrackKeyAtFrame(EvtRuntimeGroup *group, s32 frame, evtViewerInfo_t *viewer) {
@@ -197,12 +197,12 @@ EvtRuntimeChild *evtCreateTrackKeyAtFrame(EvtRuntimeGroup *group, s32 frame, evt
         break;
     case 11: {
         EvtViewerDrawPayload *draw = sdfChipAllocDirect(sizeof(*draw));
-        draw->parameters.vec[0] = kwlnDrawVector.fogMin;
-        draw->parameters.color = kwlnDrawVector.color;
+        draw->parameters.vec[0] = dds3FogParamMain.fogMin;
+        draw->parameters.color = dds3FogParamMain.color;
         key->payload = draw;
-        draw->parameters.vec[1] = kwlnDrawVector.fogMax;
-        draw->parameters.vec[2] = kwlnDrawVector.fogNear;
-        draw->parameters.vec[3] = kwlnDrawVector.fogFar;
+        draw->parameters.vec[1] = dds3FogParamMain.fogMax;
+        draw->parameters.vec[2] = dds3FogParamMain.fogNear;
+        draw->parameters.vec[3] = dds3FogParamMain.fogFar;
         key->p08.h[0] = 1;
         break;
     }

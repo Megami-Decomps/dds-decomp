@@ -213,11 +213,11 @@ extern void btlClearRuntimeFlag2000(void);
 
 extern u8 D_003E9130[];
 
-extern f32 *D_0037F770[];
+extern f32 *dds3LightParam[];
 
-extern u8 kwlnDefaultColorVector[];
+extern u8 dds3AmbientColor[];
 
-extern f32 *D_0037F770[];
+extern f32 *dds3LightParam[];
 
 extern s32 btlDoesEnabledStatusMatchCurrentId(datUnitWork_t *, u32);
 
@@ -4570,9 +4570,9 @@ u32 btlUnitBaseLightTask(BtlUnitBaseLightArgs *work) {
                 SDF_VU0_COPYVECTOR(unit->colorEnd, info->secondColor);
                 SDF_VU0_COPYVECTOR(unit->lightDirection, info->direction);
             } else {
-                f32 *defaultLight = D_0037F770[0];
+                f32 *defaultLight = dds3LightParam[0];
                 SDF_VU0_COPYVECTOR(unit->colorStart, defaultLight);
-                SDF_VU0_COPYVECTOR(unit->colorEnd, kwlnDefaultColorVector);
+                SDF_VU0_COPYVECTOR(unit->colorEnd, dds3AmbientColor);
                 SDF_VU0_COPYVECTOR(unit->lightDirection, defaultLight + 4);
                 btlBossDebugPrintf("btl:base light error[%p]\n", unit);
             }

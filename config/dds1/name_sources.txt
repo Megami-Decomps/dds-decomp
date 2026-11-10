@@ -7525,7 +7525,7 @@
 0x002B2E98	effSyncLinkedActorChildParameter	inferred	For flagged linked actors copies source parameter to child and updates child with that value. [names_reviewed5.tsv]
 0x002B2F20	effTransitionSelectedActorRgbColors	inferred	Inferred from the current C implementation in game/code_0029C530.c; agent-proposed name checked against its owner, fields and callees (R1 finite names pass).
 0x002B3090	effComputeLightDirectionVU	inferred	normalizes (vec - D_003DCBE0) with vrsqrt, stores D_003DCBA0, calls sdf3DMakeLightParallelPacket; returns 0 unless func_001A1438 and D_003BC9AC
-0x002B3130	effResetDefaultColorTables	inferred	eff copies two quadwords from *D_00324770 and one from D_00324780 then clears D_003BC9AC
+0x002B3130	effResetDefaultColorTables	inferred	eff copies two quadwords from *dds3LightParam and one from D_00324780 then clears D_003BC9AC
 0x002B3178	effInitializeFieldLightColors	inferred	Inferred from the current C implementation in game/code_0029C530.c; agent-proposed name checked against its owner, fields and callees (R1 finite names pass).
 0x002B3350	effResetCopiedPayloadTargets	inferred	zeros state and flags on each non-null path target in the copied payload
 0x002B3390	effAllocateCopiedEffectPayload	inferred	Allocates reference-backed work with a source payload copy and its size. [names_reviewed5.tsv]
@@ -9382,8 +9382,9 @@
 0x00324680	aViewTarget	inferred	SMT3HD data name via SLUS_209.11 0x002F5A50, 31 agreeing references; was aViewTarget
 0x00324690	aViewEye	inferred	SMT3HD name via SLUS_209.11 0x002F5A60, SMT3 name (was sdfViewTargetVector); was sdfViewTargetVector
 0x003246A0	aViewDown	inferred	SMT3HD data name via SLUS_209.11 0x002F5A70, 10 agreeing references; was aViewDown
-0x00324780	kwlnDefaultColorVector	inferred	confidence=high; matched_users=src/dds1/game/code_001A1960.c:btlInitializeSceneLightingAndTint, src/dds1/event/evtUnitManager.c:GetBaseAmbientRGB; Default color vector copied into battle lighting and selected for units without an explicit secondary color. [names_qp9.tsv]
-0x00324790	kwlnDrawVector	inferred	confidence=high; matched_users=src/dds1/game/code_00107FD8.c:dds3SetFogPara, src/dds1/kernel/dds3KernelDraw.c:dds3SetFog; Current draw vector is assigned directly or used as the starting value of an interpolated target; copy API updates its record. [names_qp9.tsv]
+0x00324770	dds3LightParam	inferred	SMT3HD name via SLUS_209.11 0x002F5B40 (parallel lights, ambient +0x10, fog +0x20)
+0x00324780	dds3AmbientColor	inferred	confidence=high; matched_users=src/dds1/game/code_001A1960.c:btlInitializeSceneLightingAndTint, src/dds1/event/evtUnitManager.c:GetBaseAmbientRGB; Default color vector copied into battle lighting and selected for units without an explicit secondary color. [names_qp9.tsv]
+0x00324790	dds3FogParamMain	inferred	confidence=high; matched_users=src/dds1/game/code_00107FD8.c:dds3SetFogPara, src/dds1/kernel/dds3KernelDraw.c:dds3SetFog; Current draw vector is assigned directly or used as the starting value of an interpolated target; copy API updates its record. [names_qp9.tsv]
 0x00324850	dds3RenderTargetVector	inferred	SMT3HD name via SLUS_209.11 0x002F5C20, kwln rename; was kwlnHeldTextureTargetVector; was kwlnHeldTextureTargetVector
 0x00324860	dds3RenderEyeVector	inferred	SMT3HD name via SLUS_209.11 0x002F5C30, kwln rename; was kwlnHeldTextureEyeVector; was kwlnHeldTextureEyeVector
 0x00324870	effPCPBossTexRect	inferred	confidence=high; Existing f32[4] up vector, third argument of the held-texture LookAtMatrix call. All declarations and native payload unchanged. DDS2 twin 0x0037F870; root/interior/addend instruction readers all current matched C, no import/active ASM reader. [PurD readability data b12; identifier-only]; was effPCPBossTexRect
