@@ -1275,7 +1275,6 @@ void fldDrawProjectedMapIcon(f32 x, f32 y, s32 index, u32 color) {
                         D_0044F7F0[D_0039A0E0[index].textureSlot]);
 }
 
-#ifdef NON_MATCHING
 #include "fld_projected_sprite.h"
 #include "dsp_entry_api.h"
 #include "dsp_channel.h"
@@ -1347,19 +1346,25 @@ void fldDrawProjectedMapIcon(f32 x, f32 y, s32 index, u32 color) {
 extern FldProjectedSprite D_0039A0E0[];
 
 extern f32 D_00436280;
-extern sdfTexHandle_t *D_00389978;
 extern sdfGrOt_t *fldDrawGetOt(void);
 /* Draw a minimap icon from the icon table: its textured quad rotated about its
  * anchor, squashed to the map's tilt and placed at the map position, the
- * player's (index 1) pulsing in alpha. DDS1's func_001428C0 with DDS2's
- * names, but turned about Y where DDS1's turns about Z. Upstream:
+ * player's (index 1) pulsing in alpha. The DDS1 field icon routine with
+ * DDS2's owned texture resource. Upstream:
  * INCLUDE_ASM in game/code_001442D0; written from the retail routine. Checked
  * against retail: the same memory accesses, calls
  * and immediates, and the same float, conversion and VU0 operations. */
 void func_00145A08(s32 index, f32 x, f32 y, f32 rotation) {
     f32 x0, x1, z0, z1;
     s32 textureU, textureV, textureWidth, textureHeight;
-    s32 textureURight, textureVBottom;
+    /* These real final UV endpoints survive SetRotateMatrixY and feed the
+     * FT4 call. Qualified whole-unit removal controls expose cc1's local
+     * quantity allocation: binding only the endpoints also gives their
+     * dying width/height inputs the native homes. This is a compiler
+     * allocation reconstruction, not an original spelling or hardware rule.
+     * See docs/matching/field-map-icon-endpoints.md. */
+    register s32 textureURight __asm__("$16");
+    register s32 textureVBottom __asm__("$18");
     f32 corner0[4] __attribute__((aligned(16)));
     f32 corner1[4] __attribute__((aligned(16)));
     f32 corner2[4] __attribute__((aligned(16)));
@@ -1380,7 +1385,7 @@ void func_00145A08(s32 index, f32 x, f32 y, f32 rotation) {
 
     packetList = (sdfDrawTag_t *)sdfGrAllocPacketBuff(0x20);
     sdfDrawTagInit(packetList);
-    sdf2DLinkTexPacket(packetList, D_00389978, 0);
+    sdf2DLinkTexPacket(packetList, fldGlobalBase.fieldTextures[2].texture, 0);
 
     textureU = (s32)D_0039A0E0[index].u * 16;
     textureV = (s32)D_0039A0E0[index].v * 16;
@@ -1434,11 +1439,7 @@ void func_00145A08(s32 index, f32 x, f32 y, f32 rotation) {
     drawSurface = fldDrawGetOt();
     drawSurface->append(appendTarget, packetList);
 }
-#else
-INCLUDE_ASM(const s32, "game/code_001442D0", func_00145A08);
-#endif
 
-#ifdef NON_MATCHING
 #include "fld_projected_sprite.h"
 #include "dsp_entry_api.h"
 #include "dsp_channel.h"
@@ -1510,18 +1511,23 @@ INCLUDE_ASM(const s32, "game/code_001442D0", func_00145A08);
 extern FldProjectedSprite D_0039A0E0[];
 
 extern f32 D_00436284;
-extern sdfTexHandle_t *D_00389978;
 extern sdfGrOt_t *fldDrawGetOt(void);
 /* Draw a minimap icon from the icon table with an alpha: as func_00145A08,
  * but the alpha is given, and the player's (index 1) pulses it, its pulse
  * scaled by the alpha out of 128 and clamped to a byte. Upstream: INCLUDE_ASM
  * in game/code_001442D0; written from the retail routine. Checked against
- * retail (scripts/bodies/check.sh): the same memory accesses and calls; the
- * same immediates but one a branch-likely copies. */
+ * retail: the same memory accesses, calls and alpha conversion stages. */
 void func_00145D48(s32 index, s32 alpha, f32 x, f32 y, f32 rotation) {
     f32 x0, x1, z0, z1;
     s32 textureU, textureV, textureWidth, textureHeight;
-    s32 textureURight, textureVBottom;
+    /* These real final UV endpoints survive SetRotateMatrixY and feed the
+     * FT4 call. Qualified whole-unit removal controls expose cc1's local
+     * quantity allocation: binding only the endpoints also gives their
+     * dying width/height inputs the native homes. This is a compiler
+     * allocation reconstruction, not an original spelling or hardware rule.
+     * See docs/matching/field-map-icon-endpoints.md. */
+    register s32 textureURight __asm__("$16");
+    register s32 textureVBottom __asm__("$18");
     f32 corner0[4] __attribute__((aligned(16)));
     f32 corner1[4] __attribute__((aligned(16)));
     f32 corner2[4] __attribute__((aligned(16)));
@@ -1533,23 +1539,26 @@ void func_00145D48(s32 index, s32 alpha, f32 x, f32 y, f32 rotation) {
     sdfGrOt_t *drawSurface;
 
     if (index == 1) {
-        s32 pulsed = (s32)((u32)(sdfSin(D_00436284) * 64.0f) + 0x80) * alpha / 128;
+        /* Accumulate the alpha value before packing it into the color word. */
+        color = (u32)(sdfSin(D_00436284) * 64.0f);
+        color += 0x80;
+        color = (s32)color * alpha / 128;
 
         D_00436284 += 0.2f;
-        if (pulsed < 0) {
-            pulsed = 0;
+        if ((s32)color < 0) {
+            color = 0;
         }
-        if (pulsed >= 256) {
-            pulsed = 255;
+        if ((s32)color >= 256) {
+            color = 255;
         }
-        color = (u32)pulsed << 24;
+        color <<= 24;
     } else {
         color = (u32)alpha << 24;
     }
 
     packetList = (sdfDrawTag_t *)sdfGrAllocPacketBuff(0x20);
     sdfDrawTagInit(packetList);
-    sdf2DLinkTexPacket(packetList, D_00389978, 0);
+    sdf2DLinkTexPacket(packetList, fldGlobalBase.fieldTextures[2].texture, 0);
 
     textureU = (s32)D_0039A0E0[index].u * 16;
     textureV = (s32)D_0039A0E0[index].v * 16;
@@ -1603,9 +1612,6 @@ void func_00145D48(s32 index, s32 alpha, f32 x, f32 y, f32 rotation) {
     drawSurface = fldDrawGetOt();
     drawSurface->append(appendTarget, packetList);
 }
-#else
-INCLUDE_ASM(const s32, "game/code_001442D0", func_00145D48);
-#endif
 
 s32 fldAutoMap_GetFloor(s32 scene, u32 index) {
     s32 result = 1;

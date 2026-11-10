@@ -1113,7 +1113,6 @@ void fldDrawProjectedMapIcon(f32 x, f32 y, s32 index, u32 color) {
                         D_003D40A0[D_0033EBA0[index].textureSlot]);
 }
 
-#ifdef NON_MATCHING
 #include "fld_projected_sprite.h"
 #include "dsp_entry_api.h"
 #include "dsp_channel.h"
@@ -1190,12 +1189,18 @@ extern sdfGrOt_t *fldDrawGetOt(void);
 /* Draw a minimap icon from the icon table: its textured quad rotated about its
  * anchor, squashed to the map's tilt and placed at the map position, the
  * player's (index 1) pulsing in alpha. Upstream: INCLUDE_ASM in
- * game/code_001411F0; written from the retail routine. It differs from retail
- * only in register allocation and scheduling. */
+ * game/code_001411F0; written from the retail routine. */
 void fldAutoMapDrawIconOfsRF(s32 index, f32 x, f32 y, f32 rotation) {
     f32 x0, x1, z0, z1;
     s32 textureU, textureV, textureWidth, textureHeight;
-    s32 textureURight, textureVBottom;
+    /* These real final UV endpoints survive SetRotateMatrixY and feed the
+     * FT4 call. Qualified whole-unit removal controls expose cc1's local
+     * quantity allocation: binding only the endpoints also gives their
+     * dying width/height inputs the native homes. This is a compiler
+     * allocation reconstruction, not an original spelling or hardware rule.
+     * See docs/matching/field-map-icon-endpoints.md. */
+    register s32 textureURight __asm__("$16");
+    register s32 textureVBottom __asm__("$18");
     f32 corner0[4] __attribute__((aligned(16)));
     f32 corner1[4] __attribute__((aligned(16)));
     f32 corner2[4] __attribute__((aligned(16)));
@@ -1270,9 +1275,6 @@ void fldAutoMapDrawIconOfsRF(s32 index, f32 x, f32 y, f32 rotation) {
     drawSurface = fldDrawGetOt();
     drawSurface->append(appendTarget, packetList);
 }
-#else
-INCLUDE_ASM(const s32, "game/code_001411F0", fldAutoMapDrawIconOfsRF);
-#endif
 
 s32 fldAutoMap_GetFloor(s32 scene, u32 index) {
     s32 result = 1;
