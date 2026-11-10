@@ -10936,6 +10936,11 @@
 0x00438AD8	sdfCdTrayMode	inferred	SMT3HD name via SLUS_209.11 0x00551918, sdfCd twin; was sdfDiscType
 0x00438AE0	sdfFileDefaultSrcType	inferred	SMT3HD name via SLUS_209.11 0x00551920, sdfFile twin; was D_00438AE0
 0x00438AE4	sdfFileSemaId	inferred	SMT3HD data name via SLUS_209.11 0x00551924, 9 agreeing references; was sdfFileSemaId
+0x00438AE8	sdfFileCdromPrefix	inferred	SMT3HD name via SLUS_209.11 0x00551928, sdf/sdfFile SMT3 rename; was sdfDiscPathPrefix
+0x00438AF0	sdfFileHostPrefix	inferred	SMT3HD name via SLUS_209.11 0x00551930, sdf/sdfFile SMT3 rename; was D_00438AF0
+0x00438AF8	sdfFileHddPrefix	inferred	SMT3HD name via SLUS_209.11 0x00551938, sdf/sdfFile SMT3 rename; was sdfPfsPathPrefix
+0x00438B00	sdfFileCdromName	inferred	SMT3HD name via SLUS_209.11 0x00551940, sdf/sdfFile SMT3 rename; was D_00438B00
+0x00438B08	sdfFileCmdActiveHead	inferred	SMT3HD name via SLUS_209.11 0x00551948, sdf/sdfFile SMT3 rename; was D_00438B08
 0x00438B0C	sdfFileCmdFreeList	inferred	SMT3HD name via SLUS_209.11 0x0055194C, sdfFileIO twin; was D_00438B0C
 0x00438B10	sdfFileCmdCount	inferred	SMT3HD name via SLUS_209.11 0x00551950, sdfFileIO twin; was D_00438B10
 0x00438B1C	sdfFileCmdFreeCount	inferred	SMT3HD name via SLUS_209.11 0x0055195C, sdfFileIO twin; was D_00438B1C

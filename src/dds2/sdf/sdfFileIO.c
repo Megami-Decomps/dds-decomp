@@ -137,7 +137,7 @@ extern void EIntr(void);
 
 extern void sdfChipFreeDirect(void *aPtr);
 
-#define D_00551948 D_00438B08
+#define D_00551948 sdfFileCmdActiveHead
 #define D_00551954 D_00438B14
 #define D_00551958 D_00438B18
 #define D_00551968 D_00438B28

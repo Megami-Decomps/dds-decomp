@@ -54,7 +54,7 @@ typedef struct Bytes7 {
     s8 b[7];
 } Bytes7;
 
-extern Bytes7 D_00438AF0[];
+extern Bytes7 sdfFileHostPrefix[];
 
 extern s8 sdfPrintIopFlag;
 
@@ -62,21 +62,21 @@ extern char D_00438AC0[];
 
 extern char sdfCdDirectPrefix[]; /* cdrom */
 
-extern char sdfDiscPathPrefix[];
+extern char sdfFileCdromPrefix[];
 
 typedef struct Bytes6 {
     s8 b[6];
 } Bytes6;
 
-extern Bytes6 sdfPfsPathPrefix[];
+extern Bytes6 sdfFileHddPrefix[];
 
-extern char D_00438B00[]; /* cdrom */
+extern char sdfFileCdromName[]; /* cdrom */
 
 extern u8 sdfFileDefaultSrcType;
 
 extern u8 sdfFileCmdDefaultDevice;
 
-extern sdfFileCmdHandle_t *D_00438B08;
+extern sdfFileCmdHandle_t *sdfFileCmdActiveHead;
 
 extern sdfFileCmdHandle_t *sdfFileCmdFreeList;
 

@@ -138,11 +138,11 @@ extern void *memcpy(void *, const void *, unsigned int);
 #define SDK_SKIP_EIntr
 #include "sdk_libkernl.h"
 
-#define D_00551930 D_003BD400
-#define D_00551940 D_003BD410
-#define D_00551948 D_003BD418
-#define D_00551928 sdfDiscPathPrefix
-#define D_00551938 sdfPfsPathPrefix
+#define D_00551930 sdfFileHostPrefix
+#define D_00551940 sdfFileCdromName
+#define D_00551948 sdfFileCmdActiveHead
+#define D_00551928 sdfFileCdromPrefix
+#define D_00551938 sdfFileHddPrefix
 
 extern char D_00551928[];
 
@@ -408,14 +408,14 @@ INCLUDE_SDATA(const s32, "sdf/sdfFile", sdfFileDefaultSrcType);
 
 INCLUDE_SDATA(const s32, "sdf/sdfFile", sdfFileSemaId);
 
-INCLUDE_SDATA(const s32, "sdf/sdfFile", sdfDiscPathPrefix);
+INCLUDE_SDATA(const s32, "sdf/sdfFile", sdfFileCdromPrefix);
 
-INCLUDE_SDATA(const s32, "sdf/sdfFile", D_003BD400);
+INCLUDE_SDATA(const s32, "sdf/sdfFile", sdfFileHostPrefix);
 
-INCLUDE_SDATA(const s32, "sdf/sdfFile", sdfPfsPathPrefix);
+INCLUDE_SDATA(const s32, "sdf/sdfFile", sdfFileHddPrefix);
 
-INCLUDE_SDATA(const s32, "sdf/sdfFile", D_003BD410);
+INCLUDE_SDATA(const s32, "sdf/sdfFile", sdfFileCdromName);
 
-INCLUDE_SDATA(const s32, "sdf/sdfFile", D_003BD418);
+INCLUDE_SDATA(const s32, "sdf/sdfFile", sdfFileCmdActiveHead);
 
 INCLUDE_SDATA(const s32, "sdf/sdfFile", sdfFileCmdFreeList);

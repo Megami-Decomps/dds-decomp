@@ -45,7 +45,7 @@ extern s32 sdfDiscRequestPending;
 
 extern char sdfFileHostRootPath[];
 
-extern u8 sdfPfsPathPrefix[];
+extern u8 sdfFileHddPrefix[];
 
 extern u32 sdfCdTrayMode;
 
@@ -67,17 +67,17 @@ extern char D_003BD3D0[];
 
 extern char sdfCdDirectPrefix[]; /* cdrom */
 
-extern char sdfDiscPathPrefix[];
+extern char sdfFileCdromPrefix[];
 
 typedef struct Bytes7 {
     s8 b[7];
 } Bytes7;
 
-extern Bytes7 D_003BD400[];
+extern Bytes7 sdfFileHostPrefix[];
 
-extern char D_003BD410[]; 
+extern char sdfFileCdromName[]; 
 
-extern sdfFileCmdHandle_t *D_003BD418;
+extern sdfFileCmdHandle_t *sdfFileCmdActiveHead;
 
 extern sdfFileCmdHandle_t *sdfFileCmdFreeList;
 
