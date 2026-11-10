@@ -13,6 +13,6 @@ typedef s32 MdlPartInfoPacketResult;
 u16 mdlPibGetEffectCount(const MdlRecord *record);
 
 /* Test a borrowed PAC packet header for the grouped part-info command/tag. */
-MdlPartInfoPacketResult mdlIsPartInfoPacket(const PacWork *packetWork);
+MdlPartInfoPacketResult mdlPackCheck(const PacWork *packetWork);
 
 #endif /* MDL_PART_INFO_API_H */

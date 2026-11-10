@@ -4836,7 +4836,7 @@
 0x002177D0	mdlFree	inferred	SMT3HD name via SLUS_209.11 0x001DD220, reloc-identical; was mdlDestroyContext
 0x00217878	mdlLink	inferred	SMT3HD name via SLUS_209.11 0x001DD2C8, reloc-identical; was mdlProcessContextNodesAndTransforms
 0x002179A8	mdlBlendEntryPitchYawAndUpdate	inferred	confidence=high; src/dds1/model/mdlManager.c:func_002179A8; Blends an indexed entry basis toward degree-based pitch/yaw, advances child slots and conditionally updates model/draw resources. [names_qp9.tsv]
-0x00217C60	mdlEnableAllEntries	inferred	sets enabled flag on every entry of table
+0x00217C60	mdlHideAllNode	inferred	sets enabled flag on every entry of table; was mdlHideAllNode
 0x00217CA8	mdlMotion	inferred	SMT3HD name via SLUS_209.11 0x001DD440, reloc-identical; was mdlFindOrCreateMotionRecordNode
 0x00217DA0	mdlLoopMotion	inferred	SMT3HD name via SLUS_209.11 0x001DD538, reloc-identical; was mdlAddEntryFlagged
 0x00217DC0	mdlSingleMotion	inferred	SMT3HD name via SLUS_209.11 0x001DD558, reloc-identical; was mdlAddEntryPlain
@@ -4872,7 +4872,7 @@
 0x00218410	mdlGetNumOfCut	inferred	SMT3HD name via SLUS_209.11 0x001DDBA8, reloc-identical; was mdlGetNodeRefHalf
 0x00218440	mdlSetClutColor	inferred	SMT3HD name via SLUS_209.11 0x001DDBD8, shared-hash-in-run; was mdlReleaseInnerResourceHandle
 0x00218460	mdlGetFilebase	inferred	SMT3HD name via SLUS_209.11 0x001DDBF8, reloc-identical; was mdlCopyResourceBasename
-0x00218580	mdlIsPartInfoPacket	inferred	SMT3HD name via SLUS_209.11 0x001DDD18, byte-identical; was mdlIsInnerSentinel
+0x00218580	mdlPackCheck	inferred	SMT3HD name via SLUS_209.11 0x001DDD18, byte-identical; was mdlIsInnerSentinel; was mdlIsPartInfoPacket
 0x002185B0	mdlPackSetOld	inferred	SMT3HD name via SLUS_209.11 0x001DDD48, reloc-identical; was mdlApplyQueuedGroupPackets
 0x00218768	mdlPackSet	inferred	SMT3HD name via SLUS_209.11 0x001DDF00, reloc-identical; was mdlApplyGroupedPartPackets
 0x002189D8	mdlFileCbFree	inferred	SMT3HD name via SLUS_209.11 0x001DE170, shared-hash-in-run; was mdlDestroyLoadRequestOwner
