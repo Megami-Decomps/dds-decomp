@@ -8585,6 +8585,7 @@ sdfHddValid = 0x003BD476;
 sdfDev9LoadFlag = 0x003BD477;
 sdfDev9Ready = 0x003BD478;
 sdfCdClock = 0x003BD480;
+sdfCdClockCache = 0x003BD488;
 p2sdSmgHandle = 0x003BD490;
 p2sdPcmCallback = 0x003BD494;
 p2sdPcmState = 0x003BD498;
