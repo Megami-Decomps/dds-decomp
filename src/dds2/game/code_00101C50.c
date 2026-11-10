@@ -370,7 +370,7 @@ extern sdfDrawTag_t *D_00435C14;
 
 extern u32 dds3DrawFlag;
 
-extern s8 sdfGrFrameComplete;
+extern s8 sdfDrawPublishFlag;
 
 /* Update draw controls, submit thirteen packet groups, optionally draw the
  * vignette, then flush pools. The skip bit suppresses one packet-slot publication. */
@@ -465,7 +465,7 @@ s32 dds3DrawProcess(dds3ProcessID_t *task) {
     } else {
         dds3DrawFlag &= KWLN_FRAME_CLEAR_SKIP_POOL_QUEUE;
     }
-    sdfGrFrameComplete = 0;
+    sdfDrawPublishFlag = 0;
     return 0;
 }
 

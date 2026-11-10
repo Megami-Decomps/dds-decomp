@@ -10223,9 +10223,9 @@
 0x003BD324	sdfGrPacketBuffLimit	inferred	SMT3HD data name via SLUS_209.11 0x0055187C, 2 agreeing references; was sdfGrPacketBuffLimit
 0x003BD32C	sdfDrawFrameFlag	inferred	SMT3HD data name via SLUS_209.11 0x00551884, 8 agreeing references; was sdfDrawFrameFlag
 0x003BD32D	sdfDrawSyncFlag	inferred	SMT3HD name via SLUS_209.11 0x00551885, sdfDraw reference; was D_003BD32D
-0x003BD330	sdfGrFrameComplete	inferred	Set when sdfGrDrawFrame finishes a frame; the main loop clears it. DDS2 twin 0x00438A20.
+0x003BD330	sdfDrawPublishFlag	inferred	SMT3HD name via SLUS_209.11 0x00551888, sdf/sdfDraw SMT3 rename; was sdfGrFrameComplete
 0x003BD331	sdfGrDrawFrameId	inferred	SMT3HD data name via SLUS_209.11 0x00551889, 3 agreeing references; was sdfGrDrawFrameId
-0x003BD332	sdfGrBufferSlotIndex	inferred	The buffer slot the frame being drawn uses, the opposite of the shown field. DDS2 twin 0x00438A22.
+0x003BD332	sdfGrBufferSlot	inferred	SMT3HD name via SLUS_209.11 0x0055188A, sdf/sdfDraw SMT3 rename; was sdfGrBufferSlotIndex
 0x003BD333	sdfReqDrawDelayCount	inferred	SMT3HD data name via SLUS_209.11 0x0055188B, 3 agreeing references; was sdfReqDrawDelayCount
 0x003BD334	sdfReqDrawDelaySleepCount	inferred	SMT3HD name via SLUS_209.11 0x0055188C, sdfDraw reference; was D_003BD334
 0x003BD338	sdfDrawReqQueueIndex	inferred	SMT3HD data name via SLUS_209.11 0x00551890, 5 agreeing references; was sdfDrawReqQueueIndex

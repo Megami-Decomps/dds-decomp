@@ -65,7 +65,7 @@ extern u8 sdfFrameId;
 
 #define SDF_GRAPH_DEPTH_BUFFER_INDEX 2
 
-#define D_0055188A sdfGrBufferSlotIndex
+#define D_0055188A sdfGrBufferSlot
 
 extern u8 D_0055188A;
 
@@ -984,7 +984,7 @@ void sdfGrInitDraw(void) {
 }
 
 /* The draw worker publishes this to the kernel process, which clears it. */
-#define D_00551888 sdfGrFrameComplete
+#define D_00551888 sdfDrawPublishFlag
 
 extern volatile u8 D_00551888;
 
@@ -1151,11 +1151,11 @@ INCLUDE_SDATA(const s32, "sdf/sdfDraw", sdfDrawSyncFlag);
 
 INCLUDE_SDATA(const s32, "sdf/sdfDraw", D_003BD32E);
 
-INCLUDE_SDATA(const s32, "sdf/sdfDraw", sdfGrFrameComplete);
+INCLUDE_SDATA(const s32, "sdf/sdfDraw", sdfDrawPublishFlag);
 
 INCLUDE_SDATA(const s32, "sdf/sdfDraw", sdfGrDrawFrameId);
 
-INCLUDE_SDATA(const s32, "sdf/sdfDraw", sdfGrBufferSlotIndex);
+INCLUDE_SDATA(const s32, "sdf/sdfDraw", sdfGrBufferSlot);
 
 INCLUDE_SDATA(const s32, "sdf/sdfDraw", sdfReqDrawDelayCount);
 
