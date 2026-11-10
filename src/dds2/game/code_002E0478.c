@@ -363,7 +363,7 @@ extern s32 effSharedRibbonReferenceCount;
 
 extern u32 D_00437E78;
 
-extern struct SdfTextureFileHeader *effFlashTextureHandles;
+extern struct SdfTextureFileHeader *effFlashTextureHandles[2];
 
 extern u32 effModelUpdateControlFlags;
 
@@ -3343,13 +3343,9 @@ EffTrackSet *effCreateTrackSet(s32 count, u16 kind) {
     return set;
 }
 
-extern struct SdfTextureFileHeader *D_00437E54;
-
 INCLUDE_SDATA(const s32, "game/code_002E0478", D_00437E48);
 
 INCLUDE_SDATA(const s32, "game/code_002E0478", effFlashTextureHandles);
-
-INCLUDE_SDATA(const s32, "game/code_002E0478", D_00437E54);
 
 INCLUDE_SDATA(const s32, "game/code_002E0478", D_00437E58);
 
@@ -3361,13 +3357,13 @@ EffTrackSet *effCreateTrackSetWithSharedReferences(u32 count, u16 kind, u32 shar
             switch (effect->kind) {
             case 3:
                 if (D_00437E58[0] == 0) {
-                    D_00437E60[0] = effCloneSharedReferenceWithValue(effFlashTextureHandles, 0x100);
+                    D_00437E60[0] = effCloneSharedReferenceWithValue(effFlashTextureHandles[0], 0x100);
                 }
                 D_00437E58[0]++;
                 break;
             case 4:
                 if (D_00437E58[1] == 0) {
-                    D_00437E60[1] = effCloneSharedReferenceWithValue(D_00437E54, 0x101);
+                    D_00437E60[1] = effCloneSharedReferenceWithValue(effFlashTextureHandles[1], 0x101);
                 }
                 D_00437E58[1]++;
                 break;
@@ -3635,12 +3631,12 @@ void effDrawTrackSet(EffTrackSet *track, const Matrix4 *matrix) {
 extern sdfMemHandle_t *D_00437E48[2];
 
 void effLoadFlashTextures(void) {
-    D_00437E48[0] = sdfDevLoadFileEx("/effect/flash00.tmx", (u32 *)&effFlashTextureHandles, 0);
-    D_00437E48[1] = sdfDevLoadFileEx("/effect/flash01.tmx", (u32 *)(&effFlashTextureHandles + 1), 0);
+    D_00437E48[0] = sdfDevLoadFileEx("/effect/flash00.tmx", (u32 *)&effFlashTextureHandles[0], 0);
+    D_00437E48[1] = sdfDevLoadFileEx("/effect/flash01.tmx", (u32 *)&effFlashTextureHandles[1], 0);
 }
 
 u32 effGetFlashTextureHandle(s32 flashTextureIndex) {
-    return (u32)(&effFlashTextureHandles)[flashTextureIndex];
+    return (u32)effFlashTextureHandles[flashTextureIndex];
 }
 
 typedef struct EffCounterHeader {
