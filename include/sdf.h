@@ -428,7 +428,7 @@ typedef struct SdfDmaSrc {
 typedef struct sdfGrRefPacketHeader_t {
     u64 dmaTag;
     u64 vifCommands;
-    int __attribute__((mode(TI))) nextTag;
+    s128 nextTag;
 } sdfGrRefPacketHeader_t;
 
 typedef char sdfGrRefPacketHeader_t_size_must_be_0x20[
@@ -543,26 +543,16 @@ typedef struct sdfMatPacket_t
     u32 cmd_call_kind;
 } sdfMatPacket_t;
 
-typedef char sdfMatPacket_t_ambient_at_0x04[
-    ((u32)&((sdfMatPacket_t *)0)->ambient == 0x04) ? 1 : -1];
-typedef char sdfMatPacket_t_diffuse_at_0x08[
-    ((u32)&((sdfMatPacket_t *)0)->diffuse == 0x08) ? 1 : -1];
 typedef char sdfMatPacket_t_mtexDiffuse_at_0x0C[
     ((u32)&((sdfMatPacket_t *)0)->mtexDiffuse == 0x0C) ? 1 : -1];
 typedef char sdfMatPacket_t_specularColor_at_0x10[
     ((u32)&((sdfMatPacket_t *)0)->specularColor == 0x10) ? 1 : -1];
 typedef char sdfMatPacket_t_constant_at_0x1C[
     ((u32)&((sdfMatPacket_t *)0)->constant == 0x1C) ? 1 : -1];
-typedef char sdfMatPacket_t_mtexAlpha_at_0x20[
-    ((u32)&((sdfMatPacket_t *)0)->mtexAlpha == 0x20) ? 1 : -1];
-typedef char sdfMatPacket_t_mtexAlgo_at_0x24[
-    ((u32)&((sdfMatPacket_t *)0)->mtexAlgo == 0x24) ? 1 : -1];
 typedef char sdfMatPacket_t_tex1Data_at_0x38[
     ((u32)&((sdfMatPacket_t *)0)->tex1Data == 0x38) ? 1 : -1];
-typedef char sdfMatPacket_t_clampData_at_0x48[
-    ((u32)&((sdfMatPacket_t *)0)->clampData == 0x48) ? 1 : -1];
-typedef char sdfMatPacket_t_mtexTex1Data_at_0x50[
-    ((u32)&((sdfMatPacket_t *)0)->mtexTex1Data == 0x50) ? 1 : -1];
+typedef char sdfMatPacket_t_mtexClampData_at_0x60[
+    ((u32)&((sdfMatPacket_t *)0)->mtexClampData == 0x60) ? 1 : -1];
 typedef char sdfMatPacket_t_texTm_at_0x68[
     ((u32)&((sdfMatPacket_t *)0)->texTm == 0x68) ? 1 : -1];
 typedef char sdfMatPacket_t_mtexTexTm_at_0x80[
