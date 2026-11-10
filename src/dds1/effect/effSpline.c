@@ -1,140 +1,164 @@
 #include "common.h"
-#include "sdf_vu0.h"
-#include "eff_random.h"
-#include "eff_param.h"
-#include "sdf_heap_api.h"
-#include "eff.h"
-#include "eff_math.h"
-#include "eff_channel.h"
-#include "eff_channel_layout.h"
-#include "pcp_vu0.h"
-#include "fr_font.h"
-#include "font_mem_control_api.h"
+#include "ps2asm.h"
+#include "model.h"
+#include "motion.h"
 
-#define EFF_CURVE_COMPONENT_COUNT 3
+/* DDS's names for the same functions. */
+#define dds3_1B09C0 effSplRun
+#define func_001B0A60 effSplCalc
+#define func_001B0B90 effSplCalcRegist
+#define func_001B0CC0 effSplRewind
+#define func_001B0CD0 effSplSetStep
+#define dds3_1B1238 effCreateChannel
+#define dds3_1B12B0 effReleaseInterpolationChannel
+#define dds3_1B12D0 effAdvanceChanCursor
+#define func_001B1370 effSampleChannelBezier
+#define func_001B1478 effClearChanCursor
+#define func_001B1488 effSetChanStep
 
-#define EFF_CURVE_POINT_BYTES 12
+/* Cubic spline fitted over a point list; dds3AllocSplineHandle takes 0x2C. */
+typedef struct dds3Spline_t {
+    void *handle;
+    void *coefHandle;
+    s32 count;
+    s16 single;
+    s16 pad0E;
+    void *points;
+    f32 *coefs;
+    f32 *coefB;
+    f32 *coefC;
+    s32 unk20;
+    f32 unk24;
+    f32 unk28;
+} dds3Spline_t;
 
-#define EFF_BEZIER_MIN_RECORD_COUNT 4
+/* Walks a point list at a fixed step; dds3_1B1238 takes 0x18. */
+typedef struct dds3SplineWalk_t {
+    void *handle;
+    s32 count;
+    f32 *points;
+    s32 index;
+    f32 t;
+    f32 step;
+} dds3SplineWalk_t;
 
-#define EFF_BEZIER_RECORD_ADVANCE 3
+/* 128-byte party records; this unit only reads the formation index. */
 
-#define EFF_CHANNEL_BYTES 0x18
 
-#define EFF_CHANNEL_DEFAULT_STEP 0.05f
+extern void sdfMemFreeDirect(sdfMemHandle_t *aHandle);
 
-#define EFF_PRIMITIVE_CUBIC_MODE 0
+extern sdfMemHandle_t *sdfMemAllocDirect(s32 aSize);
 
-extern void effSplCalc(EffVert *vertex, EffPrimitiveCurve *primitive, s32 recordIndex, f32 t);
+extern void *sdfMemLock(sdfMemHandle_t *aHandle);
 
-extern void effSampleChannelBezier(EffVert *vertex, EffChan *channel, s32 recordIndex, f32 t);
+void dds3AllocSplinePoints(dds3Spline_t *spline, s32 flattenEqualComponents);
 
-extern void dds3BuildSplinePoints(f32 *tangents, f32 *keys, u32 recordCount);
+void dds3BuildSplinePoints(f32 *tangents, f32 *points, u32 count);
 
-extern void SolveTridiagonal(f32 *solution, f32 *rhs, s32 count);
+void dds3BuildSplineCoefs(dds3Spline_t *spline, f32 *tangents);
 
-extern void dds3BuildSplineCoefs(EffPrimitiveCurve *primitive, f32 *tangents);
+void SolveTridiagonal(f32 *solution, f32 *rhs, s32 count);
 
-extern void dds3BuildSplineCoefsSkipDup(EffPrimitiveCurve *primitive, f32 *tangents);
+void dds3BuildSplineCoefsSkipDup(dds3Spline_t *spline, f32 *tangents);
 
-extern void dds3AllocSplinePoints(EffPrimitiveCurve *primitive, s32 flattenEqualComponents);
+void func_001B1370(sdfVector4_t *vertex, dds3SplineWalk_t *channel, s32 index, f32 t);
 
-EffPrimitiveCurve *dds3AllocSplineHandle(f32 *keys, u32 recordCount, s32 flattenEqualComponents) {
+void func_001B0A60(sdfVector4_t *vertex, dds3Spline_t *primitive, s32 recordIndex, f32 t);
+
+dds3Spline_t *dds3AllocSplineHandle(f32 *points, u32 count, s32 flattenEqualComponents) {
     sdfMemHandle_t *primaryResource = sdfMemAllocDirect(0x2C);
-    f32 step = EFF_CHANNEL_DEFAULT_STEP;
-    EffPrimitiveCurve *primitive = (EffPrimitiveCurve *)sdfMemLock(primaryResource);
+    f32 step = 0.05f;
+    dds3Spline_t *primitive = (dds3Spline_t *)sdfMemLock(primaryResource);
     sdfMemHandle_t *coefficientResource;
-    f32 (*coefficients)[EFF_CURVE_COMPONENT_COUNT];
+    f32 (*coefficients)[3];
 
-    primitive->allocation = primaryResource;
-    primitive->recordCount = recordCount;
-    primitive->keys = keys;
-    primitive->cursorIndex = 0;
-    primitive->cursorPosition = 0.0f;
-    primitive->cursorStep = step;
-    if (recordCount < 3) {
-        primitive->cubicCoefficients = NULL;
-        primitive->interpolationMode = 1;
+    primitive->handle = primaryResource;
+    primitive->count = count;
+    primitive->points = points;
+    primitive->unk20 = 0;
+    primitive->unk24 = 0;
+    primitive->unk28 = step;
+    if (count < 3) {
+        primitive->coefs = NULL;
+        primitive->single = 1;
     } else {
-        coefficientResource = sdfMemAllocDirect(recordCount * 36);
-        coefficients = (f32 (*)[EFF_CURVE_COMPONENT_COUNT])sdfMemLock(coefficientResource);
-        primitive->allocation = primaryResource;
-        primitive->coefficientAllocation = coefficientResource;
-        primitive->interpolationMode = EFF_PRIMITIVE_CUBIC_MODE;
-        primitive->recordCount = recordCount;
-        primitive->keys = keys;
-        primitive->cubicCoefficients = (f32 *)coefficients;
-        primitive->quadraticCoefficients = (f32 *)(coefficients + recordCount);
-        primitive->linearCoefficients = (f32 *)(coefficients + recordCount * 2);
-        primitive->cursorIndex = 0;
-        primitive->cursorPosition = 0.0f;
-        primitive->cursorStep = step;
+        coefficientResource = sdfMemAllocDirect(count * 36);
+        coefficients = (f32 (*)[3])sdfMemLock(coefficientResource);
+        primitive->handle = primaryResource;
+        primitive->coefHandle = coefficientResource;
+        primitive->single = 0;
+        primitive->count = count;
+        primitive->points = points;
+        primitive->coefs = (f32 *)coefficients;
+        primitive->coefB = (f32 *)(coefficients + count);
+        primitive->coefC = (f32 *)(coefficients + count * 2);
+        primitive->unk20 = 0;
+        primitive->unk24 = 0;
+        primitive->unk28 = step;
         dds3AllocSplinePoints(primitive, flattenEqualComponents);
     }
     return primitive;
 }
 
-/* Release the optional coefficient allocation, then the primary buffer; do not free or clear the object. */
-void dds3FreeSplineHandle(EffPrimitiveCurve *primitive) {
-    if (primitive != NULL) {
-        if (primitive->cubicCoefficients != NULL) {
-            sdfMemFreeDirect(primitive->coefficientAllocation);
-        }
-        sdfMemFreeDirect(primitive->allocation);
+void dds3FreeSplineHandle(dds3Spline_t *pSpline)
+{
+    if (pSpline == NULL) {
+        return;
     }
+    if (pSpline->coefs != NULL) {
+        sdfMemFreeDirect(pSpline->coefHandle);
+    }
+    sdfMemFreeDirect(pSpline->handle);
 }
 
-/* Sample before stepping. Wrap at >1 only, subtract once, and return zero when the record cursor resets. */
-s32 effSplRun(void *vertex, EffPrimitiveCurve *primitive) {
-    s32 continuing = 1;
-    f32 position = primitive->cursorPosition;
-    u32 recordIndex = primitive->cursorIndex;
+s32 dds3_1B09C0(sdfVector4_t *pVertex, dds3Spline_t *pSpline)
+{
+    f32 t = pSpline->unk24;
+    s32 index = pSpline->unk20;
+    s32 running = 1;
 
-    effSplCalc(vertex, primitive, recordIndex, position);
-    position += primitive->cursorStep;
-    if (position > 1.0f) {
-        position -= 1.0f;
-        recordIndex += 1;
+    func_001B0A60(pVertex, pSpline, index, t);
+    t += pSpline->unk28;
+    if (t > 1.0f) {
+        t -= 1.0f;
+        index++;
     }
-    if (recordIndex >= primitive->recordCount - 1) {
-        position = 0.0f;
-        recordIndex = 0;
-        continuing = 0;
+    if ((u32)index >= (u32)(pSpline->count - 1)) {
+        t = 0.0f;
+        index = 0;
+        running = 0;
     }
-    primitive->cursorIndex = recordIndex;
-    primitive->cursorPosition = position;
-    return continuing;
+    pSpline->unk20 = index;
+    pSpline->unk24 = t;
+    return running;
 }
 
-/* Evaluate packed XYZ cubic coefficients or adjacent linear keys at t.
- * a/b serve as coefficients or endpoints; only the cubic path writes output W. */
-void effSplCalc(EffVert *vertex, EffPrimitiveCurve *primitive, s32 recordIndex, f32 t) {
+void func_001B0A60(sdfVector4_t *vertex, dds3Spline_t *primitive, s32 recordIndex, f32 t) {
     f32 *a;
     f32 *b;
     f32 *c;
     f32 *d;
 
-    if (primitive->interpolationMode == EFF_PRIMITIVE_CUBIC_MODE) {
-        a = primitive->cubicCoefficients + recordIndex * EFF_CURVE_COMPONENT_COUNT;
-        b = primitive->quadraticCoefficients + recordIndex * EFF_CURVE_COMPONENT_COUNT;
-        c = primitive->linearCoefficients + recordIndex * EFF_CURVE_COMPONENT_COUNT;
-        d = primitive->keys + recordIndex * EFF_CURVE_COMPONENT_COUNT;
+    if ((u16)primitive->single == 0) {
+        a = primitive->coefs + recordIndex * 3;
+        b = primitive->coefB + recordIndex * 3;
+        c = primitive->coefC + recordIndex * 3;
+        d = (f32 *)primitive->points + recordIndex * 3;
         vertex->x = ((a[0] * t + b[0]) * t + c[0]) * t + d[0];
         vertex->y = ((a[1] * t + b[1]) * t + c[1]) * t + d[1];
         vertex->z = ((a[2] * t + b[2]) * t + c[2]) * t + d[2];
         vertex->w = 1.0f;
     } else {
-        a = primitive->keys + recordIndex * EFF_CURVE_COMPONENT_COUNT;
-        b = a + EFF_CURVE_COMPONENT_COUNT;
+        a = (f32 *)primitive->points + recordIndex * 3;
+        b = a + 3;
         vertex->x = a[0] + (b[0] - a[0]) * t;
         vertex->y = a[1] + (b[1] - a[1]) * t;
         vertex->z = a[2] + (b[2] - a[2]) * t;
     }
 }
 
-/* Evaluate packed XYZ cubic coefficients or adjacent linear keys into vf10.
- * The linear path leaves local W untouched before the native full-vector load. */
-void effSplCalcRegist(EffPrimitiveCurve *primitive, s32 recordIndex, f32 t)
+/* vu0 routine: sample the curve into vf10. */
+void func_001B0B90(dds3Spline_t *primitive, s32 recordIndex, f32 t)
 {
     f32 vertex[4];
     f32 *a;
@@ -142,18 +166,18 @@ void effSplCalcRegist(EffPrimitiveCurve *primitive, s32 recordIndex, f32 t)
     f32 *c;
     f32 *d;
 
-    if (primitive->interpolationMode == EFF_PRIMITIVE_CUBIC_MODE) {
-        a = primitive->cubicCoefficients + recordIndex * EFF_CURVE_COMPONENT_COUNT;
-        b = primitive->quadraticCoefficients + recordIndex * EFF_CURVE_COMPONENT_COUNT;
-        c = primitive->linearCoefficients + recordIndex * EFF_CURVE_COMPONENT_COUNT;
-        d = primitive->keys + recordIndex * EFF_CURVE_COMPONENT_COUNT;
+    if ((u16)primitive->single == 0) {
+        a = primitive->coefs + recordIndex * 3;
+        b = primitive->coefB + recordIndex * 3;
+        c = primitive->coefC + recordIndex * 3;
+        d = (f32 *)primitive->points + recordIndex * 3;
         vertex[0] = ((a[0] * t + b[0]) * t + c[0]) * t + d[0];
         vertex[1] = ((a[1] * t + b[1]) * t + c[1]) * t + d[1];
         vertex[2] = ((a[2] * t + b[2]) * t + c[2]) * t + d[2];
         vertex[3] = 1.0f;
     } else {
-        a = primitive->keys + recordIndex * EFF_CURVE_COMPONENT_COUNT;
-        b = a + EFF_CURVE_COMPONENT_COUNT;
+        a = (f32 *)primitive->points + recordIndex * 3;
+        b = a + 3;
         vertex[0] = a[0] + (b[0] - a[0]) * t;
         vertex[1] = a[1] + (b[1] - a[1]) * t;
         vertex[2] = a[2] + (b[2] - a[2]) * t;
@@ -161,60 +185,53 @@ void effSplCalcRegist(EffPrimitiveCurve *primitive, s32 recordIndex, f32 t)
     SDF_VU0_LOADVECTOR_MEMOPS(*(u128 *)vertex);
 }
 
-/* Reset the primitive's record index and within-record position without changing its step. */
-void effSplRewind(EffPrimitiveCurve *primitive) {
-    primitive->cursorIndex = 0;
-    primitive->cursorPosition = 0;
+void func_001B0CC0(dds3Spline_t *pSpline)
+{
+    pSpline->unk20 = 0;
+    pSpline->unk24 = 0;
 }
 
-/* Set the per-call cursor increment; sampling and wrapping are performed by the advance routine. */
-void effSplSetStep(EffPrimitiveCurve *primitive, f32 step) {
-    primitive->cursorStep = step;
+void func_001B0CD0(dds3Spline_t *pSpline, f32 value)
+{
+    pSpline->unk28 = value;
 }
 
-/* Build temporary coordinate-major tangents, select a coefficient policy, then release the temporary buffer. */
-void dds3AllocSplinePoints(EffPrimitiveCurve *primitive, s32 flattenEqualComponents) {
-    sdfMemHandle_t *allocation = sdfMemAllocDirect(primitive->recordCount * EFF_CURVE_POINT_BYTES);
-    f32 *tangentData = (f32 *)sdfMemLock(allocation);
+void dds3AllocSplinePoints(dds3Spline_t *primitive, s32 flattenEqualComponents) {
+    sdfMemHandle_t *handle = sdfMemAllocDirect(primitive->count * 12);
+    f32 *tangentData = (f32 *)sdfMemLock(handle);
 
-    dds3BuildSplinePoints(tangentData, primitive->keys, primitive->recordCount);
+    dds3BuildSplinePoints(tangentData, primitive->points, primitive->count);
     if (flattenEqualComponents == 0) {
         dds3BuildSplineCoefs(primitive, tangentData);
     } else {
         dds3BuildSplineCoefsSkipDup(primitive, tangentData);
     }
-    sdfMemFreeDirect(allocation);
+    sdfMemFreeDirect(handle);
 }
 
-/* Per coordinate, estimate the slope at every key (one-sided at the ends, the
- * sum of both neighbour differences inside) and solve those into cubic
- * tangents, writing one coordinate-major run of recordCount values each. */
-void dds3BuildSplinePoints(f32 *tangents, f32 *keys, u32 recordCount)
-{
-    s32 count = recordCount;
-    sdfMemHandle_t *allocation = sdfMemAllocDirect(count * sizeof(f32));
-    f32 *slopes = (f32 *)sdfMemLock(allocation);
-    f32 (*key)[EFF_CURVE_COMPONENT_COUNT] = (f32 (*)[EFF_CURVE_COMPONENT_COUNT])keys;
+void dds3BuildSplinePoints(f32 *tangents, f32 *points, u32 count) {
+    sdfMemHandle_t *handle = sdfMemAllocDirect(count * sizeof(f32));
+    f32 *rhs = (f32 *)sdfMemLock(handle);
+    f32 (*pts)[3] = (f32 (*)[3])points;
     s32 component;
     s32 i;
 
-    for (component = 0; component < EFF_CURVE_COMPONENT_COUNT; component++) {
-        slopes[0] = (key[1][component] - key[0][component]) * 3.0f;
-        slopes[count - 1] = (key[count - 1][component] - key[count - 2][component]) * 3.0f;
-        for (i = 1; i <= count - 2; i++) {
-            slopes[i] = ((key[i][component] - key[i - 1][component]) +
-                         (key[i + 1][component] - key[i][component])) * 3.0f;
+    for (component = 0; component < 3; component++) {
+        rhs[0] = (pts[1][component] - pts[0][component]) * 3.0f;
+        rhs[count - 1] = (pts[count - 1][component] - pts[count - 2][component]) * 3.0f;
+        for (i = 1; i <= (s32)count - 2; i++) {
+            rhs[i] = ((pts[i][component] - pts[i - 1][component]) +
+                      (pts[i + 1][component] - pts[i][component])) * 3.0f;
         }
-        SolveTridiagonal(tangents, slopes, count);
+        SolveTridiagonal(tangents, rhs, count);
         tangents += count;
     }
-    sdfMemFreeDirect(allocation);
+    sdfMemFreeDirect(handle);
 }
 
-/* Solve the cubic tangent system: endpoint diagonal 2, interior diagonal 4. */
 void SolveTridiagonal(f32 *solution, f32 *rhs, s32 count) {
     s32 byteCount = count * sizeof(f32);
-    sdfMemHandle_t *allocation = sdfMemAllocDirect(byteCount);
+    void *handle = sdfMemAllocDirect(byteCount);
     f32 *upper;
     s32 i;
     f32 denominator;
@@ -223,7 +240,7 @@ void SolveTridiagonal(f32 *solution, f32 *rhs, s32 count) {
     f32 *rhsEnd;
 
     count -= 2;
-    upper = (f32 *)sdfMemLock(allocation);
+    upper = (f32 *)sdfMemLock(handle);
     denominator = 2.0f;
 
     solution[0] = rhs[0] / denominator;
@@ -241,123 +258,115 @@ void SolveTridiagonal(f32 *solution, f32 *rhs, s32 count) {
     for (i = count; i >= 0; i--) {
         solution[i] -= upper[i + 1] * solution[i + 1];
     }
-    sdfMemFreeDirect(allocation);
+    sdfMemFreeDirect(handle);
 }
 
-/* Build Hermite power-basis XYZ coefficients from interleaved points and coordinate-major tangents. */
-void dds3BuildSplineCoefs(EffPrimitiveCurve *primitive, f32 *tangents) {
-    f32 *cubic = primitive->cubicCoefficients;
-    f32 *quadratic = primitive->quadraticCoefficients;
-    f32 *linear = primitive->linearCoefficients;
-    f32 *points = primitive->keys;
-    s32 recordCount = primitive->recordCount;
+void dds3BuildSplineCoefs(dds3Spline_t *primitive, f32 *tangents) {
+    f32 *cubic = primitive->coefs;
+    f32 *quadratic = primitive->coefB;
+    f32 *linear = primitive->coefC;
+    f32 *points = primitive->points;
+    s32 count = primitive->count;
     s32 segment;
-    for (segment = 0; segment < recordCount - 1; segment++) {
+    for (segment = 0; segment < count - 1; segment++) {
         s32 component;
-        for (component = 0; component < EFF_CURVE_COMPONENT_COUNT; component++) {
-            f32 endValue = points[segment * EFF_CURVE_COMPONENT_COUNT + component + EFF_CURVE_COMPONENT_COUNT];
-            f32 startValue = points[segment * EFF_CURVE_COMPONENT_COUNT + component];
-            f32 startTangent = tangents[component * recordCount + segment];
-            f32 endTangent = tangents[component * recordCount + segment + 1];
-            cubic[segment * EFF_CURVE_COMPONENT_COUNT + component] = 2.0f * (startValue - endValue) +
+        for (component = 0; component < 3; component++) {
+            f32 endValue = points[segment * 3 + component + 3];
+            f32 startValue = points[segment * 3 + component];
+            f32 startTangent = tangents[component * count + segment];
+            f32 endTangent = tangents[component * count + segment + 1];
+            cubic[segment * 3 + component] = 2.0f * (startValue - endValue) +
                 (startTangent + endTangent);
-            quadratic[segment * EFF_CURVE_COMPONENT_COUNT + component] = (endValue - startValue) * 3.0f -
+            quadratic[segment * 3 + component] = (endValue - startValue) * 3.0f -
                 (2.0f * startTangent + endTangent);
-            linear[segment * EFF_CURVE_COMPONENT_COUNT + component] = startTangent;
+            linear[segment * 3 + component] = startTangent;
         }
     }
 }
 
-/* Build Hermite coefficients, but flatten exactly equal endpoint components even when tangents are nonzero. */
-void dds3BuildSplineCoefsSkipDup(EffPrimitiveCurve *primitive, f32 *tangents) {
-    f32 *cubic = primitive->cubicCoefficients;
-    f32 *quadratic = primitive->quadraticCoefficients;
-    f32 *linear = primitive->linearCoefficients;
-    f32 *points = primitive->keys;
-    s32 recordCount = primitive->recordCount;
+void dds3BuildSplineCoefsSkipDup(dds3Spline_t *primitive, f32 *tangents) {
+    f32 *cubic = primitive->coefs;
+    f32 *quadratic = primitive->coefB;
+    f32 *linear = primitive->coefC;
+    f32 *points = primitive->points;
+    s32 count = primitive->count;
     s32 segment;
     s32 component;
 
-    for (segment = 0; segment < recordCount - 1; segment++) {
-        for (component = 0; component < EFF_CURVE_COMPONENT_COUNT; component++) {
-            f32 startValue = points[segment * EFF_CURVE_COMPONENT_COUNT + component];
-            f32 endValue = points[segment * EFF_CURVE_COMPONENT_COUNT + component + EFF_CURVE_COMPONENT_COUNT];
+    for (segment = 0; segment < count - 1; segment++) {
+        for (component = 0; component < 3; component++) {
+            f32 startValue = points[segment * 3 + component];
+            f32 endValue = points[segment * 3 + component + 3];
 
             if (startValue == endValue) {
-                cubic[segment * EFF_CURVE_COMPONENT_COUNT + component] = 0.0f;
-                quadratic[segment * EFF_CURVE_COMPONENT_COUNT + component] = 0.0f;
-                linear[segment * EFF_CURVE_COMPONENT_COUNT + component] = 0.0f;
+                cubic[segment * 3 + component] = 0.0f;
+                quadratic[segment * 3 + component] = 0.0f;
+                linear[segment * 3 + component] = 0.0f;
             } else {
-                f32 startTangent = tangents[component * recordCount + segment];
-                f32 endTangent = tangents[component * recordCount + segment + 1];
+                f32 startTangent = tangents[component * count + segment];
+                f32 endTangent = tangents[component * count + segment + 1];
 
-                cubic[segment * EFF_CURVE_COMPONENT_COUNT + component] = 2.0f * (startValue - endValue) + (startTangent + endTangent);
-                quadratic[segment * EFF_CURVE_COMPONENT_COUNT + component] = (endValue - startValue) * 3.0f - (2.0f * startTangent + endTangent);
-                linear[segment * EFF_CURVE_COMPONENT_COUNT + component] = startTangent;
+                cubic[segment * 3 + component] = 2.0f * (startValue - endValue) + (startTangent + endTangent);
+                quadratic[segment * 3 + component] = (endValue - startValue) * 3.0f - (2.0f * startTangent + endTangent);
+                linear[segment * 3 + component] = startTangent;
             }
         }
     }
 }
 
-/* Allocate the small channel when at least four records exist; borrow the supplied rows and set its default step. */
-EffChan *effCreateChannel(EffFloatRows *rows, u32 recordCount) {
-    EffChan *channel = NULL;
-    sdfMemHandle_t *allocation;
-    EffChan *channelObject;
+void *dds3_1B1238(void *rows, u32 count) {
+    void *channel = NULL;
+    sdfMemHandle_t *handle;
+    dds3SplineWalk_t *channelObject;
 
-    if (recordCount < EFF_BEZIER_MIN_RECORD_COUNT) {
+    if (count < 4) {
         return channel;
     }
-    allocation = sdfMemAllocDirect(EFF_CHANNEL_BYTES);
-    channel = (void *)sdfMemLock(allocation);
+    handle = sdfMemAllocDirect(0x18);
+    channel = (void *)sdfMemLock(handle);
     channelObject = channel;
-    channelObject->allocation = allocation;
-    channelObject->cursorStep = EFF_CHANNEL_DEFAULT_STEP;
-    channelObject->recordCount = recordCount;
-    channelObject->rows = rows;
-    channelObject->cursorPosition = 0;
-    channelObject->cursorIndex = 0;
+    channelObject->handle = handle;
+    channelObject->step = 0.05f;
+    channelObject->count = count;
+    channelObject->points = rows;
+    channelObject->t = 0;
+    channelObject->index = 0;
     return channel;
 }
 
-/* Release the handle at a nonnull address without clearing it.
- * The native s32 signature has no explicit return; retain that contract. */
-s32 effReleaseInterpolationChannel(void **handleAddress) {
-    if (handleAddress != NULL) {
-        sdfMemFreeDirect(*handleAddress);
+s32 dds3_1B12B0(dds3SplineWalk_t *pWalk)
+{
+    if (pWalk != NULL) {
+        sdfMemFreeDirect(pWalk->handle);
     }
 }
 
-/* Sample before stepping, then advance three records only when position exceeds one.
- * Subtract once; return zero when the record cursor resets at the unsigned count-minus-one boundary. */
-s32 effAdvanceChanCursor(void *vertex, EffChan *channel) {
+s32 dds3_1B12D0(void *vertex, dds3SplineWalk_t *channel) {
     s32 continuing = 1;
-    f32 position = channel->cursorPosition;
-    u32 recordIndex = channel->cursorIndex;
+    f32 position = channel->t;
+    u32 recordIndex = channel->index;
 
-    effSampleChannelBezier(vertex, channel, recordIndex, position);
-    position += channel->cursorStep;
+    func_001B1370(vertex, channel, recordIndex, position);
+    position += channel->step;
     if (position > 1.0f) {
         position -= 1.0f;
-        recordIndex += EFF_BEZIER_RECORD_ADVANCE;
+        recordIndex += 3;
     }
-    if (recordIndex >= channel->recordCount - 1) {
+    if (recordIndex >= channel->count - 1) {
         position = 0.0f;
         recordIndex = 0;
         continuing = 0;
     }
-    channel->cursorIndex = recordIndex;
-    channel->cursorPosition = position;
+    channel->index = recordIndex;
+    channel->t = position;
     return continuing;
 }
 
-/* Evaluate four packed XYZ Bezier controls at t and write homogeneous W=1.
- * Preserve the native weight multiplication and sum association. */
-void effSampleChannelBezier(EffVert *vertex, EffChan *channel, s32 recordIndex, f32 t) {
+void func_001B1370(sdfVector4_t *vertex, dds3SplineWalk_t *channel, s32 recordIndex, f32 t) {
     f32 weights[4];
     f32 oneMinusT = 1.0f - t;
-    f32 *p0 = channel->rows->primary + recordIndex * EFF_CURVE_COMPONENT_COUNT;
-    f32 *p1 = p0 + EFF_CURVE_COMPONENT_COUNT;
+    f32 *p0 = channel->points + recordIndex * 3;
+    f32 *p1 = p0 + 3;
     f32 *p2 = p0 + 6;
     f32 *p3 = p0 + 9;
 
@@ -371,13 +380,14 @@ void effSampleChannelBezier(EffVert *vertex, EffChan *channel, s32 recordIndex, 
     vertex->w = 1.0f;
 }
 
-/* Reset the channel's record index and within-record position without changing its step. */
-void effClearChanCursor(EffChan *channel) {
-    channel->cursorIndex = 0;
-    channel->cursorPosition = 0;
+void func_001B1478(dds3SplineWalk_t *pWalk)
+{
+    pWalk->index = 0;
+    pWalk->t = 0.0f;
 }
 
-/* Set the per-call channel cursor increment without advancing it. */
-void effSetChanStep(EffChan *channel, f32 step) {
-    channel->cursorStep = step;
+void func_001B1488(dds3SplineWalk_t *pWalk, f32 step)
+{
+    pWalk->step = step;
 }
+/* SMT3's sdata in this span is the battle camera's; DDS has none here. */
