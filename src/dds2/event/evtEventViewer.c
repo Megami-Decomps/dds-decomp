@@ -667,7 +667,7 @@ void evtViewerApplyParameterKeyTracks(evtViewerInfo_t *viewer) {
 }
 
 
-extern sdf3DFogParam_t dds3FogParamMain;
+extern sdf3DFogParam_t dds3FogState;
 extern u128 *dds3LightParam[];
 extern u128 dds3AmbientColor[];
 extern f32 sdfFaceDivSoften;
@@ -1051,7 +1051,7 @@ extern void mnuDrawCampScaledTexture(sdfTexHandle_t *texture, CampDisplayDefault
 
 
 /* Timeline payloads store fogFar before fogNear. */
-extern sdf3DFogParam_t dds3FogParamMain;
+extern sdf3DFogParam_t dds3FogState;
 extern u128 *dds3LightParam[];
 extern u128 dds3AmbientColor[];
 extern f32 sdfFaceDivSoften;
@@ -1438,7 +1438,7 @@ void evtViewerUpdateTimelineGroupState(EvtRuntimeGroup *group, EvtRuntimeChild *
         if (from != NULL || to != NULL) {
             evtHokanSceneFog(enable, ratio, from, to, &D_00453990);
             dds3SetFogPara(0, D_00453990.vec[1], D_00453990.vec[0], D_00453990.vec[2], D_00453990.vec[3]);
-            dds3FogParamMain.color = D_00453990.color;
+            dds3FogState.color = D_00453990.color;
         }
         break;
     }
@@ -3701,7 +3701,7 @@ s32 evtEventViewerHandleKeyEditCommand(s32 command, s32 unused, evtViewerInfo_t 
                     case 11: {
                         EvtViewerDrawPayload *parameters = key->payload;
                         dds3SetFogPara(0, parameters->parameters.vec[1], parameters->parameters.vec[0], parameters->parameters.vec[2], parameters->parameters.vec[3]);
-                        dds3FogParamMain.color = parameters->parameters.color;
+                        dds3FogState.color = parameters->parameters.color;
                         viewer->controlState = dds3StartProcess(D_004373A0, 0x2AF9, 1, 1, mdlDebugPrintEffectScale2, NULL, 1);
                         evtViewerPushCommandHistory(11, 0, 0, viewer);
                         break;
@@ -4471,11 +4471,11 @@ s32 evtEventViewerCopyEffectSetupPayload(s32 unused0, s32 unused1, evtViewerInfo
         break;
     case 11:
         draw = entry->payload;
-        draw->parameters.vec[0] = dds3FogParamMain.fogMin;
-        draw->parameters.color = dds3FogParamMain.color;
-        draw->parameters.vec[1] = dds3FogParamMain.fogMax;
-        draw->parameters.vec[2] = dds3FogParamMain.fogNear;
-        draw->parameters.vec[3] = dds3FogParamMain.fogFar;
+        draw->parameters.vec[0] = dds3FogState.fogMin;
+        draw->parameters.color = dds3FogState.color;
+        draw->parameters.vec[1] = dds3FogState.fogMax;
+        draw->parameters.vec[2] = dds3FogState.fogNear;
+        draw->parameters.vec[3] = dds3FogState.fogFar;
         break;
     case 13:
         memcpy(entry->payload, effGetLoadDescA(), 0x28);
@@ -4687,7 +4687,7 @@ u8 evtViewerSkipsCampSceneIdRelease(PolyMovieWork *task) {
     return task->eventId == 0x263;
 }
 
-extern f32 sdfViewShakeVector[];
+extern f32 dds3QuakeOffset[];
 extern void evtFreeStage();
 extern void dds3FreeRenderTexture();
 extern void fldReleaseCameraColorEffect();
@@ -4705,7 +4705,7 @@ void evtViewerRelease(viewer)
     mnuCampLinkFontGlyph(viewer);
     fldSetTitleDrawMode(0);
     dds3StopQuake();
-    sdfViewShakeVector[0] = sdfViewShakeVector[1] = sdfViewShakeVector[2] = sdfViewShakeVector[3] = 0.0f;
+    dds3QuakeOffset[0] = dds3QuakeOffset[1] = dds3QuakeOffset[2] = dds3QuakeOffset[3] = 0.0f;
     if (viewer->timedActive == 1) {
         if (viewer->timedEnd.mode != EVT_TIMED_ACTION_END_PRESERVE_MOVIE_ON_RELEASE ||
             evtViewerHasUpdateFlag(viewer) == 1) {

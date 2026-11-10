@@ -75,7 +75,7 @@ segments:
       - [0x5268, c, kernel/dds3Randomize]  # SMT3 unit
       - [0x5290, c, game/code_00104290]  # DDS-only debug graph and texture viewer
       - [0x6150, c, kernel/dds3KernelDraw]  # Nocturne __FILE__; SMT3 unit starts at dds3InitializeFrameDrawPackets
-      - [0x8FD8, c, game/code_00107FD8]
+      - [0xB1B0, c, kernel/dds3SequenceList]
       - [0xCB28, c, script/scrScriptProcess]  # Nocturne __FILE__
       - [0xD120, c, script/scrTraceCode]  # Nocturne __FILE__
       - [0xE6B8, c, script/scrCommonCommand]  # Nocturne __FILE__ + P4 transfer
@@ -336,7 +336,7 @@ segments:
       - [0x29F030, .rodata, kernel/dds3PadManager]
       - [0x29F050, .rodata, game/code_00104290]
       - [0x29F170, .rodata, kernel/dds3KernelDraw]
-      - [0x29F1A0, .rodata, game/code_00107FD8]
+      - [0x29F1F0, .rodata, kernel/dds3SequenceList]
       - [0x29F278, .rodata, script/scrScriptProcess]
       - [0x2A0390, .rodata, script/scrTraceCode]
       - [0x2A04C8, .rodata, script/scrCommonCommand]
@@ -560,7 +560,7 @@ segments:
       - [0x2BB860, .sdata, kernel/dds3PadManager]
       - [0x2BB880, .sdata, game/code_00104290]
       - [0x2BB8E8, .sdata, kernel/dds3KernelDraw]  # starts at egl_OT_Offset, as in SMT3
-      - [0x2BB948, .sdata, game/code_00107FD8]
+      - [0x2BB950, .sdata, kernel/dds3SequenceList]
       - [0x2BB9A0, .sdata, basic/dds3DbgBasic]
       - [0x2BB9B8, .sdata, basic/dds3Basic]
       - [0x2BB9C0, .sdata, basic/dds3MoverBasic]

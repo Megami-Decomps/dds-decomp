@@ -194,7 +194,7 @@
 0x00108AC0	evtSubmitSecondaryGsTest	inferred	R_Names31 B94
 0x00108BD8	evtSubmitPrimaryAlphaBlendMode	inferred	R_Names31 B94
 0x00108CE0	evtSubmitFixedAlphaBlend	inferred	R_Names31 B94
-0x00108EC0	evtSubmitTexturedGradientQuad	inferred	Inferred from the current C implementation in game/code_00107EF8.c; agent-proposed name checked against its owner, fields and callees (R1 finite names pass).
+0x00108EC0	evtSubmitTexturedGradientQuad	inferred	Inferred from the current C implementation in kernel/dds3KernelDraw.c; agent-proposed name checked against its owner, fields and callees (R1 finite names pass).
 0x00109028	evtSubmitTexturedGradientQuadPoints	inferred	Submits a textured quad with four corner colours (sdfPrimLinkGt4) to the current draw surface, placed by four float screen points (top left, top right, bottom left, bottom right) where evtSubmitTexturedGradientQuad takes a rectangle. DDS2's own; no direct caller.
 0x00109248	evtSubmitGradientRectAtDepth	inferred	R_Names31 B94
 0x001094F8	evtSubmitDefaultDepthGradientRect	inferred	R_Names31 B94
@@ -260,7 +260,7 @@
 0x0010A980	evtAdminModeEighteenEntryNoOp	inferred	confidence=high; Native ddsAdminModeCallbacks mode18 entry slot0x003848A8. Registered entry is empty; no scene identity is asserted. DDS1 twin0x0010A840 has the same role at0x003298A8; no scene identity inferred. Existing signature, constants and definition order retained. [Namer1 readability b76; paired native registry, dds3_admin_dispatch.h and dispatcher completion contract]
 0x0010A988	evtAdminModeEighteenDestroyNoOp	inferred	confidence=high; Native ddsAdminModeCallbacks mode18 destroy slot0x003848AC. Registered destroy returns zero without side effects; dispatcher accepts it and applies transition delay1. DDS1 twin0x0010A848 has the same role at0x003298AC; no scene identity inferred. Existing signature, constants and definition order retained. [Namer1 readability b76; paired native registry, dds3_admin_dispatch.h and dispatcher completion contract]
 0x0010A990	evtKeepAdminModeEighteenPending	inferred	confidence=high; Native ddsAdminModeCallbacks mode18 cleanup slot0x003848B0. Registered cleanup always returns zero, so dispatcher leaves this mode pending. DDS1 twin0x0010A850 has the same role at0x003298B0; no scene identity inferred. Existing signature, constants and definition order retained. [Namer1 readability b76; paired native registry, dds3_admin_dispatch.h and dispatcher completion contract]
-0x0010A9B0	evtExitCampTaskGroup	inferred	confidence=high; matched-C; src/dds2/game/code_00107EF8.c:891:func_0010A9B0; Lifecycle callback removes camp tasks then returns zero completion status.; twin=0x0010A870, anchored ordered retail pairing.; sources=names_R_Names35.tsv [names_qp10.tsv]
+0x0010A9B0	evtExitCampTaskGroup	inferred	confidence=high; matched-C; src/dds2/kernel/dds3SequenceList.c:480:func_0010A9B0; Lifecycle callback removes camp tasks then returns zero completion status.; twin=0x0010A870, anchored ordered retail pairing.; sources=names_R_Names35.tsv [names_qp10.tsv]
 0x0010A9D0	mnuCheckCampStateAndAcknowledge	inferred	Calls mnuAcknowledgeCampState, which clears completed state; original Is name hid mutation. [names_reviewed21.tsv]
 0x0010A9F0	evtCreateSkyAndCampTasks	inferred	creates sky task and calls camp panel initializer [names_R_FuncNames2.tsv]
 0x0010AA18	evtDestroySkyAndCampTasks	inferred	destroys sky task and camp panel tasks [names_R_FuncNames2.tsv]
@@ -283,7 +283,7 @@
 0x0010ABC8	evtCreateMovieViewerTask	inferred	calls InitMovieViewer [names_R_FuncNames2.tsv]
 0x0010ABE0	evtDestroyMovieViewerTask	inferred	calls FinishMovieViewer [names_R_FuncNames2.tsv]
 0x0010AC00	evtKeepMovieViewerModePending	inferred	confidence=high; Native ddsAdminModeCallbacks mode26 cleanup slot0x00384910: mode 26 cleanup after movie-viewer create/destroy; constant zero keeps polling. Both dds3AdminPollModeCompletion bodies set completion flag2 only for nonzero cleanup; destroy zero is accepted with transition delay1. DDS1 twin0x0010AAC0, same mode/role at0x00329910. Existing return/formals retained. [Namer1 readability b75; paired native registry and typed dispatcher contract]
-0x0010AC08	evtEnterInterfaceMode	inferred	confidence=high; Native admin-mode27 entry callback00384914 invokes the empty interface initialization provider. Dispatcher entry role is defined in dds3_admin_dispatch.h and game/code_00107EF8.c; existing formal/return shape preserved. DDS1 twin0010AAC8. [PurA readability b4; native callback registration and paired adapter bodies]
+0x0010AC08	evtEnterInterfaceMode	inferred	confidence=high; Native admin-mode27 entry callback00384914 invokes the empty interface initialization provider. Dispatcher entry role is defined in dds3_admin_dispatch.h and kernel/dds3SequenceList.c; existing formal/return shape preserved. DDS1 twin0010AAC8. [PurA readability b4; native callback registration and paired adapter bodies]
 0x0010AC20	evtDestroyInterfaceMode	inferred	confidence=high; Native admin-mode27 destroy callback00384918 invokes the empty interface shutdown provider and returns0. Existing formal/return shape preserved. DDS1 twin0010AAE0. [PurA readability b4; native callback registration, dispatcher destroy contract and paired adapter bodies]
 0x0010AC40	evtKeepInterfaceModePending	inferred	confidence=high; Native admin-mode27 cleanup callback0038491C always returns0. Both dds3AdminPollModeCompletion bodies set completion flag2 only when cleanup()!=0; zero therefore keeps polling, not immediate completion. DDS1 twin0010AB00. [PurA readability b4; native callback registration and dispatcher zero-result meaning]
 0x0010AC88	evtDestroyLmapTask	inferred	stops lmap task and sends event-mode cleanup [names_R_FuncNames2.tsv]
@@ -300,9 +300,9 @@
 0x0010B118	evtToggleDebugTimeGraphTask	inferred	Creates DebugTimeGrph task for mode one or destroys it for mode zero. [names_reviewed7.tsv]
 0x0010B190	sdfDrawHeapSpanOverlay	inferred	U2
 0x0010B780	evtDrawConditionalHeapUsageOverlay	inferred	R_Names31 B94
-0x0010B7B8	evtDrawResourceCountDebugTask	inferred	Inferred from the current C implementation in game/code_00107EF8.c; agent-proposed name checked against its owner, fields and callees (R1 finite names pass).
+0x0010B7B8	evtDrawResourceCountDebugTask	inferred	Inferred from the current C implementation in kernel/dds3SequenceList.c; agent-proposed name checked against its owner, fields and callees (R1 finite names pass).
 0x0010B8D0	evtResourceCountDebugTaskDestroy	inferred	Empty destroy callback registered by evtToggleAlternateDebugTimeGraphTask for the DebugTimeGrph task that draws font, text and GS resource counts; paired DDS1 callback at 0x0010B6A8.
-0x0010B8D8	evtToggleAlternateDebugTimeGraphTask	inferred	confidence=high; matched-C; src/dds2/game/code_00107EF8.c:1228:func_0010B8D8; Creates or destroys the alternate event debug time-graph task according to mode one/zero.; source=reviewed-prior-QP15 [names_qp15.tsv]
+0x0010B8D8	evtToggleAlternateDebugTimeGraphTask	inferred	confidence=high; matched-C; src/dds2/kernel/dds3SequenceList.c:982:func_0010B8D8; Creates or destroys the alternate event debug time-graph task according to mode one/zero.; source=reviewed-prior-QP15 [names_qp15.tsv]
 0x0010B950	scrLinkHandle	inferred	SMT3HD name via SLUS_209.11 0x00109848, reloc-identical; was evtLinkWorkNode
 0x0010B990	scrUnlinkHandle	inferred	SMT3HD name via SLUS_209.11 0x00109888, reloc-identical; was evtUnlinkWorkNode
 0x0010B9E8	scrPrintProcedureStart	inferred	SMT3HD name via SLUS_209.11 0x001098E0, SMT3 name (was bfContextCreate); was bfContextCreate
@@ -9985,7 +9985,10 @@
 0x0037F4D0	dds3PadButtonPrev	inferred	SMT3HD data name via SLUS_209.11 0x002F57D0, 2 agreeing references; was dds3PadButtonPrev
 0x0037F510	dds3PadButtonState	inferred	SMT3HD data name via SLUS_209.11 0x002F5810, 53 agreeing references; was dds3PadButtonState
 0x0037F550	effSharedRandomState	inferred	confidence=high; src/dds2/game/code_00102DC8.c:D_0037F550; type=PRNG state storage (u8[]); refs=dds3InitRandCB,btlSelectActorAction; Seeded with a fixed value and passed to random generators for effect frame, position and scale variation. [names_qp9.tsv]
-0x0037F590	sdfViewShakeVector	inferred	the camera shake offset: added to the view's eye and target before the look-at basis is built, random-walked by evtUpdateSelectionStateInterpolation, zeroed by the event viewer
+0x0037F590	dds3QuakeOffset	inferred	SMT3HD name via SLUS_209.11 0x2F5960, SMT3 kernel/dds3KernelDraw name, same offset in the unit's data; was sdfViewShakeVector
+0x0037F5A0	eglPolyStripWord	inferred	SMT3HD name via SLUS_209.11 0x2F5970, SMT3 kernel/dds3KernelDraw name, same offset in the unit's data; was D_0037F5A0
+0x0037F5B0	eglLineVerts	inferred	SMT3HD name via SLUS_209.11 0x2F5980, SMT3 kernel/dds3KernelDraw name, same offset in the unit's data; was D_0037F5B0
+0x0037F5D0	eglLineColors	inferred	SMT3HD name via SLUS_209.11 0x2F59A0, SMT3 kernel/dds3KernelDraw name, same offset in the unit's data; was D_0037F5D0
 0x0037F5E0	dds3ScreenParam	inferred	SMT3HD data name via SLUS_209.11 0x002F59B0, 2 agreeing references; was dds3ScreenParam
 0x0037F610	sdfProjectionMatrix	inferred	confidence=high; data D_0037F610; matched-C-users=8; src/dds2/game/code_00159B48.c:450:effComputeProjectedOffsetAngle; src/dds2/game/code_00231A80.c:575:mdlGetScreenOffset; src/dds2/game/code_00231A80.c:596:mdlProjectPoints; src/dds2/game/code_00194700.c:428:effScreenOffset; src/dds2/game/code_00128FE8.c:1183:fldPoint3To2; Projection helpers postmultiply view transform by this matrix before perspective divide; data-twin=D_00324610, supported by 7 independently paired matched functions.; retail-data-start=asm/dds2/data/data.data.s:412.; seed-placeholder=D_0037F610; current asm label and source default identifier verified; source=names_reviewed36.tsv. [names_qp10_seed.tsv]
 0x0037F680	aViewTarget	inferred	SMT3HD data name via SLUS_209.11 0x002F5A50, 31 agreeing references; was aViewTarget
@@ -9993,7 +9996,7 @@
 0x0037F6A0	aViewDown	inferred	SMT3HD data name via SLUS_209.11 0x002F5A70, 10 agreeing references; was aViewDown
 0x0037F770	dds3LightParam	inferred	SMT3HD name via SLUS_209.11 0x002F5B40 (parallel lights, ambient +0x10, fog +0x20)
 0x0037F780	dds3AmbientColor	inferred	confidence=high; matched_users=src/dds2/game/code_001DD390.c:btlInitializeSceneLightingAndTint, src/dds2/game/code_002DE248.c:effResetDefaultColorTables; Default color vector copied into battle lighting and selected for units without an explicit secondary color. Retail address correspondence is independently corroborated by at least two paired functions. [names_qp9.tsv]
-0x0037F790	dds3FogParamMain	inferred	confidence=high; matched_users=src/dds2/game/code_00107EF8.c:dds3SetFogPara, src/dds2/kernel/dds3KernelDraw.c:dds3SetFog; Current draw vector is assigned directly or used as the starting value of an interpolated target; copy API updates its record. Retail address correspondence is independently corroborated by at least two paired functions. [names_qp9.tsv]
+0x0037F790	dds3FogState	inferred	SMT3HD name via SLUS_209.11 0x2F5B60, SMT3 kernel/dds3KernelDraw name (fog record at dds3LightParam + 0x20); was dds3FogParamMain
 0x0037F850	dds3RenderTargetVector	inferred	SMT3HD name via SLUS_209.11 0x002F5C20, kwln rename; was kwlnHeldTextureTargetVector; was kwlnHeldTextureTargetVector
 0x0037F860	dds3RenderEyeVector	inferred	SMT3HD name via SLUS_209.11 0x002F5C30, kwln rename; was kwlnHeldTextureEyeVector; was kwlnHeldTextureEyeVector
 0x0037F870	effPCPBossTexRect	inferred	confidence=high; Existing f32[4] up vector, third argument of the held-texture LookAtMatrix call. All declarations and native payload unchanged. DDS1 twin 0x00324870; root/interior/addend instruction readers all current matched C, no import/active ASM reader. [PurD readability data b12; identifier-only]; was effPCPBossTexRect
@@ -10705,8 +10708,8 @@
 0x00435D00	dds3BackgroundFadeSecondRamp	inferred	The background fade's second band ramp, up to DDS3_BGFADE_SECOND_RAMP_MAX: the band's bottom moves down 8 units a step. DDS1 twin 0x003BA930.; was dds3BackgroundFadeSecondRamp
 0x00435D04	distblurovercnt	inferred	SMT3HD data name via SLUS_209.11 0x0054E97C, 4 agreeing references; was distblurovercnt
 0x00435D08	ripblurovercnt	inferred	SMT3HD data name via SLUS_209.11 0x0054E980, 4 agreeing references; was ripblurovercnt
-0x00435D18	evtSelectionStateActive	inferred	confidence=high; matched_users=src/dds2/game/code_00107EF8.c:evtCheckSelectionState, src/dds2/game/code_00107EF8.c:evtSelStateCreate; Creation sets this flag; state polling checks it before accessing the allocated selection state. Retail address correspondence is independently corroborated by at least two paired functions. [names_qp9.tsv]
-0x00435D30	evtConsoleFontResourceChain	inferred	confidence=high; matched_users=src/dds2/game/code_00107EF8.c:evtDestroyFontResourceChain, src/dds2/game/code_00107EF8.c:evtEnsureFontResourceChain; Developer font-chain creation configures this shared node; teardown destroys and clears it. Retail address correspondence is independently corroborated by at least two paired functions. [names_qp9.tsv]
+0x00435D18	evtSelectionStateActive	inferred	confidence=high; matched_users=src/dds2/kernel/dds3KernelDraw.c:evtCheckSelectionState, src/dds2/kernel/dds3KernelDraw.c:evtSelStateCreate; Creation sets this flag; state polling checks it before accessing the allocated selection state. Retail address correspondence is independently corroborated by at least two paired functions. [names_qp9.tsv]
+0x00435D30	evtConsoleFontResourceChain	inferred	confidence=high; matched_users=src/dds2/kernel/dds3SequenceList.c:evtDestroyFontResourceChain, src/dds2/kernel/dds3SequenceList.c:evtEnsureFontResourceChain; Developer font-chain creation configures this shared node; teardown destroys and clears it. Retail address correspondence is independently corroborated by at least two paired functions. [names_qp9.tsv]
 0x00435D60	scrHandleCount	inferred	SMT3HD data name via SLUS_209.11 0x0054E994, 4 agreeing references; was scrHandleCount
 0x00435D64	scrHandleFirst	inferred	SMT3HD data name via SLUS_209.11 0x0054E998, 4 agreeing references; was scrHandleFirst
 0x00435D68	scrHandleLast	inferred	SMT3HD data name via SLUS_209.11 0x0054E99C, 5 agreeing references; was scrHandleLast
@@ -11148,6 +11151,7 @@
 0x00438D90	dds3PadVibrationState	inferred	SMT3HD data name via SLUS_209.11 0x00551B90, 3 agreeing references; was dds3PadVibrationState
 0x00438D99	dds3PadVibrationMode	inferred	was dds3PadVibrationMode
 0x00438DA8	dds3DebugGraphTask	inferred	The task handle created for DebugTimeGrph and passed to hierarchy destruction.; was dds3DebugGraphTask
+0x00438DB0	eglMaterial	inferred	SMT3HD name via SLUS_209.11 0x551BA8, SMT3 kernel/dds3KernelDraw name, same offset in the unit's data; was D_00438DB0
 0x00438DB4	blurnow	inferred	SMT3HD data name via SLUS_209.11 0x00551BAC, 4 agreeing references; was blurnow
 0x00438DB6	blurmax	inferred	SMT3HD data name via SLUS_209.11 0x00551BAE, 3 agreeing references; was blurmax
 0x00438DB8	bluralphabase	inferred	SMT3HD data name via SLUS_209.11 0x00551BB0, 3 agreeing references; was bluralphabase
@@ -11158,6 +11162,26 @@
 0x00438DC2	fademax	inferred	SMT3HD data name via SLUS_209.11 0x00551BBA, 10 agreeing references; was fademax
 0x00438DC4	dds3BackgroundFadeCounter	inferred	high confidence; src/dds2/game/code_00102DC8.c dds3FadeBackgroundStartIn(): D_00438DC4 = 0; Instruction-aligned data counterpart of DDS1 D_003BD6C4 in the matched dds3FadeBackgroundStartIn() twin. Background fade counter starts at zero for the increasing fade and at duration for the opposite fade. [names_reviewed26.tsv]; was dds3BackgroundFadeCounter
 0x00438DC6	dds3BackgroundFadeDuration	inferred	high confidence; src/dds2/game/code_00102DC8.c dds3FadeBackgroundStartIn(): D_00438DC6 = 0; Instruction-aligned data counterpart of DDS1 D_003BD6C6 in the matched dds3FadeBackgroundStartIn() twin. Stores the caller-supplied background fade duration. [names_reviewed26.tsv]; was dds3BackgroundFadeDuration
+0x00438DC8	lightcolornow	inferred	SMT3HD name via SLUS_209.11 0x551BC0, SMT3 kernel/dds3KernelDraw name, same offset in the unit's data; was D_00438DC8
+0x00438DD0	lightcolormax	inferred	SMT3HD name via SLUS_209.11 0x551BC8, SMT3 kernel/dds3KernelDraw name, same offset in the unit's data; was D_00438DD0
+0x00438DD8	lightdirnow	inferred	SMT3HD name via SLUS_209.11 0x551BD0, SMT3 kernel/dds3KernelDraw name, same offset in the unit's data; was D_00438DD8
+0x00438DE0	lightdirmax	inferred	SMT3HD name via SLUS_209.11 0x551BD8, SMT3 kernel/dds3KernelDraw name, same offset in the unit's data; was D_00438DE0
+0x00438DE6	ambientnow	inferred	SMT3HD name via SLUS_209.11 0x551BDE, SMT3 kernel/dds3KernelDraw name, same offset in the unit's data; was D_00438DE6
+0x00438DE8	ambientmax	inferred	SMT3HD name via SLUS_209.11 0x551BE0, SMT3 kernel/dds3KernelDraw name, same offset in the unit's data; was D_00438DE8
+0x00438DEC	ambientbase	inferred	SMT3HD name via SLUS_209.11 0x551BE4, SMT3 kernel/dds3KernelDraw name, same offset in the unit's data; was D_00438DEC
+0x00438DF0	ambienttarget	inferred	SMT3HD name via SLUS_209.11 0x551BE8, SMT3 kernel/dds3KernelDraw name, same offset in the unit's data; was D_00438DF0
+0x00438DF4	fogrgbnow	inferred	SMT3HD name via SLUS_209.11 0x551BEC, SMT3 kernel/dds3KernelDraw name, same offset in the unit's data; was D_00438DF4
+0x00438DF6	fogrgbmax	inferred	SMT3HD name via SLUS_209.11 0x551BEE, SMT3 kernel/dds3KernelDraw name, same offset in the unit's data; was D_00438DF6
+0x00438DF8	fogparanow	inferred	SMT3HD name via SLUS_209.11 0x551BF0, SMT3 kernel/dds3KernelDraw name, same offset in the unit's data; was D_00438DF8
+0x00438DFA	fogparamax	inferred	SMT3HD name via SLUS_209.11 0x551BF2, SMT3 kernel/dds3KernelDraw name, same offset in the unit's data; was D_00438DFA
+0x00438DFC	fogrgbbase	inferred	SMT3HD name via SLUS_209.11 0x551BF4, SMT3 kernel/dds3KernelDraw name, same offset in the unit's data; was D_00438DFC
+0x00438E00	fogrgbtarget	inferred	SMT3HD name via SLUS_209.11 0x551BF8, SMT3 kernel/dds3KernelDraw name, same offset in the unit's data; was D_00438E00
+0x00438E04	sbnow	inferred	SMT3HD name via SLUS_209.11 0x551BFC, SMT3 kernel/dds3KernelDraw name, same offset in the unit's data; was D_00438E04
+0x00438E06	sbmax	inferred	SMT3HD name via SLUS_209.11 0x551BFE, SMT3 kernel/dds3KernelDraw name, same offset in the unit's data; was D_00438E06
+0x00438E08	softenbase	inferred	SMT3HD name via SLUS_209.11 0x551C00, SMT3 kernel/dds3KernelDraw name, same offset in the unit's data; was D_00438E08
+0x00438E0C	softentarget	inferred	SMT3HD name via SLUS_209.11 0x551C04, SMT3 kernel/dds3KernelDraw name, same offset in the unit's data; was D_00438E0C
+0x00438E10	biasbase	inferred	SMT3HD name via SLUS_209.11 0x551C08, SMT3 kernel/dds3KernelDraw name, same offset in the unit's data; was D_00438E10
+0x00438E14	biastarget	inferred	SMT3HD name via SLUS_209.11 0x551C0C, SMT3 kernel/dds3KernelDraw name, same offset in the unit's data; was D_00438E14
 0x00438E18	mulblurnow	inferred	SMT3HD data name via SLUS_209.11 0x00551C10, 7 agreeing references; was mulblurnow
 0x00438E1A	mulblurmax	inferred	SMT3HD data name via SLUS_209.11 0x00551C12, 5 agreeing references; was mulblurmax
 0x00438E1C	mulblurabase	inferred	SMT3HD data name via SLUS_209.11 0x00551C14, 4 agreeing references; was mulblurabase
@@ -11194,7 +11218,7 @@
 0x00438E5A	mfilteratarget	inferred	SMT3HD data name via SLUS_209.11 0x00551C52, 3 agreeing references; was mfilteratarget
 0x00438E5C	mfilterswapnow	inferred	SMT3HD data name via SLUS_209.11 0x00551C54, 7 agreeing references; was mfilterswapnow
 0x00438E5E	mfilterswapmax	inferred	SMT3HD data name via SLUS_209.11 0x00551C56, 4 agreeing references; was mfilterswapmax
-0x00438E60	evtSelectionState	inferred	confidence=high; matched_users=src/dds2/game/code_00107EF8.c:evtCheckSelectionState, src/dds2/game/code_00107EF8.c:evtSelStateCreate; Shared allocated selection state contains count/limit, values and frame counters and is used by polling. Retail address correspondence is independently corroborated by at least two paired functions. [names_qp9.tsv]
+0x00438E60	evtSelectionState	inferred	confidence=high; matched_users=src/dds2/kernel/dds3KernelDraw.c:evtCheckSelectionState, src/dds2/kernel/dds3KernelDraw.c:evtSelStateCreate; Shared allocated selection state contains count/limit, values and frame counters and is used by polling. Retail address correspondence is independently corroborated by at least two paired functions. [names_qp9.tsv]
 0x00438E6C	CodeFunc_2Operation_i1	inferred	SMT3HD data name via SLUS_209.11 0x00551C58, 13 agreeing references; was CodeFunc_2Operation_i1
 0x00438E70	CodeFunc_2Operation_i2	inferred	SMT3HD data name via SLUS_209.11 0x00551C5C, 13 agreeing references; was CodeFunc_2Operation_i2
 0x00438E74	CodeFunc_2Operation_ri	inferred	SMT3HD data name via SLUS_209.11 0x00551C60, 39 agreeing references; was CodeFunc_2Operation_ri
@@ -11361,6 +11385,12 @@
 0x0043DD70	dds3MFilterCurrent	inferred	SMT3HD name via SLUS_209.11 0x00556C70, kwln rename; was kwlnTexturedSquareFrameParameters; was kwlnTexturedSquareFrameParameters
 0x0043DDA0	dds3ZClearDrawTag	inferred	SMT3HD data name via SLUS_209.11 0x00556CA0, 2 agreeing references; was dds3ZClearDrawTag
 0x0043E1C0	dds3FadePacket	inferred	The background fade's overlay packet, one per draw buffer. DDS1 twin 0x003C2A40.; was dds3FadePacket
+0x0043E320	dds3LightColor	inferred	SMT3HD name via SLUS_209.11 0x557220, SMT3 kernel/dds3KernelDraw name, same offset in the unit's data; was D_0043E320
+0x0043E330	dds3LightTargetColor	inferred	SMT3HD name via SLUS_209.11 0x557230, SMT3 kernel/dds3KernelDraw name, same offset in the unit's data; was D_0043E330
+0x0043E340	dds3LightArcFrom	inferred	SMT3HD name via SLUS_209.11 0x557240, SMT3 kernel/dds3KernelDraw name, same offset in the unit's data; was D_0043E340
+0x0043E370	dds3LightArcTo	inferred	SMT3HD name via SLUS_209.11 0x557270, SMT3 kernel/dds3KernelDraw name, same offset in the unit's data; was D_0043E370
+0x0043E3A0	dds3FogParam	inferred	SMT3HD name via SLUS_209.11 0x5572A0, SMT3 kernel/dds3KernelDraw name, same offset in the unit's data; was D_0043E3A0
+0x0043E3B0	dds3FogColor	inferred	SMT3HD name via SLUS_209.11 0x5572B0, SMT3 kernel/dds3KernelDraw name, same offset in the unit's data; was D_0043E3B0
 0x0043E3C0	dds3MultiBlurBuf	inferred	SMT3HD data name via SLUS_209.11 0x005572C0, 2 agreeing references; was dds3MultiBlurBuf
 0x0043E3F0	mulblurtarget	inferred	SMT3HD data name via SLUS_209.11 0x005572F0, 7 agreeing references; was mulblurtarget
 0x0043E420	dds3DistBlurBuf	inferred	SMT3HD name via SLUS_209.11 0x00557320, kwln rename; was kwlnFilterBlurTransitionStartParameters; was kwlnFilterBlurTransitionStartParameters

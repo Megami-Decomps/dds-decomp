@@ -149,7 +149,7 @@ extern f32 dds3RenderTargetVector[4], dds3RenderEyeVector[4], effPCPBossTexRect[
 
 extern f32 D_0037FA20[4], fldAutoMapEye[4], fldAutoMapUp[4];
 
-extern sdf3DFogParam_t dds3RenderFogParam, dds3FogParam2, dds3FogParamMain;
+extern sdf3DFogParam_t dds3RenderFogParam, dds3FogParam2, dds3FogState;
 
 extern Matrix4 dds3RenderViewportMatrix;
 
@@ -157,7 +157,7 @@ extern Matrix4 D_00384790;
 
 extern f32 aViewTarget[4], aViewEye[4], aViewDown[4];
 
-extern u8 sdfViewShakeVector[];
+extern u8 dds3QuakeOffset[];
 
 extern Matrix4 sdfViewMatrix;
 
@@ -246,7 +246,7 @@ s32 dds3DrawFirstProcess(dds3ProcessID_t *task) {
     SDF_VU0_NORMALIZE();
     SDF_VU0_SCALEVECTOR_V0(600.0f);
     SDF_VU0_ADDVECTOR();
-    SDF_VU0_LOADVECTOR_B(sdfViewShakeVector);
+    SDF_VU0_LOADVECTOR_B(dds3QuakeOffset);
     SDF_VU0_ADDVECTOR();
     SDF_VU0_STOREVECTOR(&eye);
     SDF_VU0_LOADVECTOR(aViewEye);
@@ -265,7 +265,7 @@ s32 dds3DrawFirstProcess(dds3ProcessID_t *task) {
         viewNode->regFunc(viewNode, (sdfDrawTag_t *)(D_003820F0 - 0x250 + bufferIndex * DDS3_FRAME_BUFFER_BYTES));
         viewList = dds3FontReqAllocDrawTag();
         viewFrustum = (u64 *)sdfGrAllocPacketBuff(0x50);
-        sdf3DMakeFogPacket((struct ConsFrustumPacket *)viewFrustum, &dds3FogParamMain);
+        sdf3DMakeFogPacket((struct ConsFrustumPacket *)viewFrustum, &dds3FogState);
         sdfDrawTagLink(viewList, (u32)viewFrustum);
         viewNode->regFunc(viewNode, viewList);
 

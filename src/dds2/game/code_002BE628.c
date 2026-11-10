@@ -3971,7 +3971,7 @@ extern f32 aViewTarget[4];
 
 extern f32 aViewDown[4];
 
-extern u8 sdfViewShakeVector[];
+extern u8 dds3QuakeOffset[];
 
 extern Matrix4 sdfViewMatrix;
 
@@ -4332,7 +4332,7 @@ void evtStageTestUpdateCamera(void)
     SDF_VU0_NORMALIZE();
     SDF_VU0_SCALEVECTOR_V0(600.0f);
     SDF_VU0_ADDVECTOR();
-    SDF_VU0_LOADVECTOR_B(sdfViewShakeVector);
+    SDF_VU0_LOADVECTOR_B(dds3QuakeOffset);
     SDF_VU0_ADDVECTOR();
     SDF_VU0_STOREVECTOR(&eye);
     SDF_VU0_LOADVECTOR(aViewEye);

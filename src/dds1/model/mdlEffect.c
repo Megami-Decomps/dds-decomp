@@ -2668,7 +2668,7 @@ extern char D_003BBCD0[]; /* "%f" */
 
 extern char D_003BBCD8[]; /* "fog=" */
 
-extern sdf3DFogParam_t dds3FogParamMain;
+extern sdf3DFogParam_t dds3FogState;
 
 /* Read the viewer's config text file: bg-color=, eye-position=, target-position=, fovy=, fog= lines. */
 INCLUDE_RODATA(const s32, "model/mdlEffect", D_003ABEB0);
@@ -2731,11 +2731,11 @@ void mdlLoadViewerPresentationConfig(void) {
             }
         } else if (memcmp(lineStart, D_003BBCD8, 4) == 0) {
             if (sscanf(lineStart + 4, "%d,%f,%d,%f,%x", &fogNear, &fogValue, &fogFar, &fogFarB, &color) == 5) {
-                dds3FogParamMain.fogMax = fogNear;
-                dds3FogParamMain.fogNear = fogValue;
-                dds3FogParamMain.fogMin = fogFar;
-                dds3FogParamMain.fogFar = fogFarB;
-                dds3FogParamMain.color = color;
+                dds3FogState.fogMax = fogNear;
+                dds3FogState.fogNear = fogValue;
+                dds3FogState.fogMin = fogFar;
+                dds3FogState.fogFar = fogFarB;
+                dds3FogState.color = color;
             }
         }
         lineOffset = nextLineOffset;
@@ -2753,9 +2753,9 @@ void mdlSaveViewerPresentationConfig(void) {
     size = sprintf(buffer, D_003ABF18, D_003BA8EC,
                         D_003D7B20.x, D_003D7B20.y, D_003D7B20.z,
                         D_003D7B30.x, D_003D7B30.y, D_003D7B30.z,
-                        dds3ScreenParam.camera.fov, (s32)dds3FogParamMain.fogMax,
-                        dds3FogParamMain.fogNear, (s32)dds3FogParamMain.fogMin,
-                        dds3FogParamMain.fogFar, dds3FogParamMain.color);
+                        dds3ScreenParam.camera.fov, (s32)dds3FogState.fogMax,
+                        dds3FogState.fogNear, (s32)dds3FogState.fogMin,
+                        dds3FogState.fogFar, dds3FogState.color);
     request = fileSave(D_00367AF8, buffer, size);
     fileSync(request);
     fileHandleFree((struct FileRequest *)request);
@@ -3198,7 +3198,7 @@ s32 mdlDebugPrintEffectScale2(dds3ProcessID_t *task) {
         } else if (mdlDebugScaleWork.selection < 4) {
             mdlGetDebugEntry(mdlDebugScaleWork.selection);
         } else {
-            dds3DebugColorEditEx(&dds3FogParamMain.color, mdlDebugScaleWork.selection - 4, (s8 *)mdlDebugScaleWork.pad);
+            dds3DebugColorEditEx(&dds3FogState.color, mdlDebugScaleWork.selection - 4, (s8 *)mdlDebugScaleWork.pad);
         }
     }
     sdfDrawTagLink(mdlDebugScaleWork.packetList,
@@ -3225,7 +3225,7 @@ s32 mdlDebugPrintEffectScale2(dds3ProcessID_t *task) {
                                                           (mdlDebugScaleWork.unk04 == 1 && mdlDebugScaleWork.selection == i) ? 6 : 0,
                                                           D_00367D58[i].format, value));
     }
-    mdlDebugTextBox(0x8680, 0x7C60, dds3FogParamMain.color, mdlDebugScaleWork.selection - 4);
+    mdlDebugTextBox(0x8680, 0x7C60, dds3FogState.color, mdlDebugScaleWork.selection - 4);
     D_00325708.regFunc(&D_00325708, mdlDebugScaleWork.packetList);
     return 0;
 }

@@ -11,13 +11,136 @@
 #include "dds3_fade_color.h"
 #include "evt_frame_state_packet.h"
 #include "dds3_draw_light_binding.h"
-#include "draw3d.h"
 #include "gs_packet.h"
 #include "eff_rectangle_blur_api.h"
 #include "eff_event_draw.h"
 #include "eff_event_work_api.h"
 #include "dds3_frame_draw_bank.h"
 #include "sdf_packet_alloc.h"
+#include "evt_sel_state.h"
+#include "sdf_line_pair_packet_api.h"
+#include "sdf_gs_header.h"
+#include "sdf_dev_cons.h"
+
+#include "kernel_draw.h"
+#include "sdfFrame.h"
+
+typedef struct
+{
+    f32 fogMax;
+    f32 fogMin;
+    f32 fogNear;
+    f32 fogFar;
+} dds3FogRange_t;
+
+extern dds3LightState_t dds3LightParam;
+SYMBOL_AT(sdf3DFogParam_t, dds3FogState, dds3LightParam, 0x20);
+SYMBOL_AT(sdfVector4_t, dds3AmbientColor, dds3LightParam, 0x10);
+extern dds3FogRange_t dds3FogParam;
+extern dds3FogRange_t dds3FogColor;
+extern u16 fogparanow; extern u16 fogparamax;
+extern f32 sdfFaceDivSoften; extern f32 sdfFaceDivBias;
+extern u16 sbnow; extern u16 sbmax;
+extern f32 softenbase; extern f32 softentarget;
+extern f32 biasbase; extern f32 biastarget;
+extern u16 lightcolornow[4];
+extern u16 lightcolormax[4];
+extern u16 lightdirnow[4];
+extern u16 lightdirmax[3];
+extern u32 dds3LightColor[];
+extern u32 dds3LightTargetColor[];
+extern f32 dds3LightArcFrom[][4];
+extern f32 dds3LightArcTo[][4];
+extern u16 ambientnow, ambientmax;
+extern u32 ambientbase, ambienttarget;
+extern u16 fogrgbnow, fogrgbmax;
+extern u32 fogrgbbase, fogrgbtarget;
+void Lerp(f32 aRatio);
+void ToMatrix(void);
+void dds3RotationArc(void);
+
+static inline u32 PackRGBAWord(f32 unit) {
+    u32 rgba[4];
+    MMI_RGBA_PACK_UNIT(rgba[0], unit);
+    return rgba[0];
+}
+
+#include "sdf_packet_builders.h"
+#include "common.h"
+#include "file_menu_start_mode.h"
+#include "fld_terminal_scene_state.h"
+#include "dds3_frame_draw_buffer.h"
+#include "sdf_packet_header.h"
+#include "sdf_packet_append.h"
+#include "sdf_chip.h"
+#include "sdf_primitive_packet_api.h"
+
+#include "kernel.h"
+#include "sdf_asset_state.h"
+#include "sdf_sif_command.h"
+#include "itf.h"
+/* Declared before first use (were implicit int). */
+/* Original-style implicit int, kept: matched code depends on it: fldProcTrigSequence. */
+
+enum {
+    EVT_PACKET_LIST_BYTES = 0x20,
+    EVT_GS_COMMAND_BYTES = 0x30,
+    EVT_GS_TEST_PRIMARY = 0x47,
+    EVT_GS_TEST_SECONDARY = 0x48,
+    EVT_GS_ALPHA_PRIMARY = 0x42,
+    EVT_FIXED_ALPHA_INTERPOLATION = 0x64,
+    EVT_QUAD_DEFAULT_DEPTH = 0xFFFFFF,
+    EVT_FRAME_REFERENCE_PACKET_BYTES = 0x40,
+    EVT_FRAME_DRAW_RECORD_BYTES = 0x1F40,
+    EVT_BACKGROUND_BLEND_FLAG = 0x100,
+    EVT_DRAW_COLOR_BLEND_FLAG = 0x200,
+    EVT_DRAW_VECTOR_BLEND_FLAG = 0x400,
+    EVT_SAVED_VECTOR_BLEND_FLAG = 0x4000,
+    EVT_QUAD_DESCRIPTOR_BYTES = 0x2C,
+    EVT_QUAD_VERTEX_COUNT = 4,
+    EVT_SELECTION_ALLOCATION_BYTES = 0x28,
+    EVT_DEV_CONSOLE_BUFFER_BYTES = 0x200,
+    BF_FLW0_MAGIC = 0x30574C46
+};
+
+extern u32 egl_OT_Offset;
+
+extern u32 dds3DrawFlag;
+
+#include "sdf_asset_create.h"
+
+extern s8 evtSelectionStateActive;
+
+extern EvtSelState *evtSelectionState;
+
+extern f32 dds3QuakeOffset[4];
+
+extern void *eglMaterial;
+
+typedef struct {
+    f32 x;
+    f32 y;
+    f32 z;
+    f32 w;
+} DrawVec4;
+
+/* The allocated draw state's float at +0x1C is initialized to 1. */
+typedef struct EvtDrawState {
+    u8 pad00[0x1C];
+    f32 value1C;
+} EvtDrawState;
+
+extern void evtUpdateSelectionStateInterpolation(void);
+
+extern void evtSelStateDestroy(void);
+
+extern sdfGrOt_t sdfDebugGrOt;
+
+typedef struct dds3ResourceNode_t {
+    s32 unk0;
+    struct dds3ResourceNode_t *next;
+    s32 *ready;
+} dds3ResourceNode_t;
 
 extern u32 dds3DrawFlag;
 extern u8 dds3ScreenBlurFlag;
@@ -29,8 +152,6 @@ extern s16 bluralphabase;
 extern s16 blurscalebase;
 extern s16 bluralphatarget;
 extern s16 blurscaletarget;
-
-extern dds3LightSourceTable_t dds3LightParam;
 
 /* Pending, saved, and frame blocks share the effect owner's parameter type.
  * dds3DrawFlag tracks each family's running fades and transitions. */
@@ -44,8 +165,6 @@ extern dds3Effect_DistortionBlurParam_t distblurtarget;
 extern dds3Effect_RippleBlurParam_t ripblurtarget __attribute__((aligned(8)));
 extern dds3Effect_DistortionBlurParam_t dds3DistBlurBuf;
 extern dds3Effect_RippleBlurParam_t dds3RipBlurBuf __attribute__((aligned(8)));
-extern u128 dds3AmbientColor;
-extern sdf3DFogParam_t dds3FogParamMain;
 extern u16 filter2abase;
 extern u16 filter2now;
 extern u16 filter2atarget;
@@ -78,7 +197,6 @@ extern u32 distblurovercnt;
 extern u32 ripblurovercnt;
 extern void Normalize(void);
 
-#define DDS3_DRAW_VECTOR_PARAM_BYTES 0x14
 #define DDS3_DRAW_ALPHA_CHANNEL 3
 #define DDS3_DRAW_COLOR_FADE_BIT 0x80000
 #define DDS3_DRAW_COLOR_TRANSITION_BIT 0x100000
@@ -155,7 +273,7 @@ void dds3InitializeFrameDrawPackets(s32 bufferIndex) {
     sdfDrawTagLink(&dds3DrawEnv[bufferIndex].sceneList,
                     (u32)&dds3DrawEnv[bufferIndex].sceneMatrix);
     sdf3DMakeLightParallelPacket(&dds3DrawEnv[bufferIndex].scenePacketStorage,
-                  (sdf3DLight_t **)dds3LightParam, (sdfVector4_t *)&dds3AmbientColor);
+                  dds3LightParam.parallel, &dds3AmbientColor);
     sdfDrawTagLink(&dds3DrawEnv[bufferIndex].sceneList,
                     (u32)&dds3DrawEnv[bufferIndex].scenePacketStorage);
 
@@ -286,7 +404,6 @@ sdfTexHandle_t *dds3GetRenderTexture(void) {
     return dds3RenderTexture;
 }
 
-extern f32 sdfViewShakeVector[];
 extern f32 D_003BA940[];
 extern f32 fabsf(f32 value);
 
@@ -312,20 +429,20 @@ void dds3RunQuake(void) {
         if (limits[axis] != 0.0f) {
             f32 step = dds3GetRandFloatA(0) * limits[axis] * 0.5f + limits[axis] * 0.5f;
 
-            if (limits[axis] * weights[axis] <= fabsf(sdfViewShakeVector[axis])) {
-                if (sdfViewShakeVector[axis] <= 0.0f) {
-                    sdfViewShakeVector[axis] += step;
+            if (limits[axis] * weights[axis] <= fabsf(dds3QuakeOffset[axis])) {
+                if (dds3QuakeOffset[axis] <= 0.0f) {
+                    dds3QuakeOffset[axis] += step;
                 } else {
-                    sdfViewShakeVector[axis] -= step;
+                    dds3QuakeOffset[axis] -= step;
                 }
             } else {
-                sdfViewShakeVector[axis] += 2.0f * (step * (dds3GetRandFloatA(0) - 0.5f));
+                dds3QuakeOffset[axis] += 2.0f * (step * (dds3GetRandFloatA(0) - 0.5f));
             }
-            if (sdfViewShakeVector[axis] < -limits[axis]) {
-                sdfViewShakeVector[axis] = -limits[axis];
+            if (dds3QuakeOffset[axis] < -limits[axis]) {
+                dds3QuakeOffset[axis] = -limits[axis];
             }
-            if (limits[axis] < sdfViewShakeVector[axis]) {
-                sdfViewShakeVector[axis] = limits[axis];
+            if (limits[axis] < dds3QuakeOffset[axis]) {
+                dds3QuakeOffset[axis] = limits[axis];
             }
         }
     }
@@ -802,18 +919,20 @@ void dds3SetScreenFovy(f32 fieldOfView) {
 }
 
 /* Copy one complete vector into the default draw color state; retain no source pointer. */
-void dds3SetAmbient(const u128 *source) {
-    SDF_VU0_COPYVECTOR(&dds3AmbientColor, source);
+void dds3SetAmbient(sdfVector4_t *ambient)
+{
+    SDF_VU0_COPYVECTOR(&dds3LightParam.ambient, ambient);
 }
 
 /* Copy the five-word draw vector parameter body without interpreting or retaining it. */
-void dds3SetFog(const sdf3DFogParam_t *source) {
-    memcpy(&dds3FogParamMain, source, DDS3_DRAW_VECTOR_PARAM_BYTES);
+void dds3SetFog(s32 *fog)
+{
+    memcpy(&dds3LightParam.fog, fog, 0x14);
 }
 
 /* Retain the caller-owned light-data pointer in its draw slot. */
 void dds3SetLight(f32 (*lightSource)[4], dds3LightSourceSlot_t slot) {
-    dds3LightParam[slot] = lightSource;
+    dds3LightParam.parallel[slot] = (sdf3DLight_t *)lightSource;
 }
 
 /* Initialize bounds covering the default 512-by-448 draw viewport. */
@@ -1639,9 +1758,873 @@ void dds3RotationArc(void) {
     Normalize();
 }
 
+/* vu0 routine: stage an immediate or interpolated parallel light color. */
+void dds3SetLightColor(s32 frame, s32 no, f32 *col)
+{
+    sdf3DLight_t *light = dds3LightParam.parallel[no];
+    u32 baseColorWords[4];
+    u32 targetColorWords[4];
+    u32 packedBaseColor;
+    u32 packedTargetColor;
+    u32 blendFlag;
+
+    if (light != NULL) {
+        blendFlag = 4 << (no * 2);
+        if (frame == 0) {
+            dds3DrawFlag &= ~blendFlag;
+            SDF_VU0_LOADVECTOR(col);
+            SDF_VU0_VECTOR_W_SET_ZERO();
+            SDF_VU0_STOREVECTOR(&dds3LightParam.parallel[no]->color);
+        } else {
+            lightcolormax[no] = SDF_FRAMES(frame);
+            lightcolornow[no] = 0;
+            dds3DrawFlag |= blendFlag;
+            SDF_VU0_LOADVECTOR(light);
+            MMI_RGBA_PACK_128(packedBaseColor);
+            baseColorWords[0] = packedBaseColor;
+            dds3LightColor[no] = packedBaseColor;
+            SDF_VU0_LOADVECTOR(col);
+            SDF_VU0_VECTOR_W_SET_ZERO();
+            MMI_RGBA_PACK_128(packedTargetColor);
+            dds3LightTargetColor[no] = packedTargetColor;
+            targetColorWords[0] = packedTargetColor;
+        }
+    }
+}
+
+void dds3SetLightDir(s32 frame, s32 no, f32 *dir)
+{
+    u32 blendFlag;
+
+    if (dds3LightParam.parallel[no] != NULL) {
+        blendFlag = 8 << (no * 2);
+        if (frame == 0) {
+            dds3DrawFlag &= ~blendFlag;
+            SDF_VU0_LOADVECTOR(dir);
+            SDF_VU0_NORMALIZE();
+            SDF_VU0_VECTOR_W_SET_ZERO();
+            SDF_VU0_STOREVECTOR(&dds3LightParam.parallel[no]->v);
+        } else {
+            lightdirmax[no] = SDF_FRAMES(frame);
+            lightdirnow[no] = 0;
+            dds3DrawFlag |= blendFlag;
+            SDF_VU0_LOADVECTOR(dir);
+            SDF_VU0_VECTOR_W_SET_ZERO();
+            SDF_VU0_NORMALIZE();
+            SDF_VU0_COPYVECTOR_A_TO_B();
+            SDF_VU0_LOADVECTOR(&dds3LightParam.parallel[no]->v);
+            SDF_VU0_VECTOR_W_SET_ZERO();
+            SDF_VU0_NORMALIZE();
+            /* No memory clobber here: retail recomputes the slot offset after the call. */
+            SDF_VU0_STOREVECTOR_NOMEM(dds3LightArcFrom[no]);
+            dds3RotationArc();
+            SDF_VU0_STOREVECTOR(dds3LightArcTo[no]);
+        }
+    }
+}
+
+/* vu0 routine: stage an immediate or interpolated ambient color. */
+void dds3SetAmbientColor(s32 frame, f32 *col)
+{
+    u32 baseColorWords[4];
+    u32 targetColorWords[4];
+    u32 packedColor;
+
+    if (frame == 0) {
+        dds3DrawFlag &= ~0x100;
+        SDF_VU0_LOADVECTOR(col);
+        SDF_VU0_VECTOR_W_SET_ONE();
+        SDF_VU0_STOREVECTOR(&dds3LightParam.ambient);
+    } else {
+        ambientmax = SDF_FRAMES(frame);
+        ambientnow = 0;
+        dds3DrawFlag |= 0x100;
+        SDF_VU0_LOADVECTOR(&dds3LightParam.ambient);
+        MMI_RGBA_PACK_128(packedColor);
+        baseColorWords[0] = packedColor;
+        ambientbase = packedColor;
+        SDF_VU0_LOADVECTOR(col);
+        SDF_VU0_VECTOR_W_SET_ONE();
+        MMI_RGBA_PACK_128(packedColor);
+        targetColorWords[0] = packedColor;
+        ambienttarget = packedColor;
+    }
+}
+
+/* vu0 routine: stage an immediate or interpolated packed color. */
+void dds3SetFogColor(s32 frame, f32 *col)
+{
+    u32 targetColorWords[4];
+    u32 packedTargetColor;
+
+    SDF_VU0_LOADVECTOR(col);
+    SDF_VU0_VECTOR_W_SET_ZERO();
+    MMI_RGBA_PACK_255(packedTargetColor);
+    targetColorWords[0] = packedTargetColor;
+    if (frame == 0) {
+        dds3DrawFlag &= ~0x200;
+        dds3LightParam.fog.color = targetColorWords[0];
+    } else {
+        dds3DrawFlag |= 0x200;
+        fogrgbmax = SDF_FRAMES(frame);
+        fogrgbtarget = targetColorWords[0];
+        fogrgbbase = dds3LightParam.fog.color;
+        fogrgbnow = 0;
+    }
+}
+
+void dds3SetFogPara(s32 frame, f32 max, f32 min, f32 near, f32 far)
+{
+    if (frame == 0) {
+        dds3DrawFlag &= ~0x400;
+        dds3FogState.fogMax = max;
+        dds3FogState.fogMin = min;
+        dds3FogState.fogNear = near;
+        dds3FogState.fogFar = far;
+    } else {
+        f32 oldMax = dds3FogState.fogMax;
+        f32 oldMin = dds3FogState.fogMin;
+        f32 oldNear = dds3FogState.fogNear;
+        f32 oldFar = dds3FogState.fogFar;
+        dds3DrawFlag |= 0x400;
+        fogparamax = SDF_FRAMES(frame);
+        dds3FogParam.fogMax = oldMax;
+        dds3FogParam.fogMin = oldMin;
+        dds3FogParam.fogNear = oldNear;
+        dds3FogParam.fogFar = oldFar;
+        dds3FogColor.fogMax = max;
+        dds3FogColor.fogMin = min;
+        dds3FogColor.fogNear = near;
+        dds3FogColor.fogFar = far;
+        fogparanow = 0;
+    }
+}
+
+/* SDK float-input color conversion, shared by the six light/ambient/fog inputs. */
+static inline void dds3UnpackLightColor(u32 color, f32 unit) {
+    u32 rgba[4] __attribute__((aligned(16)));
+    rgba[0] = color;
+    EE_MMI_RGBA_UNPACK_READONLY(rgba, unit);
+}
+
+/* vu0 routine: advance staged light, ambient, fog and face divide blends. */
+void dds3SceneLightUpdateFirst(void) {
+    s32 i;
+    u32 mask;
+    f32 ratio;
+
+    for (i = 0, mask = 4; i < 3; i++, mask <<= 2) {
+        if (dds3LightParam.parallel[i] == NULL) {
+            dds3DrawFlag &= ~(mask | (mask << 1));
+        } else {
+            if (dds3DrawFlag & mask) {
+                ++lightcolornow[i];
+                ratio = (f32)lightcolornow[i] / lightcolormax[i];
+                dds3UnpackLightColor(dds3LightColor[i], 0.0078125f);
+                SDF_VU0_SCALEVECTOR_BITS(1.0f - ratio);
+                SDF_VU0_COPYVECTOR_A_TO_B();
+                dds3UnpackLightColor(dds3LightTargetColor[i], 0.0078125f);
+                SDF_VU0_SCALEVECTOR_V0(ratio);
+                SDF_VU0_ADDVECTOR();
+                SDF_VU0_STOREVECTOR_NOMEM(dds3LightParam.parallel[i]);
+                if (lightcolornow[i] >= lightcolormax[i]) {
+                    dds3DrawFlag &= ~mask;
+                }
+            }
+            if (dds3DrawFlag & (mask << 1)) {
+                ++lightdirnow[i];
+                ratio = (f32)lightdirnow[i] / lightdirmax[i];
+                SDF_VU0_LOADIDENTITYVECTOR();
+                SDF_VU0_VECTOR_W_SET_ONE();
+                SDF_VU0_LOADVECTOR_B(&dds3LightArcTo[i]);
+                Lerp(ratio);
+                ToMatrix();
+                SDF_VU0_LOADVECTOR(&dds3LightArcFrom[i]);
+                SDF_VU0_APPLYMATRIX();
+                SDF_VU0_STOREVECTOR_NOMEM(&dds3LightParam.parallel[i]->v);
+                if (lightdirnow[i] >= lightdirmax[i]) {
+                    dds3DrawFlag &= ~(mask << 1);
+                }
+            }
+        }
+    }
+    if (dds3DrawFlag & 0x100) {
+        ++ambientnow;
+        ratio = (f32)ambientnow / ambientmax;
+        dds3UnpackLightColor(ambientbase, 0.0078125f);
+        SDF_VU0_SCALEVECTOR_BITS(1.0f - ratio);
+        SDF_VU0_COPYVECTOR_A_TO_B();
+        dds3UnpackLightColor(ambienttarget, 0.0078125f);
+        SDF_VU0_SCALEVECTOR_V0(ratio);
+        SDF_VU0_ADDVECTOR();
+        SDF_VU0_VECTOR_W_SET_ONE();
+        SDF_VU0_STOREVECTOR_NOMEM(&dds3AmbientColor);
+        if (ambientnow >= ambientmax) {
+            dds3DrawFlag &= ~0x100;
+        }
+    }
+    if (dds3DrawFlag & 0x200) {
+        ++fogrgbnow;
+        ratio = (f32)fogrgbnow / fogrgbmax;
+        dds3UnpackLightColor(fogrgbbase, 0.0078125f);
+        SDF_VU0_SCALEVECTOR_BITS(1.0f - ratio);
+        SDF_VU0_COPYVECTOR_A_TO_B();
+        dds3UnpackLightColor(fogrgbtarget, 0.0078125f);
+        SDF_VU0_SCALEVECTOR_BITS(ratio);
+        SDF_VU0_ADDVECTOR();
+        {
+            u32 rgba[4] __attribute__((aligned(16)));
+            MMI_RGBA_PACK_UNIT(rgba[0], 128.0f);
+            dds3FogState.color = rgba[0];
+        }
+        if (fogrgbnow >= fogrgbmax) {
+            dds3DrawFlag &= ~0x200;
+        }
+    }
+    if (dds3DrawFlag & 0x400) {
+        ++fogparanow;
+        ratio = (f32)fogparanow / fogparamax;
+        SDF_VU0_LOADVECTOR(&dds3FogParam);
+        SDF_VU0_LOADVECTOR_B(&dds3FogColor);
+        SDF_VU0_SCALEVECTOR_BITS(1.0f - ratio);
+        SDF_VU0_SCALEVECTOR_B_V0(ratio);
+        SDF_VU0_ADDVECTOR();
+        SDF_VU0_GETVECTOR_X(dds3FogState.fogMax);
+        SDF_VU0_GETVECTOR_Y(dds3FogState.fogMin);
+        SDF_VU0_GETVECTOR_Z(dds3FogState.fogNear);
+        SDF_VU0_GETVECTOR_W(dds3FogState.fogFar);
+        if (fogparanow >= fogparamax) {
+            dds3DrawFlag &= ~0x400;
+        }
+    }
+    if (dds3DrawFlag & 0x4000) {
+        ++sbnow;
+        ratio = (f32)sbnow / sbmax;
+        sdfFaceDivSoften = softenbase * (1.0f - ratio) + softentarget * ratio;
+        sdfFaceDivBias = biasbase * (1.0f - ratio) + biastarget * ratio;
+        if (sbnow >= sbmax) {
+            dds3DrawFlag &= ~0x4000;
+        }
+    }
+}
+
+void dds3SetSoftenBias(s32 frame, f32 soften, f32 bias)
+{
+    if (frame == 0) {
+        dds3DrawFlag &= ~0x4000;
+        sdfFaceDivSoften = soften;
+        sdfFaceDivBias = bias;
+    } else {
+        f32 psoften = sdfFaceDivSoften;
+        f32 pbias = sdfFaceDivBias;
+        dds3DrawFlag |= 0x4000;
+        sbmax = SDF_FRAMES(frame);
+        softenbase = psoften;
+        softentarget = soften;
+        biasbase = pbias;
+        biastarget = bias;
+        sbnow = 0;
+    }
+}
+
+void eglInit(void) {
+    if (eglMaterial == NULL) {
+        eglMaterial = sdfMatNew();
+        ((EvtDrawState *)eglMaterial)->value1C = 1.0f;
+    }
+}
+
+void eglSetOt(u32 surfaceIndex) {
+    egl_OT_Offset = surfaceIndex;
+}
+
+/* GS AD packet payload starts after the 0x20-byte command header. */
+typedef struct EvtGsCommand {
+    u8 pad00[0x20];
+    u64 data;
+    u64 registerId;
+} EvtGsCommand;
+
+extern sdfGrOt_t sdfGrOtTable[];
+
+extern s32 sdf2DGetPrimPacketSize(s32 registerCount, s32 loopCount);
+extern u8 *sdf2DGetPrimPtr(SdfDrawPacket *packet);
+
+extern void *sdf2DMakeStdPacket(void *, s32);
+
+/* Submit primary-context GS TEST settings. Z testing is always enabled;
+   unusedZte is a retained native formal, not the source of the ZTE bit. */
+void evtSubmitPrimaryGsTest(s32 ate, s32 atst, s32 aref, s32 afail, s32 date, s32 datm, s32 unusedZte, s32 ztst) {
+    void *list = (void *)sdfGrAllocPacketBuff(EVT_PACKET_LIST_BYTES);
+    void *packet;
+    EvtGsCommand *command;
+    sdfDrawTagInit(list);
+    packet = (void *)sdfGrAllocPacketBuff(EVT_GS_COMMAND_BYTES);
+    command = (EvtGsCommand *)sdf2DMakeStdPacket(packet, EVT_GS_COMMAND_BYTES);
+    command->data = (ztst << 17) | 0x10000 | (datm << 15) | (date << 14) | (afail << 12) | (aref << 4) | (atst << 1) | ate;
+    command->registerId = EVT_GS_TEST_PRIMARY;
+    sdfDrawTagLink(list, (u32)(packet));
+    {
+        sdfGrOt_t *surface = &sdfGrOtTable[egl_OT_Offset];
+        surface->regFunc(surface, list);
+    }
+}
+
+/* Submit the same TEST bit layout for the secondary GS context, with ZTE forced on. */
+void evtSubmitSecondaryGsTest(s32 ate, s32 atst, s32 aref, s32 afail, s32 date, s32 datm, s32 unusedZte, s32 ztst) {
+    void *list = (void *)sdfGrAllocPacketBuff(EVT_PACKET_LIST_BYTES);
+    void *packet;
+    EvtGsCommand *command;
+    sdfDrawTagInit(list);
+    packet = (void *)sdfGrAllocPacketBuff(EVT_GS_COMMAND_BYTES);
+    command = (EvtGsCommand *)sdf2DMakeStdPacket(packet, EVT_GS_COMMAND_BYTES);
+    command->data = (ztst << 17) | 0x10000 | (datm << 15) | (date << 14) | (afail << 12) | (aref << 4) | (atst << 1) | ate;
+    command->registerId = EVT_GS_TEST_SECONDARY;
+    sdfDrawTagLink(list, (u32)(packet));
+    {
+        sdfGrOt_t *surface = &sdfGrOtTable[egl_OT_Offset];
+        surface->regFunc(surface, list);
+    }
+}
+
+/* Select a primary-context ALPHA equation by mode; unknown modes use 0x44. */
 INCLUDE_RODATA(const s32, "kernel/dds3KernelDraw", D_0039E170);
 
 INCLUDE_RODATA(const s32, "kernel/dds3KernelDraw", D_0039E188);
+
+void evtSubmitPrimaryAlphaBlendMode(s32 blendMode) {
+    void *list = (void *)sdfGrAllocPacketBuff(EVT_PACKET_LIST_BYTES);
+    void *packet;
+    EvtGsCommand *command;
+
+    sdfDrawTagInit(list);
+    packet = (void *)sdfGrAllocPacketBuff(EVT_GS_COMMAND_BYTES);
+    command = (EvtGsCommand *)sdf2DMakeStdPacket(packet, EVT_GS_COMMAND_BYTES);
+    switch (blendMode) {
+    case 1:
+        command->data = 0x48;
+        break;
+    case 2:
+        command->data = 0x42;
+        break;
+    case 3:
+        command->data = 0x84;
+        break;
+    case 4:
+        command->data = 0x06;
+        break;
+    case 5:
+        command->data = 0x89;
+        break;
+    case 6:
+        command->data = 0x42;
+        break;
+    case 10:
+        command->data = 0x2A;
+        break;
+    case 20:
+        command->data = 0x4A;
+        break;
+    default:
+        command->data = 0x44;
+        break;
+    }
+    command->registerId = EVT_GS_ALPHA_PRIMARY;
+    sdfDrawTagLink(list, (u32)(packet));
+    {
+        sdfGrOt_t *surface = &sdfGrOtTable[egl_OT_Offset];
+        surface->regFunc(surface, list);
+    }
+}
+
+/* Submit ALPHA_1 = (Cs - Cd) * FIX / 128 + Cd; retain the native unmasked FIX input. */
+void evtSubmitFixedAlphaBlend(s32 fixedAlpha) {
+    void *list = (void *)sdfGrAllocPacketBuff(EVT_PACKET_LIST_BYTES);
+    void *packet;
+    EvtGsCommand *command;
+    sdfDrawTagInit(list);
+    packet = (void *)sdfGrAllocPacketBuff(EVT_GS_COMMAND_BYTES);
+    command = (EvtGsCommand *)sdf2DMakeStdPacket(packet, EVT_GS_COMMAND_BYTES);
+    command->data = ((u64)fixedAlpha << 32) | EVT_FIXED_ALPHA_INTERPOLATION;
+    command->registerId = EVT_GS_ALPHA_PRIMARY;
+    sdfDrawTagLink(list, (u32)(packet));
+    {
+        sdfGrOt_t *surface = &sdfGrOtTable[egl_OT_Offset];
+        surface->regFunc(surface, list);
+    }
+}
+
+extern dds3FrameDrawBuffer_t dds3FrameDrawPacketRecords[];
+
+extern void sdfGrSetFrameMaskRGB(const u8 *, SdfDmaReferenceChainPacket *, s32);
+
+void evtSubmitPrimaryFramePacket(void) {
+    sdfDrawTag_t *list = (sdfDrawTag_t *)sdfGrAllocPacketBuff(EVT_PACKET_LIST_BYTES);
+    SdfDmaReferenceChainPacket *framePacket;
+    sdfDrawTagInit(list);
+    framePacket = (SdfDmaReferenceChainPacket *)sdfGrAllocPacketBuff(EVT_FRAME_REFERENCE_PACKET_BYTES);
+    sdfGrSetFrameMaskRGB(dds3FrameDrawPacketRecords[dds3GetFrameID()].baseBytes, framePacket, 0);
+    sdfDrawTagLinkRefGif(list, (u32)framePacket);
+    {
+        sdfGrOt_t *surface = &sdfGrOtTable[egl_OT_Offset];
+        surface->regFunc(surface, list);
+    }
+}
+
+extern void sdfGrSetFrameMaskReset(const u8 *, SdfDmaReferenceChainPacket *, s32);
+
+void evtSubmitAlternateFramePacket(void) {
+    sdfDrawTag_t *list = (sdfDrawTag_t *)sdfGrAllocPacketBuff(EVT_PACKET_LIST_BYTES);
+    SdfDmaReferenceChainPacket *framePacket;
+    sdfDrawTagInit(list);
+    framePacket = (SdfDmaReferenceChainPacket *)sdfGrAllocPacketBuff(EVT_FRAME_REFERENCE_PACKET_BYTES);
+    sdfGrSetFrameMaskReset(dds3FrameDrawPacketRecords[dds3GetFrameID()].baseBytes, framePacket, 0);
+    sdfDrawTagLinkRefGif(list, (u32)framePacket);
+    {
+        sdfGrOt_t *surface = &sdfGrOtTable[egl_OT_Offset];
+        surface->regFunc(surface, list);
+    }
+}
+
+void evtSubmitTexturedGradientQuad(s32 x, s32 y, s32 width, s32 height,
+                   s32 u, s32 v, s32 textureWidth, s32 textureHeight,
+                   u32 color0, u32 color1, u32 color2, u32 color3, sdfTexHandle_t *texture) {
+    sdfDrawTag_t *list;
+    sdfGrOt_t *surface;
+    s32 left, top, right, bottom;
+    s32 uLeft, vTop, uRight, vBottom;
+
+    list = dds3FontReqAllocDrawTag();
+    sdf2DLinkTexPacket(list, texture, SDF_GS_CONTEXT_1);
+    left = (x << 4) + 0x7000;
+    top = (y << 3);
+    right = (x << 4) + (width << 4) + 0x7000;
+    bottom = top + (height << 3) + 0x7900;
+    top += 0x7900;
+    uLeft = (u << 4);
+    vTop = (v << 4);
+    uRight = uLeft + (textureWidth << 4);
+    vBottom = vTop + (textureHeight << 4);
+    sdfPrimLinkGt4(list, 0x40,
+        left, top, uLeft, vTop, color0,
+        right, top, uRight, vTop, color1,
+        left, bottom, uLeft, vBottom, color3,
+        right, bottom, uRight, vBottom, color2,
+        -1, NULL);
+    surface = &sdfGrOtTable[egl_OT_Offset];
+    surface->regFunc(surface, list);
+}
+
+/* Native rectangle emitter: x/y/width/height, explicit depth, then TL/TR/BR/BL colors. */
+void evtSubmitGradientRectAtDepth(s32 x, s32 y, s32 w, s32 h, u32 depth, s32 color0, s32 color1, s32 color2, s32 color3) {
+    s32 coords[8];
+    sdfDrawTag_t *command;
+    SdfDrawPacket *packet;
+    u64 *dst;
+    s32 i;
+    s32 *pos;
+    sdfGrOt_t *descriptor;
+
+    u32 r0 = color0 & 0xFF;
+    u32 g0 = (color0 >> 8) & 0xFF;
+    u32 b0 = (color0 >> 16) & 0xFF;
+    u32 a0 = (u32)color0 >> 24;
+    u32 r1 = color1 & 0xFF;
+    u32 g1 = (color1 >> 8) & 0xFF;
+    u32 b1 = (color1 >> 16) & 0xFF;
+    u32 a1 = (u32)color1 >> 24;
+    u32 r2 = color2 & 0xFF;
+    u32 g2 = (color2 >> 8) & 0xFF;
+    u32 b2 = (color2 >> 16) & 0xFF;
+    u32 a2 = (u32)color2 >> 24;
+    u32 r3 = color3 & 0xFF;
+    u32 g3 = (color3 >> 8) & 0xFF;
+    u32 b3 = (color3 >> 16) & 0xFF;
+    u32 a3 = (u32)color3 >> 24;
+
+    coords[0] = x * 16;
+    coords[1] = y * 8;
+    coords[2] = (x + w) * 16;
+    coords[3] = y * 8;
+    coords[4] = (x + w) * 16;
+    coords[5] = (y + h) * 8;
+    coords[6] = x * 16;
+    coords[7] = (y + h) * 8;
+    command = (sdfDrawTag_t *)sdfGrAllocPacketBuff(0x20);
+    sdfDrawTagInit(command);
+    packet = (SdfDrawPacket *)sdfGrAllocPacketBuff(sdf2DGetPrimPacketSize(2, 4));
+    sdf2DMakePrimPacketHeader(packet, 0x4D, 2, 0x41, 4);
+    dst = (u64 *)sdf2DGetPrimPtr(packet);
+    for (i = 0, pos = coords; i < 4; i++) {
+        if (i == 0) {
+            dst[0] = (u64)r0 | ((u64)g0 << 32);
+            dst[1] = (u64)b0 | ((u64)a0 << 32);
+        } else if (i == 1) {
+            dst[0] = (u64)r1 | ((u64)g1 << 32);
+            dst[1] = (u64)b1 | ((u64)a1 << 32);
+        } else if (i == 2) {
+            dst[0] = (u64)r2 | ((u64)g2 << 32);
+            dst[1] = (u64)b2 | ((u64)a2 << 32);
+        } else {
+            dst[0] = (u64)r3 | ((u64)g3 << 32);
+            dst[1] = (u64)b3 | ((u64)a3 << 32);
+        }
+        dst += 2;
+        dst[1] = depth;
+        dst[0] = (u64)(u32)(pos[0] + 0x7000) |
+            ((u64)(pos[1] + 0x7900) << 32);
+        dst += 2;
+        pos += 2;
+    }
+    sdfDrawTagLink(command, (u32)packet);
+    descriptor = &sdfGrOtTable[egl_OT_Offset];
+    descriptor->regFunc(descriptor, command);
+}
+
+/* Submit the four-corner gradient rectangle with the native default depth.
+   The inserted 0xFFFFFF is depth, not a white color. */
+void evtSubmitDefaultDepthGradientRect(s32 x, s32 y, s32 width, s32 height, s32 topLeftColor, s32 topRightColor, s32 bottomRightColor, s32 bottomLeftColor) {
+    evtSubmitGradientRectAtDepth(x, y, width, height, EVT_QUAD_DEFAULT_DEPTH, topLeftColor, topRightColor, bottomRightColor, bottomLeftColor);
+}
+
+/* Submit three packed vertex colors and XY pairs at the default depth. */
+void eglLinkTri(s32 x0, s32 y0, s32 x1, s32 y1, s32 x2, s32 y2, s32 color0, s32 color1, s32 color2) {
+    s32 coords[3][2];
+    sdfDrawTag_t *command;
+    SdfDrawPacket *packet;
+    u64 *dst;
+    s32 i;
+    sdfGrOt_t *descriptor;
+
+    u32 r0 = color0 & 0xFF;
+    u32 g0 = (color0 >> 8) & 0xFF;
+    u32 b0 = (color0 >> 16) & 0xFF;
+    u32 a0 = (u32)color0 >> 24;
+    u32 r1 = color1 & 0xFF;
+    u32 g1 = (color1 >> 8) & 0xFF;
+    u32 b1 = (color1 >> 16) & 0xFF;
+    u32 a1 = (u32)color1 >> 24;
+    u32 r2 = color2 & 0xFF;
+    u32 g2 = (color2 >> 8) & 0xFF;
+    u32 b2 = (color2 >> 16) & 0xFF;
+    u32 a2 = (u32)color2 >> 24;
+    coords[0][0] = x0 * 16;
+    coords[0][1] = y0 * 8;
+    coords[1][0] = x1 * 16;
+    coords[1][1] = y1 * 8;
+    coords[2][0] = x2 * 16;
+    coords[2][1] = y2 * 8;
+    command = (sdfDrawTag_t *)sdfGrAllocPacketBuff(0x20);
+    sdfDrawTagInit(command);
+    packet = (SdfDrawPacket *)sdfGrAllocPacketBuff(sdf2DGetPrimPacketSize(2, 3));
+    sdf2DMakePrimPacketHeader(packet, 0x4D, 2, 0x41, 3);
+    dst = (u64 *)sdf2DGetPrimPtr(packet);
+    for (i = 0; i < 3; i++) {
+        if (i == 0) {
+            dst[0] = (u64)r0 | ((u64)g0 << 32);
+            dst[1] = (u64)b0 | ((u64)a0 << 32);
+        } else if (i == 1) {
+            dst[0] = (u64)r1 | ((u64)g1 << 32);
+            dst[1] = (u64)b1 | ((u64)a1 << 32);
+        } else if (i == 2) {
+            dst[0] = (u64)r2 | ((u64)g2 << 32);
+            dst[1] = (u64)b2 | ((u64)a2 << 32);
+        }
+        dst += 2;
+        dst[1] = 0xFFFFFF;
+        dst[0] = (u64)(u32)(coords[i][0] + 0x7000) |
+            ((u64)(coords[i][1] + 0x7900) << 32);
+        dst += 2;
+    }
+    sdfDrawTagLink(command, (u32)packet);
+    descriptor = &sdfGrOtTable[egl_OT_Offset];
+    descriptor->regFunc(descriptor, command);
+}
+
+extern u64 eglPolyStripWord[]; /* index table; only the first 8 bytes are used */
+
+/* Preserve the native 0,2,3,1 vertex/index order; W components are not initialized here. */
+void eglLinkPoly4(f32 x0, f32 y0, f32 z0, f32 x1, f32 y1, f32 z1, f32 x2, f32 y2, f32 z2, f32 x3, f32 y3, f32 z3, u32 i0, u32 i1, u32 i2, u32 i3) {
+    sdf3DPrimPolyParm_t desc;
+    DrawVec4 verts[EVT_QUAD_VERTEX_COUNT];
+    s32 indices[EVT_QUAD_VERTEX_COUNT];
+    u64 strip[2];
+    void *list;
+    sdfGrOt_t *surface;
+
+    list = (void *)sdfGrAllocPacketBuff(EVT_PACKET_LIST_BYTES);
+    sdfDrawTagInit(list);
+    sdf3DPrimLinkResetTm(list, 0);
+    sdf3DPrimLinkMat(list, eglMaterial, 0);
+    memset(&desc, 0, EVT_QUAD_DESCRIPTOR_BYTES);
+    desc.color = 0x80808080;
+    desc.faceCount = 2;
+    desc.pointCount = EVT_QUAD_VERTEX_COUNT;
+    desc.vertex = &verts[0].x;
+    desc.vertexColor = indices;
+    desc.faceIndex = strip;
+    verts[0].x = x0;
+    verts[0].y = y0;
+    verts[0].z = z0;
+    verts[1].x = x2;
+    verts[1].y = y2;
+    verts[1].z = z2;
+    verts[2].x = x3;
+    verts[2].y = y3;
+    verts[2].z = z3;
+    verts[3].x = x1;
+    verts[3].y = y1;
+    verts[3].z = z1;
+    indices[0] = i0;
+    indices[1] = i2;
+    indices[2] = i3;
+    indices[3] = i1;
+    strip[0] = eglPolyStripWord[0];
+    sdfDrawTagLink(list, (u32)(sdf3DPrimMakePoly(&desc)));
+    surface = &sdfGrOtTable[egl_OT_Offset];
+    surface->regFunc(surface, list);
+}
+
+/* Submit the same native vertex permutation with rectangular UVs, then queue asset release. */
+void eglLinkTexPoly4(s32 i0, f32 x0, f32 y0, f32 z0, s32 i1, f32 x1, f32 y1, f32 z1, s32 i2, f32 x2, f32 y2, f32 z2, s32 i3, f32 x3, f32 y3, f32 z3, u32 bits, f32 u0, f32 v0, f32 u1, f32 v1) {
+    sdf3DPrimPolyParm_t desc;
+    f32 verts[16];
+    s32 indices[EVT_QUAD_VERTEX_COUNT];
+    u64 strip[2];
+    f32 uvs[8];
+    void *asset;
+    void *list;
+    sdfGrOt_t *surface;
+
+    asset = sdfMatNew();
+    sdfMatSetTex(asset, (sdfTexHandle_t *)bits);
+    list = (void *)sdfGrAllocPacketBuff(EVT_PACKET_LIST_BYTES);
+    sdfDrawTagInit(list);
+    sdf3DPrimLinkResetTm(list, 0);
+    sdf3DPrimLinkMat(list, asset, 0);
+    memset(&desc, 0, EVT_QUAD_DESCRIPTOR_BYTES);
+    desc.color = 0x80808080;
+    desc.faceCount = 2;
+    desc.pointCount = EVT_QUAD_VERTEX_COUNT;
+    desc.vertex = verts;
+    desc.vertexColor = indices;
+    desc.faceIndex = strip;
+    desc.uv = uvs;
+    verts[0] = x0;
+    verts[1] = y0;
+    verts[2] = z0;
+    verts[4] = x2;
+    verts[5] = y2;
+    verts[6] = z2;
+    verts[8] = x3;
+    verts[9] = y3;
+    verts[10] = z3;
+    verts[12] = x1;
+    verts[13] = y1;
+    verts[14] = z1;
+    indices[0] = i0;
+    indices[1] = i2;
+    indices[2] = i3;
+    indices[3] = i1;
+    strip[0] = eglPolyStripWord[0];
+    uvs[0] = u0;
+    uvs[1] = v0;
+    uvs[2] = u0;
+    uvs[3] = v1;
+    uvs[4] = u1;
+    uvs[5] = v1;
+    uvs[6] = u1;
+    uvs[7] = v0;
+    sdfDrawTagLink(list, (u32)(sdf3DPrimMakePoly(&desc)));
+    surface = &sdfGrOtTable[egl_OT_Offset];
+    surface->regFunc(surface, list);
+    sdfMatFreeDelayed((sdfMat_t *)asset);
+}
+
+extern f32 eglLineVerts[][4];
+
+extern u32 eglLineColors[];
+
+void eglLinkLine(f32 x, f32 y, f32 z, f32 u, f32 v, f32 w, u32 first, u32 second) {
+    void *list;
+    eglLineVerts[0][0] = x;
+    eglLineVerts[0][1] = y;
+    eglLineVerts[0][2] = z;
+    eglLineVerts[1][0] = u;
+    eglLineVerts[1][1] = v;
+    eglLineVerts[1][2] = w;
+    eglLineColors[1] = second;
+    eglLineColors[0] = first;
+    list = (void *)sdfGrAllocPacketBuff(0x20);
+    sdfDrawTagInit(list);
+    sdfDrawTagLink(list, (u32)(effDebugDrawWireModel(eglLineVerts, eglLineColors, 2, 0x80)));
+    {
+        sdfGrOt_t *surface = &sdfGrOtTable[egl_OT_Offset];
+        surface->regFunc(surface, list);
+    }
+}
+
+void eglLinkPrint(s32 x, s32 y, s32 packetArg, s32 drawArg) {
+    SifCommand sifParameters;
+    void *list;
+    void *packet;
+    sdfGrOt_t *surface;
+    list = dds3FontReqAllocDrawTag();
+    packet = (void *)sdfGrAllocPacketBuff(0x40);
+    sdfPrimSetOpaquePacket(packet);
+    sdfDrawTagLink(list, (u32)(packet));
+    sdfDevSetPrintCB(&sifParameters, x * 16 + 0x7000, y * 8 + 0x7900, 0x0FFFFF80, packetArg);
+    sdfDrawTagLink(list, (u32)(sdfDevPrintfEx(&sifParameters, (const char *)drawArg)));
+    surface = &sdfDebugGrOt;
+    surface->regFunc(surface, list);
+}
+
+void eglLinkKanji(s32 width, s32 height, s32 colors, const char *text) {
+    struct _FRQ *glyph;
+
+    glyph = itfCreateMeasuredTextGlyph(width << 4, height << 3, 0, colors, text, NULL);
+    frFontDrawGlyphInDefaultMode(glyph);
+    frDestroyFontRequestAfter(glyph);
+}
+
+/* Zero frames leaves the prior state untouched; zero countLimit selects the -1 sentinel. */
+s32 evtSelStateCreate(s32 countLimit, s16 frames, s32 firstValue, s32 secondValue) {
+    EvtSelState *selectionState;
+    if (frames == 0) {
+        return 0;
+    }
+    if (evtSelectionStateActive != 0) {
+        evtSelStateDestroy();
+    }
+    selectionState = sdfChipAllocZeroDirect(EVT_SELECTION_ALLOCATION_BYTES);
+    evtSelectionState = selectionState;
+    if (countLimit == 0) {
+        selectionState->limit = EVT_SEL_STATE_UNBOUNDED_LIMIT;
+    } else {
+        selectionState->limit = countLimit;
+    }
+    evtSelectionState->rampUpFrames = firstValue;
+    evtSelectionState->rampDownFrames = secondValue;
+    evtSelectionState->amplitude[0] = frames;
+    evtSelectionState->amplitude[1] = frames;
+    evtSelectionState->amplitude[2] = frames;
+    evtSelectionStateActive = 1;
+    return 1;
+}
+
+/* Return zero only when inactive on entry; updating or destroying active state returns one. */
+u32 evtCheckSelectionState(void) {
+    EvtSelState *selectionState;
+    if (evtSelectionStateActive == 0) {
+        return 0;
+    }
+    selectionState = evtSelectionState;
+    if (selectionState->limit > selectionState->count ||
+        selectionState->limit == EVT_SEL_STATE_UNBOUNDED_LIMIT) {
+        evtUpdateSelectionStateInterpolation();
+    } else {
+        evtSelStateDestroy();
+        return 1;
+    }
+    return 1;
+}
+
+#ifdef NON_MATCHING
+#include "common.h"
+#include "fpu.h"
+
+extern u32 dds3DrawFlag;
+
+extern void evtUpdateSelectionStateInterpolation(void);
+
+extern f32 aViewTarget[];
+/* Advances the camera-shake selection state by one frame: ramps the per-axis
+ * shake limit up over its first frames, holds it, then ramps it down as the
+ * frame limit approaches, and on each frame random-walks the shake offset on
+ * all three axes within that limit (adding on odd frames, subtracting on even),
+ * keeping the vertical shake from pushing the view eye above its floor unless
+ * the draw-control flag is set. Upstream: INCLUDE_ASM in
+ * kernel/dds3KernelDraw in both games; written from the retail
+ * routine. It differs from retail in structure but not
+ * behavior: retail keeps the random, limit and jitter values in stack arrays,
+ * reloads the state pointer from memory in each iteration, tests a dead
+ * zero-limit case and repeats the whole axis loop for odd and even frames,
+ * which the body folds into one loop. */
+void evtUpdateSelectionStateInterpolation(void) {
+    EvtSelState *state = evtSelectionState;
+    f32 *shake = dds3QuakeOffset;
+    s32 randomPercent;
+    s32 limitPercent;
+    f32 jitter;
+    s32 axis;
+
+    switch (state->mode) {
+    case 0:
+        if (state->rampUpFrames <= state->count) {
+            state->mode = 1;
+            state->offset[0] = state->amplitude[0];
+            state->offset[1] = state->amplitude[1];
+            state->offset[2] = state->amplitude[2];
+        } else {
+            for (axis = 0; axis < 3; axis++) {
+                state->offset[axis] = (f32)(state->amplitude[axis] * (state->count + 1)) / (f32)state->rampUpFrames;
+            }
+        }
+        break;
+    case 1:
+        if (state->count >= state->limit - state->rampDownFrames) {
+            if (state->limit != -1) {
+                state->mode = 2;
+            }
+        }
+        break;
+    case 2:
+        for (axis = 0; axis < 3; axis++) {
+            state->offset[axis] = (f32)(state->amplitude[axis] * (state->limit - state->count)) / (f32)state->rampDownFrames;
+        }
+        break;
+    }
+
+    for (axis = 0; axis < 3; axis++) {
+        randomPercent = (s32)(dds3GetRandFloatA(NULL) * 100.0f);
+        limitPercent = (s32)(state->offset[axis] * 100.0f);
+        jitter = (f32)(randomPercent % limitPercent) / 10.0f;
+        if (state->count & 1) {
+            shake[axis] += jitter;
+            if (state->offset[axis] <= ffabsf(shake[axis])) {
+                shake[axis] = state->offset[axis];
+            }
+        } else {
+            shake[axis] -= jitter;
+            if (shake[axis] <= -state->offset[axis]) {
+                shake[axis] = -state->offset[axis];
+            }
+        }
+        if (!(dds3DrawFlag & 0x20000000) && axis == 1) {
+            if (-11.0f < aViewTarget[1] + shake[1]) {
+                shake[1] = 0.0f;
+            }
+        }
+    }
+    state->count++;
+}
+#else
+INCLUDE_ASM(const s32, "kernel/dds3KernelDraw", evtUpdateSelectionStateInterpolation);
+#endif
+
+void evtDestroySelectionState(void) {
+    evtSelStateDestroy();
+}
+
+void evtSelStateDestroy(void) {
+    if (evtSelectionStateActive != 0) {
+        sdfChipFreeDirect(evtSelectionState);
+        evtSelectionStateActive = 0;
+        SDF_VU0_LOADIDENTITYVECTOR();
+        SDF_VU0_VECTOR_W_SET_ZERO();
+        SDF_VU0_STOREVECTOR(dds3QuakeOffset);
+    }
+}
 
 INCLUDE_SDATA(const s32, "kernel/dds3KernelDraw", egl_OT_Offset);
 
@@ -1700,4 +2683,6 @@ INCLUDE_SDATA(const s32, "kernel/dds3KernelDraw", distblurovercnt);
 INCLUDE_SDATA(const s32, "kernel/dds3KernelDraw", ripblurovercnt);
 
 INCLUDE_SDATA(const s32, "kernel/dds3KernelDraw", D_003BA940);
+
+INCLUDE_SDATA(const s32, "kernel/dds3KernelDraw", evtSelectionStateActive);
 
