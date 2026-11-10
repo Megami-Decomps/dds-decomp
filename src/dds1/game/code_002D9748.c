@@ -232,14 +232,14 @@ SdfModelNodeIndex sdfModelGetNodeIndexByName(sdfModelRootNode_t *model, const ch
     return SDF_MODEL_NODE_INDEX_NOT_FOUND;
 }
 
-extern const char D_00398188[];
+extern const char sdfModelDefaultName[];
 
 const char *sdfModelGetNodeName(sdfModelRootNode_t *model, s32 nameId) {
     SdfChunkHeader *chunk = sdfModelGetExtraChunk(model, SDF_CHUNK_NAMED_IDS);
     const u8 *name;
     const u8 *end;
     if (chunk == NULL) {
-        return D_00398188;
+        return sdfModelDefaultName;
     }
     name = (const u8 *)(chunk + 1);
     end = (const u8 *)chunk + chunk->size;
@@ -254,7 +254,7 @@ const char *sdfModelGetNodeName(sdfModelRootNode_t *model, s32 nameId) {
         }
         name = (const u8 *)(id + 1);
         if (name >= end) {
-            return D_00398188;
+            return sdfModelDefaultName;
         }
     } while (1);
 }

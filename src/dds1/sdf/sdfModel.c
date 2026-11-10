@@ -6,7 +6,7 @@
 
 #define func_002BFF98 sdfDevResizeBufferedRequest
 #define func_002B2628 sdfChunkFindById
-#define D_00529428 D_00398188
+#define D_00529428 sdfModelDefaultName
 
 /* Audited SDK COP2/MMI operations: ee-gcc cannot express packed
  * vector transfers or the implicit VU matrix-register convention in C. */
