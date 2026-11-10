@@ -2879,7 +2879,7 @@ loads or stores even when every instruction is right:
 - A table that really lives in `.rodata` is `const`: the `const` extern makes
   its loads unchanging, the false anti-dependence on a later store goes away,
   and sched2 picks the other load first (DDS1/DDS2 `CodeFunc_Comm`:
-  `extern const ScrCommand D_0039E288[]`; mutable spelling swaps two loads
+  `extern const scrCommandTable_t scrCommandTable[]`; mutable spelling swaps two loads
   around the `bnel` slot).
 - A flag word that is really a bitfield in a struct with callback-pointer
   members takes the aggregate's alias set, which orders the flag store

@@ -372,7 +372,7 @@ extern void kwlnFadeResetBackground(void);
 
 extern void fldFreeInputPanel(void), evtDisableMoonDraw(void), fldFreeAddressProcess(void);
 
-extern void mnuDestroyCampTasks(void), scrDestroyAllNamedProcesses(void);
+extern void mnuDestroyCampTasks(void), scrAllReleaseScript(void);
 
 extern void fldReleaseMenuSlotsAfterWait(void);
 
@@ -2588,7 +2588,7 @@ void fldReleaseCampSceneTasks(void) {
         D_00435F74 = 0;
     }
     mnuDestroyCampTasks();
-    scrDestroyAllNamedProcesses();
+    scrAllReleaseScript();
     fldReleaseMenuSlotsAfterWait();
 }
 

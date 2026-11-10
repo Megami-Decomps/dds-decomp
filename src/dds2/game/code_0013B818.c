@@ -70,7 +70,7 @@ extern void fldMarkStageExplorationBitmapRegion(s32, s32, s32, s32, s32, s32);
 extern struct dds3Basic_t *fldPlayerObject;
 extern s32 D_003897C0[];
 extern void datAddCurrencyClamped(s32 delta);
-extern void scrDestroyAllNamedProcesses(void);
+extern void scrAllReleaseScript(void);
 extern dds3Basic_t *fldCamNowEveCamera(void);
 extern void fldShowSceneModels(void);
 extern void fldHideSceneModelsAndResetCamera(void);
@@ -2075,7 +2075,7 @@ s32 fldDispatchInteractionAction(s32 messageId, s32 slot) {
                 s32 command;
                 s32 flag;
 
-                scrDestroyAllNamedProcesses();
+                scrAllReleaseScript();
                 command = D_0038E2D0.extraActions[(s8)D_0038E2D0.sets[D_004361C8].messages[row].extraAction].parameter0;
                 flag = D_0038E2D0.extraActions[(s8)D_0038E2D0.sets[D_004361C8].messages[row].extraAction].parameter1;
                 fldSetDeferredFieldCommand(fldGlobalBase.area, command);

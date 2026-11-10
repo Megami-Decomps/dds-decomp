@@ -11,7 +11,7 @@
 #include "kwln_task_lifecycle.h"
 #include "sdf_packet_alloc.h"
 
-extern void scrDestroyAllNamedProcesses(void);
+extern void scrAllReleaseScript(void);
 
 extern s32 dpy;
 
@@ -103,7 +103,7 @@ s32 EventDebugProcess1(dds3ProcessID_t *task) {
 
 /* Test-task teardown destroys the named script processes. */
 void EventDebugShutdown(dds3ProcessID_t *task) {
-    scrDestroyAllNamedProcesses();
+    scrAllReleaseScript();
 }
 
 void evtInitEventTest(void) {

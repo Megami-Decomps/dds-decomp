@@ -247,23 +247,23 @@ extern scrProcessWork_s *scrHandleFirst;
 extern scrProcessWork_s *scrHandleLast;
 
 scrProcessWork_s *scrGetScriptHandle(void);
-scrProcessWork_s *scrSearchScriptName(const char *name);
-void *scrGetUserData(dds3ProcessID_t *task);
-void scrSetUserData(dds3ProcessID_t *task, void *actor);
-void scrScriptShutdown(dds3ProcessID_t *task);
-void scrRunScript(scrProcessWork_s *context);
-KwlnTaskUpdateResult scrScriptProcess(dds3ProcessID_t *task);
-ScrTraceResult scrTraceCode(scrProcessWork_s *context);
-void scrProcDestroyTask(scrProcessWork_s *process);
-scrProcessWork_s *scrCreateTaskWithDefaultOption(const struct scrHeader_t *header);
-void PushInt(scrProcessWork_s *script, ScrVmInteger value);
-void PushFloat(scrProcessWork_s *script, f32 value);
-void PushStr(scrProcessWork_s *script, const char *value);
-void PushRet(scrProcessWork_s *script, ScrProgramCounter returnAddress);
-ScrVmInteger PopInt(scrProcessWork_s *script);
-f32 PopFloat(scrProcessWork_s *script);
+scrProcessWork_s *scrSearchScriptName(char *scriptname);
+void *scrGetUserData(dds3ProcessID_t *id);
+void scrSetUserData(dds3ProcessID_t *id, void *p);
+void scrScriptShutdown(dds3ProcessID_t *id);
+s32 scrRunScript(scrProcessWork_s *h);
+s32 scrScriptProcess(dds3ProcessID_t *id);
+s32 scrTraceCode(scrProcessWork_s *pwork);
+void scrPrintProcedureEnd(scrProcessWork_s *pw);
+scrProcessWork_s *scrCreateTaskWithDefaultOption(void *data);
+void PushInt(scrProcessWork_s *pwork, s32 data);
+void PushFloat(scrProcessWork_s *pw, f32 value);
+void PushStr(scrProcessWork_s *pwork, u8 *data);
+void PushRet(scrProcessWork_s *pwork, s32 cp);
+s32 PopInt(scrProcessWork_s *pwork);
+f32 PopFloat(scrProcessWork_s *pwork);
 /* Return the procedure-table index for an exact name match, or NOT_FOUND. */
-ScrProcedureIndex scrSearchProcedureName(const scrHeader_t *header, const char *name);
+s32 scrSearchProcedureName(void *scrdata, char *procname);
 /* Script integer register 210 (dds3GlobalWork_t +0x388): set/clear by the process-control script commands. */
 #define SCR_PROCESS_CONTROL_FLAG_REGISTER ((ScrGlobalIntegerIndex)210)
 

@@ -1772,7 +1772,7 @@ scrProcessWork_s *scrGetWorkTaskHandle(void) {
 }
 
 void scrDestroyWorkTask(void) {
-    scrProcDestroyTask(evtWorkScriptTask);
+    scrPrintProcedureEnd(evtWorkScriptTask);
     evtWorkScriptTask = 0;
 }
 

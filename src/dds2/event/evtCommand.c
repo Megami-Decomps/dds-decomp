@@ -63,7 +63,7 @@ void dds3AdminiCallSequence(s32 command, const void *payload, u32 payloadSize, s
 
 #include "sdf_debug_api.h"
 
-void scrDestroyAllNamedProcesses(void);
+void scrAllReleaseScript(void);
 
 void fldBgmStop(void);
 
@@ -383,7 +383,7 @@ ScrCommandResult evtCommand_CALL_EVENT(void)
     eventId = scrGetIntPara(0);
     printf("call_event:%d\n", eventId);
     dds3AdminiCallSequence(6, &eventId, EVT_SCALAR_REQUEST_SIZE, 0);
-    scrDestroyAllNamedProcesses();
+    scrAllReleaseScript();
     return 1;
 }
 
@@ -409,7 +409,7 @@ void evtSubmitEventRequest(FldBattleSceneRecordIndex sceneRecordIndex,
     payload[0] = 0;
     payload[1] = sceneRecordIndex;
     dds3AdminiCallSequence(0xe, payload, EVT_PAIRED_REQUEST_SIZE, followupEventId > 0);
-    scrDestroyAllNamedProcesses();
+    scrAllReleaseScript();
 }
 
 ScrCommandResult evtCommandSubmitEvent(void)
@@ -432,7 +432,7 @@ void evtSubmitEventRequestImmediate(FldBattleSceneRecordIndex sceneRecordIndex)
     payload[0] = 0;
     payload[1] = sceneRecordIndex;
     dds3AdminiCallSequence(0xe, payload, EVT_PAIRED_REQUEST_SIZE, 1);
-    scrDestroyAllNamedProcesses();
+    scrAllReleaseScript();
 }
 
 ScrCommandResult evtCommand_CALL_BATTLE2(void)
@@ -469,7 +469,7 @@ ScrCommandResult evtCommand_CALL_FIELD(void)
     sequenceName = scrGetStrPara(2);
     fldSetSceneParam2(&requestBuffer, stage, kind, sequenceName);
     dds3AdminiCallSequence(5, &requestBuffer, EVT_FIELD_SEQUENCE_REQUEST_SIZE, 0);
-    scrDestroyAllNamedProcesses();
+    scrAllReleaseScript();
     return 1;
 }
 
@@ -484,7 +484,7 @@ ScrCommandResult evtCommand_CALL_FIELD2(void)
     sequenceName = scrGetStrPara(1);
     fldSetSceneParam2(&requestBuffer, D_00389780[0], kind, sequenceName);
     dds3AdminiCallSequence(5, &requestBuffer, EVT_FIELD_SEQUENCE_REQUEST_SIZE, 0);
-    scrDestroyAllNamedProcesses();
+    scrAllReleaseScript();
     return 1;
 }
 
@@ -509,7 +509,7 @@ ScrCommandResult evtCommand_CALL_FIELD3(void)
     sequenceName = scrGetStrPara(1);
     fldSetSceneParam3(&requestBuffer, D_00389780[0], kind, sequenceName);
     dds3AdminiCallSequence(5, &requestBuffer, EVT_FIELD_SEQUENCE_REQUEST_SIZE, 0);
-    scrDestroyAllNamedProcesses();
+    scrAllReleaseScript();
     return 1;
 }
 

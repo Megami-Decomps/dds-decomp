@@ -2,7 +2,7 @@
 #include "kwln_task_create.h"
 #include "kwln_task_lifecycle.h"
 
-extern void scrDestroyAllNamedProcesses(void);
+extern void scrAllReleaseScript(void);
 
 extern char D_004221D8[]; /* "EventTest" */
 
@@ -24,7 +24,7 @@ s32 evtDebugCameraStep(dds3ProcessID_t *task) {
 
 /* Test-task teardown destroys the named script processes. */
 void EventDebugShutdown(dds3ProcessID_t *task) {
-    scrDestroyAllNamedProcesses();
+    scrAllReleaseScript();
 }
 
 void evtInitEventTest(void) {

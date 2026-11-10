@@ -51,7 +51,7 @@ void sdfRuntimeTaskTeardownHook(void);
 s32 dds3GlobalWorkMainProc(dds3ProcessID_t *task);
 void evtResetWorldAndProfileRuntime(void);
 
-extern void scrClearProcessGlobals(void);
+extern void dds3GlobalWorkClearFlags(void);
 extern void evtInitGlobalWork(void);
 extern void ptyClearProfileRecords(void);
 extern void ptyRebuildAllProfiles(void);
@@ -218,7 +218,7 @@ extern void btlClearSharedBattleStateWords(void);
 extern void ptyInitRuntime(void);
 
 void evtResetWorldAndProfileRuntime(void) {
-    scrClearProcessGlobals();
+    dds3GlobalWorkClearFlags();
     evtInitGlobalWork();
     DDS3_GBWK->world.updateMode = 8;
     ptyInitRuntime();
@@ -384,7 +384,7 @@ void sdfResetGameRuntime(s32 fullReset) {
     }
     DDS3_GBWK->header.firstTick = 0;
     DDS3_GBWK->header.secondTick = 0;
-    scrClearProcessGlobals();
+    dds3GlobalWorkClearFlags();
     evtInitGlobalWork();
     DDS3_GBWK->world.updateMode = 8;
     ptyInitRuntime();

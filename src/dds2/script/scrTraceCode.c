@@ -1,325 +1,342 @@
 #include "common.h"
-#include "kwln.h"
+#include "sdk_libgcc.h"
+/* DDS's global work keeps the script variables at SMT3's offsets. */
+typedef struct
+{
+    u8 unk0[0x40];
+    s32 integers[256];
+    f32 floats[256];
+} dds3GlobalWork_t;
+extern dds3GlobalWork_t *DDS3_GBWK;
 #include "scr.h"
-#include "scr_process_task_owner_api.h"
-#include "scr_trace_result.h"
-#include "kwln_task_runner.h"
-#include "dat_state.h"
-#include "scr_command_result.h"
-#include "scr_binary_operator.h"
-#include "scr_string_parameter_api.h"
-#include "scr_arg_read.h"
-#include "scr_integer_parameter_api.h"
-#include "scr_command_timer_api.h"
-#include "scr_program_counter_api.h"
-#include "scr_current_process_user_data_api.h"
-#include "mdl_flag_api.h"
 
-void PushInt(scrProcessWork_s *script, ScrVmInteger integerValue) {
-    script->StackType[script->SP] = SCR_STACK_TYPE_INT;
-    script->StackData[script->SP].i = integerValue;
-    script->SP = script->SP + 1;
+enum code_operation
+{
+    CODE_OPERATION_ADD = 0,
+    CODE_OPERATION_SUB = 1,
+    CODE_OPERATION_MUL = 2,
+    CODE_OPERATION_DIV = 3,
+    CODE_OPERATION_OR = 4,
+    CODE_OPERATION_AND = 5,
+    CODE_OPERATION_EQ = 6,
+    CODE_OPERATION_NEQ = 7,
+    CODE_OPERATION_S = 8,
+    CODE_OPERATION_L = 9,
+    CODE_OPERATION_SE = 10,
+    CODE_OPERATION_LE = 11,
+    CODE_OPERATION_MAX = 12
+};
+
+extern scrProcessWork_s *nowpwork;
+extern const scrCommandTable_t scrCommandTable[];
+extern s32 (*codefunc[])(scrProcessWork_s *pw);
+
+extern s32 PopInt(scrProcessWork_s *pwork);
+extern f32 PopFloat(scrProcessWork_s *pwork);
+extern void CodeFunc_2Operation(scrProcessWork_s *pwork, s32 type);
+
+void PushInt(scrProcessWork_s *pwork, s32 data)
+{
+    pwork->StackType[pwork->SP] = SCR_STACK_TYPE_INT;
+    pwork->StackData[pwork->SP].i = data;
+    pwork->SP++;
 }
 
-void PushFloat(scrProcessWork_s *script, f32 floatValue) {
-    script->StackType[script->SP] = SCR_STACK_TYPE_FLOAT;
-    script->StackData[script->SP].f = floatValue;
-    script->SP = script->SP + 1;
+void PushFloat(scrProcessWork_s *pw, f32 value)
+{
+    pw->StackType[pw->SP] = SCR_STACK_TYPE_FLOAT;
+    pw->StackData[pw->SP].f = value;
+    pw->SP++;
 }
 
-void PushStr(scrProcessWork_s *script, const char *string) {
-    script->StackType[script->SP] = SCR_STACK_TYPE_STRING;
-    script->StackData[script->SP].i = EE_ADDR_S(string);
-    script->SP = script->SP + 1;
+void PushStr(scrProcessWork_s *pwork, u8 *data)
+{
+    pwork->StackType[pwork->SP] = SCR_STACK_TYPE_STRING;
+    pwork->StackData[pwork->SP].i = (s32)data;
+    pwork->SP++;
 }
 
-void PushRet(scrProcessWork_s *script, ScrProgramCounter returnAddress) {
-    script->StackType[script->SP] = SCR_STACK_TYPE_RET;
-    script->StackData[script->SP].i = returnAddress;
-    script->SP = script->SP + 1;
+void PushRet(scrProcessWork_s *pwork, s32 cp)
+{
+    pwork->StackType[pwork->SP] = SCR_STACK_TYPE_RET;
+    pwork->StackData[pwork->SP].i = cp;
+    pwork->SP++;
 }
 
 
-ScrVmInteger PopInt(scrProcessWork_s *script) {
-    ScrStackDepth stackDepth = script->SP;
+s32 PopInt(scrProcessWork_s *pwork)
+{
+    s32 stackIndex = pwork->SP;
 
-    script->SP = stackDepth - 1;
-    switch ((s8)script->StackType[stackDepth - 1]) {
+    pwork->SP = stackIndex - 1;
+    switch ((s8)pwork->StackType[stackIndex - 1]) {
     case SCR_STACK_TYPE_INT:
-        return script->StackData[script->SP].i;
     case SCR_STACK_TYPE_RET:
-        return script->StackData[script->SP].i;
+        return pwork->StackData[pwork->SP].i;
     case SCR_STACK_TYPE_FLOAT:
-        return script->StackData[script->SP].f;
+        return pwork->StackData[pwork->SP].f;
     case SCR_STACK_TYPE_INTVAR:
-        return DDS3_GBWK->script.ints[script->StackData[script->SP].i];
+        return DDS3_GBWK->integers[pwork->StackData[pwork->SP].i];
     case SCR_STACK_TYPE_FLOATVAR:
-        return DDS3_GBWK->script.floats[script->StackData[script->SP].i];
+        return DDS3_GBWK->floats[pwork->StackData[pwork->SP].i];
     }
     return 0;
 }
 
-f32 PopFloat(scrProcessWork_s *script) {
-    ScrStackDepth stackDepth = script->SP;
+f32 PopFloat(scrProcessWork_s *pwork)
+{
+    s32 stackIndex = pwork->SP;
 
-    script->SP = stackDepth - 1;
-    switch ((s8)script->StackType[stackDepth - 1]) {
+    pwork->SP = stackIndex - 1;
+    switch ((s8)pwork->StackType[stackIndex - 1]) {
     case SCR_STACK_TYPE_INT:
-        return (f32)script->StackData[script->SP].i;
+        return (f32)pwork->StackData[pwork->SP].i;
     case SCR_STACK_TYPE_RET:
         return 0.0f;
     case SCR_STACK_TYPE_FLOAT:
-        return script->StackData[script->SP].f;
+        return pwork->StackData[pwork->SP].f;
     case SCR_STACK_TYPE_INTVAR:
-        return (f32)DDS3_GBWK->script.ints[script->StackData[script->SP].i];
+        return (f32)DDS3_GBWK->integers[pwork->StackData[pwork->SP].i];
     case SCR_STACK_TYPE_FLOATVAR:
-        return DDS3_GBWK->script.floats[script->StackData[script->SP].i];
+        return DDS3_GBWK->floats[pwork->StackData[pwork->SP].i];
     }
     return 0.0f;
 }
 
-/* Push the word following the opcode, then advance past its operand. */
-u32 CodeFunc_PushI(scrProcessWork_s *script) {
-    s32 operandPc;
-
-    operandPc = script->CP + 1;
-    script->CP = operandPc;
-    PushInt(script, script->Code[operandPc].i);
-    script->CP = script->CP + 1;
-    return 1;
-}
-
-extern ScrOpcodeHandlerResult (*codefunc[])(scrProcessWork_s *scr);
-
-extern const scrCommandTable_t D_00411408[];
-ScrOpcodeHandlerResult CodeFunc_PushIS(scrProcessWork_s *scr) {
-    PushInt(scr, scr->Code[scr->CP].s.s1);
-    scr->CP++;
-    return SCR_OPCODE_HANDLER_RESULT_CONTINUE;
-}
-
-ScrOpcodeHandlerResult CodeFunc_PushF(scrProcessWork_s *scr) {
-    scr->CP++;
-    PushFloat(scr, scr->Code[scr->CP].f);
-    scr->CP++;
-    return SCR_OPCODE_HANDLER_RESULT_CONTINUE;
-}
-
-ScrOpcodeHandlerResult CodeFunc_PushIX(scrProcessWork_s *scr) {
-    PushInt(scr, DDS3_GBWK->script.ints[(ScrGlobalIntegerIndex)scr->Code[scr->CP].s.s1]);
-    scr->CP++;
-    return SCR_OPCODE_HANDLER_RESULT_CONTINUE;
-}
-
-ScrOpcodeHandlerResult CodeFunc_PushFX(scrProcessWork_s *scr) {
-    PushFloat(scr, DDS3_GBWK->script.floats[(ScrGlobalFloatIndex)scr->Code[scr->CP].s.s1]);
-    scr->CP++;
-    return SCR_OPCODE_HANDLER_RESULT_CONTINUE;
-}
-
-ScrOpcodeHandlerResult CodeFunc_PushLIX(scrProcessWork_s *scr) {
-    PushInt(scr, scr->LocalInt[scr->Code[scr->CP].s.s1]);
-    scr->CP++;
-    return SCR_OPCODE_HANDLER_RESULT_CONTINUE;
-}
-
-ScrOpcodeHandlerResult CodeFunc_PushLFX(scrProcessWork_s *scr) {
-    PushFloat(scr, scr->LocalFloat[scr->Code[scr->CP].s.s1]);
-    scr->CP++;
-    return SCR_OPCODE_HANDLER_RESULT_CONTINUE;
-}
-
-ScrOpcodeHandlerResult CodeFunc_PushSTR(scrProcessWork_s *scr) {
-    PushStr(scr, scr->StringData + scr->Code[scr->CP].s.s1);
-    scr->CP++;
-    return SCR_OPCODE_HANDLER_RESULT_CONTINUE;
-}
-
-/* Copy the VM's reserved return slot back onto its active operand stack. */
-ScrOpcodeHandlerResult CodeFunc_PushReg(scrProcessWork_s *scr) {
-    scr->StackType[scr->SP] = scr->StackType[SCR_STACK_RETURN_VALUE_SLOT];
-    scr->StackData[scr->SP].i = scr->StackData[SCR_STACK_RETURN_VALUE_SLOT].i;
-    scr->SP++;
-    scr->CP++;
-    return SCR_OPCODE_HANDLER_RESULT_CONTINUE;
-}
-
-ScrOpcodeHandlerResult CodeFunc_PopIX(scrProcessWork_s *scr) {
-    DDS3_GBWK->script.ints[(ScrGlobalIntegerIndex)scr->Code[scr->CP].s.s1] = PopInt(scr);
-    scr->CP++;
-    return SCR_OPCODE_HANDLER_RESULT_CONTINUE;
-}
-
-ScrOpcodeHandlerResult CodeFunc_PopFX(scrProcessWork_s *scr) {
-    f32 floatValue;
-
-    floatValue = PopFloat(scr);
-    DDS3_GBWK->script.floats[(ScrGlobalFloatIndex)scr->Code[scr->CP].s.s1] = floatValue;
-    scr->CP++;
-    return SCR_OPCODE_HANDLER_RESULT_CONTINUE;
-}
-
-ScrOpcodeHandlerResult CodeFunc_PopLIX(scrProcessWork_s *scr) {
-    ScrVmInteger integerValue;
-
-    integerValue = PopInt(scr);
-    scr->LocalInt[scr->Code[scr->CP].s.s1] = integerValue;
-    scr->CP++;
-    return SCR_OPCODE_HANDLER_RESULT_CONTINUE;
-}
-
-ScrOpcodeHandlerResult CodeFunc_PopLFX(scrProcessWork_s *scr) {
-    scr->LocalFloat[scr->Code[scr->CP].s.s1] = PopFloat(scr);
-    scr->CP++;
-    return SCR_OPCODE_HANDLER_RESULT_CONTINUE;
-}
-
-ScrOpcodeHandlerResult CodeFunc_Proc(scrProcessWork_s *scr) {
-    scr->CP++;
-    return SCR_OPCODE_HANDLER_RESULT_CONTINUE;
-}
-
-/* Yield without consuming operands until the command completes. */
-ScrOpcodeHandlerResult CodeFunc_Comm(scrProcessWork_s *scr) {
-    s32 programCounter = scr->CP;
-    ScrCommandIndex commandIndex = scr->Code[programCounter].s.s1;
-    ScrCommandResult commandResult;
-
-    nowpwork = scr;
-    commandResult = D_00411408[commandIndex].comm();
-    if (commandResult == SCR_COMMAND_RESULT_PENDING) {
-        return SCR_OPCODE_HANDLER_RESULT_YIELDED;
-    }
-    scr->SP -= D_00411408[commandIndex].paranum;
-    if (programCounter == scr->CP) {
-        scr->CP = programCounter + 1;
-    }
-    return SCR_OPCODE_HANDLER_RESULT_CONTINUE;
-}
-
-ScrOpcodeHandlerResult CodeFunc_End(scrProcessWork_s *scr)
+s32 CodeFunc_PushI(scrProcessWork_s *pwork)
 {
-    ScrProgramCounter returnAddress;
+    pwork->CP++;
+    PushInt(pwork, pwork->Code[pwork->CP].i);
+    pwork->CP++;
+    return CODE_RET_NEXT;
+}
 
-    if (scr->SP == 0) {
-        return SCR_OPCODE_HANDLER_RESULT_FINISHED;
+s32 CodeFunc_PushIS(scrProcessWork_s *pwork)
+{
+    PushInt(pwork, pwork->Code[pwork->CP].s.s1);
+    pwork->CP++;
+    return CODE_RET_NEXT;
+}
+
+s32 CodeFunc_PushF(scrProcessWork_s *pwork)
+{
+    pwork->CP++;
+    PushFloat(pwork, pwork->Code[pwork->CP].f);
+    pwork->CP++;
+    return CODE_RET_NEXT;
+}
+
+s32 CodeFunc_PushIX(scrProcessWork_s *pwork)
+{
+    PushInt(pwork, DDS3_GBWK->integers[pwork->Code[pwork->CP].s.s1]);
+    pwork->CP++;
+    return CODE_RET_NEXT;
+}
+
+s32 CodeFunc_PushFX(scrProcessWork_s *pwork)
+{
+    PushFloat(pwork, DDS3_GBWK->floats[pwork->Code[pwork->CP].s.s1]);
+    pwork->CP++;
+    return CODE_RET_NEXT;
+}
+
+s32 CodeFunc_PushLIX(scrProcessWork_s *pwork)
+{
+    PushInt(pwork, pwork->LocalInt[pwork->Code[pwork->CP].s.s1]);
+    pwork->CP++;
+    return CODE_RET_NEXT;
+}
+
+s32 CodeFunc_PushLFX(scrProcessWork_s *pwork)
+{
+    PushFloat(pwork, pwork->LocalFloat[pwork->Code[pwork->CP].s.s1]);
+    pwork->CP++;
+    return CODE_RET_NEXT;
+}
+
+s32 CodeFunc_PushSTR(scrProcessWork_s *pwork)
+{
+    PushStr(pwork, pwork->StringData + pwork->Code[pwork->CP].s.s1);
+    pwork->CP++;
+    return CODE_RET_NEXT;
+}
+
+s32 CodeFunc_PushReg(scrProcessWork_s *pwork)
+{
+    pwork->StackType[pwork->SP] = pwork->StackType[27];
+    pwork->StackData[pwork->SP].i = pwork->StackData[27].i;
+    pwork->SP++;
+    pwork->CP++;
+    return CODE_RET_NEXT;
+}
+
+s32 CodeFunc_PopIX(scrProcessWork_s *pwork)
+{
+    DDS3_GBWK->integers[pwork->Code[pwork->CP].s.s1] = PopInt(pwork);
+    pwork->CP++;
+    return CODE_RET_NEXT;
+}
+
+s32 CodeFunc_PopFX(scrProcessWork_s *pwork)
+{
+    f32 value = PopFloat(pwork);
+
+    DDS3_GBWK->floats[pwork->Code[pwork->CP].s.s1] = value;
+    pwork->CP++;
+    return CODE_RET_NEXT;
+}
+
+s32 CodeFunc_PopLIX(scrProcessWork_s *pwork)
+{
+    pwork->LocalInt[pwork->Code[pwork->CP].s.s1] = PopInt(pwork);
+    pwork->CP++;
+    return CODE_RET_NEXT;
+}
+
+s32 CodeFunc_PopLFX(scrProcessWork_s *pwork)
+{
+    pwork->LocalFloat[pwork->Code[pwork->CP].s.s1] = PopFloat(pwork);
+    pwork->CP++;
+    return CODE_RET_NEXT;
+}
+
+s32 CodeFunc_Proc(scrProcessWork_s *pwork)
+{
+    pwork->CP++;
+    return CODE_RET_NEXT;
+}
+
+/* A pending command yields without consuming its arguments. */
+s32 CodeFunc_Comm(scrProcessWork_s *pwork)
+{
+    s32 commandCP = pwork->CP;
+    s32 commandIndex = pwork->Code[commandCP].s.s1;
+
+    nowpwork = pwork;
+    if (scrCommandTable[commandIndex].comm() == 0) {
+        return CODE_RET_SYNC;
     }
-    returnAddress = PopInt(scr);
-    scr->CP = returnAddress + 1;
-    return SCR_OPCODE_HANDLER_RESULT_CONTINUE;
+    pwork->SP -= scrCommandTable[commandIndex].paranum;
+    if (commandCP == pwork->CP) {
+        pwork->CP = commandCP + 1;
+    }
+    return CODE_RET_NEXT;
 }
 
-ScrOpcodeHandlerResult CodeFunc_Jump(scrProcessWork_s *scr) {
-    scr->CP = scr->ProcTable[scr->Code[scr->CP].s.s1].CodeAddress;
-    return SCR_OPCODE_HANDLER_RESULT_CONTINUE;
+s32 CodeFunc_End(scrProcessWork_s *pwork)
+{
+    if (pwork->SP == 0) {
+        return CODE_RET_END;
+    }
+
+    pwork->CP = PopInt(pwork) + 1;
+    return CODE_RET_NEXT;
 }
 
-/* Save the return PC before transferring control to a procedure. */
-ScrOpcodeHandlerResult CodeFunc_Call(scrProcessWork_s *scr) {
-    PushRet(scr, scr->CP);
-    scr->CP = scr->ProcTable[scr->Code[scr->CP].s.s1].CodeAddress;
-    return SCR_OPCODE_HANDLER_RESULT_CONTINUE;
+s32 CodeFunc_Jump(scrProcessWork_s *pwork)
+{
+    pwork->CP = pwork->ProcTable[pwork->Code[pwork->CP].s.s1].CodeAddress;
+    return CODE_RET_NEXT;
 }
 
-ScrOpcodeHandlerResult CodeFunc_Run(scrProcessWork_s *scr) {
-    scr->CP++;
-    return SCR_OPCODE_HANDLER_RESULT_CONTINUE;
+s32 CodeFunc_Call(scrProcessWork_s *pwork)
+{
+    PushRet(pwork, pwork->CP);
+    pwork->CP = pwork->ProcTable[pwork->Code[pwork->CP].s.s1].CodeAddress;
+    return CODE_RET_NEXT;
 }
 
-ScrOpcodeHandlerResult CodeFunc_Goto(scrProcessWork_s *scr) {
-    scr->CP = scr->LabelTable[scr->Code[scr->CP].s.s1].CodeAddress;
-    return SCR_OPCODE_HANDLER_RESULT_CONTINUE;
+s32 CodeFunc_Run(scrProcessWork_s *pwork)
+{
+    pwork->CP++;
+    return CODE_RET_NEXT;
+}
+
+s32 CodeFunc_Goto(scrProcessWork_s *pwork)
+{
+    pwork->CP = pwork->LabelTable[pwork->Code[pwork->CP].s.s1].CodeAddress;
+    return CODE_RET_NEXT;
 }
 
 extern s32 CodeFunc_2Operation_i1;
-
 extern s32 CodeFunc_2Operation_i2;
-
 extern s32 CodeFunc_2Operation_ri;
-
 extern f32 CodeFunc_2Operation_f1;
-
 extern f32 CodeFunc_2Operation_f2;
-
 extern f32 CodeFunc_2Operation_rf;
-
 extern s32 CodeFunc_2Operation_t1;
-
 extern s32 CodeFunc_2Operation_t2;
 
-void CodeFunc_2Operation(scrProcessWork_s *scr, ScrBinaryOperator operatorCode)
+void CodeFunc_2Operation(scrProcessWork_s *pwork, s32 type)
 {
-    CodeFunc_2Operation_t1 = (s8)scr->StackType[scr->SP - 1];
-    CodeFunc_2Operation_t2 = (s8)scr->StackType[scr->SP - 2];
-    if ((CodeFunc_2Operation_t1 == SCR_STACK_TYPE_INT ||
-         CodeFunc_2Operation_t1 == SCR_STACK_TYPE_INTVAR) &&
-        (CodeFunc_2Operation_t2 == SCR_STACK_TYPE_INT ||
-         CodeFunc_2Operation_t2 == SCR_STACK_TYPE_INTVAR)) {
-        CodeFunc_2Operation_i1 = PopInt(scr);
-        CodeFunc_2Operation_i2 = PopInt(scr);
-        switch (operatorCode) {
-        case SCR_BINARY_OPERATOR_ADD:
+    CodeFunc_2Operation_t1 = (s8)pwork->StackType[pwork->SP - 1];
+    CodeFunc_2Operation_t2 = (s8)pwork->StackType[pwork->SP - 2];
+    if ((CodeFunc_2Operation_t1 == 0 || CodeFunc_2Operation_t1 == 2) && (CodeFunc_2Operation_t2 == 0 || CodeFunc_2Operation_t2 == 2)) {
+        CodeFunc_2Operation_i1 = PopInt(pwork);
+        CodeFunc_2Operation_i2 = PopInt(pwork);
+        switch (type) {
+        case 0:
             CodeFunc_2Operation_ri = CodeFunc_2Operation_i1 + CodeFunc_2Operation_i2;
             break;
-        case SCR_BINARY_OPERATOR_SUBTRACT:
+        case 1:
             CodeFunc_2Operation_ri = CodeFunc_2Operation_i1 - CodeFunc_2Operation_i2;
             break;
-        case SCR_BINARY_OPERATOR_MULTIPLY:
+        case 2:
             CodeFunc_2Operation_ri = CodeFunc_2Operation_i1 * CodeFunc_2Operation_i2;
             break;
-        case SCR_BINARY_OPERATOR_DIVIDE:
+        case 3:
             CodeFunc_2Operation_ri = CodeFunc_2Operation_i1 / CodeFunc_2Operation_i2;
             break;
-        case SCR_BINARY_OPERATOR_LOGICAL_OR:
+        case 4:
             if (CodeFunc_2Operation_i1 != 0 || CodeFunc_2Operation_i2 != 0) {
                 CodeFunc_2Operation_ri = 1;
             } else {
                 CodeFunc_2Operation_ri = 0;
             }
             break;
-        case SCR_BINARY_OPERATOR_LOGICAL_AND:
+        case 5:
             if (CodeFunc_2Operation_i1 != 0 && CodeFunc_2Operation_i2 != 0) {
                 CodeFunc_2Operation_ri = 1;
             } else {
                 CodeFunc_2Operation_ri = 0;
             }
             break;
-        case SCR_BINARY_OPERATOR_EQUAL:
+        case 6:
             if (CodeFunc_2Operation_i1 == CodeFunc_2Operation_i2) {
                 CodeFunc_2Operation_ri = 1;
             } else {
                 CodeFunc_2Operation_ri = 0;
             }
             break;
-        case SCR_BINARY_OPERATOR_NOT_EQUAL:
+        case 7:
             if (CodeFunc_2Operation_i1 != CodeFunc_2Operation_i2) {
                 CodeFunc_2Operation_ri = 1;
             } else {
                 CodeFunc_2Operation_ri = 0;
             }
             break;
-        case SCR_BINARY_OPERATOR_LESS_THAN:
+        case 8:
             if (CodeFunc_2Operation_i1 < CodeFunc_2Operation_i2) {
                 CodeFunc_2Operation_ri = 1;
             } else {
                 CodeFunc_2Operation_ri = 0;
             }
             break;
-        case SCR_BINARY_OPERATOR_GREATER_THAN:
+        case 9:
             if (CodeFunc_2Operation_i1 > CodeFunc_2Operation_i2) {
                 CodeFunc_2Operation_ri = 1;
             } else {
                 CodeFunc_2Operation_ri = 0;
             }
             break;
-        case SCR_BINARY_OPERATOR_LESS_OR_EQUAL:
+        case 10:
             if (CodeFunc_2Operation_i1 <= CodeFunc_2Operation_i2) {
                 CodeFunc_2Operation_ri = 1;
             } else {
                 CodeFunc_2Operation_ri = 0;
             }
             break;
-        case SCR_BINARY_OPERATOR_GREATER_OR_EQUAL:
+        case 11:
             if (CodeFunc_2Operation_i1 >= CodeFunc_2Operation_i2) {
                 CodeFunc_2Operation_ri = 1;
             } else {
@@ -327,372 +344,379 @@ void CodeFunc_2Operation(scrProcessWork_s *scr, ScrBinaryOperator operatorCode)
             }
             break;
         }
-        PushInt(scr, CodeFunc_2Operation_ri);
+        PushInt(pwork, CodeFunc_2Operation_ri);
     } else {
-        CodeFunc_2Operation_f1 = PopFloat(scr);
-        CodeFunc_2Operation_f2 = PopFloat(scr);
-        switch (operatorCode) {
-        case SCR_BINARY_OPERATOR_ADD:
+        CodeFunc_2Operation_f1 = PopFloat(pwork);
+        CodeFunc_2Operation_f2 = PopFloat(pwork);
+        switch (type) {
+        case 0:
             CodeFunc_2Operation_rf = CodeFunc_2Operation_f1 + CodeFunc_2Operation_f2;
             break;
-        case SCR_BINARY_OPERATOR_SUBTRACT:
+        case 1:
             CodeFunc_2Operation_rf = CodeFunc_2Operation_f1 - CodeFunc_2Operation_f2;
             break;
-        case SCR_BINARY_OPERATOR_MULTIPLY:
+        case 2:
             CodeFunc_2Operation_rf = CodeFunc_2Operation_f1 * CodeFunc_2Operation_f2;
             break;
-        case SCR_BINARY_OPERATOR_DIVIDE:
+        case 3:
             CodeFunc_2Operation_rf = CodeFunc_2Operation_f1 / CodeFunc_2Operation_f2;
             break;
-        case SCR_BINARY_OPERATOR_LOGICAL_OR:
-            if (CodeFunc_2Operation_f1 != 0.0 || CodeFunc_2Operation_f2 != 0.0) {
+        case 4:
+            if (dpcmp(fptodp(CodeFunc_2Operation_f1), 0.0) != 0 ||
+                dpcmp(fptodp(CodeFunc_2Operation_f2), 0.0) != 0) {
                 CodeFunc_2Operation_ri = 1;
             } else {
                 CodeFunc_2Operation_ri = 0;
             }
-            PushInt(scr, CodeFunc_2Operation_ri);
+            PushInt(pwork, CodeFunc_2Operation_ri);
             return;
-        case SCR_BINARY_OPERATOR_LOGICAL_AND:
-            if (CodeFunc_2Operation_f1 != 0.0 && CodeFunc_2Operation_f2 != 0.0) {
+        case 5:
+            if (dpcmp(fptodp(CodeFunc_2Operation_f1), 0.0) != 0 &&
+                dpcmp(fptodp(CodeFunc_2Operation_f2), 0.0) != 0) {
                 CodeFunc_2Operation_ri = 1;
             } else {
                 CodeFunc_2Operation_ri = 0;
             }
-            PushInt(scr, CodeFunc_2Operation_ri);
+            PushInt(pwork, CodeFunc_2Operation_ri);
             return;
-        case SCR_BINARY_OPERATOR_EQUAL:
+        case 6:
             if (CodeFunc_2Operation_f1 == CodeFunc_2Operation_f2) {
                 CodeFunc_2Operation_ri = 1;
             } else {
                 CodeFunc_2Operation_ri = 0;
             }
-            PushInt(scr, CodeFunc_2Operation_ri);
+            PushInt(pwork, CodeFunc_2Operation_ri);
             return;
-        case SCR_BINARY_OPERATOR_NOT_EQUAL:
+        case 7:
             if (CodeFunc_2Operation_f1 != CodeFunc_2Operation_f2) {
                 CodeFunc_2Operation_ri = 1;
             } else {
                 CodeFunc_2Operation_ri = 0;
             }
-            PushInt(scr, CodeFunc_2Operation_ri);
+            PushInt(pwork, CodeFunc_2Operation_ri);
             return;
-        case SCR_BINARY_OPERATOR_LESS_THAN:
+        case 8:
             if (CodeFunc_2Operation_f1 < CodeFunc_2Operation_f2) {
                 CodeFunc_2Operation_ri = 1;
             } else {
                 CodeFunc_2Operation_ri = 0;
             }
-            PushInt(scr, CodeFunc_2Operation_ri);
+            PushInt(pwork, CodeFunc_2Operation_ri);
             return;
-        case SCR_BINARY_OPERATOR_GREATER_THAN:
+        case 9:
             if (CodeFunc_2Operation_f1 > CodeFunc_2Operation_f2) {
                 CodeFunc_2Operation_ri = 1;
             } else {
                 CodeFunc_2Operation_ri = 0;
             }
-            PushInt(scr, CodeFunc_2Operation_ri);
+            PushInt(pwork, CodeFunc_2Operation_ri);
             return;
-        case SCR_BINARY_OPERATOR_LESS_OR_EQUAL:
+        case 10:
             if (CodeFunc_2Operation_f1 <= CodeFunc_2Operation_f2) {
                 CodeFunc_2Operation_ri = 1;
             } else {
                 CodeFunc_2Operation_ri = 0;
             }
-            PushInt(scr, CodeFunc_2Operation_ri);
+            PushInt(pwork, CodeFunc_2Operation_ri);
             return;
-        case SCR_BINARY_OPERATOR_GREATER_OR_EQUAL:
+        case 11:
             if (CodeFunc_2Operation_f1 >= CodeFunc_2Operation_f2) {
                 CodeFunc_2Operation_ri = 1;
             } else {
                 CodeFunc_2Operation_ri = 0;
             }
-            PushInt(scr, CodeFunc_2Operation_ri);
+            PushInt(pwork, CodeFunc_2Operation_ri);
             return;
         }
-        PushFloat(scr, CodeFunc_2Operation_rf);
+        PushFloat(pwork, CodeFunc_2Operation_rf);
     }
 }
 
-ScrOpcodeHandlerResult CodeFunc_Add(scrProcessWork_s *scr) {
-    CodeFunc_2Operation(scr, SCR_BINARY_OPERATOR_ADD);
-    scr->CP = scr->CP + 1;
-    return SCR_OPCODE_HANDLER_RESULT_CONTINUE;
-}
 
-ScrOpcodeHandlerResult CodeFunc_Sub(scrProcessWork_s *scr) {
-    CodeFunc_2Operation(scr, SCR_BINARY_OPERATOR_SUBTRACT);
-    scr->CP = scr->CP + 1;
-    return SCR_OPCODE_HANDLER_RESULT_CONTINUE;
-}
-
-ScrOpcodeHandlerResult CodeFunc_Mul(scrProcessWork_s *scr) {
-    CodeFunc_2Operation(scr, SCR_BINARY_OPERATOR_MULTIPLY);
-    scr->CP = scr->CP + 1;
-    return SCR_OPCODE_HANDLER_RESULT_CONTINUE;
-}
-
-ScrOpcodeHandlerResult CodeFunc_Div(scrProcessWork_s *scr) {
-    CodeFunc_2Operation(scr, SCR_BINARY_OPERATOR_DIVIDE);
-    scr->CP = scr->CP + 1;
-    return SCR_OPCODE_HANDLER_RESULT_CONTINUE;
-}
-
-ScrOpcodeHandlerResult CodeFunc_Minus(scrProcessWork_s *scr) {
-    switch ((s8)scr->StackType[scr->SP - 1]) {
-    case SCR_STACK_TYPE_INT:
-        scr->StackData[scr->SP - 1].i = -scr->StackData[scr->SP - 1].i;
-        break;
-    case SCR_STACK_TYPE_FLOAT:
-        scr->StackData[scr->SP - 1].f = -scr->StackData[scr->SP - 1].f;
-        break;
-    case SCR_STACK_TYPE_INTVAR:
-        DDS3_GBWK->script.ints[scr->StackData[scr->SP - 1].i] =
-            -DDS3_GBWK->script.ints[scr->StackData[scr->SP - 1].i];
-        break;
-    case SCR_STACK_TYPE_FLOATVAR:
-        DDS3_GBWK->script.floats[scr->StackData[scr->SP - 1].i] =
-            -DDS3_GBWK->script.floats[scr->StackData[scr->SP - 1].i];
-        break;
-    case SCR_STACK_TYPE_RET:
-        break;
-    }
-    scr->CP++;
-    return SCR_OPCODE_HANDLER_RESULT_CONTINUE;
-}
-
-ScrOpcodeHandlerResult CodeFunc_Not(scrProcessWork_s *scr) {
-    switch ((s8)scr->StackType[scr->SP - 1]) {
-    case SCR_STACK_TYPE_INT:
-    case SCR_STACK_TYPE_INTVAR:
-        PushInt(scr, PopInt(scr) == 0);
-        break;
-    case SCR_STACK_TYPE_FLOAT:
-    case SCR_STACK_TYPE_FLOATVAR:
-        PushInt(scr, PopFloat(scr) == 0.0f);
-        break;
-    case SCR_STACK_TYPE_RET:
-        break;
-    }
-    scr->CP++;
-    return SCR_OPCODE_HANDLER_RESULT_CONTINUE;
-}
-
-ScrOpcodeHandlerResult CodeFunc_Or(scrProcessWork_s *scr) {
-    CodeFunc_2Operation(scr, SCR_BINARY_OPERATOR_LOGICAL_OR);
-    scr->CP = scr->CP + 1;
-    return SCR_OPCODE_HANDLER_RESULT_CONTINUE;
-}
-
-ScrOpcodeHandlerResult CodeFunc_And(scrProcessWork_s *scr) {
-    CodeFunc_2Operation(scr, SCR_BINARY_OPERATOR_LOGICAL_AND);
-    scr->CP = scr->CP + 1;
-    return SCR_OPCODE_HANDLER_RESULT_CONTINUE;
-}
-
-ScrOpcodeHandlerResult CodeFunc_EQ(scrProcessWork_s *scr) {
-    CodeFunc_2Operation(scr, SCR_BINARY_OPERATOR_EQUAL);
-    scr->CP = scr->CP + 1;
-    return SCR_OPCODE_HANDLER_RESULT_CONTINUE;
-}
-
-ScrOpcodeHandlerResult CodeFunc_NEQ(scrProcessWork_s *scr) {
-    CodeFunc_2Operation(scr, SCR_BINARY_OPERATOR_NOT_EQUAL);
-    scr->CP = scr->CP + 1;
-    return SCR_OPCODE_HANDLER_RESULT_CONTINUE;
-}
-
-ScrOpcodeHandlerResult CodeFunc_S(scrProcessWork_s *scr) {
-    CodeFunc_2Operation(scr, SCR_BINARY_OPERATOR_LESS_THAN);
-    scr->CP = scr->CP + 1;
-    return SCR_OPCODE_HANDLER_RESULT_CONTINUE;
-}
-
-ScrOpcodeHandlerResult CodeFunc_L(scrProcessWork_s *scr) {
-    CodeFunc_2Operation(scr, SCR_BINARY_OPERATOR_GREATER_THAN);
-    scr->CP = scr->CP + 1;
-    return SCR_OPCODE_HANDLER_RESULT_CONTINUE;
-}
-
-ScrOpcodeHandlerResult CodeFunc_SE(scrProcessWork_s *scr) {
-    CodeFunc_2Operation(scr, SCR_BINARY_OPERATOR_LESS_OR_EQUAL);
-    scr->CP = scr->CP + 1;
-    return SCR_OPCODE_HANDLER_RESULT_CONTINUE;
-}
-
-ScrOpcodeHandlerResult CodeFunc_LE(scrProcessWork_s *scr) {
-    CodeFunc_2Operation(scr, SCR_BINARY_OPERATOR_GREATER_OR_EQUAL);
-    scr->CP = scr->CP + 1;
-    return SCR_OPCODE_HANDLER_RESULT_CONTINUE;
-}
-
-ScrOpcodeHandlerResult CodeFunc_IF(scrProcessWork_s *scr)
+s32 CodeFunc_Add(scrProcessWork_s *pwork)
 {
-    s32 conditionIsTruthy;
+    CodeFunc_2Operation(pwork, CODE_OPERATION_ADD);
+    pwork->CP++;
+    return CODE_RET_NEXT;
+}
 
-    switch ((s8)scr->StackType[scr->SP - 1]) {
+s32 CodeFunc_Sub(scrProcessWork_s *pwork)
+{
+    CodeFunc_2Operation(pwork, CODE_OPERATION_SUB);
+    pwork->CP++;
+    return CODE_RET_NEXT;
+}
+
+s32 CodeFunc_Mul(scrProcessWork_s *pwork)
+{
+    CodeFunc_2Operation(pwork, CODE_OPERATION_MUL);
+    pwork->CP++;
+    return CODE_RET_NEXT;
+}
+
+s32 CodeFunc_Div(scrProcessWork_s *pwork)
+{
+    CodeFunc_2Operation(pwork, CODE_OPERATION_DIV);
+    pwork->CP++;
+    return CODE_RET_NEXT;
+}
+
+s32 CodeFunc_Minus(scrProcessWork_s *pwork)
+{
+    switch ((s8)pwork->StackType[pwork->SP - 1]) {
+    case SCR_STACK_TYPE_INT:
+        pwork->StackData[pwork->SP - 1].i = -pwork->StackData[pwork->SP - 1].i;
+        break;
+    case SCR_STACK_TYPE_FLOAT:
+        pwork->StackData[pwork->SP - 1].f = -pwork->StackData[pwork->SP - 1].f;
+        break;
+    case SCR_STACK_TYPE_INTVAR:
+        DDS3_GBWK->integers[pwork->StackData[pwork->SP - 1].i] =
+            -DDS3_GBWK->integers[pwork->StackData[pwork->SP - 1].i];
+        break;
+    case SCR_STACK_TYPE_FLOATVAR:
+        DDS3_GBWK->floats[pwork->StackData[pwork->SP - 1].i] =
+            -DDS3_GBWK->floats[pwork->StackData[pwork->SP - 1].i];
+        break;
+    case SCR_STACK_TYPE_RET:
+        break;
+    }
+    pwork->CP++;
+    return CODE_RET_NEXT;
+}
+
+s32 CodeFunc_Not(scrProcessWork_s *pwork)
+{
+    switch ((s8)pwork->StackType[pwork->SP - 1]) {
     case SCR_STACK_TYPE_INT:
     case SCR_STACK_TYPE_INTVAR:
-        conditionIsTruthy = PopInt(scr);
+        PushInt(pwork, PopInt(pwork) == 0);
         break;
     case SCR_STACK_TYPE_FLOAT:
     case SCR_STACK_TYPE_FLOATVAR:
-        conditionIsTruthy = (PopFloat(scr) != 0.0f);
+        PushInt(pwork, PopFloat(pwork) == 0.0f);
         break;
     case SCR_STACK_TYPE_RET:
-        conditionIsTruthy = 0;
-        break;
-    default:
-        conditionIsTruthy = 0;
         break;
     }
-    if (conditionIsTruthy != 0)
-        scr->CP++;
-    else
-        scr->CP = scr->LabelTable[scr->Code[scr->CP].s.s1].CodeAddress;
-    return SCR_OPCODE_HANDLER_RESULT_CONTINUE;
+
+    pwork->CP++;
+    return CODE_RET_NEXT;
 }
 
-/* Run instructions until one stops the context: returns 2 when a handler returns 0 (finished),
- * 1 when a handler returns 2 (yield for one tick). */
-ScrTraceResult scrTraceCode(scrProcessWork_s *scr) {
-    ScrOpcodeHandlerResult handlerResult;
+s32 CodeFunc_Or(scrProcessWork_s *pwork)
+{
+    CodeFunc_2Operation(pwork, CODE_OPERATION_OR);
+    pwork->CP++;
+    return CODE_RET_NEXT;
+}
+
+s32 CodeFunc_And(scrProcessWork_s *pwork)
+{
+    CodeFunc_2Operation(pwork, CODE_OPERATION_AND);
+    pwork->CP++;
+    return CODE_RET_NEXT;
+}
+
+s32 CodeFunc_EQ(scrProcessWork_s *pwork)
+{
+    CodeFunc_2Operation(pwork, CODE_OPERATION_EQ);
+    pwork->CP++;
+    return CODE_RET_NEXT;
+}
+
+s32 CodeFunc_NEQ(scrProcessWork_s *pwork)
+{
+    CodeFunc_2Operation(pwork, CODE_OPERATION_NEQ);
+    pwork->CP++;
+    return CODE_RET_NEXT;
+}
+
+s32 CodeFunc_S(scrProcessWork_s *pwork)
+{
+    CodeFunc_2Operation(pwork, CODE_OPERATION_S);
+    pwork->CP++;
+    return CODE_RET_NEXT;
+}
+
+s32 CodeFunc_L(scrProcessWork_s *pwork)
+{
+    CodeFunc_2Operation(pwork, CODE_OPERATION_L);
+    pwork->CP++;
+    return CODE_RET_NEXT;
+}
+
+s32 CodeFunc_SE(scrProcessWork_s *pwork)
+{
+    CodeFunc_2Operation(pwork, CODE_OPERATION_SE);
+    pwork->CP++;
+    return CODE_RET_NEXT;
+}
+
+s32 CodeFunc_LE(scrProcessWork_s *pwork)
+{
+    CodeFunc_2Operation(pwork, CODE_OPERATION_LE);
+    pwork->CP++;
+    return CODE_RET_NEXT;
+}
+
+s32 CodeFunc_IF(scrProcessWork_s *pwork)
+{
+    s32 cond;
+
+    switch ((s8)pwork->StackType[pwork->SP - 1]) {
+    case SCR_STACK_TYPE_INT:
+    case SCR_STACK_TYPE_INTVAR:
+        cond = PopInt(pwork);
+        break;
+    case SCR_STACK_TYPE_FLOAT:
+    case SCR_STACK_TYPE_FLOATVAR:
+        cond = PopFloat(pwork) != 0.0f;
+        break;
+    case SCR_STACK_TYPE_RET:
+    default:
+        cond = 0;
+        break;
+    }
+
+    if (cond) {
+        pwork->CP++;
+    } else {
+        pwork->CP = pwork->LabelTable[pwork->Code[pwork->CP].s.s1].CodeAddress;
+    }
+    return CODE_RET_NEXT;
+}
+
+/* Continue until an instruction completes the procedure or yields a tick. */
+s32 scrTraceCode(scrProcessWork_s *pwork)
+{
+    s32 result;
 
     while (1) {
-        handlerResult = codefunc[scr->Code[scr->CP].s.s0](scr);
-        if (handlerResult == SCR_OPCODE_HANDLER_RESULT_FINISHED) {
-            scr->CommandTimer = 0;
-            return SCR_TRACE_RESULT_FINISHED;
+        result = codefunc[pwork->Code[pwork->CP].s.s0](pwork);
+        if (result == CODE_RET_END) {
+            pwork->CommandTimer = 0;
+            return SCR_RESULT_END;
         }
-        if (handlerResult == SCR_OPCODE_HANDLER_RESULT_YIELDED) {
+        if (result == CODE_RET_SYNC) {
             break;
         }
-        if (handlerResult == SCR_OPCODE_HANDLER_RESULT_CONTINUE) {
-            scr->CommandTimer = 0;
+        if (result == CODE_RET_NEXT) {
+            pwork->CommandTimer = 0;
         }
     }
-    scr->CommandTimer++;
-    scr->ScriptTimer++;
-    return SCR_TRACE_RESULT_YIELDED;
+    pwork->CommandTimer++;
+    pwork->ScriptTimer++;
+    return SCR_RESULT_CONTINUE;
 }
 
-/* Script command parameter `parameterIndex` (0 = first) as an int, converting floats and
- * dereferencing global variable references. */
-ScrVmInteger scrGetIntPara(ScrCommandParameterIndex parameterIndex) {
-    scrProcessWork_s *scr = nowpwork;
-    ScrStackValueIndex stackIndex = scr->SP - parameterIndex - 1;
+s32 scrGetIntPara(s32 n)
+{
+    scrProcessWork_s *pw = nowpwork;
+    s32 stackIndex = pw->SP - n - 1;
 
-    switch ((s8)scr->StackType[stackIndex]) {
+    switch ((s8)pw->StackType[stackIndex]) {
     case SCR_STACK_TYPE_INT:
-        return scr->StackData[stackIndex].i;
     case SCR_STACK_TYPE_RET:
-        return scr->StackData[stackIndex].i;
+        return pw->StackData[stackIndex].i;
     case SCR_STACK_TYPE_FLOAT:
-        return scr->StackData[stackIndex].f;
+        return pw->StackData[stackIndex].f;
     case SCR_STACK_TYPE_INTVAR:
-        return DDS3_GBWK->script.ints[scr->StackData[stackIndex].i];
+        return DDS3_GBWK->integers[pw->StackData[stackIndex].i];
     case SCR_STACK_TYPE_FLOATVAR:
-        return DDS3_GBWK->script.floats[scr->StackData[stackIndex].i];
+        return DDS3_GBWK->floats[pw->StackData[stackIndex].i];
     }
     return 0;
 }
 
-f32 scrGetFloatPara(ScrCommandParameterIndex parameterIndex)
+f32 scrGetFloatPara(s32 n)
 {
-    scrProcessWork_s *scr = nowpwork;
-    ScrStackValueIndex stackIndex = scr->SP - parameterIndex - 1;
+    scrProcessWork_s *pw = nowpwork;
+    s32 stackIndex = pw->SP - n - 1;
 
-    switch ((s8)scr->StackType[stackIndex]) {
+    switch ((s8)pw->StackType[stackIndex]) {
     case SCR_STACK_TYPE_INT:
-        return (f32)scr->StackData[stackIndex].i;
     case SCR_STACK_TYPE_RET:
-        return (f32)scr->StackData[stackIndex].i;
+        return (f32)pw->StackData[stackIndex].i;
     case SCR_STACK_TYPE_FLOAT:
-        return scr->StackData[stackIndex].f;
+        return pw->StackData[stackIndex].f;
     case SCR_STACK_TYPE_INTVAR:
-        return (f32)DDS3_GBWK->script.ints[scr->StackData[stackIndex].i];
+        return (f32)DDS3_GBWK->integers[pw->StackData[stackIndex].i];
     case SCR_STACK_TYPE_FLOATVAR:
-        return DDS3_GBWK->script.floats[scr->StackData[stackIndex].i];
+        return DDS3_GBWK->floats[pw->StackData[stackIndex].i];
     }
     return 0.0f;
 }
 
-/* Return a string parameter only when its VM stack tag is STRING. */
-const char *scrGetStrPara(ScrCommandParameterIndex parameterIndex)
+u8 *scrGetStrPara(s32 n)
 {
-    scrProcessWork_s *scr = nowpwork;
-    ScrStackValueIndex stackIndex = scr->SP - parameterIndex - 1;
-    s32 stackType = (s8)scr->StackType[stackIndex];
+    scrProcessWork_s *pw = nowpwork;
+    s32 stackIndex = pw->SP - n - 1;
+    s32 stackType = (s8)pw->StackType[stackIndex];
 
     if (stackType >= 0) {
         if (stackType >= SCR_STACK_TYPE_STRING) {
             if (stackType == SCR_STACK_TYPE_STRING) {
-                return EE_ADDR_AS(const char *, scr->StackData[stackIndex].i);
+                return (u8 *)pw->StackData[stackIndex].i;
             }
         }
     }
     return NULL;
 }
 
-/* A command's return value: its type tag, then its value, in the running
- * context's return slot. The tag goes through the context as read on entry,
- * the value through nowpwork read again, since the byte store may
- * have changed it as far as C knows; retail reads it twice. */
-
-#define SCR_SET_RETURN_VALUE(scr, type, member, value)                   \
-    do {                                                                 \
-        (scr)->StackType[SCR_STACK_RETURN_VALUE_SLOT] = (type);          \
-        nowpwork->StackData[SCR_STACK_RETURN_VALUE_SLOT].member = (value); \
-    } while (0)
-
-/* The setters return the context they set the value in, which retail
- * leaves in v0: a command that ends by setting its value returns it as its
- * result, and a nonzero result tells CodeFunc_Comm the command is done. */
-scrProcessWork_s *scrSetIntReturnValue(ScrVmInteger retVal)
+void scrSetIntReturnValue(s32 i)
 {
-    scrProcessWork_s *scr = nowpwork;
-    SCR_SET_RETURN_VALUE(scr, SCR_STACK_TYPE_INT, i, retVal);
-    return scr;
+    nowpwork->StackType[27] = SCR_STACK_TYPE_INT;
+    nowpwork->StackData[27].i = i;
 }
 
-scrProcessWork_s *scrSetFloatReturnValue(f32 retVal)
+void scrSetFloatReturnValue(f32 f)
 {
-    scrProcessWork_s *scr = nowpwork;
-    SCR_SET_RETURN_VALUE(scr, SCR_STACK_TYPE_FLOAT, f, retVal);
-    return scr;
+    nowpwork->StackType[27] = SCR_STACK_TYPE_FLOAT;
+    nowpwork->StackData[27].f = f;
 }
 
-ScrProgramCounter scrGetProcedureCodeAddress(ScrProcedureIndex procedureIndex) {
-    return nowpwork->ProcTable[procedureIndex].CodeAddress;
+s32 scrGetProcedureCodeAddress(s32 procindex)
+{
+    return nowpwork->ProcTable[procindex].CodeAddress;
 }
 
-ScrProgramCounter scrGetLabelCodeAddress(ScrLabelIndex labelIndex) {
-    return nowpwork->LabelTable[labelIndex].CodeAddress;
+s32 scrGetLabelCodeAddress(s32 labelindex)
+{
+    return nowpwork->LabelTable[labelindex].CodeAddress;
 }
 
-ScrProgramCounter scrGetCodePointer(void) {
+s32 scrGetCodePointer(void)
+{
     return nowpwork->CP;
 }
 
-void scrSetCodePointer(ScrProgramCounter programCounter) {
-    nowpwork->CP = programCounter;
+void scrSetCodePointer(s32 cp)
+{
+    nowpwork->CP = cp;
 }
 
-u32 scrGetScriptTimer(void) {
+s32 scrGetScriptTimer(void)
+{
     return nowpwork->ScriptTimer;
 }
 
-ScrCommandYieldCount scrGetCommandTimer(void) {
+s32 scrGetCommandTimer(void)
+{
     return nowpwork->CommandTimer;
 }
 
-ItfMesWindowIndex scrGetMessageHandle(void) {
+s32 scrGetMessageHandle(void)
+{
     return nowpwork->MesHandle;
 }
 
-scrProcessWork_s *scrGetScriptHandle(void) {
+scrProcessWork_s *scrGetScriptHandle(void)
+{
     return nowpwork;
 }
 
-void *scrGetCurrentProcessUserData(void) {
+void *scrGetData(void)
+{
     return nowpwork->data;
 }

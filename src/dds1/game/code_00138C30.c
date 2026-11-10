@@ -131,7 +131,7 @@ extern void fldMarkStageExplorationBitmapRegion(s32, s32, s32, s32, s32, s32);
 extern void fldSetFlagBit(s32 area, s32 floor, s32 bit);
 
 extern void datAddCurrencyClamped(s32 delta);
-extern void scrDestroyAllNamedProcesses(void);
+extern void scrAllReleaseScript(void);
 extern void fldSetDeferredFieldCommand(u32 command, u32 parameter);
 
 struct dds3Basic_t;
@@ -2426,7 +2426,7 @@ s32 fldDispatchInteractionAction(s32 messageId, s32 slot) {
                 s32 command;
                 s32 flag;
 
-                scrDestroyAllNamedProcesses();
+                scrAllReleaseScript();
                 command = D_00332E30.extraActions[(s8)D_00332E30.sets[D_003BAE38].messages[row].extraAction].parameter0;
                 flag = D_00332E30.extraActions[(s8)D_00332E30.sets[D_003BAE38].messages[row].extraAction].parameter1;
                 fldSetDeferredFieldCommand(fldGlobalBase.area, command);

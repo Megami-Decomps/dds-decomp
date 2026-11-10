@@ -294,13 +294,13 @@
 0x0010BC40	fldFlowParse	inferred	SMT3HD name via SLUS_209.11 0x00109B48, reloc-identical; was bfParseFLW0
 0x0010BD50	scrLoadScriptFile	inferred	SMT3HD name via SLUS_209.11 0x00109C58, reloc-identical; was scrOpenProcessFromResource
 0x0010BDB0	scrStartScriptProcess	inferred	SMT3HD name via SLUS_209.11 0x00109CB8, reloc-identical; was scrProcCreateTask
-0x0010BE08	scrClearProcessGlobals	inferred	SMT3HD name via SLUS_209.11 0x00109D10, reloc-identical; clears 256 integer and float script globals; was dds3GlobalWorkClearFlags
+0x0010BE08	dds3GlobalWorkClearFlags	inferred	SMT3HD name via SLUS_209.11 0x00109D10, script/scrScriptProcess SMT3 rename; was scrClearProcessGlobals
 0x0010BE40	scrStartScriptByName	inferred	SMT3HD name via SLUS_209.11 0x00109D48, shared-hash-in-run; was scrCreateProcessTaskFromResource
 0x0010BE90	scrStartScript2	inferred	SMT3HD name via SLUS_209.11 0x00109D98, shared-hash-in-run; was scrCreateTaskForProcessId
 0x0010BEE0	scrRunScriptEx	inferred	SMT3HD name via SLUS_209.11 0x00109DE8, reloc-identical; was scrCreateTaskFromContextParameters
 0x0010BF30	scrCreateProcessAtFirstProcedure	inferred	confidence=high; matched-C; src/dds2/script/scrScriptProcess.c:82:func_0010BF30; Creates a script VM process from caller-supplied FLW0 sections with procedure index zero, without creating a scheduler task.; source=fresh-R_Names31-QP12 [names_qp12_apply.tsv]
-0x0010BF48	scrProcDestroyTask	inferred	twin of DDS1 scrProcDestroyTask
-0x0010BFE0	scrDestroyAllNamedProcesses	inferred	Walks the script-name list and destroys each eligible task or standalone process. [names_reviewed6.tsv]
+0x0010BF48	scrPrintProcedureEnd	inferred	SMT3HD name via SLUS_209.11 0x00109E50, script/scrScriptProcess SMT3 rename; was scrProcDestroyTask
+0x0010BFE0	scrAllReleaseScript	inferred	SMT3HD name via SLUS_209.11 0x00109F08, script/scrScriptProcess SMT3 rename; was scrDestroyAllNamedProcesses
 0x0010C100	scrSearchScriptName	inferred	SMT3HD name via SLUS_209.11 0x0010A078, reloc-identical; was scrFindNamedProcessNode
 0x0010C158	scrSearchProcedureName	inferred	SMT3HD name via SLUS_209.11 0x0010A0D0, reloc-identical; was bfFindScriptIndexByName
 0x0010C250	scrSetUserData	inferred	SMT3HD name via SLUS_209.11 0x0010A1C8, reloc-identical; was scrSetCurrentActor
@@ -363,7 +363,7 @@
 0x0010D898	scrGetScriptTimer	inferred	SMT3HD name via SLUS_209.11 0x0010B810, shared-hash-in-run; was scrGetTimer
 0x0010D8B8	scrGetMessageHandle	inferred	SMT3HD name via SLUS_209.11 0x0010B830, shared-hash-in-run; was scrGetWindow
 0x0010D8C8	scrGetScriptHandle	inferred	SMT3HD name via SLUS_209.11 0x0010B840, shared-hash-in-run; was scrGetCurrentContext
-0x0010D8D0	scrGetCurrentProcessUserData	inferred	Semantic name from returning nowpwork->userData; shared-hash SMT3HD name via SLUS_209.11 0x0010B848 was scrGetData, previously scrGetCurrentCommandWork
+0x0010D8D0	scrGetData	inferred	SMT3HD name via SLUS_209.11 0x0010B848, script/scrTraceCode SMT3 rename; was scrGetCurrentProcessUserData
 0x0010D8E0	scrCommand_KEY	inferred	SMT3HD name via SLUS_209.11 0x0010B858, reloc-identical; was scrHasNegativeMarkerDuringCommandTimer
 0x0010D910	scrCommand_BIT_CHK	inferred	SMT3HD name via SLUS_209.11 0x0010B888, shared-hash-in-run; was scrOpcodeTestModelFlag
 0x0010D940	scrCommand_BIT_ON	inferred	SMT3HD name via SLUS_209.11 0x0010B8B8, shared-hash-in-run; was scrOpcodeSetModelFlag
@@ -10548,6 +10548,7 @@
 0x0040F5C8	fileioLibraryVersion	inferred	The EE FILEIO library's version ("2500" here): the library's open compares the IOP FILEIO's reply at 0x00486FA8 with it, or with "....", and refuses a mismatch. DDS1 twin 0x0039C448.
 0x0040F5D0	sbrkBreak	inferred	The heap's current end that sbrk moves (Sony's sbrk: checked against EndOfHeap with interrupts off), initialized to the end of the loaded image; newlib's allocator grows and trims through it. DDS1 twin 0x0039C450.
 0x00410C6C	sdfAsinTable	inferred	SMT3HD name via SLUS_209.11 0x0052D944, sdfMath asin table; was sdfNormalizedAsinSamples
+0x00411408	scrCommandTable	inferred	SMT3HD name via SLUS_209.11 0x0052E350, script/scrScriptProcess SMT3 rename; was D_00411408
 0x00412688	scrSceneLightDirectionZeroWarning	inferred	confidence=high; Existing C-defined WARNING: SCENE_LIGHT_DIR length zero string, emitted when all direction components have abs<=0.01; native allocation40B including padding, C literal38B including NUL. DDS1 twin 0x0039F508; existing const char[], native 0x28-byte allocation and padding unchanged. No import or active ASM reader. [PurD readability data b7; native/matched-C twin; identifier-only]
 0x004127C0	dds3PlayerModelName	inferred	confidence=high; Existing C-defined player_a selector string with explicit16-byte storage; chooses the p_a chunk family. DDS1 twin 0x0039F640; existing const char[16], native 0x10-byte allocation and padding unchanged. No import or active ASM reader. [PurD readability data b6; native/matched-C twin; identifier-only]
 0x00413C10	fldTitleTaskName	inferred	confidence=high; data D_00413C10; matched-C-users=3; src/dds2/game/code_001442D0.c:2185:fldTitleIsActive; src/dds2/game/code_001442D0.c:2209:fldStartTitle; src/dds2/game/code_001442D0.c:2241:fldDestroyTitleTask; Title existence, creation and teardown use same task-name string; data-twin=D_003A0800, supported by 2 independently paired matched functions.; retail-data-start=asm/dds2/data/game/code_001442D0.rodata.s:609.; seed-placeholder=D_00413C10; current asm label and source default identifier verified; source=names_reviewed36.tsv. [names_qp10_seed.tsv]
