@@ -166,26 +166,6 @@ SdfDmaTagHeader *sdfModelSetNormalDrawPacket(sdfModelNode_t *node, const SdfInde
     return payload + 1;
 }
 
-#ifdef NON_MATCHING
-#include "common.h"
-#include "sdf_measure_command.h"
-#include "sdf_asset_packets.h"
-#include "sdf_dma_tag.h"
-#include "sdf_vu_lighting.h"
-#include "sdf_chip.h"
-#include "sdf_model.h"
-#include "pcp_vu0.h"
-#include "sdf_draw.h"
-#include "sdf_model_copy.h"
-#include "sdf_vu_matrix.h"
-#include "sdf_vu_matrix_multiply_api.h"
-#include "sdf_message.h"
-#include "sdf_key_pool.h"
-#include "sdf_model_command_views.h"
-#include "sdf_packet_alloc.h"
-
-extern SdfDmaTagHeader *sdfModelSetMatRefPacket(sdfModelRootNode_t *model, s32 index, SdfDmaTagHeader *packet, s32 frame);
-
 /* Indexed command with the per-node unpack list that follows the payload words. */
 typedef struct SdfIndexedNodeCommandView {
     u8 kind;
@@ -196,19 +176,39 @@ typedef struct SdfIndexedNodeCommandView {
     u16 nodeIds[0];         /* 0x10 */
 } SdfIndexedNodeCommandView;
 
+typedef char SdfIndexedNodeCommandView_nodeCount_at_0x0C[
+    ((u32)&((SdfIndexedNodeCommandView *)0)->nodeCount == 0x0C) ? 1 : -1];
+typedef char SdfIndexedNodeCommandView_nodeIds_at_0x10[
+    ((u32)&((SdfIndexedNodeCommandView *)0)->nodeIds == 0x10) ? 1 : -1];
+
+/* Four VIF payload words between the closing CNT and payload REF tags. */
+typedef struct SdfSkinCountVifBlock {
+    u32 unpackCode;
+    u32 nodeCount;
+    u32 itopCode;
+    u32 mscalCode;
+} SdfSkinCountVifBlock;
+
+typedef char SdfSkinCountVifBlock_size_must_be_0x10[
+    (sizeof(SdfSkinCountVifBlock) == 0x10) ? 1 : -1];
+
 /* Emit an indexed command's packets: the asset packet, a 7-quadword unpack of
  * each listed node's frame workspace, the closing VIF block, then the command's
  * own payload. Upstream: INCLUDE_ASM in sdf/sdfModel; written from the retail
- * routine. 87 of 96 words match retail; two saved registers swap. */
-SdfDmaTagHeader *sdfModelSetOneSkinDrawPacket(sdfModelNode_t *node, SdfIndexedNodeCommandView *command,
-                                                    SdfDmaTagHeader *packet, s32 frame) {
-    u32 packed = command->assetIndexAndCount;
+ * routine. The do-while preserves its unconditional first node reference.
+ * The initialized packed word retains s6 across the material and node calls;
+ * ordinary allocation swaps it with the loop-invariant UNPACK code. See
+ * docs/compiler-trace-skin-packet.md for the qualified allocation evidence.
+ * This is an allocation reconstruction, not a hardware-register requirement. */
+SdfDmaTagHeader *sdfModelSetOneSkinDrawPacket(sdfModelNode_t *node, const SdfIndexedNodeCommandView *command,
+                                                    SdfDmaTagHeader *packet, SdfGraphBufferIndex frame) {
+    register u32 packed __asm__("$22") = command->assetIndexAndCount;
     u32 count;
     u32 i;
-    u16 *ids;
+    const u16 *ids;
     u32 unpackAddress;
     u8 *workspace;
-    u32 *vifBlock;
+    SdfSkinCountVifBlock *vifBlock;
 
     packet = sdfModelSetMatRefPacket(node->root, packed >> 16, packet, frame);
     packed &= 0xFFFF;
@@ -232,12 +232,12 @@ SdfDmaTagHeader *sdfModelSetOneSkinDrawPacket(sdfModelNode_t *node, SdfIndexedNo
     packet->control = 0x10;
     packet->firstVifCode = 0;
     packet->secondVifCode = 0;
-    vifBlock = (u32 *)(packet + 1);
+    vifBlock = (SdfSkinCountVifBlock *)(packet + 1);
     packet += 2;
-    vifBlock[1] = count;
-    vifBlock[0] = 0x6001C000;
-    vifBlock[2] = 0x0400000E;
-    vifBlock[3] = 0x14000000;
+    vifBlock->nodeCount = count;
+    vifBlock->unpackCode = 0x6001C000;
+    vifBlock->itopCode = 0x0400000E;
+    vifBlock->mscalCode = 0x14000000;
     packet->control = 0x30;
     packet->quadwordCount = packed;
     packet->address = command->address & 0x0FFFFFFF;
@@ -245,9 +245,9 @@ SdfDmaTagHeader *sdfModelSetOneSkinDrawPacket(sdfModelNode_t *node, SdfIndexedNo
     packet->secondVifCode = 0;
     return packet + 1;
 }
-#else
-INCLUDE_ASM(const s32, "sdf/sdfModel", sdfModelSetOneSkinDrawPacket);
-#endif
+
+
+
 
 #ifdef NON_MATCHING
 #include "common.h"
@@ -443,7 +443,7 @@ void sdfModelLinkDrawPacket(sdfModelNode_t *node, const u32 *commandList,
             packet = sdfModelSetNormalDrawPacket(node, (const SdfIndexedCommandView *)command, packet, bufferIndex);
             break;
         case 2:
-            packet = sdfModelSetOneSkinDrawPacket(node, command, packet, bufferIndex);
+            packet = sdfModelSetOneSkinDrawPacket(node, (const SdfIndexedNodeCommandView *)command, packet, bufferIndex);
             break;
         case 3:
             listNode = sdfModelNewPacketHeader(node, packetSelector, bufferIndex);
