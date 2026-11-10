@@ -486,5 +486,5 @@ dds3TaskUpdateResult_t dds3BasicDrawProcess(dds3ProcessID_t *task) {
     return 0;
 }
 
-INCLUDE_SDATA(const s32, "game/code_00101D60", D_003BA844);
+INCLUDE_SDATA(const s32, "kernel/dds3KernelProcess", D_003BA844);
 

@@ -65,9 +65,8 @@ segments:
       - [0x1000, asm, hand/crt0]
       - [0x11D8, c, game/code_00100000]
       - [0x1980, c, kernel/dds3KernelCore]  # Nocturne __FILE__
-      - [0x29F0, c, game/code_001019F0]
       - [0x2AC0, c, sdf/sdfDefaultMain]  # SMT3 unit (sdf-decomp tools/twins.py runs)
-      - [0x2C50, c, game/code_00101C50]
+      - [0x2C50, c, kernel/dds3KernelProcess]  # SMT3 unit
       - [0x3790, c, kernel/dds3AdminiProcess]  # Nocturne __FILE__; starts at dds3GetAdminTaskWork (same-TU provider evidence)
       - [0x3DC8, c, game/code_00102DC8]
       - [0x73B8, c, kernel/dds3KernelDraw]  # Nocturne __FILE__
@@ -584,7 +583,7 @@ segments:
       - [0x336B80, .sdata, game/code_00100000]
       - [0x336BF4, .sdata, kernel/dds3KernelCore]
       - [0x336C0C, .sdata, sdf/sdfDefaultMain]
-      - [0x336C14, .sdata, game/code_00101C50]
+      - [0x336C14, .sdata, kernel/dds3KernelProcess]
       - [0x336C18, .sdata, kernel/dds3AdminiProcess]
       - [0x336C20, .sdata, game/code_00102DC8]
       - [0x336D18, .sdata, game/code_00107EF8]
