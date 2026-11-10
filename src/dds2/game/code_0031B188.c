@@ -46,7 +46,7 @@ static inline void mnuSetBasisRow(f32 *row, f32 x, f32 y, f32 z, f32 w) {
 }
 
 
-extern void evtPrintDeveloperConsoleMessage(const char *, ...);
+extern void datDebugPrintf(const char *, ...);
 
 
 extern SoundSlotPool *dds3SoundSlotPool;
@@ -182,7 +182,7 @@ s32 mnuApplyFrameKeyedModelMotion(MenuWorkEntry *work, MnuShootingWork *unusedCo
                 if (record != NULL) {
                     frame = work->elapsed;
                     if (frame == record->parameters[0]) {
-                        evtPrintDeveloperConsoleMessage("%d:%d:%d:%d\n", frame,
+                        datDebugPrintf("%d:%d:%d:%d\n", frame,
                             record->parameters[0], record->parameters[1],
                             record->parameters[2]);
                         node = work->object.modelNode;
@@ -212,7 +212,7 @@ MnuEffectWork *mnuCreateEffectWork(s32 listCount, s32 *recordCounts) {
     MnuEffectRecord *records;
 
     for (i = 0; i < listCount; i++) allocationSize += recordCounts[i] * 32;
-    evtPrintDeveloperConsoleMessage("EffectWork Object Size %d\n", allocationSize);
+    datDebugPrintf("EffectWork Object Size %d\n", allocationSize);
     allocation = sdfMemAllocDirect(allocationSize);
     work = (MnuEffectWork *)sdfMemGetPtr(allocation);
     memset(work, 0, allocationSize);
@@ -285,7 +285,7 @@ void mnuAssignEffectRecordQueues(MnuEffectList *list, s32 resourceIndex, FileQue
         if (source == NULL) {
             source = sources[resourceIndex];
             record->queue = source;
-            evtPrintDeveloperConsoleMessage(D_00438950, resourceIndex, D_0040AD50[resourceIndex]);
+            datDebugPrintf(D_00438950, resourceIndex, D_0040AD50[resourceIndex]);
         } else {
             record->queue = fileQueueClone(source);
         }
@@ -508,7 +508,7 @@ MnuSectionModelWork *mnuCreateSectionModelWork(s32 listCount, s32 *nodeCounts) {
     u8 *records;
 
     for (i = 0; i < listCount; i++) allocationSize += nodeCounts[i] * sizeof(MnuModelNode);
-    evtPrintDeveloperConsoleMessage(D_0042DAE8, allocationSize);
+    datDebugPrintf(D_0042DAE8, allocationSize);
     allocation = sdfMemAllocDirect(allocationSize);
     work = (MnuSectionModelWork *)sdfMemGetPtr(allocation);
     memset(work, 0, allocationSize);

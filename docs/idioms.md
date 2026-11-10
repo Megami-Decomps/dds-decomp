@@ -3797,7 +3797,7 @@ prints `mtrChkMantraCompleteMaster!!` and checks the six mastery flags
 through a nine-entry unit-index map. Its owner is `datUnitWork_t`, not
 an integer with an ad hoc `+4` access. The actual providers are
 `s32 evtBitCheck(s32)`, `s32 prfAreAllRequiredProfileFlagsSet(datUnitWork_t *)`,
-and the existing variadic `void evtPrintDeveloperConsoleMessage`.
+and the existing variadic `void datDebugPrintf`.
 
 With these contracts, ordinary automatic array initializers and early
 returns are text-exact. The arrays replace their two source

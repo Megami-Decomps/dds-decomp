@@ -10,8 +10,6 @@ typedef struct
 extern dds3GlobalWork_t *DDS3_GBWK;
 #include "scr.h"
 
-#define datDebugPrintf evtPrintDeveloperConsoleMessage
-#define scrPrintProcedureStart bfContextCreate
 extern s32 scrIsCurrentWorkTask(scrProcessWork_s *pw);
 
 extern s32 scrHandleCount;

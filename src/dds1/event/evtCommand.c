@@ -70,7 +70,7 @@ void evtDisableMoonCalc(void);
 
 void evtSetAgeOfMoon(s32 phase);
 
-void evtPrintDeveloperConsoleMessage(const char *fmt, ...);
+void datDebugPrintf(const char *fmt, ...);
 
 #include "sdf_debug_api.h"
 
@@ -154,18 +154,18 @@ ScrCommandResult evtCommand_EFFMG1_POS(void) {
 
     primaryEffect = evtSearchBasic(EFF_WORLD_KIND_EFFECT_OBJECT, scrGetIntPara(0));
     if (primaryEffect == NULL) {
-        evtPrintDeveloperConsoleMessage("EFFMG1_POS mg1 ID error!\n");
+        datDebugPrintf("EFFMG1_POS mg1 ID error!\n");
         return 1;
     }
 
     sourcePoint0 = evtSearchBasic(EFF_WORLD_KIND_EFFECT_OBJECT, scrGetIntPara(1));
     sourcePoint1 = evtSearchBasic(EFF_WORLD_KIND_EFFECT_OBJECT, scrGetIntPara(2));
     if (sourcePoint0 == NULL || sourcePoint1 == NULL) {
-        evtPrintDeveloperConsoleMessage("EFFMG1_POS point ID not found!\n");
+        datDebugPrintf("EFFMG1_POS point ID not found!\n");
         return 1;
     }
     if (dds3EffectObjectSetMG12Pos(primaryEffect, sourcePoint0, sourcePoint1, NULL, NULL) == 0) {
-        evtPrintDeveloperConsoleMessage("EFFMG1_POS set error!\n");
+        datDebugPrintf("EFFMG1_POS set error!\n");
         return 1;
     }
     return 1;
@@ -193,7 +193,7 @@ ScrCommandResult evtCommand_EFFMG2_POS(void) {
 
     primaryEffect = evtSearchBasic(EFF_WORLD_KIND_EFFECT_OBJECT, scrGetIntPara(0));
     if (primaryEffect == NULL) {
-        evtPrintDeveloperConsoleMessage("EFFMG2_POS mg2 ID error!\n");
+        datDebugPrintf("EFFMG2_POS mg2 ID error!\n");
         return 1;
     }
 
@@ -203,11 +203,11 @@ ScrCommandResult evtCommand_EFFMG2_POS(void) {
     sourcePoint3 = evtSearchBasic(EFF_WORLD_KIND_EFFECT_OBJECT, scrGetIntPara(4));
 
     if (sourcePoint0 == NULL || sourcePoint1 == NULL || sourcePoint2 == NULL || sourcePoint3 == NULL) {
-        evtPrintDeveloperConsoleMessage("EFFMG2_POS point ID not found!\n");
+        datDebugPrintf("EFFMG2_POS point ID not found!\n");
         return 1;
     }
     if (dds3EffectObjectSetMG12Pos(primaryEffect, sourcePoint0, sourcePoint1, sourcePoint2, sourcePoint3) == 0) {
-        evtPrintDeveloperConsoleMessage("EFFMG2_POS set error!\n");
+        datDebugPrintf("EFFMG2_POS set error!\n");
         return 1;
     }
     return 1;
@@ -303,12 +303,12 @@ ScrCommandResult evtCommand_EFFECT_PATH_MOVE(void) {
 
     effect = evtSearchBasic(EFF_WORLD_KIND_EFFECT_OBJECT, scrGetIntPara(0));
     if (effect == NULL) {
-        evtPrintDeveloperConsoleMessage(D_003AC700);
+        datDebugPrintf(D_003AC700);
         return 1;
     }
     path = evtSearchBasic(EFF_WORLD_KIND_ACTION_10, scrGetIntPara(1));
     if (path == NULL) {
-        evtPrintDeveloperConsoleMessage(D_003AC728);
+        datDebugPrintf(D_003AC728);
         return 1;
     }
     evtPathLinkAndMake(path, effect);
@@ -329,7 +329,7 @@ ScrCommandResult evtCommand_EFFECT_PATH_WAIT(void) {
     EvtPathStatus scaleStatus;
 
     if (effectObject == NULL) {
-        evtPrintDeveloperConsoleMessage("EFFECT_PATH_WAIT not found eff!\n");
+        datDebugPrintf("EFFECT_PATH_WAIT not found eff!\n");
         return 1;
     }
     scaleStatus = evtCheckPathStat(effectObject);
@@ -354,7 +354,7 @@ ScrCommandResult evtCommand_SEARCH_ID(void) {
                                               (const u8 *)scrGetStrPara(0));
     if (worldNode == NULL) {
         printf("ID : id not found!! <%s>\n", scrGetStrPara(0));
-        evtPrintDeveloperConsoleMessage("WARNING: ID not found! <%s>\n", scrGetStrPara(0));
+        datDebugPrintf("WARNING: ID not found! <%s>\n", scrGetStrPara(0));
         scrSetIntReturnValue(0);
     } else {
         scrSetIntReturnValue(worldNode->key);
@@ -599,7 +599,7 @@ ScrCommandResult evtCommand_FIELD_CLS(void)
     }
     dds3DrawFlag |= 0x2000000;
     printf("event stage shutdown !!\n");
-    evtPrintDeveloperConsoleMessage("field shutdown.\n");
+    datDebugPrintf("field shutdown.\n");
     return 1;
 }
 
@@ -613,7 +613,7 @@ ScrCommandResult evtCommand_FIELD_CLS_STOP(void)
     }
     dds3DrawFlag |= 0x2000000;
     printf("event stage shutdown2 !!\n");
-    evtPrintDeveloperConsoleMessage("field shutdown2.\n");
+    datDebugPrintf("field shutdown2.\n");
     return 1;
 }
 
@@ -621,7 +621,7 @@ ScrCommandResult evtCommand_UNIT_CLS(void)
 {
     evtFreeAllUnit();
     printf("unit all clear !!\n");
-    evtPrintDeveloperConsoleMessage("unit all clear.\n");
+    datDebugPrintf("unit all clear.\n");
     return 1;
 }
 
@@ -631,7 +631,7 @@ ScrCommandResult evtCommand_UNIT_CLS_STOP(void)
     while (sdfDelayedResrcCheck()) {
     }
     printf("unit all clear2 !!\n");
-    evtPrintDeveloperConsoleMessage("unit all clear2.\n");
+    datDebugPrintf("unit all clear2.\n");
     return 1;
 }
 
@@ -1012,14 +1012,14 @@ ScrCommandResult evtCommand_LOAD_BE(void) {
     }
     if (evtSearchEventPack(eventId) == 0) {
         message = D_003AC958;
-        evtPrintDeveloperConsoleMessage(message, eventId);
+        datDebugPrintf(message, eventId);
         sdfPrintf(message, eventId);
         dds3LinkProcess(commandWork->ProcessID, evtLoadEventPack(eventId));
         return SCR_COMMAND_RESULT_PENDING;
     }
     if (evtGetEventPackStat(eventId) == EVT_PACK_LOAD_COMPLETE) {
         message = D_003AC968;
-        evtPrintDeveloperConsoleMessage(message, eventId);
+        datDebugPrintf(message, eventId);
         sdfPrintf(message, eventId);
         return SCR_COMMAND_RESULT_COMPLETE;
     }
@@ -1038,7 +1038,7 @@ ScrCommandResult evtCommand_READ_BE(void) {
     if (evtSearchEventPack(eventId) != 0) {
         return SCR_COMMAND_RESULT_COMPLETE;
     }
-    evtPrintDeveloperConsoleMessage(D_003AC978, eventId);
+    datDebugPrintf(D_003AC978, eventId);
     dds3LinkProcess(commandWork->ProcessID, evtLoadEventPack(eventId));
     return SCR_COMMAND_RESULT_COMPLETE;
 }
@@ -1049,7 +1049,7 @@ ScrCommandResult evtCommand_CHK_BE(void) {
     EvtPackLoadQueryResult result;
 
     if (scrGetScriptHandle() != 0 && evtSearchEventPack(eventId) != 0 && evtGetEventPackStat(eventId) == EVT_PACK_LOAD_COMPLETE) {
-        evtPrintDeveloperConsoleMessage(D_003AC968, eventId);
+        datDebugPrintf(D_003AC968, eventId);
         result = EVT_PACK_LOAD_QUERY_READY;
     } else {
         result = EVT_PACK_LOAD_QUERY_NOT_READY;
@@ -1068,7 +1068,7 @@ ScrCommandResult evtCommand_DEL_BE(void) {
     if (evtSearchEventPack(eventId) == 0) {
         return SCR_COMMAND_RESULT_COMPLETE;
     }
-    evtPrintDeveloperConsoleMessage(D_003AC988, eventId);
+    datDebugPrintf(D_003AC988, eventId);
     evtKillEventPack(eventId);
     return SCR_COMMAND_RESULT_COMPLETE;
 }
@@ -1094,7 +1094,7 @@ ScrCommandResult evtCommandStartPolygonMovie(void) {
     eventId = scrGetIntPara(0);
     sceneId = scrGetIntPara(1);
     movieTask = evtViewerCreateTask(commandWork->ProcessID->priority, eventId, sceneId);
-    evtPrintDeveloperConsoleMessage(D_003AC9E0, scrGetIntPara(0), scrGetIntPara(1));
+    datDebugPrintf(D_003AC9E0, scrGetIntPara(0), scrGetIntPara(1));
     dds3LinkProcess(commandWork->ProcessID, movieTask);
     evtPolygonMovieSetFlagBits(movieTask, EVT_POLY_MOVIE_SCRIPT_STARTUP_HOLD);
     scrSetIntReturnValue(scrProcessHandleToVmInteger(movieTask));
@@ -1291,7 +1291,7 @@ ScrCommandResult evtCommand_LIGHT_PATH_MOVE(void) {
         return 1;
     }
     printf(D_003ACA40);
-    evtPrintDeveloperConsoleMessage(D_003ACA58);
+    datDebugPrintf(D_003ACA58);
     return 1;
 }
 

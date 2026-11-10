@@ -476,7 +476,7 @@ extern void sdfInstallNonzeroSpriteSlots(SdfSlotSet *);
 extern void effRequestResourceByMode(const char *, const char *, s32, u32 *);
 extern SndPackedTrackLoadStatus p2sdLoadCheckMidi(s32);
 extern void p2sdLoadSMGFile(s32);
-extern void evtPrintDeveloperConsoleMessage(const char *, ...);
+extern void datDebugPrintf(const char *, ...);
 
 INCLUDE_RODATA(const s32, "game/code_0030A128", D_0042D280);
 
@@ -501,7 +501,7 @@ LmapResourceLoadResult fldAdvanceLmapResourceLoad(LmapTaskState *task)
         break;
     case LMAP_RESOURCE_LOAD_PHASE_INSTALL_SLOTS:
         sdfInstallNonzeroSpriteSlots((SdfSlotSet *)task);
-        evtPrintDeveloperConsoleMessage(D_0042D280);
+        datDebugPrintf(D_0042D280);
         return LMAP_RESOURCE_LOAD_COMPLETE;
     case LMAP_RESOURCE_LOAD_PHASE_REQUEST_ENTRY:
         load->file = NULL;
@@ -566,7 +566,7 @@ LmapResourceLoadResult fldAdvanceLmapResourceLoad(LmapTaskState *task)
     case LMAP_RESOURCE_LOAD_PHASE_CONSUME_ENTRY:
         if (load->file != NULL) {
             fileGetLoadPtr(load->file);
-            evtPrintDeveloperConsoleMessage(D_0042D298, fileGetLoadSize(load->file));
+            datDebugPrintf(D_0042D298, fileGetLoadSize(load->file));
         }
         if (files[load->entry].kind == 2) {
             node = ((FilePacRequest *)load->archive)->packet.queueHead;
@@ -576,7 +576,7 @@ LmapResourceLoadResult fldAdvanceLmapResourceLoad(LmapTaskState *task)
                 slotIndex = 0;
                 do {
                     if (node->packet[0] == 1) {
-                        evtPrintDeveloperConsoleMessage(D_0042D2A8, sdfPacGetResrcFileName(node));
+                        datDebugPrintf(D_0042D2A8, sdfPacGetResrcFileName(node));
                         if (task->variant == 1) {
                             task->spriteSlots[slotIndex + 1] =
                                 effCreateResourceSlotSetFromAllocation(PAC_WORK_ALLOCATION(node), EFF_RESOURCE_SOURCE_TRANSIENT);
@@ -594,11 +594,11 @@ LmapResourceLoadResult fldAdvanceLmapResourceLoad(LmapTaskState *task)
                 } while (node != NULL);
             }
         }
-        evtPrintDeveloperConsoleMessage(D_0042D2A8, files[load->entry].name);
+        datDebugPrintf(D_0042D2A8, files[load->entry].name);
         if (load->file != NULL) {
             sdfMemFreeDirect(fileGetMemHandle(load->file));
             fileRequestFreeIfComplete(load->file);
-            evtPrintDeveloperConsoleMessage(D_0042D2B8);
+            datDebugPrintf(D_0042D2B8);
         }
         if (load->archive != NULL) {
             pacFileHandleFree_(load->archive);

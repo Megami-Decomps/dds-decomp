@@ -202,12 +202,12 @@ s32 mdlAdvanceViewerPackageTask(dds3ProcessID_t *task) {
 }
 
 extern char D_0042D4E0[];
-extern void evtPrintDeveloperConsoleMessage(const char *fmt, ...);
+extern void datDebugPrintf(const char *fmt, ...);
 extern void dds3AdminiCallSequence(s32 requestedMode, const void *requestData, u32 dataBytes, s32 markHistory);
 extern void scrAllReleaseScript(void);
 
 s32 evtCallShooting(void) {
-    evtPrintDeveloperConsoleMessage(D_0042D4E0, 0);
+    datDebugPrintf(D_0042D4E0, 0);
     dds3AdminiCallSequence(0x1D, 0, 0, 0);
     scrAllReleaseScript();
     return 1;
@@ -271,7 +271,7 @@ s32 mnuAdvanceShootingPackageLoad(u8 *workBytes) {
     case MNU_SHOOTING_PACKAGE_LOAD_FINISHED:
         work->packageLoadState = MNU_SHOOTING_PACKAGE_LOAD_INITIALIZE;
         work->state = 1;
-        evtPrintDeveloperConsoleMessage(D_0042D500);
+        datDebugPrintf(D_0042D500);
         return 1;
 
     case MNU_SHOOTING_PACKAGE_LOAD_REQUEST_ENTRY:
@@ -306,7 +306,7 @@ s32 mnuAdvanceShootingPackageLoad(u8 *workBytes) {
                 p2sdLoadSMGFile(D_0040A970[work->packageEntryIndex].value);
             } else {
                 work->packageLoadState = MNU_SHOOTING_PACKAGE_LOAD_PROCESS_ENTRY;
-                evtPrintDeveloperConsoleMessage(D_0042D518,
+                datDebugPrintf(D_0042D518,
                     D_0040A970[work->packageEntryIndex].name);
             }
             break;
@@ -365,7 +365,7 @@ s32 mnuAdvanceShootingPackageLoad(u8 *workBytes) {
         case 4:
         case 5:
             if (pacCheckEnd(work->packageDataRequest) != 0) {
-                evtPrintDeveloperConsoleMessage(D_0042D530);
+                datDebugPrintf(D_0042D530);
                 work->packageLoadState = MNU_SHOOTING_PACKAGE_LOAD_PROCESS_ENTRY;
             }
             break;
@@ -378,7 +378,7 @@ s32 mnuAdvanceShootingPackageLoad(u8 *workBytes) {
         if (request != NULL) {
             data = (void *)fileGetLoadPtr(request);
             request = work->packageRequest;
-            evtPrintDeveloperConsoleMessage(D_0042D548,
+            datDebugPrintf(D_0042D548,
                                             fileGetLoadSize(request));
         }
 
@@ -388,7 +388,7 @@ s32 mnuAdvanceShootingPackageLoad(u8 *workBytes) {
             case 6:
             case 10:
             case 14:
-                evtPrintDeveloperConsoleMessage(D_0042D558, D_0040A970[work->packageEntryIndex].name);
+                datDebugPrintf(D_0042D558, D_0040A970[work->packageEntryIndex].name);
                 work->objects = mnuLoadSectionObjectListWithRelocations(data);
                 printf(D_0042D578);
                 break;
@@ -459,28 +459,28 @@ s32 mnuAdvanceShootingPackageLoad(u8 *workBytes) {
                 if (entry->packet[0] == 1) {
                     switch (entryIndex) {
                     case 0:
-                        evtPrintDeveloperConsoleMessage(D_0042D618, D_0040A970[work->packageEntryIndex].name, 0);
+                        datDebugPrintf(D_0042D618, D_0040A970[work->packageEntryIndex].name, 0);
                         work->drawObjects = mnuLoadSectionObjectListWithRelocations(entry->dataCursor);
                         sdfMemFreeDirect(PAC_WORK_ALLOCATION(entry));
-                        evtPrintDeveloperConsoleMessage(D_0042D578);
+                        datDebugPrintf(D_0042D578);
                         break;
                     case 1:
-                        evtPrintDeveloperConsoleMessage(D_0042D640, D_0040A970[work->packageEntryIndex].name, 1);
+                        datDebugPrintf(D_0042D640, D_0040A970[work->packageEntryIndex].name, 1);
                         work->playerObjects = mnuLoadSectionObjectListWithRelocations(entry->dataCursor);
                         sdfMemFreeDirect(PAC_WORK_ALLOCATION(entry));
-                        evtPrintDeveloperConsoleMessage(D_0042D578);
+                        datDebugPrintf(D_0042D578);
                         break;
                     case 2:
-                        evtPrintDeveloperConsoleMessage(D_0042D668, D_0040A970[work->packageEntryIndex].name, 2);
+                        datDebugPrintf(D_0042D668, D_0040A970[work->packageEntryIndex].name, 2);
                         work->objects = mnuLoadSectionObjectListWithRelocations(entry->dataCursor);
                         sdfMemFreeDirect(PAC_WORK_ALLOCATION(entry));
-                        evtPrintDeveloperConsoleMessage(D_0042D578);
+                        datDebugPrintf(D_0042D578);
                         break;
                     case 3:
-                        evtPrintDeveloperConsoleMessage(D_0042D690, D_0040A970[work->packageEntryIndex].name, 3);
+                        datDebugPrintf(D_0042D690, D_0040A970[work->packageEntryIndex].name, 3);
                         work->mapObjects = mnuLoadSectionObjectListWithRelocations(entry->dataCursor);
                         sdfMemFreeDirect(PAC_WORK_ALLOCATION(entry));
-                        evtPrintDeveloperConsoleMessage(D_0042D578);
+                        datDebugPrintf(D_0042D578);
                         break;
                     default:
                         break;
@@ -515,13 +515,13 @@ s32 mnuAdvanceShootingPackageLoad(u8 *workBytes) {
             break;
         }
 
-        evtPrintDeveloperConsoleMessage(D_0042D6B8, D_0040A970[work->packageEntryIndex].name);
+        datDebugPrintf(D_0042D6B8, D_0040A970[work->packageEntryIndex].name);
 
         if (D_0040A970[work->packageEntryIndex].kind == 0) {
             sdfMemFreeDirect(
                 fileGetMemHandle(work->packageRequest));
             fileRequestFreeIfComplete(work->packageRequest);
-            evtPrintDeveloperConsoleMessage(D_0042D6C8);
+            datDebugPrintf(D_0042D6C8);
         }
 
         work->packageEntryIndex++;
@@ -870,7 +870,7 @@ s32 mnuInitializeShootingWorkResources(MnuShootingWork *work) {
             mnuPopulateModelNodeList(&groups[i], 5, records[i].minor, 0, 1.0f, 1.0f, 1.0f);
         }
         mnuDeactivateAllModelNodes(&groups[i]);
-        evtPrintDeveloperConsoleMessage("Major:0x%x Minor:0x%x Num:%d\n", records[i].major, records[i].minor, records[i].instanceCount);
+        datDebugPrintf("Major:0x%x Minor:0x%x Num:%d\n", records[i].major, records[i].minor, records[i].instanceCount);
     }
     if (work->effectWork == NULL) {
         counts = sdfChipAllocDirect(12);
@@ -886,7 +886,7 @@ s32 mnuInitializeShootingWorkResources(MnuShootingWork *work) {
             mnuClearNodeRecords(list);
             mnuAssignEffectRecordQueues(list, i, work->queueCopies);
             mnuClearAllNodeBroadcastFlags(list);
-            evtPrintDeveloperConsoleMessage("Effect Load!!\n");
+            datDebugPrintf("Effect Load!!\n");
         }
     }
     if (work->work24 == NULL) {
@@ -929,7 +929,7 @@ s32 mnuInitializeShootingWorkResources(MnuShootingWork *work) {
     work->result = 0;
     work->phaseTicks = 0;
     work->playerResetState = 0;
-    evtPrintDeveloperConsoleMessage("stgInit_Section\n");
+    datDebugPrintf("stgInit_Section\n");
     return 1;
 }
 
@@ -961,7 +961,7 @@ void mnuReleaseShootingSectionResources(MnuShootingWork *work) {
         sdfMemFreeDirect(work->modelWork->allocation);
         work->modelWork = NULL;
     }
-    evtPrintDeveloperConsoleMessage("stgRelease_Section !!\n");
+    datDebugPrintf("stgRelease_Section !!\n");
 }
 
 extern u8 dds3PadButtonState[2][2][16];
@@ -1310,7 +1310,7 @@ void mnuCreateShootingEntryObject(MenuWorkEntry *entry, MnuShootingWork *work) {
         mnuClearInactiveSoundBufferState();
         parameterIndex = mnuGetMovementRecordByIndex(entry->tag)->parameterTag;
         D_00438928 = mnuAcquireUnusedModelNode(&groups[8]);
-        evtPrintDeveloperConsoleMessage("---------------------BG create!!\n");
+        datDebugPrintf("---------------------BG create!!\n");
         break;
     case MNU_WORK_TAG_REGISTRY_TABLE: {
         MenuRegistry *record = mnuGetMenuRecordRegistryEntry(entry->tag);
@@ -1330,7 +1330,7 @@ void mnuCreateShootingEntryObject(MenuWorkEntry *entry, MnuShootingWork *work) {
                 if (tagClass == MNU_WORK_TAG_MOVEMENT_TABLE) node->flags |= 2;
                 mnuPlaceShootingEntryObject(entry, work);
             } else {
-                evtPrintDeveloperConsoleMessage("model none\n");
+                datDebugPrintf("model none\n");
             }
         }
     } else {
@@ -1344,7 +1344,7 @@ void mnuCreateShootingEntryObject(MenuWorkEntry *entry, MnuShootingWork *work) {
             printf("sprite none\n");
         }
     }
-    evtPrintDeveloperConsoleMessage("---------------------create!!\n");
+    datDebugPrintf("---------------------create!!\n");
 }
 
 
@@ -1440,7 +1440,7 @@ void mnuFinishOrDeactivateShootingEntry(MenuWorkEntry *entry, MnuShootingWork *w
                                            position[0], position[1], position[2]);
         }
         if (entry->tag == 0x0201000F || entry->tag == 0x02010010) {
-            evtPrintDeveloperConsoleMessage("======================================= ADD ITEM !!!!!!!!!!\n");
+            datDebugPrintf("======================================= ADD ITEM !!!!!!!!!!\n");
             runtime = mnuGetRuntimeHitTargetList();
             angle = ((dds3GetRandFloatA(NULL) * 90.0f + 135.0f) *
                      3.141592503f) / 180.0f;
@@ -1509,7 +1509,7 @@ void mnuFinishOrDeactivateShootingEntry(MenuWorkEntry *entry, MnuShootingWork *w
         work->targets--;
     }
     if (object == NULL) {
-        evtPrintDeveloperConsoleMessage("---------------------delete!! OBJECT INDEX %d\n",
+        datDebugPrintf("---------------------delete!! OBJECT INDEX %d\n",
                                          (u16)entry->tag);
     }
 }
@@ -1628,7 +1628,7 @@ void mnuApplyPlayerRuntimeRecordFeedback(MenuRuntimeRecord *record) {
         mdlSmoothLoopMotion(node->model, 0, 2, 0.0f, 0.0f);
         sdfMotionSeek(node->model->first, 20.0f);
         D_00438934 = node->model->first->frameCount - 20;
-        evtPrintDeveloperConsoleMessage("ModelFrame [%d]\n", D_00438934);
+        datDebugPrintf("ModelFrame [%d]\n", D_00438934);
         mnuClaimTimedEntryEffectRecord();
     }
 }

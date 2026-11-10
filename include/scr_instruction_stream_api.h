@@ -5,7 +5,7 @@
 
 /* The VM borrows its source tables and reads them without modifying them.
  * Message auxiliary data stays mutable because window initialization relocates it. */
-scrProcessWork_s *bfContextCreate(const struct scrHeader_t *header,
+scrProcessWork_s *scrPrintProcedureStart(const struct scrHeader_t *header,
     const scrTypeTable_t *sections, const scrProcTable_t *procedures, const scrLabelTable_t *labels,
     const scrCode_u *instructions,
     struct ItfMesSub *auxiliaryData, const char *strings, ScrProcedureIndex procedureIndex);

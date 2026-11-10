@@ -80,13 +80,13 @@ EvtLoadedRecord *evtCreateLoadedRecord(const u8 *resourceData) {
 extern void mnuRebuildMantraCategoryAvailability(void);
 void mnuLoadMantraNodePositionTable(const u8 *resourceData);
 
-extern void evtPrintDeveloperConsoleMessage(const char *, ...);
+extern void datDebugPrintf(const char *, ...);
 
 /* Load the mantra node-position table synchronously and release the request. */
 void mtrLoadMantraNodePositions(void) {
     struct FileRequest *request;
 
-    evtPrintDeveloperConsoleMessage("Mantra Table Load [/facility/data/mtrMantraBlockData.tbl]\n");
+    datDebugPrintf("Mantra Table Load [/facility/data/mtrMantraBlockData.tbl]\n");
     request = fileLoad("/facility/data/mtrMantraBlockData.tbl");
     while (!pacFileCheckEnd(request)) {
     }
@@ -219,7 +219,7 @@ void mnuUpdateMantraRecordFlags(MantraFlagResource *work, datUnitWork_t *unit, s
     s32 i = 0;
 
     rank = mnuGetActiveMantraModelFlagState();
-    evtPrintDeveloperConsoleMessage(D_00425098, rank);
+    datDebugPrintf(D_00425098, rank);
     selected = scrGetSelectedScriptEntryId(unit);
     entry = work->flags;
     node = (MantraNodePos *)mnuMantraNodePositionTable->records;

@@ -1116,7 +1116,7 @@ s32 btlExitWhenAudioAndTasksIdle(void) {
     return 0;
 }
 
-extern void evtPrintDeveloperConsoleMessage(const char *, ...);
+extern void datDebugPrintf(const char *, ...);
 
 extern void btlSetScene(s32);
 
@@ -1165,10 +1165,10 @@ void btlStart(s32 mode, s32 pack, s32 encounter) {
                 ((BtlState *)btlRuntime)->background.ids.major = 0xE4;
                 ((BtlState *)btlRuntime)->background.ids.minor = 2;
             }
-            evtPrintDeveloperConsoleMessage("Pack:0x%X Maj:%d Min:%d\n", pack, ((BtlState *)btlRuntime)->background.ids.major, ((BtlState *)btlRuntime)->background.ids.minor);
+            datDebugPrintf("Pack:0x%X Maj:%d Min:%d\n", pack, ((BtlState *)btlRuntime)->background.ids.major, ((BtlState *)btlRuntime)->background.ids.minor);
             if (((BtlState *)btlRuntime)->background.ids.major == 0 && ((BtlState *)btlRuntime)->background.ids.minor == 0) {
                 if (btlResolveQueuedSceneRequestParameters(&req.code, &req.parameter) != 0) {
-                    evtPrintDeveloperConsoleMessage("GetFldBG Maj:%d Min:%d\n", req.code, req.parameter);
+                    datDebugPrintf("GetFldBG Maj:%d Min:%d\n", req.code, req.parameter);
                     paramA = req.code;
                     paramB = req.parameter;
                     ((BtlState *)btlRuntime)->background.ids.major = paramA;

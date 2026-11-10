@@ -577,7 +577,7 @@ s32 btlExitWhenAudioAndTasksIdle(void) {
     return 0;
 }
 
-extern void evtPrintDeveloperConsoleMessage(const char *format, ...);
+extern void datDebugPrintf(const char *format, ...);
 extern void btlSetScene(s32 sceneId);
 extern void itfMesSetFlags(s32 flags);
 
@@ -603,10 +603,10 @@ void btlStart(s32 mode, s32 pack, s32 encounter) {
             btlRuntime->encounterParamA = paramA;
             paramB = datBattleAdjustmentRecords[pack].encounterParamB;
             btlRuntime->encounterParamB = paramB;
-            evtPrintDeveloperConsoleMessage("Pack:0x%X Maj:%d Min:%d\n", pack, (s16)paramA, (s16)paramB);
+            datDebugPrintf("Pack:0x%X Maj:%d Min:%d\n", pack, (s16)paramA, (s16)paramB);
             if (btlRuntime->encounterParamA == 0 && btlRuntime->encounterParamB == 0) {
                 if (btlResolveQueuedSceneRequestParameters(&req.code, &req.parameter) != 0) {
-                    evtPrintDeveloperConsoleMessage("GetFldBG Maj:%d Min:%d\n", req.code, req.parameter);
+                    datDebugPrintf("GetFldBG Maj:%d Min:%d\n", req.code, req.parameter);
                     paramA = req.code;
                     paramB = req.parameter;
                     btlRuntime->encounterParamA = paramA;

@@ -1728,7 +1728,7 @@ INCLUDE_SDATA(const s32, "game/code_00107FD8", D_003BA958);
 
 INCLUDE_SDATA(const s32, "game/code_00107FD8", evtConsoleFontResourceChain);
 
-void evtPrintDeveloperConsoleMessage(const char *format, ...) {
+void datDebugPrintf(const char *format, ...) {
     char messageBuffer[EVT_DEV_CONSOLE_BUFFER_BYTES];
     __builtin_va_list formatArgs;
 
@@ -2048,7 +2048,7 @@ INCLUDE_RODATA(const s32, "game/code_00107FD8", D_0039E220);
 
 INCLUDE_RODATA(const s32, "game/code_00107FD8", D_0039E238);
 
-scrProcessWork_s *bfContextCreate(const scrHeader_t *header, const scrTypeTable_t *procedureSection,
+scrProcessWork_s *scrPrintProcedureStart(const scrHeader_t *header, const scrTypeTable_t *procedureSection,
                         const scrProcTable_t *procedures, const scrLabelTable_t *labels,
                         const scrCode_u *instructions, struct ItfMesSub *auxiliaryData,
                         const char *strings, ScrProcedureIndex procedureIndex) {
@@ -2115,7 +2115,7 @@ scrProcessWork_s *bfContextCreate(const scrHeader_t *header, const scrTypeTable_
         process->MesHandle = itfMesMngInitialize(auxiliaryData);
     }
     scrLinkHandle(process);
-    evtPrintDeveloperConsoleMessage("start <%s>\n", procedures[procedureIndex].Name);
+    datDebugPrintf("start <%s>\n", procedures[procedureIndex].Name);
     return process;
 }
 
@@ -2158,7 +2158,7 @@ scrProcessWork_s *fldFlowParse(const scrHeader_t *header, ScrProcedureIndex proc
                 return 0;
         }
     }
-    return bfContextCreate(header, sections, procedures, labels,
+    return scrPrintProcedureStart(header, sections, procedures, labels,
                            (const scrCode_u *)instructionSection,
                            auxiliaryData, strings, procedureIndex);
 }

@@ -43,7 +43,7 @@ extern char D_00422050[];
 extern s32 fileMenuTaskExists(void);
 extern u32 dds3NullDrawProc(void);
 #include "sdf_debug_api.h"
-void evtPrintDeveloperConsoleMessage(const char *fmt, ...);
+void datDebugPrintf(const char *fmt, ...);
 extern char D_00422030[];
 extern char D_00421FE8[];
 EvtPackedSoundTrackId evtLoadEventBgm(s32 id);
@@ -85,7 +85,7 @@ u32 evtCommand_TEX_BE(void) {
     eventId = scrGetIntPara(0);
     entry = evtGetEventPackResourceAddress(eventId, scrGetIntPara(1));
     if (entry == 0) {
-        evtPrintDeveloperConsoleMessage(D_00422030, scrGetIntPara(1));
+        datDebugPrintf(D_00422030, scrGetIntPara(1));
         return 1;
     }
     task = evtStartPictureProcess(0x2AFE, entry);
@@ -178,11 +178,11 @@ u32 evtCommand_SET_SKY_A(void) {
 
     alpha = scrGetIntPara(1);
     if (alpha < -255) {
-        evtPrintDeveloperConsoleMessage("warning : SET_SKY_A alpha < -255\n");
+        datDebugPrintf("warning : SET_SKY_A alpha < -255\n");
         alpha = -255;
     }
     if (alpha > 255) {
-        evtPrintDeveloperConsoleMessage("warning : SET_SKY_A alpha > 255\n");
+        datDebugPrintf("warning : SET_SKY_A alpha > 255\n");
         alpha = 255;
     }
     evtSetSkyAlpha(scrGetIntPara(0), alpha);

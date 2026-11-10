@@ -293,7 +293,7 @@
 0x0010AB70	evtWaitLmapTaskGone	inferred	DDS2 0010ACB0 twin; returns whether fldLmapTaskExists is zero [names_R_FuncNames2.tsv]
 0x0010AB90	evtEnsureFontResourceChain	inferred	address-based Unk placeholder; inferred action from provenance [names_audit.tsv]
 0x0010ABE0	evtDestroyFontResourceChain	inferred	Destroys existing console font resource node and clears global handle. [names_reviewed7.tsv]
-0x0010AC10	evtPrintDeveloperConsoleMessage	inferred	src/dds1/game/code_00107FD8.c func_0010AC10: Formats variadic message into stack buffer and prints it only when developer console node exists. [names_reviewed24.tsv]
+0x0010AC10	datDebugPrintf	inferred	SMT3HD name via SLUS_209.11 0x001097E8, SMT3 name (was evtPrintDeveloperConsoleMessage); was evtPrintDeveloperConsoleMessage
 0x0010AC98	evtDrawGeneralHeapUsageGraph	inferred	DDS2 twin 0x0010AEC0; draws current general-heap free percentage and peak bar, then advances the peak hold.
 0x0010AEE8	evtGeneralHeapGraphTaskDestroy	inferred	Empty destroy callback registered for the DebugTimeGrph heap-usage task created by evtToggleDebugTimeGraphTask; paired DDS2 callback at 0x0010B110.
 0x0010AEF0	evtToggleDebugTimeGraphTask	inferred	Creates DebugTimeGrph task for mode one or destroys it for mode zero. [names_reviewed7.tsv]
@@ -306,7 +306,7 @@
 0x0010B6B0	evtToggleAlternateDebugTimeGraphTask	inferred	confidence=high; matched-C; src/dds1/game/code_00107FD8.c:1192:func_0010B6B0; Creates or destroys the alternate event debug time-graph task according to mode one/zero.; source=reviewed-prior-QP15 [names_qp15.tsv]
 0x0010B728	scrLinkHandle	inferred	SMT3HD name via SLUS_209.11 0x00109848, reloc-identical; was evtLinkWorkNode
 0x0010B768	scrUnlinkHandle	inferred	SMT3HD name via SLUS_209.11 0x00109888, reloc-identical; was evtUnlinkWorkNode
-0x0010B7C0	bfContextCreate	inferred	legacy BFContext_Create: allocates and initialises a BF/FLW0 script context (0xF4)
+0x0010B7C0	scrPrintProcedureStart	inferred	SMT3HD name via SLUS_209.11 0x001098E0, SMT3 name (was bfContextCreate); was bfContextCreate
 0x0010BA18	fldFlowParse	inferred	SMT3HD name via SLUS_209.11 0x00109B48, reloc-identical; was bfParseFLW0
 0x0010BB28	scrLoadScriptFile	inferred	SMT3HD name via SLUS_209.11 0x00109C58, reloc-identical; was scrOpenProcessFromResource
 0x0010BB88	scrStartScriptProcess	inferred	SMT3HD name via SLUS_209.11 0x00109CB8, reloc-identical; was scrProcCreateTask

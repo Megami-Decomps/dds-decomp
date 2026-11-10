@@ -7,7 +7,7 @@ extern s32 mnuRebuildMenuWorkEntryCallbackRecords(MenuWorkEntry *, s32);
 extern f32 mnuEvaluateTimedValue(MenuWorkEntry *);
 extern u32 mnuAdvanceWorkEntry(MenuWorkEntry *, s32);
 extern void mnuUpdateShootingProgressTier(MnuShootingWork *);
-extern void evtPrintDeveloperConsoleMessage(const char *, ...);
+extern void datDebugPrintf(const char *, ...);
 extern MenuWorkEntry D_0040ABF8;
 
 void mnuApplyShootingRuntimeRecordEvent(MenuRuntimeRecord *record, MenuWorkEntry *entry, MnuShootingWork *work) {
@@ -31,7 +31,7 @@ void mnuApplyShootingRuntimeRecordEvent(MenuRuntimeRecord *record, MenuWorkEntry
                 itfClaimWideSlotWithTaggedPayload((s32)(entry->currentX + (f32)originX),
                     (s32)y + originY, 10000, 0, work->spriteNumberPool);
             }
-            evtPrintDeveloperConsoleMessage("ITEM GET !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!! %d\n", (D_0040ABF8.flags >> 15) & 0xF);
+            datDebugPrintf("ITEM GET !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!! %d\n", (D_0040ABF8.flags >> 15) & 0xF);
         } else if (D_0040ABF8.remaining != 0) {
             mnuAdvanceWorkEntry(entry, 1);
         }
@@ -73,7 +73,7 @@ void mnuApplyShootingRuntimeRecordEvent(MenuRuntimeRecord *record, MenuWorkEntry
             mnuUpdateShootingProgressTier(work);
             score = registry->score * work->step;
             work->currentScore += score;
-            evtPrintDeveloperConsoleMessage("Add Score[%d]\n", score);
+            datDebugPrintf("Add Score[%d]\n", score);
         } else {
             work->currentScore += work->step;
         }
@@ -90,7 +90,7 @@ void mnuApplyShootingRuntimeRecordEvent(MenuRuntimeRecord *record, MenuWorkEntry
             mnuUpdateShootingProgressTier(work);
             score = registry->score * work->step;
             work->currentScore += score;
-            evtPrintDeveloperConsoleMessage("Add Score[%d]\n", score);
+            datDebugPrintf("Add Score[%d]\n", score);
         }
         break;
     }

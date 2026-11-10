@@ -33,7 +33,6 @@ extern s8 dds3PadBitTable[];
 
 #include "sdk_libc.h"
 
-#define datDebugPrintf evtPrintDeveloperConsoleMessage
 extern void datDebugPrintf(const char *fmt, ...);
 
 

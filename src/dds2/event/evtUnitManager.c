@@ -1194,7 +1194,7 @@ extern void evtUnitLightOff(evtUnitHandle_t *unit, s32 duration);
 
 extern void evtEndUnitValueTransition(evtUnitHandle_t *unit, s32 duration);
 
-extern void evtPrintDeveloperConsoleMessage(const char *fmt, ...);
+extern void datDebugPrintf(const char *fmt, ...);
 
 extern void dds3StartBEDEffectObjectBasic(dds3Basic_t *effectObject, u32 entryId);
 
@@ -1730,7 +1730,7 @@ ScrCommandResult evtCommand_MODEL_BE(void) {
     resourceId = scrGetIntPara(1);
     modelKey = evtInitMotionSeProcess(eventId, resourceId);
     if (modelKey < 0) {
-        evtPrintDeveloperConsoleMessage("MODEL_BE not fount RID = %d!\n", scrGetIntPara(1));
+        datDebugPrintf("MODEL_BE not fount RID = %d!\n", scrGetIntPara(1));
         return 1;
     }
     eventId = scrGetIntPara(0);
@@ -2533,7 +2533,7 @@ ScrCommandResult evtCommand_MODEL_LIGHT_DIR(void) {
     direction[2] = scrGetFloatPara(4);
     if (ffabsf(direction[0]) <= 0.01f && ffabsf(direction[1]) <= 0.01f &&
         ffabsf(direction[2]) <= 0.01f) {
-        evtPrintDeveloperConsoleMessage(D_00421A30);
+        datDebugPrintf(D_00421A30);
         return 1;
     }
     SDF_VU0_LOADVECTOR(direction);
@@ -2615,7 +2615,7 @@ ScrCommandResult evtCommand_EFFECT_BE(void) {
     descriptor = evtGetEventPackResourceAddress(eventId, key);
     if (descriptor == NULL) {
         key = scrGetIntPara(1);
-        evtPrintDeveloperConsoleMessage(D_00421A58, key);
+        datDebugPrintf(D_00421A58, key);
         scrSetIntReturnValue(0);
         return 1;
     }
@@ -2696,7 +2696,7 @@ ScrCommandResult evtCommand_EFFBED_BE(void) {
     resource = evtGetEventPackResourceAddress(eventId, key);
     if (resource == NULL) {
         key = scrGetIntPara(1);
-        evtPrintDeveloperConsoleMessage(D_00421AD8, key);
+        datDebugPrintf(D_00421AD8, key);
         scrSetIntReturnValue(0);
         return 1;
     }
@@ -2724,7 +2724,7 @@ ScrCommandResult evtCommand_EFFBED_START(void) {
     if (unit != NULL) {
         entryId = scrGetIntPara(1);
         if (entryId >= 3U) {
-            evtPrintDeveloperConsoleMessage(D_00421AF8, entryId);
+            datDebugPrintf(D_00421AF8, entryId);
             return 1;
         } else {
             dds3StartBEDEffectObjectBasic(unit, entryId);
@@ -2752,7 +2752,7 @@ ScrCommandResult evtCommand_EFFBED_START_EVO(void) {
         s32 entryId = scrGetIntPara(1);
         s32 modelRecordIndex;
         if ((u32)entryId >= 3) {
-            evtPrintDeveloperConsoleMessage(D_00421AF8, entryId);
+            datDebugPrintf(D_00421AF8, entryId);
             return 1;
         }
         dds3StartBEDEffectObjectBasic(unit, entryId);
@@ -2802,7 +2802,7 @@ ScrCommandResult evtCommand_EFFMG1_BE(void) {
     descriptor = evtGetEventPackResourceAddress(eventId, key);
     if (descriptor == NULL) {
         key = scrGetIntPara(1);
-        evtPrintDeveloperConsoleMessage(D_00421B50, key);
+        datDebugPrintf(D_00421B50, key);
         scrSetIntReturnValue(0);
         return 1;
     }
@@ -2848,7 +2848,7 @@ ScrCommandResult evtCommand_EFFMG2_BE(void) {
     descriptor = evtGetEventPackResourceAddress(eventId, key);
     if (descriptor == NULL) {
         key = scrGetIntPara(1);
-        evtPrintDeveloperConsoleMessage(D_00421BA0, key);
+        datDebugPrintf(D_00421BA0, key);
         scrSetIntReturnValue(0);
         return 1;
     }

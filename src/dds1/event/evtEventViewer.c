@@ -845,7 +845,7 @@ extern u16 D_003BBE78;
 extern char D_003ACFE8[];
 extern void mnuUnpackNibbleFields(EvtRuntimeChild *key, s32 *lowBitsOut, s32 *highBitsOut);
 extern void mnuStopTitleVoicePlayback(void);
-extern void evtPrintDeveloperConsoleMessage(const char *, ...);
+extern void datDebugPrintf(const char *, ...);
 extern void fldSetTitleDrawMode(u32);
 extern void nbPanelAnalyzeStart(void);
 
@@ -952,7 +952,7 @@ void evtEventViewerApplyTimelineKey(EvtRuntimeGroup *track, EvtRuntimeChild *key
             if (mnuQueryTitleSoundBusy() != MNU_TITLE_SOUND_IDLE) {
                 voiceCueResult = itfMesSelectTableItemText(viewer->windowContext->messageManagerHandle, nibbles[0], 0);
                 if (voiceCueResult == ITF_MES_VOICE_CUE_FOUND) {
-                    evtPrintDeveloperConsoleMessage(D_003ACFE8, nibbles[0]);
+                    datDebugPrintf(D_003ACFE8, nibbles[0]);
                     mnuStopTitleVoicePlayback();
                     viewer->voicePending = ITF_MES_VOICE_CUE_FOUND;
                     viewer->voiceMessage = nibbles[0];
@@ -4257,7 +4257,7 @@ KwlnTaskUpdateResult evtViewerUpdateFrame(dds3ProcessID_t *task) {
         itfMesStartEntry(viewer->windowContext->messageManagerHandle,
             viewer->voiceMessage, 0);
         viewer->voicePending = ITF_MES_VOICE_CUE_NOT_FOUND;
-        evtPrintDeveloperConsoleMessage("[conflict voice play      ] mesno= %d\n",
+        datDebugPrintf("[conflict voice play      ] mesno= %d\n",
             viewer->voiceMessage);
     }
     if (viewer->nowframe != viewer->previousGlyphPosition) {

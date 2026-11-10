@@ -751,7 +751,7 @@ extern void nbPanelAnalyzeStart(void);
 extern void kwlnFadeBackgroundStartIn(s32 duration);
 extern void itfMesBuildOptionList(ItfMesWindowIndex window, ItfMesEntryIndex entryIndex);
 extern void mnuStopTitleVoicePlayback(void);
-extern void evtPrintDeveloperConsoleMessage(const char *format, ...);
+extern void datDebugPrintf(const char *format, ...);
 extern char D_004224A8[];
 
 /* Apply one timeline key to its effect, audio, message, or fade channel. */
@@ -893,7 +893,7 @@ void evtEventViewerApplyTimelineKey(EvtRuntimeGroup *track, EvtRuntimeChild *key
             if (mnuQueryTitleSoundBusy() != MNU_TITLE_SOUND_IDLE) {
                 voiceCueResult = itfMesSelectTableItemText(viewer->windowContext->messageManagerHandle, nibbles[0], 0);
                 if (voiceCueResult == ITF_MES_VOICE_CUE_FOUND) {
-                    evtPrintDeveloperConsoleMessage(D_004224A8, nibbles[0]);
+                    datDebugPrintf(D_004224A8, nibbles[0]);
                     mnuStopTitleVoicePlayback();
                     viewer->voicePending = ITF_MES_VOICE_CUE_FOUND;
                     viewer->voiceMessage = nibbles[0];
@@ -4517,7 +4517,7 @@ KwlnTaskUpdateResult evtViewerPickNextHandler(dds3ProcessID_t *task) {
 
 extern s16 D_004372B4;
 extern s8 dds3PadButtonState[];
-extern void evtPrintDeveloperConsoleMessage(const char *, ...);
+extern void datDebugPrintf(const char *, ...);
 extern void evtUpdateViewerMessageWindow(evtViewerInfo_t *);
 extern void mnuAdvanceShopMenuState();
 extern u8 mnuGetMoviePlaybackMode(void);
@@ -4561,7 +4561,7 @@ KwlnTaskUpdateResult evtViewerUpdateFrame(dds3ProcessID_t *task) {
         itfMesStartEntry(viewer->windowContext->messageManagerHandle,
             viewer->voiceMessage, 0);
         viewer->voicePending = ITF_MES_VOICE_CUE_NOT_FOUND;
-        evtPrintDeveloperConsoleMessage("[conflict voice play      ] mesno= %d\n",
+        datDebugPrintf("[conflict voice play      ] mesno= %d\n",
             viewer->voiceMessage);
     }
     if (viewer->nowframe != viewer->previousGlyphPosition) {
