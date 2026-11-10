@@ -601,9 +601,8 @@ void *sdfDevPrintf(u32 aX, u32 aY, u32 aZ, s32 aAttr, const char *aStr, ...)
     return sdfDevVprintf(cb, aStr, args);
 }
 
-#define func_002BD300 sdfPktSetCmd
 
-void func_002BD300(u32 *aCB, s32 aMode)
+void sdfPktSetCmd(u32 *aCB, s32 aMode)
 {
     aCB[3] = sdfDevConsColorTable[aMode];
 }
@@ -613,7 +612,7 @@ void sdfDevSetPrintCB(u32 *aCB, u32 aX, u32 aY, u32 aZ, s32 aAttr)
     aCB[0] = aX;
     aCB[1] = aY;
     aCB[2] = aZ;
-    func_002BD300(aCB, aAttr);
+    sdfPktSetCmd(aCB, aAttr);
 }
 
 INCLUDE_SDATA(const s32, "sdf/sdfDevCons", devConsTop);
