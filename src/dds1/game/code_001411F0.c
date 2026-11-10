@@ -2761,6 +2761,7 @@ FldSceneReadyState fldAutoMapChkMode(void) {
 }
 
 /* Handle automap input, clamp the grid position, and refresh its camera. */
+
 INCLUDE_RODATA(const s32, "game/code_001411F0", D_003A05D8);
 
 void fldUpdateAutomapInput(void) {
@@ -3484,6 +3485,7 @@ extern s32 D_003BD7E4, D_003BD7E8;
 
 /* Retains fldmix.LB node values and their memory blocks in field work.
  * Nodes 10..13 supply the map resources later acquired by the scene camera. */
+
 INCLUDE_RODATA(const s32, "game/code_001411F0", D_003A0650);
 
 INCLUDE_RODATA(const s32, "game/code_001411F0", D_003A0668);
@@ -5961,6 +5963,7 @@ void fldTickWeatherEffectNodes(void) {
 FldSparkEncounterSelection fldGetEncounterSelection(void) {
     return ((FldEnt110 *)D_003D62A4[0])->encounterSelection;
 }
+
 INCLUDE_SDATA(const s32, "game/code_001411F0", D_003BAE78);
 
 INCLUDE_SDATA(const s32, "game/code_001411F0", fldSeLastBgm);

@@ -166,7 +166,7 @@ extern s32 sdfProjectPointInForwardConeVU(void);
 
 extern EffLensFlareElement effLensFlareSets[][13];
 
-extern sdfGrOt_t D_003255A8;
+SYMBOL_AT(sdfGrOt_t, D_003255A8, sdfGrOtTable, 0xA60);
 
 static inline void effBlendFlareBaseColor(u32 color, const u32 *workColor, f32 *baseColor) {
     UnpackRGBAWord(color, 0x3C000000);

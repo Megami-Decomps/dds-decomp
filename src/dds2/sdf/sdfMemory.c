@@ -503,6 +503,7 @@ s32 SdfIopFileRpc(const char *aName, s32 aDataSize, const void *aData, s32 *aOut
 
 /* DDS's build defines the heap root in this unit. */
 sdfMemHandleCB_tag sdfMemCB __attribute__((section(".bss"), aligned(8)));
+
 INCLUDE_SDATA(const s32, "sdf/sdfMemory", sdfMemFullCallback);
 
 INCLUDE_SDATA(const s32, "sdf/sdfMemory", sdfGrDrawFirstFlag);

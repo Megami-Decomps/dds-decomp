@@ -914,6 +914,7 @@ void fldElvDrawFloorNum(void) {
     fldDrawPercentValue(380, 18, shown);
 }
 #else
+
 INCLUDE_RODATA(const s32, "game/code_0011D3A0", D_0039FA00);
 
 INCLUDE_ASM(const s32, "game/code_0011D3A0", fldElvDrawFloorNum);
@@ -2355,6 +2356,7 @@ u8 fldIsStageExplorationCellMarked(s32 floor, f32 x, f32 z) {
     }
     return 0;
 }
+
 INCLUDE_SDATA(const s32, "game/code_0011D3A0", D_003BAAE0);
 
 INCLUDE_SDATA(const s32, "game/code_0011D3A0", D_003BAAE8);

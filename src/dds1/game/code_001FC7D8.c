@@ -284,6 +284,7 @@ extern s32 nbClipEffectNum(s32 screen[4]);
 extern void btlBossDebugPrintf(const char *format, ...);
 
 /* vu0 routine: choose an on-screen HP/MP label anchor, leaving it in vf10. */
+
 INCLUDE_RODATA(const s32, "game/code_001FC7D8", D_003A57E0);
 
 INCLUDE_RODATA(const s32, "game/code_001FC7D8", D_003A57F0);

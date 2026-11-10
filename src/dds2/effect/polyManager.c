@@ -2641,6 +2641,7 @@ void (*dds3SpPolySetScaleTable[4])(void *work, f32 scale) = {
     (dds3SpPolyScaleFunc_t)dds3SpPoly_SphereRingSetScale,
     (dds3SpPolyScaleFunc_t)dds3SpPoly_RollRingSetScale,
 };
+
 INCLUDE_SDATA(const s32, "effect/polyManager", hDrawListTop);
 
 INCLUDE_SDATA(const s32, "effect/polyManager", dds3TrackPolyTag);

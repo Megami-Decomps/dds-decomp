@@ -114,7 +114,7 @@ extern movieStream_t mnuMovieDrawContext;
 void mnuRequestIndexedMovieResource(s32 index);
 void movieStop(void);
 
-extern sdfGrOt_t D_003803C8;
+SYMBOL_AT(sdfGrOt_t, D_003803C8, sdfGrOtTable, 0x880);
 
 extern dds3ProcessID_t *PlayingNo;
 
@@ -1233,6 +1233,7 @@ s32 mnuUpdateStaffRoll(dds3ProcessID_t *task) {
 
 extern MnuStaffImageRecord mnuStaffRollImageRecords[19];
 extern s32 D_00437AB4;
+
 INCLUDE_RODATA(const s32, "game/code_002A5260", D_00429938);
 
 void mnuAdvanceStaffImageSequence(void) {

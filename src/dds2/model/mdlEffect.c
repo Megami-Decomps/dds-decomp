@@ -369,6 +369,7 @@ extern char D_00436FC0[], D_00436FC8[];
 
 /* Append the kind-dependent record summary at the requested text position and style. */
 /* Append a kind-specific record description at the supplied packet coordinates/style. */
+
 INCLUDE_RODATA(const s32, "model/mdlEffect", D_00420FF0);
 
 INCLUDE_RODATA(const s32, "model/mdlEffect", D_00421000);
@@ -1170,6 +1171,7 @@ extern void mdlFreeViewResources(void);
 
 /* Step the viewer's selected row, then apply that row's pending resource or
  * entry selection when the confirm buttons are pressed. */
+
 INCLUDE_RODATA(const s32, "model/mdlEffect", D_00421120);
 
 INCLUDE_RODATA(const s32, "model/mdlEffect", D_00421130);
@@ -1725,6 +1727,7 @@ void mdlAdjustViewerScale(void) {
 }
 
 /* Draw the motion progress bar: timeline frame, playhead marker and "[time/length]" label, then the zoom value. */
+
 INCLUDE_RODATA(const s32, "model/mdlEffect", D_00421278);
 
 void mdlDrawViewerMotionTimeline(void) {
@@ -2092,6 +2095,7 @@ extern char D_004370E0[];
 extern char D_004370E8[];
 
 /* Draw viewer toggles, time-graph status and the background-color/config controls. */
+
 INCLUDE_RODATA(const s32, "model/mdlEffect", D_00421388);
 
 INCLUDE_RODATA(const s32, "model/mdlEffect", D_004213A0);
@@ -2408,7 +2412,7 @@ s32 mdlRequestViewerExitOnce(void) {
     return 0;
 }
 
-extern sdfGrOt_t D_00380048; /* sdfGrOtTable[40], a native interior symbol. */
+SYMBOL_AT(sdfGrOt_t, D_00380048, sdfGrOtTable, 0x500);
 
 extern f32 D_003C8A00[][4];
 
@@ -2590,7 +2594,7 @@ void mdlDrawMapPositionRecords(dds3ModelHandle_t *resource) {
     }
 }
 
-extern sdfGrOt_t D_003805A8;
+SYMBOL_AT(sdfGrOt_t, D_003805A8, sdfGrOtTable, 0xA60);
 
 extern sdfGrOt_t *sdfModelOtTable[13][4];
 
@@ -2680,6 +2684,7 @@ extern char D_00437118[]; /* "fog=" */
 extern sdf3DFogParam_t dds3FogState;
 
 /* Read the viewer's config text file: bg-color=, eye-position=, target-position=, fovy=, fog= lines. */
+
 INCLUDE_RODATA(const s32, "model/mdlEffect", D_00421420);
 
 void mdlLoadViewerPresentationConfig(void) {
@@ -2880,7 +2885,7 @@ extern char D_00437138[]; /* ">" in .sdata */
 
 extern char D_00437140[]; /* "%6.2f" in .sdata */
 
-extern sdfGrOt_t D_00380708;
+SYMBOL_AT(sdfGrOt_t, D_00380708, sdfGrOtTable, 0xBC0);
 
 extern void dds3DebugFloatEditEx(f32 *value, u8 *padState, f32 min, f32 max, f32 step, f32 bigStep);
 

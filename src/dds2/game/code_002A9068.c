@@ -964,6 +964,7 @@ s32 mnuStaffCampCancelCheck(dds3ProcessID_t *task) {
 
 /* Share menu userdata across the input/draw/owner tasks, attach fade and cancel
  * tasks to drawing, then start the opening fade and mark camp active. */
+
 INCLUDE_RODATA(const s32, "game/code_002A9068", mnuCampDrawTaskName);
 
 INCLUDE_RODATA(const s32, "game/code_002A9068", mnuCampOwnerTaskName);

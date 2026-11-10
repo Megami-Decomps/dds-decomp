@@ -2082,6 +2082,7 @@ extern BtlRuntimeTask *btlFindTaskByKind(u16);
 
 /* Return whether the predicate is satisfied by value or registered tasks.
  * Kinds 5/8 accept running (phase 2) or absent, not an existing finishing task. */
+
 INCLUDE_RODATA(const s32, "game/code_001DD390", D_004178A8);
 
 INCLUDE_RODATA(const s32, "game/code_001DD390", D_004178B8);
@@ -3931,6 +3932,7 @@ BtlRuntimeTask *btlScheduleRefreshTask(BtlUnit *unit) {
 }
 
 /* Task-start callbacks do not return a status to the scheduler. */
+
 INCLUDE_RODATA(const s32, "game/code_001DD390", D_00417AF0);
 
 INCLUDE_RODATA(const s32, "game/code_001DD390", D_00417B10);
@@ -6207,6 +6209,12 @@ INCLUDE_RODATA(const s32, "game/code_001DD390", D_00417CA8);
 
 INCLUDE_RODATA(const s32, "game/code_001DD390", D_00417CB8);
 
+INCLUDE_RODATA(const s32, "game/code_001DD390", D_00417CC8);
+
+INCLUDE_RODATA(const s32, "game/code_001DD390", D_00417CD8);
+
+INCLUDE_RODATA(const s32, "game/code_001DD390", D_00417CE8);
+
 void btlResetCameraMotion(BtlLinkedCommand *action) {
     BtlState *work = (BtlState *)btlGetRuntime();
     BtlUnit *unit;
@@ -6357,6 +6365,7 @@ typedef char BattleIndexWork_battleExperienceReward_offset_check[
     ((u32)&((BattleIndexWork *)0)->battleExperienceReward == 0x54) ? 1 : -1];
 typedef char BattleIndexWork_moneyReward_offset_check[
     ((u32)&((BattleIndexWork *)0)->moneyReward == 0x58) ? 1 : -1];
+
 INCLUDE_SDATA(const s32, "game/code_001DD390", btlDeferredTaskHead);
 
 INCLUDE_SDATA(const s32, "game/code_001DD390", D_00436A28);

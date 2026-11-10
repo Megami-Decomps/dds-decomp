@@ -74,7 +74,7 @@ extern char D_004150B0[]; /* "btl:hunt ep=%d[id=%X]\n" */
 
 extern s32 TestMsgMngD_Process(dds3ProcessID_t *task);
 
-extern sdfGrOt_t D_003805A8;
+SYMBOL_AT(sdfGrOt_t, D_003805A8, sdfGrOtTable, 0xA60);
 
 extern u8 D_003B4D08[];
 
@@ -91,7 +91,7 @@ extern SndPad dds3PadButtonState;
 
 extern sdfGrOt_t sdfGrOtTable[];
 
-extern sdfGrOt_t D_00380708;
+SYMBOL_AT(sdfGrOt_t, D_00380708, sdfGrOtTable, 0xBC0);
 
 extern s32 D_00435CBC;
 

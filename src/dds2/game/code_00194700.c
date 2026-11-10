@@ -650,7 +650,7 @@ void dds3EffectListSetTexture(EffResourceDescriptor *work, const char *textureRe
     sdfMemFreeDirect(loadedResource);
 }
 
-extern sdfGrOt_t D_003805A8;
+SYMBOL_AT(sdfGrOt_t, D_003805A8, sdfGrOtTable, 0xA60);
 
 /* Queue the overlay's texture as a quad at its screen position. */
 void dds3EffectFileListWindowDrawSprite(EffResourceDescriptor *overlay) {

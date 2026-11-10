@@ -464,7 +464,7 @@ extern void itfMiscDrawAlphaPrim(sdfDrawTag_t *packet, s32 table, s32 mode);
 extern s32 mnuCampQuadBounds[4];
 extern s32 mnuCampQuadTexcoords[4];
 extern s32 mnuCampQuadColor[4];
-extern sdfGrOt_t D_003255A8;
+SYMBOL_AT(sdfGrOt_t, D_003255A8, sdfGrOtTable, 0xA60);
 
 void mnuCampInitDisplayDefaults(CampDisplayDefaults *display) {
     display->x = 0x100;
@@ -925,7 +925,7 @@ void mnuAdvanceShopMenuState(evtViewerInfo_t *scene) {
 }
 
 
-extern sdfGrOt_t D_00325708;
+SYMBOL_AT(sdfGrOt_t, D_00325708, sdfGrOtTable, 0xBC0);
 extern u8 D_00325860[];
 
 void mnuShopCreateDescriptorSurface(evtViewerInfo_t *scene) {
@@ -2759,6 +2759,7 @@ extern char D_003BC3B8[];
 extern void evtCopyEntryStringToActiveWindow(s32 window, const char *text);
 
 /* Format the buy/sell price in the message window; sells over the currency cap use the overflow message. */
+
 INCLUDE_SDATA(const s32, "game/code_00242608", mnuShopRestoreMiddleVector);
 
 INCLUDE_SDATA(const s32, "game/code_00242608", D_003BC388);
@@ -2845,6 +2846,7 @@ extern void datAddCurrencyClamped(s32);
 extern u32 mnuShopCommitMode1PurchaseNoOp(u32);
 
 /* Apply the selected buy/sell operation, then restore the row's displayed price. */
+
 INCLUDE_SDATA(const s32, "game/code_00242608", D_003BC3B8);
 
 INCLUDE_SDATA(const s32, "game/code_00242608", D_003BC3C0);

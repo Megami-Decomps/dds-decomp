@@ -383,7 +383,7 @@ void dds3MultiBillboardPktLink(BillRenderPair *pair) {
     data[1]->count = 0;
 }
 
-extern sdfGrOt_t D_00325228;
+SYMBOL_AT(sdfGrOt_t, D_00325228, sdfGrOtTable, 0x6E0);
 extern void sdfGrSetFrameMaskReset(const u8 *source, SdfDmaReferenceChainPacket *packet, s32 gsContext);
 
 void billFlushPendingRenderPairs(void) {

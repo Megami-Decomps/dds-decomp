@@ -446,6 +446,7 @@ extern void fileSyncAll(void);
 
 /* Wait/copy a pending file while locked, then prepare a commit for controls
  * other than 1. DDS1 also prints its retail BGM banner before unlocking. */
+
 INCLUDE_RODATA(const s32, "game/code_00269C10", D_003AFCF0);
 
 void mnuTitleStreamUpdateAndLogBgm(void) {

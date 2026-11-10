@@ -387,6 +387,7 @@ void fldLocalMapDebugPrintfNoop(const char *fmt, ...) {
 }
 
 /* Map a local-map mode to its track-selection ordinal; unmapped modes use 1. */
+
 INCLUDE_RODATA(const s32, "game/code_0030A128", fldLocalMapTaskName);
 
 s32 fldLocalMapTrackSlotFromMode(s32 mode) {

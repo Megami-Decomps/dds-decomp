@@ -1865,6 +1865,7 @@ void mdlMakeHddFileList(void) {
     }
     mdlMakeHddFileListDummy();
 }
+
 INCLUDE_SDATA(const s32, "model/mdlManager", mdlModelPathPrefix);
 
 INCLUDE_SDATA(const s32, "model/mdlManager", mdlPackedBundleExt);

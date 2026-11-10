@@ -22,7 +22,7 @@ extern u32 sndTestMessageResourceIndex;
 extern sdfTexHandle_t *sndTestMessageTexture;
 extern void itfMiscDrawAlphaPrim(sdfDrawTag_t *, s32, s32);
 extern void itfMiscDrawAlphaPrim(sdfDrawTag_t *, s32, s32);
-extern sdfGrOt_t D_00325708;
+SYMBOL_AT(sdfGrOt_t, D_00325708, sdfGrOtTable, 0xBC0);
 
 /* Named and indexed views of the same four signed 32-bit color channels. */
 typedef union UiQuadColor {
@@ -109,7 +109,7 @@ s32 TestMsgMngC_Process(dds3ProcessID_t *task) {
     return 0;
 }
 
-extern sdfGrOt_t D_003255A8;
+SYMBOL_AT(sdfGrOt_t, D_003255A8, sdfGrOtTable, 0xA60);
 
 extern u8 D_00358318[];
 

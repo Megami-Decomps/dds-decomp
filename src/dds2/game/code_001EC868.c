@@ -2282,6 +2282,7 @@ extern u8 D_00418320[];
 
 /* vu0 routine: frame the action's target groups from the actor's side, widening
  * for several targets, then keep the actor clear of the near camera plane. */
+
 INCLUDE_RODATA(const s32, "game/code_001EC868", D_00417F30);
 
 INCLUDE_RODATA(const s32, "game/code_001EC868", D_004180B0);
@@ -3450,6 +3451,7 @@ typedef struct BtlSpeciesCameraFactors {
 extern BtlSpeciesCameraFactors D_003B6DD0[10];
 
 /* vu0 routine: frame the first target with one of two paired quaternion poses. */
+
 INCLUDE_RODATA(const s32, "game/code_001EC868", D_00418338);
 
 void btlBuildSpeciesFramedCameraPair(BtlLinkedCommand *action, BtlCamState *from, BtlCamState *to) {
@@ -11681,6 +11683,7 @@ BtlRuntimeTask *sndCreateSetStateTask(void) {
 }
 
 /* Consume archive records only for enabled SYSEFF rows; clear unavailable entries. */
+
 INCLUDE_RODATA(const s32, "game/code_001EC868", D_00418E58);
 
 INCLUDE_RODATA(const s32, "game/code_001EC868", D_00418E70);

@@ -921,6 +921,7 @@ void fldElvDrawFloorNum(void) {
     fldDrawPercentValue(380, 18, shown);
 }
 #else
+
 INCLUDE_RODATA(const s32, "game/code_0011F208", D_00412B90);
 
 INCLUDE_ASM(const s32, "game/code_0011F208", fldElvDrawFloorNum);

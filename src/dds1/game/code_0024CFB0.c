@@ -793,6 +793,7 @@ extern void uiDrawUniformRgbRange(s32 *, s32 *, s32, u32, s32);
 
 /* Draw top/bottom viewport indicators; each flag selects its brighter color.
  * The two triangles retain their signed x-radius and y-offset calculations. */
+
 INCLUDE_SDATA(const s32, "game/code_0024CFB0", gMsgID);
 
 INCLUDE_SDATA(const s32, "game/code_0024CFB0", gMsgFlag);

@@ -1103,6 +1103,7 @@ s32 mnuUpdateTerminalMessageWindowIndicator(dds3ProcessID_t *task) {
 }
 
 /* Create terminal update/draw/exit tasks plus DDS2's parented term_fade task. */
+
 INCLUDE_RODATA(const s32, "game/code_002665B0", D_00424F00);
 
 INCLUDE_RODATA(const s32, "game/code_002665B0", D_00424F10);

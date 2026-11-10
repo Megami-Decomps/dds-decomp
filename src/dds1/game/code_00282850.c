@@ -3189,7 +3189,7 @@ void *evtCreateBattleStageTestCamera(void) {
     return evtStageTestCameraUpdate;
 }
 
-extern sdfGrOt_t D_00325708;
+SYMBOL_AT(sdfGrOt_t, D_00325708, sdfGrOtTable, 0xBC0);
 
 extern s32 D_003BC7D0;
 

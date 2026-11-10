@@ -226,7 +226,7 @@ extern s32 D_00437CB8;
 
 extern s32 D_00437CBC;
 
-extern sdfGrOt_t D_00380708;
+SYMBOL_AT(sdfGrOt_t, D_00380708, sdfGrOtTable, 0xBC0);
 
 extern s8 dds3PadButtonState[];
 
@@ -3439,6 +3439,7 @@ extern u32 datComputeSkillBoostedMaxMp(datUnitWork_t *);
 
 /* Apply a permanent stat/capacity item and refill eligible vitals.
  * Returns 0 for other items, 1 when accepted, or 2 when capped and already full. */
+
 INCLUDE_RODATA(const s32, "game/code_002BE628", D_0042B300);
 
 INCLUDE_RODATA(const s32, "game/code_002BE628", D_0042B350);
@@ -4529,6 +4530,8 @@ INCLUDE_RODATA(const s32, "game/code_002BE628", D_0042B538);
 INCLUDE_RODATA(const s32, "game/code_002BE628", D_0042B548);
 
 INCLUDE_RODATA(const s32, "game/code_002BE628", D_0042B558);
+
+INCLUDE_RODATA(const s32, "game/code_002BE628", D_0042B568);
 
 void evtStageTestDrawCameraTransformDebug(void) {
     dds3Basic_t *world = (dds3Basic_t *)dds3GetActiveScene();

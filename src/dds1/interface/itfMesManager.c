@@ -2728,7 +2728,7 @@ void DrawMsgMng_Shutdown(dds3ProcessID_t *task) {
     itfMesMngManager.windowTexture = NULL;
 }
 
-extern sdfGrOt_t D_00325708;
+SYMBOL_AT(sdfGrOt_t, D_00325708, sdfGrOtTable, 0xBC0);
 extern s32 D_00358028[];
 extern u8 D_003BB230[5];
 extern u8 D_003BB238[5];

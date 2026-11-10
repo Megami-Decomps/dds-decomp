@@ -431,6 +431,7 @@ s32 mtrAdvanceMantraResourceLoadState(MtrResourceLoadState *load, u16 mode) {
     return 0;
 }
 #else
+
 INCLUDE_RODATA(const s32, "game/code_00286BA8", mnuResourceTaskName);
 
 INCLUDE_ASM(const s32, "game/code_00286BA8", mtrAdvanceMantraResourceLoadState);

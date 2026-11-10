@@ -582,6 +582,7 @@ void evtDrawListViewportPanel(s32 x, s32 y, s32 width, EvtPanelRecord *record) {
 void evtDrawPlainPanel(u32 x, u32 y, u32 width, u32 height) {
     uiDrawUniformColorRect(x, y, 0, width, height, EVT_PANEL_BACKGROUND_COLOR, EVT_PANEL_DRAW_COMMAND);
 }
+
 INCLUDE_SDATA(const s32, "game/code_0026C1D0", gMsgID);
 
 INCLUDE_SDATA(const s32, "game/code_0026C1D0", gMsgFlag);

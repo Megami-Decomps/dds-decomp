@@ -184,7 +184,7 @@ def place(version):
             text = text[:pos] + ("\n" if pos == len(text) else "") + line + "\n\n" + text[pos:]
             added += 1
         # One blank line before each included item, however often this reruns.
-        text = re.sub(r"\n{3,}(?=INCLUDE_(?:RODATA|SDATA)\(|SDATA_PAD\()", "\n\n", text)
+        text = re.sub(r"(?<=.)\n+(?=INCLUDE_(?:RODATA|SDATA)\(|SDATA_PAD\()", "\n\n", text)
         write_text_if_changed(c, text)
     print(f"{version}: {added} INCLUDE_SDATA lines")
 

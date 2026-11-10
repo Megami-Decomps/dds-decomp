@@ -926,6 +926,7 @@ void effEveBEDPartGetPositionPtr(EffEventInit *source, EffectVectorRequest *para
 extern billHandle_t *billCreateFromResource(s32 kind, const char *path);
 
 /* Allocate particles plus their owner, copy parameters and acquire shared textures. */
+
 INCLUDE_RODATA(const s32, "effect/effEvent", D_003A12E0);
 
 EffEventBillSet *effEVECombParSmokeCreate(EffEventBillParams *src) {
@@ -1136,7 +1137,7 @@ extern void sdf3DMakeDirectRefPacket(struct DmaPacketHeader *packet, u32 sourceA
 
 extern void sdfBillBoardMakeTMPacket(u8 *packet, const f32 *matrix);
 
-extern sdfGrOt_t D_003252A8;
+SYMBOL_AT(sdfGrOt_t, D_003252A8, sdfGrOtTable, 0x760);
 
 extern sdfTexHandle_t *dds3BillboardGetTex(billHandle_t *effect);
 
@@ -1750,6 +1751,7 @@ void effEveAPP4Randomize(EffEmit *emitter) {
         bezierSlot->t = cursorStep * (f32)randomStep;
     } while (recordIndex < recordCount);
 }
+
 INCLUDE_SDATA(const s32, "effect/effEvent", Eve_BlurShow);
 
 INCLUDE_SDATA(const s32, "effect/effEvent", Eve_PartialMultiBlurShow);

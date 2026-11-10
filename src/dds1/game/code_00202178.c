@@ -533,6 +533,7 @@ s32 func_00202668(BtlTask *actor, s32 unused) {
     return 1;
 }
 #else
+
 INCLUDE_RODATA(const s32, "game/code_00202178", D_003A5AD0);
 
 INCLUDE_RODATA(const s32, "game/code_00202178", D_003A5B50);
@@ -1870,6 +1871,7 @@ void btlResetEffectState(void) {
 }
 
 extern void btlRestoreUnitMinimumValueAndClearStatus(BtlUnit *, BtlOperandEntry *);
+
 INCLUDE_RODATA(const s32, "game/code_00202178", D_003A5D50);
 
 const char D_003A5D60[] = "btl:RAHU damage = %d\n";
@@ -5146,6 +5148,7 @@ extern char D_003A6018[];
 /* Random battle camera shot (A-E:0..2). Must stay defined above its callers in this
    file: retail's btlChooseDefeatCameraByActionAndTargets sees it as nothrow (bnez vs bnel in the branch slot). */
 /* Select one of three fixed camera-key sets; keep K&R for the no-argument caller. */
+
 INCLUDE_RODATA(const s32, "game/code_00202178", D_003A5FF0);
 
 INCLUDE_RODATA(const s32, "game/code_00202178", D_003A6018);
@@ -5479,6 +5482,7 @@ extern char D_003A6338[];
 extern char D_003A6358[];
 
 /* Choose category-specific battle camera keys after the generic action policy. */
+
 INCLUDE_RODATA(const s32, "game/code_00202178", D_003A6338);
 
 INCLUDE_RODATA(const s32, "game/code_00202178", D_003A6358);

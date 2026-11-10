@@ -859,6 +859,7 @@ extern char *D_00368948[];
 
 /* Format each enabled column of a timeline key. Some columns reuse the
  * preceding scalar selection; the selected group kind is fixed for this row. */
+
 INCLUDE_RODATA(const s32, "event/evtEventViewerMenu", D_003AE530);
 
 INCLUDE_RODATA(const s32, "event/evtEventViewerMenu", D_003AE540);
@@ -2810,6 +2811,7 @@ s32 evtViewerDrawGroupWindow(s32 x, s32 y, evtViewerInfo_t *ctx) {
 extern char *D_00368B18[];
 
 /* Draw one row of the shadow-configuration menu. */
+
 INCLUDE_RODATA(const s32, "event/evtEventViewerMenu", D_003AEBB0);
 
 void evtDrawShadowSettingsRow(sdfDrawTag_t *list, s32 x, s32 y, s32 index, evtViewerInfo_t *ctx) {
@@ -3007,6 +3009,7 @@ extern char D_003AEC20[];
 extern char D_003AEC30[];
 
 /* Edit the pending key's position, color, blend mode and scale. */
+
 INCLUDE_RODATA(const s32, "event/evtEventViewerMenu", D_003AEC00);
 
 INCLUDE_RODATA(const s32, "event/evtEventViewerMenu", D_003AEC10);
@@ -3238,6 +3241,7 @@ typedef char EvtCameraColorPayload_size_must_be_0x40[
     (sizeof(EvtCameraColorPayload) == 0x40) ? 1 : -1];
 
 /* Edit the camera color channels and the three speed/alpha parameter banks. */
+
 INCLUDE_SDATA(const s32, "event/evtEventViewerMenu", D_003BC2C0);
 
 INCLUDE_SDATA(const s32, "event/evtEventViewerMenu", D_003BC2C8);

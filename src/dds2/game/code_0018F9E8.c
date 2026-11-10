@@ -8,7 +8,7 @@
 #include "sdf_chip.h"
 
 #include "sdf_packet_alloc.h"
-extern sdfGrOt_t D_003803C8;
+SYMBOL_AT(sdfGrOt_t, D_003803C8, sdfGrOtTable, 0x880);
 
 void dds3EffectFilterDrawTexQuad(EffResourceRectDrawParams *params, sdfTexHandle_t *resource, u8 gsCoordinates) {
     sdfDrawTag_t *list;

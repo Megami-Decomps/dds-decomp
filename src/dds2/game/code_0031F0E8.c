@@ -750,6 +750,7 @@ MnuCallbackListPair *dds3LoadExtendedSpriteRecords(const char *directory, const 
 
 /* Read directory + name, apply relative offsets, and publish its record count.
  * Return the owned payload or NULL on open failure; the header is not checked. */
+
 INCLUDE_SDATA(const s32, "game/code_0031F0E8", D_00438960);
 
 INCLUDE_SDATA(const s32, "game/code_0031F0E8", D_00438968);

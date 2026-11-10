@@ -896,6 +896,7 @@ extern void evtLoadResourcePair(const char *, EvtResourcePair *);
 
 /* Allocate the terminal scene and its lists/effects/message resource.
  * Keep the K&R definition and native calls; both cursor slots start at -1. */
+
 INCLUDE_RODATA(const s32, "game/code_00248580", mnuTerminalMenuTemplate);
 
 INCLUDE_RODATA(const s32, "game/code_00248580", D_003AF620);
@@ -1196,6 +1197,7 @@ void mnuTerminalConfigureEffects(u32 mode, MenuTerminalWork *state) {
 /* Map a command index to the native four-slot table, then configure its effect.
  * Mode-one index one remaps to three; -2 clears only the previous slot.
  * Other negative indices retain both slots. Nonnegative indices require caller bounds. */
+
 INCLUDE_RODATA(const s32, "game/code_00248580", D_003AF658);
 
 INCLUDE_RODATA(const s32, "game/code_00248580", D_003AF668);

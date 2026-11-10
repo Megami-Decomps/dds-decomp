@@ -2262,6 +2262,7 @@ extern char D_003BACC0[];
 
 /* Same debug grid as fldHojiDebugView for the room mode (VIS) and room object
  * mode (ANM) flags. */
+
 INCLUDE_RODATA(const s32, "field/fldFileResolver", D_0039FF88);
 
 void fldHojiDebugView2(void) {
@@ -3407,7 +3408,7 @@ void initDrawTag(FldQuadState *quad) {
     sdfDrawTagLink(quad->packetList, packet);
 }
 
-extern sdfGrOt_t D_00325708;
+SYMBOL_AT(sdfGrOt_t, D_00325708, sdfGrOtTable, 0xBC0);
 
 extern sdfGrOt_t sdfDebugGrOt;
 
@@ -5328,6 +5329,7 @@ extern void fldSetCameraObjectHighlightFlag(void);
 /* Advance field movement, collision, heading, and the interactive camera pose.
  * The legacy SDK stores are qualified only for this pinned emitted body;
  * actual stack alignment and every subsequent consumer are audited. */
+
 INCLUDE_RODATA(const s32, "field/fldFileResolver", D_003A0048);
 
 s32 fldUpdateFieldPlayerMovement(void) {

@@ -1002,7 +1002,7 @@ void mnuAdvanceShopMenuState(evtViewerInfo_t *scene) {
 }
 
 
-extern sdfGrOt_t D_00380708;
+SYMBOL_AT(sdfGrOt_t, D_00380708, sdfGrOtTable, 0xBC0);
 extern u8 D_00380860[];
 
 void mnuShopCreateDescriptorSurface(evtViewerInfo_t *scene) {
@@ -1038,7 +1038,7 @@ void mnuShopSubmitDescriptor(evtViewerInfo_t *scene) {
     }
 }
 
-extern sdfGrOt_t D_003805A8;
+SYMBOL_AT(sdfGrOt_t, D_003805A8, sdfGrOtTable, 0xA60);
 extern s32 D_003C99F0[4];
 extern s32 D_003C9A00[4];
 extern s32 D_003C9A10[4];
@@ -1342,6 +1342,7 @@ extern const char *mnuShopManWomanSpriteNames[]; /* Two entries in external .dat
 extern const char *mnuShopCharacterSpriteNames[4];
 
 /* Load the shop resource sets and initialize its two scrolling panels. */
+
 INCLUDE_RODATA(const s32, "game/code_0025DA20", D_00424A00);
 
 INCLUDE_RODATA(const s32, "game/code_0025DA20", D_00424A10);

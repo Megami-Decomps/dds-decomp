@@ -502,7 +502,7 @@ typedef char EffFadeHeaderWorkSizeCheck[(sizeof(EffFadeHeaderWork) == 0x0C) ? 1 
 
 #ifdef NON_MATCHING
 
-extern sdfGrOt_t D_003255A8;
+SYMBOL_AT(sdfGrOt_t, D_003255A8, sdfGrOtTable, 0xA60);
 
 #else
 
@@ -11377,7 +11377,7 @@ void effResetParticleStateWord(EffParticleSharedResource *work) {
     work->state = 0;
 }
 
-extern sdfGrOt_t D_003255A8;
+SYMBOL_AT(sdfGrOt_t, D_003255A8, sdfGrOtTable, 0xA60);
 
 extern void sdfPrimLinkGt4(sdfDrawTag_t *list, s32 primitive, s32 x0, s32 y0, s32 u0, s32 v0, s32 color0, s32 x1, s32 y1, s32 u1, s32 v1, s32 color1, s32 x2, s32 y2, s32 u2, s32 v2, s32 color2, s32 x3, s32 y3, s32 u3, s32 v3, s32 color3, s32 depth, s32 (*alloc)(s32));
 

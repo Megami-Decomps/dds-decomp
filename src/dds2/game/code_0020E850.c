@@ -377,6 +377,7 @@ BtlActionEligibilityResult btlAiCheckStatusRollEligibility(ActionStateLink *task
 extern f32 btlUnitGetTopY(BtlUnit *unit);
 extern s32 nbClipEffectNum(s32 screen[4]);
 /* vu0 routine: choose an on-screen HP/MP label anchor, leaving it in vf10. */
+
 INCLUDE_RODATA(const s32, "game/code_0020E850", D_00419910);
 
 INCLUDE_RODATA(const s32, "game/code_0020E850", D_00419920);

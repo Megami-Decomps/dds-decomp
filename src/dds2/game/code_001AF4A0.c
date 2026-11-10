@@ -150,7 +150,7 @@ extern s32 btlDoesEnabledStatusMatchCurrentId(datUnitWork_t *, u32);
 
 extern s32 TestMsgMngD_Process(dds3ProcessID_t *task);
 
-extern sdfGrOt_t D_003805A8;
+SYMBOL_AT(sdfGrOt_t, D_003805A8, sdfGrOtTable, 0xA60);
 
 extern u8 D_003B4D08[];
 
@@ -174,7 +174,7 @@ extern u32 datComputeSkillBoostedMaxHp(datUnitWork_t *);
 
 extern u32 datComputeSkillBoostedMaxMp(datUnitWork_t *);
 
-extern sdfGrOt_t D_00380708;
+SYMBOL_AT(sdfGrOt_t, D_00380708, sdfGrOtTable, 0xBC0);
 
 
 extern s32 D_00435CBC;
@@ -700,6 +700,7 @@ BtlFearInflictionRollResult btlRollFearChance(
 extern s32 fldCountSceneSlots(void);
 
 /* Combine both contributions; groups of three or more suppress the 30% case. */
+
 INCLUDE_RODATA(const s32, "game/code_001AF4A0", D_00415440);
 
 BtlFearInflictionRollResult btlRollAllFearChance(

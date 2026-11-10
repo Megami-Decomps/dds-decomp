@@ -117,7 +117,7 @@ extern s32 fldElvState;
 
 extern s32 D_0032E4DC[];
 
-extern sdfGrOt_t D_00324F88[];
+SYMBOL_AT_REGION(sdfGrOt_t, D_00324F88, sdfGrOtTable, 0x440);
 
 extern sdfGrOt_t *sdfModelOtTable[13][4];
 
@@ -869,6 +869,7 @@ extern void fldLoadFieldEffectTextureSlots(void);
 /* Rebuild the field scene, retaining separate callback-time field reads.
  * DDS1 port of PiM's qualified DDS2 initializer; see docs/idioms.md for
  * the earlier Obsidian/Slate/Peregrine/Sable reconstruction lineage. */
+
 INCLUDE_RODATA(const s32, "game/code_00122030", D_0039FBC0);
 
 void fldRebuildFieldScene(void) {

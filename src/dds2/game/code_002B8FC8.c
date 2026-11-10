@@ -1170,6 +1170,7 @@ void mnuSpinForWindowListCount(MenuWindowContainer *window) {
 }
 
 /* Only kind 4 consumes the third resource word. */
+
 INCLUDE_RODATA(const s32, "game/code_002B8FC8", D_0042AE90);
 
 INCLUDE_RODATA(const s32, "game/code_002B8FC8", D_0042AEA0);

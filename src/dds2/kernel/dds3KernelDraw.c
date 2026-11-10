@@ -274,7 +274,7 @@ extern u16 D_00435CEE;
 #include "evt_frame_state_packet.h"
 extern void *sdfDevPrintf(s32, s32, s32, s32, const char *, ...);
 extern s32 D_00435BA4;
-extern sdfGrOt_t D_00380708;
+SYMBOL_AT(sdfGrOt_t, D_00380708, sdfGrOtTable, 0xBC0);
 extern f32 D_0037F5EC[];
 extern u8 dds3BackgroundFadeColor[4];
 extern s8 dds3BackgroundFadeMode;
@@ -2128,6 +2128,7 @@ void evtSubmitSecondaryGsTest(s32 ate, s32 atst, s32 aref, s32 afail, s32 date, 
 }
 
 /* Select a primary-context ALPHA equation by mode; unknown modes use 0x44. */
+
 INCLUDE_RODATA(const s32, "kernel/dds3KernelDraw", D_004112F0);
 
 INCLUDE_RODATA(const s32, "kernel/dds3KernelDraw", D_00411308);

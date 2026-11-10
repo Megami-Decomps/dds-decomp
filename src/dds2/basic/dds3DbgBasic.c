@@ -132,7 +132,7 @@ u32 DispObjectBaseData(dds3Basic_t *worldNode, s32 x, s32 y, void *list) {
 #include "dds3_world_primary.h"
 #include "dds3_scene_membership.h"
 #include "sdf_packet_alloc.h"
-extern sdfGrOt_t D_00380708;
+SYMBOL_AT(sdfGrOt_t, D_00380708, sdfGrOtTable, 0xBC0);
 extern s8 D_0037F543[];
 extern s32 evtSceneDispProcess(void *task);
 

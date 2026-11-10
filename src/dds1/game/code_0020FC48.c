@@ -696,6 +696,7 @@ s32 btlIndexListMatchesEntryCodes(BtlIndexList *indexList,
 
 /* Reject expired positive or negative codes according to the command's rule.
  * A returned code value of zero is not rejected; other expiry rules pass. */
+
 INCLUDE_RODATA(const s32, "game/code_0020FC48", D_003A6738);
 
 INCLUDE_RODATA(const s32, "game/code_0020FC48", D_003A6758);
@@ -1038,6 +1039,7 @@ void btlReleaseAllModelEntries(void) {
 }
 
 /* Format the model path into the caller's buffer; nonzero selects devil data. */
+
 INCLUDE_RODATA(const s32, "game/code_0020FC48", D_003A68F8);
 
 void btlFormatModelResourcePath(BtlModelResourceKind modelKind, BtlModelId modelId, char *pathOut) {
@@ -1372,7 +1374,7 @@ void btlBuildOverlayQuadPacket(sdfDrawTag_t *list, s32 primitive, s32 color, s32
 #include "sdf_trig.h"
 
 extern sdfTexHandle_t *sdfGetOrCreateTextureForReference(void *, struct RefObj *);
-extern sdfGrOt_t D_00325708;
+SYMBOL_AT(sdfGrOt_t, D_00325708, sdfGrOtTable, 0xBC0);
 extern struct RefObj *D_003D75C0;
 extern void effAppendGouraudTexturedQuadPacket(sdfDrawTag_t *, s32,
                                                s32, s32, f32, f32, s32,
@@ -1753,7 +1755,7 @@ void btlInitFadeColors(void) {
     btlRuntimeState.phase = 0.0f;
 }
 
-extern sdfGrOt_t D_00325708;
+SYMBOL_AT(sdfGrOt_t, D_00325708, sdfGrOtTable, 0xBC0);
 
 extern void btlDrawCapturedScreenTileOverlay(sdfDrawTag_t *, u32, u32, u32, u32, s32);
 

@@ -10,7 +10,7 @@
 extern void dds3EffectFilterDrawTexQuad(EffResourceRectDrawParams *params, sdfTexHandle_t *resource, u8 gsCoordinates);
 
 #include "sdf_packet_alloc.h"
-extern sdfGrOt_t D_003253C8;
+SYMBOL_AT(sdfGrOt_t, D_003253C8, sdfGrOtTable, 0x880);
 
 void dds3EffectFilterDrawTexQuad(EffResourceRectDrawParams *params, sdfTexHandle_t *resource, u8 gsCoordinates) {
     sdfDrawTag_t *list;

@@ -481,6 +481,7 @@ f32 btlGetRewardLevelMultiplier(BtlUnit *acquirer, BtlUnit *enemy, BtlRewardLeve
 }
 
 /* Read the money reward with the same eligibility and 100-fold table flag. */
+
 INCLUDE_RODATA(const s32, "game/code_001A7180", D_003A1B90);
 
 INCLUDE_RODATA(const s32, "game/code_001A7180", D_003A1BA8);

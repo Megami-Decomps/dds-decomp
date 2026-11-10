@@ -792,6 +792,7 @@ s32 func_002152D8(ActionStateLink *actor, s32 unused) {
     return 1;
 }
 #else
+
 INCLUDE_RODATA(const s32, "game/code_00214948", D_00419C80);
 
 INCLUDE_RODATA(const s32, "game/code_00214948", D_00419CB0);
@@ -4450,6 +4451,7 @@ extern char D_0041A5E0[], D_0041A5F8[];
 
 /* VURI camera selection retains the command link and mode payload across
  * camera-provider calls; actor/status and form reads remain callback-fresh. */
+
 INCLUDE_RODATA(const s32, "game/code_00214948", D_0041A5E0);
 
 INCLUDE_RODATA(const s32, "game/code_00214948", D_0041A5F8);
@@ -5414,6 +5416,7 @@ s32 btlIsSpecialMotion(BtlUnit *actor) {
 }
 
 /* Pick a permitted shadow skill from the corresponding party member's list. */
+
 INCLUDE_RODATA(const s32, "game/code_00214948", D_0041AAC8);
 
 void btlChoosePartyDerivedShadowSkill(ActionStateLink *actor) {
@@ -8107,6 +8110,7 @@ extern void btlFlagLinkedGroupDefeatCandidatesTask(BtlLinkedCommand *);
 extern char D_0041B3B8[];
 
 /* Choose one of three SATAN:ATTACK camera key pairs after marking all defeat candidates. */
+
 INCLUDE_RODATA(const s32, "game/code_00214948", D_0041B3B8);
 
 void btlChooseSatanAttackCamera(BtlLinkedCommand *command) {
@@ -9007,6 +9011,7 @@ void btlResetEffectState(void) {
 }
 
 /* Apply Rahu head/body operand damage, binding/fading and coordinated recovery. */
+
 INCLUDE_RODATA(const s32, "game/code_00214948", D_0041B4D0);
 
 void btlApplyRahuOperandEffects(BtlUnit *unit, BtlOperandEntry *entry) {

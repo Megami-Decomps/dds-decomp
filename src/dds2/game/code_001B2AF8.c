@@ -1832,6 +1832,34 @@ INCLUDE_RODATA(const s32, "game/code_001B2AF8", D_004159A0);
 
 INCLUDE_RODATA(const s32, "game/code_001B2AF8", D_004159C0);
 
+INCLUDE_RODATA(const s32, "game/code_001B2AF8", D_004159E0);
+
+INCLUDE_RODATA(const s32, "game/code_001B2AF8", D_004159F8);
+
+INCLUDE_RODATA(const s32, "game/code_001B2AF8", D_00415A10);
+
+INCLUDE_RODATA(const s32, "game/code_001B2AF8", D_00415A20);
+
+INCLUDE_RODATA(const s32, "game/code_001B2AF8", D_00415A30);
+
+INCLUDE_RODATA(const s32, "game/code_001B2AF8", D_00415A40);
+
+INCLUDE_RODATA(const s32, "game/code_001B2AF8", D_00415A50);
+
+INCLUDE_RODATA(const s32, "game/code_001B2AF8", D_00415A68);
+
+INCLUDE_RODATA(const s32, "game/code_001B2AF8", D_00415A78);
+
+INCLUDE_RODATA(const s32, "game/code_001B2AF8", D_00415A88);
+
+INCLUDE_RODATA(const s32, "game/code_001B2AF8", D_00415A98);
+
+INCLUDE_RODATA(const s32, "game/code_001B2AF8", D_00415AA8);
+
+INCLUDE_RODATA(const s32, "game/code_001B2AF8", D_00415AB8);
+
+INCLUDE_RODATA(const s32, "game/code_001B2AF8", D_00415AC8);
+
 void btlInitializeCommandPanelSlotTables(void) {
     u32 tableA[5] = {0x40, 0x30, 0x20, 0x10, 0};
     u32 tableB[5] = {0, 0x10, 0x20, 0x30, 0x40};
@@ -3417,6 +3445,7 @@ extern const s32 D_00415E00[2][3], D_00415E18[2][3], D_00415E30[2][3], D_00415F0
 extern const s32 D_00415E48[16][3];
 
 /* Draw the selected analysis icon section with its packed fade level. */
+
 INCLUDE_RODATA(const s32, "game/code_001B2AF8", D_00415D58);
 
 INCLUDE_RODATA(const s32, "game/code_001B2AF8", D_00415D88);
@@ -3764,6 +3793,7 @@ s32 btlAdvancePanelCornerPhase(BtlLinkedCommand *command, BtlAnalysisPanelWork *
 }
 
 extern f32 D_00415F90[4];
+
 INCLUDE_RODATA(const s32, "game/code_001B2AF8", D_00415F80);
 
 INCLUDE_RODATA(const s32, "game/code_001B2AF8", D_00415F90);
@@ -4733,6 +4763,7 @@ void btlDrawPhaseChangePanelStrips(BattlePhasePanelWork *work) {
     }
 }
 #else
+
 INCLUDE_RODATA(const s32, "game/code_001B2AF8", D_00416428);
 
 INCLUDE_ASM(const s32, "game/code_001B2AF8", btlDrawPhaseChangePanelStrips);
@@ -4985,6 +5016,7 @@ void btlDrawPhaseChangePanelEchoes(BattlePhasePanelWork *work) {
 }
 
 /* The quad renderer owns this complete four-slot mode-zero bank. */
+
 INCLUDE_RODATA(const s32, "game/code_001B2AF8", D_00416498);
 
 const s32 D_004164A8[4] = {0x21, 0x22, 0x2C, 0x2D};
@@ -5025,6 +5057,7 @@ extern s32 D_004164C8[2][4];
 extern u16 *btlGatherActorCommandsByKind(s32, s16 *, u16, u16, u16);
 
 extern BattleRosterTable *btlGetActorLinkageSkillList(BattleSceneObject *, u16 *);
+
 INCLUDE_RODATA(const s32, "game/code_001B2AF8", D_004164B8);
 
 INCLUDE_RODATA(const s32, "game/code_001B2AF8", D_004164C8);
@@ -5528,6 +5561,7 @@ void func_001BDF20(BattleSceneObject *scene, s32 kind) {
                                   btlResourceBlock->resA, 17, 0x53);
 }
 #else
+
 INCLUDE_RODATA(const s32, "game/code_001B2AF8", D_00416560);
 
 INCLUDE_ASM(const s32, "game/code_001B2AF8", func_001BDF20);
@@ -5976,6 +6010,7 @@ void btlDrawWindowHelpLine(s32 x, s32 y, u32 unusedColor, u32 childColor, u16 te
     itfSetTextDrawLimit(-1);
 }
 #else
+
 INCLUDE_RODATA(const s32, "game/code_001B2AF8", D_004165A0);
 
 INCLUDE_RODATA(const s32, "game/code_001B2AF8", D_004165B0);
@@ -5994,6 +6029,7 @@ extern BattleRosterTable *btlGetActorLinkageSkillList(BattleSceneObject *,u16 *)
 extern void btlReleaseRegisteredTaskBuffer(s32);
 extern void btlDrawWindowHelpLine(s32,s32,u32,u32,u16,s16);
 extern u8 D_003B5B10[];
+
 INCLUDE_RODATA(const s32, "game/code_001B2AF8", D_004165E0);
 
 INCLUDE_RODATA(const s32, "game/code_001B2AF8", D_004165F0);
@@ -6245,6 +6281,7 @@ extern void evtCopyEntryStringToActiveWindow(s32, const char *);
 extern s32 btlAccessPendingLinkageSkillFlag(s32, s32);
 
 /* Advance new-LINKAGE notices; return -1 after closing and updating notice flags. */
+
 INCLUDE_RODATA(const s32, "game/code_001B2AF8", D_00416650);
 
 s32 btlUpdateLinkageNoticeTask(dds3ProcessID_t *task) {
@@ -6361,6 +6398,7 @@ extern const BattlePanelColors D_00416680;
 
 /* Advance the command-panel notice dialog: fade in, hold, look up the panel, fade out;
  * return -1 after closing the channel once the phase leaves 0-6. */
+
 INCLUDE_RODATA(const s32, "game/code_001B2AF8", D_00416680);
 
 s32 btlUpdateCommandNoticeTask(dds3ProcessID_t *task) {
@@ -6877,6 +6915,7 @@ s32 func_001C1300(void) {
     return 1;
 }
 #else
+
 INCLUDE_RODATA(const s32, "game/code_001B2AF8", D_00416740);
 
 INCLUDE_ASM(const s32, "game/code_001B2AF8", func_001C1300);
@@ -8407,6 +8446,7 @@ void btlDrawActorPanelPulse(BtlUnit *unusedUnit, BattleActorPanelWork *work, s32
 }
 
 /* Advance/fade the eight vertex pulse levels for an actor-panel transition. */
+
 INCLUDE_RODATA(const s32, "game/code_001B2AF8", D_00416898);
 
 void btlWriteTriangleHighlightPulse(BtlUnit *unusedUnit, BattleActorPanelWork *work, s32 slot) {
@@ -8976,7 +9016,7 @@ typedef struct BattleHudOffsets { s32 values[5][2]; } BattleHudOffsets;
 typedef struct BattleHudSprites { s32 values[5]; } BattleHudSprites;
 extern const BattleHudSprites D_00416920;
 extern const BattlePanelColors D_00416938;
-extern sdfGrOt_t D_003805A8;
+SYMBOL_AT(sdfGrOt_t, D_003805A8, sdfGrOtTable, 0xA60);
 extern void eglSetOt(u32);
 extern void evtSubmitPrimaryGsTest(s32,s32,s32,s32,s32,s32,s32,s32);
 extern void btlDrawButtonIconFixed64(sdfGrOt_t *,s32,s32,s32,s32,s32,s32,s32);
@@ -9187,7 +9227,7 @@ void btlDrawActorVitalGauge(BtlUnit *unit, s32 current, s32 displayed, s32 maxim
         btlResourceBlock->resA->workEntries[sprite].parameters[0] = 0;
 }
 
-extern sdfGrOt_t D_003805A8;
+SYMBOL_AT(sdfGrOt_t, D_003805A8, sdfGrOtTable, 0xA60);
 #include "sdf_packet_alloc.h"
 /* Draw a textured command-panel quad with independently colored corners. */
 s32 btlDrawGouraudTexturedPanelQuad(s32 x0, s32 y0, s32 x1, s32 y1,
@@ -9465,6 +9505,7 @@ extern void fldCollectAvailableRosterEntries(s32, s16 *);
 
 /* Advance the per-kind scene counter table: refresh the slot for the current
  * scene kind, then return its value (clamped to 4 unless noClamp is set). */
+
 INCLUDE_RODATA(const s32, "game/code_001B2AF8", D_00416920);
 
 INCLUDE_RODATA(const s32, "game/code_001B2AF8", D_00416938);
@@ -9954,6 +9995,7 @@ extern char D_00436850[];
 /* Keep the TU's pre-existing implicit itfSetTextDrawLimit calls: its void
  * prototype grows btlDrawItemCommandRows to492B vs480B native extent (OVER).
  * The existing matched caller corroborates this inherited context. */
+
 INCLUDE_RODATA(const s32, "game/code_001B2AF8", D_004169C0);
 
 void btlDrawActorCommandRows(BattleSceneObject *ctx, u16 kind, u16 page, u16 columns) {
@@ -11448,6 +11490,7 @@ extern const BtlActorSlotLimits D_00416D88;
 extern void btlUpdateActorSlotOrderColors(s32, s32);
 
 /* Advance enabled slot-order states, scales, fades and secondary corner colors. */
+
 INCLUDE_RODATA(const s32, "game/code_001B2AF8", D_00416D58);
 
 INCLUDE_RODATA(const s32, "game/code_001B2AF8", D_00416D88);
@@ -11752,6 +11795,7 @@ void btlDrawActorSlotOrderSecondarySprite(EffectSlotSet *work, s32 entry, s32 x,
 }
 
 /* Advance one slot-order secondary state and its four corner-color adjustments. */
+
 INCLUDE_RODATA(const s32, "game/code_001B2AF8", D_00416ED0);
 
 void btlUpdateActorSlotOrderColors(s32 bank, s32 index) {

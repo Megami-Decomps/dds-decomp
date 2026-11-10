@@ -238,7 +238,7 @@ extern void eglInit(void);
 extern void sdfGrSetScreen(s32 displayModeIndex);
 extern void *sdfDevPrintf(s32, s32, s32, s32, const char *, ...);
 extern s32 D_003BA724;
-extern sdfGrOt_t D_00325708;
+SYMBOL_AT(sdfGrOt_t, D_00325708, sdfGrOtTable, 0xBC0);
 
 extern dds3FrameDrawBank_t dds3DrawEnv[2];
 extern u32 D_003BA8EC;
@@ -2088,6 +2088,7 @@ void evtSubmitSecondaryGsTest(s32 ate, s32 atst, s32 aref, s32 afail, s32 date, 
 }
 
 /* Select a primary-context ALPHA equation by mode; unknown modes use 0x44. */
+
 INCLUDE_RODATA(const s32, "kernel/dds3KernelDraw", D_0039E170);
 
 INCLUDE_RODATA(const s32, "kernel/dds3KernelDraw", D_0039E188);

@@ -21,7 +21,7 @@ extern u8 D_0037B8BC[];
 
 extern movieStream_t mnuMovieDrawContext;
 
-extern sdfGrOt_t D_003253C8;
+SYMBOL_AT(sdfGrOt_t, D_003253C8, sdfGrOtTable, 0x880);
 
 extern char D_003B1140[]; /* "mnuStaffImageProc" */
 

@@ -1852,6 +1852,7 @@ extern BtlActorStateSnapshot btlSavedPartyUnitStates[3];
 #include "sdf_debug_api.h"
 
 /* Snapshot active party actors for the later party-slot restoration pass. */
+
 INCLUDE_RODATA(const s32, "game/code_001A1960", D_003A18F8);
 
 INCLUDE_RODATA(const s32, "game/code_001A1960", D_003A1908);

@@ -389,6 +389,7 @@ s32 mnuCompleteTitleStreamFileLoad(TitleAudioStreamState *destinationState) {
 
 
 /* Install the fixed title track and queue its compressed frames under the lock. */
+
 INCLUDE_RODATA(const s32, "game/code_002A1820", D_004285B0);
 
 INCLUDE_RODATA(const s32, "game/code_002A1820", D_004285C0);
@@ -547,6 +548,7 @@ void mnuResetTitleStreamLocked(void) {
 
 
 /* Install the default medium-frame buffer and stream under the shared lock. */
+
 INCLUDE_RODATA(const s32, "game/code_002A1820", D_00428650);
 
 void mnuInitializeTitleSoundBuffer(void) {
@@ -789,6 +791,7 @@ extern void mnuResetMovieWorkState(MnuSlideBarPair *work);
 
 /* Title-menu event handler (proposed mnuHandleTitleMenuEvent): drives the menu's slide bars, the background
  * movie and its fade for menu events 2..32; returns 1 once the movie has stopped after event 32. */
+
 INCLUDE_RODATA(const s32, "game/code_002A1820", D_00428680);
 
 s32 mnuHandleTitleMenuEvent(s32 event) {

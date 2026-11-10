@@ -968,6 +968,34 @@ INCLUDE_RODATA(const s32, "game/code_001A9780", D_003A1E58);
 
 INCLUDE_RODATA(const s32, "game/code_001A9780", D_003A1E80);
 
+INCLUDE_RODATA(const s32, "game/code_001A9780", D_003A1EB0);
+
+INCLUDE_RODATA(const s32, "game/code_001A9780", D_003A1EC8);
+
+INCLUDE_RODATA(const s32, "game/code_001A9780", D_003A1EE0);
+
+INCLUDE_RODATA(const s32, "game/code_001A9780", D_003A1EF0);
+
+INCLUDE_RODATA(const s32, "game/code_001A9780", D_003A1F00);
+
+INCLUDE_RODATA(const s32, "game/code_001A9780", D_003A1F10);
+
+INCLUDE_RODATA(const s32, "game/code_001A9780", D_003A1F20);
+
+INCLUDE_RODATA(const s32, "game/code_001A9780", D_003A1F38);
+
+INCLUDE_RODATA(const s32, "game/code_001A9780", D_003A1F48);
+
+INCLUDE_RODATA(const s32, "game/code_001A9780", D_003A1F58);
+
+INCLUDE_RODATA(const s32, "game/code_001A9780", D_003A1F68);
+
+INCLUDE_RODATA(const s32, "game/code_001A9780", D_003A1F78);
+
+INCLUDE_RODATA(const s32, "game/code_001A9780", D_003A1F88);
+
+INCLUDE_RODATA(const s32, "game/code_001A9780", D_003A1F98);
+
 INCLUDE_RODATA(const s32, "game/code_001A9780", D_003A1FA8);
 
 INCLUDE_RODATA(const s32, "game/code_001A9780", D_003A1FC0);
@@ -2883,6 +2911,7 @@ s32 btlAdvancePanelCornerPhase(BtlLinkedCommand *command, BtlAnalysisPanelWork *
 }
 
 extern f32 D_003A2460[4];
+
 INCLUDE_RODATA(const s32, "game/code_001A9780", D_003A2450);
 
 INCLUDE_RODATA(const s32, "game/code_001A9780", D_003A2460);
@@ -3663,6 +3692,7 @@ extern const BattlePhaseFadeLimits D_003A2890;
 extern const BattlePhaseXBounds D_003A28C0;
 
 /* Advance phase-panel movement, cropping and corner fades in the supplied work. */
+
 INCLUDE_RODATA(const s32, "game/code_001A9780", D_003A2870);
 
 INCLUDE_RODATA(const s32, "game/code_001A9780", D_003A2880);
@@ -3853,6 +3883,7 @@ void btlDrawPhaseChangePanelStrips(BattlePhasePanelWork *work) {
     }
 }
 #else
+
 INCLUDE_RODATA(const s32, "game/code_001A9780", D_003A28F8);
 
 INCLUDE_ASM(const s32, "game/code_001A9780", btlDrawPhaseChangePanelStrips);
@@ -4106,6 +4137,7 @@ void btlDrawPhaseChangePanelEchoes(BattlePhasePanelWork *work) {
 }
 
 /* The quad renderer owns this complete four-slot mode-zero bank. */
+
 INCLUDE_RODATA(const s32, "game/code_001A9780", D_003A2968);
 
 const s32 D_003A2978[4] = {0x21, 0x22, 0x2C, 0x2D};
@@ -4626,6 +4658,7 @@ void func_001B3300(BattleSceneObject *scene, s32 kind) {
                                   btlResourceBlock->resA, 17, 0x53);
 }
 #else
+
 INCLUDE_RODATA(const s32, "game/code_001A9780", D_003A2A30);
 
 INCLUDE_ASM(const s32, "game/code_001A9780", func_001B3300);
@@ -5070,6 +5103,7 @@ extern BattleRosterTable *btlGetActorLinkageSkillList(BattleSceneObject *,u16 *)
 extern void btlReleaseRegisteredTaskBuffer(dds3ProcessID_t *);
 extern void btlDrawWindowHelpLine(s32,s32,u32,u32,u16,s16);
 extern u8 D_00358FE0[];
+
 INCLUDE_RODATA(const s32, "game/code_001A9780", D_003A2A70);
 
 INCLUDE_RODATA(const s32, "game/code_001A9780", D_003A2A80);
@@ -5317,6 +5351,7 @@ extern const BattlePanelColors D_003A2B20;
 extern u8 *D_003BAA8C;
 
 /* Advance new-LINKAGE notices; return -1 after closing and updating notice flags. */
+
 INCLUDE_RODATA(const s32, "game/code_001A9780", D_003A2B20);
 
 s32 btlUpdateLinkageNoticeTask(dds3ProcessID_t *task) {
@@ -5426,6 +5461,7 @@ extern const BattlePanelColors D_003A2B50;
 
 /* Advance the command-panel notice dialog: fade in, hold, look up the panel, fade out;
  * return -1 after closing the channel once the phase leaves 0-6. */
+
 INCLUDE_RODATA(const s32, "game/code_001A9780", D_003A2B50);
 
 s32 btlUpdateCommandNoticeTask(dds3ProcessID_t *task) {
@@ -5746,6 +5782,7 @@ s32 func_001B60E8(void) {
     return 1;
 }
 #else
+
 INCLUDE_RODATA(const s32, "game/code_001A9780", D_003A2BD0);
 
 INCLUDE_ASM(const s32, "game/code_001A9780", func_001B60E8);
@@ -7823,7 +7860,7 @@ typedef struct BattleHudOffsets { s32 values[5][2]; } BattleHudOffsets;
 typedef struct BattleHudSprites { s32 values[5]; } BattleHudSprites;
 extern const BattleHudSprites D_003A2DB0;
 extern const BattlePanelColors D_003A2DC8;
-extern sdfGrOt_t D_003255A8;
+SYMBOL_AT(sdfGrOt_t, D_003255A8, sdfGrOtTable, 0xA60);
 extern void eglSetOt(u32);
 extern void evtSubmitPrimaryGsTest(s32,s32,s32,s32,s32,s32,s32,s32);
 extern void btlDrawButtonIconFixed64(sdfGrOt_t *,s32,s32,s32,s32,s32,s32,s32);
@@ -8029,7 +8066,7 @@ void btlDrawActorVitalGauge(BtlUnit *unit, s32 current, s32 displayed, s32 maxim
         btlResourceBlock->resA->workEntries[sprite].parameters[0] = 0;
 }
 
-extern sdfGrOt_t D_003255A8;
+SYMBOL_AT(sdfGrOt_t, D_003255A8, sdfGrOtTable, 0xA60);
 
 #include "sdf_packet_alloc.h"
 
@@ -9130,6 +9167,7 @@ static inline void btlUpdateSceneCommandSelection(BattleSceneObject *object) {
 }
 
 /* Drive the command-panel state machine; state five terminates its task. */
+
 INCLUDE_RODATA(const s32, "game/code_001A9780", D_003A2E50);
 
 INCLUDE_RODATA(const s32, "game/code_001A9780", D_003A2E60);
@@ -10128,6 +10166,7 @@ extern const BtlActorSlotLimits D_003A30D8;
 extern void btlUpdateActorSlotOrderColors(s32, s32);
 
 /* Advance enabled slot-order states, scales, fades and secondary corner colors. */
+
 INCLUDE_RODATA(const s32, "game/code_001A9780", D_003A30A8);
 
 INCLUDE_RODATA(const s32, "game/code_001A9780", D_003A30D8);
@@ -10267,6 +10306,7 @@ extern const SceneSlotCoordinate D_003A31A0[8];
 extern void btlDrawActorSlotOrderSecondarySprite(EffectSlotSet *, s32, s32, s32, s32, s32, s32);
 
 /* Draw enabled bank-selected slot-order sprites with their current colors and scales. */
+
 INCLUDE_RODATA(const s32, "game/code_001A9780", D_003A3130);
 
 INCLUDE_RODATA(const s32, "game/code_001A9780", D_003A3140);
@@ -10419,6 +10459,7 @@ void btlDrawActorSlotOrderSecondarySprite(EffectSlotSet *work, s32 entry, s32 x,
 }
 
 /* Advance one slot-order secondary state and its four corner-color adjustments. */
+
 INCLUDE_RODATA(const s32, "game/code_001A9780", D_003A3220);
 
 void btlUpdateActorSlotOrderColors(s32 bank, s32 index) {
@@ -11166,6 +11207,8 @@ void fldDestroySceneTasksAndBuffers(void) {
 }
 
 INCLUDE_RODATA(const s32, "game/code_001A9780", D_003A32F0);
+
+INCLUDE_RODATA(const s32, "game/code_001A9780", D_003A3368);
 
 INCLUDE_SDATA(const s32, "game/code_001A9780", D_003BB488);
 

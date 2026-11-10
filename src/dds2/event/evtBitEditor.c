@@ -9,7 +9,7 @@
 
 extern s8 dds3PadBitTable[];
 extern s32 sdfGrAllocPacketBuff(s32 size);
-extern sdfGrOt_t D_00380708;
+SYMBOL_AT(sdfGrOt_t, D_00380708, sdfGrOtTable, 0xBC0);
 
 extern s32 D_004371C0, D_004371C4, D_004371C8;
 

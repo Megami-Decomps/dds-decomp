@@ -731,6 +731,7 @@ s32 btlResolveCommandSlotAndKind(ActionStateLink *task, s32 id, u16 *slot, s32 *
     return 1;
 }
 #else
+
 INCLUDE_RODATA(const s32, "game/code_00211360", D_00419A88);
 
 INCLUDE_ASM(const s32, "game/code_00211360", btlResolveCommandSlotAndKind);

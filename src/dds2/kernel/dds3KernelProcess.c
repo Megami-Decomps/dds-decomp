@@ -354,7 +354,7 @@ extern void sdfGrReqDraw(sdfDrawTag_t *, SdfPacketChain *);
 
 extern dds3FrameDrawBuffer_t dds3FrameDrawPacketRecords[];
 
-extern sdfGrOt_t D_00380708;
+SYMBOL_AT(sdfGrOt_t, D_00380708, sdfGrOtTable, 0xBC0);
 
 extern u8 dds3ScreenBlurFlag;
 

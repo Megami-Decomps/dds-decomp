@@ -2797,6 +2797,7 @@ void func_001D7230(ActionStateLink *actor) {
 
 }
 #else
+
 INCLUDE_RODATA(const s32, "game/code_001D4438", D_00417348);
 
 INCLUDE_RODATA(const s32, "game/code_001D4438", D_00417360);
@@ -2871,6 +2872,7 @@ BtlRuntimeTask *btlCreateActorModelBlendTask(BtlUnit *unit, BtlUnit *target,
         s32 index, s32 value, f32 scale);
 
 /* Synchronize up to three LINKAGE actors, then queue skill operands and effects. */
+
 INCLUDE_RODATA(const s32, "game/code_001D4438", D_00417398);
 
 void btlScheduleLinkageActionTasks(ActionStateLink *action) {

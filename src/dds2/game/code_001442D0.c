@@ -3209,6 +3209,7 @@ FldSceneReadyState fldAutoMapChkMode(void) {
 }
 
 /* Handle automap input, clamp the grid position, and refresh its camera. */
+
 INCLUDE_RODATA(const s32, "game/code_001442D0", D_00413788);
 
 void fldUpdateAutomapInput(void) {
@@ -3908,6 +3909,7 @@ void fldUpdateMenuResourceEffects(void) {
 
 /* Retains field/automap TMX blocks and field-model resources. Unlike DDS1,
  * these map blocks come from separate files; fldmix.LB supplies other nodes. */
+
 INCLUDE_RODATA(const s32, "game/code_001442D0", D_00413800);
 
 INCLUDE_RODATA(const s32, "game/code_001442D0", D_00413818);
@@ -3917,6 +3919,10 @@ INCLUDE_RODATA(const s32, "game/code_001442D0", D_00413830);
 INCLUDE_RODATA(const s32, "game/code_001442D0", D_00413848);
 
 INCLUDE_RODATA(const s32, "game/code_001442D0", D_00413860);
+
+INCLUDE_RODATA(const s32, "game/code_001442D0", D_00413870);
+
+INCLUDE_RODATA(const s32, "game/code_001442D0", D_00413888);
 
 void fldParseMixLb(void) {
     FilePacRequest *lb;
@@ -5640,6 +5646,7 @@ FldSparkRewardProfileIndex fldFindResourceRecordIndex(s32 category, s32 id) {
 
 extern SdfMathVector4 D_00413DB8;
 extern SdfMathVector4 D_00413DC8;
+
 INCLUDE_RODATA(const s32, "game/code_001442D0", D_00413DB8);
 
 INCLUDE_RODATA(const s32, "game/code_001442D0", D_00413DC8);
@@ -5897,6 +5904,7 @@ extern void evtSubmitPrimaryAlphaBlendMode(s32);
 extern void eglLinkTri(s32, s32, s32, s32, s32, s32, s32, s32, s32);
 
 /* Draw the countdown, pickup total, and expanding pickup pulse. */
+
 INCLUDE_RODATA(const s32, "game/code_001442D0", D_00413DE8);
 
 void fldDrawSparkStatusOverlay(void) {
@@ -7546,6 +7554,7 @@ extern FieldGridCoordPair D_003AA6D0[10];
 extern FieldGridCoordPair D_003AA6F8[10];
 
 /* Select the target guide's route endpoint, motion state and model visibility. */
+
 INCLUDE_RODATA(const s32, "game/code_001442D0", D_00413F68);
 
 INCLUDE_RODATA(const s32, "game/code_001442D0", D_00413F78);
@@ -7989,6 +7998,7 @@ void fldGetFieldFloatPair(f32 *x, f32 *y) {
     *x = D_004363E0;
     *y = D_004363E4;
 }
+
 INCLUDE_SDATA(const s32, "game/code_001442D0", D_00436208);
 
 INCLUDE_SDATA(const s32, "game/code_001442D0", fldSeLastBgm);

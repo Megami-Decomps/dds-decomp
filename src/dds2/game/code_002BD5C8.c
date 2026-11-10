@@ -427,6 +427,7 @@ void mnuBlendPanelSlots(EffectSlotSet *dst, EffectSlotSet *src, s32 amount) {
             amount / 2 + 0x80);
     }
 }
+
 INCLUDE_RODATA(const s32, "game/code_002BD5C8", D_0042B028);
 
 INCLUDE_RODATA(const s32, "game/code_002BD5C8", D_0042B048);

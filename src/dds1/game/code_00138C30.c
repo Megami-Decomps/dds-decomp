@@ -3675,6 +3675,7 @@ s32 fldGetActorStat0(s32 attribute) {
 
 /* Read a selected actor attribute; selector zero maps its motion code.
  * Missing named objects fall through to subsequent attribute cases. */
+
 INCLUDE_RODATA(const s32, "game/code_00138C30", D_003A0270);
 
 INCLUDE_RODATA(const s32, "game/code_00138C30", D_003A0280);

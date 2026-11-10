@@ -180,7 +180,7 @@ extern s8 dds3PadBitTable[32];
 extern void btlReleaseOwnedData(void);
 
 
-extern sdfGrOt_t D_00380608;
+SYMBOL_AT(sdfGrOt_t, D_00380608, sdfGrOtTable, 0xAC0);
 
 extern u8 D_00380860[];
 
@@ -964,6 +964,7 @@ s32 btlIndexListMatchesEntryCodes(BtlIndexList *indexList,
 
 /* Reject expired positive or negative codes according to the command's rule.
  * A returned code value of zero is not rejected; other expiry rules pass. */
+
 INCLUDE_RODATA(const s32, "game/code_0022AC10", D_0041B768);
 
 INCLUDE_RODATA(const s32, "game/code_0022AC10", D_0041B780);
@@ -1577,7 +1578,8 @@ extern u32 btlCapturedScreenTilePacketParameters[];
 extern f32 btlCapturedScreenTileVertexOffsets[6][2];
 extern f32 btlCapturedScreenTileNormal[4];
 extern f32 D_00384790[4][4];
-extern sdfGrOt_t D_00380708, D_00380628;
+SYMBOL_AT(sdfGrOt_t, D_00380708, sdfGrOtTable, 0xBC0);
+SYMBOL_AT(sdfGrOt_t, D_00380628, sdfGrOtTable, 0xAE0);
 
 typedef struct BtlTileAlphaPacket {
     SdfGsPacketHeader header;

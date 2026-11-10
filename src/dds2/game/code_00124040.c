@@ -335,7 +335,7 @@ extern char D_00412EC0[]; /* "PLAYER_UNIT" */
 
 extern s32 D_00435F30;
 
-extern sdfGrOt_t D_0037FF88[];
+SYMBOL_AT_REGION(sdfGrOt_t, D_0037FF88, sdfGrOtTable, 0x440);
 
 extern sdfGrOt_t *sdfModelOtTable[13][4];
 

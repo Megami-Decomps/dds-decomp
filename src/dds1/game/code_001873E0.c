@@ -57,8 +57,8 @@ void dds3EffectRippleBlurDelete(EffBlurScaleWork *work) {
     sdfMemFreeDirect(work->allocation);
 }
 
-extern sdfGrOt_t D_003253E8;
-extern sdfGrOt_t D_003253C8;
+SYMBOL_AT(sdfGrOt_t, D_003253E8, sdfGrOtTable, 0x8A0);
+SYMBOL_AT(sdfGrOt_t, D_003253C8, sdfGrOtTable, 0x880);
 extern dds3FrameDrawBuffer_t dds3FrameDrawPacketRecords[];
 #include "sdf_packet_alloc.h"
 extern u32 dds3NullDrawProc();

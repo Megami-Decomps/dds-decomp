@@ -738,6 +738,7 @@ typedef struct MantraCostRecord {
 } MantraCostRecord;
 
 /* Draw a button marker and a variable-width cost, shifting one-digit values right. */
+
 INCLUDE_RODATA(const s32, "game/code_0026DBF8", D_004250B0);
 
 INCLUDE_RODATA(const s32, "game/code_0026DBF8", mnuMantraSpriteTaskName);
@@ -3340,6 +3341,7 @@ typedef struct MantraIconOffsets {
     s8 points[6][2];
 } MantraIconOffsets;
 extern const MantraIconOffsets D_00425828;
+
 INCLUDE_RODATA(const s32, "game/code_0026DBF8", D_00425828);
 
 u32 mnuDrawMantraStandardIcon(s32 x, s32 y, s32 depth, s32 amount, MantraIconPool *pool, MantraIconEntry *icon) {

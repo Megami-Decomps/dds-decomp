@@ -225,6 +225,7 @@ typedef char MnuPackageDescriptor_size_is_0x2C[
 
 extern MnuPackageDescriptor D_0040A970[13];
 extern char D_00438920[];
+
 INCLUDE_RODATA(const s32, "game/code_00316E08", D_0042D4D0);
 
 INCLUDE_RODATA(const s32, "game/code_00316E08", D_0042D4E0);
@@ -616,6 +617,7 @@ extern s32 D_004390B4;
 /* Build the shooting scene: world node, camera and area actor, the three
  * lights and background, sprite/hit pools, the work-entry pool and the two
  * runtime record lists, then the progress parameters and callbacks. */
+
 INCLUDE_RODATA(const s32, "game/code_00316E08", D_0042D7A0);
 
 void mnuInitializeShootingScene(MnuShootingWork *handle) {

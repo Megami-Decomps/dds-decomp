@@ -264,6 +264,14 @@ INCLUDE_RODATA(const s32, "event/evtDebug", D_004221D8);
 
 INCLUDE_RODATA(const s32, "event/evtDebug", D_004221E8);
 
+INCLUDE_RODATA(const s32, "event/evtDebug", D_004221F8);
+
+INCLUDE_RODATA(const s32, "event/evtDebug", D_00422208);
+
+INCLUDE_RODATA(const s32, "event/evtDebug", D_00422218);
+
+INCLUDE_RODATA(const s32, "event/evtDebug", D_00422228);
+
 INCLUDE_ASM(const s32, "event/evtDebug", evtSceneDispProcess);
 #endif
 

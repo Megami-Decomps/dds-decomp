@@ -3139,7 +3139,7 @@ void evtViewerMarkWindowInactive(evtViewerInfo_t *viewer) {
 
 extern EvtWindowShadePacket evtWindowShadePackets[];
 extern u8 D_004372C8[4];
-extern sdfGrOt_t D_00380448;
+SYMBOL_AT(sdfGrOt_t, D_00380448, sdfGrOtTable, 0x900);
 
 /* Ramp the message-window shade toward its target and, while visible, queue
  * the translucent shade sprite for the current draw buffer. */

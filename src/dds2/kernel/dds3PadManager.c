@@ -293,6 +293,7 @@ void dds3UpdateVibrationSlots(void) {
         }
     }
 }
+
 INCLUDE_SDATA(const s32, "kernel/dds3PadManager", D_00435C38);
 
 INCLUDE_SDATA(const s32, "kernel/dds3PadManager", D_00435C3F);

@@ -2291,6 +2291,7 @@ void func_001CB410(BtlTask *actor) {
 
 }
 #else
+
 INCLUDE_RODATA(const s32, "game/code_001C8890", D_003A3648);
 
 INCLUDE_RODATA(const s32, "game/code_001C8890", D_003A3658);
@@ -2331,6 +2332,7 @@ extern BtlRuntimeTask *btlCreateQueuedActorEntrySelectionTask(BtlUnit *, BtlOper
 
 
 /* Schedule the LINKAGE action task chain (inferred role). */
+
 INCLUDE_RODATA(const s32, "game/code_001C8890", D_003A36A8);
 
 void btlScheduleLinkageActionTasks(BtlTask *action) {

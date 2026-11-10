@@ -1901,6 +1901,7 @@ extern s32 fldGetActorStat0(s32 attribute);
 /* Follow the INF flag/message graph to its terminal event or actor action.
  * Linked selectors recurse in tail position; the native routine loops without
  * growing the stack. Targets and eventHit are signed serialized bytes. */
+
 INCLUDE_RODATA(const s32, "game/code_0013B818", D_004133A0);
 
 s32 fldResolveEventSelectorTarget(s32 selector) {
@@ -2160,6 +2161,7 @@ void fldInfToWAP(void) {
 
 /* Resolve a named actor in the current area to its template; the selected
  * template kind is also recorded for the caller in fldPickedActorTemplateKind. */
+
 INCLUDE_RODATA(const s32, "game/code_0013B818", D_00413448);
 
 const char *fldPickActorTemplateByName(const char *name) {
@@ -3144,6 +3146,7 @@ s32 fldGetActorStat0(s32 attribute) {
 
 /* Read a selected actor attribute; selector zero maps its motion code.
  * Missing named objects fall through to subsequent attribute cases. */
+
 INCLUDE_RODATA(const s32, "game/code_0013B818", D_004134C0);
 
 INCLUDE_RODATA(const s32, "game/code_0013B818", D_004134D0);

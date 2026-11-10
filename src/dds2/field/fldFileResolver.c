@@ -625,7 +625,7 @@ extern sdfGrOt_t sdfDebugGrOt;
 
 extern void InversMatrix(void);
 
-extern sdfGrOt_t D_00380708;
+SYMBOL_AT(sdfGrOt_t, D_00380708, sdfGrOtTable, 0xBC0);
 
 extern u8 D_00436070[];
 
@@ -2100,6 +2100,7 @@ extern u8 fldTestRoomObjectModeFlag(s32 mapId, u32 slotIndex, s32 bit);
 
 /* Same debug grid as fldHojiDebugView for the room mode (VIS) and room object
  * mode (ANM) flags. */
+
 INCLUDE_RODATA(const s32, "field/fldFileResolver", D_00413198);
 
 void fldHojiDebugView2(void) {
@@ -5180,6 +5181,7 @@ extern s32 fldIsCurrentGridGuideMarkerActive(void);
 extern void fldGetFieldFloatPair(f32 *, f32 *);
 
 /* Field movement, player pose and camera input controller. */
+
 INCLUDE_RODATA(const s32, "field/fldFileResolver", D_00413280);
 
 s32 fldUpdateFieldPlayerMovement(void) {

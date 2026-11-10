@@ -556,6 +556,7 @@ void sdfCdInit(void)
     sceCdInit(0);
     sceCdMmode(sdfCdTrayMode);
 }
+
 INCLUDE_SDATA(const s32, "sdf/sdfCd", sdfDiscRequestPending);
 
 INCLUDE_SDATA(const s32, "sdf/sdfCd", sdfCdDirectPrefix);

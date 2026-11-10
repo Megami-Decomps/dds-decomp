@@ -2738,7 +2738,7 @@ void DrawMsgMng_Shutdown(dds3ProcessID_t *task) {
     itfMesMngManager.windowTexture = NULL;
 }
 
-extern sdfGrOt_t D_00380708;
+SYMBOL_AT(sdfGrOt_t, D_00380708, sdfGrOtTable, 0xBC0);
 
 extern s32 D_003B4A18[];
 
@@ -2884,7 +2884,7 @@ extern const s32 D_00414D60[12][4];
 extern s16 D_00438F34;
 extern s32 D_00438F30;
 extern s16 D_00438F38;
-extern sdfGrOt_t D_003805A8;
+SYMBOL_AT(sdfGrOt_t, D_003805A8, sdfGrOtTable, 0xA60);
 extern const s32 D_00414E20[7][4];
 extern void sdfSubmitGsTestOneRegisterPacket(u64 data, u32 kind);
 extern void sdfSubmitGsAlphaOneRegisterPacket(u32 data, u32 kind);

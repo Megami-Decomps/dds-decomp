@@ -2090,6 +2090,7 @@ void fldAddItemBoxObject(f32 x, f32 y, f32 z, f32 extent, f32 height,
 
 void evtMessageExtraActionNoOp(void) {
 }
+
 INCLUDE_SDATA(const s32, "game/code_00136EF8", fldCameraColorLayerScroll);
 
 INCLUDE_SDATA(const s32, "game/code_00136EF8", fldItemBoxObjBuf);

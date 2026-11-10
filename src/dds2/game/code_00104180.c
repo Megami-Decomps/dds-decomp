@@ -462,6 +462,7 @@ s32 dds3EnsureDefaultResource(void) {
     dds3TextureAttachTask(&sdfDebugGrOt);
     return 0;
 }
+
 INCLUDE_SDATA(const s32, "game/code_00104180", D_00435C50);
 
 INCLUDE_SDATA(const s32, "game/code_00104180", D_00435C52);

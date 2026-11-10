@@ -1986,6 +1986,7 @@ void btlFlagTasksForUpdate(void) {
 
 /* Return whether the predicate is satisfied by value or registered tasks.
  * Kinds 5/8 accept running (phase 2) or absent, not an existing finishing task. */
+
 INCLUDE_RODATA(const s32, "game/code_001D0BA0", D_003A3A40);
 
 INCLUDE_RODATA(const s32, "game/code_001D0BA0", D_003A3A50);
@@ -3854,6 +3855,7 @@ BtlRuntimeTask *btlScheduleRefreshTask(BtlUnit *owner) {
 }
 
 /* Task-start callbacks do not return a status to the scheduler. */
+
 INCLUDE_RODATA(const s32, "game/code_001D0BA0", D_003A3BC8);
 
 INCLUDE_RODATA(const s32, "game/code_001D0BA0", D_003A3BE8);
@@ -6212,6 +6214,12 @@ INCLUDE_RODATA(const s32, "game/code_001D0BA0", D_003A3D70);
 INCLUDE_RODATA(const s32, "game/code_001D0BA0", D_003A3D80);
 
 INCLUDE_RODATA(const s32, "game/code_001D0BA0", D_003A3D90);
+
+INCLUDE_RODATA(const s32, "game/code_001D0BA0", D_003A3DA0);
+
+INCLUDE_RODATA(const s32, "game/code_001D0BA0", D_003A3DB0);
+
+INCLUDE_RODATA(const s32, "game/code_001D0BA0", D_003A3DC0);
 
 INCLUDE_RODATA(const s32, "game/code_001D0BA0", D_003A3DD0);
 

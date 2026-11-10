@@ -780,6 +780,7 @@ const u16 mnuMantraBridgeNodesForDirections2And3[3][5] __attribute__((section(".
 };
 
 /* Write each panel slot's 0xB0 saved flag words back to its list node's script entries and log the slot number. */
+
 INCLUDE_RODATA(const s32, "game/code_0028FD30", D_004276C0);
 
 void mnuStoreMantraPanelFlagsToScript(MnuStatusResource *object) {
@@ -2236,6 +2237,7 @@ void mnuStorePanelEntry(s32 soundHandle, s32 framesRemaining) {
 void mnuSetCurrentTerminalContext(MenuTerminalContext *value) {
     mnuCurrentTerminalContext = value;
 }
+
 INCLUDE_SDATA(const s32, "game/code_0028FD30", D_00437950);
 
 INCLUDE_SDATA(const s32, "game/code_0028FD30", D_00437958);

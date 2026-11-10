@@ -1551,6 +1551,7 @@ void sdfEnableFlagListViewTargetRelativeMode(void) {
 void sdfDisableFlagListViewTargetRelativeMode(void) {
     D_003BD2C8 = 0;
 }
+
 INCLUDE_SDATA(const s32, "game/code_002CC750", sdfDebugLogAppendMode);
 
 INCLUDE_SDATA(const s32, "game/code_002CC750", sdfDebugLogPairFormat);

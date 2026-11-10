@@ -75,6 +75,7 @@ void mnuReleaseStaffImageHandles(struct EffectSlotSet **resources) {
 }
 
 /* Return this category's handle array and count; unknown categories have none. */
+
 INCLUDE_RODATA(const s32, "game/code_00270FB0", D_003B2020);
 
 struct EffectSlotSet **mnuGetStaffCategoryEntries(MnuStaffVisualCategory category, s32 *outEntryCount,

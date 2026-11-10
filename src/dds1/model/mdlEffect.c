@@ -330,6 +330,7 @@ extern char D_003BBB80[], D_003BBB88[];
 
 /* Append the kind-dependent record summary at the requested text position and style. */
 /* Append a kind-specific record description at the supplied packet coordinates/style. */
+
 INCLUDE_RODATA(const s32, "model/mdlEffect", D_003ABA80);
 
 INCLUDE_RODATA(const s32, "model/mdlEffect", D_003ABA90);
@@ -1169,6 +1170,7 @@ extern void mdlFreeViewResources(void);
 /* Step the viewer's selected row, then apply that row's pending resource or
  * entry selection when the confirm buttons are pressed. */
 /* Handle resource, node and motion selection, including load/confirm input. */
+
 INCLUDE_RODATA(const s32, "model/mdlEffect", D_003ABBB0);
 
 INCLUDE_RODATA(const s32, "model/mdlEffect", D_003ABBC0);
@@ -2096,6 +2098,7 @@ extern char D_003BBCA0[];
 extern char D_003BBCA8[];
 
 /* Draw viewer toggles, time-graph status and the background-color/config controls. */
+
 INCLUDE_RODATA(const s32, "model/mdlEffect", D_003ABE18);
 
 INCLUDE_RODATA(const s32, "model/mdlEffect", D_003ABE30);
@@ -2412,7 +2415,7 @@ s32 mdlRequestViewerExitOnce(void) {
     return 0;
 }
 
-extern sdfGrOt_t D_00325048; /* sdfGrOtTable[40], a native interior symbol. */
+SYMBOL_AT(sdfGrOt_t, D_00325048, sdfGrOtTable, 0x500);
 
 extern f32 D_00367B80[][4];
 
@@ -2581,7 +2584,7 @@ void mdlDrawMapPositionRecords(dds3ModelHandle_t *resource) {
     }
 }
 
-extern sdfGrOt_t D_003255A8;
+SYMBOL_AT(sdfGrOt_t, D_003255A8, sdfGrOtTable, 0xA60);
 
 extern sdfGrOt_t *sdfModelOtTable[13][4];
 
@@ -2671,6 +2674,7 @@ extern char D_003BBCD8[]; /* "fog=" */
 extern sdf3DFogParam_t dds3FogState;
 
 /* Read the viewer's config text file: bg-color=, eye-position=, target-position=, fovy=, fog= lines. */
+
 INCLUDE_RODATA(const s32, "model/mdlEffect", D_003ABEB0);
 
 void mdlLoadViewerPresentationConfig(void) {
@@ -2849,7 +2853,7 @@ extern char D_003BBCF8[]; /* ">" in .sdata */
 
 extern char D_003BBD00[]; /* "%6.2f" in .sdata */
 
-extern sdfGrOt_t D_00325708;
+SYMBOL_AT(sdfGrOt_t, D_00325708, sdfGrOtTable, 0xBC0);
 
 extern void dds3DebugFloatEditEx(f32 *value, u8 *padState, f32 min, f32 max, f32 step, f32 bigStep);
 

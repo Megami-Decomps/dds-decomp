@@ -15,7 +15,7 @@
 extern u8 evtPictureQuadBounds[];
 extern u8 evtPictureQuadTexcoords[];
 extern u8 evtPictureQuadColor[];
-extern sdfGrOt_t D_003255A8;
+SYMBOL_AT(sdfGrOt_t, D_003255A8, sdfGrOtTable, 0xA60);
 #include "sdf_packet_alloc.h"
 extern void itfMiscDrawAlphaPrim(sdfDrawTag_t *packet, s32 index, s32 flag);
 

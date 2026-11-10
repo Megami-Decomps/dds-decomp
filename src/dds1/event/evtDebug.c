@@ -36,7 +36,7 @@ void *evtGetDebugProcess(void) {
     return (void *)EventDebugProcess1;
 }
 
-extern sdfGrOt_t D_00325708;
+SYMBOL_AT(sdfGrOt_t, D_00325708, sdfGrOtTable, 0xBC0);
 
 extern u8 dds3PadButtonState[2][2][16];
 

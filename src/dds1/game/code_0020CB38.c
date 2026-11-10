@@ -839,6 +839,7 @@ extern char D_003A63C0[];
 
 /* Select the linked-action boss camera from category, sides and target count.
  * The native result is not a general "camera changed" flag. */
+
 INCLUDE_SDATA(const s32, "game/code_0020CB38", D_003BB8A8);
 
 INCLUDE_SDATA(const s32, "game/code_0020CB38", D_003BB8B0);

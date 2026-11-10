@@ -2176,6 +2176,7 @@ extern u8 D_003A43F0[];
 
 /* vu0 routine: frame the action's target groups from the actor's side, widening
  * for several targets, then keep the actor clear of the near camera plane. */
+
 INCLUDE_RODATA(const s32, "game/code_001DEFE0", D_003A4000);
 
 INCLUDE_RODATA(const s32, "game/code_001DEFE0", D_003A4180);
@@ -3245,6 +3246,7 @@ typedef struct BattlePairCameraFramePreset {
 /* Frame the first listed target from one of two randomized pair presets: both
  * cameras start at its muzzle, lowered by the preset height scale, at a distance
  * that fits the larger of its reach (wider view) and half its height. */
+
 INCLUDE_RODATA(const s32, "game/code_001DEFE0", D_003A4408);
 
 void btlBuildRandomDefeatCandidateCameraPair(BtlLinkedCommand *action, BtlCamState *from, BtlCamState *to) {
@@ -4091,6 +4093,7 @@ extern f32 btlCameraTerminalDistance;
 
 /* Select a camera policy, construct its focus and eye, and initialize the
  * optional endpoint used by the camera cursor. */
+
 INCLUDE_RODATA(const s32, "game/code_001DEFE0", D_003A4668);
 
 void btlBuildPresetCameraPose(BtlLinkedCommand *action, BtlCamState *out, s16 bank, s16 index) {
@@ -11673,6 +11676,7 @@ typedef char BattleFormationActionArgs_size[(sizeof(BattleFormationActionArgs) =
 
 
 /* Select the linkage formation by command row; task completion is always one. */
+
 INCLUDE_RODATA(const s32, "game/code_001DEFE0", D_003A5328);
 
 INCLUDE_RODATA(const s32, "game/code_001DEFE0", D_003A5340);
