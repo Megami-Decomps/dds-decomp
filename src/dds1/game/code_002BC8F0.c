@@ -9,8 +9,7 @@
 #include "itf_draw_grid.h"
 #include "eff_ref_obj.h"
 #include "sdf_heap_api.h"
-#include "ee_mmi.h"
-#include "pcp_vu0.h"
+#include "ps2asm.h"
 #include "eff.h"
 #include "eff_resource_slots.h"
 #include "eff_resource_records.h"
@@ -1124,6 +1123,10 @@ void itfRotateScreenOffset(s32 *outX, s32 *outY, s32 x, s32 y, s32 centerX, s32 
 }
 
 
+/* NON_MATCHING: register allocation in this function depends on how many
+ * types and functions the unit declares before it, so it matches only with
+ * unused declarations added; waits for the unit's real boundaries. */
+#ifdef NON_MATCHING
 void sdfDrawTexturedQuad(s32 x, s32 y, u32 depth, s32 width, s32 height,
                    const EffSpriteUV *uvRect, const EffSpriteColor *cornerColors,
                    u32 flipFlags, f32 angle, u32 blendKind, s32 mode,
@@ -1248,6 +1251,9 @@ void sdfDrawTexturedQuad(s32 x, s32 y, u32 depth, s32 width, s32 height,
     effSubmitSurfacePacket(&sdfGrOtTable[surfaceId], packetList);
     sdfSubmitGsAlphaOneRegisterPacket(0x44, surfaceId);
 }
+#else
+INCLUDE_ASM(void, "game/code_002BC8F0", sdfDrawTexturedQuad);
+#endif
 
 
 extern void uiDrawGradientColorRect(u32, u32, u32, u32, u32, const u32 *, u32);

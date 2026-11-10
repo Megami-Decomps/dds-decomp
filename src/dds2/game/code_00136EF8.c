@@ -16,7 +16,7 @@
 #include "sdf_vu_matrix.h"
 #include "dds3_fade.h"
 #include "fpu.h"
-#include "pcp_vu0.h"
+#include "ps2asm.h"
 #include "dds3obj.h"
 #include "evt_world_source_transform.h"
 #include "fld.h"

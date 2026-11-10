@@ -1,10 +1,9 @@
 #include "sdk_ps2.h"
 #include "common.h"
-#include "sdf_vu0.h"
+#include "ps2asm.h"
 #include "sdf_chip.h"
 #include "dds3obj.h"
 #include "dds3_path.h"
-#include "pcp_vu0.h"
 #include "eff_quaternion_nlerp.h"
 
 void dds3FreeSplineHandle(struct EffPrimitiveCurve *primitive);
@@ -25,15 +24,15 @@ void dds3PathBasicControlGetPos(dds3PathBasicControl_t *path) {
         keyframes = path->positionKeys;
         dds3PathEvalSpline(&segmentIndex, &interpolationWeight, keyframes, path->counter.time);
         entries = keyframes->data.position;
-        VU0_SET_VF10_COMPONENT(x, entries[segmentIndex + 1][0]);
-        VU0_SET_VF10_COMPONENT(y, entries[segmentIndex + 1][1]);
-        VU0_SET_VF10_COMPONENT(z, entries[segmentIndex + 1][2]);
-        VU0_SCALAR_OP(interpolationWeight, "vmulx.xyzw vf10, vf10, vf2x");
+        SDF_VU0_SETVECTOR_X(entries[segmentIndex + 1][0]);
+        SDF_VU0_SETVECTOR_Y(entries[segmentIndex + 1][1]);
+        SDF_VU0_SETVECTOR_Z(entries[segmentIndex + 1][2]);
+        SDF_VU0_SCALEVECTOR_V0(interpolationWeight);
         SDF_VU0_COPYVECTOR_A_TO_B();
-        VU0_SET_VF10_COMPONENT(x, entries[segmentIndex][0]);
-        VU0_SET_VF10_COMPONENT(y, entries[segmentIndex][1]);
-        VU0_SET_VF10_COMPONENT(z, entries[segmentIndex][2]);
-        VU0_SCALAR_OP(1.0f - interpolationWeight, "vmulx.xyzw vf10, vf10, vf2x");
+        SDF_VU0_SETVECTOR_X(entries[segmentIndex][0]);
+        SDF_VU0_SETVECTOR_Y(entries[segmentIndex][1]);
+        SDF_VU0_SETVECTOR_Z(entries[segmentIndex][2]);
+        SDF_VU0_SCALEVECTOR_V0(1.0f - interpolationWeight);
         SDF_VU0_ADDVECTOR();
         SDF_VU0_VECTOR_W_SET_ZERO();
     } else {
@@ -73,44 +72,44 @@ void dds3PathBasicControlGetTransform(const dds3PathBasicControl_t *path, WorldT
         keyframes = path->transformKeys;
         dds3PathEvalSpline(&segmentIndex, &interpolationWeight, keyframes, path->counter.time);
         entries = keyframes->data.worldTransform;
-        VU0_SET_VF10_COMPONENT(x, entries[segmentIndex + 1].rotation[0]);
-        VU0_SET_VF10_COMPONENT(y, entries[segmentIndex + 1].rotation[1]);
-        VU0_SET_VF10_COMPONENT(z, entries[segmentIndex + 1].rotation[2]);
-        VU0_SET_VF10_W(entries[segmentIndex + 1].rotation[3]);
-        VU0_SCALAR_OP(interpolationWeight, "vmulx.xyzw vf10, vf10, vf2x");
+        SDF_VU0_SETVECTOR_X(entries[segmentIndex + 1].rotation[0]);
+        SDF_VU0_SETVECTOR_Y(entries[segmentIndex + 1].rotation[1]);
+        SDF_VU0_SETVECTOR_Z(entries[segmentIndex + 1].rotation[2]);
+        SDF_VU0_SETVECTOR_W(entries[segmentIndex + 1].rotation[3]);
+        SDF_VU0_SCALEVECTOR_V0(interpolationWeight);
         SDF_VU0_COPYVECTOR_A_TO_B();
-        VU0_SET_VF10_COMPONENT(x, entries[segmentIndex].rotation[0]);
-        VU0_SET_VF10_COMPONENT(y, entries[segmentIndex].rotation[1]);
-        VU0_SET_VF10_COMPONENT(z, entries[segmentIndex].rotation[2]);
-        VU0_SET_VF10_W(entries[segmentIndex].rotation[3]);
-        VU0_SCALAR_OP(1.0f - interpolationWeight, "vmulx.xyzw vf10, vf10, vf2x");
+        SDF_VU0_SETVECTOR_X(entries[segmentIndex].rotation[0]);
+        SDF_VU0_SETVECTOR_Y(entries[segmentIndex].rotation[1]);
+        SDF_VU0_SETVECTOR_Z(entries[segmentIndex].rotation[2]);
+        SDF_VU0_SETVECTOR_W(entries[segmentIndex].rotation[3]);
+        SDF_VU0_SCALEVECTOR_V0(1.0f - interpolationWeight);
         SDF_VU0_ADDVECTOR();
         SDF_VU0_GETVECTOR_X(transformParams->rotation[0]);
         SDF_VU0_GETVECTOR_Y(transformParams->rotation[1]);
         SDF_VU0_GETVECTOR_Z(transformParams->rotation[2]);
         SDF_VU0_GETVECTOR_W(transformParams->rotation[3]);
-        VU0_SET_VF10_COMPONENT(x, entries[segmentIndex + 1].position[0]);
-        VU0_SET_VF10_COMPONENT(y, entries[segmentIndex + 1].position[1]);
-        VU0_SET_VF10_COMPONENT(z, entries[segmentIndex + 1].position[2]);
-        VU0_SCALAR_OP(interpolationWeight, "vmulx.xyzw vf10, vf10, vf2x");
+        SDF_VU0_SETVECTOR_X(entries[segmentIndex + 1].position[0]);
+        SDF_VU0_SETVECTOR_Y(entries[segmentIndex + 1].position[1]);
+        SDF_VU0_SETVECTOR_Z(entries[segmentIndex + 1].position[2]);
+        SDF_VU0_SCALEVECTOR_V0(interpolationWeight);
         SDF_VU0_COPYVECTOR_A_TO_B();
-        VU0_SET_VF10_COMPONENT(x, entries[segmentIndex].position[0]);
-        VU0_SET_VF10_COMPONENT(y, entries[segmentIndex].position[1]);
-        VU0_SET_VF10_COMPONENT(z, entries[segmentIndex].position[2]);
-        VU0_SCALAR_OP(1.0f - interpolationWeight, "vmulx.xyzw vf10, vf10, vf2x");
+        SDF_VU0_SETVECTOR_X(entries[segmentIndex].position[0]);
+        SDF_VU0_SETVECTOR_Y(entries[segmentIndex].position[1]);
+        SDF_VU0_SETVECTOR_Z(entries[segmentIndex].position[2]);
+        SDF_VU0_SCALEVECTOR_V0(1.0f - interpolationWeight);
         SDF_VU0_ADDVECTOR();
         SDF_VU0_GETVECTOR_X(transformParams->position[0]);
         SDF_VU0_GETVECTOR_Y(transformParams->position[1]);
         SDF_VU0_GETVECTOR_Z(transformParams->position[2]);
-        VU0_SET_VF10_COMPONENT(x, entries[segmentIndex + 1].scale[0]);
-        VU0_SET_VF10_COMPONENT(y, entries[segmentIndex + 1].scale[1]);
-        VU0_SET_VF10_COMPONENT(z, entries[segmentIndex + 1].scale[2]);
-        VU0_SCALAR_OP(interpolationWeight, "vmulx.xyzw vf10, vf10, vf2x");
+        SDF_VU0_SETVECTOR_X(entries[segmentIndex + 1].scale[0]);
+        SDF_VU0_SETVECTOR_Y(entries[segmentIndex + 1].scale[1]);
+        SDF_VU0_SETVECTOR_Z(entries[segmentIndex + 1].scale[2]);
+        SDF_VU0_SCALEVECTOR_V0(interpolationWeight);
         SDF_VU0_COPYVECTOR_A_TO_B();
-        VU0_SET_VF10_COMPONENT(x, entries[segmentIndex].scale[0]);
-        VU0_SET_VF10_COMPONENT(y, entries[segmentIndex].scale[1]);
-        VU0_SET_VF10_COMPONENT(z, entries[segmentIndex].scale[2]);
-        VU0_SCALAR_OP(1.0f - interpolationWeight, "vmulx.xyzw vf10, vf10, vf2x");
+        SDF_VU0_SETVECTOR_X(entries[segmentIndex].scale[0]);
+        SDF_VU0_SETVECTOR_Y(entries[segmentIndex].scale[1]);
+        SDF_VU0_SETVECTOR_Z(entries[segmentIndex].scale[2]);
+        SDF_VU0_SCALEVECTOR_V0(1.0f - interpolationWeight);
         SDF_VU0_ADDVECTOR();
         SDF_VU0_GETVECTOR_X(transformParams->scale[0]);
         SDF_VU0_GETVECTOR_Y(transformParams->scale[1]);

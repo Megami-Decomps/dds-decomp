@@ -1,7 +1,7 @@
 #include "sdk_ps2.h"
 #include "snd_packed_track_load_status.h"
 #include "common.h"
-#include "sdf_vu0.h"
+#include "ps2asm.h"
 #include "mnu_sprite_placement.h"
 #include "sdf_chip.h"
 #include "mnu_title_stream.h"
@@ -24,7 +24,6 @@
 #include "dds3_task_lifecycle.h"
 #include "file_pac.h"
 #include "file_request_api.h"
-#include "pcp_vu0.h"
 #include "eff_random.h"
 #include "sdf_trig.h"
 #include "sdf_gs_register_submit_api.h"
@@ -1423,13 +1422,13 @@ void mnuFinishOrDeactivateShootingEntry(MenuWorkEntry *entry, MnuShootingWork *w
                          entry->currentAngleRadians + 1.5707963f) -
                      sdfSin(entry->currentAngleRadians + 1.5707963f) * 0.0f;
             SDF_VU0_LOADVECTOR(&step);
-            VU0_SCALE_VF(vf10, (f32)entry->movementEffectScale / 3.5f);
+            SDF_VU0_SCALEVECTOR_BITS((f32)entry->movementEffectScale / 3.5f);
             SDF_VU0_STOREVECTOR(&step);
         } else {
             step.x = 0.0f;
             step.y = 1.0f;
             SDF_VU0_LOADVECTOR(&step);
-            VU0_SCALE_VF(vf10, 4.0f);
+            SDF_VU0_SCALEVECTOR_BITS(4.0f);
             SDF_VU0_STOREVECTOR(&step);
         }
         if ((entry->tag & MNU_WORK_TAG_CLASS_MASK) == MNU_WORK_TAG_REGISTRY_TABLE) {

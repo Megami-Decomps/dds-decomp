@@ -1,6 +1,6 @@
 #include "sdk_ps2.h"
 #include "common.h"
-#include "sdf_vu0.h"
+#include "ps2asm.h"
 #include "sdf_column_packet_api.h"
 #include "dds3_draw_buffer.h"
 #include "dds3_frame_draw_buffer.h"
@@ -20,7 +20,6 @@
 #include "sdf_thread_sleep.h"
 #include "sdf_projection.h"
 #include "sdf_draw.h"
-#include "pcp_vu0.h"
 #include "sdf_packet_alloc.h"
 #include "sdf_message.h"
 
@@ -206,7 +205,7 @@ s32 dds3DrawFirstProcess(dds3ProcessID_t *task) {
             u64 *sceneFrustum;
             sdf3DMakeScreenParam(&D_003247B0.camera);
             LookAtMatrix(dds3RenderTargetVector, dds3RenderEyeVector, effPCPBossTexRect);
-            VU0_STORE_MATRIX_UNCLOBBERED(&dds3RenderViewportMatrix);
+            SDF_VU0_STOREMATRIX_NOMEM(&dds3RenderViewportMatrix);
             sdf3DMakeViewportPacket((struct ConsMatrixPacket *)(dds3HeldTextureMatrixPackets + bufferIndex * DDS3_FRAME_BUFFER_BYTES),
                 &D_003247B0, &dds3RenderViewportMatrix);
             sceneNode = &sdfGrOtTable[1];
@@ -227,7 +226,7 @@ s32 dds3DrawFirstProcess(dds3ProcessID_t *task) {
             dds3LightParam2, &dds3AmbientColor2);
         sdf3DMakeScreenParam(&D_00324980.camera);
         LookAtMatrix(D_00324A20, fldAutoMapEye, fldAutoMapUp);
-        VU0_STORE_MATRIX_UNCLOBBERED(&D_00329790);
+        SDF_VU0_STOREMATRIX_NOMEM(&D_00329790);
         sdf3DMakeViewportPacket((struct ConsMatrixPacket *)(dds3OverlayMatrixPackets + bufferIndex * DDS3_FRAME_BUFFER_BYTES), &D_00324980, &D_00329790);
         overlayNode = &sdfGrOtTable[85];
         overlayNode->regFunc(overlayNode, (sdfDrawTag_t *)(dds3OverlayMatrixPackets - 0x20 + bufferIndex * DDS3_FRAME_BUFFER_BYTES));
@@ -245,7 +244,7 @@ s32 dds3DrawFirstProcess(dds3ProcessID_t *task) {
     SDF_VU0_LOADVECTOR_B(aViewEye);
     SDF_VU0_SUBVECTOR();
     SDF_VU0_NORMALIZE();
-    VU0_SCALAR_OP(600.0f, "vmulx.xyzw vf10, vf10, vf2x");
+    SDF_VU0_SCALEVECTOR_V0(600.0f);
     SDF_VU0_ADDVECTOR();
     SDF_VU0_LOADVECTOR_B(sdfViewShakeVector);
     SDF_VU0_ADDVECTOR();
@@ -254,7 +253,7 @@ s32 dds3DrawFirstProcess(dds3ProcessID_t *task) {
     SDF_VU0_ADDVECTOR();
     SDF_VU0_STOREVECTOR_NOMEM(&target);
     LookAtMatrix((const f32 *)&eye, (const f32 *)&target, aViewDown);
-    VU0_STORE_MATRIX_UNCLOBBERED(&sdfViewMatrix);
+    SDF_VU0_STOREMATRIX_NOMEM(&sdfViewMatrix);
     {
         sdfGrOt_t *viewNode;
         sdfDrawTag_t *viewList;

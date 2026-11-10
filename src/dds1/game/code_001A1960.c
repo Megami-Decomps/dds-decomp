@@ -31,7 +31,7 @@
 #include "sdf_heap_api.h"
 #include "btl_scene_fade.h"
 #include "btl_resource.h"
-#include "pcp_vu0.h"
+#include "ps2asm.h"
 #include "btl_ui.h"
 #include "sdf.h"
 #include "btl_indexed_ui_resource_api.h"

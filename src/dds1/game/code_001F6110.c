@@ -11,7 +11,7 @@
 #include "scr_integer_parameter_api.h"
 #include "btl_horizontal_aim_api.h"
 #include "btl_camera_mode_index.h"
-#include "sdf_vu0.h"
+#include "ps2asm.h"
 #include "btl_aim_horizontal_direction_clamped_api.h"
 #include "btl_actor_mode_acceptance.h"
 #include "btl_boss_debug_api.h"
@@ -36,8 +36,6 @@
 #include "sdf_heap_api.h"
 #include "bill_object_api.h"
 #include "btl_state.h"
-#include "ee_mmi.h"
-#include "pcp_vu0.h"
 #include "sdf_vu_transform_api.h"
 #include "kernel.h"
 #include "scr.h"
@@ -228,7 +226,7 @@ BtlProjectedScreenPointResult btlProjectForwardPositionToScreen(BtlProjectedScre
     }
     SDF_VU0_NORMALIZE();
     SDF_VU0_COPYVECTOR_A_TO_B();
-    VU0_LOAD_MATRIX(sdfViewMatrix);
+    SDF_VU0_LOADMATRIX(sdfViewMatrix);
     SDF_VU0_COPYMATRIX_A_TO_B();
     ReverseMatrix();
     SDF_VU0_GET_ROW2();
@@ -238,10 +236,7 @@ BtlProjectedScreenPointResult btlProjectForwardPositionToScreen(BtlProjectedScre
         return BTL_PROJECTED_SCREEN_POINT_REJECTED;
     }
     SDF_VU0_COPYVECTOR_C_TO_A();
-    VU0_MOVE_VF(vf28, vf24);
-    VU0_MOVE_VF(vf29, vf25);
-    VU0_MOVE_VF(vf30, vf26);
-    VU0_MOVE_VF(vf31, vf27);
+    SDF_VU0_COPYMATRIX_B_TO_A();
     projection = sdfProjectionMatrix;
     MultMatrixRev((const struct Matrix4 *)projection);
     SDF_VU0_APPLYMATRIX_XYZ1();
@@ -272,7 +267,7 @@ s32 nbClipEffectNum(s32 screenPosition[4]) {
 
     SDF_VU0_NORMALIZE();
     SDF_VU0_COPYVECTOR_A_TO_B();
-    VU0_LOAD_MATRIX(sdfViewMatrix);
+    SDF_VU0_LOADMATRIX(sdfViewMatrix);
     SDF_VU0_COPYMATRIX_A_TO_B();
     ReverseMatrix();
     SDF_VU0_GET_ROW2();
@@ -282,10 +277,7 @@ s32 nbClipEffectNum(s32 screenPosition[4]) {
         return 0;
 
     SDF_VU0_COPYVECTOR_C_TO_A();
-    VU0_MOVE_VF(vf28, vf24);
-    VU0_MOVE_VF(vf29, vf25);
-    VU0_MOVE_VF(vf30, vf26);
-    VU0_MOVE_VF(vf31, vf27);
+    SDF_VU0_COPYMATRIX_B_TO_A();
     projectionData = sdfProjectionMatrix;
     MultMatrixRev((const struct Matrix4 *)projectionData);
     SDF_VU0_APPLYMATRIX_XYZ1();
@@ -310,7 +302,7 @@ void effBTLModelGetSphereCenter(BtlUnit *unit) {
     ToMatrix();
     SDF_VU0_LOADVECTOR(unit->bodyOffset);
     VU0_SET_VF2X(unit->scale);
-    VU0_MUL_VF2X(vf10, vf10);
+    VU0_MULX_XYZW_VF10_VF10_VF2X();
     SDF_VU0_APPLYMATRIX();
     SDF_VU0_LOADVECTOR_B(pos);
     SDF_VU0_ADDVECTOR();
@@ -326,7 +318,7 @@ void btlUnitGetBodyPosVU(const BtlUnit *unit) {
     ToMatrix();
     SDF_VU0_LOADVECTOR(unit->muzzleOffset);
     VU0_SET_VF2X(unit->scale);
-    VU0_MUL_VF2X(vf10, vf10);
+    VU0_MULX_XYZW_VF10_VF10_VF2X();
     SDF_VU0_APPLYMATRIX();
     SDF_VU0_LOADVECTOR_B(pos);
     SDF_VU0_ADDVECTOR();
@@ -345,7 +337,7 @@ void btlUnitGetEffectPosVU(BtlUnit *unit) {
     ToMatrix();
     SDF_VU0_LOADVECTOR(unit->bodyOffset);
     VU0_SET_VF2X(unit->scale);
-    VU0_MUL_VF2X(vf10, vf10);
+    VU0_MULX_XYZW_VF10_VF10_VF2X();
     SDF_VU0_APPLYMATRIX();
     SDF_VU0_LOADVECTOR_B(pos);
     SDF_VU0_ADDVECTOR();
@@ -874,8 +866,8 @@ BtlUnit *btlFindNearestUnit(u32 mask, BtlUnit *target) {
                 if (target != unit) {
                     if (unit->status.flags & mask) {
                         effBTLModelGetSphereCenter(unit);
-                        VU0_SCALAR_OP(targetPos.f[1], "vaddx.y vf10, vf0, vf2x");
-                        VU0_LOAD_VF($vf11, &targetPos);
+                        SDF_VU0_SETVECTOR_Y_V0(targetPos.f[1]);
+                        SDF_VU0_LOADVECTOR_B(&targetPos);
                         SDF_VU0_SUBVECTOR();
                         SDF_VU0_GETLENGTH(distance);
                         if (needsFirstSample) {
@@ -907,7 +899,7 @@ BtlUnit *btlFindFarthestUnit(u32 mask, f32 *point) {
             if (!(unit->status.flags & 0xC0)) {
                 if (unit->status.flags & mask) {
                     effBTLModelGetSphereCenter(unit);
-                    VU0_SCALAR_OP(point[1], "vaddx.y vf10, vf0, vf2x");
+                    SDF_VU0_SETVECTOR_Y_V0(point[1]);
                     SDF_VU0_LOADVECTOR_B(point);
                     SDF_VU0_SUBVECTOR();
                     SDF_VU0_GETLENGTH(distance);
@@ -1110,7 +1102,7 @@ BtlHorizontalAimResult btlAimHorizontalDirectionVU(const f32 *origin, const f32 
         FromEuler(0.0f, atan2f(delta[0], delta[2]), 0.0f);
         return BTL_HORIZONTAL_AIM_DIRECTION_BUILT;
     }
-    VU0_LOAD_VF($vf10, &btlHorizontalAimIdentityQuaternion);
+    SDF_VU0_LOADVECTOR(&btlHorizontalAimIdentityQuaternion);
     return BTL_HORIZONTAL_AIM_NO_XZ_DELTA;
 }
 
@@ -1165,12 +1157,12 @@ f32 btlTriangleNormalDotEdge(const f32 *vertexA, const f32 *vertexB, const f32 *
     f32 direction[4];
     f32 projection;
     btlTriangleNormalVU(vertexA, vertexB, vertexC);
-    VU0_STORE_VF($vf10, direction);
-    VU0_LOAD_VF($vf10, vertexA);
-    VU0_LOAD_VF($vf11, vertexC);
+    SDF_VU0_STOREVECTOR(direction);
+    SDF_VU0_LOADVECTOR(vertexA);
+    SDF_VU0_LOADVECTOR_B(vertexC);
     SDF_VU0_SUBVECTOR();
     SDF_VU0_COPYVECTOR_A_TO_B();
-    VU0_LOAD_VF($vf10, direction);
+    SDF_VU0_LOADVECTOR(direction);
         SDF_VU0_INNERPRODUCT(projection);
     return projection;
 }
@@ -1183,7 +1175,7 @@ void btlPointOffPlaneVU(f32 *vertexA, f32 *vertexB, f32 *vertexC, f32 *point) {
     SDF_VU0_LOADVECTOR_B(vertexC);
     SDF_VU0_SUBVECTOR();
     SDF_VU0_NORMALIZE();
-    VU0_SCALAR_OP(projection, "vmulx.xyzw vf10, vf10, vf2x");
+    SDF_VU0_SCALEVECTOR_V0(projection);
     SDF_VU0_LOADVECTOR_B(vertexC);
     SDF_VU0_ADDVECTOR();
 }
@@ -1202,7 +1194,7 @@ f32 btlProjectOnPlaneVU(const f32 *vertexA, const f32 *vertexB, const f32 *verte
     SDF_VU0_COPYVECTOR_A_TO_B();
     SDF_VU0_LOADVECTOR(direction);
     SDF_VU0_INNERPRODUCT(projection);
-    VU0_SCALAR_OP(projection, "vmulx.xyzw vf10, vf10, vf2x");
+    SDF_VU0_SCALEVECTOR_V0(projection);
     SDF_VU0_LOADVECTOR_B(vertexC);
     SDF_VU0_ADDVECTOR();
     return projection;
@@ -1238,10 +1230,10 @@ u32 btlBlendColor(u32 colorA, u32 colorB, f32 blendFactor) {
     SDF_VU0_COPYVECTOR_A_TO_B();
     colorAStorage[0] = colorA;
     EE_MMI_RGBA_UNPACK(colorAStorage, channelScaleBits);
-    VU0_SCALAR_OP_CLOBBER(1.0f - blendFactor, "vmulx.xyzw vf10, vf10, vf2x");
-    VU0_SCALAR_OP_R3_CLOBBER(blendFactor, "vmulx.xyzw vf11, vf11, vf2x");
+    SDF_VU0_SCALEVECTOR_V0_CLOBBER(1.0f - blendFactor);
+    SDF_VU0_SCALEVECTOR_B_V1_CLOBBER(blendFactor);
     SDF_VU0_ADDVECTOR();
-    EE_MMI_RGBA_PACK(packed);
+    SDF_VU0_dds3ColorFtoI(packed, 128.0f);
     packedStorage[0] = packed;
     
     return packed;
@@ -1256,10 +1248,10 @@ u32 btlBlendColorVec(f32 *colorA, f32 *colorB, f32 blendFactor) {
     s32 packedStorage[4];
     SDF_VU0_LOADVECTOR(colorA);
     SDF_VU0_LOADVECTOR_B(colorB);
-    VU0_SCALAR_OP(1.0f - blendFactor, "vmulx.xyzw vf10, vf10, vf2x");
-    VU0_SCALAR_OP_R3(blendFactor, "vmulx.xyzw vf11, vf11, vf2x");
+    SDF_VU0_SCALEVECTOR_V0(1.0f - blendFactor);
+    SDF_VU0_SCALEVECTOR_B_V1(blendFactor);
     SDF_VU0_ADDVECTOR();
-    EE_MMI_RGBA_PACK(packed);
+    SDF_VU0_dds3ColorFtoI(packed, 128.0f);
     packedStorage[0] = packed;
     return packedStorage[0];
 }
@@ -2780,11 +2772,11 @@ void btlUpdateDebugCameraFromPad(void) {
     }
     if (dds3PadBitTable[0] < 0) {
         if ((u8)(D_003BB770 & 1) == 0) {
-            PCP_COPY_VECTOR_UNCLOBBERED(btlDebugCameraPositions[0], camera->poseset->pos);
-            PCP_COPY_VECTOR_UNCLOBBERED(btlDebugCameraRotations[0], camera->poseset->rotation);
+            SDF_VU0_COPYVECTOR_NOMEM(btlDebugCameraPositions[0], camera->poseset->pos);
+            SDF_VU0_COPYVECTOR_NOMEM(btlDebugCameraRotations[0], camera->poseset->rotation);
         } else {
-            PCP_COPY_VECTOR_UNCLOBBERED(btlDebugCameraPositions[1], camera->poseset->pos);
-            PCP_COPY_VECTOR_UNCLOBBERED(btlDebugCameraRotations[1], camera->poseset->rotation);
+            SDF_VU0_COPYVECTOR_NOMEM(btlDebugCameraPositions[1], camera->poseset->pos);
+            SDF_VU0_COPYVECTOR_NOMEM(btlDebugCameraRotations[1], camera->poseset->rotation);
         }
         D_003BB770 ^= 1;
     } else if (dds3PadBitTable[1] < 0) {

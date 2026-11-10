@@ -13,7 +13,7 @@
 #include "pty_field_hp_attrition_api.h"
 #include "sdf_delayed_resource_check_api.h"
 #include "dds3_object_flags.h"
-#include "sdf_vu0.h"
+#include "ps2asm.h"
 #include "sdf_trig.h"
 #include "sdf_vu_matrix.h"
 #include "fld_scene_status_api.h"
@@ -39,7 +39,6 @@
 #include "mdl.h"
 #include "field_stage.h"
 #include "eff_blur.h"
-#include "pcp_vu0.h"
 #include "fpu.h"
 #include "fld.h"
 #include "fld_scene_sequence_api.h"
@@ -830,8 +829,8 @@ void fldFirstInit(void) {
 
 void fldResetPlayerSceneTransformState(void) {
     FieldPlayerSceneWork *sceneWork = &fldSceneParam;
-    VU0_STORE_VF(vf0, &sceneWork->position);
-    VU0_STORE_VF(vf0, &sceneWork->rotation);
+    SDF_VU0_STOREIDENTITYVECTOR(&sceneWork->position);
+    SDF_VU0_STOREIDENTITYVECTOR(&sceneWork->rotation);
     fldPlayerObject = 0;
     *fldGetPlayerSceneStateAddress() = 0;
 }
@@ -1509,9 +1508,9 @@ void fldSpawnPlayerUnits(f32 *input) {
             player = fldPlayerObject;
         } else {
             dds3PoseSet_t *inner = player->poseset;
-            PCP_COPY_VECTOR_F32(inner->pos, input);
-            PCP_COPY_VECTOR_F32(inner->smoothedPosition, input);
-            PCP_COPY_VECTOR_F32(inner->rotation, input + 4);
+            SDF_VU0_COPYVECTOR_F32(inner->pos, input);
+            SDF_VU0_COPYVECTOR_F32(inner->smoothedPosition, input);
+            SDF_VU0_COPYVECTOR_F32(inner->rotation, input + 4);
         }
 
         dds3SetPosPoseSet(player, (u128 *)input);

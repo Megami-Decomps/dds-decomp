@@ -7,7 +7,7 @@ struct EffNodeDescriptor;
 #include "sdf_map_position_api.h"
 #include "scr_integer_parameter_api.h"
 #include "dds3_object_flags.h"
-#include "sdf_vu0.h"
+#include "ps2asm.h"
 #include "btl_model_record.h"
 #include "sdf_model_scalars.h"
 #include "sdf_motion.h"
@@ -39,8 +39,6 @@ struct EffNodeDescriptor;
 #include "dds3obj.h"
 #include "mdl.h"
 #include "sdf_draw.h"
-#include "pcp_vu0.h"
-#include "ee_mmi.h"
 #include "sdf_vu_matrix.h"
 #include "eff_quaternion_nlerp.h"
 
@@ -126,11 +124,11 @@ void evtAdvanceUnitVisualTransitions(evtUnitHandle_t *unit) {
         SDF_VU0_COPYVECTOR_A_TO_B();
         rgbSource[0] = unit->color60;
         EE_MMI_RGBA_UNPACK_READONLY(rgbSource, 0.0078125f);
-        VU0_SCALE_VF(vf10, 1.0f - factor);
-        VU0_SCALE_VF(vf11, factor);
+        SDF_VU0_SCALEVECTOR_BITS(1.0f - factor);
+        SDF_VU0_SCALEVECTOR_B_BITS(factor);
         SDF_VU0_ADDVECTOR();
         oldColor = mdlGetColor((dds3ModelHandle_t *)unit->owner);
-        EE_MMI_RGBA_PACK_UNIT(packed, 128.0f);
+        MMI_RGBA_PACK_UNIT(packed, 128.0f);
         rgbResult[0] = packed;
         mdlSetColor((dds3ModelHandle_t *)unit->owner, (oldColor & 0xFF000000) | (rgbResult[0] & 0xFFFFFF));
         if (unit->rgbElapsed >= unit->rgbDuration) {
@@ -148,11 +146,11 @@ void evtAdvanceUnitVisualTransitions(evtUnitHandle_t *unit) {
         SDF_VU0_COPYVECTOR_A_TO_B();
         alphaSource[0] = unit->color60;
         EE_MMI_RGBA_UNPACK_READONLY(alphaSource, 0.0078125f);
-        VU0_SCALE_VF(vf10, 1.0f - factor);
-        VU0_SCALE_VF(vf11, factor);
+        SDF_VU0_SCALEVECTOR_BITS(1.0f - factor);
+        SDF_VU0_SCALEVECTOR_B_BITS(factor);
         SDF_VU0_ADDVECTOR();
         oldColor = mdlGetColor((dds3ModelHandle_t *)unit->owner);
-        EE_MMI_RGBA_PACK_UNIT(packed, 128.0f);
+        MMI_RGBA_PACK_UNIT(packed, 128.0f);
         alphaResult[0] = packed;
         mdlSetColor((dds3ModelHandle_t *)unit->owner, (oldColor & 0xFFFFFF) | (alphaResult[0] & 0xFF000000));
         if (unit->alphaElapsed >= unit->alphaDuration) {
@@ -350,7 +348,7 @@ void evtAdvanceUnitVisualTransitions(evtUnitHandle_t *unit) {
         }
         firstSource[0] = unit->firstCurrent;
         EE_MMI_RGBA_UNPACK_READONLY(firstSource, 0.0078125f);
-        VU0_SCALE_VF(vf10, 1.0f - factor);
+        SDF_VU0_SCALEVECTOR_BITS(1.0f - factor);
         SDF_VU0_COPYVECTOR_A_TO_B();
         if (unit->flags & EVT_UNIT_FLAG_USE_LOCAL_COLOR_TARGETS) {
             firstTarget[0] = unit->color08;
@@ -360,16 +358,16 @@ void evtAdvanceUnitVisualTransitions(evtUnitHandle_t *unit) {
         } else {
             SDF_VU0_LOADVECTOR(dds3LightParam[0]);
         }
-        VU0_SCALE_VF(vf10, factor);
+        SDF_VU0_SCALEVECTOR_BITS(factor);
         SDF_VU0_ADDVECTOR();
         SDF_VU0_VECTOR_W_SET_ZERO();
-        EE_MMI_RGBA_PACK_UNIT(firstPacked, 128.0f);
+        MMI_RGBA_PACK_UNIT(firstPacked, 128.0f);
         firstResult[0] = firstPacked;
         unit->firstCurrent = firstResult[0];
         unit->color0C = unit->firstCurrent;
         secondSource[0] = unit->color54;
         EE_MMI_RGBA_UNPACK_READONLY(secondSource, 0.0078125f);
-        VU0_SCALE_VF(vf10, 1.0f - factor);
+        SDF_VU0_SCALEVECTOR_BITS(1.0f - factor);
         SDF_VU0_COPYVECTOR_A_TO_B();
         if (unit->flags & EVT_UNIT_FLAG_USE_LOCAL_COLOR_TARGETS) {
             secondTarget[0] = unit->color58;
@@ -379,10 +377,10 @@ void evtAdvanceUnitVisualTransitions(evtUnitHandle_t *unit) {
         } else {
             SDF_VU0_LOADVECTOR(dds3AmbientColor);
         }
-        VU0_SCALE_VF(vf10, factor);
+        SDF_VU0_SCALEVECTOR_BITS(factor);
         SDF_VU0_ADDVECTOR();
         SDF_VU0_VECTOR_W_SET_ONE();
-        EE_MMI_RGBA_PACK_UNIT(secondPacked, 128.0f);
+        MMI_RGBA_PACK_UNIT(secondPacked, 128.0f);
         secondResult[0] = secondPacked;
         unit->color54 = secondResult[0];
         unit->color5C = unit->color54;
@@ -403,7 +401,7 @@ void evtAdvanceUnitVisualTransitions(evtUnitHandle_t *unit) {
             } else {
                 SDF_VU0_LOADVECTOR(dds3LightParam[0]);
             }
-            EE_MMI_RGBA_PACK_UNIT(firstPacked, 128.0f);
+            MMI_RGBA_PACK_UNIT(firstPacked, 128.0f);
             defaultFirst[0] = firstPacked;
             unit->color0C = defaultFirst[0];
         }
@@ -413,7 +411,7 @@ void evtAdvanceUnitVisualTransitions(evtUnitHandle_t *unit) {
             } else {
                 SDF_VU0_LOADVECTOR(dds3AmbientColor);
             }
-            EE_MMI_RGBA_PACK_UNIT(secondPacked, 128.0f);
+            MMI_RGBA_PACK_UNIT(secondPacked, 128.0f);
             defaultSecond[0] = secondPacked;
             unit->color5C = defaultSecond[0];
         }
@@ -425,51 +423,51 @@ void evtAdvanceUnitVisualTransitions(evtUnitHandle_t *unit) {
         weightedTransition = factor;
         currentFirst[0] = unit->color0C;
         EE_MMI_RGBA_UNPACK_READONLY(currentFirst, 0.0078125f);
-        VU0_SCALE_VF(vf10, 1.0f - factor);
+        SDF_VU0_SCALEVECTOR_BITS(1.0f - factor);
         SDF_VU0_LOADVECTOR_B(target);
-        VU0_SCALE_VF(vf11, factor);
+        SDF_VU0_SCALEVECTOR_B_BITS(factor);
         SDF_VU0_ADDVECTOR();
         SDF_VU0_STOREVECTOR_NOMEM(blendedDirection);
         if (previous) {
             factor = previousWeight;
             previousFirst[0] = unit->color0C;
             EE_MMI_RGBA_UNPACK_READONLY(previousFirst, 0.0078125f);
-            VU0_SCALE_VF(vf10, 1.0f - factor);
+            SDF_VU0_SCALEVECTOR_BITS(1.0f - factor);
             SDF_VU0_LOADVECTOR_B(previous);
-            VU0_SCALE_VF(vf11, factor);
+            SDF_VU0_SCALEVECTOR_B_BITS(factor);
             SDF_VU0_ADDVECTOR();
-            VU0_SCALE_VF(vf10, 1.0f - transition);
+            SDF_VU0_SCALEVECTOR_BITS(1.0f - transition);
             SDF_VU0_LOADVECTOR_B(blendedDirection);
-            VU0_SCALE_VF(vf11, transition);
+            SDF_VU0_SCALEVECTOR_B_BITS(transition);
             SDF_VU0_ADDVECTOR();
         }
         SDF_VU0_VECTOR_W_SET_ZERO();
-        EE_MMI_RGBA_PACK_UNIT(packed, 128.0f);
+        MMI_RGBA_PACK_UNIT(packed, 128.0f);
         finalFirst[0] = packed;
         unit->color = finalFirst[0];
         factor = weightedTransition;
         currentSecond[0] = unit->color5C;
         EE_MMI_RGBA_UNPACK_READONLY(currentSecond, 0.0078125f);
-        VU0_SCALE_VF(vf10, 1.0f - factor);
+        SDF_VU0_SCALEVECTOR_BITS(1.0f - factor);
         SDF_VU0_LOADVECTOR_B(target->secondColor);
-        VU0_SCALE_VF(vf11, factor);
+        SDF_VU0_SCALEVECTOR_B_BITS(factor);
         SDF_VU0_ADDVECTOR();
         SDF_VU0_STOREVECTOR_NOMEM(blendedDirection);
         if (previous) {
             factor = previousWeight;
             previousSecond[0] = unit->color5C;
             EE_MMI_RGBA_UNPACK_READONLY(previousSecond, 0.0078125f);
-            VU0_SCALE_VF(vf10, 1.0f - factor);
+            SDF_VU0_SCALEVECTOR_BITS(1.0f - factor);
             SDF_VU0_LOADVECTOR_B(previous->secondColor);
-            VU0_SCALE_VF(vf11, factor);
+            SDF_VU0_SCALEVECTOR_B_BITS(factor);
             SDF_VU0_ADDVECTOR();
-            VU0_SCALE_VF(vf10, 1.0f - transition);
+            SDF_VU0_SCALEVECTOR_BITS(1.0f - transition);
             SDF_VU0_LOADVECTOR_B(blendedDirection);
-            VU0_SCALE_VF(vf11, transition);
+            SDF_VU0_SCALEVECTOR_B_BITS(transition);
             SDF_VU0_ADDVECTOR();
         }
         SDF_VU0_VECTOR_W_SET_ZERO();
-        EE_MMI_RGBA_PACK_UNIT(packed, 128.0f);
+        MMI_RGBA_PACK_UNIT(packed, 128.0f);
         finalSecond[0] = packed;
         unit->color50 = finalSecond[0];
     } else {
@@ -679,11 +677,11 @@ void evtSetUnitLightAndAmbient(evtUnitHandle_t *unit, s32 duration, u32 firstCol
     unit->color58 = secondColor;
     packedScale.scaleValue = 128.0f;
     GetBaseLightRGB(unit);
-    EE_MMI_RGBA_PACK_UNIT(firstPackedColor, packedScale.scaleBits);
+    MMI_RGBA_PACK_UNIT(firstPackedColor, packedScale.scaleBits);
     firstColorVector[0] = firstPackedColor;
     unit->firstCurrent = firstPackedColor;
     GetBaseAmbientRGB(unit);
-    EE_MMI_RGBA_PACK_UNIT(secondPackedColor, packedScale.scaleBits);
+    MMI_RGBA_PACK_UNIT(secondPackedColor, packedScale.scaleBits);
     secondColorVector[0] = secondPackedColor;
     unit->color54 = secondPackedColor;
     unit->flags = (unit->flags | EVT_UNIT_FLAG_USE_LOCAL_COLOR_TARGETS) &
@@ -997,7 +995,7 @@ EvtUnitFacingTargetResult evtUnitRotationQuat(evtUnitHandle_t *unit, f32 *quat, 
     SDF_VU0_GET_ROW2();
     VU0_SET_VF10_Y_CLEAR_W(0.0f);
     SDF_VU0_NORMALIZE();
-    VU0_SCALAR_OP(-1.0f, "vmulx.xyzw vf10, vf10, vf2x");
+    SDF_VU0_SCALEVECTOR_V0(-1.0f);
     SDF_VU0_LOADVECTOR_B(unit->effObj->poseset->pos);
     SDF_VU0_ADDVECTOR();
     SDF_VU0_STOREVECTOR(v);
@@ -1021,7 +1019,7 @@ EvtUnitMotionStepResult evtUnitMoveType0(evtUnitHandle_t *unit) {
         SDF_VU0_NORMALIZE();
     }
     scale = unit->motionParameter * 0.1f;
-    VU0_SCALAR_OP(scale, "vmulx.xyzw vf10, vf10, vf2x");
+    SDF_VU0_SCALEVECTOR_V0(scale);
     SDF_VU0_STOREVECTOR(v);
     dds3GetPosPoseSetMCR(obj, (u128 *)v);
     return EVT_UNIT_MOTION_STEP_APPLIED;
@@ -1080,14 +1078,14 @@ EvtUnitMotionStepResult evtUnitMoveTypePathTrace(evtUnitHandle_t *unit) {
 
     dds3PathBasicControlStep(&unit->pathControl->counter);
     dds3PathBasicControlGetPos(unit->pathControl);
-    VU0_STORE_VF($vf10, v);
+    SDF_VU0_STOREVECTOR(v);
     dds3SetPosPoseSet(unit->effObj, (u128 *)v);
     if (unit->flags & EVT_UNIT_FLAG_USE_PATH_ROTATION) {
         dds3PathBasicControlGetRot(unit->pathControl);
         SDF_VU0_COPYVECTOR_A_TO_B();
         FromEuler(0.0f, 3.14159265f, 0.0f);
         Mult();
-        VU0_STORE_VF($vf10, v);
+        SDF_VU0_STOREVECTOR(v);
         dds3SetRotPoseSet(unit->effObj, (u128 *)v);
     }
     return EVT_UNIT_MOTION_STEP_APPLIED;
@@ -1279,7 +1277,7 @@ void evtSetUnitMove3(evtUnitHandle_t *work, s32 pathObjectKey, s32 frames, s32 v
     work->transitionSourceKind = EVT_UNIT_TRANSITION_SOURCE_PATH_CURVE;
     work->linkedUnit = pathSource;
     dds3PathBasicControlGetPos(path);
-    VU0_STORE_VF($vf10, work->targetVector);
+    SDF_VU0_STOREVECTOR(work->targetVector);
     work->motionParameter = frames;
     work->directionOffset = valueB6;
     work->motionCallback = 0;
@@ -1871,7 +1869,7 @@ ScrCommandResult evtCommand_MODEL_ROT_XYZ(void) {
     SDF_VU0_COPYVECTOR_A_TO_B();
     FromEuler(0.0f, 0.0f, scrGetFloatPara(3) * toRad);
     Mult();
-    VU0_STORE_VF($vf10, v);
+    SDF_VU0_STOREVECTOR(v);
     dds3SetRotPoseSet(unit, (u128 *)v);
     return 1;
 }
@@ -2446,18 +2444,18 @@ ScrCommandResult evtCommand_MODEL_LIGHT_RGB(void) {
     u32 scale;
 
     unit = evtGetUnitHandle(scrGetIntPara(0));
-    VU0_SCALAR_OP(scrGetFloatPara(2), "vaddx.x vf10, vf0, vf2x");
-    VU0_SCALAR_OP(scrGetFloatPara(3), "vaddx.y vf10, vf0, vf2x");
-    VU0_SCALAR_OP(scrGetFloatPara(4), "vaddx.z vf10, vf0, vf2x");
+    SDF_VU0_SETVECTOR_X_V0(scrGetFloatPara(2));
+    SDF_VU0_SETVECTOR_Y_V0(scrGetFloatPara(3));
+    SDF_VU0_SETVECTOR_Z_V0(scrGetFloatPara(4));
     SDF_VU0_VECTOR_W_SET_ZERO();
     scale = 0x43000000;
-    EE_MMI_RGBA_PACK_UNIT(packed1, scale);
+    MMI_RGBA_PACK_UNIT(packed1, scale);
     color1[0] = packed1;
-    VU0_SCALAR_OP(scrGetFloatPara(5), "vaddx.x vf10, vf0, vf2x");
-    VU0_SCALAR_OP(scrGetFloatPara(6), "vaddx.y vf10, vf0, vf2x");
-    VU0_SCALAR_OP(scrGetFloatPara(7), "vaddx.z vf10, vf0, vf2x");
+    SDF_VU0_SETVECTOR_X_V0(scrGetFloatPara(5));
+    SDF_VU0_SETVECTOR_Y_V0(scrGetFloatPara(6));
+    SDF_VU0_SETVECTOR_Z_V0(scrGetFloatPara(7));
     SDF_VU0_VECTOR_W_SET_ONE();
-    EE_MMI_RGBA_PACK_UNIT(packed2, scale);
+    MMI_RGBA_PACK_UNIT(packed2, scale);
     color2[0] = packed2;
     evtSetUnitLightAndAmbient(unit, scrGetIntPara(1), packed1, packed2);
     return 1;
@@ -2493,10 +2491,10 @@ ScrCommandResult evtCommand_MODEL_RGB(void) {
     u32 packed;
 
     unit = evtGetUnitHandle(scrGetIntPara(0));
-    VU0_SCALAR_OP(scrGetFloatPara(2), "vaddx.x vf10, vf0, vf2x");
-    VU0_SCALAR_OP(scrGetFloatPara(3), "vaddx.y vf10, vf0, vf2x");
-    VU0_SET_AXIS_CLEAR_W(scrGetFloatPara(4), z);
-    EE_MMI_RGBA_PACK_F128(packed);
+    SDF_VU0_SETVECTOR_X_V0(scrGetFloatPara(2));
+    SDF_VU0_SETVECTOR_Y_V0(scrGetFloatPara(3));
+    VU0_SET_VF10_Z_CLEAR_W(scrGetFloatPara(4));
+    MMI_RGBA_PACK_128_S2(packed);
     color[0] = packed;
     evtSetUnitColorRGB(unit, scrGetIntPara(1), packed);
     return 1;
@@ -2509,8 +2507,8 @@ ScrCommandResult evtCommand_MODEL_A(void) {
 
     unit = evtGetUnitHandle(scrGetIntPara(0));
     SDF_VU0_LOADIDENTITYVECTOR();
-    VU0_SCALAR_OP(scrGetFloatPara(2), "vmulx.w vf10, vf0, vf2x");
-    EE_MMI_RGBA_PACK_F128(packed);
+    VU0_SEQ_FROM_ROTATION(scrGetFloatPara(2));
+    MMI_RGBA_PACK_128_S2(packed);
     color[0] = packed;
     evtSetUnitColorA(unit, scrGetIntPara(1), packed);
     return 1;
@@ -2880,7 +2878,7 @@ ScrCommandResult evtCommand_EFFECT_ROT_XYZ(void) {
         SDF_VU0_COPYVECTOR_A_TO_B();
         FromEuler(0.0f, 0.0f, scrGetFloatPara(3) * toRad);
         Mult();
-        VU0_STORE_VF($vf10, v);
+        SDF_VU0_STOREVECTOR(v);
         dds3SetRotPoseSet(obj, (u128 *)v);
     }
     return 1;

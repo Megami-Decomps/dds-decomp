@@ -9,8 +9,7 @@
 #include "itf_draw_grid.h"
 #include "eff_ref_obj.h"
 #include "sdf_heap_api.h"
-#include "ee_mmi.h"
-#include "pcp_vu0.h"
+#include "ps2asm.h"
 #include "eff.h"
 #include "eff_resource_slots.h"
 #include "eff_resource_records.h"
@@ -20,6 +19,8 @@
 #include "sdf_texture_file.h"
 #include "btl.h"
 #include "file_request_api.h"
+/* Declared before first use (were implicit int). */
+extern void * memset(void *, s32, u32);
 extern sdfGrOt_t sdfGrOtTable[];
 extern EffRecordBucket D_00400508[];
 
@@ -28,6 +29,7 @@ static inline void effSubmitSurfacePacket(sdfGrOt_t *surface, sdfDrawTag_t *list
 }
 
 extern char D_004387E8[];
+extern s32 sprintf(char *, const char *, ...);
 
 #define EFF_RESOURCE_PATH_BYTES 0x80
 #define EFF_RESOURCE_KEEP_ALLOCATION 1
@@ -204,6 +206,8 @@ void effReleaseRecordBuckets(EffectOwnerRecord *list) {
         }
     }
 }
+
+extern void itfGridLookupValueOrDefault(void *object, s32 key);
 
 /* Dispatch every bucket record and optionally refresh its owner/slot lookup. */
 s32 effDispatchRecordBuckets(s32 refresh, EffectOwnerRecord *list, s32 drawOption) {
@@ -911,6 +915,8 @@ typedef union EffSpriteColor {
     } channels;
 } EffSpriteColor;
 
+#include "sdf_packet_alloc.h"
+
 extern void sdfTexSetFilter(sdfTexHandle_t *, s32, s32);
 extern s32 sdf2DGetPrimPacketSize(s32, s32);
 extern u8 *sdf2DGetPrimPtr(SdfDrawPacket *packet);
@@ -1010,6 +1016,14 @@ void itfRotateScreenOffset(s32 *outX, s32 *outY, s32 x, s32 y, s32 centerX, s32 
 }
 
 
+/* NON_MATCHING: register allocation in this function depends on how many
+ * types and functions the unit declares before it, so it matches only with
+ * unused declarations added; waits for the unit's real boundaries. */
+void sdfDrawTexturedQuad(s32 x, s32 y, u32 depth, s32 width, s32 height,
+                   const EffSpriteUV *uvRect, const EffSpriteColor *cornerColors,
+                   u32 flipFlags, f32 angle, u32 blendKind, s32 mode, s32 aspectMode,
+                   sdfTexHandle_t *texture, s32 surfaceId);
+#ifdef NON_MATCHING
 void sdfDrawTexturedQuad(s32 x, s32 y, u32 depth, s32 width, s32 height,
                    const EffSpriteUV *uvRect, const EffSpriteColor *cornerColors,
                    u32 flipFlags, f32 angle, u32 blendKind, s32 mode, s32 aspectMode,
@@ -1134,6 +1148,9 @@ void sdfDrawTexturedQuad(s32 x, s32 y, u32 depth, s32 width, s32 height,
     effSubmitSurfacePacket(&sdfGrOtTable[surfaceId], packetList);
     sdfSubmitGsAlphaOneRegisterPacket(0x44, surfaceId);
 }
+#else
+INCLUDE_ASM(void, "game/code_00304030", sdfDrawTexturedQuad);
+#endif
 
 
 void itfDrawRotatedTexturedRect(s32 x, s32 y, s32 depth, s32 width, s32 height,

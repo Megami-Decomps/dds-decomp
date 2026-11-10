@@ -2,7 +2,10 @@
 #include "sdf_projection.h"
 #include "common.h"
 #include "sdf_map_position_api.h"
-#include "sdf_vu0.h"
+#include "ps2asm.h"
+
+#define VEC3_SPLAT(v, x) ((v)[0] = (x), (v)[1] = (x), (v)[2] = (x))
+
 #include "btl_effect_position.h"
 #include "eff_random.h"
 #include "sdf_chip.h"
@@ -12,9 +15,7 @@
 #include "eff_param.h"
 #include "eff_pcp_boss.h"
 #include "eff_flash_fan_color_slot.h"
-#include "pcp_vu0.h"
 #include "sdf_vu_transform_api.h"
-#include "ee_mmi.h"
 #include "mdl.h"
 #include "sdf_chunk.h"
 
@@ -310,7 +311,7 @@ void effPCPCrackDraw(effPCPCrack_t *work) {
                             SDF_VU0_LOADVECTOR(perpendicular);
                         }
                         SDF_VU0_LOADVECTOR_B(trailWidth);
-                        VU0_SCALE_VF(vf11, blend);
+                        SDF_VU0_SCALEVECTOR_B_BITS(blend);
                         SDF_VU0_MULVECTOR();
                         SDF_VU0_COPYVECTOR_A_TO_B();
                         SDF_VU0_LOADVECTOR(positions + 1);
@@ -466,7 +467,7 @@ void effPCPCrackDraw(effPCPCrack_t *work) {
 
 void effPCPCrackSetPosition(f32 *dst, const f32 *src)
 {
-    PCP_COPY_VECTOR_F32(dst, src);
+    SDF_VU0_COPYVECTOR_F32(dst, src);
 }
 
 void effBossTrailSetColor(effPCPCrack_t *work, s32 value) {
@@ -532,14 +533,14 @@ void effBossBeamUpdate(EffPCPBossWork *work) {
         LookAtMatrix(work->position, direction, effBossLookAtReferenceAxis);
         ReverseMatrix();
         SDF_VU0_RESET_ROW3();
-        VU0_STORE_MATRIX(matrix);
+        SDF_VU0_STOREMATRIX(matrix);
     } else {
         work->position[0] = 0;
         work->position[1] = 0;
         work->position[2] = 400.0f;
         work->position[3] = 0;
-        VU0_STORE_VF(vf0, work->position);
-        EE_MMI_UNIT_MATRIX(matrix);
+        SDF_VU0_STOREIDENTITYVECTOR(work->position);
+        SDF_VU0_STOREIDENTITY(matrix);
         direction = work->parameterVector;
     }
     dds3EffectPartSetRotateMatrix(work->modelResource, matrix);

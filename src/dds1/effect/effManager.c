@@ -2,7 +2,7 @@
 #include "sdf_chip.h"
 #include "par_cell_api.h"
 #include "sdf_heap_api.h"
-#include "ee_mmi.h"
+#include "ps2asm.h"
 #include "eff.h"
 #include "eff_node.h"
 #include "eff_create_node_from_parameter.h"
@@ -179,11 +179,11 @@ EffNode *dds3EffectLoad(EffNodeDescriptor *descriptor) {
         case 0:
         case 1:
             instance = (EffLegacyNodeInstanceView *)node->instanceWord;
-            EE_MMI_UNIT_MATRIX(&instance->matrixAtB0);
+            SDF_VU0_STOREIDENTITY(&instance->matrixAtB0);
             break;
         case 2:
             instance = (EffLegacyNodeInstanceView *)node->instanceWord;
-            EE_MMI_UNIT_MATRIX(&instance->matrixAt20);
+            SDF_VU0_STOREIDENTITY(&instance->matrixAt20);
             break;
         }
         printf("effManager:set Identity matrix\n");

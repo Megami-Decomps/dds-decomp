@@ -8,7 +8,7 @@
 #include "btl_command_target_policy.h"
 #include "btl_resolve_unit_value_api.h"
 #include "sdf_delayed_resource_check_api.h"
-#include "sdf_vu0.h"
+#include "ps2asm.h"
 #include "btl_actor_resource_bank_api.h"
 #include "btl_actor_entry_code_api.h"
 #include "scr_integer_return_value_api.h"
@@ -50,7 +50,6 @@
 #include "btl_command_target_eligibility.h"
 #include "btl_party_command_use_result.h"
 #include "btl_command_required_entry_match.h"
-#include "pcp_vu0.h"
 #include "sdf_vu_transform_api.h"
 #include "sdf_vu_matrix.h"
 #include "sdf.h"
@@ -1671,7 +1670,7 @@ BtlRuntimeFadeStepResult btlDrawCapturedScreenTileOverlay(
         }
         tiles = (sdfDrawTag_t *)sdfGrAllocPacketBuff(0x20);
         sdfDrawTagInit(tiles);
-        VU0_LOAD_MATRIX(D_00384790);
+        SDF_VU0_LOADMATRIX(D_00384790);
         ReverseMatrix();
         waveRadius = 640.0f;
         sdf3DPrimLinkTm(tiles, NULL);
@@ -1779,7 +1778,7 @@ draw_tile:
                     center[2] = depth;
                     centerX = centerOffsetX + 0x1000;
                     centerY = centerOffsetY + 0xE00;
-                    VU0_LOAD_VF($vf11, center);
+                    SDF_VU0_LOADVECTOR_B(center);
                     for (vertex = 0; vertex < 6; vertex++) {
                         pixelX = centerX + (s32)(btlCapturedScreenTileVertexOffsets[vertex][0] * size);
                         pixelY = centerY + (s32)(btlCapturedScreenTileVertexOffsets[vertex][1] * size);
@@ -1788,14 +1787,14 @@ draw_tile:
                         positions[vertex][0] = width * (f32)(pixelX - 0x1000) / 4096.0f;
                         positions[vertex][1] = height * (f32)(pixelY - 0xE00) / 3584.0f;
                         positions[vertex][2] = depth;
-                        VU0_LOAD_VF($vf10, positions[vertex]);
-                        VU0_SUB($vf10, $vf10, $vf11);
-                        VU0_APPLY_MATRIX($vf10, $vf10);
-                        VU0_ADD($vf10, $vf10, $vf11);
-                        VU0_STORE_VF($vf10, positions[vertex]);
-                        VU0_LOAD_VF($vf10, btlCapturedScreenTileNormal);
-                        VU0_ROTATE_VEC($vf10, $vf10);
-                        VU0_STORE_VF($vf10, normals[vertex]);
+                        SDF_VU0_LOADVECTOR(positions[vertex]);
+                        SDF_VU0_SUBVECTOR();
+                        SDF_VU0_APPLYMATRIX();
+                        SDF_VU0_ADDVECTOR();
+                        SDF_VU0_STOREVECTOR(positions[vertex]);
+                        SDF_VU0_LOADVECTOR(btlCapturedScreenTileNormal);
+                        SDF_VU0_APPLYMATRIX_XYZ();
+                        SDF_VU0_STOREVECTOR(normals[vertex]);
                     }
                     sdfDrawTagLink(tiles, (u32)effPkt3DPrimMakePoly(&btlCapturedScreenTileDrawParams));
                 }

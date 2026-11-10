@@ -32,7 +32,7 @@
 #include "btl_hunt_mp_recovery_api.h"
 #include "btl_command_target_policy.h"
 #include "dds3_object_flags.h"
-#include "sdf_vu0.h"
+#include "ps2asm.h"
 #include "btl_aim_horizontal_direction_clamped_api.h"
 #include "btl_set_actor_effect_parameter_api.h"
 #include "btl_raise_party_record_status_value.h"
@@ -100,8 +100,6 @@
 #include "mdl_asset_request.h"
 #include "btl_model_and_sound_readiness_api.h"
 #include "file_request_api.h"
-#include "pcp_vu0.h"
-#include "ee_mmi.h"
 #include "fpu.h"
 #include "dat_state.h"
 #include "dat_command.h"
@@ -2475,7 +2473,7 @@ void btlBindUnitModel(BtlUnit *unit, u32 kind, u32 index) {
         model = unit->ext->owner;
         unit->ext->flags |= 0x200000;
         SDF_VU0_SETSCALE1VECTOR();
-        VU0_SCALAR_OP(unit->actorScale, "vmulx.xyzw vf10, vf10, vf2x");
+        SDF_VU0_SCALEVECTOR_V0(unit->actorScale);
         inner = unit->effectObject->poseset;
         inner->flags = (inner->flags | 1) & ~2;
         SDF_VU0_STOREVECTOR(inner->scale);
@@ -3538,13 +3536,13 @@ void btlWarpUnitToMotionReach(BtlUnit *unit, BtlUnit *target, s32 index) {
         SDF_VU0_APPLYMATRIX();
         SDF_VU0_LOADVECTOR_B(bodyPos);
     }
-    VU0_SCALAR_OP(reach, "vmulx.xyzw vf10, vf10, vf2x");
+    SDF_VU0_SCALEVECTOR_V0(reach);
     SDF_VU0_ADDVECTOR();
     SDF_VU0_STOREVECTOR(world);
     SDF_VU0_LOADVECTOR(unit->orientation);
     ToMatrix();
     SDF_VU0_LOADVECTOR(unit->bodyOffset);
-    VU0_SCALAR_OP(unit->scale, "vmulx.xyzw vf10, vf10, vf2x");
+    SDF_VU0_SCALEVECTOR_V0(unit->scale);
     SDF_VU0_APPLYMATRIX();
     SDF_VU0_NEGVECTOR_XYZ();
     SDF_VU0_LOADVECTOR_B(world);
@@ -3555,7 +3553,7 @@ void btlWarpUnitToMotionReach(BtlUnit *unit, BtlUnit *target, s32 index) {
         if (sdfModelGetMarkPos(unit->ext->owner->inner, 0) == 0) {
             dds3GetPosPoseSet(unit->effectObject);
         }
-        VU0_SCALAR_OP(0.0f, "vaddx.y vf10, vf0, vf2x");
+        SDF_VU0_SETVECTOR_Y_V0(0.0f);
         SDF_VU0_LOADVECTOR_B(world);
         SDF_VU0_SUBVECTOR();
         SDF_VU0_GETLENGTH(distance);
@@ -3689,14 +3687,14 @@ s32 btlApproachTargetTask(BtlApproachTaskArgs *args) {
     SDF_VU0_STOREVECTOR_NOMEM(toPos);
     toPos[1] = fromPos[1];
     SDF_VU0_LOADVECTOR(fromPos);
-    VU0_LOAD_VF_PTR(vf11, toPos);
+    SDF_VU0_LOADVECTOR_B_F32_NV(toPos);
     SDF_VU0_COPYVECTOR_A_TO_C();
     SDF_VU0_SUBVECTOR();
     SDF_VU0_NORMALIZE();
-    VU0_SCALAR_OP(reach, "vmulx.xyzw vf10, vf10, vf2x");
+    SDF_VU0_SCALEVECTOR_V0(reach);
     SDF_VU0_ADDVECTOR();
     SDF_VU0_COPYVECTOR_C_TO_B();
-    VU0_LERP_VF10(0.8f / scale);
+    SDF_VU0_INTERPOLATE(0.8f / scale);
     SDF_VU0_STOREVECTOR(pos);
     SDF_VU0_LOADVECTOR_B(fromPos);
     SDF_VU0_SUBVECTOR();
@@ -3704,7 +3702,7 @@ s32 btlApproachTargetTask(BtlApproachTaskArgs *args) {
     SDF_VU0_LOADVECTOR(unit->orientation);
     ToMatrix();
     SDF_VU0_LOADVECTOR(unit->bodyOffset);
-    VU0_SCALAR_OP(unit->scale, "vmulx.xyzw vf10, vf10, vf2x");
+    SDF_VU0_SCALEVECTOR_V0(unit->scale);
     SDF_VU0_APPLYMATRIX();
     SDF_VU0_NEGVECTOR_XYZ();
     SDF_VU0_LOADVECTOR_B(pos);
@@ -3754,7 +3752,7 @@ s32 btlUpdateUnitPositionInterpolationTask(BtlPosLerpTaskArgs *args) {
         }
         SDF_VU0_LOADVECTOR(&args->from);
         SDF_VU0_LOADVECTOR_B(&args->to);
-        VU0_LERP_VF10(args->t);
+        SDF_VU0_INTERPOLATE(args->t);
         SDF_VU0_STOREVECTOR(pos);
         btlSetUnitPosition(unit, pos);
     } else {
@@ -4014,10 +4012,10 @@ u32 btlUpdateModelChangeTask(BtlModelChangeArgs *args) {
             u32 secondColor;
 
             SDF_VU0_LOADVECTOR(unit->colorStart);
-            EE_MMI_RGBA_PACK_UNIT(packedStart[0], 128.0f);
+            MMI_RGBA_PACK_UNIT(packedStart[0], 128.0f);
             firstColor = packedStart[0];
             SDF_VU0_LOADVECTOR(unit->colorEnd);
-            EE_MMI_RGBA_PACK_UNIT(packedEnd[0], 128.0f);
+            MMI_RGBA_PACK_UNIT(packedEnd[0], 128.0f);
             secondColor = packedEnd[0];
             evtSetUnitLightAndAmbient(unit->ext, 0, firstColor, secondColor);
         }
@@ -5089,8 +5087,8 @@ void btlUpdateActiveActorModelState(void) {
                 pulse = 2.0f - pulse;
             }
             SDF_VU0_SETSCALE1VECTOR();
-            VU0_SCALAR_OP(pulse * 1.6f + 0.3f, "vmulx.xyzw vf10, vf10, vf2x");
-            EE_MMI_RGBA_PACK(packed[0]);
+            SDF_VU0_SCALEVECTOR_V0(pulse * 1.6f + 0.3f);
+            SDF_VU0_dds3ColorFtoI(packed[0], 128.0f);
             btlBlendUnitColor(unit, (packed[0] & 0xFFFFFF) | 0x80000000, 0);
         }
     }
@@ -5384,7 +5382,7 @@ void btlApplyUnitEffectScale(BtlUnit *unit) {
     if (unit->status.flags & 2) {
         btlInitializeEffectVectorsFromSourceRecords(unit, unit->resourceKind, unit->resourceIndex);
         SDF_VU0_SETSCALE1VECTOR();
-        VU0_SCALAR_OP(unit->actorScale, "vmulx.xyzw vf10, vf10, vf2x");
+        SDF_VU0_SCALEVECTOR_V0(unit->actorScale);
         inner = unit->effectObject->poseset;
         inner->flags |= OBJECT_TRANSFORM_FLAG_UPDATE_PENDING;
         inner->flags &= ~OBJECT_TRANSFORM_FLAG_MATRIX_CACHE_VALID;
@@ -5471,7 +5469,7 @@ void btlNormalizeActionCameraKeyScales(BtlLinkedCommand *action) {
             SDF_VU0_LOADVECTOR(key + 16);
             SDF_VU0_NEGVECTOR_XYZ();
             SDF_VU0_LOADVECTOR_B(pos);
-            VU0_SCALAR_OP(key[20] - 1.0f, "vmulx.xyzw vf10, vf10, vf2x");
+            SDF_VU0_SCALEVECTOR_V0(key[20] - 1.0f);
             SDF_VU0_ADDVECTOR();
             SDF_VU0_STOREVECTOR(pos);
             key[20] = 1.0f;
@@ -5623,10 +5621,10 @@ s32 btlAdjustCameraDirectionForDefaultPlane(BtlCamState *state) {
         vector[3] = 0.0f;
         if (-20.0f < vector[1]) {
             SDF_VU0_LOADVECTOR(state->position);
-            VU0_SET_VF10_COMPONENT(y, 0.0f);
+            SDF_VU0_SETVECTOR_Y(0.0f);
             SDF_VU0_COPYVECTOR_A_TO_B();
             SDF_VU0_LOADVECTOR(vector);
-            VU0_SET_VF10_COMPONENT(y, 0.0f);
+            SDF_VU0_SETVECTOR_Y(0.0f);
             SDF_VU0_SUBVECTOR();
             SDF_VU0_NORMALIZE();
             SDF_VU0_STOREVECTOR(direction);
@@ -5663,10 +5661,10 @@ s32 btlAdjustCameraDirectionForPlane(BtlCamState *state, f32 height) {
         vector[3] = 0.0f;
         if (height < vector[1]) {
             SDF_VU0_LOADVECTOR(state->position);
-            VU0_SET_VF10_COMPONENT(y, 0.0f);
+            SDF_VU0_SETVECTOR_Y(0.0f);
             SDF_VU0_COPYVECTOR_A_TO_B();
             SDF_VU0_LOADVECTOR(vector);
-            VU0_SET_VF10_COMPONENT(y, 0.0f);
+            SDF_VU0_SETVECTOR_Y(0.0f);
             SDF_VU0_SUBVECTOR();
             SDF_VU0_NORMALIZE();
             SDF_VU0_STOREVECTOR(direction);
@@ -5928,7 +5926,7 @@ void btlUpdateBattleCameraFrame(void) {
     }
     SDF_VU0_LOADVECTOR(scene->cameraCommand.camera.direction);
     SDF_VU0_STOREVECTOR(&data->localEyeOffset);
-    VU0_SCALAR_OP(-scene->cameraCommand.camera.distance, "vmulx.xyzw vf10, vf10, vf2x");
+    SDF_VU0_SCALEVECTOR_V0(-scene->cameraCommand.camera.distance);
     SDF_VU0_LOADVECTOR_B(scene->cameraCommand.camera.position);
     SDF_VU0_ADDVECTOR();
     SDF_VU0_STOREVECTOR_B(&data->worldEye);
@@ -6015,7 +6013,7 @@ void btlInitMotionTransformFromVectors(BtlCamState *object, const f32 *origin, c
     SDF_VU0_APPLYMATRIX_XYZ();
     SDF_VU0_STOREVECTOR(object->direction);
     VU0_SET_VF2X(1.0f);
-    VU0_MUL_VF2X(vf10, vf10);
+    VU0_MULX_XYZW_VF10_VF10_VF2X();
     SDF_VU0_COPYVECTOR_A_TO_B();
     SDF_VU0_LOADVECTOR(origin);
     SDF_VU0_ADDVECTOR();

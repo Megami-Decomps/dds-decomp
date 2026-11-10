@@ -1,6 +1,6 @@
 #include "sdk_ps2.h"
 #include "common.h"
-#include "sdf_vu0.h"
+#include "ps2asm.h"
 #include "fld_map_selection.h"
 #include "sdf_vu_matrix.h"
 #include "sdf_vector_latch.h"
@@ -11,7 +11,6 @@
 #include "sdf_textured_rect.h"
 #include "sdf_heap_api.h"
 #include "fpu.h"
-#include "pcp_vu0.h"
 #include "fld_lmap_task.h"
 #include "fld_map_resource.h"
 #include "sdf_texture_file.h"
@@ -749,7 +748,7 @@ void egl3Dto2D(s32 *gridX, s32 *gridY, f32 x, f32 y, f32 z) {
     point[1] = y;
     point[2] = z;
     point[3] = 1.0f;
-    VU0_LOAD_MATRIX(sdfViewMatrix);
+    SDF_VU0_LOADMATRIX(sdfViewMatrix);
     MultMatrixRev((const struct Matrix4 *)sdfProjectionMatrix);
     SDF_VU0_COPYMATRIX_A_TO_B();
     SDF_VU0_LOADVECTOR(point);

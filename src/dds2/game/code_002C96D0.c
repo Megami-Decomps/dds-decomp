@@ -8,7 +8,28 @@
 #include "file_menu_state_result.h"
 #include "file_config_list_node.h"
 #include "file_config_option_api.h"
-#include "sdf_vu0.h"
+#include "ps2asm.h"
+
+#define VEC3_SPLAT(v, x) ((v)[0] = (x), (v)[1] = (x), (v)[2] = (x))
+
+static inline void UnpackRGBAWord(u32 color, u32 unitBits) {
+    u32 rgba[4];
+    rgba[0] = color;
+    EE_MMI_RGBA_UNPACK_READONLY(rgba, unitBits);
+}
+
+static inline void UnpackRGBAWordFloat(u32 color, f32 unit) {
+    u32 rgba[4];
+    rgba[0] = color;
+    EE_MMI_RGBA_UNPACK(rgba, unit);
+}
+
+static inline u32 PackRGBAWord(f32 unit) {
+    u32 rgba[4];
+    MMI_RGBA_PACK_UNIT(rgba[0], unit);
+    return rgba[0];
+}
+
 #include "file_job_type.h"
 #include "file_config_task.h"
 #include "eff_emitter_type.h"
@@ -20,7 +41,6 @@
 #include "snd_sequence_volume_pan.h"
 #include "sdf_trig.h"
 #include "eff_scale_params.h"
-#include "ee_mmi.h"
 #include "eff_random.h"
 #include "sdf_quaternion.h"
 #include "btl_stage_task_cleanup.h"
@@ -53,7 +73,6 @@
 #include "dat_state.h"
 #include "dat_new_cycle_state.h"
 #include "mnu_list.h"
-#include "pcp_vu0.h"
 #include "sdf_vu_transform_api.h"
 #include "sdf_vu_matrix.h"
 #include "sdf_vu_matrix_multiply_api.h"
@@ -4589,7 +4608,7 @@ sdfGrOt_t *effGetPacketSubmissionSurface(s32 index) {
 
 void mnuProjectViewPoint(void) {
     u8 *matrix;
-    VU0_LOAD_MATRIX(sdfViewMatrix);
+    SDF_VU0_LOADMATRIX(sdfViewMatrix);
     matrix = sdfProjectionMatrix;
     MultMatrixRev((const struct Matrix4 *)matrix);
     SDF_VU0_APPLYMATRIX_XYZ1();
@@ -4617,7 +4636,7 @@ s32 sdfProjectPointInForwardConeVU(void) {
 
     SDF_VU0_NORMALIZE();
     SDF_VU0_COPYVECTOR_A_TO_B();
-    VU0_LOAD_MATRIX(sdfViewMatrix);
+    SDF_VU0_LOADMATRIX(sdfViewMatrix);
     SDF_VU0_COPYMATRIX_A_TO_B();
     ReverseMatrix();
     SDF_VU0_GET_ROW2();
@@ -4627,10 +4646,7 @@ s32 sdfProjectPointInForwardConeVU(void) {
         return 0;
 
     SDF_VU0_COPYVECTOR_C_TO_A();
-    VU0_MOVE_VF(vf28, vf24);
-    VU0_MOVE_VF(vf29, vf25);
-    VU0_MOVE_VF(vf30, vf26);
-    VU0_MOVE_VF(vf31, vf27);
+    SDF_VU0_COPYMATRIX_B_TO_A();
     projection = (f32 *)sdfProjectionMatrix;
     MultMatrixRev((const struct Matrix4 *)projection);
     SDF_VU0_APPLYMATRIX_XYZ1();
@@ -5135,11 +5151,11 @@ void fileQueueInitTransform(void *queue)
     FileQueue *view = queue;
 
     memset(view, 0, 0x80);
-    VU0_STORE_VF_UNCLOBBERED(vf0, view);
-    VU0_STORE_VF_UNCLOBBERED(vf0, view->axis);
-    VU0_STORE_VF_UNCLOBBERED(vf0, view->position);
+    SDF_VU0_STOREIDENTITYVECTOR_NOMEM(view);
+    SDF_VU0_STOREIDENTITYVECTOR_NOMEM(view->axis);
+    SDF_VU0_STOREIDENTITYVECTOR_NOMEM(view->position);
     view->position[1] = -5.0f;
-    VU0_STORE_VF_UNCLOBBERED(vf0, view->quat);
+    SDF_VU0_STOREIDENTITYVECTOR_NOMEM(view->quat);
     view->scale = 1.0f;
     view->scaleMultiplier = 1.0f;
     view->color = 0x80808080;
@@ -5279,7 +5295,7 @@ FileQueue *fileCloneQueueEntries(FileQueue *source) {
             } while (--count != 0);
         }
     }
-    VU0_STORE_VF(vf0, vec);
+    SDF_VU0_STOREIDENTITYVECTOR(vec);
     fileQueueSetPosition(queue, vec);
     fileQueueSetRotation(queue, vec);
     fileQueueSetScale(queue, 1.0f);
@@ -5329,11 +5345,11 @@ void fileQueueUpdate(FileQueue *queue)
             SDF_VU0_LOADVECTOR_B(queue->offset);
             SDF_VU0_ADDVECTOR();
             if (job->xformFlags & 4) {
-                VU0_SCALAR_OP(-5.0f, "vaddx.y vf10, vf0, vf2x");
+                SDF_VU0_SETVECTOR_Y_V0(-5.0f);
             }
             SDF_VU0_LOADVECTOR_B(pos);
             if (job->xformFlags & 0x80) {
-                VU0_SCALE_VF(vf11, total);
+                SDF_VU0_SCALEVECTOR_B_BITS(total);
             }
             SDF_VU0_ADDVECTOR();
             SDF_VU0_STOREVECTOR_NOMEM(pos);
@@ -5380,7 +5396,7 @@ FileQueue *fileQueueClone(const FileQueue *source) {
         fileJobCopyHeader(job, src);
         fileQueueAppend(queue, job);
     }
-    VU0_STORE_VF(vf0, vec);
+    SDF_VU0_STOREIDENTITYVECTOR(vec);
     fileQueueSetPosition(queue, vec);
     fileQueueSetRotation(queue, vec);
     fileQueueSetScale(queue, 1.0f);
@@ -5412,19 +5428,19 @@ void fileQueueSetPosition(FileQueue *queue, const f32 vec[4])
     SDF_VU0_STOREVECTOR(base);
     SDF_VU0_LOADVECTOR(queue->quat);
     ToMatrix();
-    VU0_STORE_MATRIX(rot);
+    SDF_VU0_STOREMATRIX(rot);
     scale = queue->scale * queue->scaleMultiplier;
     for (job = queue->first; job != NULL; job = job->next) {
         SDF_VU0_LOADVECTOR(base);
         if (job->xformFlags & 4) {
-            VU0_SCALAR_OP(-5.0f, "vaddx.y vf10, vf0, vf2x");
+            SDF_VU0_SETVECTOR_Y_V0(-5.0f);
         }
         SDF_VU0_LOADVECTOR_B(job->offset);
         if (job->xformFlags & 0x80) {
-            VU0_SCALE_VF(vf11, scale);
+            SDF_VU0_SCALEVECTOR_B_BITS(scale);
         }
-        VU0_LOAD_MATRIX(rot);
-        VU0_ROTATE_VEC(vf11, vf11);
+        SDF_VU0_LOADMATRIX(rot);
+        SDF_VU0_APPLYMATRIX_XYZ_B();
         SDF_VU0_ADDVECTOR();
         SDF_VU0_STOREVECTOR_NOMEM(pos);
         fileJobInvokePositionCallback((FileJobPayload *)job->id, pos);
@@ -5474,10 +5490,10 @@ void fileQueueSetScale(FileQueue *queue, f32 scale)
             SDF_VU0_LOADVECTOR_B(queue->offset);
             SDF_VU0_ADDVECTOR();
             if (job->xformFlags & 4) {
-                VU0_SCALAR_OP(-5.0f, "vaddx.y vf10, vf0, vf2x");
+                SDF_VU0_SETVECTOR_Y_V0(-5.0f);
             }
             SDF_VU0_LOADVECTOR_B(job->offset);
-            VU0_SCALAR_OP(total, "vmulx.xyzw vf11, vf11, vf2x");
+            SDF_VU0_SCALEVECTOR_B_V0(total);
             SDF_VU0_ADDVECTOR();
             SDF_VU0_STOREVECTOR_NOMEM(&pos);
             fileJobInvokePositionCallback((FileJobPayload *)job->id, (f32 *)&pos);
@@ -5510,7 +5526,7 @@ void fileQueueSetColor(FileQueue *queue, u32 color) {
         EE_MMI_RGBA_UNPACK(jobColor, 1.0f / 128.0f);
         SDF_VU0_LOADVECTOR_B(tint);
         SDF_VU0_MULVECTOR();
-        EE_MMI_RGBA_PACK_UNIT(result, 0x43000000);
+        MMI_RGBA_PACK_UNIT(result, 0x43000000);
         payload = (FileJobPayload *)job->id;
         packed[0] = result;
         fileDispatchJobTypeCallback(payload, result);
@@ -5995,7 +6011,7 @@ void camFollowOffsetVec(FileJob *obj, void *dst)
     }
     SDF_VU0_LOADVECTOR(obj->offset);
     if (obj->xformFlags & 0x10) {
-        VU0_SCALAR_OP(0.0f, "vaddx.y vf10, vf0, vf2x");
+        SDF_VU0_SETVECTOR_Y_V0(0.0f);
     }
     SDF_VU0_GETLENGTH(length);
     VEC3_SPLAT(len, length);
@@ -6003,13 +6019,13 @@ void camFollowOffsetVec(FileJob *obj, void *dst)
     SDF_VU0_LOADVECTOR_B(aViewTarget);
     SDF_VU0_SUBVECTOR();
     if (obj->xformFlags & 0x10) {
-        VU0_SCALAR_OP(0.0f, "vaddx.y vf10, vf0, vf2x");
+        SDF_VU0_SETVECTOR_Y_V0(0.0f);
     }
     SDF_VU0_NORMALIZE();
     SDF_VU0_LOADVECTOR_B(len);
     SDF_VU0_MULVECTOR();
     if (obj->xformFlags & 0x10) {
-        VU0_SCALAR_OP(obj->offset[1], "vaddx.y vf10, vf0, vf2x");
+        SDF_VU0_SETVECTOR_Y_V0(obj->offset[1]);
     }
     SDF_VU0_STOREVECTOR(dst);
 }
@@ -6374,7 +6390,7 @@ void fileDrawLoadObjectSlots(s32 object) {
     u32 textureTransformedPacked;
     s32 textureTransformedFrame;
 
-    eeUnpackRGBAWordFloat(obj->color, 0.0078125f);
+    UnpackRGBAWordFloat(obj->color, 0.0078125f);
     SDF_VU0_STOREVECTOR(modulation);
     record = (FileSlotTable *)obj->record;
     count = record->count;
@@ -6389,10 +6405,10 @@ void fileDrawLoadObjectSlots(s32 object) {
                 for (i = 0; i < count; i++, slot++) {
                     if (FILE_SLOT_FRAME(slot) >= 0) {
 
-                        eeUnpackRGBAWordFloat(slot->color, 0.0078125f);
+                        UnpackRGBAWordFloat(slot->color, 0.0078125f);
                         SDF_VU0_LOADVECTOR_B(modulation);
                         SDF_VU0_MULVECTOR();
-                        billDirectPacked = eePackRGBAWord(128.0f);
+                        billDirectPacked = PackRGBAWord(128.0f);
                         scale = slot->scale;
                         dds3BillboardSetRGBA(billboard, billDirectPacked);
                         dds3BillboardSetScale(billboard, scale, scale);
@@ -6408,18 +6424,18 @@ void fileDrawLoadObjectSlots(s32 object) {
                 SDF_VU0_LOADVECTOR(orientation);
                 ToMatrix();
                 SDF_VU0_LOAD_ROW3(origin);
-                VU0_STORE_MATRIX(matrix);
+                SDF_VU0_STOREMATRIX(matrix);
                 for (i = 0; i < count; i++, slot++) {
                     if (FILE_SLOT_FRAME(slot) >= 0) {
 
-                        VU0_LOAD_MATRIX(matrix);
+                        SDF_VU0_LOADMATRIX(matrix);
                         SDF_VU0_LOADVECTOR(slot->pos);
                         SDF_VU0_APPLYMATRIX_XYZ1();
                         SDF_VU0_STOREVECTOR(transformed);
-                        eeUnpackRGBAWordFloat(slot->color, 0.0078125f);
+                        UnpackRGBAWordFloat(slot->color, 0.0078125f);
                         SDF_VU0_LOADVECTOR_B(modulation);
                         SDF_VU0_MULVECTOR();
-                        billTransformedPacked = eePackRGBAWord(128.0f);
+                        billTransformedPacked = PackRGBAWord(128.0f);
                         scale = slot->scale;
                         dds3BillboardSetRGBA(billboard, billTransformedPacked);
                         dds3BillboardSetScale(billboard, scale, scale);
@@ -6440,10 +6456,10 @@ void fileDrawLoadObjectSlots(s32 object) {
                     }
                     if (FILE_SLOT_FRAME(slot) >= 0) {
 
-                        eeUnpackRGBAWordFloat(slot->color, 0.0078125f);
+                        UnpackRGBAWordFloat(slot->color, 0.0078125f);
                         SDF_VU0_LOADVECTOR_B(modulation);
                         SDF_VU0_MULVECTOR();
-                        jobDirectPacked = eePackRGBAWord(128.0f);
+                        jobDirectPacked = PackRGBAWord(128.0f);
                         fileDispatchJobTypeCallback(*jobs, jobDirectPacked);
                         fileJobInvokeScaleCallback(*jobs, slot->scale);
                         fileJobInvokePositionCallback(*jobs, slot->pos);
@@ -6456,21 +6472,21 @@ void fileDrawLoadObjectSlots(s32 object) {
                 SDF_VU0_LOADVECTOR(orientation);
                 ToMatrix();
                 SDF_VU0_LOAD_ROW3(origin);
-                VU0_STORE_MATRIX(matrix);
+                SDF_VU0_STOREMATRIX(matrix);
                 for (i = 0; i < count; i++, slot++, jobs++) {
                     if (FILE_SLOT_FRAME(slot) == 0) {
                         fileJobNotifyComplete(*jobs);
                     }
                     if (FILE_SLOT_FRAME(slot) >= 0) {
 
-                        VU0_LOAD_MATRIX(matrix);
+                        SDF_VU0_LOADMATRIX(matrix);
                         SDF_VU0_LOADVECTOR(slot->pos);
                         SDF_VU0_APPLYMATRIX_XYZ1();
                         SDF_VU0_STOREVECTOR(transformed);
-                        eeUnpackRGBAWordFloat(slot->color, 0.0078125f);
+                        UnpackRGBAWordFloat(slot->color, 0.0078125f);
                         SDF_VU0_LOADVECTOR_B(modulation);
                         SDF_VU0_MULVECTOR();
-                        jobTransformedPacked = eePackRGBAWord(128.0f);
+                        jobTransformedPacked = PackRGBAWord(128.0f);
                         fileDispatchJobTypeCallback(*jobs, jobTransformedPacked);
                         fileJobInvokeScaleCallback(*jobs, slot->scale);
                         fileJobInvokePositionCallback(*jobs, transformed);
@@ -6488,10 +6504,10 @@ void fileDrawLoadObjectSlots(s32 object) {
                     }
                     if (FILE_SLOT_FRAME(slot) >= 0) {
 
-                        eeUnpackRGBAWordFloat(slot->color, 0.0078125f);
+                        UnpackRGBAWordFloat(slot->color, 0.0078125f);
                         SDF_VU0_LOADVECTOR_B(modulation);
                         SDF_VU0_MULVECTOR();
-                        queueDirectPacked = eePackRGBAWord(128.0f);
+                        queueDirectPacked = PackRGBAWord(128.0f);
                         fileQueueSetColor(*queues, queueDirectPacked);
                         fileQueueSetScale(*queues, slot->scale);
                         fileQueueSetPosition(*queues, slot->pos);
@@ -6504,21 +6520,21 @@ void fileDrawLoadObjectSlots(s32 object) {
                 SDF_VU0_LOADVECTOR(orientation);
                 ToMatrix();
                 SDF_VU0_LOAD_ROW3(origin);
-                VU0_STORE_MATRIX(matrix);
+                SDF_VU0_STOREMATRIX(matrix);
                 for (i = 0; i < count; i++, slot++, queues++) {
                     if (FILE_SLOT_FRAME(slot) == 0) {
                         fileQueueNotifyAllJobsComplete(*queues);
                     }
                     if (FILE_SLOT_FRAME(slot) >= 0) {
 
-                        VU0_LOAD_MATRIX(matrix);
+                        SDF_VU0_LOADMATRIX(matrix);
                         SDF_VU0_LOADVECTOR(slot->pos);
                         SDF_VU0_APPLYMATRIX_XYZ1();
                         SDF_VU0_STOREVECTOR(transformed);
-                        eeUnpackRGBAWordFloat(slot->color, 0.0078125f);
+                        UnpackRGBAWordFloat(slot->color, 0.0078125f);
                         SDF_VU0_LOADVECTOR_B(modulation);
                         SDF_VU0_MULVECTOR();
-                        queueTransformedPacked = eePackRGBAWord(128.0f);
+                        queueTransformedPacked = PackRGBAWord(128.0f);
                         fileQueueSetColor(*queues, queueTransformedPacked);
                         fileQueueSetScale(*queues, slot->scale);
                         fileQueueSetPosition(*queues, transformed);
@@ -6547,7 +6563,7 @@ void fileDrawLoadObjectSlots(s32 object) {
                             u32 *__restrict packedOutput = directOutput;
                             const s32 *__restrict frameInput;
 
-                            EE_MMI_RGBA_PACK_UNIT(packedOutput[0], 128.0f);
+                            MMI_RGBA_PACK_UNIT(packedOutput[0], 128.0f);
                             textureDirectPacked = packedOutput[0];
                             params.color = textureDirectPacked;
                             frameInput = &FILE_SLOT_FRAME(slot);
@@ -6572,11 +6588,11 @@ void fileDrawLoadObjectSlots(s32 object) {
                 SDF_VU0_LOADVECTOR(orientation);
                 ToMatrix();
                 SDF_VU0_LOAD_ROW3(origin);
-                VU0_STORE_MATRIX(matrix);
+                SDF_VU0_STOREMATRIX(matrix);
                 for (i = 0; i < count; i++, slot++) {
                     if (FILE_SLOT_FRAME(slot) >= 0) {
 
-                        VU0_LOAD_MATRIX(matrix);
+                        SDF_VU0_LOADMATRIX(matrix);
                         SDF_VU0_LOADVECTOR(slot->pos);
                         SDF_VU0_APPLYMATRIX_XYZ1();
                         SDF_VU0_STOREVECTOR(params.position);
@@ -6588,7 +6604,7 @@ void fileDrawLoadObjectSlots(s32 object) {
                             u32 *__restrict packedOutput = transformedOutput;
                             const s32 *__restrict frameInput;
 
-                            EE_MMI_RGBA_PACK_UNIT(packedOutput[0], 128.0f);
+                            MMI_RGBA_PACK_UNIT(packedOutput[0], 128.0f);
                             textureTransformedPacked = packedOutput[0];
                             params.color = textureTransformedPacked;
                             frameInput = &FILE_SLOT_FRAME(slot);
@@ -6730,14 +6746,14 @@ u32 effSampleColorAlphaTracks(const SdfColorTrack *colorTrack,
     }
 
     unitBits = 0x3C000000;
-    eeUnpackRGBAWord(color0, unitBits);
+    UnpackRGBAWord(color0, unitBits);
     SDF_VU0_COPYVECTOR_A_TO_B();
-    eeUnpackRGBAWord(color1, unitBits);
+    UnpackRGBAWord(color1, unitBits);
     inverseFactor = 1.0f - factor;
-    VU0_SCALE_VF(vf10, inverseFactor);
-    VU0_SCALE_VF(vf11, factor);
+    SDF_VU0_SCALEVECTOR_BITS(inverseFactor);
+    SDF_VU0_SCALEVECTOR_B_BITS(factor);
     SDF_VU0_ADDVECTOR();
-    packedColor = eePackRGBAWord(128.0f);
+    packedColor = PackRGBAWord(128.0f);
 
     fadeInFrame = (s32)(alphaTrack->fadeInFraction * durationFloat);
     fadeOutFrame = (s32)(alphaTrack->fadeOutFraction * durationFloat);
@@ -6823,11 +6839,8 @@ void fileSampleKeyTracks(FileSlot *out, const FileKeyBlock *block, s32 frame, co
         out->angle = effSampleScalarCurve(&block->heading.track.curve, frame, block->length);
         return;
     }
-    VU0_MOVE_VF(vf20, vf28);
-    VU0_MOVE_VF(vf21, vf29);
-    VU0_MOVE_VF(vf22, vf30);
-    VU0_MOVE_VF(vf23, vf31);
-    VU0_LOAD_MATRIX(sdfViewMatrix);
+    SDF_VU0_COPYMATRIX_A_TO_C();
+    SDF_VU0_LOADMATRIX(sdfViewMatrix);
     MultMatrixRev((const struct Matrix4 *)sdfProjectionMatrix);
     SDF_VU0_LOADVECTOR(out->pos);
     SDF_VU0_APPLYMATRIX_XYZ1();
@@ -6843,10 +6856,7 @@ void fileSampleKeyTracks(FileSlot *out, const FileKeyBlock *block, s32 frame, co
     } else {
         out->angle = 0.0f;
     }
-    VU0_MOVE_VF(vf28, vf20);
-    VU0_MOVE_VF(vf29, vf21);
-    VU0_MOVE_VF(vf30, vf22);
-    VU0_MOVE_VF(vf31, vf23);
+    SDF_VU0_COPYMATRIX_C_TO_A();
 }
 
 void fileInvalidateSlotGroup(FileSlotTable *table, FileSlot *slot) {
@@ -6970,7 +6980,7 @@ void effUpdateGridRecordSlotHistory(FileSlotTable *record, FileSlot *slot) {
                         SDF_VU0_STOREVECTOR_NOMEM(color);
                         SDF_VU0_SUBVECTOR_B_A();
                         SDF_VU0_SETSCALE1VECTOR();
-                        VU0_SCALE_VF(vf10, step);
+                        SDF_VU0_SCALEVECTOR_BITS(step);
                         SDF_VU0_MULVECTOR();
                         SDF_VU0_STOREVECTOR_NOMEM(colorStep);
                         for (i = 0; i < rows - 1; i++) {
@@ -6981,9 +6991,9 @@ void effUpdateGridRecordSlotHistory(FileSlotTable *record, FileSlot *slot) {
                             cursor->angle = angle + angleDelta * fraction;
                             SDF_VU0_LOADVECTOR(color);
                             SDF_VU0_LOADVECTOR_B(colorStep);
-                            VU0_ADD_EXTENDED(vf10, vf10, vf11);
+                            SDF_VU0_ADDVECTOR();
                             SDF_VU0_STOREVECTOR_NOMEM(color);
-                            EE_MMI_RGBA_PACK_UNIT(curveResultColor[0], 128.0f);
+                            MMI_RGBA_PACK_UNIT(curveResultColor[0], 128.0f);
                             cursor->color = curveResultColor[0];
                             FILE_SLOT_FRAME(cursor) = frame;
                             cursor--;
@@ -7008,7 +7018,7 @@ void effUpdateGridRecordSlotHistory(FileSlotTable *record, FileSlot *slot) {
                         SDF_VU0_STOREVECTOR_NOMEM(color);
                         SDF_VU0_SUBVECTOR_B_A();
                         SDF_VU0_SETSCALE1VECTOR();
-                        VU0_SCALE_VF(vf10, step);
+                        SDF_VU0_SCALEVECTOR_BITS(step);
                         SDF_VU0_MULVECTOR();
                         SDF_VU0_STOREVECTOR_NOMEM(colorStep);
                         {
@@ -7018,18 +7028,18 @@ void effUpdateGridRecordSlotHistory(FileSlotTable *record, FileSlot *slot) {
                                 fraction += step;
                                 SDF_VU0_LOADVECTOR(shiftTarget->pos);
                                 SDF_VU0_LOADVECTOR_B(group->pos);
-                                VU0_LERP_VF10(fraction);
+                                SDF_VU0_INTERPOLATE(fraction);
                                 SDF_VU0_STOREVECTOR_NOMEM(cursor->pos);
                                 cursor->scale = scale + scaleDelta * fraction;
                                 cursor->angle = angle + angleDelta * fraction;
                                 SDF_VU0_LOADVECTOR(color);
                                 SDF_VU0_LOADVECTOR_B(colorStep);
-                                VU0_ADD_EXTENDED(vf10, vf10, vf11);
+                                SDF_VU0_ADDVECTOR();
                                 SDF_VU0_STOREVECTOR_NOMEM(color);
                                 {
                                     u8 *__restrict slotBytes;
 
-                                    EE_MMI_RGBA_PACK_UNIT(packedOutput[0], 128.0f);
+                                    MMI_RGBA_PACK_UNIT(packedOutput[0], 128.0f);
                                     slotBytes = (u8 *)cursor;
                                     *(u32 *)(slotBytes + (u32)&((FileSlot *)0)->color) = packedOutput[0];
                                     *(s32 *)(slotBytes + (u32)&FILE_SLOT_FRAME((FileSlot *)0)) = frame;
@@ -7619,7 +7629,7 @@ void effUpdateCircularEmitterSlots(FileSlotTable *record) {
                             SDF_VU0_LOADVECTOR(direction);
                             SDF_VU0_LOADVECTOR_B(radiusVector);
                             SDF_VU0_MULVECTOR();
-                            VU0_SET_VF10_COMPONENT(y, motion->height);
+                            SDF_VU0_SETVECTOR_Y(motion->height);
                             localSpace = flags & 1;
                             if (localSpace == 0) {
                                 motion->origin[0] = origin[0];
@@ -8560,10 +8570,10 @@ void effUpdateCurveEmitterSlots(FileSlotTable *record) {
                             SDF_VU0_LOADVECTOR_C(start);
                             SDF_VU0_COPYVECTOR_C_TO_A();
                             SDF_VU0_LOADVECTOR_B(endpoint);
-                            VU0_LERP_VF10((f32)keys->emitter.curve.firstPercent / 100.0f);
+                            SDF_VU0_INTERPOLATE((f32)keys->emitter.curve.firstPercent / 100.0f);
                             SDF_VU0_STOREVECTOR(firstPoint);
                             SDF_VU0_COPYVECTOR_C_TO_A();
-                            VU0_LERP_VF10((f32)keys->emitter.curve.secondPercent / 100.0f);
+                            SDF_VU0_INTERPOLATE((f32)keys->emitter.curve.secondPercent / 100.0f);
                             SDF_VU0_STOREVECTOR(secondPoint);
                             SDF_VU0_COPYVECTOR_C_TO_A();
                             SDF_VU0_SUBVECTOR();
@@ -8586,8 +8596,8 @@ void effUpdateCurveEmitterSlots(FileSlotTable *record) {
                             SDF_VU0_LOADVECTOR(firstPoint);
                             SDF_VU0_LOADVECTOR_C(lateral);
                             SDF_VU0_COPYVECTOR_C_TO_B();
-                            VU0_SCALE_VF(vf11, offset);
-                            VU0_ROTATE_VEC(vf11, vf11);
+                            SDF_VU0_SCALEVECTOR_B_BITS(offset);
+                            SDF_VU0_APPLYMATRIX_XYZ_B();
                             SDF_VU0_ADDVECTOR();
                             SDF_VU0_STOREVECTOR(point);
                             motion->firstControl[0] = point[0];
@@ -8598,8 +8608,8 @@ void effUpdateCurveEmitterSlots(FileSlotTable *record) {
                                  (1.0f - keys->emitter.curve.secondRandomness));
                             SDF_VU0_LOADVECTOR(secondPoint);
                             SDF_VU0_COPYVECTOR_C_TO_B();
-                            VU0_SCALE_VF(vf11, offset);
-                            VU0_ROTATE_VEC(vf11, vf11);
+                            SDF_VU0_SCALEVECTOR_B_BITS(offset);
+                            SDF_VU0_APPLYMATRIX_XYZ_B();
                             SDF_VU0_ADDVECTOR();
                             SDF_VU0_STOREVECTOR(point);
                             motion->secondControl[0] = point[0];
@@ -8662,7 +8672,7 @@ void effUpdateCurveEmitterSlots(FileSlotTable *record) {
                                     SDF_VU0_STOREVECTOR(point);
                                     SetRotateMatrixAxis(rotation, (const struct RwV3d *)axis);
                                     SDF_VU0_LOADVECTOR_B(axis);
-                                    VU0_SCALE_VF(vf11, motion->pathLength * progress);
+                                    SDF_VU0_SCALEVECTOR_B_BITS(motion->pathLength * progress);
                                     SDF_VU0_LOADVECTOR(point);
                                     SDF_VU0_SUBVECTOR();
                                     SDF_VU0_APPLYMATRIX_XYZ();
@@ -8721,7 +8731,7 @@ void effUpdateCurveEmitterSlots(FileSlotTable *record) {
                             SDF_VU0_STOREVECTOR(axis);
                             SetRotateMatrixAxis(rotation, (const struct RwV3d *)axis);
                             SDF_VU0_LOADVECTOR_B(axis);
-                            VU0_SCALE_VF(vf11, motion->pathLength * progress);
+                            SDF_VU0_SCALEVECTOR_B_BITS(motion->pathLength * progress);
                             SDF_VU0_LOADVECTOR(point);
                             SDF_VU0_SUBVECTOR();
                             SDF_VU0_APPLYMATRIX_XYZ();
@@ -8794,8 +8804,8 @@ FileSlotTable *fileAllocateGridRecordSlots(u16 type, u32 count, const void *data
     memcpy(rec->data0, src, dataBytes);
     memcpy(rec->data1, src, dataBytes);
     vec = rec->data0;
-    VU0_STORE_VF(vf0, vec);
-    VU0_STORE_VF(vf0, vec + 0x10);
+    SDF_VU0_STOREIDENTITYVECTOR(vec);
+    SDF_VU0_STOREIDENTITYVECTOR(vec + 0x10);
     if (vec[0xBC] != 0) {
         rec->flags |= 1;
     }

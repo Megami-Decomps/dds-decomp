@@ -4,7 +4,7 @@
 #include "dsp_name.h"
 #include "sdf_packet_list.h"
 #include "common.h"
-#include "sdf_vu0.h"
+#include "ps2asm.h"
 #include "sdf_kernel_thread_param.h"
 #include "sdf_thread_workspace_api.h"
 #include "eff_random.h"
@@ -14,7 +14,6 @@
 #include "sdf_semaphore_api.h"
 #include "eff_curve.h"
 #include "sdf_projection.h"
-#include "pcp_vu0.h"
 #include "itf.h"
 #include "fr_font.h"
 #include "dat_state.h"
@@ -1444,7 +1443,7 @@ void sdfUpdateFlagListEntries(SdfFlagListWork *work) {
             SDF_VU0_NORMALIZE();
             SDF_VU0_COPYVECTOR_A_TO_B();
             SDF_VU0_SETSCALE1VECTOR();
-            VU0_SCALAR_OP_R3(step, "vmulx.xyzw vf10, vf10, vf2x");
+            SDF_VU0_SCALEVECTOR_V1(step);
             SDF_VU0_MULVECTOR();
             SDF_VU0_COPYVECTOR_A_TO_C();
             SDF_VU0_LOADVECTOR(vertices[0]);

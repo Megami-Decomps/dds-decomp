@@ -2,7 +2,7 @@
 #include "scr_integer_parameter_api.h"
 #include "scr_command_parameter_index.h"
 #include "dds3_basic_lifecycle.h"
-#include "sdf_vu0.h"
+#include "ps2asm.h"
 #include "eff_inner_float_api.h"
 #include "sdf_sif_command.h"
 #include "scr_integer_return_value_api.h"
@@ -10,7 +10,6 @@
 #include "sdf_chip.h"
 #include "sdf_packet_list.h"
 #include "kernel.h"
-#include "pcp_vu0.h"
 #include "eff_transform.h"
 #include "dds3obj.h"
 #include "sdf.h"
@@ -142,7 +141,7 @@ u8 dds3InitPoseSet(dds3Basic_t *node) {
     }
     inner->flags = OBJECT_TRANSFORM_FLAG_UPDATE_PENDING;
     dds3BackupPoseSet(inner);
-    VU0_STORE_VF(vf0, &inner->unkB0);
+    SDF_VU0_STOREIDENTITYVECTOR(&inner->unkB0);
     node->poseset = inner;
     inner->unkC8 = 0;
     inner->radius = 0.0f;
@@ -178,9 +177,9 @@ void dds3BackupPoseSet(dds3PoseSet_t *node) {
     u8 *p50;
     u8 *p60;
 
-    VU0_STORE_VF(vf0, p40);
+    SDF_VU0_STOREIDENTITYVECTOR(p40);
     p50 = (u8 *)&node->rotation;
-    VU0_STORE_VF(vf0, p50);
+    SDF_VU0_STOREIDENTITYVECTOR(p50);
     SDF_VU0_SETSCALE1VECTOR();
     p60 = (u8 *)&node->scale;
     SDF_VU0_STOREVECTOR(p60);
@@ -257,7 +256,7 @@ void dds3GetPosPoseSetMCR(dds3Basic_t *node, u128 *vector) {
     SDF_VU0_LOADVECTOR(src);
     SDF_VU0_LOADVECTOR_B_BARRIER(vector);
     SDF_VU0_ADDVECTOR();
-    VU0_STORE_VF10_BASE_OFF(dst, inner, 0x40);
+    SDF_VU0_STOREVECTOR_OFFSET(dst, inner, 0x40);
 }
 
 void dds3AddRotPoseSet(dds3Basic_t *node, u128 *vector) {
@@ -265,10 +264,10 @@ void dds3AddRotPoseSet(dds3Basic_t *node, u128 *vector) {
 
     inner->flags = (inner->flags | OBJECT_TRANSFORM_FLAG_UPDATE_PENDING) &
         ~OBJECT_TRANSFORM_FLAG_MATRIX_CACHE_VALID;
-    VU0_LOAD_VF($vf10, &inner->rotation);
-    VU0_LOAD_VF($vf11, vector);
+    SDF_VU0_LOADVECTOR(&inner->rotation);
+    SDF_VU0_LOADVECTOR_B(vector);
     Mult();
-    VU0_STORE_VF($vf10, &inner->rotation);
+    SDF_VU0_STOREVECTOR(&inner->rotation);
 }
 
 void dds3GetSclPoseSetMCR(dds3Basic_t *node, u128 *vector) {
@@ -281,7 +280,7 @@ void dds3GetSclPoseSetMCR(dds3Basic_t *node, u128 *vector) {
     SDF_VU0_LOADVECTOR(src);
     SDF_VU0_LOADVECTOR_B_BARRIER(vector);
     SDF_VU0_MULVECTOR();
-    VU0_STORE_VF10_BASE_OFF(dst, inner, 0x60);
+    SDF_VU0_STOREVECTOR_OFFSET(dst, inner, 0x60);
 }
 /* vu0 routine: build the world matrix in vf28-vf31 from rotation (quaternion),
    per-row scale and translation. */
@@ -304,11 +303,11 @@ void dds3GetTMPoseSet(dds3Basic_t *object) {
     u32 flags = transform->flags;
 
     if (flags & OBJECT_TRANSFORM_FLAG_MATRIX_CACHE_VALID) {
-        VU0_LOAD_MATRIX(transform->matrix);
+        SDF_VU0_LOADMATRIX(transform->matrix);
     } else {
         transform->flags = flags | OBJECT_TRANSFORM_FLAG_MATRIX_CACHE_VALID;
         dds3MakeMatrix(transform->scale, transform->rotation, transform->pos);
-        VU0_STORE_MATRIX(transform->matrix);
+        SDF_VU0_STOREMATRIX(transform->matrix);
     }
 }
 

@@ -1,7 +1,7 @@
 #include "sdk_ps2.h"
 #include "sdf_gs_header.h"
 #include "common.h"
-#include "sdf_vu0.h"
+#include "ps2asm.h"
 #include "dds3_draw_buffer.h"
 #include "dds3_frame_draw_buffer.h"
 #include "bill_state_packet.h"
@@ -13,8 +13,6 @@
 #include "sdf_heap_api.h"
 #include "sdf_texture_file.h"
 #include "eff.h"
-#include "ee_mmi.h"
-#include "pcp_vu0.h"
 #include "sdf.h"
 #include "sdf_texture_primary_buffer_api.h"
 
@@ -83,9 +81,9 @@ void dds3BillboardTagLink(billHandle_t *obj, BillChildPayload *child) {
             SDF_VU0_LOADIDENTITY();
             SDF_VU0_LOADVECTOR_BARRIER(dds3BillboardTagParam);
             SDF_VU0_SCALE_XYZ();
-            VU0_STORE_MATRIX(matrix);
+            SDF_VU0_STOREMATRIX(matrix);
         } else {
-            EE_MMI_UNIT_MATRIX(matrix);
+            SDF_VU0_STOREIDENTITY(matrix);
         }
         geometry = (u8 *)sdfGrAllocPacketBuff(0x38);
         sdfBillBoardMakeTMPacket(geometry, matrix);
@@ -269,9 +267,9 @@ void billAppendPairedQuadEntry(billHandle_t *obj, BillRenderPair *node) {
             SDF_VU0_LOADIDENTITY();
             SDF_VU0_LOADVECTOR_BARRIER(billPairFacingScale);
             SDF_VU0_SCALE_XYZ();
-            VU0_STORE_MATRIX(matrix);
+            SDF_VU0_STOREMATRIX(matrix);
         } else {
-            EE_MMI_UNIT_MATRIX(matrix);
+            SDF_VU0_STOREIDENTITY(matrix);
         }
         sdfBillBoardMakeTMPacket(geometry, matrix);
         sdfDrawTagLink(node->packetList, (u32)geometry);
@@ -586,7 +584,7 @@ u32 dds3Billboard_P2AColorMul(u32 colorA, u32 colorB) {
     color2[0] = colorB;
     EE_MMI_RGBA_UNPACK(color2, unit);
     SDF_VU0_MULVECTOR();
-    EE_MMI_RGBA_PACK(packed);
+    SDF_VU0_dds3ColorFtoI(packed, 128.0f);
     blended[0] = packed;
     return blended[0];
 }

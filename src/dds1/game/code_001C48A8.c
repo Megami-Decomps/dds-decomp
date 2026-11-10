@@ -28,7 +28,7 @@
 extern u8 sndIsStreamStatusTwoOrThree(void);
 extern s8 btlChooseStartVoice(void);
 extern BtlRuntimeTask *btlCreateSoundUpdateTask(u32);
-#include "pcp_vu0.h"
+#include "ps2asm.h"
 #include "dat_state.h"
 #include "sdf.h"
 #include "btl_scene_initializer.h"
@@ -197,7 +197,7 @@ void fldBattleSceneEnterInit(u8 *scene) {
     btlRequestSceneEventResources();
     btlInitializeBossCallbacks(work->sceneId);
     sndStartBattleSceneStream(work->streamAdjustmentIndex, work->sceneId);
-    VU0_STORE_VF($vf0, scene);
+    SDF_VU0_STOREIDENTITYVECTOR(scene);
 }
 
 extern s32 btlIsFadeInPhaseOrIdle(void);

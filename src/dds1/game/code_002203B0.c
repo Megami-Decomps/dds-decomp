@@ -1,5 +1,5 @@
 #include "common.h"
-#include "sdf_vu0.h"
+#include "ps2asm.h"
 #include "sdf_float_counter.h"
 #include "eff_node.h"
 #include "eff_dependency.h"
@@ -13,7 +13,6 @@
 #include "evt_stage_anime_control_api.h"
 #include "evt_unit_move_end_api.h"
 #include "evt_unit_path_advance_api.h"
-#include "pcp_vu0.h"
 #include "dds3_world_counter.h"
 #include "sdf_vu_matrix.h"
 
@@ -119,7 +118,7 @@ void evtVu0SubVectorXZAxis(f32 *a, f32 *b) {
     SDF_VU0_LOADVECTOR(a);
     SDF_VU0_LOADVECTOR_B(b);
     SDF_VU0_SUBVECTOR();
-    VU0_SCALAR_OP(0.0f, "vaddx.y vf10, vf0, vf2x");
+    SDF_VU0_SETVECTOR_Y_V0(0.0f);
 }
 
 /* vf10 = the unit's rotated y axis flattened to the ground plane, negated */
@@ -133,7 +132,7 @@ void evtGetUnitDirVector(evtUnitHandle_t *unit) {
     v[3] = 1.0f;
     SDF_VU0_LOADVECTOR(v);
     SDF_VU0_NORMALIZE();
-    VU0_SCALAR_OP(-1.0f, "vmulx.xyzw vf10, vf10, vf2x");
+    SDF_VU0_SCALEVECTOR_V0(-1.0f);
 }
 
 /* vu0 routine: test target range or the selected path endpoint. */
@@ -195,7 +194,7 @@ EvtUnitPathAdvanceResult evtGetNextMovePos(evtUnitHandle_t *unit) {
         }
         dds3PathBasicControlSetRatio(&unit->pathControl->counter, t);
         dds3PathBasicControlGetPos(unit->pathControl);
-        VU0_STORE_VF($vf10, unit->targetVector);
+        SDF_VU0_STOREVECTOR(unit->targetVector);
         return EVT_UNIT_PATH_ADVANCED;
     }
     return EVT_UNIT_PATH_NOT_ADVANCED;

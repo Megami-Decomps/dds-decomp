@@ -2,7 +2,20 @@
 #include "common.h"
 #include "sdf_map_position_api.h"
 #include "eff_texture_table.h"
-#include "sdf_vu0.h"
+#include "ps2asm.h"
+
+static inline void UnpackRGBAWord(u32 color, u32 unitBits) {
+    u32 rgba[4];
+    rgba[0] = color;
+    EE_MMI_RGBA_UNPACK_READONLY(rgba, unitBits);
+}
+
+static inline u32 PackRGBAWord(f32 unit) {
+    u32 rgba[4];
+    MMI_RGBA_PACK_UNIT(rgba[0], unit);
+    return rgba[0];
+}
+
 #include "eff_object_node.h"
 #include "eff_model_owner.h"
 #include "sdf_motion.h"
@@ -12,8 +25,6 @@
 #include "sdf_heap_api.h"
 #include "eff_anim.h"
 #include "file.h"
-#include "pcp_vu0.h"
-#include "ee_mmi.h"
 #include "mdl.h"
 #include "mdl_broadcast_callback.h"
 #include "btl_grouped_entity_api.h"
@@ -128,7 +139,7 @@ EffModelOwner *effCreateModelOwner(FileJobPayload *source) {
         if (data != 0) {
             owner->model = effLoadViewerModelWithVUState(data, source->secondary.size);
             SDF_VU0_SETSCALE1VECTOR();
-            VU0_SCALE_VF_MFC1(vf10, owner->scale);
+            SDF_VU0_SCALEVECTOR_V0_BARRIER(owner->scale);
             mdlSetScale(owner->model);
         }
     }
@@ -166,7 +177,7 @@ void effRecreateModelFromSource(EffModelOwner *owner, EffModelOwner *source) {
     model = mdlLoad(group, id);
     effInitModelVUState(model);
     SDF_VU0_SETSCALE1VECTOR();
-    VU0_SCALAR_OP_CLOBBER(owner->scale, "vmulx.xyzw vf10, vf10, vf2x");
+    SDF_VU0_SCALEVECTOR_V0_CLOBBER(owner->scale);
     mdlSetScale(model);
     owner->model = model;
 }
@@ -688,7 +699,7 @@ void func_002DD448(EffResourceOwner *owner) {
             distanceScale = distance / 800.0f;
             distanceScale /= scale;
             SDF_VU0_SETSCALE1VECTOR();
-            VU0_SCALAR_OP(distanceScale, "vmulx.xyzw vf10, vf10, vf2x");
+            SDF_VU0_SCALEVECTOR_V0(distanceScale);
             SDF_VU0_SCALE_XYZ();
             SDF_VU0_STORE_ROW0_NOMEM(owner->model->inner->matrix[0]);
             SDF_VU0_STORE_ROW1_NOMEM(owner->model->inner->matrix[1]);
@@ -710,23 +721,23 @@ void func_002DD448(EffResourceOwner *owner) {
                 &owner->base.alphaTrack, frame, limit);
             broadcastColor = mdlGetColor(owner->model);
             byteUnit = 0x3C000000;
-            eeUnpackRGBAWord(broadcastColor, byteUnit);
+            UnpackRGBAWord(broadcastColor, byteUnit);
             SDF_VU0_COPYVECTOR_A_TO_B();
-            eeUnpackRGBAWord(sampledColor, byteUnit);
+            UnpackRGBAWord(sampledColor, byteUnit);
             SDF_VU0_MULVECTOR();
-            color = eePackRGBAWord(128.0f);
+            color = PackRGBAWord(128.0f);
             for (index = 0; index < count; index++, queue++) {
                 if (!(effModelUpdateControlFlags & EFF_MODEL_UPDATE_PAUSE_EFFECT_FRAME_ADVANCE)) {
                     sdfModelGetMarkPosMatrix(model, index);
-                    VU0_STORE_VF_UNCLOBBERED(vf31, position);
+                    SDF_VU0_STORE_ROW3_NOMEM(position);
                     if (scale != 0.0f) {
                         SDF_VU0_SETSCALE1VECTOR();
-                        VU0_SCALE_VF(vf10, 1.0f / (scale * distanceScale));
+                        SDF_VU0_SCALEVECTOR_BITS(1.0f / (scale * distanceScale));
                         SDF_VU0_SCALE_XYZ();
                     }
                     SetRotateMatrixY_B(3.14159265f);
                     MultMatrixNoArg();
-                    VU0_STORE_MATRIX(matrix);
+                    SDF_VU0_STOREMATRIX(matrix);
                     fileQueueSetPosition(*queue, position);
                     sdfVuMatrixToQuaternion(matrix);
                     Normalize();
@@ -744,22 +755,22 @@ void func_002DD448(EffResourceOwner *owner) {
         } else {
             for (index = 0; index < count; index++) {
                 sdfModelGetMarkPosMatrix(model, index);
-                VU0_STORE_VF_UNCLOBBERED(vf31, position);
-                VU0_STORE_MATRIX(matrix);
+                SDF_VU0_STORE_ROW3_NOMEM(position);
+                SDF_VU0_STOREMATRIX(matrix);
                 SDF_VU0_LOADVECTOR(D_003E9130);
-                VU0_SCALE_VF(vf10, 5000.0f);
+                SDF_VU0_SCALEVECTOR_BITS(5000.0f);
                 SDF_VU0_APPLYMATRIX_XYZ1();
                 SDF_VU0_STOREVECTOR_NOMEM(endpoint);
                 btlDebugDrawSegment(position, endpoint, 0x80006000);
-                VU0_LOAD_MATRIX_MEMORY(matrix);
+                SDF_VU0_LOADMATRIX_BARRIER(matrix);
                 SDF_VU0_LOADVECTOR(effWorldUpVector);
-                VU0_SCALE_VF(vf10, 5000.0f);
+                SDF_VU0_SCALEVECTOR_BITS(5000.0f);
                 SDF_VU0_APPLYMATRIX_XYZ1();
                 SDF_VU0_STOREVECTOR_NOMEM(endpoint);
                 btlDebugDrawSegment(position, endpoint, 0x80600000);
-                VU0_LOAD_MATRIX_MEMORY(matrix);
+                SDF_VU0_LOADMATRIX_BARRIER(matrix);
                 SDF_VU0_LOADVECTOR(D_003E9120);
-                VU0_SCALE_VF(vf10, 5000.0f);
+                SDF_VU0_SCALEVECTOR_BITS(5000.0f);
                 SDF_VU0_APPLYMATRIX_XYZ1();
                 SDF_VU0_STOREVECTOR_NOMEM(endpoint);
                 btlDebugDrawSegment(position, endpoint, 0x80000060);
@@ -791,7 +802,7 @@ void effPropagateResourceModelMask(EffResourceOwner *owner, u32 color) {
 void effScaleModelVec(EffResourceOwner *owner, float scale) {
     u32 bits;
     SDF_VU0_SETSCALE1VECTOR();
-    VU0_SCALAR_OP_TMP_MEMORY(bits, scale, "vmulx.xyzw vf10, vf10, vf2x");
+    SDF_VU0_SCALEVECTOR_BARRIER(scale);
     mdlSetScale(owner->model);
 }
 
@@ -922,8 +933,8 @@ sdfTexHandle_t *sdfGetOrCreateTextureForReference(sdfGrOt_t *surface, RefObj *so
     secondary = texture->clutGsHandle->addr;
     pixelFormat = texture->pixelFormat;
     heightLog2 = (s16)height - 1;
-    EE_MMI_BIT_LENGTH(heightLog2);
-    EE_MMI_BIT_LENGTH(widthLog2);
+    heightLog2 = PS2_WORD_BIT_LENGTH(heightLog2);
+    widthLog2 = PS2_WORD_BIT_LENGTH(widthLog2);
     secondary >>= 6;
     texture->packet->tex0.data =
         ((u64)2 << 61) |

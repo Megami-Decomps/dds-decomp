@@ -29,7 +29,7 @@
 #include "sdf_delayed_resource_check_api.h"
 #include "fld_archive_load_state.h"
 #include "dds3_object_flags.h"
-#include "sdf_vu0.h"
+#include "ps2asm.h"
 #include "snd_track_playback_api.h"
 #include "sdf_vu_matrix.h"
 #include "sdf_texture_draw_packet.h"
@@ -65,7 +65,6 @@
 #include "fld_transfer_chunk.h"
 #include "sdf.h"
 #include "sdf_projection.h"
-#include "pcp_vu0.h"
 #include "fpu.h"
 #include "mdl.h"
 #include "dat_state.h"
@@ -1322,7 +1321,6 @@ void fldDrawProjectedMapIcon(f32 x, f32 y, s32 index, u32 color) {
 #include "sdf_projection.h"
 #include "sdf_draw.h"
 #include "fpu.h"
-#include "pcp_vu0.h"
 #include "dat_state.h"
 #include "eff.h"
 #include "eff_node.h"
@@ -1400,18 +1398,18 @@ void func_00145A08(s32 index, f32 x, f32 y, f32 rotation) {
     corner2[0] = corner0[0]; corner2[1] = 0.0f; corner2[2] = corner3[2];
 
     SetRotateMatrixY((rotation + 180.0f) * 3.14f / 180.0f);
-    VU0_LOAD_VF_MEMORY(vf10, corner0);
-    VU0_ROTATE_VEC_EXTENDED(vf10, vf10);
-    VU0_STORE_VF(vf10, corner0);
-    VU0_LOAD_VF_MEMORY(vf10, corner1);
-    VU0_ROTATE_VEC_EXTENDED(vf10, vf10);
-    VU0_STORE_VF(vf10, corner1);
-    VU0_LOAD_VF_MEMORY(vf10, corner2);
-    VU0_ROTATE_VEC_EXTENDED(vf10, vf10);
-    VU0_STORE_VF(vf10, corner2);
-    VU0_LOAD_VF_MEMORY(vf10, corner3);
-    VU0_ROTATE_VEC_EXTENDED(vf10, vf10);
-    VU0_STORE_VF(vf10, corner3);
+    SDF_VU0_LOADVECTOR_BARRIER(corner0);
+    SDF_VU0_APPLYMATRIX_XYZ_EXTENDED();
+    SDF_VU0_STOREVECTOR(corner0);
+    SDF_VU0_LOADVECTOR_BARRIER(corner1);
+    SDF_VU0_APPLYMATRIX_XYZ_EXTENDED();
+    SDF_VU0_STOREVECTOR(corner1);
+    SDF_VU0_LOADVECTOR_BARRIER(corner2);
+    SDF_VU0_APPLYMATRIX_XYZ_EXTENDED();
+    SDF_VU0_STOREVECTOR(corner2);
+    SDF_VU0_LOADVECTOR_BARRIER(corner3);
+    SDF_VU0_APPLYMATRIX_XYZ_EXTENDED();
+    SDF_VU0_STOREVECTOR(corner3);
 
     xOffset = x * 16.0f;
     yOffset = y * 16.0f;
@@ -1485,7 +1483,6 @@ INCLUDE_ASM(const s32, "game/code_001442D0", func_00145A08);
 #include "sdf_projection.h"
 #include "sdf_draw.h"
 #include "fpu.h"
-#include "pcp_vu0.h"
 #include "dat_state.h"
 #include "eff.h"
 #include "eff_node.h"
@@ -1569,18 +1566,18 @@ void func_00145D48(s32 index, s32 alpha, f32 x, f32 y, f32 rotation) {
     corner2[0] = corner0[0]; corner2[1] = 0.0f; corner2[2] = corner3[2];
 
     SetRotateMatrixY((rotation + 180.0f) * 3.14f / 180.0f);
-    VU0_LOAD_VF_MEMORY(vf10, corner0);
-    VU0_ROTATE_VEC_EXTENDED(vf10, vf10);
-    VU0_STORE_VF(vf10, corner0);
-    VU0_LOAD_VF_MEMORY(vf10, corner1);
-    VU0_ROTATE_VEC_EXTENDED(vf10, vf10);
-    VU0_STORE_VF(vf10, corner1);
-    VU0_LOAD_VF_MEMORY(vf10, corner2);
-    VU0_ROTATE_VEC_EXTENDED(vf10, vf10);
-    VU0_STORE_VF(vf10, corner2);
-    VU0_LOAD_VF_MEMORY(vf10, corner3);
-    VU0_ROTATE_VEC_EXTENDED(vf10, vf10);
-    VU0_STORE_VF(vf10, corner3);
+    SDF_VU0_LOADVECTOR_BARRIER(corner0);
+    SDF_VU0_APPLYMATRIX_XYZ_EXTENDED();
+    SDF_VU0_STOREVECTOR(corner0);
+    SDF_VU0_LOADVECTOR_BARRIER(corner1);
+    SDF_VU0_APPLYMATRIX_XYZ_EXTENDED();
+    SDF_VU0_STOREVECTOR(corner1);
+    SDF_VU0_LOADVECTOR_BARRIER(corner2);
+    SDF_VU0_APPLYMATRIX_XYZ_EXTENDED();
+    SDF_VU0_STOREVECTOR(corner2);
+    SDF_VU0_LOADVECTOR_BARRIER(corner3);
+    SDF_VU0_APPLYMATRIX_XYZ_EXTENDED();
+    SDF_VU0_STOREVECTOR(corner3);
 
     xOffset = x * 16.0f;
     yOffset = y * 16.0f;
@@ -1752,7 +1749,7 @@ void fldDrawAutomapScene(void) {
 
     proposed = fldAutoMapGetFloorMax();
     frSetFontDrawOT(0x5E);
-    VU0_LOAD_MATRIX(&D_00384790);
+    SDF_VU0_LOADMATRIX(&D_00384790);
     InversMatrix();
     D_00436288 = D_0043624C;
     if ((s8)dds3PadButtonState[1][0][8] < 0 && D_00436288 < proposed) {
@@ -1978,7 +1975,7 @@ void fldDrawAutomapScene(void) {
     sdf3DSetCamera(&dds3ScreenParam, &sdfViewMatrix);
     D_004362A8 += 0.4f;
     D_004362AC += 0.2f;
-    PCP_COPY_VECTOR_F32(focus, D_0037FA20);
+    SDF_VU0_COPYVECTOR_F32(focus, D_0037FA20);
 
     if (D_00436298 >= 128) {
         selectedFloor = D_00436288 - 1;
@@ -2362,7 +2359,7 @@ void fldDrawAutomapScene(void) {
         frDestroyFontRequestAfter(D_00438ED4);
     }
 
-    VU0_LOAD_MATRIX(&sdfViewMatrix);
+    SDF_VU0_LOADMATRIX(&sdfViewMatrix);
 }
 
 extern s32 sdfGrAllocPacketBuff(s32);
@@ -2468,7 +2465,7 @@ void fldDrawScrollingLayerOverlay(void) {
     s32 panelOffset;
 
     D_004362B0 += 0.04f;
-    VU0_LOAD_MATRIX(&D_00384790);
+    SDF_VU0_LOADMATRIX(&D_00384790);
     InversMatrix();
     sdf3DSetCamera(&dds3ScreenParam, &D_00384790);
 
@@ -2545,7 +2542,7 @@ void fldDrawScrollingLayerOverlay(void) {
     rsetAlpha(0);
     rsetAlpha(0);
     sdf3DSetCamera(&dds3ScreenParam, &sdfViewMatrix);
-    VU0_LOAD_MATRIX(&sdfViewMatrix);
+    SDF_VU0_LOADMATRIX(&sdfViewMatrix);
     rsetOtOfs(0x5E);
     rsetTest(1, 5, 0x81, 1, 0, 0, 1, 2);
     rsetAlpha(0);
@@ -2596,7 +2593,6 @@ void fldDrawScrollingLayerOverlay(void) {
 #include "sdf_projection.h"
 #include "sdf_draw.h"
 #include "fpu.h"
-#include "pcp_vu0.h"
 #include "dat_state.h"
 #include "eff.h"
 #include "eff_node.h"
@@ -2694,7 +2690,7 @@ void func_00148A98(void) {
     playerWorldX = fldGlobalBase.x + sceneX;
     playerWorldZ = fldGlobalBase.z + sceneZ;
     fldAutoMapGetFloorMax();
-    VU0_LOAD_MATRIX(&D_00384790);
+    SDF_VU0_LOADMATRIX(&D_00384790);
     InversMatrix();
     D_004362B8 = D_0043624C;
     D_004362BC = 128;
@@ -2785,7 +2781,7 @@ void func_00148A98(void) {
     sdf3DSetCamera(&dds3ScreenParam, &sdfViewMatrix);
     D_004362C0 += 0.4f;
     D_004362C4 += 0.2f;
-    PCP_COPY_VECTOR_F32(focus, D_0037FA20);
+    SDF_VU0_COPYVECTOR_F32(focus, D_0037FA20);
 
     if (D_004362BC >= 128) {
         rsetAlpha(1);
@@ -2910,7 +2906,7 @@ void func_00148A98(void) {
     }
     rsetOtOfs(0x5E);
     rsetAlpha(0);
-    VU0_LOAD_MATRIX(&sdfViewMatrix);
+    SDF_VU0_LOADMATRIX(&sdfViewMatrix);
 }
 #else
 INCLUDE_ASM(const s32, "game/code_001442D0", func_00148A98);
@@ -3804,7 +3800,7 @@ void fldUpdatePositionedTextureNodes(void) {
             }
             effCopyVectorToNodeInstance(fldEffectTextureNodes[i], position);
             SetRotateMatrixY(-angle);
-            VU0_STORE_MATRIX_UNCLOBBERED(matrix);
+            SDF_VU0_STOREMATRIX_NOMEM(matrix);
             effApplyNodeTransformMatrix(fldEffectTextureNodes[i], matrix);
             dds3EffectDispatchUpdate(fldEffectTextureNodes[i]);
         }
@@ -4867,7 +4863,6 @@ void fldFlushQueuedEffectPositions(void) {
 #include "sdf_projection.h"
 #include "sdf_draw.h"
 #include "fpu.h"
-#include "pcp_vu0.h"
 #include "dat_state.h"
 #include "eff.h"
 #include "eff_node.h"
@@ -4951,13 +4946,13 @@ void func_0014DEA8(void) {
             }
             transition = dds3GetUnitHandleObjectBasic(slot->unitObject);
             if (sdfModelGetMarkPos(transition->owner->inner, 2) != 0) {
-                VU0_STORE_VF(vf10, position);
+                SDF_VU0_STOREVECTOR(position);
             }
             placeEffectNode((EffNode *)(u32)slot->effectNode, position);
         } else if (slot->activationState == 1 || slot->activationState == 2) {
             transition = dds3GetUnitHandleObjectBasic(slot->unitObject);
             if (sdfModelGetMarkPos(transition->owner->inner, 1) != 0) {
-                VU0_STORE_VF(vf10, position);
+                SDF_VU0_STOREVECTOR(position);
             }
             kind = D_003A8EB0[slot->effectKindIndex].kind;
             if (kind == 2 || kind == 3) {
@@ -4999,7 +4994,7 @@ void func_0014DEA8(void) {
         }
         dds3ObjectBaseOffFlag((void *)entry->object, 1);
         dds3GetPosPoseSet((dds3Basic_t *)(u32)entry->object);
-        VU0_STORE_VF(vf10, position);
+        SDF_VU0_STOREVECTOR(position);
 
         height = target[1] - position[1];
         if (height < 0.0f) {
@@ -7295,7 +7290,7 @@ void fldUpdateTargetGuideEffects(void) {
 
     if (fldTargetGuideState.updateFlags & 0x40) {
         dds3OnPoseSetFlag(D_00435F1C->poseset, 8);
-        PCP_COPY_VECTOR_F32(smoothedPosition, D_00435F1C->poseset->smoothedPosition);
+        SDF_VU0_COPYVECTOR_F32(smoothedPosition, D_00435F1C->poseset->smoothedPosition);
         if (fabsf(smoothedPosition[0] - position[0]) < 1.0f) {
             D_00435F1C->poseset->smoothedPosition[0] = position[0];
         } else {
@@ -7822,9 +7817,9 @@ void fldCreateGrippedUnitMarker(s32 gridX, s32 gridY, s32 slot) {
         scale[0] = 1.0f;
         scale[1] = 0.5f;
         scale[2] = 1.0f;
-        PCP_COPY_VECTOR_F32(object->poseset->pos, position);
-        PCP_COPY_VECTOR_F32(object->poseset->smoothedPosition, position);
-        PCP_COPY_VECTOR_F32(object->poseset->rotation, rotation);
+        SDF_VU0_COPYVECTOR_F32(object->poseset->pos, position);
+        SDF_VU0_COPYVECTOR_F32(object->poseset->smoothedPosition, position);
+        SDF_VU0_COPYVECTOR_F32(object->poseset->rotation, rotation);
         dds3SetPosPoseSet(object, (u128 *)position);
         dds3SetRotPoseSet(object, (u128 *)rotation);
         dds3SetSclPoseSet(object, (u128 *)scale);
@@ -7909,9 +7904,9 @@ void fldCreateChaseCameraObject(void) {
     position[2] = 800.0f;
     object = D_00435F1C;
     inner = object->poseset;
-    PCP_COPY_VECTOR_F32(inner->pos, position);
-    PCP_COPY_VECTOR_F32(inner->smoothedPosition, position);
-    PCP_COPY_VECTOR_F32(inner->rotation, rotation);
+    SDF_VU0_COPYVECTOR_F32(inner->pos, position);
+    SDF_VU0_COPYVECTOR_F32(inner->smoothedPosition, position);
+    SDF_VU0_COPYVECTOR_F32(inner->rotation, rotation);
     dds3SetPosPoseSet(object, (u128 *)position);
     dds3SetRotPoseSet(D_00435F1C, (u128 *)rotation);
     dds3SetSclPoseSet(D_00435F1C, (u128 *)scale);

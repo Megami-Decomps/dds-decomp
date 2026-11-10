@@ -1,5 +1,5 @@
 #include "common.h"
-#include "pcp_vu0.h"
+#include "ps2asm.h"
 #include "eff_pcp_map_events.h"
 
 /* vu0 routine: copy the PCP event-work position vector, including its fourth lane. */

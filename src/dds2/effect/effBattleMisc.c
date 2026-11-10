@@ -1,9 +1,8 @@
 #include "common.h"
-#include "sdf_vu0.h"
+#include "ps2asm.h"
 #include "sdf_vu_rotation_axes.h"
 #include "dds3obj.h"
 #include "btl_effect_position.h"
-#include "pcp_vu0.h"
 #include "sdf_vu_transform_api.h"
 #include "sdf_vu_matrix.h"
 #include "sdf_vu_matrix_multiply_api.h"
@@ -360,7 +359,7 @@ void effBTLPartGetRotateMatrixPtr(EffectVectorRequest *request, u128 *out) {
         SetRotateMatrixY_B(angle);
         MultMatrixRevNoArg();
     }
-    VU0_STORE_MATRIX(out);
+    SDF_VU0_STOREMATRIX(out);
 }
 
 EffBattleTransitionDuration effBattleMiscGetTableEntry(EffBattleTransitionDurationIndex durationIndex) {

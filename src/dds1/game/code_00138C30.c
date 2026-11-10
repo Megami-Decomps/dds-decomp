@@ -14,7 +14,7 @@
 #include "fld_camera_link_mode.h"
 #include "fld_map_slot_auxiliary_flag_selector.h"
 #include "fld_camera_model_motion_request.h"
-#include "sdf_vu0.h"
+#include "ps2asm.h"
 #include "fld_stop_entry.h"
 #include "sdf_resource_list_release_api.h"
 #include "dds3_background_fade_api.h"
@@ -91,7 +91,6 @@
 #include "evt_unit.h"
 #include "evt_unit_color_transition.h"
 #include "fpu.h"
-#include "pcp_vu0.h"
 #include "sdf.h"
 #include "sdf_sif_command.h"
 #include "mdl.h"
@@ -672,7 +671,6 @@ FldEventDisplayResourceIndex fldEveHit_AddEveData(
 #include "common.h"
 #include "sdk_libc.h"
 #include "fpu.h"
-#include "pcp_vu0.h"
 #include "sdf_vu_matrix.h"
 #include "eff_transform.h"
 #include "fld.h"
@@ -692,9 +690,9 @@ static inline void fldRotateTriggerCorner(f32 *offset, f32 *rotated, f32 x, f32 
     offset[0] = x;
     offset[1] = y;
     offset[2] = z;
-    VU0_LOAD_VF(vf10, offset);
-    VU0_APPLY_MATRIX(vf10, vf10);
-    VU0_STORE_VF_UNCLOBBERED(vf10, rotated);
+    SDF_VU0_LOADVECTOR(offset);
+    SDF_VU0_APPLYMATRIX();
+    SDF_VU0_STOREVECTOR_NOMEM(rotated);
 }
 
 /* Register a resource's trigger in the next room slot and return the slot:
@@ -749,7 +747,7 @@ FldRoomRecordIndex fldRegisterRoomObject(
         positionZ = resource->transform[2];
         SDF_VU0_COPYVECTOR(rotation, &resource->transform[4]);
         LoadIdentity();
-        VU0_LOAD_VF(vf10, rotation);
+        SDF_VU0_LOADVECTOR(rotation);
         ToMatrix();
         fldRotateTriggerCorner(offset, rotated[0], sizeX * 0.5f, -(sizeY * 0.5f), 0.0f);
         fldRotateTriggerCorner(offset, rotated[1], -(sizeX * 0.5f), -(sizeY * 0.5f), 0.0f);
@@ -761,9 +759,9 @@ FldRoomRecordIndex fldRegisterRoomObject(
             fldEveHitTable[slot].corner[i][2] = rotated[i][2] + positionZ;
             fldEveHitTable[slot].corner[i][3] = 1.0f;
         }
-        VU0_LOAD_VF(vf10, reference);
-        VU0_APPLY_MATRIX(vf10, vf10);
-        VU0_STORE_VF_UNCLOBBERED(vf10, fldEveHitTable[slot].center);
+        SDF_VU0_LOADVECTOR(reference);
+        SDF_VU0_APPLYMATRIX();
+        SDF_VU0_STOREVECTOR_NOMEM(fldEveHitTable[slot].center);
         for (i = 0; i < 4; i++) {
             SDF_VU0_COPYVECTOR(vertices[i], fldEveHitTable[slot].corner[i]);
         }
@@ -987,7 +985,7 @@ FldRoomRecordIndex fldRegisterRoomObject(
         rotation[2] = resource->transform[6];
         rotation[3] = resource->transform[7];
         LoadIdentity();
-        VU0_LOAD_VF(vf10, rotation);
+        SDF_VU0_LOADVECTOR(rotation);
         ToMatrix();
         fldRotateTriggerCorner(offset, rotated[0], -(sizeX * 0.5f), -(sizeY * 0.5f), -(sizeZ * 0.5f));
         fldRotateTriggerCorner(offset, rotated[1], sizeX * 0.5f, -(sizeY * 0.5f), -(sizeZ * 0.5f));
@@ -1003,9 +1001,9 @@ FldRoomRecordIndex fldRegisterRoomObject(
             fldEveHitTable[slot].corner[i][2] = rotated[i][2] + positionZ;
             fldEveHitTable[slot].corner[i][3] = 1.0f;
         }
-        VU0_LOAD_VF(vf10, reference);
-        VU0_APPLY_MATRIX(vf10, vf10);
-        VU0_STORE_VF_UNCLOBBERED(vf10, fldEveHitTable[slot].center);
+        SDF_VU0_LOADVECTOR(reference);
+        SDF_VU0_APPLYMATRIX();
+        SDF_VU0_STOREVECTOR_NOMEM(fldEveHitTable[slot].center);
         /* Face 0: corners 0, 1, 2. */
         face = 0;
         vertices[0][0] = fldEveHitTable[slot].corner[0][0];
@@ -1174,7 +1172,7 @@ s32 fldTestRoomProbeFacingAndRange(dds3Basic_t *actor, dds3Basic_t *entry) {
                 dir[1] = 0.0f;
                 SDF_VU0_LOADVECTOR(dir);
                 SDF_VU0_NORMALIZE();
-                VU0_SCALAR_OP(-1.0f, "vmulx.xyzw vf10, vf10, vf2x");
+                SDF_VU0_SCALEVECTOR_V0(-1.0f);
                 SDF_VU0_COPYVECTOR_A_TO_C();
                 SDF_VU0_LOADVECTOR(position);
                 SDF_VU0_LOADVECTOR_B(actor->poseset->pos);
@@ -1239,7 +1237,7 @@ s32 fldTestRoomProbeFacing(dds3Basic_t *actor, dds3Basic_t *entry) {
                 dir[1] = 0.0f;
                 SDF_VU0_LOADVECTOR(dir);
                 SDF_VU0_NORMALIZE();
-                VU0_SCALAR_OP(-1.0f, "vmulx.xyzw vf10, vf10, vf2x");
+                SDF_VU0_SCALEVECTOR_V0(-1.0f);
                 SDF_VU0_COPYVECTOR_A_TO_C();
                 SDF_VU0_LOADVECTOR(position);
                 SDF_VU0_LOADVECTOR_B(actor->poseset->pos);
@@ -1292,7 +1290,7 @@ s32 fldTestActorRoomProbeCondition(s32 roomIndex, dds3Basic_t *actor, f32 *posit
         dir[1] = 0.0f;
         SDF_VU0_LOADVECTOR(dir);
         SDF_VU0_NORMALIZE();
-        VU0_SCALAR_OP(-1.0f, "vmulx.xyzw vf10, vf10, vf2x");
+        SDF_VU0_SCALEVECTOR_V0(-1.0f);
         SDF_VU0_COPYVECTOR_A_TO_C();
         SDF_VU0_LOADVECTOR(position);
         SDF_VU0_LOADVECTOR_B(actor->poseset->pos);
@@ -1536,7 +1534,6 @@ s32 fldEveHit_ChkEveHitAfter(void) {
 #include "evt_unit.h"
 #include "evt_unit_color_transition.h"
 #include "fpu.h"
-#include "pcp_vu0.h"
 #include "sdf.h"
 #include "sdf_sif_command.h"
 #include "mdl.h"
@@ -3458,7 +3455,6 @@ void fldInitializeActorLinkedSequence(s32 mode, s32 index, fldSceneParam_t *sequ
 #include "evt_unit.h"
 #include "evt_unit_color_transition.h"
 #include "fpu.h"
-#include "pcp_vu0.h"
 #include "sdf.h"
 #include "sdf_sif_command.h"
 #include "mdl.h"

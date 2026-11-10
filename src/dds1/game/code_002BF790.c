@@ -20,7 +20,7 @@
 #include "sdf.h"
 #include "sdf_draw.h"
 #include "sdf_projection.h"
-#include "pcp_vu0.h"
+#include "ps2asm.h"
 #include "sdf_primitive_packet_api.h"
 #include "sdf_packet_append.h"
 #include "grid_packed_vertex.h"
@@ -545,7 +545,7 @@ void itfInitDoubleBufferedScenePackets(void) {
 
     sdf3DMakeScreenParam(&dds3ScreenParam.camera);
     LookAtMatrix(aViewTarget, aViewEye, aViewDown);
-    VU0_STORE_MATRIX_UNCLOBBERED(&sdfViewMatrix);
+    SDF_VU0_STOREMATRIX_NOMEM(&sdfViewMatrix);
     for (i = 0; i < 2; i++) {
         sdfDrawTagInit(&D_003DFAB0[i]);
         sdf3DLinkInitPacket(&D_003DFAB0[i], &D_003DFAF0[i]);

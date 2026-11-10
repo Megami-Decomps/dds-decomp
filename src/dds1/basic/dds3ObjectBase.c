@@ -2,7 +2,7 @@
 #include "scr_integer_parameter_api.h"
 #include "scr_command_parameter_index.h"
 #include "dds3_basic_lifecycle.h"
-#include "sdf_vu0.h"
+#include "ps2asm.h"
 #include "eff_inner_float_api.h"
 #include "sdf_sif_command.h"
 #include "scr_integer_return_value_api.h"
@@ -10,7 +10,6 @@
 #include "sdf_chip.h"
 #include "sdf_packet_list.h"
 #include "kernel.h"
-#include "pcp_vu0.h"
 #include "eff_transform.h"
 #include "dds3obj.h"
 #include "sdf.h"
@@ -362,7 +361,7 @@ void dds3ObjectBaseMakeMatter(dds3Basic_t *object) {
     model = dds3ModelBasicMakeModel(scriptModelObject);
     motion = dds3ModelBasicSetMotion(scriptModelObject, model);
     dds3GetTMPoseSet(object);
-    VU0_STORE_MATRIX(model->matrix);
+    SDF_VU0_STOREMATRIX(model->matrix);
     sdfModelEvalTm2(model, 0);
     sdfModelEvalTm2(model, 1);
     base->resourceState = DDS3_OBJECT_RESOURCE_DEV_MOTION;

@@ -17,7 +17,7 @@
 #include "sdf.h"
 #include "sdf_draw.h"
 #include "sdf_projection.h"
-#include "pcp_vu0.h"
+#include "ps2asm.h"
 
 extern GridTextListItem *itfFindGridNodeByKey(u32, GridTextWidget *);
 

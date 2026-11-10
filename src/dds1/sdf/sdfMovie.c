@@ -108,7 +108,6 @@ void sdfSetGridScaledDrawBounds(s32 column, s32 row, s32 width, s32 height, u32 
 }
 
 #ifdef NON_MATCHING
-#include "ee_mmi.h"
 
 extern s32 sdfGrAllocPacketBuff(s32 size);
 extern sdfDrawTag_t *sdfPrimAllocDrawTag(s32 (*allocator)(s32));
@@ -130,7 +129,7 @@ extern sdfMovieCb_t *movieSemaId;
 static inline s32 bitLength(s32 x) {
     s32 leading;
 
-    EE_MMI_PLZCW(leading, x);
+    MMI_PLZCW(leading, x);
     return 31 - (leading & 0xFF);
 }
 

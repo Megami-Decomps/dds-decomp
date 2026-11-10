@@ -20,7 +20,7 @@
 #include "dds3_path.h"
 #include "dds3_slot1_handler_api.h"
 extern void fldApplyCurrentTaskScene(const char *name);
-#include "pcp_vu0.h"
+#include "ps2asm.h"
 #include "fpu.h"
 #include "dds3obj.h"
 #include "dds3_basic_array_cursor.h"

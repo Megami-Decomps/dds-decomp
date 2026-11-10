@@ -26,7 +26,7 @@
 #include "sdf_delayed_resource_check_api.h"
 #include "fld_archive_load_state.h"
 #include "dds3_object_flags.h"
-#include "sdf_vu0.h"
+#include "ps2asm.h"
 #include "snd_track_playback_api.h"
 #include "fld_scene_ready_api.h"
 #include "fld_camp_check_state_api.h"
@@ -65,7 +65,6 @@
 #include "sdf_projection.h"
 #include "sdf_draw.h"
 #include "fpu.h"
-#include "pcp_vu0.h"
 #include "dat_state.h"
 #include "eff.h"
 #include "eff_node.h"
@@ -1160,7 +1159,6 @@ void fldDrawProjectedMapIcon(f32 x, f32 y, s32 index, u32 color) {
 #include "sdf_projection.h"
 #include "sdf_draw.h"
 #include "fpu.h"
-#include "pcp_vu0.h"
 #include "dat_state.h"
 #include "eff.h"
 #include "eff_node.h"
@@ -1236,18 +1234,18 @@ void fldAutoMapDrawIconOfsRF(s32 index, f32 x, f32 y, f32 rotation) {
     corner2[0] = corner0[0]; corner2[1] = 0.0f; corner2[2] = corner3[2];
 
     SetRotateMatrixY((rotation + 180.0f) * 3.14f / 180.0f);
-    VU0_LOAD_VF_MEMORY(vf10, corner0);
-    VU0_ROTATE_VEC_EXTENDED(vf10, vf10);
-    VU0_STORE_VF(vf10, corner0);
-    VU0_LOAD_VF_MEMORY(vf10, corner1);
-    VU0_ROTATE_VEC_EXTENDED(vf10, vf10);
-    VU0_STORE_VF(vf10, corner1);
-    VU0_LOAD_VF_MEMORY(vf10, corner2);
-    VU0_ROTATE_VEC_EXTENDED(vf10, vf10);
-    VU0_STORE_VF(vf10, corner2);
-    VU0_LOAD_VF_MEMORY(vf10, corner3);
-    VU0_ROTATE_VEC_EXTENDED(vf10, vf10);
-    VU0_STORE_VF(vf10, corner3);
+    SDF_VU0_LOADVECTOR_BARRIER(corner0);
+    SDF_VU0_APPLYMATRIX_XYZ_EXTENDED();
+    SDF_VU0_STOREVECTOR(corner0);
+    SDF_VU0_LOADVECTOR_BARRIER(corner1);
+    SDF_VU0_APPLYMATRIX_XYZ_EXTENDED();
+    SDF_VU0_STOREVECTOR(corner1);
+    SDF_VU0_LOADVECTOR_BARRIER(corner2);
+    SDF_VU0_APPLYMATRIX_XYZ_EXTENDED();
+    SDF_VU0_STOREVECTOR(corner2);
+    SDF_VU0_LOADVECTOR_BARRIER(corner3);
+    SDF_VU0_APPLYMATRIX_XYZ_EXTENDED();
+    SDF_VU0_STOREVECTOR(corner3);
 
     xOffset = x * 16.0f;
     yOffset = y * 16.0f;
@@ -1406,7 +1404,7 @@ void fldDrawAutomapScene(void) {
 
     proposed = fldAutoMapGetFloorMax();
     frSetFontDrawOT(0x5E);
-    VU0_LOAD_MATRIX(&D_00329790);
+    SDF_VU0_LOADMATRIX(&D_00329790);
     InversMatrix();
     D_003BAEF0 = D_003BAEB8;
     if ((s8)dds3PadButtonState[1][0][8] < 0 && D_003BAEF0 < proposed) {
@@ -1628,7 +1626,7 @@ void fldDrawAutomapScene(void) {
     sdf3DSetCamera(&dds3ScreenParam, &sdfViewMatrix);
     D_003BAF10 += 0.4f;
     D_003BAF14 += 0.2f;
-    PCP_COPY_VECTOR_F32(focus, D_00324A20);
+    SDF_VU0_COPYVECTOR_F32(focus, D_00324A20);
 
     if (D_003BAF00 >= 128) {
         selectedFloor = D_003BAEF0 - 1;
@@ -1950,7 +1948,7 @@ void fldDrawAutomapScene(void) {
         frDestroyFontRequestAfter(D_003BD7CC);
     }
 
-    VU0_LOAD_MATRIX(&sdfViewMatrix);
+    SDF_VU0_LOADMATRIX(&sdfViewMatrix);
 }
 
 extern f32 D_003BAF18;
@@ -1968,7 +1966,7 @@ void fldDrawFieldBackdropFrame(void) {
 
     /* The stored single-precision phase step is just below 0.1. */
     D_003BAF18 += 0x1.999998p-4f;
-    VU0_LOAD_MATRIX(&D_00329790);
+    SDF_VU0_LOADMATRIX(&D_00329790);
     InversMatrix();
     sdf3DSetCamera(&dds3ScreenParam, &D_00329790);
 
@@ -2033,7 +2031,7 @@ void fldDrawFieldBackdropFrame(void) {
 
     rsetAlpha(0);
     sdf3DSetCamera(&dds3ScreenParam, &sdfViewMatrix);
-    VU0_LOAD_MATRIX(&sdfViewMatrix);
+    SDF_VU0_LOADMATRIX(&sdfViewMatrix);
     rsetOtOfs(0x5E);
     rsetTest(1, 5, 0x81, 1, 0, 0, 1, 2);
     rsetAlpha(0);
@@ -2085,7 +2083,6 @@ void fldDrawFieldBackdropFrame(void) {
 #include "sdf_projection.h"
 #include "sdf_draw.h"
 #include "fpu.h"
-#include "pcp_vu0.h"
 #include "dat_state.h"
 #include "eff.h"
 #include "eff_node.h"
@@ -2167,7 +2164,7 @@ void func_00144D30(void) {
     playerWorldX = fldGlobalBase.x + sceneX;
     playerWorldZ = fldGlobalBase.z + sceneZ;
     fldAutoMapGetFloorMax();
-    VU0_LOAD_MATRIX(mapMatrix);
+    SDF_VU0_LOADMATRIX(mapMatrix);
     InversMatrix();
     D_003BAF1C = D_003BAEB8;
     D_003BAF20 = 128;
@@ -2268,7 +2265,7 @@ void func_00144D30(void) {
     sdf3DSetCamera(&dds3ScreenParam, &sdfViewMatrix);
     D_003BAF24 += 0.4f;
     D_003BAF28 += 0.2f;
-    PCP_COPY_VECTOR_F32(focus, D_00324A20);
+    SDF_VU0_COPYVECTOR_F32(focus, D_00324A20);
 
     if (D_003BAF20 >= 128) {
         rsetAlpha(1);
@@ -2476,7 +2473,7 @@ void func_00144D30(void) {
     }
     rsetOtOfs(0x5E);
     rsetAlpha(0);
-    VU0_LOAD_MATRIX(&sdfViewMatrix);
+    SDF_VU0_LOADMATRIX(&sdfViewMatrix);
 }
 #else
 INCLUDE_ASM(const s32, "game/code_001411F0", func_00144D30);
@@ -3398,7 +3395,7 @@ void fldUpdateEffectTextureTransforms(void) {
             }
             effCopyVectorToNodeInstance(fldEffectTextureNodes[i], vec);
             SetRotateMatrixY(-angle);
-            VU0_STORE_MATRIX_UNCLOBBERED(mat);
+            SDF_VU0_STOREMATRIX_NOMEM(mat);
             effApplyNodeTransformMatrix(fldEffectTextureNodes[i], mat);
             dds3EffectDispatchUpdate(fldEffectTextureNodes[i]);
         }
@@ -4406,7 +4403,6 @@ void fldFlushQueuedEffectPositions(void) {
 #include "sdf_projection.h"
 #include "sdf_draw.h"
 #include "fpu.h"
-#include "pcp_vu0.h"
 #include "dat_state.h"
 #include "eff.h"
 #include "eff_node.h"
@@ -4486,13 +4482,13 @@ void func_00149B68(void) {
             }
             transition = dds3GetUnitHandleObjectBasic(slot->unitObject);
             if (sdfModelGetMarkPos(transition->owner->inner, 2) != 0) {
-                VU0_STORE_VF(vf10, position);
+                SDF_VU0_STOREVECTOR(position);
             }
             placeEffectNode(slot->effectNode, position);
         } else if (slot->activationState == 1 || slot->activationState == 2) {
             transition = dds3GetUnitHandleObjectBasic(slot->unitObject);
             if (sdfModelGetMarkPos(transition->owner->inner, 1) != 0) {
-                VU0_STORE_VF(vf10, position);
+                SDF_VU0_STOREVECTOR(position);
             }
             kind = D_0034C8F0[slot->effectKindIndex].kind;
             if (kind == 2 || kind == 3) {
@@ -4534,7 +4530,7 @@ void func_00149B68(void) {
         }
         dds3ObjectBaseOffFlag((void *)entry->object, 1);
         dds3GetPosPoseSet((dds3Basic_t *)(u32)entry->object);
-        VU0_STORE_VF(vf10, position);
+        SDF_VU0_STOREVECTOR(position);
 
         height = target[1] - position[1];
         if (height < 0.0f) {

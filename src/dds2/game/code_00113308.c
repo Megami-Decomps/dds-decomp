@@ -2,7 +2,7 @@
 #include "mdl.h"
 #include "common.h"
 #include "sdf_map_position_api.h"
-#include "sdf_vu0.h"
+#include "ps2asm.h"
 #include "sdf_vu_matrix.h"
 #include "sdf_trig.h"
 #include "sdf_model.h"
@@ -12,7 +12,6 @@
 #include "dds3_basic_array_cursor.h"
 #include "dds3_object_flags.h"
 #include "eff_dependency.h"
-#include "pcp_vu0.h"
 #include "eff_object.h"
 #include "evt_world_source_transform.h"
 #include "evt_unit.h"
@@ -297,8 +296,8 @@ s32 effUpdateFollowModelTransform(dds3Basic_t *obj) {
             SDF_VU0_COPYVECTOR_A_TO_B();
             SDF_VU0_LOADIDENTITYVECTOR();
             SDF_VU0_VECTOR_W_SET_ZERO();
-            VU0_SCALAR_OP_CLOBBER(sdfSin(data->transitionWork->wobblePhase) * 0.01f, "vaddx.x vf10, vf0, vf2x");
-            VU0_SCALAR_OP_CLOBBER(sdfSin(data->transitionWork->wobblePhase) * 0.004f, "vaddx.y vf10, vf0, vf2x");
+            SDF_VU0_SETVECTOR_X(sdfSin(data->transitionWork->wobblePhase) * 0.01f);
+            SDF_VU0_SETVECTOR_Y(sdfSin(data->transitionWork->wobblePhase) * 0.004f);
             SDF_VU0_MULVECTOR();
             SDF_VU0_ADDVECTOR();
         }
@@ -727,7 +726,7 @@ s32 effUpdateFadingModelTransform(dds3Basic_t *object) {
             inner->pos[2] = data->offset[2] + data->position[2];
         }
         SDF_VU0_SET_ROW3();
-        VU0_STORE_MATRIX(model->matrix);
+        SDF_VU0_STOREMATRIX(model->matrix);
         dds3SetRadiusPoseSet(inner);
         sdfModelEvalTm(model);
     }

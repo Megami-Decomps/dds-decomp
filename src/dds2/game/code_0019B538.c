@@ -1,5 +1,5 @@
 #include "common.h"
-#include "sdf_vu0.h"
+#include "ps2asm.h"
 #include "eff_random.h"
 #include "eff_param.h"
 #include "sdf_heap_api.h"
@@ -7,7 +7,6 @@
 #include "eff_math.h"
 #include "eff_channel.h"
 #include "eff_channel_layout.h"
-#include "pcp_vu0.h"
 #include "fr_font.h"
 #include "font_mem_control_api.h"
 

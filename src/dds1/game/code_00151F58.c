@@ -5,7 +5,7 @@
 #include "sdf_gs_header.h"
 #include "sdf_quaternion.h"
 #include "common.h"
-#include "sdf_vu0.h"
+#include "ps2asm.h"
 #include "sdf_vu_matrix.h"
 #include "eff_generated_texture_descriptor.h"
 #include "dds3_draw_buffer.h"
@@ -21,9 +21,7 @@
 #include "par_cell_api.h"
 #include "sdf_heap_api.h"
 #include "sdf_gs_packet.h"
-#include "pcp_vu0.h"
 #include "sdf_vu_transform_api.h"
-#include "ee_mmi.h"
 #include "sdf_asset_create.h"
 #include "eff.h"
 #include "eff_particle_emitter_variants.h"
@@ -309,7 +307,7 @@ f32 effComputeProjectedOffsetAngle(const void *position, const void *offset) {
     f32 projectedPosition[4];
     f32 projectedEndpoint[4];
 
-    VU0_LOAD_MATRIX(sdfViewMatrix);
+    SDF_VU0_LOADMATRIX(sdfViewMatrix);
     MultMatrixRev((const struct Matrix4 *)sdfProjectionMatrix);
     SDF_VU0_LOADVECTOR(position);
     SDF_VU0_COPYVECTOR_A_TO_C();
@@ -367,7 +365,7 @@ u8 *dds3P2APolygonCreate(s32 entryIndex) {
     instance->billboard = dds3BillboardCreate(1, entryIndex);
     instance->material = sdfMatNew();
     sdfMatSetConstant(instance->material, 1.0f);
-    EE_MMI_UNIT_MATRIX(instance->transform);
+    SDF_VU0_STOREIDENTITY(instance->transform);
     return (u8 *)instance;
 }
 
@@ -381,8 +379,8 @@ u8 *dds3P2APolygonCopy(EffUnitObject *source) {
     sdfMatSetDiffuse(instance->material, 0x80808080);
     sdfMatSetAmbient(instance->material, 0x80808080);
     sdfMatSetSpecular(instance->material, 0x80808080);
-    EE_MMI_UNIT_MATRIX(instance->transform);
-    EE_MMI_UNIT_MATRIX(instance->localMatrix);
+    SDF_VU0_STOREIDENTITY(instance->transform);
+    SDF_VU0_STOREIDENTITY(instance->localMatrix);
     return (u8 *)instance;
 }
 
@@ -402,8 +400,8 @@ void dds3P2APolygonSetScale(EffUnitObject *instance, float scale) {
 
 /* vu0 routine: copy the supplied 4x4 matrix to the instance's second matrix. */
 void dds3P2APolygonSetRotateMatrix(EffUnitObject *instance, void *matrix) {
-    VU0_LOAD_MATRIX(matrix);
-    VU0_STORE_MATRIX(instance->transform);
+    SDF_VU0_LOADMATRIX(matrix);
+    SDF_VU0_STOREMATRIX(instance->transform);
 }
 
 void dds3P2APolygonSetRGBA(EffUnitObject *instance, u32 value) {
@@ -470,14 +468,14 @@ void dds3P2APolygonDraw(EffUnitObject *instance) {
     dds3P2APolygonGetResource(instance, modeValues);
     list = sdfGrAllocPacketBuff(0x20);
     sdfDrawTagInit((sdfDrawTag_t *)list);
-    VU0_LOAD_MATRIX(instance->transform);
+    SDF_VU0_LOADMATRIX(instance->transform);
     SDF_VU0_LOADMATRIX_B(instance->localMatrix);
     MultMatrixNoArg();
-    VU0_STORE_MATRIX_UNCLOBBERED(matrix);
+    SDF_VU0_STOREMATRIX_NOMEM(matrix);
     matrix[3][0] = instance->billboard->position[0];
     matrix[3][1] = instance->billboard->position[1];
     matrix[3][2] = instance->billboard->position[2];
-    VU0_LOAD_MATRIX(matrix);
+    SDF_VU0_LOADMATRIX(matrix);
     sdf3DPrimLinkTm((sdfDrawTag_t *)list, 0);
     memset(&params, 0, sizeof(params));
     params.attr = 0x4000;
@@ -611,7 +609,7 @@ void effDrawGeneratedTextureQuad(sdfDrawTag_t *list, EffGeneratedTextureDescript
     texturePacket->clamp.registerId = SDF_GS_CLAMP_1;
     sdfDrawTagLink(list, (u32)texturePacket);
 
-    EE_MMI_UNIT_MATRIX(matrix);
+    SDF_VU0_STOREIDENTITY(matrix);
     packet = (u64 *)sdfGrAllocPacketBuff(0x38);
     sdfBillBoardMakeTMPacket((u8 *)packet, matrix);
     sdfDrawTagLink(list, (u32)packet);
@@ -762,7 +760,7 @@ void effDrawCompositeTextureQuad(sdfDrawTag_t *list, EffCompositeGsDescriptor *s
     textureState->clamp.registerId = SDF_GS_CLAMP_2;
     sdfDrawTagLink(list, (u32)textureState);
 
-    EE_MMI_UNIT_MATRIX(matrix);
+    SDF_VU0_STOREIDENTITY(matrix);
     geometry = (u8 *)sdfGrAllocPacketBuff(0x38);
     sdfBillBoardMakeTMPacket((u8 *)geometry, matrix);
     sdfDrawTagLink(list, (u32)geometry);

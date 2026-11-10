@@ -1,9 +1,8 @@
 #include "common.h"
-#include "sdf_vu0.h"
+#include "ps2asm.h"
 #include "fpu.h"
 #include "sdf_trig.h"
 #include "eff_random.h"
-#include "pcp_vu0.h"
 #include "sdf_vu_matrix.h"
 
 extern EffRandState sdfDefaultRandCB;

@@ -1,7 +1,7 @@
 #include "sdk_ps2.h"
 #include "common.h"
 #include "sdf_map_position_api.h"
-#include "sdf_vu0.h"
+#include "ps2asm.h"
 #include "dds3_object_flags.h"
 #include "mdl.h"
 #include "sdf_chip.h"
@@ -9,7 +9,6 @@
 #include "sdf_heap_api.h"
 #include "eff_dependency.h"
 #include "eff_parameter_position_readiness.h"
-#include "pcp_vu0.h"
 #include "dds3obj.h"
 #include "dds3_object_control_slot.h"
 #include "dds3_object_base_resource_view.h"
@@ -167,7 +166,7 @@ s32 dds3EffectObjectBasicMainProcedure(dds3Basic_t *obj) {
             effCopyVectorToNodeInstance(node, position);
             SDF_VU0_LOADVECTOR(rotation);
             ToMatrix();
-            VU0_STORE_MATRIX(matrix);
+            SDF_VU0_STOREMATRIX(matrix);
             effApplyNodeTransformMatrix(node, matrix);
         }
         result = effInvokeNodeConditionOrAcceptDefault(node);

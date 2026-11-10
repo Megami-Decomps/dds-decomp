@@ -5,7 +5,7 @@
 #include "btl_state.h"
 #include "btl_event_pack_id_api.h"
 #include "btl_command.h"
-#include "pcp_vu0.h"
+#include "ps2asm.h"
 #include "kernel.h"
 #include "dds3_process_registration.h"
 #include "scr.h"

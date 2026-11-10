@@ -9,7 +9,14 @@
 #include "sdf_gs_blend.h"
 #include "common.h"
 #include "file_menu_start_mode.h"
-#include "sdf_vu0.h"
+#include "ps2asm.h"
+
+static inline u32 PackRGBAWord(f32 unit) {
+    u32 rgba[4];
+    MMI_RGBA_PACK_UNIT(rgba[0], unit);
+    return rgba[0];
+}
+
 #include "dds3_background_fade_api.h"
 #include "mnu_camp_state_ack_api.h"
 #include "fld_lmap_task_presence.h"
@@ -31,8 +38,6 @@
 #include "dds3_task_priority_query.h"
 #include "dds3_task_create.h"
 #include "sdf_primitive_packet_api.h"
-#include "pcp_vu0.h"
-#include "ee_mmi.h"
 #include "eff_quaternion_nlerp.h"
 #include "sdf_vu_matrix.h"
 #include "sdf.h"
@@ -292,12 +297,12 @@ void dds3SetLightColor(s32 blendFrames, s32 lightIndex, const f32 *color) {
             D_00438DC8[lightIndex] = 0;
             dds3DrawFlag |= blendFlag;
             SDF_VU0_LOADVECTOR(light);
-            EE_MMI_RGBA_PACK(packedStartColor);
+            SDF_VU0_dds3ColorFtoI(packedStartColor, 128.0f);
             startColorWords[0] = packedStartColor;
             D_0043E320[lightIndex] = startColorWords[0];
             SDF_VU0_LOADVECTOR(color);
             SDF_VU0_VECTOR_W_SET_ZERO();
-            EE_MMI_RGBA_PACK_UNCLOBBERED(packedTargetColor);
+            MMI_RGBA_PACK_128(packedTargetColor);
             targetColorWords[0] = packedTargetColor;
             D_0043E330[lightIndex] = targetColorWords[0];
         }
@@ -364,12 +369,12 @@ void dds3SetAmbientColor(s32 blendFrames, f32 *color) {
         D_00438DE8 = blendFrames;
         D_00438DE6 = 0;
         SDF_VU0_LOADVECTOR(dds3AmbientColor);
-        EE_MMI_RGBA_PACK(packedStartColor);
+        SDF_VU0_dds3ColorFtoI(packedStartColor, 128.0f);
         startColorWords[0] = packedStartColor;
         D_00438DEC = startColorWords[0];
         SDF_VU0_LOADVECTOR(color);
         SDF_VU0_VECTOR_W_SET_ONE();
-        EE_MMI_RGBA_PACK(packedTargetColor);
+        SDF_VU0_dds3ColorFtoI(packedTargetColor, 128.0f);
         targetColorWords[0] = packedTargetColor;
         D_00438DF0 = targetColorWords[0];
     }
@@ -388,7 +393,7 @@ void dds3SetFogColor(s32 blendFrames, f32 *color) {
 
     SDF_VU0_LOADVECTOR(color);
     SDF_VU0_VECTOR_W_SET_ZERO();
-    EE_MMI_RGBA_PACK_F255(packedTargetColor);
+    MMI_RGBA_PACK_255(packedTargetColor);
     targetColorWords[0] = packedTargetColor;
     if (blendFrames == 0) {
         dds3DrawFlag &= ~EVT_DRAW_COLOR_BLEND_FLAG;
@@ -431,14 +436,14 @@ void dds3SetFogPara(s32 blendFrames, f32 x, f32 y, f32 z, f32 w) {
 }
 
 /* SDK float-input unpack: the RGBA word and its 16-byte workspace stay in memory. */
-static inline void eeUnpackRGBAWordFloatReadOnly(u32 color, f32 unit) {
+static inline void UnpackRGBAWordFloatReadOnly(u32 color, f32 unit) {
     u32 rgba[4];
     rgba[0] = color;
     EE_MMI_RGBA_UNPACK_READONLY(rgba, unit);
 }
 
 /* The color-blend site passes ratio and the 128.0f pack scale as ordinary GPR operands
-   (VU0_SCALE_VF / eePackRGBAWord), so their SF->GPR reloads advance the spill ring
+   (SDF_VU0_SCALEVECTOR_BITS / PackRGBAWord), so their SF->GPR reloads advance the spill ring
    ($2,$3,$4) and the vector-blend site starts at $4 (cc1probe --reload, DDS1 uid650). */
 void dds3SceneLightUpdateFirst(void) {
     s32 i;
@@ -452,11 +457,11 @@ void dds3SceneLightUpdateFirst(void) {
             if (dds3DrawFlag & mask) {
                 ++D_00438DC8[i];
                 ratio = (f32)D_00438DC8[i] / D_00438DD0[i];
-                eeUnpackRGBAWordFloatReadOnly(D_0043E320[i], 0.0078125f);
-                VU0_SCALE_VF(vf10, 1.0f - ratio);
+                UnpackRGBAWordFloatReadOnly(D_0043E320[i], 0.0078125f);
+                SDF_VU0_SCALEVECTOR_BITS(1.0f - ratio);
                 SDF_VU0_COPYVECTOR_A_TO_B();
-                eeUnpackRGBAWordFloatReadOnly(D_0043E330[i], 0.0078125f);
-                VU0_SCALAR_OP(ratio, "vmulx.xyzw vf10, vf10, vf2x");
+                UnpackRGBAWordFloatReadOnly(D_0043E330[i], 0.0078125f);
+                SDF_VU0_SCALEVECTOR_V0(ratio);
                 SDF_VU0_ADDVECTOR();
                 SDF_VU0_STOREVECTOR_NOMEM(dds3LightParam[i]);
                 if (D_00438DC8[i] >= D_00438DD0[i]) {
@@ -483,11 +488,11 @@ void dds3SceneLightUpdateFirst(void) {
     if (dds3DrawFlag & EVT_BACKGROUND_BLEND_FLAG) {
         ++D_00438DE6;
         ratio = (f32)D_00438DE6 / D_00438DE8;
-        eeUnpackRGBAWordFloatReadOnly(D_00438DEC, 0.0078125f);
-        VU0_SCALE_VF(vf10, 1.0f - ratio);
+        UnpackRGBAWordFloatReadOnly(D_00438DEC, 0.0078125f);
+        SDF_VU0_SCALEVECTOR_BITS(1.0f - ratio);
         SDF_VU0_COPYVECTOR_A_TO_B();
-        eeUnpackRGBAWordFloatReadOnly(D_00438DF0, 0.0078125f);
-        VU0_SCALAR_OP(ratio, "vmulx.xyzw vf10, vf10, vf2x");
+        UnpackRGBAWordFloatReadOnly(D_00438DF0, 0.0078125f);
+        SDF_VU0_SCALEVECTOR_V0(ratio);
         SDF_VU0_ADDVECTOR();
         SDF_VU0_VECTOR_W_SET_ONE();
         SDF_VU0_STOREVECTOR_NOMEM(dds3AmbientColor);
@@ -498,13 +503,13 @@ void dds3SceneLightUpdateFirst(void) {
     if (dds3DrawFlag & EVT_DRAW_COLOR_BLEND_FLAG) {
         ++D_00438DF4;
         ratio = (f32)D_00438DF4 / D_00438DF6;
-        eeUnpackRGBAWordFloatReadOnly(D_00438DFC, 0.0078125f);
-        VU0_SCALE_VF(vf10, 1.0f - ratio);
+        UnpackRGBAWordFloatReadOnly(D_00438DFC, 0.0078125f);
+        SDF_VU0_SCALEVECTOR_BITS(1.0f - ratio);
         SDF_VU0_COPYVECTOR_A_TO_B();
-        eeUnpackRGBAWordFloatReadOnly(D_00438E00, 0.0078125f);
-        VU0_SCALE_VF(vf10, ratio);
+        UnpackRGBAWordFloatReadOnly(D_00438E00, 0.0078125f);
+        SDF_VU0_SCALEVECTOR_BITS(ratio);
         SDF_VU0_ADDVECTOR();
-        D_0037F7A0[0] = eePackRGBAWord(128.0f);
+        D_0037F7A0[0] = PackRGBAWord(128.0f);
         if (D_00438DF4 >= D_00438DF6) {
             dds3DrawFlag &= ~EVT_DRAW_COLOR_BLEND_FLAG;
         }
@@ -514,8 +519,8 @@ void dds3SceneLightUpdateFirst(void) {
         ratio = (f32)D_00438DF8 / D_00438DFA;
         SDF_VU0_LOADVECTOR(&D_0043E3A0);
         SDF_VU0_LOADVECTOR_B(&D_0043E3B0);
-        VU0_SCALE_VF(vf10, 1.0f - ratio);
-        VU0_SCALAR_OP(ratio, "vmulx.xyzw vf11, vf11, vf2x");
+        SDF_VU0_SCALEVECTOR_BITS(1.0f - ratio);
+        SDF_VU0_SCALEVECTOR_B_V0(ratio);
         SDF_VU0_ADDVECTOR();
         SDF_VU0_GETVECTOR_X(dds3FogParamMain.fogMax);
         SDF_VU0_GETVECTOR_Y(dds3FogParamMain.fogMin);
@@ -1091,10 +1096,8 @@ u32 evtCheckSelectionState(void) {
 #include "sdf_dev_cons.h"
 #include "sdf_dev_console_node.h"
 #include "sdf_gs_blend.h"
-#include "ee_mmi.h"
 #include "sdf_packet_list.h"
 #include "sdf_packet_builders.h"
-#include "pcp_vu0.h"
 #include "common.h"
 #include "dds3_background_fade_api.h"
 #include "sdf_heap_overlay_block.h"

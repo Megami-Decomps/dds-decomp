@@ -15,7 +15,7 @@
 #include "dds3_task_runner.h"
 #include "dds3_process_main_result.h"
 #include "sdk_ps2.h"
-#include "sdf_vu0.h"
+#include "ps2asm.h"
 #include "sdf_column_packet_api.h"
 #include "dds3_draw_buffer.h"
 #include "dds3_frame_draw_buffer.h"
@@ -32,7 +32,6 @@
 #include "sdf_thread_sleep.h"
 #include "sdf_projection.h"
 #include "sdf_draw.h"
-#include "pcp_vu0.h"
 #include "sdf_packet_alloc.h"
 #include "sdf_message.h"
 

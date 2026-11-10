@@ -11,7 +11,7 @@
 #include "common.h"
 #include "sdf_file_existence_api.h"
 #include "dds3_object_flags.h"
-#include "sdf_vu0.h"
+#include "ps2asm.h"
 #include "mdl_option_label.h"
 #include "eff_inner_float_api.h"
 #include "mdl_light_editor_state.h"
@@ -43,8 +43,6 @@
 #include "dds3_world_counter.h"
 #include "evt_unit_object_key.h"
 #include "sdf_vu_matrix.h"
-#include "pcp_vu0.h"
-#include "ee_mmi.h"
 #include "dat_state.h"
 #include "sdf_draw.h"
 #include "sdf_chunk.h"
@@ -801,7 +799,7 @@ void mdlEffect_P2A_D3P_GetPos(sdfModelRootNode_t *model, dds3ModelEffectCtrlr_t 
     sdfModelNode_t *drawNode = sdfModelSearchNode(model, mapPosition->nodeId);
     f32 scale = anchorRecord->payload.part.anchorScale;
 
-    VU0_LOAD_MATRIX(drawNode->worldMatrix);
+    SDF_VU0_LOADMATRIX(drawNode->worldMatrix);
     SDF_VU0_LOADVECTOR(&mapPosition->position);
     SDF_VU0_APPLYMATRIX_XYZ1();
     SDF_VU0_COPYVECTOR_A_TO_B();
@@ -809,7 +807,7 @@ void mdlEffect_P2A_D3P_GetPos(sdfModelRootNode_t *model, dds3ModelEffectCtrlr_t 
     SDF_VU0_SUBVECTOR_A_C();
     SDF_VU0_NORMALIZE();
     VU0_SET_VF2X(scale);
-    VU0_MUL_VF2X(vf10, vf10);
+    VU0_MULX_XYZW_VF10_VF10_VF2X();
     SDF_VU0_ADDVECTOR();
     SDF_VU0_STOREVECTOR_NOMEM(positionOut);
 }
@@ -1458,22 +1456,22 @@ void mdlUpdateViewerCameraFromPad(void) {
             }
         }
         SDF_VU0_LOADIDENTITYVECTOR();
-        EE_MMI_LOAD_MATRIX_COLUMN(vf11, sdfViewMatrix);
-        VU0_SCALAR_OP(speed, "vmulx.xyzw vf11, vf11, vf2x");
+        SDF_VU0_LOADVECTOR_B_MTXCOL(sdfViewMatrix);
+        SDF_VU0_SCALEVECTOR_B_V0(speed);
         if (dds3PadBitTable[5] != 0) {
             SDF_VU0_ADDVECTOR();
         } else if (dds3PadBitTable[4] != 0) {
             SDF_VU0_SUBVECTOR();
         }
-        EE_MMI_LOAD_MATRIX_COLUMN(vf11, sdfViewMatrix + 2);
-        VU0_SCALAR_OP(speed, "vmulx.xyzw vf11, vf11, vf2x");
+        SDF_VU0_LOADVECTOR_B_MTXCOL(sdfViewMatrix + 2);
+        SDF_VU0_SCALEVECTOR_B_V0(speed);
         if (dds3PadBitTable[6] != 0) {
             SDF_VU0_ADDVECTOR();
         } else if (dds3PadBitTable[7] != 0) {
             SDF_VU0_SUBVECTOR();
         }
-        EE_MMI_LOAD_MATRIX_COLUMN(vf11, sdfViewMatrix + 1);
-        VU0_SCALAR_OP(speed, "vmulx.xyzw vf11, vf11, vf2x");
+        SDF_VU0_LOADVECTOR_B_MTXCOL(sdfViewMatrix + 1);
+        SDF_VU0_SCALEVECTOR_B_V0(speed);
         if (dds3PadBitTable[9] != 0) {
             SDF_VU0_ADDVECTOR();
         } else if (dds3PadBitTable[8] != 0) {
@@ -1497,34 +1495,34 @@ void mdlUpdateViewerCameraFromPad(void) {
         rotated = 0;
         SDF_VU0_LOADIDENTITYVECTOR();
         if (dds3PadBitTable[5] != 0) {
-            EE_MMI_LOAD_MATRIX_COLUMN(vf11, sdfViewMatrix + 1);
+            SDF_VU0_LOADVECTOR_B_MTXCOL(sdfViewMatrix + 1);
             FromRotation_B(speed);
             Mult();
             rotated = 1;
         } else if (dds3PadBitTable[4] != 0) {
-            EE_MMI_LOAD_MATRIX_COLUMN(vf11, sdfViewMatrix + 1);
+            SDF_VU0_LOADVECTOR_B_MTXCOL(sdfViewMatrix + 1);
             FromRotation_B(-speed);
             Mult();
             rotated = 1;
         }
         if (dds3PadBitTable[6] != 0) {
-            EE_MMI_LOAD_MATRIX_COLUMN(vf11, sdfViewMatrix);
+            SDF_VU0_LOADVECTOR_B_MTXCOL(sdfViewMatrix);
             FromRotation_B(speed);
             Mult();
             rotated = 1;
         } else if (dds3PadBitTable[7] != 0) {
-            EE_MMI_LOAD_MATRIX_COLUMN(vf11, sdfViewMatrix);
+            SDF_VU0_LOADVECTOR_B_MTXCOL(sdfViewMatrix);
             FromRotation_B(-speed);
             Mult();
             rotated = 1;
         }
         if (dds3PadBitTable[8] != 0) {
-            EE_MMI_LOAD_MATRIX_COLUMN(vf11, sdfViewMatrix + 2);
+            SDF_VU0_LOADVECTOR_B_MTXCOL(sdfViewMatrix + 2);
             FromRotation_B(speed);
             Mult();
             rotated = 1;
         } else if (dds3PadBitTable[9] != 0) {
-            EE_MMI_LOAD_MATRIX_COLUMN(vf11, sdfViewMatrix + 2);
+            SDF_VU0_LOADVECTOR_B_MTXCOL(sdfViewMatrix + 2);
             FromRotation_B(-speed);
             Mult();
             rotated = 1;
@@ -1605,22 +1603,22 @@ void mdlUpdateViewerSelectedModelFromPad(void) {
             }
         }
         mdlGetPosition(mdlViewerState.resources[0]);
-        EE_MMI_LOAD_MATRIX_COLUMN(vf11, sdfViewMatrix);
-        VU0_SCALAR_OP(speed, "vmulx.xyzw vf11, vf11, vf2x");
+        SDF_VU0_LOADVECTOR_B_MTXCOL(sdfViewMatrix);
+        SDF_VU0_SCALEVECTOR_B_V0(speed);
         if (dds3PadBitTable[5] != 0) {
             SDF_VU0_ADDVECTOR();
         } else if (dds3PadBitTable[4] != 0) {
             SDF_VU0_SUBVECTOR();
         }
-        EE_MMI_LOAD_MATRIX_COLUMN(vf11, sdfViewMatrix + 2);
-        VU0_SCALAR_OP(speed, "vmulx.xyzw vf11, vf11, vf2x");
+        SDF_VU0_LOADVECTOR_B_MTXCOL(sdfViewMatrix + 2);
+        SDF_VU0_SCALEVECTOR_B_V0(speed);
         if (dds3PadBitTable[6] != 0) {
             SDF_VU0_ADDVECTOR();
         } else if (dds3PadBitTable[7] != 0) {
             SDF_VU0_SUBVECTOR();
         }
-        EE_MMI_LOAD_MATRIX_COLUMN(vf11, sdfViewMatrix + 1);
-        VU0_SCALAR_OP(speed, "vmulx.xyzw vf11, vf11, vf2x");
+        SDF_VU0_LOADVECTOR_B_MTXCOL(sdfViewMatrix + 1);
+        SDF_VU0_SCALEVECTOR_B_V0(speed);
         if (dds3PadBitTable[9] != 0) {
             SDF_VU0_ADDVECTOR();
         } else if (dds3PadBitTable[8] != 0) {
@@ -2451,7 +2449,7 @@ void mdlSubmitViewerResourceDrawPacket(void) {
     if (mdlViewerState.taskPhase == 3) {
         packetList = dds3FontReqAllocDrawTag();
         resource = mdlViewerState.resources[0];
-        VU0_LOAD_MATRIX(resource->inner->matrix);
+        SDF_VU0_LOADMATRIX(resource->inner->matrix);
         drawPacket = (s32)sdfDrawRotatedModel(D_003C89B0, D_003C89F0, 4, 0x80);
         if ((dds3PadBitTable[13] < 0) & (D_004370F8 == 0)) {
             D_004370F8 = 1;

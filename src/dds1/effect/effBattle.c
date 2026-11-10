@@ -1,9 +1,7 @@
 #include "common.h"
-#include "sdf_vu0.h"
+#include "ps2asm.h"
 #include "sdf_chip.h"
 #include "btl_sound.h"
-#include "pcp_vu0.h"
-#include "ee_mmi.h"
 #include "eff_param.h"
 #include "btl.h"
 #include "eff.h"
@@ -131,10 +129,10 @@ u32 effBTLCutGetAllPartColor(u32 elapsed, u32 duration)
     }
     SDF_VU0_LOADVECTOR(D_00352870);
     SDF_VU0_LOADVECTOR_B(D_00352860);
-    VU0_SCALAR_OP(1.0f - ratio, "vmulx.xyzw vf10, vf10, vf2x");
-    VU0_SCALAR_OP_R3(ratio, "vmulx.xyzw vf11, vf11, vf2x");
+    SDF_VU0_SCALEVECTOR_V0(1.0f - ratio);
+    SDF_VU0_SCALEVECTOR_B_V1(ratio);
     SDF_VU0_ADDVECTOR();
-    EE_MMI_RGBA_PACK(packedColor[0]);
+    SDF_VU0_dds3ColorFtoI(packedColor[0], 128.0f);
     return packedColor[0];
 }
 
@@ -209,7 +207,7 @@ void effBattleUpdate(effBTLCutHandle_t *work) {
         SDF_VU0_LOADVECTOR_B(D_003A0DE0);
         Mult();
         ToMatrix();
-        VU0_STORE_MATRIX(baseMatrix);
+        SDF_VU0_STOREMATRIX(baseMatrix);
 
         overrideOwner = (BtlUnit *)effBTLFieldColorGetOverrideSelector();
         if (overrideOwner != NULL) {
@@ -217,9 +215,9 @@ void effBattleUpdate(effBTLCutHandle_t *work) {
             SDF_VU0_LOADVECTOR_B(D_003A0DE0);
             Mult();
             ToMatrix();
-            VU0_STORE_MATRIX(overrideMatrix);
+            SDF_VU0_STOREMATRIX(overrideMatrix);
         } else {
-            EE_MMI_UNIT_MATRIX(overrideMatrix);
+            SDF_VU0_STOREIDENTITY(overrideMatrix);
         }
 
         finalOwner = (BtlUnit *)effBTLFieldColorGetFinalSelector();
@@ -228,25 +226,25 @@ void effBattleUpdate(effBTLCutHandle_t *work) {
             SDF_VU0_LOADVECTOR_B(D_003A0DE0);
             Mult();
             ToMatrix();
-            VU0_STORE_MATRIX(finalMatrix);
+            SDF_VU0_STOREMATRIX(finalMatrix);
         } else {
-            EE_MMI_UNIT_MATRIX(finalMatrix);
+            SDF_VU0_STOREIDENTITY(finalMatrix);
         }
 
         if ((unit->status.flags & 0x200) != 0) {
             SDF_VU0_LOADVECTOR(D_003A0DF0);
             ToMatrix();
-            VU0_STORE_MATRIX(alternateMatrix);
+            SDF_VU0_STOREMATRIX(alternateMatrix);
             SDF_VU0_LOADVECTOR(D_003A0E00);
             ToMatrix();
-            VU0_STORE_MATRIX(oppositeMatrix);
+            SDF_VU0_STOREMATRIX(oppositeMatrix);
         } else {
             SDF_VU0_LOADVECTOR(D_003A0E00);
             ToMatrix();
-            VU0_STORE_MATRIX(alternateMatrix);
+            SDF_VU0_STOREMATRIX(alternateMatrix);
             SDF_VU0_LOADVECTOR(D_003A0DF0);
             ToMatrix();
-            VU0_STORE_MATRIX(oppositeMatrix);
+            SDF_VU0_STOREMATRIX(oppositeMatrix);
         }
 
         if ((work->flags & 1) == 0) {
@@ -331,7 +329,7 @@ void effBattleUpdate(effBTLCutHandle_t *work) {
                     effBTLModelGetMarkMatrix2(unit, entry->aimParams.count);
                     SDF_VU0_LOADMATRIX_B(baseMatrix);
                     MultMatrixNoArg();
-                    VU0_STORE_MATRIX_UNCLOBBERED(matrixOutput);
+                    SDF_VU0_STOREMATRIX_NOMEM(matrixOutput);
                     dds3EffectPartSetRotateMatrix(work->parameterWorks[entryIndex], matrixOutput);
                     break;
                 case 8:
@@ -344,10 +342,10 @@ void effBattleUpdate(effBTLCutHandle_t *work) {
                     effBTLModelGetMarkMatrix2(unit, entry->aimParams.count);
                     if (scalar != 0.0f) {
                         SDF_VU0_SETSCALE1VECTOR();
-                        VU0_SCALE_VF(vf10, 1.0f / scalar);
+                        SDF_VU0_SCALEVECTOR_BITS(1.0f / scalar);
                         SDF_VU0_SCALE_XYZ();
                     }
-                    VU0_STORE_MATRIX_UNCLOBBERED(matrixOutput);
+                    SDF_VU0_STOREMATRIX_NOMEM(matrixOutput);
                     dds3EffectPartSetRotateMatrix(work->parameterWorks[entryIndex], matrixOutput);
                     break;
 
@@ -361,10 +359,10 @@ void effBattleUpdate(effBTLCutHandle_t *work) {
                     effBTLModelGetMarkMatrix2(overrideOwner, entry->aimParams.count);
                     if (scalar != 0.0f) {
                         SDF_VU0_SETSCALE1VECTOR();
-                        VU0_SCALE_VF(vf10, 1.0f / scalar);
+                        SDF_VU0_SCALEVECTOR_BITS(1.0f / scalar);
                         SDF_VU0_SCALE_XYZ();
                     }
-                    VU0_STORE_MATRIX_UNCLOBBERED(matrixOutput);
+                    SDF_VU0_STOREMATRIX_NOMEM(matrixOutput);
                     dds3EffectPartSetRotateMatrix(work->parameterWorks[entryIndex], matrixOutput);
                     break;
 
@@ -378,10 +376,10 @@ void effBattleUpdate(effBTLCutHandle_t *work) {
                     effBTLModelGetMarkMatrix2(finalOwner, entry->aimParams.count);
                     if (scalar != 0.0f) {
                         SDF_VU0_SETSCALE1VECTOR();
-                        VU0_SCALE_VF(vf10, 1.0f / scalar);
+                        SDF_VU0_SCALEVECTOR_BITS(1.0f / scalar);
                         SDF_VU0_SCALE_XYZ();
                     }
-                    VU0_STORE_MATRIX_UNCLOBBERED(matrixOutput);
+                    SDF_VU0_STOREMATRIX_NOMEM(matrixOutput);
                     dds3EffectPartSetRotateMatrix(work->parameterWorks[entryIndex], matrixOutput);
                     break;
                 default:

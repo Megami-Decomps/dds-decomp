@@ -2,7 +2,7 @@
 #include "snd_packed_track_load_status.h"
 #include "btl_runtime_state.h"
 #include "sdf_gs_header.h"
-#include "pcp_vu0.h"
+#include "ps2asm.h"
 #include "common.h"
 #include "btl_unit_model_progress_api.h"
 #include "scr_integer_parameter_api.h"
@@ -10,7 +10,6 @@
 #include "btl_command_target_policy.h"
 #include "btl_resolve_unit_value_api.h"
 #include "sdf_delayed_resource_check_api.h"
-#include "sdf_vu0.h"
 #include "btl_actor_resource_bank_api.h"
 #include "btl_actor_entry_code_api.h"
 #include "btl_event_asset_api.h"
@@ -60,7 +59,6 @@
 #include "sdf.h"
 #include "sdf_linked_packet.h"
 #include "sdf_packet_builders.h"
-#include "ee_mmi.h"
 #include "mdl.h"
 #include "mdl_asset_request.h"
 #include "dat_command.h"
@@ -1222,7 +1220,7 @@ u32 btlMulColor(u32 colorA, u32 colorB) {
     color2[0] = colorB;
     EE_MMI_RGBA_UNPACK(color2, unit);
     SDF_VU0_MULVECTOR();
-    EE_MMI_RGBA_PACK(packed);
+    SDF_VU0_dds3ColorFtoI(packed, 128.0f);
     blended[0] = packed;
     return blended[0];
 }
@@ -1325,7 +1323,6 @@ void btlBuildOverlayQuadPacket(sdfDrawTag_t *list, s32 primitive, s32 color, s32
 
 #ifdef NON_MATCHING
 #include "sdf_gs_header.h"
-#include "pcp_vu0.h"
 #include "common.h"
 #include "btl_actor_resource_bank_api.h"
 #include "btl_event_asset_api.h"
@@ -1365,7 +1362,6 @@ void btlBuildOverlayQuadPacket(sdfDrawTag_t *list, s32 primitive, s32 color, s32
 #include "sdf.h"
 #include "sdf_linked_packet.h"
 #include "sdf_packet_builders.h"
-#include "ee_mmi.h"
 #include "mdl.h"
 #include "mdl_asset_request.h"
 #include "dat_command.h"

@@ -7,7 +7,7 @@
 #include "fr_font.h"
 #include "sdf_heap_api.h"
 #include "fpu.h"
-#include "pcp_vu0.h"
+#include "ps2asm.h"
 extern f32 sdfQuatDot(f32 *, f32 *);
 
 

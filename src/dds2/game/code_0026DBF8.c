@@ -5,13 +5,12 @@
 #include "eff_resource_slots.h"
 #include "eff_resource_source_lifetime.h"
 #include "common.h"
-#include "sdf_vu0.h"
+#include "ps2asm.h"
 #include "snd_sequence_volume_pan.h"
 #include "sdf_trig.h"
 #include "eff_random.h"
 #include "btl_stage_task_cleanup.h"
 #include "sdf_chip.h"
-#include "pcp_vu0.h"
 #include "sdf_heap_api.h"
 #include "file_request_api.h"
 #include "mnu_mantra_position_api.h"
@@ -4631,7 +4630,7 @@ s32 mnuDrawMantraPanelOrbitingEffect(s32 x, s32 y, s32 z, s32 alpha, MantraPanel
     }
     for (i = 0; i < 2; i++) {
         SDF_VU0_LOADVECTOR(directions[i]);
-        VU0_SCALE_VF(vf10, 150.0f);
+        SDF_VU0_SCALEVECTOR_BITS(150.0f);
         SDF_VU0_STOREVECTOR(scaled);
         drawX = (s32)((f32)(x + offsets[i][0]) + scaled[0] * phases[i]);
         drawY = (s32)((f32)(y + offsets[i][1]) + scaled[1] * phases[i]);

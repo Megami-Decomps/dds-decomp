@@ -1,11 +1,10 @@
 #include "sdk_ps2.h"
 #include "common.h"
 #include "dds3_draw_light_binding.h"
-#include "sdf_vu0.h"
+#include "ps2asm.h"
 #include "kernel.h"
 #include "draw3d.h"
 #include "gs_packet.h"
-#include "pcp_vu0.h"
 #include "eff_blur.h"
 #include "eff_rectangle_blur_api.h"
 #include "eff_event_draw.h"
@@ -925,14 +924,10 @@ void dds3RotationArc(void) {
 
     SDF_VU0_VECTOR_W_SET_ZERO();
     SDF_VU0_NORMALIZE();
-    VU0_MOVE_VF(vf2, vf10);
-    SDF_VU0_COPYVECTOR_B_TO_A();
-    VU0_MOVE_VF(vf11, vf2);
+    SDF_VU0_SWAPVECTOR_A_B();
     SDF_VU0_VECTOR_W_SET_ZERO();
     SDF_VU0_NORMALIZE();
-    VU0_MOVE_VF(vf2, vf10);
-    SDF_VU0_COPYVECTOR_B_TO_A();
-    VU0_MOVE_VF(vf11, vf2);
+    SDF_VU0_SWAPVECTOR_A_B();
 
     SDF_VU0_INNERPRODUCT(dot);
     if (dot >= 0.9999f) {
@@ -945,7 +940,7 @@ void dds3RotationArc(void) {
         if (0.9999f <= fabsf(component)) {
             SDF_VU0_LOADIDENTITYVECTOR();
             SDF_VU0_VECTOR_W_SET_ZERO();
-            VU0_SET_VF10_COMPONENT(z, -1.0f);
+            SDF_VU0_SETVECTOR_Z(-1.0f);
         } else {
             SDF_VU0_GETVECTOR_Z(component);
             axis[0] = -component;
@@ -958,7 +953,7 @@ void dds3RotationArc(void) {
 
         SDF_VU0_INNERPRODUCT(dot);
         SDF_VU0_OUTERPRODUCT();
-        VU0_SET_VF10_W(dot);
+        SDF_VU0_SETVECTOR_W(dot);
         return;
     }
 
@@ -969,6 +964,6 @@ void dds3RotationArc(void) {
     SDF_VU0_INNERPRODUCT(dot);
     SDF_VU0_OUTERPRODUCT();
     SDF_VU0_STOREVECTOR(axis);
-    VU0_SET_VF10_W(dot);
+    SDF_VU0_SETVECTOR_W(dot);
     Normalize();
 }

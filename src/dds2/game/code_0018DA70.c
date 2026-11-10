@@ -4,7 +4,7 @@
 #include "sdf_packet_list.h"
 #include "common.h"
 #include "dds3_background_fade_api.h"
-#include "sdf_vu0.h"
+#include "ps2asm.h"
 #include "dds3_draw_buffer.h"
 #include "sdf_trig.h"
 #include "dds3_frame_draw_buffer.h"
@@ -15,7 +15,6 @@
 #include "eff_blur.h"
 #include "eff.h"
 #include "eff_math.h"
-#include "pcp_vu0.h"
 
 
 extern void effPCP_ThunderPolyListDraw(EffThunderGroup *group);
@@ -62,10 +61,10 @@ void effUpdatePairedResources(PairedEffectResources *work) {
                 SDF_VU0_COPYVECTOR_A_TO_C();
                 SDF_VU0_STOREVECTOR(record->points[0]);
                 SDF_VU0_LOADVECTOR_B(work->startVec);
-                VU0_LERP_VF10(0.33f);
+                SDF_VU0_INTERPOLATE(0.33f);
                 SDF_VU0_STOREVECTOR(record->points[1]);
                 SDF_VU0_COPYVECTOR_C_TO_A();
-                VU0_LERP_VF10(0.66f);
+                SDF_VU0_INTERPOLATE(0.66f);
                 SDF_VU0_STOREVECTOR(record->points[2]);
                 SDF_VU0_STOREVECTOR_B(record->points[3]);
                 effPCP_ThunderPolyListSetColor(work->resource[resourceIndex], blendColor);

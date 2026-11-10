@@ -32,7 +32,28 @@
 #include "eff_span_work.h"
 #include "common.h"
 #include "dds3_camera_update_flags.h"
-#include "sdf_vu0.h"
+#include "ps2asm.h"
+
+#define VEC3_SPLAT(v, x) ((v)[0] = (x), (v)[1] = (x), (v)[2] = (x))
+
+static inline void UnpackRGBAWord(u32 color, u32 unitBits) {
+    u32 rgba[4];
+    rgba[0] = color;
+    EE_MMI_RGBA_UNPACK_READONLY(rgba, unitBits);
+}
+
+static inline void UnpackRGBAWordFloat(u32 color, f32 unit) {
+    u32 rgba[4];
+    rgba[0] = color;
+    EE_MMI_RGBA_UNPACK(rgba, unit);
+}
+
+static inline u32 PackRGBAWord(f32 unit) {
+    u32 rgba[4];
+    MMI_RGBA_PACK_UNIT(rgba[0], unit);
+    return rgba[0];
+}
+
 #include "eff_emitter_type.h"
 #include "sdf_vu_rotation_axes.h"
 #include "file_pac.h"
@@ -66,8 +87,6 @@
 #include "eff_curve.h"
 #include "file.h"
 #include "file_slot.h"
-#include "ee_mmi.h"
-#include "pcp_vu0.h"
 #include "eff_queue.h"
 #include "btl_resource_name.h"
 #include "mdl.h"
@@ -597,7 +616,7 @@ const EffLensFlareParams *source;
 {
     EffFadeVectorWork *effect = sdfChipAllocDirect(sizeof(EffFadeVectorWork));
     memset(effect, 0, sizeof(EffFadeVectorWork));
-    VU0_STORE_VF($vf0, effect->vector);
+    SDF_VU0_STOREIDENTITYVECTOR(effect->vector);
     memcpy(&effect->source, source, sizeof(effect->source));
     return effect;
 }
@@ -678,8 +697,6 @@ void effResetFadeVectorFrame(EffFadeVectorWork *work) {
 #include "eff_curve.h"
 #include "file.h"
 #include "file_slot.h"
-#include "ee_mmi.h"
-#include "pcp_vu0.h"
 #include "eff_queue.h"
 #include "btl_resource_name.h"
 #include "mdl.h"
@@ -705,11 +722,11 @@ extern s32 sdfProjectPointInForwardConeVU(void);
 extern EffLensFlareElement effLensFlareSets[][13];
 extern sdfGrOt_t D_003255A8;
 static inline void effBlendFlareBaseColor(u32 color, const u32 *workColor, f32 *baseColor) {
-    eeUnpackRGBAWord(color, 0x3C000000);
-    VU0_MOVE_VF_EXTENDED(vf11, vf10);
-    eeUnpackRGBAWord(*workColor, 0x3C000000);
-    VU0_MUL_EXTENDED(vf10, vf10, vf11);
-    VU0_STORE_VF(vf10, baseColor);
+    UnpackRGBAWord(color, 0x3C000000);
+    SDF_VU0_COPYVECTOR_A_TO_B_EXTENDED();
+    UnpackRGBAWord(*workColor, 0x3C000000);
+    SDF_VU0_MULVECTOR_EXTENDED();
+    SDF_VU0_STOREVECTOR(baseColor);
 }
 
 static inline void effSetFlareSprite(dds3EffectSpriteVertex_t *vertex, u32 red, u32 green, u32 blue, u32 alpha, s32 u0, s32 v0, s32 x0, s32 y0, s32 u1, s32 v1, s32 x1, s32 y1) {
@@ -759,12 +776,12 @@ void effDrawLensFlare(EffFadeVectorWork *work) {
     sdfTexHandle_t *texture;
     u32 i;
 
-    VU0_LOAD_VF(vf10, work->vector);
+    SDF_VU0_LOADVECTOR(work->vector);
     if (sdfProjectPointInForwardConeVU() == 0) {
         work->frame++;
         return;
     }
-    VU0_STORE_VF(vf10, projected);
+    SDF_VU0_STOREVECTOR(projected);
     clipX = (s32)projected[0];
     clipY = (s32)projected[1];
     clipY -= 0x800;
@@ -837,10 +854,10 @@ void effDrawLensFlare(EffFadeVectorWork *work) {
             centerY = (s32)(y * 16.0f);
             radiusX = (s32)(scale * 0.5f);
             radiusY = radiusX >> 1;
-            eeUnpackRGBAWord(element->color, 0x3C000000);
-            VU0_LOAD_VF(vf11, baseColor);
-            VU0_MUL_EXTENDED(vf10, vf10, vf11);
-            EE_MMI_RGBA_PACK(color);
+            UnpackRGBAWord(element->color, 0x3C000000);
+            SDF_VU0_LOADVECTOR_B(baseColor);
+            SDF_VU0_MULVECTOR_EXTENDED();
+            SDF_VU0_dds3ColorFtoI(color, 128.0f);
             radiusX >>= 1;
             radiusY >>= 1;
             textureWidth = texture->width;
@@ -1070,7 +1087,7 @@ void effUpdateFadeBlendA(EffKindWork *work) {
     color2[0] = second;
     EE_MMI_RGBA_UNPACK(color2, unit);
     SDF_VU0_MULVECTOR();
-    EE_MMI_RGBA_PACK(packed);
+    SDF_VU0_dds3ColorFtoI(packed, 128.0f);
     blended[0] = packed;
     out->color = blended[0];
     out->displacement = effSampleScalarCurve(&config->blendB, frame, duration) * 0.01f + 1.0f;
@@ -1140,7 +1157,7 @@ void effUpdateProjectedBlurFadeRectangle(EffKindWork *work) {
     color2[0] = second;
     EE_MMI_RGBA_UNPACK(color2, unit);
     SDF_VU0_MULVECTOR();
-    EE_MMI_RGBA_PACK(packed);
+    SDF_VU0_dds3ColorFtoI(packed, 128.0f);
     blended[0] = packed;
     out->body.source.color = blended[0];
     out->body.source.displacement = effSampleScalarCurve(&config->blendB, frame, duration) * 0.01f + 1.0f;
@@ -1217,7 +1234,7 @@ void effUpdateFadeMapA(EffKindWork *work) {
     color2[0] = second;
     EE_MMI_RGBA_UNPACK(color2, unit);
     SDF_VU0_MULVECTOR();
-    EE_MMI_RGBA_PACK(packed);
+    SDF_VU0_dds3ColorFtoI(packed, 128.0f);
     blended[0] = packed;
     out->params.color = blended[0];
     out->params.uvDisplacementAmplitude = effSampleScalarCurve(&config->blendB, frame, duration) * 0.01f;
@@ -1294,7 +1311,7 @@ void effUpdateFadeMapB(EffKindWork *work) {
     color2[0] = second;
     EE_MMI_RGBA_UNPACK(color2, unit);
     SDF_VU0_MULVECTOR();
-    EE_MMI_RGBA_PACK(packed);
+    SDF_VU0_dds3ColorFtoI(packed, 128.0f);
     blended[0] = packed;
     out->params.color = blended[0];
     out->params.angleStep = effSampleScalarCurve(&config->blendB, frame, duration) * 0.01f;
@@ -1348,7 +1365,7 @@ void effUpdateFadeBlendB(EffKindWork *work) {
     color2[0] = second;
     EE_MMI_RGBA_UNPACK(color2, unit);
     SDF_VU0_MULVECTOR();
-    EE_MMI_RGBA_PACK(packed);
+    SDF_VU0_dds3ColorFtoI(packed, 128.0f);
     blended[0] = packed;
     out->color = blended[0];
     out->displacement = effSampleScalarCurve(&config->blendB, frame, duration) + 1.0f;
@@ -1384,11 +1401,11 @@ void effUpdateFadeBlendC(EffKindWork *work) {
      * "Trace-justified base color capture: effUpdateFadeBlendC". */
     baseColor = work->color;
     unit = 0x3C000000;
-    eeUnpackRGBAWord(baseColor, unit);
+    UnpackRGBAWord(baseColor, unit);
     SDF_VU0_COPYVECTOR_A_TO_B();
-    eeUnpackRGBAWord(second, unit);
+    UnpackRGBAWord(second, unit);
     SDF_VU0_MULVECTOR();
-    packed = eePackRGBAWord(128.0f);
+    packed = PackRGBAWord(128.0f);
     out->color = packed;
     out->blendControl = work->mode;
     dds3EffectFilter(out);
@@ -1455,7 +1472,7 @@ void effUpdateProjectedFadeColor(EffKindWork *work) {
     color2[0] = second;
     EE_MMI_RGBA_UNPACK(color2, 1.0f / 128.0f);
     SDF_VU0_MULVECTOR();
-    EE_MMI_RGBA_PACK_F128(packed);
+    MMI_RGBA_PACK_128_S2(packed);
     blended[0] = packed;
     *(u32 *)out->params.draw.color = blended[0];
     out->params.draw.blendControl = work->mode;
@@ -1482,7 +1499,7 @@ EffKindWork *effAllocateKindWork(u16 kind, u8 *source) {
     work->target = 0;
     work->color = 0x80808080;
     work->scale = 1.0f;
-    VU0_STORE_VF($vf0, work);
+    SDF_VU0_STOREIDENTITYVECTOR(work);
     work->payload = (u8 *)work + headerSize;
     memcpy(work->payload, source, size);
     switch (((EffKindSource *)source)->modeKind) {
@@ -1576,7 +1593,7 @@ EffKindWork *effAllocateAlternateKindWork(u16 kind, u8 *source) {
     work->target = 0;
     work->color = 0x80808080;
     work->scale = 1.0f;
-    VU0_STORE_VF($vf0, work);
+    SDF_VU0_STOREIDENTITYVECTOR(work);
     work->payload = (u8 *)work + headerSize;
     memcpy(work->payload, source, size);
     switch (((EffKindSource *)source)->modeKind) {
@@ -1673,8 +1690,8 @@ u8 *effCreateBillboardWork(FileJobPayload *source) {
     ((EffBillboardWork *)work)->frame = 0;
     ((EffBillboardWork *)work)->color = 0x80808080;
     ((EffBillboardWork *)work)->scale = 1.0f;
-    VU0_STORE_VF(vf0, work);
-    VU0_STORE_VF(vf0, work + 0x10);
+    SDF_VU0_STOREIDENTITYVECTOR(work);
+    SDF_VU0_STOREIDENTITYVECTOR(work + 0x10);
     if (source == NULL) {
         return work;
     }
@@ -1879,10 +1896,10 @@ void billAdvanceFrameInstances(EffClassWork *work) {
     colors = (u32 *)asset->tail;
     direction[1] = 0.0f;
     direction[3] = 0.0f;
-    eeUnpackRGBAWordFloat(innerColor, 1.0f / 128.0f);
+    UnpackRGBAWordFloat(innerColor, 1.0f / 128.0f);
     SDF_VU0_STOREVECTOR_NOMEM(innerVector);
     outerColor = config->outerColor & 0xFFFFFF;
-    eeUnpackRGBAWordFloat(outerColor, 1.0f / 128.0f);
+    UnpackRGBAWordFloat(outerColor, 1.0f / 128.0f);
     SDF_VU0_STOREVECTOR_NOMEM(outerVector);
     fadeStart = (s32)(config->frame.fadeInFraction * (f32)lifetime);
     fadeEnd = (s32)(config->frame.fadeOutFraction * (f32)lifetime);
@@ -1920,7 +1937,7 @@ void billAdvanceFrameInstances(EffClassWork *work) {
             u128 *position = vertices;
             s32 count = 4;
             do {
-                VU0_STORE_VF(vf0, position);
+                SDF_VU0_STOREIDENTITYVECTOR(position);
                 *color = 0;
                 position++;
                 color++;
@@ -1940,11 +1957,11 @@ void billAdvanceFrameInstances(EffClassWork *work) {
             angle += entry->angle;
             SDF_VU0_LOADVECTOR(effOnesVector);
             SDF_VU0_COPYVECTOR_A_TO_B();
-            VU0_SCALE_VF(vf10, entry->radius);
+            SDF_VU0_SCALEVECTOR_BITS(entry->radius);
             SDF_VU0_STOREVECTOR_NOMEM(radius);
             SDF_VU0_COPYVECTOR_B_TO_A();
-            VU0_SCALE_VF(vf10, entry->innerWidth);
-            VU0_SCALE_VF(vf11, entry->outerWidth);
+            SDF_VU0_SCALEVECTOR_BITS(entry->innerWidth);
+            SDF_VU0_SCALEVECTOR_B_BITS(entry->outerWidth);
             SDF_VU0_STOREVECTOR_NOMEM(innerWidth);
             SDF_VU0_STOREVECTOR_B_NOMEM(outerWidth);
             direction[0] = sdfCos(angle);
@@ -1953,9 +1970,9 @@ void billAdvanceFrameInstances(EffClassWork *work) {
             SDF_VU0_COPYVECTOR_A_TO_C();
             SDF_VU0_GETVECTOR_X(cosine);
             SDF_VU0_GETVECTOR_Z(sine);
-            VU0_SCALAR_OP(sine, "vaddx.x vf10, vf0, vf2x");
+            SDF_VU0_SETVECTOR_X_V0(sine);
             cosine = -cosine;
-            VU0_SCALAR_OP(cosine, "vaddx.z vf10, vf0, vf2x");
+            SDF_VU0_SETVECTOR_Z_V0(cosine);
             SDF_VU0_COPYVECTOR_A_TO_B();
             SDF_VU0_LOADVECTOR(innerWidth);
             SDF_VU0_MULVECTOR();
@@ -1970,12 +1987,12 @@ void billAdvanceFrameInstances(EffClassWork *work) {
             SDF_VU0_LOADVECTOR(innerWidth);
             SDF_VU0_COPYVECTOR_A_TO_B();
             SDF_VU0_STOREVECTOR(vertices + 2);
-            VU0_NEGATE_XYZ(vf11);
+            SDF_VU0_NEGVECTOR_B_XYZ();
             SDF_VU0_STOREVECTOR_B(vertices + 4);
             SDF_VU0_LOADVECTOR(outerWidth);
             SDF_VU0_COPYVECTOR_A_TO_B();
             SDF_VU0_ADDVECTOR_A_C();
-            VU0_NEGATE_XYZ(vf11);
+            SDF_VU0_NEGVECTOR_B_XYZ();
             SDF_VU0_STOREVECTOR(vertices);
             SDF_VU0_ADDVECTOR_B_C();
             SDF_VU0_STOREVECTOR_B(vertices + 1);
@@ -1983,15 +2000,15 @@ void billAdvanceFrameInstances(EffClassWork *work) {
             else if (fadeEnd < age) alpha = (f32)(s32)((u32)lifetime - (u32)age) / (f32)(s32)((u32)lifetime - (u32)fadeEnd);
             else alpha = 1.0f;
             SDF_VU0_LOADVECTOR_B(effOnesVector);
-            VU0_SCALE_VF(vf11, alpha);
+            SDF_VU0_SCALEVECTOR_B_BITS(alpha);
             SDF_VU0_LOADVECTOR(outerVector);
             SDF_VU0_MULVECTOR();
-            outerPacked = eePackRGBAWord(128.0f);
+            outerPacked = PackRGBAWord(128.0f);
             colors[0] = outerPacked;
             colors[1] = outerPacked;
             SDF_VU0_LOADVECTOR(innerVector);
             SDF_VU0_MULVECTOR();
-            innerPacked = eePackRGBAWord(128.0f);
+            innerPacked = PackRGBAWord(128.0f);
             if (item & 1) {
                 colors[3] = innerPacked | 0xFF000000;
                 innerPacked = (u32)(alpha * 128.0f) << 24;
@@ -2031,23 +2048,23 @@ void billUpdateFrameDrawColorAndTransform(BillCellDrawWork *work) {
     }
     second = effSampleColorAlphaTracks(&((EffBillTimedHeader *)config)->colorTrack, &((EffBillTimedHeader *)config)->alphaTrack, limit, progress);
     unit = 0x3C000000;
-    eeUnpackRGBAWord(work->baseColor, unit);
+    UnpackRGBAWord(work->baseColor, unit);
     SDF_VU0_COPYVECTOR_A_TO_B();
-    eeUnpackRGBAWord(second, unit);
+    UnpackRGBAWord(second, unit);
     SDF_VU0_MULVECTOR();
-    packed = eePackRGBAWord(128.0f);
+    packed = PackRGBAWord(128.0f);
     out->color = packed;
     out->type = ((EffBillTimedHeader *)config)->alphaTrack.surfaceIndex;
     out->flag = ((EffBillFrameHeader *)config)->mode;
     SDF_VU0_LOADVECTOR(work->transform);
     ToMatrix();
     SDF_VU0_LOADVECTOR(effOnesVector);
-    VU0_SCALAR_OP_CLOBBER(work->scale, "vmulx.xyzw vf10, vf10, vf2x");
+    SDF_VU0_SCALEVECTOR_V0_CLOBBER(work->scale);
     SDF_VU0_SCALE_XYZ();
     SDF_VU0_LOADVECTOR(work);
     SDF_VU0_VECTOR_W_SET_ONE();
     SDF_VU0_SET_ROW3();
-    VU0_STORE_MATRIX(mtx);
+    SDF_VU0_STOREMATRIX(mtx);
     effDrawTrackSet(out, (Matrix4 *)mtx);
 }
 
@@ -2159,10 +2176,10 @@ void billAdvanceCellInstances(EffClassWork *work) {
     colors = (u32 *)asset->tail;
     direction[1] = 0.0f;
     direction[3] = 0.0f;
-    eeUnpackRGBAWordFloat(firstColor, 1.0f / 128.0f);
+    UnpackRGBAWordFloat(firstColor, 1.0f / 128.0f);
     SDF_VU0_STOREVECTOR_NOMEM(firstVector);
     secondColor = config->colorB & 0xFFFFFF;
-    eeUnpackRGBAWordFloat(secondColor, 1.0f / 128.0f);
+    UnpackRGBAWordFloat(secondColor, 1.0f / 128.0f);
     SDF_VU0_STOREVECTOR_NOMEM(secondVector);
     acceleration = config->acceleration;
     respawn = config->frame.respawn;
@@ -2204,7 +2221,7 @@ void billAdvanceCellInstances(EffClassWork *work) {
             u128 *position = vertices;
             outputCount = 12;
             do {
-                VU0_STORE_VF(vf0, position);
+                SDF_VU0_STOREIDENTITYVECTOR(position);
                 *color = 0;
                 position++;
                 color++;
@@ -2236,47 +2253,45 @@ void billAdvanceCellInstances(EffClassWork *work) {
             distance = (speed + (acceleration * motionTime) * 0.5f) * motionTime;
             distance += entry->centerOffset;
             SDF_VU0_LOADVECTOR(effOnesVector);
-            VU0_SCALE_VF(vf10, entry->extent);
+            SDF_VU0_SCALEVECTOR_BITS(entry->extent);
             SDF_VU0_STOREVECTOR_NOMEM(width);
             direction[0] = sdfCos(angle);
             direction[2] = sdfSin(angle);
             SDF_VU0_LOADVECTOR(direction);
             SDF_VU0_COPYVECTOR_A_TO_C();
-            VU0_SCALE_VF(vf10, entry->radiusA);
+            SDF_VU0_SCALEVECTOR_BITS(entry->radiusA);
             SDF_VU0_COPYVECTOR_C_TO_B();
             SDF_VU0_STOREVECTOR_NOMEM(radialA);
-            VU0_SCALE_VF(vf11, entry->radiusB);
+            SDF_VU0_SCALEVECTOR_B_BITS(entry->radiusB);
             SDF_VU0_STOREVECTOR_B_NOMEM(radialB);
             SDF_VU0_COPYVECTOR_C_TO_A();
-            VU0_SCALE_VF(vf10, distance);
+            SDF_VU0_SCALEVECTOR_BITS(distance);
             SDF_VU0_STOREVECTOR_NOMEM(center);
-            VU0_MOVE_VF(vf2, vf10);
-            SDF_VU0_COPYVECTOR_C_TO_A();
-            VU0_MOVE_VF(vf12, vf2);
+            SDF_VU0_SWAPVECTOR_A_C();
             SDF_VU0_GETVECTOR_X(cosine);
             SDF_VU0_GETVECTOR_Z(sine);
-            VU0_SET_VF10_COMPONENT(x, sine);
+            SDF_VU0_SETVECTOR_X(sine);
             cosine = -cosine;
-            VU0_SET_VF10_COMPONENT(z, cosine);
+            SDF_VU0_SETVECTOR_Z(cosine);
             SDF_VU0_LOADVECTOR_B(width);
             SDF_VU0_MULVECTOR();
             SDF_VU0_STOREVECTOR_NOMEM(width);
             SDF_VU0_STOREVECTOR_C(vertices);
             for (outputCount = 0; outputCount < 6; outputCount++) {
                 SDF_VU0_LOADVECTOR(radialA);
-                VU0_SCALE_VF(vf10, billRingSines[outputCount]);
+                SDF_VU0_SCALEVECTOR_BITS(billRingSines[outputCount]);
                 SDF_VU0_ADDVECTOR_A_C();
                 SDF_VU0_LOADVECTOR_B(width);
-                VU0_SCALE_VF(vf11, billRingCosines[outputCount]);
+                SDF_VU0_SCALEVECTOR_B_BITS(billRingCosines[outputCount]);
                 SDF_VU0_ADDVECTOR();
                 SDF_VU0_STOREVECTOR(vertices + 1 + outputCount);
             }
             for (outputCount = 0; outputCount < 6; outputCount++) {
                 SDF_VU0_LOADVECTOR(radialB);
-                VU0_SCALE_VF(vf10, billRingSines[outputCount + 6]);
+                SDF_VU0_SCALEVECTOR_BITS(billRingSines[outputCount + 6]);
                 SDF_VU0_ADDVECTOR_A_C();
                 SDF_VU0_LOADVECTOR_B(width);
-                VU0_SCALE_VF(vf11, billRingCosines[outputCount + 6]);
+                SDF_VU0_SCALEVECTOR_B_BITS(billRingCosines[outputCount + 6]);
                 SDF_VU0_ADDVECTOR();
                 SDF_VU0_STOREVECTOR(vertices + 7 + outputCount);
             }
@@ -2284,10 +2299,10 @@ void billAdvanceCellInstances(EffClassWork *work) {
             else if (fadeEnd < age) alpha = (f32)(s32)((u32)lifetime - (u32)age) / (f32)(s32)((u32)lifetime - (u32)fadeEnd);
             else alpha = 1.0f;
             SDF_VU0_LOADVECTOR_B(effOnesVector);
-            VU0_SCALE_VF(vf11, alpha);
+            SDF_VU0_SCALEVECTOR_B_BITS(alpha);
             SDF_VU0_LOADVECTOR(secondVector);
             SDF_VU0_MULVECTOR();
-            secondPacked = eePackRGBAWord(128.0f);
+            secondPacked = PackRGBAWord(128.0f);
             color = colors + 1;
             outputCount = 11;
             do {
@@ -2296,7 +2311,7 @@ void billAdvanceCellInstances(EffClassWork *work) {
             } while (--outputCount >= 0);
             SDF_VU0_LOADVECTOR(firstVector);
             SDF_VU0_MULVECTOR();
-            firstPacked = eePackRGBAWord(128.0f);
+            firstPacked = PackRGBAWord(128.0f);
             colors[0] = firstPacked | ((u32)(alpha * 128.0f) << 24);
             entry->age = (s32)((u32)age + (u32)ageStep);
         }
@@ -2320,23 +2335,23 @@ void billUpdateCellDrawColorAndTransform(BillCellDrawWork *work) {
     }
     second = effSampleColorAlphaTracks(&((EffBillTimedHeader *)config)->colorTrack, &((EffBillTimedHeader *)config)->alphaTrack, limit, progress);
     unit = 0x3C000000;
-    eeUnpackRGBAWord(work->baseColor, unit);
+    UnpackRGBAWord(work->baseColor, unit);
     SDF_VU0_COPYVECTOR_A_TO_B();
-    eeUnpackRGBAWord(second, unit);
+    UnpackRGBAWord(second, unit);
     SDF_VU0_MULVECTOR();
-    packed = eePackRGBAWord(128.0f);
+    packed = PackRGBAWord(128.0f);
     out->color = packed;
     out->type = ((EffBillTimedHeader *)config)->alphaTrack.surfaceIndex;
     out->flag = ((EffBillFrameHeader *)config)->mode;
     SDF_VU0_LOADVECTOR(work->transform);
     ToMatrix();
     SDF_VU0_LOADVECTOR(effOnesVector);
-    VU0_SCALAR_OP_CLOBBER(work->scale, "vmulx.xyzw vf10, vf10, vf2x");
+    SDF_VU0_SCALEVECTOR_V0_CLOBBER(work->scale);
     SDF_VU0_SCALE_XYZ();
     SDF_VU0_LOADVECTOR(work);
     SDF_VU0_VECTOR_W_SET_ONE();
     SDF_VU0_SET_ROW3();
-    VU0_STORE_MATRIX(mtx);
+    SDF_VU0_STOREMATRIX(mtx);
     effDrawTrackSet(out, (Matrix4 *)mtx);
 }
 
@@ -2381,8 +2396,6 @@ void billReleaseParticleNode(s32 work) {
 #include "eff_bill.h"
 #include "eff_random.h"
 #include "sdf_trig.h"
-#include "pcp_vu0.h"
-#include "ee_mmi.h"
 
 extern EffRandState effSharedRandomState[];
 extern u8 effOnesVector[];
@@ -2455,15 +2468,15 @@ void billAdvanceParticleInstances(EffClassWork *work) {
     colors = (u32 *)asset->tail;
     direction[1] = 0.0f;
     direction[3] = 0.0f;
-    eeUnpackRGBAWordFloat(firstColor, 1.0f / 128.0f);
-    VU0_STORE_VF_UNCLOBBERED(vf10, firstVector);
+    UnpackRGBAWordFloat(firstColor, 1.0f / 128.0f);
+    SDF_VU0_STOREVECTOR_NOMEM(firstVector);
     secondColor = config->colorB & 0xFFFFFF;
-    eeUnpackRGBAWordFloat(secondColor, 1.0f / 128.0f);
-    VU0_STORE_VF_UNCLOBBERED(vf10, secondVector);
+    UnpackRGBAWordFloat(secondColor, 1.0f / 128.0f);
+    SDF_VU0_STOREVECTOR_NOMEM(secondVector);
     acceleration = config->acceleration;
-    VU0_STORE_VF(vf0, radialA);
+    SDF_VU0_STOREIDENTITYVECTOR(radialA);
     respawn = config->frame.respawn;
-    VU0_STORE_VF(vf0, radialB);
+    SDF_VU0_STOREIDENTITYVECTOR(radialB);
     if (itemCount <= 0) {
         return;
     }
@@ -2515,7 +2528,7 @@ void billAdvanceParticleInstances(EffClassWork *work) {
             }
         } else if (age >= lifetime) {
             for (outputCount = 0; outputCount < 13; outputCount++) {
-                VU0_STORE_VF(vf0, vertices + outputCount);
+                SDF_VU0_STOREIDENTITYVECTOR(vertices + outputCount);
                 colors[outputCount] = 0;
             }
             entry->age = retiredState;
@@ -2537,49 +2550,47 @@ void billAdvanceParticleInstances(EffClassWork *work) {
             height = (entry->rise + half) * time + gravity * time * time * 0.5f;
             radialA[1] = entry->radiusA;
             radialB[1] = entry->radiusB;
-            VU0_LOAD_VF(vf10, effOnesVector);
-            VU0_SCALE_VF(vf10, entry->extent);
-            VU0_STORE_VF_UNCLOBBERED(vf10, width);
+            SDF_VU0_LOADVECTOR(effOnesVector);
+            SDF_VU0_SCALEVECTOR_BITS(entry->extent);
+            SDF_VU0_STOREVECTOR_NOMEM(width);
             /* The heading; the center lies an offset out along it, raised
              * by the height, and the lateral axis is the heading turned a
              * quarter, scaled by the extent. */
             direction[0] = sdfCos(angle);
             direction[2] = sdfSin(angle);
-            VU0_LOAD_VF(vf10, direction);
-            VU0_MOVE_VF(vf12, vf10);
-            VU0_SCALE_VF(vf10, offset);
-            VU0_SET_VF10_COMPONENT(y, height);
-            VU0_MOVE_VF(vf2, vf10);
-            VU0_MOVE_VF(vf10, vf12);
-            VU0_MOVE_VF(vf12, vf2);
+            SDF_VU0_LOADVECTOR(direction);
+            SDF_VU0_COPYVECTOR_A_TO_C();
+            SDF_VU0_SCALEVECTOR_BITS(offset);
+            SDF_VU0_SETVECTOR_Y(height);
+            SDF_VU0_SWAPVECTOR_A_C();
             SDF_VU0_GETVECTOR_X(cosine);
             SDF_VU0_GETVECTOR_Z(sine);
-            VU0_SET_VF10_COMPONENT(x, sine);
+            SDF_VU0_SETVECTOR_X(sine);
             cosine = -cosine;
-            VU0_SET_VF10_COMPONENT(z, cosine);
-            VU0_LOAD_VF(vf11, width);
-            VU0_MUL(vf10, vf10, vf11);
-            VU0_STORE_VF_UNCLOBBERED(vf10, width);
+            SDF_VU0_SETVECTOR_Z(cosine);
+            SDF_VU0_LOADVECTOR_B(width);
+            SDF_VU0_MULVECTOR();
+            SDF_VU0_STOREVECTOR_NOMEM(width);
             /* The center, then two six-step half rings around it of radii A
              * and B. */
-            VU0_STORE_VF(vf12, vertices);
+            SDF_VU0_STOREVECTOR_C(vertices);
             for (outputCount = 0; outputCount < 6; outputCount++) {
-                VU0_LOAD_VF(vf10, radialA);
-                VU0_SCALE_VF(vf10, billRingSines[outputCount]);
-                VU0_ADD(vf10, vf10, vf12);
-                VU0_LOAD_VF(vf11, width);
-                VU0_SCALE_VF(vf11, billRingCosines[outputCount]);
-                VU0_ADD(vf10, vf10, vf11);
-                VU0_STORE_VF(vf10, vertices + 1 + outputCount);
+                SDF_VU0_LOADVECTOR(radialA);
+                SDF_VU0_SCALEVECTOR_BITS(billRingSines[outputCount]);
+                SDF_VU0_ADDVECTOR_A_C();
+                SDF_VU0_LOADVECTOR_B(width);
+                SDF_VU0_SCALEVECTOR_B_BITS(billRingCosines[outputCount]);
+                SDF_VU0_ADDVECTOR();
+                SDF_VU0_STOREVECTOR(vertices + 1 + outputCount);
             }
             for (outputCount = 0; outputCount < 6; outputCount++) {
-                VU0_LOAD_VF(vf10, radialB);
-                VU0_SCALE_VF(vf10, billRingSines[outputCount + 6]);
-                VU0_ADD(vf10, vf10, vf12);
-                VU0_LOAD_VF(vf11, width);
-                VU0_SCALE_VF(vf11, billRingCosines[outputCount + 6]);
-                VU0_ADD(vf10, vf10, vf11);
-                VU0_STORE_VF(vf10, vertices + 7 + outputCount);
+                SDF_VU0_LOADVECTOR(radialB);
+                SDF_VU0_SCALEVECTOR_BITS(billRingSines[outputCount + 6]);
+                SDF_VU0_ADDVECTOR_A_C();
+                SDF_VU0_LOADVECTOR_B(width);
+                SDF_VU0_SCALEVECTOR_B_BITS(billRingCosines[outputCount + 6]);
+                SDF_VU0_ADDVECTOR();
+                SDF_VU0_STOREVECTOR(vertices + 7 + outputCount);
             }
             if (age < fadeStart) {
                 alpha = time / (f32)fadeStart;
@@ -2590,17 +2601,17 @@ void billAdvanceParticleInstances(EffClassWork *work) {
             }
             /* Both colors fade by the alpha: the rim takes color B with a
              * zero alpha byte, the center color A with the alpha's. */
-            VU0_LOAD_VF(vf11, effOnesVector);
-            VU0_SCALE_VF(vf11, alpha);
-            VU0_LOAD_VF(vf10, secondVector);
-            VU0_MUL(vf10, vf10, vf11);
-            secondPacked = eePackRGBAWord(128.0f);
+            SDF_VU0_LOADVECTOR_B(effOnesVector);
+            SDF_VU0_SCALEVECTOR_B_BITS(alpha);
+            SDF_VU0_LOADVECTOR(secondVector);
+            SDF_VU0_MULVECTOR();
+            secondPacked = PackRGBAWord(128.0f);
             for (outputCount = 1; outputCount < 13; outputCount++) {
                 colors[outputCount] = secondPacked;
             }
-            VU0_LOAD_VF(vf10, firstVector);
-            VU0_MUL(vf10, vf10, vf11);
-            firstPacked = eePackRGBAWord(128.0f);
+            SDF_VU0_LOADVECTOR(firstVector);
+            SDF_VU0_MULVECTOR();
+            firstPacked = PackRGBAWord(128.0f);
             colors[0] = firstPacked | ((u32)(alpha * 128.0f) << 24);
             entry->age = age + 1;
         }
@@ -2626,23 +2637,23 @@ void billUpdateParticleDrawColorAndTransform(BillCellDrawWork *work) {
     }
     second = effSampleColorAlphaTracks(&((EffBillTimedHeader *)config)->colorTrack, &((EffBillTimedHeader *)config)->alphaTrack, limit, progress);
     unit = 0x3C000000;
-    eeUnpackRGBAWord(work->baseColor, unit);
+    UnpackRGBAWord(work->baseColor, unit);
     SDF_VU0_COPYVECTOR_A_TO_B();
-    eeUnpackRGBAWord(second, unit);
+    UnpackRGBAWord(second, unit);
     SDF_VU0_MULVECTOR();
-    packed = eePackRGBAWord(128.0f);
+    packed = PackRGBAWord(128.0f);
     out->color = packed;
     out->type = ((EffBillTimedHeader *)config)->alphaTrack.surfaceIndex;
     out->flag = ((EffBillFrameHeader *)config)->mode;
     SDF_VU0_LOADVECTOR(work->transform);
     ToMatrix();
     SDF_VU0_LOADVECTOR(effOnesVector);
-    VU0_SCALAR_OP_CLOBBER(work->scale, "vmulx.xyzw vf10, vf10, vf2x");
+    SDF_VU0_SCALEVECTOR_V0_CLOBBER(work->scale);
     SDF_VU0_SCALE_XYZ();
     SDF_VU0_LOADVECTOR(work);
     SDF_VU0_VECTOR_W_SET_ONE();
     SDF_VU0_SET_ROW3();
-    VU0_STORE_MATRIX(mtx);
+    SDF_VU0_STOREMATRIX(mtx);
     effDrawTrackSet(out, (Matrix4 *)mtx);
 }
 
@@ -2803,10 +2814,10 @@ void billAdvanceAnimatedFrameTransforms(EffClassWork *work) {
     colors = (u32 *)asset->tail;
     direction[1] = 0.0f;
     direction[3] = 0.0f;
-    eeUnpackRGBAWordFloat(firstColor, 1.0f / 128.0f);
+    UnpackRGBAWordFloat(firstColor, 1.0f / 128.0f);
     SDF_VU0_STOREVECTOR_NOMEM(firstVector);
     secondColor = config->colorB;
-    eeUnpackRGBAWordFloat(secondColor, 1.0f / 128.0f);
+    UnpackRGBAWordFloat(secondColor, 1.0f / 128.0f);
     SDF_VU0_STOREVECTOR_NOMEM(secondVector);
     fadeStart = (s32)(config->frame.fadeInFraction * (f32)lifetime);
     fadeEnd = (s32)(config->frame.fadeOutFraction * (f32)lifetime);
@@ -2847,7 +2858,7 @@ void billAdvanceAnimatedFrameTransforms(EffClassWork *work) {
             u128 *position = vertices;
             s32 count = 3;
             do {
-                VU0_STORE_VF(vf0, position);
+                SDF_VU0_STOREIDENTITYVECTOR(position);
                 *color = 0;
                 position++;
                 color++;
@@ -2868,10 +2879,10 @@ void billAdvanceAnimatedFrameTransforms(EffClassWork *work) {
             if (age < frames) entry->radius += entry->radiusStep;
             SDF_VU0_LOADVECTOR(effOnesVector);
             SDF_VU0_COPYVECTOR_A_TO_B();
-            VU0_SCALE_VF(vf10, entry->radius);
+            SDF_VU0_SCALEVECTOR_BITS(entry->radius);
             SDF_VU0_STOREVECTOR_NOMEM(radius);
             SDF_VU0_COPYVECTOR_B_TO_A();
-            VU0_SCALE_VF(vf10, entry->width);
+            SDF_VU0_SCALEVECTOR_BITS(entry->width);
             SDF_VU0_STOREVECTOR_NOMEM(width);
             direction[0] = sdfCos(angle);
             direction[2] = sdfSin(angle);
@@ -2879,9 +2890,9 @@ void billAdvanceAnimatedFrameTransforms(EffClassWork *work) {
             SDF_VU0_COPYVECTOR_A_TO_C();
             SDF_VU0_GETVECTOR_X(cosine);
             SDF_VU0_GETVECTOR_Z(sine);
-            VU0_SCALAR_OP(sine, "vaddx.x vf10, vf0, vf2x");
+            SDF_VU0_SETVECTOR_X_V0(sine);
             cosine = -cosine;
-            VU0_SCALAR_OP(cosine, "vaddx.z vf10, vf0, vf2x");
+            SDF_VU0_SETVECTOR_Z_V0(cosine);
             SDF_VU0_COPYVECTOR_A_TO_B();
             SDF_VU0_LOADVECTOR(width);
             SDF_VU0_MULVECTOR();
@@ -2893,12 +2904,12 @@ void billAdvanceAnimatedFrameTransforms(EffClassWork *work) {
             SDF_VU0_LOADVECTOR(width);
             SDF_VU0_COPYVECTOR_A_TO_B();
             SDF_VU0_STOREVECTOR(vertices + 2);
-            VU0_NEGATE_XYZ(vf11);
+            SDF_VU0_NEGVECTOR_B_XYZ();
             SDF_VU0_STOREVECTOR_B(vertices + 3);
             SDF_VU0_LOADVECTOR(width);
             SDF_VU0_COPYVECTOR_A_TO_B();
             SDF_VU0_ADDVECTOR_A_C();
-            VU0_NEGATE_XYZ(vf11);
+            SDF_VU0_NEGVECTOR_B_XYZ();
             SDF_VU0_STOREVECTOR(vertices);
             SDF_VU0_ADDVECTOR_B_C();
             SDF_VU0_STOREVECTOR_B(vertices + 1);
@@ -2906,15 +2917,15 @@ void billAdvanceAnimatedFrameTransforms(EffClassWork *work) {
             else if (fadeEnd < age) alpha = (f32)(s32)((u32)lifetime - (u32)age) / (f32)(s32)((u32)lifetime - (u32)fadeEnd);
             else alpha = 1.0f;
             SDF_VU0_LOADVECTOR_B(effOnesVector);
-            VU0_SCALE_VF(vf11, alpha);
+            SDF_VU0_SCALEVECTOR_B_BITS(alpha);
             SDF_VU0_LOADVECTOR(secondVector);
             SDF_VU0_MULVECTOR();
-            secondPacked = eePackRGBAWord(128.0f);
+            secondPacked = PackRGBAWord(128.0f);
             colors[0] = secondPacked;
             colors[1] = secondPacked;
             SDF_VU0_LOADVECTOR(firstVector);
             SDF_VU0_MULVECTOR();
-            firstPacked = eePackRGBAWord(128.0f);
+            firstPacked = PackRGBAWord(128.0f);
             colors[2] = firstPacked;
             colors[3] = firstPacked;
             entry->age = (s32)((u32)age + 1u);
@@ -2938,23 +2949,23 @@ void billUpdateAlternatingDrawColorAndTransform(BillCellDrawWork *work) {
     }
     second = effSampleColorAlphaTracks(&((EffBillTimedHeader *)config)->colorTrack, &((EffBillTimedHeader *)config)->alphaTrack, limit, progress);
     unit = 0x3C000000;
-    eeUnpackRGBAWord(work->baseColor, unit);
+    UnpackRGBAWord(work->baseColor, unit);
     SDF_VU0_COPYVECTOR_A_TO_B();
-    eeUnpackRGBAWord(second, unit);
+    UnpackRGBAWord(second, unit);
     SDF_VU0_MULVECTOR();
-    packed = eePackRGBAWord(128.0f);
+    packed = PackRGBAWord(128.0f);
     out->color = packed;
     out->type = ((EffBillTimedHeader *)config)->alphaTrack.surfaceIndex;
     out->flag = ((EffBillFrameHeader *)config)->mode;
     SDF_VU0_LOADVECTOR(work->transform);
     ToMatrix();
     SDF_VU0_LOADVECTOR(effOnesVector);
-    VU0_SCALAR_OP_CLOBBER(work->scale, "vmulx.xyzw vf10, vf10, vf2x");
+    SDF_VU0_SCALEVECTOR_V0_CLOBBER(work->scale);
     SDF_VU0_SCALE_XYZ();
     SDF_VU0_LOADVECTOR(work);
     SDF_VU0_VECTOR_W_SET_ONE();
     SDF_VU0_SET_ROW3();
-    VU0_STORE_MATRIX(mtx);
+    SDF_VU0_STOREMATRIX(mtx);
     effDrawTrackSet(out, (Matrix4 *)mtx);
 }
 
@@ -3105,10 +3116,10 @@ void billAdvanceEmitterInstances(EffClassWork *work) {
     colors = (u32 *)asset->tail;
     direction[1] = 0.0f;
     direction[3] = 0.0f;
-    eeUnpackRGBAWordFloat(firstColor, 1.0f / 128.0f);
+    UnpackRGBAWordFloat(firstColor, 1.0f / 128.0f);
     SDF_VU0_STOREVECTOR_NOMEM(firstVector);
     secondColor = config->secondColor;
-    eeUnpackRGBAWordFloat(secondColor, 1.0f / 128.0f);
+    UnpackRGBAWordFloat(secondColor, 1.0f / 128.0f);
     SDF_VU0_STOREVECTOR_NOMEM(secondVector);
     acceleration = config->acceleration;
     respawn = config->frame.respawn;
@@ -3146,7 +3157,7 @@ void billAdvanceEmitterInstances(EffClassWork *work) {
             u128 *position = vertices;
             s32 count = 3;
             do {
-                VU0_STORE_VF(vf0, position);
+                SDF_VU0_STOREIDENTITYVECTOR(position);
                 *color = 0;
                 position++;
                 color++;
@@ -3177,18 +3188,18 @@ void billAdvanceEmitterInstances(EffClassWork *work) {
             direction[2] = sdfSin(angle);
             SDF_VU0_LOADVECTOR(direction);
             SDF_VU0_COPYVECTOR_A_TO_B();
-            VU0_SCALE_VF(vf10, entry->radius);
+            SDF_VU0_SCALEVECTOR_BITS(entry->radius);
             SDF_VU0_STOREVECTOR_NOMEM(radial);
             SDF_VU0_COPYVECTOR_B_TO_A();
-            VU0_SCALE_VF(vf10, distance);
+            SDF_VU0_SCALEVECTOR_BITS(distance);
             SDF_VU0_COPYVECTOR_A_TO_C();
             SDF_VU0_COPYVECTOR_B_TO_A();
             SDF_VU0_GETVECTOR_X(cosine);
             SDF_VU0_GETVECTOR_Z(sine);
-            VU0_SCALAR_OP(sine, "vaddx.x vf10, vf0, vf2x");
+            SDF_VU0_SETVECTOR_X_V0(sine);
             cosine = -cosine;
-            VU0_SCALAR_OP(cosine, "vaddx.z vf10, vf0, vf2x");
-            VU0_SCALE_VF(vf10, entry->width);
+            SDF_VU0_SETVECTOR_Z_V0(cosine);
+            SDF_VU0_SCALEVECTOR_BITS(entry->width);
             SDF_VU0_STOREVECTOR_NOMEM(width);
             SDF_VU0_LOADVECTOR(radial);
             SDF_VU0_ADDVECTOR_A_C();
@@ -3211,15 +3222,15 @@ void billAdvanceEmitterInstances(EffClassWork *work) {
             else if (fadeEnd < age) alpha = (f32)(s32)((u32)lifetime - (u32)age) / (f32)(s32)((u32)lifetime - (u32)fadeEnd);
             else alpha = 1.0f;
             SDF_VU0_LOADVECTOR_B(effOnesVector);
-            VU0_SCALE_VF(vf11, alpha);
+            SDF_VU0_SCALEVECTOR_B_BITS(alpha);
             SDF_VU0_LOADVECTOR(secondVector);
             SDF_VU0_MULVECTOR();
-            secondPacked = eePackRGBAWord(128.0f);
+            secondPacked = PackRGBAWord(128.0f);
             colors[0] = secondPacked;
             colors[1] = secondPacked;
             SDF_VU0_LOADVECTOR(firstVector);
             SDF_VU0_MULVECTOR();
-            firstPacked = eePackRGBAWord(128.0f);
+            firstPacked = PackRGBAWord(128.0f);
             colors[2] = firstPacked;
             colors[3] = firstPacked;
             entry->age = (s32)((u32)age + (u32)ageStep);
@@ -3243,23 +3254,23 @@ void billUpdateEmitterDrawColorAndTransform(u8 *work) {
     }
     second = effSampleColorAlphaTracks(&((EffBillTimedHeader *)config)->colorTrack, &((EffBillTimedHeader *)config)->alphaTrack, limit, progress);
     unit = 0x3C000000;
-    eeUnpackRGBAWord(((BillCellDrawWork *)work)->baseColor, unit);
+    UnpackRGBAWord(((BillCellDrawWork *)work)->baseColor, unit);
     SDF_VU0_COPYVECTOR_A_TO_B();
-    eeUnpackRGBAWord(second, unit);
+    UnpackRGBAWord(second, unit);
     SDF_VU0_MULVECTOR();
-    packed = eePackRGBAWord(128.0f);
+    packed = PackRGBAWord(128.0f);
     out->color = packed;
     out->type = ((EffBillTimedHeader *)config)->alphaTrack.surfaceIndex;
     out->flag = ((EffBillFrameHeader *)config)->mode;
     SDF_VU0_LOADVECTOR(work + 0x10);
     ToMatrix();
     SDF_VU0_LOADVECTOR(effOnesVector);
-    VU0_SCALAR_OP_CLOBBER(((BillCellDrawWork *)work)->scale, "vmulx.xyzw vf10, vf10, vf2x");
+    SDF_VU0_SCALEVECTOR_V0_CLOBBER(((BillCellDrawWork *)work)->scale);
     SDF_VU0_SCALE_XYZ();
     SDF_VU0_LOADVECTOR(work);
     SDF_VU0_VECTOR_W_SET_ONE();
     SDF_VU0_SET_ROW3();
-    VU0_STORE_MATRIX(mtx);
+    SDF_VU0_STOREMATRIX(mtx);
     effDrawTrackSet(out, (Matrix4 *)mtx);
 }
 
@@ -3402,10 +3413,10 @@ void billAdvanceStripInstances(EffClassWork *work) {
     colors = (u32 *)asset->tail;
     center[1] = 0.0f;
     center[3] = 0.0f;
-    eeUnpackRGBAWordFloat(colorA, 1.0f / 128.0f);
+    UnpackRGBAWordFloat(colorA, 1.0f / 128.0f);
     SDF_VU0_STOREVECTOR_NOMEM(colorVectorA);
     colorB = config->colorB;
-    eeUnpackRGBAWordFloat(colorB, 1.0f / 128.0f);
+    UnpackRGBAWordFloat(colorB, 1.0f / 128.0f);
     SDF_VU0_STOREVECTOR_NOMEM(colorVectorB);
     fadeStart = (s32)(config->frame.fadeInFraction * (f32)lifetime);
     fadeEnd = (s32)(config->frame.fadeOutFraction * (f32)lifetime);
@@ -3474,7 +3485,7 @@ void billAdvanceStripInstances(EffClassWork *work) {
             u128 *position = vertices;
             s32 count = 3;
             do {
-                VU0_STORE_VF(vf0, position);
+                SDF_VU0_STOREIDENTITYVECTOR(position);
                 *color = 0;
                 position++;
                 color++;
@@ -3510,7 +3521,7 @@ void billAdvanceStripInstances(EffClassWork *work) {
             cosine = -cosine;
             direction[2] = cosine;
             SDF_VU0_LOADVECTOR(direction);
-            VU0_SCALE_VF(vf10, entry->width);
+            SDF_VU0_SCALEVECTOR_BITS(entry->width);
             SDF_VU0_STOREVECTOR_NOMEM(lateral);
             SDF_VU0_LOADVECTOR(center);
             SDF_VU0_LOADVECTOR_B(lateral);
@@ -3520,7 +3531,7 @@ void billAdvanceStripInstances(EffClassWork *work) {
             SDF_VU0_SUBVECTOR();
             SDF_VU0_STOREVECTOR(vertices + 3);
             SDF_VU0_COPYVECTOR_C_TO_B();
-            VU0_SCALE_VF(vf11, entry->length);
+            SDF_VU0_SCALEVECTOR_B_BITS(entry->length);
             SDF_VU0_LOADVECTOR(center);
             SDF_VU0_ADDVECTOR();
             SDF_VU0_LOADVECTOR_B(lateral);
@@ -3541,11 +3552,11 @@ void billAdvanceStripInstances(EffClassWork *work) {
                 alpha = 1.0f;
             }
             SDF_VU0_LOADVECTOR_B(effOnesVector);
-            VU0_SCALE_VF(vf11, alpha);
+            SDF_VU0_SCALEVECTOR_B_BITS(alpha);
             SDF_VU0_LOADVECTOR(colorVectorB);
             SDF_VU0_MULVECTOR();
             {
-                EE_MMI_RGBA_PACK_UNIT(packedB[0], 128.0f);
+                MMI_RGBA_PACK_UNIT(packedB[0], 128.0f);
                 packedColor = packedB[0];
                 colors[0] = packedColor;
                 colors[1] = packedColor;
@@ -3553,7 +3564,7 @@ void billAdvanceStripInstances(EffClassWork *work) {
             SDF_VU0_LOADVECTOR(colorVectorA);
             SDF_VU0_MULVECTOR();
             {
-                EE_MMI_RGBA_PACK_UNIT(packedA[0], 128.0f);
+                MMI_RGBA_PACK_UNIT(packedA[0], 128.0f);
                 packedColor = packedA[0];
                 colors[2] = packedColor;
                 colors[3] = packedColor;
@@ -3580,23 +3591,23 @@ void billUpdateStripDrawColorAndTransform(u8 *work) {
     }
     second = effSampleColorAlphaTracks(&((EffBillTimedHeader *)config)->colorTrack, &((EffBillTimedHeader *)config)->alphaTrack, limit, progress);
     unit = 0x3C000000;
-    eeUnpackRGBAWord(((BillCellDrawWork *)work)->baseColor, unit);
+    UnpackRGBAWord(((BillCellDrawWork *)work)->baseColor, unit);
     SDF_VU0_COPYVECTOR_A_TO_B();
-    eeUnpackRGBAWord(second, unit);
+    UnpackRGBAWord(second, unit);
     SDF_VU0_MULVECTOR();
-    packed = eePackRGBAWord(128.0f);
+    packed = PackRGBAWord(128.0f);
     out->color = packed;
     out->type = ((EffBillTimedHeader *)config)->alphaTrack.surfaceIndex;
     out->flag = ((EffBillFrameHeader *)config)->mode;
     SDF_VU0_LOADVECTOR(work + 0x10);
     ToMatrix();
     SDF_VU0_LOADVECTOR(effOnesVector);
-    VU0_SCALAR_OP_CLOBBER(((BillCellDrawWork *)work)->scale, "vmulx.xyzw vf10, vf10, vf2x");
+    SDF_VU0_SCALEVECTOR_V0_CLOBBER(((BillCellDrawWork *)work)->scale);
     SDF_VU0_SCALE_XYZ();
     SDF_VU0_LOADVECTOR(work);
     SDF_VU0_VECTOR_W_SET_ONE();
     SDF_VU0_SET_ROW3();
-    VU0_STORE_MATRIX(mtx);
+    SDF_VU0_STOREMATRIX(mtx);
     effDrawTrackSet(out, (Matrix4 *)mtx);
 }
 
@@ -3642,8 +3653,6 @@ void billReleaseTrailNode(s32 work) {
 #include "eff_bill.h"
 #include "eff_random.h"
 #include "sdf_trig.h"
-#include "pcp_vu0.h"
-#include "ee_mmi.h"
 
 extern EffRandState effSharedRandomState[];
 extern u8 effOnesVector[];
@@ -3705,10 +3714,10 @@ void billAdvanceTrailInstances(EffClassWork *work) {
     colors = (u32 *)asset->tail;
     center[1] = 0.0f;
     center[3] = 0.0f;
-    eeUnpackRGBAWordFloat(config->colorA & 0xFFFFFF, 1.0f / 128.0f);
-    VU0_STORE_VF_UNCLOBBERED(vf10, colorVectorA);
-    eeUnpackRGBAWordFloat(config->colorB & 0xFFFFFF, 1.0f / 128.0f);
-    VU0_STORE_VF_UNCLOBBERED(vf10, colorVectorB);
+    UnpackRGBAWordFloat(config->colorA & 0xFFFFFF, 1.0f / 128.0f);
+    SDF_VU0_STOREVECTOR_NOMEM(colorVectorA);
+    UnpackRGBAWordFloat(config->colorB & 0xFFFFFF, 1.0f / 128.0f);
+    SDF_VU0_STOREVECTOR_NOMEM(colorVectorB);
     fadeStart = (s32)(config->frame.fadeInFraction * (f32)lifetime);
     fadeEnd = (s32)(config->frame.fadeOutFraction * (f32)lifetime);
     acceleration = config->spinAccel;
@@ -3770,7 +3779,7 @@ void billAdvanceTrailInstances(EffClassWork *work) {
             s32 vertex;
 
             for (vertex = 0; vertex < 5; vertex++) {
-                VU0_STORE_VF(vf0, vertices + vertex);
+                SDF_VU0_STOREIDENTITYVECTOR(vertices + vertex);
                 colors[vertex] = 0;
             }
             entry->age = respawn != 0 ? -1 : -2;
@@ -3795,43 +3804,43 @@ void billAdvanceTrailInstances(EffClassWork *work) {
             direction[0] = cosine * tilt;
             direction[1] = tilt + -1.0f;
             direction[2] = sine * tilt;
-            VU0_LOAD_VF(vf10, direction);
+            SDF_VU0_LOADVECTOR(direction);
             SDF_VU0_NORMALIZE();
-            VU0_MOVE_VF(vf12, vf10);
+            SDF_VU0_COPYVECTOR_A_TO_C();
 
             /* The tangent, scaled to each end's half width. */
             direction[0] = sine;
             direction[1] = 0.0f;
             cosine = -cosine;
             direction[2] = cosine;
-            VU0_LOAD_VF(vf10, direction);
-            VU0_MOVE_VF(vf11, vf10);
-            VU0_SCALE_VF(vf10, entry->widthA);
-            VU0_SCALE_VF(vf11, entry->widthB);
-            VU0_STORE_VF_UNCLOBBERED(vf10, lateralA);
-            VU0_STORE_VF_UNCLOBBERED(vf11, lateralB);
+            SDF_VU0_LOADVECTOR(direction);
+            SDF_VU0_COPYVECTOR_A_TO_B();
+            SDF_VU0_SCALEVECTOR_BITS(entry->widthA);
+            SDF_VU0_SCALEVECTOR_B_BITS(entry->widthB);
+            SDF_VU0_STOREVECTOR_NOMEM(lateralA);
+            SDF_VU0_STOREVECTOR_B_NOMEM(lateralB);
 
             /* The root end: its center, then either side. */
-            VU0_LOAD_VF(vf10, center);
-            VU0_STORE_VF(vf10, vertices + 3);
-            VU0_LOAD_VF(vf11, lateralA);
-            VU0_ADD(vf10, vf10, vf11);
-            VU0_STORE_VF(vf10, vertices + 2);
-            VU0_SUB(vf10, vf10, vf11);
-            VU0_SUB(vf10, vf10, vf11);
-            VU0_STORE_VF(vf10, vertices + 4);
+            SDF_VU0_LOADVECTOR(center);
+            SDF_VU0_STOREVECTOR(vertices + 3);
+            SDF_VU0_LOADVECTOR_B(lateralA);
+            SDF_VU0_ADDVECTOR();
+            SDF_VU0_STOREVECTOR(vertices + 2);
+            SDF_VU0_SUBVECTOR();
+            SDF_VU0_SUBVECTOR();
+            SDF_VU0_STOREVECTOR(vertices + 4);
 
             /* The far end, a length out along the direction, either side. */
-            VU0_MOVE_VF(vf11, vf12);
-            VU0_SCALE_VF(vf11, entry->length);
-            VU0_LOAD_VF(vf10, center);
-            VU0_ADD(vf10, vf10, vf11);
-            VU0_LOAD_VF(vf11, lateralB);
-            VU0_ADD(vf10, vf10, vf11);
-            VU0_STORE_VF(vf10, vertices + 0);
-            VU0_SUB(vf10, vf10, vf11);
-            VU0_SUB(vf10, vf10, vf11);
-            VU0_STORE_VF(vf10, vertices + 1);
+            SDF_VU0_COPYVECTOR_C_TO_B();
+            SDF_VU0_SCALEVECTOR_B_BITS(entry->length);
+            SDF_VU0_LOADVECTOR(center);
+            SDF_VU0_ADDVECTOR();
+            SDF_VU0_LOADVECTOR_B(lateralB);
+            SDF_VU0_ADDVECTOR();
+            SDF_VU0_STOREVECTOR(vertices + 0);
+            SDF_VU0_SUBVECTOR();
+            SDF_VU0_SUBVECTOR();
+            SDF_VU0_STOREVECTOR(vertices + 1);
 
             entry->length += entry->lengthStep;
             entry->tilt += entry->tiltStep;
@@ -3843,16 +3852,16 @@ void billAdvanceTrailInstances(EffClassWork *work) {
             } else {
                 scale = 1.0f;
             }
-            VU0_LOAD_VF(vf11, effOnesVector);
-            VU0_SCALE_VF(vf11, scale);
-            VU0_LOAD_VF(vf10, colorVectorB);
-            VU0_MUL(vf10, vf10, vf11);
-            packed = eePackRGBAWord(128.0f);
+            SDF_VU0_LOADVECTOR_B(effOnesVector);
+            SDF_VU0_SCALEVECTOR_B_BITS(scale);
+            SDF_VU0_LOADVECTOR(colorVectorB);
+            SDF_VU0_MULVECTOR();
+            packed = PackRGBAWord(128.0f);
             colors[0] = packed;
             colors[1] = packed;
-            VU0_LOAD_VF(vf10, colorVectorA);
-            VU0_MUL(vf10, vf10, vf11);
-            packed = eePackRGBAWord(128.0f);
+            SDF_VU0_LOADVECTOR(colorVectorA);
+            SDF_VU0_MULVECTOR();
+            packed = PackRGBAWord(128.0f);
             /* The far end takes color B with a zero alpha byte; the root's
              * center color A with alpha 0xFF on odd entries and 0x40 on even
              * ones, and its sides only the fade alpha, of 128 or of 255. */
@@ -3889,23 +3898,23 @@ void billUpdateTrailDrawColorAndTransform(u8 *work) {
     }
     second = effSampleColorAlphaTracks(&((EffBillTimedHeader *)config)->colorTrack, &((EffBillTimedHeader *)config)->alphaTrack, limit, progress);
     unit = 0x3C000000;
-    eeUnpackRGBAWord(((BillCellDrawWork *)work)->baseColor, unit);
+    UnpackRGBAWord(((BillCellDrawWork *)work)->baseColor, unit);
     SDF_VU0_COPYVECTOR_A_TO_B();
-    eeUnpackRGBAWord(second, unit);
+    UnpackRGBAWord(second, unit);
     SDF_VU0_MULVECTOR();
-    packed = eePackRGBAWord(128.0f);
+    packed = PackRGBAWord(128.0f);
     out->color = packed;
     out->type = ((EffBillTimedHeader *)config)->alphaTrack.surfaceIndex;
     out->flag = ((EffBillFrameHeader *)config)->mode;
     SDF_VU0_LOADVECTOR(work + 0x10);
     ToMatrix();
     SDF_VU0_LOADVECTOR(effOnesVector);
-    VU0_SCALAR_OP_CLOBBER(((BillCellDrawWork *)work)->scale, "vmulx.xyzw vf10, vf10, vf2x");
+    SDF_VU0_SCALEVECTOR_V0_CLOBBER(((BillCellDrawWork *)work)->scale);
     SDF_VU0_SCALE_XYZ();
     SDF_VU0_LOADVECTOR(work);
     SDF_VU0_VECTOR_W_SET_ONE();
     SDF_VU0_SET_ROW3();
-    VU0_STORE_MATRIX(mtx);
+    SDF_VU0_STOREMATRIX(mtx);
     effDrawTrackSet(out, (Matrix4 *)mtx);
 }
 
@@ -4063,10 +4072,10 @@ void billAdvanceQuadInstances(EffClassWork *work) {
     colors = (u32 *)asset->tail;
     center[1] = 0.0f;
     center[3] = 0.0f;
-    eeUnpackRGBAWordFloat(colorA, 1.0f / 128.0f);
+    UnpackRGBAWordFloat(colorA, 1.0f / 128.0f);
     SDF_VU0_STOREVECTOR_NOMEM(colorVectorA);
     colorB = config->colorB;
-    eeUnpackRGBAWordFloat(colorB, 1.0f / 128.0f);
+    UnpackRGBAWordFloat(colorB, 1.0f / 128.0f);
     SDF_VU0_STOREVECTOR_NOMEM(colorVectorB);
 
     acceleration = config->acceleration;
@@ -4133,7 +4142,7 @@ void billAdvanceQuadInstances(EffClassWork *work) {
             {
                 s32 corner;
                 for (corner = 0; corner < 4; corner++) {
-                    VU0_STORE_VF(vf0, vertices + corner);
+                    SDF_VU0_STOREIDENTITYVECTOR(vertices + corner);
                     colors[corner] = 0;
                 }
             }
@@ -4174,19 +4183,19 @@ void billAdvanceQuadInstances(EffClassWork *work) {
             center[2] = sine * shapeFactor;
             SDF_VU0_LOADVECTOR(center);
             SDF_VU0_COPYVECTOR_A_TO_B();
-            VU0_SCALE_VF(vf10, entry->radius);
+            SDF_VU0_SCALEVECTOR_BITS(entry->radius);
             SDF_VU0_STOREVECTOR(basis);
             SDF_VU0_COPYVECTOR_B_TO_A();
-            VU0_SCALE_VF(vf10, motionDistance);
+            SDF_VU0_SCALEVECTOR_BITS(motionDistance);
             SDF_VU0_STOREVECTOR(center);
             center[0] += cosine * radialOffset;
             center[2] += sine * radialOffset;
 
-            VU0_SCALAR_OP(sine, "vaddx.x vf10, vf0, vf2x");
-            VU0_SCALAR_OP(0.0f, "vaddx.y vf10, vf0, vf2x");
+            SDF_VU0_SETVECTOR_X_V0(sine);
+            SDF_VU0_SETVECTOR_Y_V0(0.0f);
             cosine = -cosine;
-            VU0_SCALAR_OP(cosine, "vaddx.z vf10, vf0, vf2x");
-            VU0_SCALE_VF(vf10, entry->width);
+            SDF_VU0_SETVECTOR_Z_V0(cosine);
+            SDF_VU0_SCALEVECTOR_BITS(entry->width);
             SDF_VU0_STOREVECTOR(lateral);
 
             SDF_VU0_LOADVECTOR_C(center);
@@ -4216,15 +4225,15 @@ void billAdvanceQuadInstances(EffClassWork *work) {
                 alpha = 1.0f;
             }
             SDF_VU0_LOADVECTOR_B(effOnesVector);
-            VU0_SCALE_VF(vf11, alpha);
+            SDF_VU0_SCALEVECTOR_B_BITS(alpha);
             SDF_VU0_LOADVECTOR(colorVectorB);
             SDF_VU0_MULVECTOR();
-            packedColor = eePackRGBAWord(128.0f);
+            packedColor = PackRGBAWord(128.0f);
             colors[0] = packedColor;
             colors[1] = packedColor;
             SDF_VU0_LOADVECTOR(colorVectorA);
             SDF_VU0_MULVECTOR();
-            packedColor = eePackRGBAWord(128.0f);
+            packedColor = PackRGBAWord(128.0f);
             colors[2] = packedColor;
             colors[3] = packedColor;
             entry->timer = (s32)((u32)frame + (u32)frameStep);
@@ -4248,23 +4257,23 @@ void billUpdateQuadDrawColorAndTransform(u8 *work) {
     }
     second = effSampleColorAlphaTracks(&((EffBillTimedHeader *)config)->colorTrack, &((EffBillTimedHeader *)config)->alphaTrack, limit, progress);
     unit = 0x3C000000;
-    eeUnpackRGBAWord(((BillCellDrawWork *)work)->baseColor, unit);
+    UnpackRGBAWord(((BillCellDrawWork *)work)->baseColor, unit);
     SDF_VU0_COPYVECTOR_A_TO_B();
-    eeUnpackRGBAWord(second, unit);
+    UnpackRGBAWord(second, unit);
     SDF_VU0_MULVECTOR();
-    packed = eePackRGBAWord(128.0f);
+    packed = PackRGBAWord(128.0f);
     out->color = packed;
     out->type = ((EffBillTimedHeader *)config)->alphaTrack.surfaceIndex;
     out->flag = ((EffBillFrameHeader *)config)->mode;
     SDF_VU0_LOADVECTOR(work + 0x10);
     ToMatrix();
     SDF_VU0_LOADVECTOR(effOnesVector);
-    VU0_SCALAR_OP_CLOBBER(((BillCellDrawWork *)work)->scale, "vmulx.xyzw vf10, vf10, vf2x");
+    SDF_VU0_SCALEVECTOR_V0_CLOBBER(((BillCellDrawWork *)work)->scale);
     SDF_VU0_SCALE_XYZ();
     SDF_VU0_LOADVECTOR(work);
     SDF_VU0_VECTOR_W_SET_ONE();
     SDF_VU0_SET_ROW3();
-    VU0_STORE_MATRIX(mtx);
+    SDF_VU0_STOREMATRIX(mtx);
     effDrawTrackSet(out, (Matrix4 *)mtx);
 }
 
@@ -4283,8 +4292,8 @@ EffClassWork *effAllocateActiveInstanceWork(u16 kind, void *source) {
     ((EffClassWork *)effect)->scale = 1.0f;
     ((EffClassWork *)effect)->kind = kind;
     ((EffClassWork *)effect)->frame = 0;
-    VU0_STORE_VF($vf0, effect);
-    VU0_STORE_VF($vf0, effect + 0x10);
+    SDF_VU0_STOREIDENTITYVECTOR(effect);
+    SDF_VU0_STOREIDENTITYVECTOR(effect + 0x10);
     memcpy(((EffClassWork *)effect)->payload, source, size);
     return (EffClassWork *)effect;
 }
@@ -4584,7 +4593,7 @@ void effDrawTrackSet(EffTrackSet *track, const Matrix4 *matrix) {
     if (matrix == NULL) {
         SDF_VU0_LOADIDENTITY();
     } else {
-        VU0_LOAD_MATRIX(matrix);
+        SDF_VU0_LOADMATRIX(matrix);
     }
     sdf3DPrimLinkTm(list, 0);
 
@@ -4856,11 +4865,11 @@ void effUpdateExpandingRingPoints(EffClassWork *work) {
     thirdBand = secondBand + config->widths[2];
     SDF_VU0_LOADVECTOR(effOnesVector);
     SDF_VU0_COPYVECTOR_A_TO_B();
-    VU0_SCALAR_OP_CLOBBER(firstBand, "vmulx.xyzw vf10, vf10, vf2x");
+    SDF_VU0_SCALEVECTOR_V0_CLOBBER(firstBand);
     SDF_VU0_STOREVECTOR(bands[0]);
     SDF_VU0_COPYVECTOR_B_TO_A();
-    VU0_SCALAR_OP_CLOBBER(secondBand, "vmulx.xyzw vf10, vf10, vf2x");
-    VU0_SCALAR_OP_CLOBBER(thirdBand, "vmulx.xyzw vf11, vf11, vf2x");
+    SDF_VU0_SCALEVECTOR_V0_CLOBBER(secondBand);
+    SDF_VU0_SCALEVECTOR_B_V0_CLOBBER(thirdBand);
     SDF_VU0_STOREVECTOR(bands[1]);
     SDF_VU0_STOREVECTOR_B(bands[2]);
     for (i = 0; i < groups; i++) {
@@ -4868,7 +4877,7 @@ void effUpdateExpandingRingPoints(EffClassWork *work) {
         direction[2] = sdfSin(angle);
         SDF_VU0_LOADVECTOR(direction);
         SDF_VU0_COPYVECTOR_A_TO_B();
-        VU0_SCALAR_OP_CLOBBER(radius, "vmulx.xyzw vf10, vf10, vf2x");
+        SDF_VU0_SCALEVECTOR_V0_CLOBBER(radius);
         SDF_VU0_STOREVECTOR(out[0]);
         SDF_VU0_LOADVECTOR(bands[0]);
         SDF_VU0_MULVECTOR();
@@ -4902,11 +4911,11 @@ void billDrawCellBlendA(BillCellDrawWork *work) {
     }
     second = effSampleColorAlphaTracks(&((EffBillTimedHeader *)config)->colorTrack, &((EffBillTimedHeader *)config)->alphaTrack, limit, progress);
     unit = 0x3C000000;
-    eeUnpackRGBAWord(work->baseColor, unit);
+    UnpackRGBAWord(work->baseColor, unit);
     SDF_VU0_COPYVECTOR_A_TO_B();
-    eeUnpackRGBAWord(second, unit);
+    UnpackRGBAWord(second, unit);
     SDF_VU0_MULVECTOR();
-    packed = eePackRGBAWord(128.0f);
+    packed = PackRGBAWord(128.0f);
     out->color = packed;
     if ((packed & 0xFF000000) != 0) {
         out->type = ((EffBillTimedHeader *)config)->alphaTrack.surfaceIndex;
@@ -4914,12 +4923,12 @@ void billDrawCellBlendA(BillCellDrawWork *work) {
         SDF_VU0_LOADVECTOR(work->transform);
         ToMatrix();
         SDF_VU0_LOADVECTOR(effOnesVector);
-        VU0_SCALAR_OP_CLOBBER(work->scale, "vmulx.xyzw vf10, vf10, vf2x");
+        SDF_VU0_SCALEVECTOR_V0_CLOBBER(work->scale);
         SDF_VU0_SCALE_XYZ();
         SDF_VU0_LOADVECTOR(work);
         SDF_VU0_VECTOR_W_SET_ONE();
         SDF_VU0_SET_ROW3();
-        VU0_STORE_MATRIX(mtx);
+        SDF_VU0_STOREMATRIX(mtx);
         effDrawFourPointGroups(out, (Matrix4 *)mtx);
     }
 }
@@ -5039,7 +5048,7 @@ void effUpdateScaledClassFrameRows(BillCellDrawWork *work) {
         SDF_VU0_STOREVECTOR(dst + 0x20);
         SDF_VU0_SUBVECTOR();
         SDF_VU0_NORMALIZE();
-        VU0_SCALAR_OP(*scales, "vmulx.xyzw vf10, vf10, vf2x");
+        SDF_VU0_SCALEVECTOR_V0(*scales);
         SDF_VU0_ADDVECTOR_A_C();
         SDF_VU0_STOREVECTOR(dst);
         SDF_VU0_COPYVECTOR(dst + 0x10, src + 0x50);
@@ -5083,7 +5092,7 @@ void billDrawClassUpdatedCellBlend(BillCellDrawWork *work) {
     color2[0] = second;
     EE_MMI_RGBA_UNPACK(color2, unit);
     SDF_VU0_MULVECTOR();
-    EE_MMI_RGBA_PACK_UNCLOBBERED(packed);
+    MMI_RGBA_PACK_128(packed);
     blended[0] = packed;
     out->color = packed;
     if (packed & 0xFF000000) {
@@ -5099,12 +5108,12 @@ void billDrawClassUpdatedCellBlend(BillCellDrawWork *work) {
         SDF_VU0_LOADVECTOR(work->transform);
         ToMatrix();
         SDF_VU0_LOADVECTOR(effOnesVector);
-        VU0_SCALAR_OP(work->scale, "vmulx.xyzw vf10, vf10, vf2x");
+        SDF_VU0_SCALEVECTOR_V0(work->scale);
         SDF_VU0_SCALE_XYZ();
         SDF_VU0_LOADVECTOR(work);
         SDF_VU0_VECTOR_W_SET_ONE();
         SDF_VU0_SET_ROW3();
-        VU0_STORE_MATRIX(mtx);
+        SDF_VU0_STOREMATRIX(mtx);
         effDrawTrackSet(out, (Matrix4 *)mtx);
     }
 }
@@ -5199,17 +5208,17 @@ void effUpdateCenteredRadialRingVertices(EffClassWork *work) {
     thirdBand = secondBand + config->widths[2];
     SDF_VU0_LOADVECTOR(effOnesVector);
     SDF_VU0_COPYVECTOR_A_TO_B();
-    VU0_SCALAR_OP_CLOBBER(firstBand, "vmulx.xyzw vf10, vf10, vf2x");
+    SDF_VU0_SCALEVECTOR_V0_CLOBBER(firstBand);
     SDF_VU0_STOREVECTOR(bands[0]);
     SDF_VU0_COPYVECTOR_B_TO_A();
-    VU0_SCALAR_OP_CLOBBER(secondBand, "vmulx.xyzw vf10, vf10, vf2x");
-    VU0_SCALAR_OP_CLOBBER(thirdBand, "vmulx.xyzw vf11, vf11, vf2x");
+    SDF_VU0_SCALEVECTOR_V0_CLOBBER(secondBand);
+    SDF_VU0_SCALEVECTOR_B_V0_CLOBBER(thirdBand);
     SDF_VU0_STOREVECTOR(bands[1]);
     SDF_VU0_STOREVECTOR_B(bands[2]);
     for (i = 0; i < groups; i++) {
         direction[0] = sdfCos(angle);
         direction[2] = sdfSin(angle);
-        VU0_STORE_VF(vf0, out[0]);
+        SDF_VU0_STOREIDENTITYVECTOR(out[0]);
         SDF_VU0_LOADVECTOR_B(direction);
         SDF_VU0_LOADVECTOR(bands[0]);
         SDF_VU0_MULVECTOR();
@@ -5241,11 +5250,11 @@ void billDrawCellBlendB(EffClassWork *work) {
     }
     second = effSampleColorAlphaTracks(&config->colorTrack, &config->alphaTrack, limit, progress);
     unit = 0x3C000000;
-    eeUnpackRGBAWord(work->color, unit);
+    UnpackRGBAWord(work->color, unit);
     SDF_VU0_COPYVECTOR_A_TO_B();
-    eeUnpackRGBAWord(second, unit);
+    UnpackRGBAWord(second, unit);
     SDF_VU0_MULVECTOR();
-    packed = eePackRGBAWord(128.0f);
+    packed = PackRGBAWord(128.0f);
     out->color = packed;
     if ((packed & 0xFF000000) != 0) {
         out->type = config->alphaTrack.surfaceIndex;
@@ -5253,12 +5262,12 @@ void billDrawCellBlendB(EffClassWork *work) {
         SDF_VU0_LOADVECTOR(work->vectors.orientation);
         ToMatrix();
         SDF_VU0_LOADVECTOR(effOnesVector);
-        VU0_SCALAR_OP_CLOBBER(work->scale, "vmulx.xyzw vf10, vf10, vf2x");
+        SDF_VU0_SCALEVECTOR_V0_CLOBBER(work->scale);
         SDF_VU0_SCALE_XYZ();
         SDF_VU0_LOADVECTOR(work);
         SDF_VU0_VECTOR_W_SET_ONE();
         SDF_VU0_SET_ROW3();
-        VU0_STORE_MATRIX(mtx);
+        SDF_VU0_STOREMATRIX(mtx);
         effDrawFourPointGroups(out, (Matrix4 *)mtx);
     }
 }
@@ -5272,8 +5281,8 @@ EffClassWork *effCreateClassWork(u16 kind, void *source) {
     ((EffClassWork *)effect)->scale = 1.0f;
     ((EffClassWork *)effect)->frame = 0;
     ((EffClassWork *)effect)->kind = kind;
-    VU0_STORE_VF_UNCLOBBERED($vf0, effect);
-    VU0_STORE_VF_UNCLOBBERED($vf0, effect + 0x10);
+    SDF_VU0_STOREIDENTITYVECTOR_NOMEM(effect);
+    SDF_VU0_STOREIDENTITYVECTOR_NOMEM(effect + 0x10);
     memcpy(((EffClassWork *)effect)->payload, source, size);
     ((EffClassWork *)effect)->resource = effClassWorkOperations[kind].createResource(source);
     effClassWorkOperations[kind].initialize(effect);
@@ -5380,7 +5389,7 @@ void effDrawFourPointGroups(EffPointSet *set, const Matrix4 *matrix) {
         if (matrix == NULL) {
             SDF_VU0_LOADIDENTITY();
         } else {
-            VU0_LOAD_MATRIX(matrix);
+            SDF_VU0_LOADMATRIX(matrix);
         }
         sdf3DPrimLinkTm(list, 0);
         sdf3DPrimLinkMat(list, set->handle, 0);
@@ -5814,8 +5823,6 @@ void effAcquireSurfaceRecord(s32 node) {
 #include "eff_curve.h"
 #include "file.h"
 #include "file_slot.h"
-#include "ee_mmi.h"
-#include "pcp_vu0.h"
 #include "eff_queue.h"
 #include "btl_resource_name.h"
 #include "mdl.h"
@@ -5855,10 +5862,10 @@ extern void effResetSurfaceGridFrame(EffSurfaceGridNode *);
 struct EffSurfaceTrailHistory;
 extern void effDrawSurfaceTrailHistory(struct EffSurfaceTrailHistory *, u32);
 static inline u32 effMultiplySurfaceRowColor(u32 color, f32 *baseColor) {
-    eeUnpackRGBAWordFloat(color, 0.0078125f);
-    VU0_LOAD_VF(vf11, baseColor);
-    VU0_MUL(vf10, vf10, vf11);
-    return eePackRGBAWord(128.0f);
+    UnpackRGBAWordFloat(color, 0.0078125f);
+    SDF_VU0_LOADVECTOR_B(baseColor);
+    SDF_VU0_MULVECTOR();
+    return PackRGBAWord(128.0f);
 }
 
 /* Keep each atlas conversion's SDK containers in its own inline instance. */
@@ -5866,10 +5873,10 @@ static inline s32 effPrepareSurfaceAtlasColorFrame(FileSlot *row, f32 *baseColor
     u32 packed;
     s32 frame;
 
-    eeUnpackRGBAWordFloat(row->color, 0.0078125f);
-    VU0_LOAD_VF(vf11, baseColor);
-    VU0_MUL(vf10, vf10, vf11);
-    packed = eePackRGBAWord(128.0f);
+    UnpackRGBAWordFloat(row->color, 0.0078125f);
+    SDF_VU0_LOADVECTOR_B(baseColor);
+    SDF_VU0_MULVECTOR();
+    packed = PackRGBAWord(128.0f);
     frame = row->state;
     *colorDestination = packed;
     return frame;
@@ -5912,26 +5919,26 @@ void effDrawSurfaceNode(s32 nodeAddress) {
     f32 renderedScale;
     s32 currentFrame;
 
-    eeUnpackRGBAWordFloat(node->color, 0.0078125f);
-    VU0_STORE_VF(vf10, baseColor);
+    UnpackRGBAWordFloat(node->color, 0.0078125f);
+    SDF_VU0_STOREVECTOR(baseColor);
     record = node->record;
     if (!(record->flags & 1)) {
-        EE_MMI_UNIT_MATRIX(&initialMatrix);
+        SDF_VU0_STOREIDENTITY(&initialMatrix);
     } else {
         fileReadRecordSecondVector(record, (u128 *)quaternion);
         fileReadVectorPtr20(node->record, (u128 *)translation);
-        VU0_LOAD_VF(vf10, quaternion);
+        SDF_VU0_LOADVECTOR(quaternion);
         ToMatrix();
-        VU0_LOAD_VF(vf10, translation);
-        VU0_SET_W_ONE(vf10);
-        VU0_MOVE_VF(vf31, vf10);
-        VU0_STORE_MATRIX(&initialMatrix);
+        SDF_VU0_LOADVECTOR(translation);
+        SDF_VU0_VECTOR_W_SET_ONE();
+        SDF_VU0_SET_ROW3();
+        SDF_VU0_STOREMATRIX(&initialMatrix);
         record = node->record;
     }
-    VU0_LOAD_VF(vf10, aViewTarget);
-    VU0_LOAD_VF(vf11, aViewEye);
-    VU0_SUB(vf10, vf10, vf11);
-    VU0_STORE_VF(vf10, viewDifference);
+    SDF_VU0_LOADVECTOR(aViewTarget);
+    SDF_VU0_LOADVECTOR_B(aViewEye);
+    SDF_VU0_SUBVECTOR();
+    SDF_VU0_STOREVECTOR(viewDifference);
     count = (s32)node->handleCount;
     row = record->slots;
     effBeginMatrixVuDrawPacket(&initialMatrix);
@@ -5952,36 +5959,36 @@ void effDrawSurfaceNode(s32 nodeAddress) {
 
                 widthValue = row->scale;
                 VEC3_SPLAT(width, widthValue);
-                VU0_LOAD_VF(vf10, row->pos);
-                VU0_LOAD_VF(vf11, grid);
-                VU0_SUB(vf10, vf10, vf11);
+                SDF_VU0_LOADVECTOR(row->pos);
+                SDF_VU0_LOADVECTOR_B(grid);
+                SDF_VU0_SUBVECTOR();
                 SDF_VU0_NORMALIZE();
-                VU0_LOAD_VF(vf11, viewDifference);
-                VU0_DOT_XYZ(viewDot, vf10, vf11);
-                VU0_MOVE_VF(vf12, vf11);
-                VU0_LOAD_VF(vf11, aViewDown);
-                VU0_STORE_VF(vf10, tangent);
-                VU0_DOT_XYZ(upDot, vf10, vf11);
+                SDF_VU0_LOADVECTOR_B(viewDifference);
+                SDF_VU0_INNERPRODUCT(viewDot);
+                SDF_VU0_COPYVECTOR_B_TO_C();
+                SDF_VU0_LOADVECTOR_B(aViewDown);
+                SDF_VU0_STOREVECTOR(tangent);
+                SDF_VU0_INNERPRODUCT(upDot);
                 if (ffabsf(upDot) < 0.849999964237213134765625f) {
-                    VU0_CROSS_XYZ(vf10, vf10, vf11);
+                    SDF_VU0_OUTERPRODUCT();
                 }
-                VU0_MOVE_VF(vf11, vf12);
-                VU0_CROSS_XYZ(vf10, vf10, vf11);
+                SDF_VU0_COPYVECTOR_C_TO_B();
+                SDF_VU0_OUTERPRODUCT();
                 SDF_VU0_NORMALIZE();
                 if (viewDot < 0.0f) {
-                    VU0_NEGATE_XYZ(vf10);
+                    SDF_VU0_NEGVECTOR_XYZ();
                 }
-                VU0_STORE_VF(vf10, direction);
-                VU0_LOAD_VF(vf11, width);
-                VU0_MUL(vf10, vf10, vf11);
-                VU0_MOVE_VF(vf11, vf10);
-                VU0_LOAD_VF(vf10, row->pos);
-                VU0_STORE_VF(vf10, endpoints[1]);
-                VU0_ADD(vf10, vf10, vf11);
-                VU0_STORE_VF(vf10, endpoints[0]);
-                VU0_SUB(vf10, vf10, vf11);
-                VU0_SUB(vf10, vf10, vf11);
-                VU0_STORE_VF(vf10, endpoints[2]);
+                SDF_VU0_STOREVECTOR(direction);
+                SDF_VU0_LOADVECTOR_B(width);
+                SDF_VU0_MULVECTOR();
+                SDF_VU0_COPYVECTOR_A_TO_B();
+                SDF_VU0_LOADVECTOR(row->pos);
+                SDF_VU0_STOREVECTOR(endpoints[1]);
+                SDF_VU0_ADDVECTOR();
+                SDF_VU0_STOREVECTOR(endpoints[0]);
+                SDF_VU0_SUBVECTOR();
+                SDF_VU0_SUBVECTOR();
+                SDF_VU0_STOREVECTOR(endpoints[2]);
                 effInterpolateSurfaceGridVectors(grid, endpoints);
                 effCopyRingFrameVectors(grid, (u128 *)endpoints, 1);
                 vertices = grid->queueA;
@@ -5991,44 +5998,44 @@ void effDrawSurfaceNode(s32 nodeAddress) {
                 oppositeDirection[3] = -direction[3];
                 SDF_VU0_COPYVECTOR(vertices + 1, endpoints[0]);
                 SDF_VU0_COPYVECTOR(vertices + 7, endpoints[2]);
-                VU0_LOAD_VF(vf12, endpoints[1]);
-                VU0_STORE_VF(vf12, vertices);
-                VU0_LOAD_VF(vf10, direction);
-                VU0_LOAD_VF(vf11, tangent);
-                VU0_LERP_VF10(0.333333313465118408203125f);
+                SDF_VU0_LOADVECTOR_C(endpoints[1]);
+                SDF_VU0_STOREVECTOR_C(vertices);
+                SDF_VU0_LOADVECTOR(direction);
+                SDF_VU0_LOADVECTOR_B(tangent);
+                SDF_VU0_INTERPOLATE(0.333333313465118408203125f);
                 SDF_VU0_NORMALIZE();
-                VU0_LOAD_VF(vf11, width);
-                VU0_MUL(vf10, vf10, vf11);
-                VU0_ADD(vf10, vf10, vf12);
-                VU0_STORE_VF(vf10, vertices + 2);
-                VU0_LOAD_VF(vf10, direction);
-                VU0_LOAD_VF(vf11, tangent);
-                VU0_LERP_VF10(0.66666662693023681640625f);
+                SDF_VU0_LOADVECTOR_B(width);
+                SDF_VU0_MULVECTOR();
+                SDF_VU0_ADDVECTOR_A_C();
+                SDF_VU0_STOREVECTOR(vertices + 2);
+                SDF_VU0_LOADVECTOR(direction);
+                SDF_VU0_LOADVECTOR_B(tangent);
+                SDF_VU0_INTERPOLATE(0.66666662693023681640625f);
                 SDF_VU0_NORMALIZE();
-                VU0_LOAD_VF(vf11, width);
-                VU0_MUL(vf10, vf10, vf11);
-                VU0_ADD(vf10, vf10, vf12);
-                VU0_STORE_VF(vf10, vertices + 3);
-                VU0_LOAD_VF(vf10, tangent);
-                VU0_MUL(vf10, vf10, vf11);
-                VU0_ADD(vf10, vf10, vf12);
-                VU0_STORE_VF(vf10, vertices + 4);
-                VU0_LOAD_VF(vf10, oppositeDirection);
-                VU0_LOAD_VF(vf11, tangent);
-                VU0_LERP_VF10(0.66666662693023681640625f);
+                SDF_VU0_LOADVECTOR_B(width);
+                SDF_VU0_MULVECTOR();
+                SDF_VU0_ADDVECTOR_A_C();
+                SDF_VU0_STOREVECTOR(vertices + 3);
+                SDF_VU0_LOADVECTOR(tangent);
+                SDF_VU0_MULVECTOR();
+                SDF_VU0_ADDVECTOR_A_C();
+                SDF_VU0_STOREVECTOR(vertices + 4);
+                SDF_VU0_LOADVECTOR(oppositeDirection);
+                SDF_VU0_LOADVECTOR_B(tangent);
+                SDF_VU0_INTERPOLATE(0.66666662693023681640625f);
                 SDF_VU0_NORMALIZE();
-                VU0_LOAD_VF(vf11, width);
-                VU0_MUL(vf10, vf10, vf11);
-                VU0_ADD(vf10, vf10, vf12);
-                VU0_STORE_VF(vf10, vertices + 5);
-                VU0_LOAD_VF(vf10, oppositeDirection);
-                VU0_LOAD_VF(vf11, tangent);
-                VU0_LERP_VF10(0.333333313465118408203125f);
+                SDF_VU0_LOADVECTOR_B(width);
+                SDF_VU0_MULVECTOR();
+                SDF_VU0_ADDVECTOR_A_C();
+                SDF_VU0_STOREVECTOR(vertices + 5);
+                SDF_VU0_LOADVECTOR(oppositeDirection);
+                SDF_VU0_LOADVECTOR_B(tangent);
+                SDF_VU0_INTERPOLATE(0.333333313465118408203125f);
                 SDF_VU0_NORMALIZE();
-                VU0_LOAD_VF(vf11, width);
-                VU0_MUL(vf10, vf10, vf11);
-                VU0_ADD(vf10, vf10, vf12);
-                VU0_STORE_VF(vf10, vertices + 6);
+                SDF_VU0_LOADVECTOR_B(width);
+                SDF_VU0_MULVECTOR();
+                SDF_VU0_ADDVECTOR_A_C();
+                SDF_VU0_STOREVECTOR(vertices + 6);
             }
             SDF_VU0_COPYVECTOR(grid, row->pos);
             effDrawSurfaceTrailHistory((struct EffSurfaceTrailHistory *)grid, effMultiplySurfaceRowColor(row->color, baseColor));
@@ -6067,16 +6074,16 @@ void effDrawSurfaceNode(s32 nodeAddress) {
         } else {
             fileReadRecordSecondVector(record, (u128 *)quaternion);
             fileReadVectorPtr20(node->record, (u128 *)translation);
-            VU0_LOAD_VF(vf10, quaternion);
+            SDF_VU0_LOADVECTOR(quaternion);
             ToMatrix();
-            VU0_LOAD_VF(vf31, translation);
-            VU0_STORE_MATRIX(&drawMatrix);
+            SDF_VU0_LOAD_ROW3(translation);
+            SDF_VU0_STOREMATRIX(&drawMatrix);
             for (rowIndex = 0; rowIndex < count; rowIndex++, row++) {
                 if (row->state >= 0) {
-                    VU0_LOAD_MATRIX(&drawMatrix);
-                    VU0_LOAD_VF(vf10, row->pos);
-                    VU0_TRANSFORM_POINT(vf10, vf10);
-                    VU0_STORE_VF(vf10, transformedPosition);
+                    SDF_VU0_LOADMATRIX(&drawMatrix);
+                    SDF_VU0_LOADVECTOR(row->pos);
+                    SDF_VU0_APPLYMATRIX_XYZ1();
+                    SDF_VU0_STOREVECTOR(transformedPosition);
                     color = effMultiplySurfaceRowColor(row->color, baseColor);
                     renderedScale = row->scale * nodeScale;
                     dds3BillboardSetRGBA(billboard, color);
@@ -6116,10 +6123,10 @@ void effDrawSurfaceNode(s32 nodeAddress) {
             row = record->slots;
             fileReadRecordSecondVector(record, (u128 *)quaternion);
             fileReadVectorPtr20(node->record, (u128 *)translation);
-            VU0_LOAD_VF(vf10, quaternion);
+            SDF_VU0_LOADVECTOR(quaternion);
             ToMatrix();
-            VU0_LOAD_VF(vf31, translation);
-            VU0_STORE_MATRIX(&drawMatrix);
+            SDF_VU0_LOAD_ROW3(translation);
+            SDF_VU0_STOREMATRIX(&drawMatrix);
             for (rowIndex = 0; rowIndex < count; rowIndex++, row++, job++) {
                 currentFrame = row->state;
                 if (currentFrame == 0) {
@@ -6128,10 +6135,10 @@ void effDrawSurfaceNode(s32 nodeAddress) {
                 }
                 if (currentFrame >= 0) {
                     u32 color;
-                    VU0_LOAD_MATRIX(&drawMatrix);
-                    VU0_LOAD_VF(vf10, row->pos);
-                    VU0_TRANSFORM_POINT(vf10, vf10);
-                    VU0_STORE_VF(vf10, transformedPosition);
+                    SDF_VU0_LOADMATRIX(&drawMatrix);
+                    SDF_VU0_LOADVECTOR(row->pos);
+                    SDF_VU0_APPLYMATRIX_XYZ1();
+                    SDF_VU0_STOREVECTOR(transformedPosition);
                     color = effMultiplySurfaceRowColor(row->color, baseColor);
                     fileDispatchJobTypeCallback(*job, color);
                     fileJobInvokeScaleCallback(*job, row->scale * nodeScale);
@@ -6172,16 +6179,16 @@ void effDrawSurfaceNode(s32 nodeAddress) {
         } else {
             fileReadRecordSecondVector(record, (u128 *)quaternion);
             fileReadVectorPtr20(node->record, (u128 *)translation);
-            VU0_LOAD_VF(vf10, quaternion);
+            SDF_VU0_LOADVECTOR(quaternion);
             ToMatrix();
-            VU0_LOAD_VF(vf31, translation);
-            VU0_STORE_MATRIX(&drawMatrix);
+            SDF_VU0_LOAD_ROW3(translation);
+            SDF_VU0_STOREMATRIX(&drawMatrix);
             for (rowIndex = 0; rowIndex < count; rowIndex++, row++) {
                 if (row->state >= 0) {
-                    VU0_LOAD_MATRIX(&drawMatrix);
-                    VU0_LOAD_VF(vf10, row->pos);
-                    VU0_TRANSFORM_POINT(vf10, vf10);
-                    VU0_STORE_VF(vf10, draw.position);
+                    SDF_VU0_LOADMATRIX(&drawMatrix);
+                    SDF_VU0_LOADVECTOR(row->pos);
+                    SDF_VU0_APPLYMATRIX_XYZ1();
+                    SDF_VU0_STOREVECTOR(draw.position);
                     currentFrame = effPrepareSurfaceAtlasColorFrame(row, baseColor, &draw.color);
                     effSampleAnimSet(holder, currentFrame, &sample);
                     if (cachedSegment != sample.segment) {
@@ -6308,18 +6315,18 @@ void effFillSurfaceGridColorGradient(EffSurfaceGridNode *node, u32 *colors) {
     for (i = 0; i < count; i++) {
         SDF_VU0_LOADVECTOR(corner0);
         SDF_VU0_LOADVECTOR_B(corner2);
-        VU0_SCALAR_OP(t, "vmulx.xyzw vf10, vf10, vf2x");
-        VU0_SCALAR_OP(1.0f - t, "vmulx.xyzw vf11, vf11, vf2x");
+        SDF_VU0_SCALEVECTOR_V0(t);
+        SDF_VU0_SCALEVECTOR_B_V0(1.0f - t);
         SDF_VU0_ADDVECTOR();
-        EE_MMI_RGBA_PACK_UNIT(packedA, 128.0f);
+        MMI_RGBA_PACK_UNIT(packedA, 128.0f);
         blendedA[0] = packedA;
         out[1] = blendedA[0];
         SDF_VU0_LOADVECTOR(corner1);
         SDF_VU0_LOADVECTOR_B(corner3);
-        VU0_SCALAR_OP(t, "vmulx.xyzw vf10, vf10, vf2x");
-        VU0_SCALAR_OP(1.0f - t, "vmulx.xyzw vf11, vf11, vf2x");
+        SDF_VU0_SCALEVECTOR_V0(t);
+        SDF_VU0_SCALEVECTOR_B_V0(1.0f - t);
         SDF_VU0_ADDVECTOR();
-        EE_MMI_RGBA_PACK_UNIT(packedB, 128.0f);
+        MMI_RGBA_PACK_UNIT(packedB, 128.0f);
         blendedB[0] = packedB;
         out[2] = out[0] = blendedB[0];
         t += step;
@@ -6428,7 +6435,7 @@ void effInterpolateSurfaceGridVectors(EffSurfaceGridNode *work, const f32 (*vect
             for (j = 0; j < 3; j++) {
                 SDF_VU0_LOADVECTOR(controlVectors[j]);
                 SDF_VU0_LOADVECTOR_B(vectors[j]);
-                VU0_LERP_VF10(t);
+                SDF_VU0_INTERPOLATE(t);
                 SDF_VU0_STOREVECTOR(output[j]);
             }
             effAppendSurfaceGridVectors(work, output);
@@ -6440,7 +6447,7 @@ void effBeginMatrixVuDrawPacket(const Matrix4 *matrix) {
     struct sdfDrawTag_t *work = (struct sdfDrawTag_t *)sdfGrAllocPacketBuff(0x20);
     effCurrentRenderPacket = work;
     sdfDrawTagInit(work);
-    VU0_LOAD_MATRIX(matrix);
+    SDF_VU0_LOADMATRIX(matrix);
     sdf3DPrimLinkTm(effCurrentRenderPacket, 0);
 }
 
@@ -6548,8 +6555,8 @@ EffQuadWork *effCreateQuadWork(FileJobPayload *job) {
     void *buffer;
 
     memset(work, 0, sizeof(EffQuadWork));
-    VU0_STORE_VF(vf0, work->position);
-    VU0_STORE_VF(vf0, work->orientation);
+    SDF_VU0_STOREIDENTITYVECTOR(work->position);
+    SDF_VU0_STOREIDENTITYVECTOR(work->orientation);
     work->scale = 1.0f;
     work->color = 0x80808080;
     work->billHandle = NULL;
@@ -6695,8 +6702,6 @@ void effResetRenderResourceKind(EffQuadWork *work) {
 #include "eff_curve.h"
 #include "file.h"
 #include "file_slot.h"
-#include "ee_mmi.h"
-#include "pcp_vu0.h"
 #include "eff_queue.h"
 #include "btl_resource_name.h"
 #include "mdl.h"
@@ -6752,20 +6757,20 @@ void effDrawQuadWork(EffQuadWork *work) {
     if (frame >= duration) return;
     list = (sdfDrawTag_t *)sdfGrAllocPacketBuff(0x20);
     sdfDrawTagInit(list);
-    VU0_LOAD_VF(vf10, work->orientation);
+    SDF_VU0_LOADVECTOR(work->orientation);
     ToMatrix();
-    VU0_LOAD_VF(vf10, work->position);
-    VU0_SET_W_ONE(vf10);
-    VU0_MOVE_VF(vf31, vf10);
+    SDF_VU0_LOADVECTOR(work->position);
+    SDF_VU0_VECTOR_W_SET_ONE();
+    SDF_VU0_SET_ROW3();
     sdf3DPrimLinkTm(list, 0);
     effQuadPacketParams.uv = (u32 *)texcoords;
     effQuadPacketParams.vertex = (u128 *)positions;
     color = effSampleColorAlphaTracks(&work->source.colorTrack, &work->source.alphaTrack, frame, duration);
-    eeUnpackRGBAWord(work->color, 0x3C000000);
-    VU0_MOVE_VF(vf11, vf10);
-    eeUnpackRGBAWord(color, 0x3C000000);
-    VU0_MUL(vf10, vf10, vf11);
-    effQuadPacketParams.color = eePackRGBAWord(128.0f);
+    UnpackRGBAWord(work->color, 0x3C000000);
+    SDF_VU0_COPYVECTOR_A_TO_B();
+    UnpackRGBAWord(color, 0x3C000000);
+    SDF_VU0_MULVECTOR();
+    effQuadPacketParams.color = PackRGBAWord(128.0f);
     scale = effSampleScalarCurve(&work->source.sizeTrack.curve, frame, duration) * (work->source.sizeScale * work->scale);
     angle = effSampleScalarCurve(&work->source.angleTrack.curve, frame, duration);
     if (work->billHandle != NULL) {
@@ -7092,17 +7097,17 @@ void effUpdateRadialWavePointRows(EffClassWork *work) {
                     SDF_VU0_STOREVECTOR(axis);
                     SDF_VU0_COPYVECTOR_C_TO_A();
                     SDF_VU0_COPYVECTOR_C_TO_B();
-                    VU0_SCALE_VF(vf10, width);
+                    SDF_VU0_SCALEVECTOR_BITS(width);
                     SDF_VU0_STOREVECTOR(vertices);
                     SDF_VU0_NEGVECTOR_XYZ();
                     SDF_VU0_STOREVECTOR(vertices + 16);
-                    VU0_SCALE_VF(vf11, inner);
+                    SDF_VU0_SCALEVECTOR_B_BITS(inner);
                     SDF_VU0_STOREVECTOR_B(vertices + 4);
-                    VU0_NEGATE_XYZ(vf11);
+                    SDF_VU0_NEGVECTOR_B_XYZ();
                     SDF_VU0_STOREVECTOR_B(vertices + 12);
-                    VU0_STORE_VF(vf0, vertices + 8);
+                    SDF_VU0_STOREIDENTITYVECTOR(vertices + 8);
                     SDF_VU0_COPYVECTOR_C_TO_B();
-                    VU0_SCALE_VF(vf11, waveHeight);
+                    SDF_VU0_SCALEVECTOR_B_BITS(waveHeight);
                     for (j = 0; j < 5; j++) {
                         SDF_VU0_LOADVECTOR(vertices + j * 4);
                         SDF_VU0_ADDVECTOR();
@@ -7147,7 +7152,7 @@ void effUpdateRadialWavePointRows(EffClassWork *work) {
                             SDF_VU0_COPYVECTOR_C_TO_B();
                             SDF_VU0_LOADVECTOR(vertices + j * 4 - 20);
                             length = segmentLength + offsets[j];
-                            VU0_SCALE_VF(vf11, length);
+                            SDF_VU0_SCALEVECTOR_B_BITS(length);
                             SDF_VU0_ADDVECTOR();
                             SDF_VU0_STOREVECTOR(vertices + j * 4);
                             offsets[j] = extra;
@@ -7199,12 +7204,12 @@ void effDrawTintedFivePointGroupRows(EffClassWork *work) {
     SDF_VU0_STOREVECTOR_NOMEM(tint);
     SDF_VU0_LOADIDENTITY();
     SDF_VU0_LOADVECTOR(effOnesVector);
-    VU0_SCALAR_OP_CLOBBER(work->scale, "vmulx.xyzw vf10, vf10, vf2x");
+    SDF_VU0_SCALEVECTOR_V0_CLOBBER(work->scale);
     SDF_VU0_SCALE_XYZ();
     SDF_VU0_LOADVECTOR(work);
     SDF_VU0_VECTOR_W_SET_ONE();
     SDF_VU0_SET_ROW3();
-    VU0_STORE_MATRIX(mtx);
+    SDF_VU0_STOREMATRIX(mtx);
     for (i = 0; i < count; i++, row++) {
         if (row->key > 0) {
             EffPointSet *set = row->set;
@@ -7213,7 +7218,7 @@ void effDrawTintedFivePointGroupRows(EffClassWork *work) {
             EE_MMI_RGBA_UNPACK(rowColor, 1.0f / 128.0f);
             SDF_VU0_LOADVECTOR_B(tint);
             SDF_VU0_MULVECTOR();
-            EE_MMI_RGBA_PACK_UNIT(packed, 128.0f);
+            MMI_RGBA_PACK_UNIT(packed, 128.0f);
             blended[0] = packed;
             set->color = blended[0];
             set->type = header->alphaTrack.surfaceIndex;
@@ -7338,11 +7343,11 @@ void effUpdateRadialClassInstances(EffClassWork *work) {
     radius = config->radius;
     second = effSampleColorAlphaTracks(&config->point.timed.colorTrack, &config->point.timed.alphaTrack, frame, progress);
     unit = 0x3C000000;
-    eeUnpackRGBAWord(work->color, unit);
+    UnpackRGBAWord(work->color, unit);
     SDF_VU0_COPYVECTOR_A_TO_B();
-    eeUnpackRGBAWord(second, unit);
+    UnpackRGBAWord(second, unit);
     SDF_VU0_MULVECTOR();
-    color = eePackRGBAWord(128.0f);
+    color = PackRGBAWord(128.0f);
     scale = work->scale;
     SDF_VU0_COPYVECTOR(position, work->vectors.position);
     SDF_VU0_COPYVECTOR(orientation, work->vectors.orientation);
@@ -7646,15 +7651,15 @@ void effUpdateOrbitalPointSpanWaves(EffClassWork *work) {
                 SDF_VU0_NORMALIZE();
                 SDF_VU0_COPYVECTOR_A_TO_C();
                 SDF_VU0_COPYVECTOR_A_TO_B();
-                VU0_SCALE_VF(vf10, width);
+                SDF_VU0_SCALEVECTOR_BITS(width);
                 SDF_VU0_STOREVECTOR(vertices);
                 SDF_VU0_NEGVECTOR_XYZ();
                 SDF_VU0_STOREVECTOR(vertices + 16);
-                VU0_SCALE_VF(vf11, inner);
+                SDF_VU0_SCALEVECTOR_B_BITS(inner);
                 SDF_VU0_STOREVECTOR_B(vertices + 4);
-                VU0_NEGATE_XYZ(vf11);
+                SDF_VU0_NEGVECTOR_B_XYZ();
                 SDF_VU0_STOREVECTOR_B(vertices + 12);
-                VU0_STORE_VF(vf0, vertices + 8);
+                SDF_VU0_STOREIDENTITYVECTOR(vertices + 8);
                 position[1] += entry->height;
                 SDF_VU0_LOADVECTOR_B(position);
                 for (j = 0; j < 5; j++) {
@@ -7711,7 +7716,7 @@ void effUpdateOrbitalPointSpanWaves(EffClassWork *work) {
                         SDF_VU0_COPYVECTOR_C_TO_B();
                         SDF_VU0_LOADVECTOR(vertices + j * 4 - 20);
                         length = distance + offsets[j];
-                        VU0_SCALE_VF(vf11, length);
+                        SDF_VU0_SCALEVECTOR_B_BITS(length);
                         SDF_VU0_ADDVECTOR();
                         SDF_VU0_STOREVECTOR(vertices + j * 4);
                         offsets[j] = extra;
@@ -7760,12 +7765,12 @@ void effDrawRetainedPointSetRows(EffClassWork *work) {
     SDF_VU0_LOADVECTOR(work->vectors.orientation);
     ToMatrix();
     SDF_VU0_LOADVECTOR(effOnesVector);
-    VU0_SCALAR_OP_CLOBBER(work->scale, "vmulx.xyzw vf10, vf10, vf2x");
+    SDF_VU0_SCALEVECTOR_V0_CLOBBER(work->scale);
     SDF_VU0_SCALE_XYZ();
     SDF_VU0_LOADVECTOR(work->vectors.position);
     SDF_VU0_VECTOR_W_SET_ONE();
     SDF_VU0_SET_ROW3();
-    VU0_STORE_MATRIX(&matrix);
+    SDF_VU0_STOREMATRIX(&matrix);
     if (count > 0) {
         s32 remaining = count;
         do {
@@ -7775,7 +7780,7 @@ void effDrawRetainedPointSetRows(EffClassWork *work) {
                 EE_MMI_RGBA_UNPACK(entryColor, 1.0f / 128.0f);
                 SDF_VU0_LOADVECTOR_B(colorFactor);
                 SDF_VU0_MULVECTOR();
-                EE_MMI_RGBA_PACK_UNIT(packed, 128.0f);
+                MMI_RGBA_PACK_UNIT(packed, 128.0f);
                 blended[0] = packed;
                 set->color = blended[0];
                 set->type = config->point.timed.alphaTrack.surfaceIndex;
@@ -7797,8 +7802,8 @@ EffClassWork *effCreateClassResourceWork(u16 kind, void *source) {
     effect->scale = 1.0f;
     effect->frame = 0;
     effect->kind = kind;
-    VU0_STORE_VF_UNCLOBBERED($vf0, effect);
-    VU0_STORE_VF_UNCLOBBERED($vf0, effect->vectors.orientation);
+    SDF_VU0_STOREIDENTITYVECTOR_NOMEM(effect);
+    SDF_VU0_STOREIDENTITYVECTOR_NOMEM(effect->vectors.orientation);
     memcpy(effect->payload, source, size);
     effect->resource = effClassResourceWorkOperations[kind].createResource(source);
     effClassResourceWorkOperations[kind].initialize(effect);
@@ -7901,7 +7906,7 @@ void effDrawFivePointGroups(EffPointSet *set, Matrix4 *matrix) {
         if (matrix == NULL) {
             SDF_VU0_LOADIDENTITY();
         } else {
-            VU0_LOAD_MATRIX(matrix);
+            SDF_VU0_LOADMATRIX(matrix);
         }
         sdf3DPrimLinkTm(list, 0);
         sdf3DPrimLinkMat(list, set->handle, 0);
@@ -8065,15 +8070,15 @@ void effDrawEffectStrip(EffectStripNode *node) {
     f32 side;
 
     info = (FileKeyBlock *)node->active->data0;
-    eeUnpackRGBAWordFloat(node->color, 1.0f / 128.0f);
+    UnpackRGBAWordFloat(node->color, 1.0f / 128.0f);
     SDF_VU0_STOREVECTOR_NOMEM(nodeTint);
-    eeUnpackRGBAWordFloat(node->copiedHeader.tint, 1.0f / 128.0f);
+    UnpackRGBAWordFloat(node->copiedHeader.tint, 1.0f / 128.0f);
     SDF_VU0_LOADVECTOR_B(nodeTint);
     SDF_VU0_MULVECTOR();
     SDF_VU0_STOREVECTOR_NOMEM(tint);
     hasTransform = node->active->flags & 1;
     if (!hasTransform) {
-        EE_MMI_UNIT_MATRIX(&matrix);
+        SDF_VU0_STOREIDENTITY(&matrix);
     } else {
         fileReadRecordSecondVector(node->active, rotation);
         fileReadVectorPtr20(node->active, translation);
@@ -8082,7 +8087,7 @@ void effDrawEffectStrip(EffectStripNode *node) {
         SDF_VU0_LOADVECTOR(translation);
         SDF_VU0_VECTOR_W_SET_ONE();
         SDF_VU0_SET_ROW3();
-        VU0_STORE_MATRIX(&matrix);
+        SDF_VU0_STOREMATRIX(&matrix);
     }
     billboard = node->resource;
     opacity = node->opacity;
@@ -8108,9 +8113,9 @@ void effDrawEffectStrip(EffectStripNode *node) {
     longSize = node->copiedHeader.longSize;
     sideSize = node->copiedHeader.sideSize;
     crossSize = node->copiedHeader.crossSize;
-    eeUnpackRGBAWordFloat(node->copiedHeader.innerColor, 1.0f / 128.0f);
+    UnpackRGBAWordFloat(node->copiedHeader.innerColor, 1.0f / 128.0f);
     SDF_VU0_STOREVECTOR_NOMEM(innerTint);
-    eeUnpackRGBAWordFloat(node->copiedHeader.outerColor, 1.0f / 128.0f);
+    UnpackRGBAWordFloat(node->copiedHeader.outerColor, 1.0f / 128.0f);
     SDF_VU0_STOREVECTOR_NOMEM(outerTint);
     if (count > 0) {
         remaining = count;
@@ -8118,25 +8123,25 @@ void effDrawEffectStrip(EffectStripNode *node) {
             if ((u32)(FILE_SLOT_FRAME(entry) + 2) < 2) {
                 quad = positions;
                 for (i = 0; i < 4; i++, quad += 4) {
-                    VU0_STORE_VF(vf0, quad[0]);
-                    VU0_STORE_VF(vf0, quad[1]);
-                    VU0_STORE_VF(vf0, quad[2]);
-                    VU0_STORE_VF(vf0, quad[3]);
+                    SDF_VU0_STOREIDENTITYVECTOR(quad[0]);
+                    SDF_VU0_STOREIDENTITYVECTOR(quad[1]);
+                    SDF_VU0_STOREIDENTITYVECTOR(quad[2]);
+                    SDF_VU0_STOREIDENTITYVECTOR(quad[3]);
                 }
             } else if (FILE_SLOT_FRAME(entry) > 0) {
                 scale = entry->scale * opacity;
                 if (hasTransform) {
-                    VU0_LOAD_MATRIX(&matrix);
+                    SDF_VU0_LOADMATRIX(&matrix);
                     SDF_VU0_LOADVECTOR(entry->pos);
                     SDF_VU0_APPLYMATRIX_XYZ1();
                     SDF_VU0_STOREVECTOR(position);
                 } else {
                     SDF_VU0_COPYVECTOR(position, entry->pos);
                 }
-                eeUnpackRGBAWordFloat(entry->color, 1.0f / 128.0f);
+                UnpackRGBAWordFloat(entry->color, 1.0f / 128.0f);
                 SDF_VU0_LOADVECTOR_B(tint);
                 SDF_VU0_MULVECTOR();
-                childColor = eePackRGBAWord(128.0f);
+                childColor = PackRGBAWord(128.0f);
                 cross = crossSize * scale;
                 billExtent = billSize * scale;
                 dds3BillboardSetRGBA(billboard, childColor);
@@ -8157,20 +8162,20 @@ void effDrawEffectStrip(EffectStripNode *node) {
                 SDF_VU0_STOREVECTOR_C(positions[2]);
                 SDF_VU0_STOREVECTOR_C(positions[6]);
                 SDF_VU0_LOADVECTOR(rightAxis);
-                VU0_SCALE_VF(vf10, along);
+                SDF_VU0_SCALEVECTOR_BITS(along);
                 SDF_VU0_COPYVECTOR_A_TO_B();
                 SDF_VU0_ADDVECTOR_A_C();
                 SDF_VU0_STOREVECTOR(positions[0]);
-                VU0_NEGATE_XYZ(vf11);
+                SDF_VU0_NEGVECTOR_B_XYZ();
                 SDF_VU0_ADDVECTOR_B_C();
                 SDF_VU0_STOREVECTOR_B(positions[4]);
                 SDF_VU0_LOADVECTOR(viewUp);
-                VU0_SCALE_VF(vf10, cross);
+                SDF_VU0_SCALEVECTOR_BITS(cross);
                 SDF_VU0_COPYVECTOR_A_TO_B();
                 SDF_VU0_ADDVECTOR_A_C();
                 SDF_VU0_STOREVECTOR(positions[1]);
                 SDF_VU0_STOREVECTOR(positions[5]);
-                VU0_NEGATE_XYZ(vf11);
+                SDF_VU0_NEGVECTOR_B_XYZ();
                 SDF_VU0_ADDVECTOR_B_C();
                 SDF_VU0_STOREVECTOR_B(positions[3]);
                 SDF_VU0_STOREVECTOR_B(positions[7]);
@@ -8178,34 +8183,34 @@ void effDrawEffectStrip(EffectStripNode *node) {
                 /* Retail addresses this store from positions (+0xA0) but the next one from quad (+0x60):
                  * a bare volatile asm (no memory clobber) flushes cse's table, so the second address is not
                  * folded (cc1probe --cse, hooked==unhooked: uid599 stays quad+96). */
-                VU0_STORE_VF_UNCLOBBERED(vf12, quad[2]);
+                SDF_VU0_STOREVECTOR_C_NOMEM(quad[2]);
                 SDF_VU0_STOREVECTOR_C(quad[6]);
                 SDF_VU0_LOADVECTOR(viewUp);
-                VU0_SCALE_VF(vf10, side);
+                SDF_VU0_SCALEVECTOR_BITS(side);
                 SDF_VU0_COPYVECTOR_A_TO_B();
                 SDF_VU0_ADDVECTOR_A_C();
                 SDF_VU0_STOREVECTOR(quad[0]);
-                VU0_NEGATE_XYZ(vf11);
+                SDF_VU0_NEGVECTOR_B_XYZ();
                 SDF_VU0_ADDVECTOR_B_C();
                 SDF_VU0_STOREVECTOR_B(quad[4]);
                 SDF_VU0_LOADVECTOR(rightAxis);
-                VU0_SCALE_VF(vf10, cross);
+                SDF_VU0_SCALEVECTOR_BITS(cross);
                 SDF_VU0_COPYVECTOR_A_TO_B();
                 SDF_VU0_ADDVECTOR_A_C();
                 SDF_VU0_STOREVECTOR(quad[1]);
                 SDF_VU0_STOREVECTOR(quad[5]);
-                VU0_NEGATE_XYZ(vf11);
+                SDF_VU0_NEGVECTOR_B_XYZ();
                 SDF_VU0_ADDVECTOR_B_C();
                 SDF_VU0_STOREVECTOR_B(quad[3]);
                 SDF_VU0_STOREVECTOR_B(quad[7]);
-                eeUnpackRGBAWordFloat((entry->color & 0xFF000000) | 0x808080, 1.0f / 128.0f);
+                UnpackRGBAWordFloat((entry->color & 0xFF000000) | 0x808080, 1.0f / 128.0f);
                 SDF_VU0_COPYVECTOR_A_TO_B();
                 SDF_VU0_LOADVECTOR(innerTint);
                 SDF_VU0_MULVECTOR();
-                packedInnerColor = eePackRGBAWord(128.0f);
+                packedInnerColor = PackRGBAWord(128.0f);
                 SDF_VU0_LOADVECTOR(outerTint);
                 SDF_VU0_MULVECTOR();
-                packedOuterColor = eePackRGBAWord(128.0f);
+                packedOuterColor = PackRGBAWord(128.0f);
                 quadColors = colors;
                 for (i = 3; i >= 0; i--, quadColors += 4) {
                     quadColors[0] = packedOuterColor;
@@ -8434,8 +8439,6 @@ void effReleaseRingFadeTable(s32 work) {
 #include "eff_curve.h"
 #include "file.h"
 #include "file_slot.h"
-#include "ee_mmi.h"
-#include "pcp_vu0.h"
 #include "eff_queue.h"
 #include "btl_resource_name.h"
 #include "mdl.h"
@@ -8649,21 +8652,21 @@ void func_002ABDE0(EffClassWork *work) {
                 radial[0] = angleCos * expanded;
                 radial[2] = angleSin * expanded;
 
-                VU0_LOAD_VF(vf10, radial);
+                SDF_VU0_LOADVECTOR(radial);
                 SDF_VU0_NORMALIZE();
-                VU0_SCALE_VF(vf10, quarterWidth);
-                VU0_MOVE_VF(vf11, vf10);
-                VU0_LOAD_VF(vf10, center);
-                VU0_MOVE_VF(vf12, vf10);
-                VU0_ADD(vf10, vf10, vf11);
-                VU0_STORE_VF(vf10, positions + 0x10);
-                VU0_ADD(vf10, vf10, vf11);
-                VU0_STORE_VF(vf10, positions);
-                VU0_MOVE_VF(vf10, vf12);
-                VU0_SUB(vf10, vf10, vf11);
-                VU0_STORE_VF(vf10, positions + 0x20);
-                VU0_SUB(vf10, vf10, vf11);
-                VU0_STORE_VF(vf10, positions + 0x30);
+                SDF_VU0_SCALEVECTOR_BITS(quarterWidth);
+                SDF_VU0_COPYVECTOR_A_TO_B();
+                SDF_VU0_LOADVECTOR(center);
+                SDF_VU0_COPYVECTOR_A_TO_C();
+                SDF_VU0_ADDVECTOR();
+                SDF_VU0_STOREVECTOR(positions + 0x10);
+                SDF_VU0_ADDVECTOR();
+                SDF_VU0_STOREVECTOR(positions);
+                SDF_VU0_COPYVECTOR_C_TO_A();
+                SDF_VU0_SUBVECTOR();
+                SDF_VU0_STOREVECTOR(positions + 0x20);
+                SDF_VU0_SUBVECTOR();
+                SDF_VU0_STOREVECTOR(positions + 0x30);
 
                 angle += twistStep;
                 rowHeight += climbStep;
@@ -8712,23 +8715,23 @@ void effBlendBillboardInstanceColorsAndTransforms(u8 *work) {
     }
     second = effSampleColorAlphaTracks(&config->common.header.timed.colorTrack, &config->common.header.timed.alphaTrack, limit, progress);
     unit = 0x3C000000;
-    eeUnpackRGBAWord(((BillCellDrawWork *)work)->baseColor, unit);
+    UnpackRGBAWord(((BillCellDrawWork *)work)->baseColor, unit);
     SDF_VU0_COPYVECTOR_A_TO_B();
-    eeUnpackRGBAWord(second, unit);
+    UnpackRGBAWord(second, unit);
     SDF_VU0_MULVECTOR();
-    packed = eePackRGBAWord(128.0f);
+    packed = PackRGBAWord(128.0f);
     out->color = packed;
     out->surfaceIndex = config->common.header.timed.alphaTrack.surfaceIndex;
     out->drawMode = config->common.drawMode;
     SDF_VU0_LOADVECTOR(work + 0x10);
     ToMatrix();
     SDF_VU0_LOADVECTOR(effOnesVector);
-    VU0_SCALAR_OP_CLOBBER(((BillCellDrawWork *)work)->scale, "vmulx.xyzw vf10, vf10, vf2x");
+    SDF_VU0_SCALEVECTOR_V0_CLOBBER(((BillCellDrawWork *)work)->scale);
     SDF_VU0_SCALE_XYZ();
     SDF_VU0_LOADVECTOR(work);
     SDF_VU0_VECTOR_W_SET_ONE();
     SDF_VU0_SET_ROW3();
-    VU0_STORE_MATRIX(mtx);
+    SDF_VU0_STOREMATRIX(mtx);
     effDrawRibbon(out, (Matrix4 *)mtx);
 }
 
@@ -9009,7 +9012,7 @@ void effUpdateColumnParticlesAndRibbons(EffClassWork *work) {
                     center[1] = currentY;
                     center[2] = sine * radius;
                     SDF_VU0_LOADVECTOR_B(center);
-                    VU0_MOVE_VF_EXTENDED(vf12, vf11);
+                    SDF_VU0_COPYVECTOR_B_TO_C();
 
                     currentY -= particle->drag;
                     currentY += gravity * ageF;
@@ -9025,7 +9028,7 @@ void effUpdateColumnParticlesAndRibbons(EffClassWork *work) {
                     center[2] = sine * radius;
                     SDF_VU0_LOADVECTOR(center);
                     SDF_VU0_SUBVECTOR_EXTENDED();
-                    VU0_NORMALIZE_VF10_EXTENDED();
+                    SDF_VU0_NORMALIZE_EXTENDED();
                     SDF_VU0_STOREVECTOR(direction);
 
                     width = particle->width * 0.25f;
@@ -9036,19 +9039,19 @@ void effUpdateColumnParticlesAndRibbons(EffClassWork *work) {
                     center[1] = 0.0f;
                     center[2] = sine;
                     SDF_VU0_LOADVECTOR_B(center);
-                    VU0_CROSS_XYZ_EXTENDED(vf10, vf10, vf11);
-                    VU0_SCALE_VF(vf10, width);
+                    SDF_VU0_OUTERPRODUCT_EXTENDED();
+                    SDF_VU0_SCALEVECTOR_BITS(width);
                     SDF_VU0_COPYVECTOR_A_TO_B_EXTENDED();
 
                     for (segment = 0; segment < segmentCount; segment++) {
                         f32 fraction;
                         f32 pointY;
-                        VU0_MOVE_VF_EXTENDED(vf10, vf12);
-                        VU0_ADD_EXTENDED(vf10, vf10, vf11);
+                        SDF_VU0_COPYVECTOR_C_TO_A_EXTENDED();
+                        SDF_VU0_ADDVECTOR();
                         SDF_VU0_STOREVECTOR(vertices + 4);
-                        VU0_ADD_EXTENDED(vf10, vf10, vf11);
+                        SDF_VU0_ADDVECTOR();
                         SDF_VU0_STOREVECTOR(vertices);
-                        VU0_MOVE_VF_EXTENDED(vf10, vf12);
+                        SDF_VU0_COPYVECTOR_C_TO_A_EXTENDED();
                         SDF_VU0_SUBVECTOR_EXTENDED();
                         SDF_VU0_STOREVECTOR(vertices + 8);
                         SDF_VU0_SUBVECTOR_EXTENDED();
@@ -9063,8 +9066,8 @@ void effUpdateColumnParticlesAndRibbons(EffClassWork *work) {
                         heightRows += 8;
 
                         SDF_VU0_LOADVECTOR(direction);
-                        VU0_SCALE_VF(vf10, extentStep);
-                        VU0_ADD_EXTENDED(vf12, vf12, vf10);
+                        SDF_VU0_SCALEVECTOR_BITS(extentStep);
+                        SDF_VU0_ADDVECTOR_C_A();
                     }
 
                     *colors++ = effSampleColorAlphaTracks(&common->header.emitterColorTrack,
@@ -9098,23 +9101,23 @@ void effBillBlendCellColorAndUpdateTransform(BillCellDrawWork *work) {
     }
     second = effSampleColorAlphaTracks(&config->common.header.timed.colorTrack, &config->common.header.timed.alphaTrack, limit, progress);
     unit = 0x3C000000;
-    eeUnpackRGBAWord(work->baseColor, unit);
+    UnpackRGBAWord(work->baseColor, unit);
     SDF_VU0_COPYVECTOR_A_TO_B();
-    eeUnpackRGBAWord(second, unit);
+    UnpackRGBAWord(second, unit);
     SDF_VU0_MULVECTOR();
-    packed = eePackRGBAWord(128.0f);
+    packed = PackRGBAWord(128.0f);
     out->color = packed;
     out->surfaceIndex = config->common.header.timed.alphaTrack.surfaceIndex;
     out->drawMode = config->common.drawMode;
     SDF_VU0_LOADVECTOR(work->transform);
     ToMatrix();
     SDF_VU0_LOADVECTOR(effOnesVector);
-    VU0_SCALAR_OP_CLOBBER(work->scale, "vmulx.xyzw vf10, vf10, vf2x");
+    SDF_VU0_SCALEVECTOR_V0_CLOBBER(work->scale);
     SDF_VU0_SCALE_XYZ();
     SDF_VU0_LOADVECTOR(work);
     SDF_VU0_VECTOR_W_SET_ONE();
     SDF_VU0_SET_ROW3();
-    VU0_STORE_MATRIX(mtx);
+    SDF_VU0_STOREMATRIX(mtx);
     effDrawRibbon(out, (Matrix4 *)mtx);
 }
 
@@ -9374,7 +9377,7 @@ void effUpdateBillSpiral(EffClassWork *work) {
                     f32 rowHeight;
                     SDF_VU0_LOADVECTOR(pos);
                     SDF_VU0_APPLYMATRIX_XYZ();
-                    VU0_SCALE_VF(vf10, radius);
+                    SDF_VU0_SCALEVECTOR_BITS(radius);
                     SDF_VU0_COPYVECTOR_A_TO_C();
                     angle += step;
                     pos[0] = sdfCos(angle);
@@ -9382,12 +9385,12 @@ void effUpdateBillSpiral(EffClassWork *work) {
                     pos[2] = sdfSin(angle);
                     SDF_VU0_LOADVECTOR(pos);
                     SDF_VU0_APPLYMATRIX_XYZ();
-                    VU0_SCALE_VF(vf10, radius);
+                    SDF_VU0_SCALEVECTOR_BITS(radius);
                     SDF_VU0_COPYVECTOR_C_TO_B();
                     SDF_VU0_SUBVECTOR();
                     SDF_VU0_OUTERPRODUCT();
                     SDF_VU0_NORMALIZE();
-                    VU0_SCALE_VF(vf10, width);
+                    SDF_VU0_SCALEVECTOR_BITS(width);
                     SDF_VU0_COPYVECTOR_A_TO_B();
                     SDF_VU0_COPYVECTOR_C_TO_A();
                     SDF_VU0_ADDVECTOR();
@@ -9435,23 +9438,23 @@ void effUpdateCompactRingDrawColorAndTransform(u8 *work) {
     }
     second = effSampleColorAlphaTracks(&config->common.header.timed.colorTrack, &config->common.header.timed.alphaTrack, limit, progress);
     unit = 0x3C000000;
-    eeUnpackRGBAWord(((BillCellDrawWork *)work)->baseColor, unit);
+    UnpackRGBAWord(((BillCellDrawWork *)work)->baseColor, unit);
     SDF_VU0_COPYVECTOR_A_TO_B();
-    eeUnpackRGBAWord(second, unit);
+    UnpackRGBAWord(second, unit);
     SDF_VU0_MULVECTOR();
-    packed = eePackRGBAWord(128.0f);
+    packed = PackRGBAWord(128.0f);
     out->color = packed;
     out->surfaceIndex = config->common.header.timed.alphaTrack.surfaceIndex;
     out->drawMode = config->common.drawMode;
     SDF_VU0_LOADVECTOR(work + 0x10);
     ToMatrix();
     SDF_VU0_LOADVECTOR(effOnesVector);
-    VU0_SCALAR_OP_CLOBBER(((BillCellDrawWork *)work)->scale, "vmulx.xyzw vf10, vf10, vf2x");
+    SDF_VU0_SCALEVECTOR_V0_CLOBBER(((BillCellDrawWork *)work)->scale);
     SDF_VU0_SCALE_XYZ();
     SDF_VU0_LOADVECTOR(work);
     SDF_VU0_VECTOR_W_SET_ONE();
     SDF_VU0_SET_ROW3();
-    VU0_STORE_MATRIX(mtx);
+    SDF_VU0_STOREMATRIX(mtx);
     effDrawRibbon(out, (Matrix4 *)mtx);
 }
 
@@ -9464,8 +9467,8 @@ EffClassWork *effAllocateBlock(u16 kind, void *source) {
     effect->scale = 1.0f;
     effect->kind = kind;
     effect->frame = 0;
-    VU0_STORE_VF(vf0, effect);
-    VU0_STORE_VF(vf0, (u8 *)effect + 0x10);
+    SDF_VU0_STOREIDENTITYVECTOR(effect);
+    SDF_VU0_STOREIDENTITYVECTOR((u8 *)effect + 0x10);
     memcpy(effect->payload, source, size);
     return effect;
 }
@@ -9634,7 +9637,7 @@ static inline void unpackNormalizedColor(u32 color) {
 }
 static inline u32 packNormalizedColor(void) {
     u32 rgba[4];
-    EE_MMI_RGBA_PACK_UNIT(rgba[0], 128.0f);
+    MMI_RGBA_PACK_UNIT(rgba[0], 128.0f);
     return rgba[0];
 }
 void effDrawRibbon(EffRibbonWork *work, const Matrix4 *matrix) {
@@ -9663,14 +9666,14 @@ void effDrawRibbon(EffRibbonWork *work, const Matrix4 *matrix) {
         return;
     }
     surface = D_0037ED78[work->surfaceIndex];
-    eeUnpackRGBAWordFloat(color, 1.0f / 128.0f);
+    UnpackRGBAWordFloat(color, 1.0f / 128.0f);
     SDF_VU0_STOREVECTOR(baseVector);
     list = (void *)sdfGrAllocPacketBuff(0x20);
     sdfDrawTagInit(list);
     if (matrix == NULL) {
         SDF_VU0_LOADIDENTITY();
     } else {
-        VU0_LOAD_MATRIX(matrix);
+        SDF_VU0_LOADMATRIX(matrix);
     }
     sdf3DPrimLinkTm(list, 0);
     if (work->resource == NULL) {
@@ -9871,7 +9874,6 @@ void effReleaseTextureAnimationWork(s32 work) {
 #include "eff_random.h"
 #include "eff_curve.h"
 #include "sdf_trig.h"
-#include "pcp_vu0.h"
 
 extern EffRandState effSharedRandomState[];
 extern f32 effWorldUpVector[4];
@@ -10035,9 +10037,9 @@ void effUpdateBillFlame(EffClassWork *work) {
             particle->geometry.flame.baseA = oldU + driftA * curve;
             height -= particle->vertical.flame.drag;
             height += gravity * ageFloat;
-            VU0_LOAD_VF(vf10, effWorldUpVector);
-            VU0_SCALAR_OP(width, "vmulx.xyzw vf10, vf10, vf2x");
-            VU0_MOVE_VF(vf11, vf10);
+            SDF_VU0_LOADVECTOR(effWorldUpVector);
+            SDF_VU0_SCALEVECTOR_V0(width);
+            SDF_VU0_COPYVECTOR_A_TO_B();
             particle->vertical.flame.velocity = height;
             particle->radius = radius;
             angleStep = particle->geometry.flame.length / segmentFloat;
@@ -10050,17 +10052,17 @@ void effUpdateBillFlame(EffClassWork *work) {
                 point[0] = sdfCos(angle) * radius;
                 point[1] = height;
                 point[2] = sdfSin(angle) * radius;
-                VU0_LOAD_VF(vf10, point);
-                VU0_MOVE_VF(vf12, vf10);
-                VU0_ADD(vf10, vf10, vf11);
-                VU0_STORE_VF(vf10, position + 4);
-                VU0_ADD(vf10, vf10, vf11);
-                VU0_STORE_VF(vf10, position);
-                VU0_MOVE_VF(vf10, vf12);
-                VU0_SUB(vf10, vf10, vf11);
-                VU0_STORE_VF(vf10, position + 8);
-                VU0_SUB(vf10, vf10, vf11);
-                VU0_STORE_VF(vf10, position + 12);
+                SDF_VU0_LOADVECTOR(point);
+                SDF_VU0_COPYVECTOR_A_TO_C();
+                SDF_VU0_ADDVECTOR();
+                SDF_VU0_STOREVECTOR(position + 4);
+                SDF_VU0_ADDVECTOR();
+                SDF_VU0_STOREVECTOR(position);
+                SDF_VU0_COPYVECTOR_C_TO_A();
+                SDF_VU0_SUBVECTOR();
+                SDF_VU0_STOREVECTOR(position + 8);
+                SDF_VU0_SUBVECTOR();
+                SDF_VU0_STOREVECTOR(position + 12);
                 position += 16;
                 third = uWidth * 0.33333333f;
                 twoThirds = uWidth * 0.66666667f;
@@ -10111,23 +10113,23 @@ void effUpdateTintedScaledMesh(BillCellDrawWork *work) {
     }
     second = effSampleColorAlphaTracks(&((EffBillFlameConfig *)config)->header.timed.colorTrack, &((EffBillFlameConfig *)config)->header.timed.alphaTrack, limit, progress);
     unit = 0x3C000000;
-    eeUnpackRGBAWord(work->baseColor, unit);
+    UnpackRGBAWord(work->baseColor, unit);
     SDF_VU0_COPYVECTOR_A_TO_B();
-    eeUnpackRGBAWord(second, unit);
+    UnpackRGBAWord(second, unit);
     SDF_VU0_MULVECTOR();
-    packed = eePackRGBAWord(128.0f);
+    packed = PackRGBAWord(128.0f);
     ((EffStripWork *)out)->color = packed;
     ((EffStripWork *)out)->type = ((EffBillFlameConfig *)config)->header.timed.alphaTrack.surfaceIndex;
     ((EffStripWork *)out)->flag = ((EffBillFlameConfig *)config)->meshMode;
     SDF_VU0_LOADVECTOR(work->transform);
     ToMatrix();
     SDF_VU0_LOADVECTOR(effOnesVector);
-    VU0_SCALAR_OP(work->scale, "vmulx.xyzw vf10, vf10, vf2x");
+    SDF_VU0_SCALEVECTOR_V0(work->scale);
     SDF_VU0_SCALE_XYZ();
     SDF_VU0_LOADVECTOR(work);
     SDF_VU0_VECTOR_W_SET_ONE();
     SDF_VU0_SET_ROW3();
-    VU0_STORE_MATRIX(mtx);
+    SDF_VU0_STOREMATRIX(mtx);
     effDrawScalyTexturedStrip(out, mtx);
 }
 
@@ -10260,8 +10262,6 @@ void effSynchronizeFileTransform(u8 *work) {
 #include "eff_curve.h"
 #include "file.h"
 #include "file_slot.h"
-#include "ee_mmi.h"
-#include "pcp_vu0.h"
 #include "eff_queue.h"
 #include "btl_resource_name.h"
 #include "mdl.h"
@@ -10322,8 +10322,8 @@ void func_002AF6F8(EffClassWork *work) {
     u16 u, v, width, height;
 
     if (count > 0) {
-        eeUnpackRGBAWordFloat(work->color, 0.0078125f);
-        VU0_STORE_VF_UNCLOBBERED(vf10, baseColor);
+        UnpackRGBAWordFloat(work->color, 0.0078125f);
+        SDF_VU0_STOREVECTOR_NOMEM(baseColor);
         keys = (FileKeyBlock *)records->data0;
         slot = records->slots;
         surface = effGetPacketSubmissionSurface(keys->alphaTrack.surfaceIndex);
@@ -10351,10 +10351,10 @@ void func_002AF6F8(EffClassWork *work) {
             for (i = 0; i < count; i++, slot++, position += 2) {
                 if (slot->state >= 0) {
                     f32 uBias, vBias;
-                    eeUnpackRGBAWordFloat(slot->color, 0.0078125f);
-                    VU0_LOAD_VF(vf11, baseColor);
-                    VU0_MUL(vf10, vf10, vf11);
-                    draw.color = eePackRGBAWord(128.0f);
+                    UnpackRGBAWordFloat(slot->color, 0.0078125f);
+                    SDF_VU0_LOADVECTOR_B(baseColor);
+                    SDF_VU0_MULVECTOR();
+                    draw.color = PackRGBAWord(128.0f);
                     factor = effSampleScalarCurve(&config->scale.curve, slot->state, duration);
                     width = (u32)(uExtent * factor * textureWidth);
                     height = (u32)(vExtent * factor * textureHeight);
@@ -10383,21 +10383,21 @@ void func_002AF6F8(EffClassWork *work) {
         } else {
             fileReadRecordSecondVector(state->record, (u128 *)orientation);
             fileReadVectorPtr20(state->record, (u128 *)origin);
-            VU0_LOAD_VF(vf10, orientation);
+            SDF_VU0_LOADVECTOR(orientation);
             ToMatrix();
-            VU0_LOAD_VF(vf31, origin);
-            VU0_STORE_MATRIX(matrix);
+            SDF_VU0_LOAD_ROW3(origin);
+            SDF_VU0_STOREMATRIX(matrix);
             for (i = 0; i < count; i++, slot++, position += 2) {
                 if (slot->state >= 0) {
                     f32 uBias, vBias;
-                    VU0_LOAD_MATRIX(matrix);
-                    VU0_LOAD_VF(vf10, slot->pos);
-                    VU0_TRANSFORM_POINT(vf10, vf10);
-                    VU0_STORE_VF(vf10, draw.position);
-                    eeUnpackRGBAWordFloat(slot->color, 0.0078125f);
-                    VU0_LOAD_VF(vf11, baseColor);
-                    VU0_MUL(vf10, vf10, vf11);
-                    draw.color = eePackRGBAWord(128.0f);
+                    SDF_VU0_LOADMATRIX(matrix);
+                    SDF_VU0_LOADVECTOR(slot->pos);
+                    SDF_VU0_APPLYMATRIX_XYZ1();
+                    SDF_VU0_STOREVECTOR(draw.position);
+                    UnpackRGBAWordFloat(slot->color, 0.0078125f);
+                    SDF_VU0_LOADVECTOR_B(baseColor);
+                    SDF_VU0_MULVECTOR();
+                    draw.color = PackRGBAWord(128.0f);
                     factor = effSampleScalarCurve(&config->scale.curve, slot->state, duration);
                     width = (s32)(uExtent * factor * textureWidth);
                     height = (s32)(vExtent * factor * textureHeight);
@@ -10664,7 +10664,7 @@ void effUpdateFadedMeshTransform(BillCellDrawWork *work) {
     color2[0] = second;
     EE_MMI_RGBA_UNPACK(color2, unit);
     SDF_VU0_MULVECTOR();
-    EE_MMI_RGBA_PACK(packed);
+    SDF_VU0_dds3ColorFtoI(packed, 128.0f);
     blended[0] = packed;
     ((EffStripWork *)out)->color = blended[0];
     ((EffStripWork *)out)->type = ((EffBillQuantizedConfig *)config)->alphaTrack.surfaceIndex;
@@ -10673,12 +10673,12 @@ void effUpdateFadedMeshTransform(BillCellDrawWork *work) {
     SDF_VU0_LOADVECTOR(work->transform);
     ToMatrix();
     SDF_VU0_LOADVECTOR(effOnesVector);
-    VU0_SCALAR_OP(scale, "vmulx.xyzw vf10, vf10, vf2x");
+    SDF_VU0_SCALEVECTOR_V0(scale);
     SDF_VU0_SCALE_XYZ();
     SDF_VU0_LOADVECTOR(work);
     SDF_VU0_VECTOR_W_SET_ONE();
     SDF_VU0_SET_ROW3();
-    VU0_STORE_MATRIX(mtx);
+    SDF_VU0_STOREMATRIX(mtx);
     effDrawScalyTexturedStrip(out, mtx);
 }
 
@@ -10691,8 +10691,8 @@ EffClassWork *effAllocateBlockWithModel(u16 kind, void *source) {
     effect->scale = 1.0f;
     effect->kind = kind;
     effect->frame = 0;
-    VU0_STORE_VF($vf0, effect);
-    VU0_STORE_VF($vf0, effect->vectors.orientation);
+    SDF_VU0_STOREIDENTITYVECTOR(effect);
+    SDF_VU0_STOREIDENTITYVECTOR(effect->vectors.orientation);
     memcpy(effect->payload, source, size);
     return effect;
 }
@@ -10911,7 +10911,7 @@ void effDrawScalyTexturedStrip(EffStripWork *work, void *matrix) {
     if (matrix == NULL) {
         SDF_VU0_LOADIDENTITY();
     } else {
-        VU0_LOAD_MATRIX(matrix);
+        SDF_VU0_LOADMATRIX(matrix);
     }
     sdf3DPrimLinkTm(list, 0);
     texture = sdfGetOrCreateTextureForReference(surface, (RefObj *)effSharedScalyStripResource);
@@ -10968,11 +10968,11 @@ void effDrawScalyTexturedStrip(EffStripWork *work, void *matrix) {
             D_003DCB30.uv = (u32 *)uvsA;
             D_003DCB30.multiUv = (u32 *)uvsB;
             unit = 1.0f / 128.0f;
-            eeUnpackRGBAWordFloat(*colors, unit);
+            UnpackRGBAWordFloat(*colors, unit);
             SDF_VU0_LOADVECTOR_B(normalizedColor);
             SDF_VU0_MULVECTOR();
             unit = 128.0f;
-            packedColor = eePackRGBAWord(unit);
+            packedColor = PackRGBAWord(unit);
             D_003DCB30.color = packedColor;
             D_003DCB30.faceCount = 12;
             D_003DCB30.pointCount = 12;
@@ -11197,8 +11197,6 @@ void effReleaseParticleList(EffSpanTable *list) {
 #include "eff_curve.h"
 #include "file.h"
 #include "file_slot.h"
-#include "ee_mmi.h"
-#include "pcp_vu0.h"
 #include "eff_queue.h"
 #include "btl_resource_name.h"
 #include "mdl.h"
@@ -11255,7 +11253,7 @@ void effUpdateParticleSpanGeometry(EffModelResource *work) {
     f32 pointHalfWidth;
 
     mdlLink(model, sdfModelOtTable[10]);
-    VU0_STORE_VF_UNCLOBBERED(vf0, fallbackNormal);
+    SDF_VU0_STOREIDENTITYVECTOR_NOMEM(fallbackNormal);
     taperStep = -1.0f / (f32)frame;
     pointHalfWidth = config->pointHalfWidth;
     if (frame <= (s32)table->total) {
@@ -11264,39 +11262,39 @@ void effUpdateParticleSpanGeometry(EffModelResource *work) {
             f32 (*points)[4] = (f32 (*)[4])record->pointSet->buffer;
 
             sdfModelGetMarkPosMatrix(inner, recordIndex);
-            VU0_MOVE_VF(vf10, vf31);
+            SDF_VU0_GET_ROW3();
             pointCursor = points + record->pointCount;
-            VU0_STORE_VF(vf10, pointCursor[0]);
-            VU0_STORE_VF(vf10, pointCursor[1]);
-            VU0_STORE_VF(vf10, pointCursor[2]);
+            SDF_VU0_STOREVECTOR(pointCursor[0]);
+            SDF_VU0_STOREVECTOR(pointCursor[1]);
+            SDF_VU0_STOREVECTOR(pointCursor[2]);
             record->pointCount += 3;
             if (frame != 0) {
                 scale = 1.0f;
-                VU0_LOAD_VF(vf12, effWorldUpVector);
+                SDF_VU0_LOADVECTOR_C(effWorldUpVector);
                 for (elementIndex = 0; elementIndex < (u32)frame; elementIndex++, points += 3) {
                     f32 length;
                     f32 *farEdge;
-                    VU0_LOAD_VF(vf10, points[4]);
-                    VU0_LOAD_VF(vf11, points[1]);
-                    VU0_SUB(vf10, vf10, vf11);
+                    SDF_VU0_LOADVECTOR(points[4]);
+                    SDF_VU0_LOADVECTOR_B(points[1]);
+                    SDF_VU0_SUBVECTOR();
                     SDF_VU0_GETLENGTH(length);
                     if (1.0f < length) {
-                        VU0_MOVE_VF(vf11, vf12);
-                        VU0_CROSS_XYZ(vf10, vf10, vf11);
+                        SDF_VU0_COPYVECTOR_C_TO_B();
+                        SDF_VU0_OUTERPRODUCT();
                         SDF_VU0_NORMALIZE();
-                        VU0_STORE_VF_UNCLOBBERED(vf10, fallbackNormal);
+                        SDF_VU0_STOREVECTOR_NOMEM(fallbackNormal);
                     } else {
-                        VU0_LOAD_VF(vf10, fallbackNormal);
+                        SDF_VU0_LOADVECTOR(fallbackNormal);
                     }
                     farEdge = points[2];
-                    VU0_SCALE_VF(vf10, pointHalfWidth * scale);
-                    VU0_MOVE_VF(vf11, vf10);
-                    VU0_LOAD_VF(vf10, points[1]);
-                    VU0_ADD(vf10, vf10, vf11);
-                    VU0_STORE_VF(vf10, points[0]);
-                    VU0_SUB(vf10, vf10, vf11);
-                    VU0_SUB(vf10, vf10, vf11);
-                    VU0_STORE_VF(vf10, farEdge);
+                    SDF_VU0_SCALEVECTOR_BITS(pointHalfWidth * scale);
+                    SDF_VU0_COPYVECTOR_A_TO_B();
+                    SDF_VU0_LOADVECTOR(points[1]);
+                    SDF_VU0_ADDVECTOR();
+                    SDF_VU0_STOREVECTOR(points[0]);
+                    SDF_VU0_SUBVECTOR();
+                    SDF_VU0_SUBVECTOR();
+                    SDF_VU0_STOREVECTOR(farEdge);
                     scale += taperStep;
                 }
             }
@@ -11352,16 +11350,16 @@ void effUpdateParticleSpanGeometry(EffModelResource *work) {
                     s32 age = (s32)entry->referenceAge;
                     if (age <= lifetime) {
                         f32 length;
-                        VU0_LOAD_VF(vf10, pointCursor[4]);
-                        VU0_LOAD_VF(vf11, pointCursor[1]);
-                        VU0_SUB(vf10, vf10, vf11);
+                        SDF_VU0_LOADVECTOR(pointCursor[4]);
+                        SDF_VU0_LOADVECTOR_B(pointCursor[1]);
+                        SDF_VU0_SUBVECTOR();
                         SDF_VU0_GETLENGTH(length);
                         if (1.0f < length && age != lifetime) {
                             u32 sampled;
                             u32 packed;
 
                             SDF_VU0_NORMALIZE();
-                            VU0_STORE_VF_UNCLOBBERED(vf10, axis);
+                            SDF_VU0_STOREVECTOR_NOMEM(axis);
                             if (age < rampDuration) {
                                 scale = (f32)age / (f32)rampDuration;
                             } else {
@@ -11371,69 +11369,69 @@ void effUpdateParticleSpanGeometry(EffModelResource *work) {
                                 f32 time = (f32)age;
                                 f32 angle = (angularVelocity + angularAcceleration * time * 0.5f) * time;
                                 SetRotateMatrixAxis(angle, (const RwV3d *)axis);
-                                VU0_LOAD_VF(vf11, effWorldUpVector);
-                                VU0_ROTATE_VEC(vf11, vf11);
+                                SDF_VU0_LOADVECTOR_B(effWorldUpVector);
+                                SDF_VU0_APPLYMATRIX_XYZ_B();
                                 age = (s32)entry->referenceAge;
                             } else {
-                                VU0_LOAD_VF(vf11, effWorldUpVector);
+                                SDF_VU0_LOADVECTOR_B(effWorldUpVector);
                             }
-                            VU0_SCALE_VF(vf11, entry->second * scale);
-                            VU0_MOVE_VF(vf12, vf11);
+                            SDF_VU0_SCALEVECTOR_B_BITS(entry->second * scale);
+                            SDF_VU0_COPYVECTOR_B_TO_C();
                             scale = entry->first;
-                            VU0_LOAD_VF(vf11, axis);
-                            VU0_MOVE_VF(vf11, vf10);
-                            VU0_SCALE_VF(vf11, scale * positionScaleA);
-                            VU0_LOAD_VF(vf10, pointCursor[1]);
-                            VU0_STORE_VF(vf10, vertices[3]);
-                            VU0_ADD(vf10, vf10, vf11);
-                            VU0_STORE_VF(vf10, vertices[2]);
-                            VU0_SUB(vf10, vf10, vf11);
-                            VU0_SUB(vf10, vf10, vf11);
-                            VU0_STORE_VF(vf10, vertices[4]);
-                            VU0_LOAD_VF(vf11, axis);
-                            VU0_SCALE_VF(vf11, scale * positionScaleB);
-                            VU0_LOAD_VF(vf10, pointCursor[1]);
-                            VU0_ADD(vf10, vf10, vf12);
-                            VU0_ADD(vf10, vf10, vf11);
-                            VU0_STORE_VF(vf10, vertices[0]);
-                            VU0_SUB(vf10, vf10, vf11);
-                            VU0_SUB(vf10, vf10, vf11);
-                            VU0_STORE_VF(vf10, vertices[1]);
+                            SDF_VU0_LOADVECTOR_B(axis);
+                            SDF_VU0_COPYVECTOR_A_TO_B();
+                            SDF_VU0_SCALEVECTOR_B_BITS(scale * positionScaleA);
+                            SDF_VU0_LOADVECTOR(pointCursor[1]);
+                            SDF_VU0_STOREVECTOR(vertices[3]);
+                            SDF_VU0_ADDVECTOR();
+                            SDF_VU0_STOREVECTOR(vertices[2]);
+                            SDF_VU0_SUBVECTOR();
+                            SDF_VU0_SUBVECTOR();
+                            SDF_VU0_STOREVECTOR(vertices[4]);
+                            SDF_VU0_LOADVECTOR_B(axis);
+                            SDF_VU0_SCALEVECTOR_B_BITS(scale * positionScaleB);
+                            SDF_VU0_LOADVECTOR(pointCursor[1]);
+                            SDF_VU0_ADDVECTOR_A_C();
+                            SDF_VU0_ADDVECTOR();
+                            SDF_VU0_STOREVECTOR(vertices[0]);
+                            SDF_VU0_SUBVECTOR();
+                            SDF_VU0_SUBVECTOR();
+                            SDF_VU0_STOREVECTOR(vertices[1]);
 
                             sampled = effSampleColorAlphaTracks(&config->referenceColorTrack,
                                         &config->referenceAlphaTrack, age, lifetime);
-                            eeUnpackRGBAWordFloat(sampled, 0.0078125f);
-                            VU0_MOVE_VF(vf11, vf10);
-                            eeUnpackRGBAWordFloat(colorB, 0.0078125f);
-                            VU0_MUL(vf10, vf10, vf11);
-                            packed = eePackRGBAWord(128.0f);
+                            UnpackRGBAWordFloat(sampled, 0.0078125f);
+                            SDF_VU0_COPYVECTOR_A_TO_B();
+                            UnpackRGBAWordFloat(colorB, 0.0078125f);
+                            SDF_VU0_MULVECTOR();
+                            packed = PackRGBAWord(128.0f);
                             colors[0] = packed;
                             colors[1] = packed;
                             if (elementIndex & 1) {
-                                eeUnpackRGBAWordFloat(colorA | 0xFF000000, 0.0078125f);
-                                VU0_MUL(vf10, vf10, vf11);
-                                colors[3] = eePackRGBAWord(128.0f);
+                                UnpackRGBAWordFloat(colorA | 0xFF000000, 0.0078125f);
+                                SDF_VU0_MULVECTOR();
+                                colors[3] = PackRGBAWord(128.0f);
                                 packed = sampled & 0xFF000000;
                                 colors[2] = packed;
                                 colors[4] = packed;
                             } else {
-                                eeUnpackRGBAWordFloat(fixedEdgeColor, 0.0078125f);
-                                VU0_MUL(vf10, vf10, vf11);
-                                colors[3] = eePackRGBAWord(128.0f);
-                                eeUnpackRGBAWordFloat(0xFF000000, 0.0078125f);
-                                VU0_MUL(vf10, vf10, vf11);
-                                packed = eePackRGBAWord(128.0f);
+                                UnpackRGBAWordFloat(fixedEdgeColor, 0.0078125f);
+                                SDF_VU0_MULVECTOR();
+                                colors[3] = PackRGBAWord(128.0f);
+                                UnpackRGBAWordFloat(0xFF000000, 0.0078125f);
+                                SDF_VU0_MULVECTOR();
+                                packed = PackRGBAWord(128.0f);
                                 colors[2] = packed;
                                 colors[4] = packed;
                             }
                             age = (s32)entry->referenceAge;
                         } else {
-                            VU0_MOVE_VF(vf10, vf0);
-                            VU0_STORE_VF(vf10, vertices[0]);
-                            VU0_STORE_VF(vf10, vertices[1]);
-                            VU0_STORE_VF(vf10, vertices[2]);
-                            VU0_STORE_VF(vf10, vertices[3]);
-                            VU0_STORE_VF(vf10, vertices[4]);
+                            SDF_VU0_LOADIDENTITYVECTOR();
+                            SDF_VU0_STOREVECTOR(vertices[0]);
+                            SDF_VU0_STOREVECTOR(vertices[1]);
+                            SDF_VU0_STOREVECTOR(vertices[2]);
+                            SDF_VU0_STOREVECTOR(vertices[3]);
+                            SDF_VU0_STOREVECTOR(vertices[4]);
                         }
                         {
                             u32 updatedAge = (u32)age + 1;
@@ -11455,12 +11453,12 @@ void effUpdateParticleSpanGeometry(EffModelResource *work) {
                 }
             }
             for (; elementIndex < spanCount; elementIndex++, vertices += 5) {
-                VU0_MOVE_VF(vf10, vf0);
-                VU0_STORE_VF(vf10, vertices[0]);
-                VU0_STORE_VF(vf10, vertices[1]);
-                VU0_STORE_VF(vf10, vertices[2]);
-                VU0_STORE_VF(vf10, vertices[3]);
-                VU0_STORE_VF(vf10, vertices[4]);
+                SDF_VU0_LOADIDENTITYVECTOR();
+                SDF_VU0_STOREVECTOR(vertices[0]);
+                SDF_VU0_STOREVECTOR(vertices[1]);
+                SDF_VU0_STOREVECTOR(vertices[2]);
+                SDF_VU0_STOREVECTOR(vertices[3]);
+                SDF_VU0_STOREVECTOR(vertices[4]);
             }
         }
     }
@@ -11486,12 +11484,12 @@ void effDrawParticleSpanPointsAndReferences(EffModelResource *work) {
     SDF_VU0_LOADVECTOR(work->orientation);
     ToMatrix();
     SDF_VU0_LOADVECTOR(effOnesVector);
-    VU0_SCALAR_OP(scale, "vmulx.xyzw vf10, vf10, vf2x");
+    SDF_VU0_SCALEVECTOR_V0(scale);
     SDF_VU0_SCALE_XYZ();
     SDF_VU0_LOADVECTOR(work->position);
     SDF_VU0_VECTOR_W_SET_ONE();
     SDF_VU0_SET_ROW3();
-    VU0_STORE_MATRIX_M(matrix.u.rows[0], matrix.u.rows[1], matrix.u.rows[2], matrix.u.rows[3]);
+    SDF_VU0_STOREMATRIX_MEMOPS(matrix.u.rows[0], matrix.u.rows[1], matrix.u.rows[2], matrix.u.rows[3]);
     count = table->count;
 
     if (config->drawPoints != 0 && work->updateCount < config->progress) {
@@ -11502,7 +11500,7 @@ void effDrawParticleSpanPointsAndReferences(EffModelResource *work) {
         color2[0] = color;
         EE_MMI_RGBA_UNPACK(color2, 0.0078125f);
         SDF_VU0_MULVECTOR();
-        EE_MMI_RGBA_PACK_F128(blended[0]);
+        MMI_RGBA_PACK_128_S2(blended[0]);
         color = blended[0];
 
         record = table->records;
@@ -11538,8 +11536,8 @@ EffModelResource *effCreateModelResourceWithInlineData(u16 kind, void *source, v
     effect->scale = 1.0f;
     effect->updateCount = 0;
     effect->kind = kind;
-    VU0_STORE_VF_UNCLOBBERED($vf0, effect->position);
-    VU0_STORE_VF_UNCLOBBERED($vf0, effect->orientation);
+    SDF_VU0_STOREIDENTITYVECTOR_NOMEM(effect->position);
+    SDF_VU0_STOREIDENTITYVECTOR_NOMEM(effect->orientation);
     memcpy(effect->source, source, size);
     if (secondary != NULL) {
         effect->model = effLoadViewerModelWithVUState(secondary, param);
@@ -11668,7 +11666,7 @@ void effDrawThreePointGroups(EffPointSet *set, Matrix4 *matrix) {
         if (matrix == NULL) {
             SDF_VU0_LOADIDENTITY();
         } else {
-            VU0_LOAD_MATRIX(matrix);
+            SDF_VU0_LOADMATRIX(matrix);
         }
         sdf3DPrimLinkTm(list, 0);
         sdf3DPrimLinkMat(list, set->handle, 0);
@@ -11878,10 +11876,10 @@ void effRestoreBattleActorLighting(u32 unusedResource) {
                 u32 secondColor;
 
                 SDF_VU0_LOADVECTOR(unit->colorStart);
-                EE_MMI_RGBA_PACK_UNIT(first[0], 128.0f);
+                MMI_RGBA_PACK_UNIT(first[0], 128.0f);
                 firstColor = first[0];
                 SDF_VU0_LOADVECTOR(unit->colorEnd);
-                EE_MMI_RGBA_PACK_UNIT(second[0], 128.0f);
+                MMI_RGBA_PACK_UNIT(second[0], 128.0f);
                 secondColor = second[0];
                 effect->color0C = effect->firstCurrent = effect->color = firstColor;
                 effect->color5C = effect->color54 = effect->color50 = secondColor;
@@ -12014,10 +12012,10 @@ void effUpdateBattleActorLighting(EffActiveResource *work) {
                     secondColor = btlBlendColorVec(battle->ambientColor, actors[index]->colorEnd, 0.3f);
                 } else {
                     SDF_VU0_LOADVECTOR(actors[index]->colorStart);
-                    EE_MMI_RGBA_PACK_UNIT(packedStart[0], 128.0f);
+                    MMI_RGBA_PACK_UNIT(packedStart[0], 128.0f);
                     firstColor = packedStart[0];
                     SDF_VU0_LOADVECTOR(actors[index]->colorEnd);
-                    EE_MMI_RGBA_PACK_UNIT(packedEnd[0], 128.0f);
+                    MMI_RGBA_PACK_UNIT(packedEnd[0], 128.0f);
                     secondColor = packedEnd[0];
                 }
                 evtSetUnitLightAndAmbient(effect, config->colorFadeOut, firstColor, secondColor);
@@ -12118,11 +12116,11 @@ s32 effComputeLightDirectionVU(dds3ModelHandle_t *vector, sdf3DLightParallelPack
             return 0;
         }
         mdlGetPosition(vector);
-        VU0_LOAD_VF($vf11, D_003DCBE0);
-        VU0_SUB($vf10, $vf10, $vf11);
+        SDF_VU0_LOADVECTOR_B(D_003DCBE0);
+        SDF_VU0_SUBVECTOR();
         SDF_VU0_VECTOR_W_SET_ZERO();
         SDF_VU0_NORMALIZE();
-        VU0_STORE_VF($vf10, D_003DCBA0);
+        SDF_VU0_STOREVECTOR(D_003DCBA0);
         sdf3DMakeLightParallelPacket(target, D_0037EE80, D_003DCBD0);
         return 1;
     }
@@ -12198,10 +12196,10 @@ void effInitializeFieldLightColors(EffActiveResource *work) {
         if (handle != 0) {
             effBTLPartGetPositionPtr((void *)handle, &request, D_003DCBE0);
         }
-        eeUnpackRGBAWordFloat(config->firstColor, 1.0f / 128.0f);
+        UnpackRGBAWordFloat(config->firstColor, 1.0f / 128.0f);
         SDF_VU0_STOREVECTOR_NOMEM(D_003DCB90);
         ((f32 *)D_003DCB90)[3] = 1.0f;
-        eeUnpackRGBAWordFloat(config->secondColor, 1.0f / 128.0f);
+        UnpackRGBAWordFloat(config->secondColor, 1.0f / 128.0f);
         SDF_VU0_STOREVECTOR_NOMEM(D_003DCBD0);
         ((f32 *)D_003DCBD0)[3] = 1.0f;
         D_003BC9AC = 1;
@@ -12471,7 +12469,7 @@ s32 func_002B3698(EffActiveResource *owner) {
     dds3SetPosPoseSet(camera, position);
     SDF_VU0_LOADVECTOR(eyeOffset);
     SDF_VU0_COPYVECTOR(&data->localEyeOffset, eyeOffset);
-    VU0_SCALAR_OP(1.0f, "vmulx.xyzw vf10, vf10, vf2x");
+    SDF_VU0_SCALEVECTOR_V0(1.0f);
     SDF_VU0_STOREVECTOR(&data->worldEye);
     dds3CameraObjectBasicSetFovy(camera, D_003BC9A8);
     data->fovUpdatePending |= DDS3_CAMERA_UPDATE_FOV_BIT;
@@ -12733,8 +12731,8 @@ EffActiveResource *effAllocateResourcePayload(u16 kind, void *source) {
     effect->scale = 1.0f;
     effect->kind.index = kind;
     effect->frame = 0;
-    VU0_STORE_VF($vf0, effect);
-    VU0_STORE_VF($vf0, (u8 *)effect + 0x10);
+    SDF_VU0_STOREIDENTITYVECTOR(effect);
+    SDF_VU0_STOREIDENTITYVECTOR((u8 *)effect + 0x10);
     memcpy(effect->payload, source, size);
     return effect;
 }
@@ -12942,11 +12940,11 @@ void effDrawAndAdvanceSharedParticleFrame(EffParticleSharedResource *work) {
     }
     surface = &D_003255A8;
     color = effSampleColorAlphaTracks(&work->colorTrack, &work->alphaTrack, frame, limit);
-    eeUnpackRGBAWordFloat(work->color, 1.0f / 128.0f);
+    UnpackRGBAWordFloat(work->color, 1.0f / 128.0f);
     SDF_VU0_COPYVECTOR_A_TO_B();
-    eeUnpackRGBAWordFloat(color, 1.0f / 128.0f);
+    UnpackRGBAWordFloat(color, 1.0f / 128.0f);
     SDF_VU0_MULVECTOR();
-    packed = eePackRGBAWord(128.0f);
+    packed = PackRGBAWord(128.0f);
     size = effSampleScalarCurve(&work->scaleTrack.curve, frame, limit);
     angle = effSampleScalarCurve(&work->rotationTrack.curve, frame, limit);
     if (work->billHandle != NULL) {
@@ -13047,7 +13045,7 @@ void btlInitializeEffectWork(void) {
     D_003DF8D0[0] = 0;
     effPartsListScroll = 0;
     effPartsListExitRequested = 0;
-    VU0_STORE_VF($vf0, effBattleOffset);
+    SDF_VU0_STOREIDENTITYVECTOR(effBattleOffset);
 }
 
 void effResetFileResourceStores(void);
@@ -13085,20 +13083,20 @@ void effComputeBattleCameraPositionVU(u8 *effect) {
 
     if ((flags & 0x18) != 0) {
         camFollowOffsetVec(effect, &direction);
-        VU0_LOAD_VF($vf10, &direction);
+        SDF_VU0_LOADVECTOR(&direction);
         flags = ((FileJob *)effect)->xformFlags;
     } else {
-        VU0_LOAD_VF($vf10, ((FileJob *)effect)->offset);
+        SDF_VU0_LOADVECTOR(((FileJob *)effect)->offset);
     }
     if ((flags & 0x80) != 0) {
-        VU0_SCALAR_OP_CLOBBER(effFileQueue->scaleMultiplier, "vmulx.xyzw vf10, vf10, vf2x");
+        SDF_VU0_SCALEVECTOR_V0_CLOBBER(effFileQueue->scaleMultiplier);
     }
-    VU0_LOAD_VF($vf11, effBattleOffset);
-    VU0_ADD($vf10, $vf10, $vf11);
-    VU0_LOAD_VF($vf11, effFileQueue);
-    VU0_ADD($vf10, $vf10, $vf11);
+    SDF_VU0_LOADVECTOR_B(effBattleOffset);
+    SDF_VU0_ADDVECTOR();
+    SDF_VU0_LOADVECTOR_B(effFileQueue);
+    SDF_VU0_ADDVECTOR();
     if ((flags & 4) != 0) {
-        VU0_SCALAR_OP_CLOBBER(-5.0f, "vaddx.y vf10, vf0, vf2x");
+        SDF_VU0_SETVECTOR_Y(-5.0f);
     }
 }
 
@@ -13108,12 +13106,12 @@ void effMultiplyQuatWithFlag(u8 *effect) {
     if ((((FileJob *)effect)->xformFlags & 0x60) != 0) {
         u128 quaternion;
         camAimRotation(effect, &quaternion);
-        VU0_LOAD_VF($vf10, effFileQueue->quat);
-        VU0_LOAD_VF($vf11, &quaternion);
+        SDF_VU0_LOADVECTOR(effFileQueue->quat);
+        SDF_VU0_LOADVECTOR_B(&quaternion);
         Mult();
     } else {
-        VU0_LOAD_VF($vf10, effFileQueue->quat);
-        VU0_LOAD_VF($vf11, ((FileJob *)effect)->quat);
+        SDF_VU0_LOADVECTOR(effFileQueue->quat);
+        SDF_VU0_LOADVECTOR_B(((FileJob *)effect)->quat);
         Mult();
     }
 }
@@ -13128,10 +13126,10 @@ void effApplyBattleCameraToObject(work)
     f32 rotation[2][4] __attribute__((aligned(16)));
 
     effComputeBattleCameraPositionVU(effSelectedJobHeader);
-    VU0_STORE_VF_UNCLOBBERED($vf10, rotation[0]);
+    SDF_VU0_STOREVECTOR_NOMEM(rotation[0]);
     fileJobInvokePositionCallback(work, rotation[0]);
     effMultiplyQuatWithFlag(effSelectedJobHeader);
-    VU0_STORE_VF_UNCLOBBERED($vf10, rotation[1]);
+    SDF_VU0_STOREVECTOR_NOMEM(rotation[1]);
     fileJobInvokeRotationCallback(work, rotation[1]);
     fileJobInvokeScaleCallback(work, ((FileJob *)effSelectedJobHeader)->scale * effFileQueue->scaleMultiplier);
     fileDispatchJobTypeCallback(work, ((FileJob *)effSelectedJobHeader)->color);
@@ -13397,8 +13395,6 @@ extern EffectBlock128 effEditedQueueHeader;
 #include "eff_curve.h"
 #include "file.h"
 #include "file_slot.h"
-#include "ee_mmi.h"
-#include "pcp_vu0.h"
 #include "eff_queue.h"
 #include "btl_resource_name.h"
 #include "mdl.h"
@@ -14711,7 +14707,7 @@ s32 effUpdateCameraDiagnostics(EffectStateSnapshot *snapshot, s8 mode) {
         SDF_VU0_LOADVECTOR(snapshot->position);
     }
     SDF_VU0_STOREVECTOR(vectors[1]);
-    VU0_SET_VF10_COMPONENT(y, 0.0f);
+    SDF_VU0_SETVECTOR_Y(0.0f);
     SDF_VU0_GETLENGTH(length);
     SDF_VU0_LOADVECTOR(effBattleOffset);
     if (mode != 0) {
@@ -14730,7 +14726,7 @@ s32 effUpdateCameraDiagnostics(EffectStateSnapshot *snapshot, s8 mode) {
         deltaY = vectors[1][1];
     }
 
-    PCP_COPY_VECTOR_F32(vectors[2], vectors[3]);
+    SDF_VU0_COPYVECTOR_F32(vectors[2], vectors[3]);
     vectors[2][1] = vectors[5][1] + (-2.0f);
     if (deltaY != vectors[5][1]) {
         btlDebugDrawRadiusGuide(vectors[2], length, 0x80404040, 0);
@@ -14915,7 +14911,7 @@ s32 effResetCameraSnapshotSelection(void) {
     D_003DF840[0x88] = 8;
     D_003DF840[0x89] = 0;
     D_003DF840[0x8a] = 0;
-    VU0_STORE_VF($vf0, D_003DFA30);
+    SDF_VU0_STOREIDENTITYVECTOR(D_003DFA30);
     return 0;
 }
 
@@ -14982,11 +14978,11 @@ u32 effUpdateCameraSnapshotGuides(EffectCameraSnapshotView *state, s8 useBattleP
 
     SDF_VU0_LOADVECTOR(state->camera.quat);
     ToMatrix();
-    VU0_STORE_MATRIX_UNCLOBBERED(scratch.rotationMatrix);
+    SDF_VU0_STOREMATRIX_NOMEM(scratch.rotationMatrix);
 
     SDF_VU0_LOADVECTOR(effWorldUpVector);
     SDF_VU0_APPLYMATRIX();
-    VU0_SCALE_VF(vf10, 250.0f);
+    SDF_VU0_SCALEVECTOR_BITS(250.0f);
     SDF_VU0_LOADVECTOR_B(&scratch.segmentStart);
     SDF_VU0_ADDVECTOR();
     SDF_VU0_STOREVECTOR_NOMEM(&scratch.segmentEnd);
@@ -14996,30 +14992,30 @@ u32 effUpdateCameraSnapshotGuides(EffectCameraSnapshotView *state, s8 useBattleP
     btlDebugDrawPoint((f32 *)&scratch.segmentStart);
 
     SDF_VU0_LOADVECTOR_B(effBattleOffset);
-    VU0_LOAD_MATRIX(scratch.rotationMatrix);
+    SDF_VU0_LOADMATRIX(scratch.rotationMatrix);
     SDF_VU0_LOAD_ROW3(&scratch.basePosition);
     SDF_VU0_LOADIDENTITYVECTOR();
-    VU0_SET_VF10_COMPONENT(x, 100.0f);
+    SDF_VU0_SETVECTOR_X(100.0f);
     SDF_VU0_APPLYMATRIX_XYZ1();
     SDF_VU0_ADDVECTOR();
     SDF_VU0_STOREVECTOR_NOMEM(&scratch.segmentStart);
     SDF_VU0_LOADIDENTITYVECTOR();
-    VU0_SET_VF10_COMPONENT(x, -100.0f);
+    SDF_VU0_SETVECTOR_X(-100.0f);
     SDF_VU0_APPLYMATRIX_XYZ1();
     SDF_VU0_ADDVECTOR();
     SDF_VU0_STOREVECTOR_NOMEM(&scratch.segmentEnd);
     btlDebugDrawSegment((f32 *)&scratch.segmentStart, (f32 *)&scratch.segmentEnd, 0x80006060);
 
     SDF_VU0_LOADVECTOR_B(effBattleOffset);
-    VU0_LOAD_MATRIX(scratch.rotationMatrix);
+    SDF_VU0_LOADMATRIX(scratch.rotationMatrix);
     SDF_VU0_LOAD_ROW3(&scratch.basePosition);
     SDF_VU0_LOADIDENTITYVECTOR();
-    VU0_SET_VF10_COMPONENT(z, 25.0f);
+    SDF_VU0_SETVECTOR_Z(25.0f);
     SDF_VU0_APPLYMATRIX_XYZ1();
     SDF_VU0_ADDVECTOR();
     SDF_VU0_STOREVECTOR_NOMEM(&scratch.segmentStart);
     SDF_VU0_LOADIDENTITYVECTOR();
-    VU0_SET_VF10_COMPONENT(z, -25.0f);
+    SDF_VU0_SETVECTOR_Z(-25.0f);
     SDF_VU0_APPLYMATRIX_XYZ1();
     SDF_VU0_ADDVECTOR();
     SDF_VU0_STOREVECTOR_NOMEM(&scratch.segmentEnd);
@@ -15312,8 +15308,6 @@ void effResetMappingFlags(void) {
 #include "eff_curve.h"
 #include "file.h"
 #include "file_slot.h"
-#include "ee_mmi.h"
-#include "pcp_vu0.h"
 #include "eff_queue.h"
 #include "btl_resource_name.h"
 #include "mdl.h"

@@ -6,15 +6,13 @@
 #include "fld_runtime_reset_api.h"
 #include "fld_npc_motion.h"
 #include "sdf_packet_list.h"
-#include "ee_mmi.h"
+#include "ps2asm.h"
 #include "kernel.h"
 #include "dds3_task_create.h"
-#include "pcp_vu0.h"
 #include "sdf_vu_matrix.h"
 #include "common.h"
 #include "fld_map_slot_auxiliary_flag_selector.h"
 #include "sdf_map_position_api.h"
-#include "sdf_vu0.h"
 #include "fld_scene_ready_api.h"
 #include "fld_camp_check_state_api.h"
 #include "fld_encounter_runtime_api.h"
@@ -969,7 +967,6 @@ void drawSceneBasicList(void) {
 
 #include "fld_shadow_strip.h"
 #include "fld_area_work.h"
-#include "pcp_vu0.h"
 #include "mdl.h"
 #include "eff_object.h"
 #include "evt_unit.h"
@@ -1249,7 +1246,7 @@ void fldDrawEffectObjectShadow(dds3Basic_t *object) {
         }
     }
     D_003C2E90[3] = 1.0f;
-    VU0_LOAD_VF_PTR(vf10, D_003C2E90);
+    SDF_VU0_LOADVECTOR_F32_NV(D_003C2E90);
     SDF_VU0_NORMALIZE();
     SDF_VU0_STOREVECTOR_NOMEM(D_003C2E90);
     /* Retail still stores this full-length vector at11F43C..11F44C;
@@ -1258,7 +1255,7 @@ void fldDrawEffectObjectShadow(dds3Basic_t *object) {
     extrusion[1] = D_003C2E90[1] * length;
     extrusion[2] = D_003C2E90[2] * length;
     extrusion[3] = 1.0f;
-    VU0_LOAD_VF_PTR(vf10, D_003C2E90);
+    SDF_VU0_LOADVECTOR_F32_NV(D_003C2E90);
     SDF_VU0_NORMALIZE();
     SDF_VU0_STOREVECTOR_NOMEM(D_003C2E90);
     for (slot = 0; slot < base->resourceSlotCount; slot++) {
@@ -1272,7 +1269,7 @@ void fldDrawEffectObjectShadow(dds3Basic_t *object) {
     viewDirection[1] = aViewTarget[1] - aViewEye[1];
     viewDirection[2] = aViewTarget[2] - aViewEye[2];
     viewDirection[3] = 1.0f;
-    VU0_LOAD_VF_PTR(vf10, viewDirection);
+    SDF_VU0_LOADVECTOR_F32_NV(viewDirection);
     SDF_VU0_NORMALIZE();
     SDF_VU0_STOREVECTOR_NOMEM(viewDirection);
     rsetTest(1, 0, 0x80, 1, 0, 0, 1, 1);
@@ -1379,24 +1376,24 @@ void fldDrawEffectObjectShadow(dds3Basic_t *object) {
             }
         }
         for (i = 0; i < triangleCount; i++) {
-            VU0_LOAD_MATRIX(drawNode->worldMatrix);
+            SDF_VU0_LOADMATRIX(drawNode->worldMatrix);
             triangle = triangles[i];
             firstVertex[0] = vertices[triangle[0]][0];
             firstVertex[1] = vertices[triangle[0]][1];
             firstVertex[2] = vertices[triangle[0]][2];
-            VU0_LOAD_VF_PTR(vf10, firstVertex);
+            SDF_VU0_LOADVECTOR_F32_NV(firstVertex);
             SDF_VU0_APPLYMATRIX();
             SDF_VU0_STOREVECTOR_NOMEM(firstVertex);
             secondVertex[0] = vertices[triangle[1]][0];
             secondVertex[1] = vertices[triangle[1]][1];
             secondVertex[2] = vertices[triangle[1]][2];
-            VU0_LOAD_VF_PTR(vf10, secondVertex);
+            SDF_VU0_LOADVECTOR_F32_NV(secondVertex);
             SDF_VU0_APPLYMATRIX();
             SDF_VU0_STOREVECTOR_NOMEM(secondVertex);
             thirdVertex[0] = vertices[triangle[2]][0];
             thirdVertex[1] = vertices[triangle[2]][1];
             thirdVertex[2] = vertices[triangle[2]][2];
-            VU0_LOAD_VF_PTR(vf10, thirdVertex);
+            SDF_VU0_LOADVECTOR_F32_NV(thirdVertex);
             SDF_VU0_APPLYMATRIX();
             SDF_VU0_STOREVECTOR_NOMEM(thirdVertex);
             planeVertices[0][0] = firstVertex[0];
@@ -1412,9 +1409,9 @@ void fldDrawEffectObjectShadow(dds3Basic_t *object) {
             planeVertices[2][2] = thirdVertex[2];
             planeVertices[2][3] = thirdVertex[3];
             fldMakeEveHitPlanes(planeVertices[0], &plane[0], &plane[1], &plane[2], &plane[3]);
-            VU0_LOAD_VF_PTR(vf10, plane);
+            SDF_VU0_LOADVECTOR_F32_NV(plane);
             SDF_VU0_NORMALIZE();
-            VU0_LOAD_VF_PTR(vf11, D_003C2E90);
+            SDF_VU0_LOADVECTOR_B_F32_NV(D_003C2E90);
             SDF_VU0_INNERPRODUCT(facing);
             if (facing < 0.0f) {
                 first = triangle[0]; second = triangle[1];
@@ -1426,11 +1423,11 @@ void fldDrawEffectObjectShadow(dds3Basic_t *object) {
                 D_003C3800[minimum][maximum][0]++;
                 D_003C3800[minimum][maximum][1] = reversed;
                 if (reversed == 0) {
-                    PCP_COPY_VECTOR_UNCLOBBERED(D_003C3D50[minimum][maximum], firstVertex);
-                    PCP_COPY_VECTOR_UNCLOBBERED(D_003C6790[minimum][maximum], secondVertex);
+                    SDF_VU0_COPYVECTOR_NOMEM(D_003C3D50[minimum][maximum], firstVertex);
+                    SDF_VU0_COPYVECTOR_NOMEM(D_003C6790[minimum][maximum], secondVertex);
                 } else {
-                    PCP_COPY_VECTOR_UNCLOBBERED(D_003C3D50[minimum][maximum], secondVertex);
-                    PCP_COPY_VECTOR_UNCLOBBERED(D_003C6790[minimum][maximum], firstVertex);
+                    SDF_VU0_COPYVECTOR_NOMEM(D_003C3D50[minimum][maximum], secondVertex);
+                    SDF_VU0_COPYVECTOR_NOMEM(D_003C6790[minimum][maximum], firstVertex);
                 }
                 first = triangle[1]; second = triangle[2];
                 if (first < second) {
@@ -1441,11 +1438,11 @@ void fldDrawEffectObjectShadow(dds3Basic_t *object) {
                 D_003C3800[minimum][maximum][0]++;
                 D_003C3800[minimum][maximum][1] = reversed;
                 if (reversed == 0) {
-                    PCP_COPY_VECTOR_UNCLOBBERED(D_003C3D50[minimum][maximum], secondVertex);
-                    PCP_COPY_VECTOR_UNCLOBBERED(D_003C6790[minimum][maximum], thirdVertex);
+                    SDF_VU0_COPYVECTOR_NOMEM(D_003C3D50[minimum][maximum], secondVertex);
+                    SDF_VU0_COPYVECTOR_NOMEM(D_003C6790[minimum][maximum], thirdVertex);
                 } else {
-                    PCP_COPY_VECTOR_UNCLOBBERED(D_003C3D50[minimum][maximum], thirdVertex);
-                    PCP_COPY_VECTOR_UNCLOBBERED(D_003C6790[minimum][maximum], secondVertex);
+                    SDF_VU0_COPYVECTOR_NOMEM(D_003C3D50[minimum][maximum], thirdVertex);
+                    SDF_VU0_COPYVECTOR_NOMEM(D_003C6790[minimum][maximum], secondVertex);
                 }
                 second = triangle[2]; first = triangle[0];
                 if (second < first) {
@@ -1456,15 +1453,15 @@ void fldDrawEffectObjectShadow(dds3Basic_t *object) {
                 D_003C3800[minimum][maximum][0]++;
                 D_003C3800[minimum][maximum][1] = reversed;
                 if (reversed == 0) {
-                    PCP_COPY_VECTOR_UNCLOBBERED(D_003C3D50[minimum][maximum], thirdVertex);
-                    PCP_COPY_VECTOR_UNCLOBBERED(D_003C6790[minimum][maximum], firstVertex);
+                    SDF_VU0_COPYVECTOR_NOMEM(D_003C3D50[minimum][maximum], thirdVertex);
+                    SDF_VU0_COPYVECTOR_NOMEM(D_003C6790[minimum][maximum], firstVertex);
                 } else {
-                    PCP_COPY_VECTOR_UNCLOBBERED(D_003C3D50[minimum][maximum], firstVertex);
-                    PCP_COPY_VECTOR_UNCLOBBERED(D_003C6790[minimum][maximum], thirdVertex);
+                    SDF_VU0_COPYVECTOR_NOMEM(D_003C3D50[minimum][maximum], firstVertex);
+                    SDF_VU0_COPYVECTOR_NOMEM(D_003C6790[minimum][maximum], thirdVertex);
                 }
-                PCP_COPY_VECTOR_UNCLOBBERED(D_003C2EA0[D_003BAB24][0], firstVertex);
-                PCP_COPY_VECTOR_UNCLOBBERED(D_003C2EA0[D_003BAB24][1], secondVertex);
-                PCP_COPY_VECTOR_UNCLOBBERED(D_003C2EA0[D_003BAB24][2], thirdVertex);
+                SDF_VU0_COPYVECTOR_NOMEM(D_003C2EA0[D_003BAB24][0], firstVertex);
+                SDF_VU0_COPYVECTOR_NOMEM(D_003C2EA0[D_003BAB24][1], secondVertex);
+                SDF_VU0_COPYVECTOR_NOMEM(D_003C2EA0[D_003BAB24][2], thirdVertex);
                 D_003BAB24++;
             } else {
                 if (fldGlobalBase.area >= 500) {
@@ -1528,16 +1525,16 @@ void fldDrawEffectObjectShadow(dds3Basic_t *object) {
             for (face = 0; face < D_003BAB24; face++) {
                 if (pass == 0) {
                     f32 (*output)[4] = &triangleVertices[triangleRequest.pointCount];
-                    PCP_COPY_VECTOR_UNCLOBBERED(output[0], D_003C2EA0[face][0]);
-                    PCP_COPY_VECTOR_UNCLOBBERED(output[1], D_003C2EA0[face][1]);
-                    PCP_COPY_VECTOR_UNCLOBBERED(output[2], D_003C2EA0[face][2]);
+                    SDF_VU0_COPYVECTOR_NOMEM(output[0], D_003C2EA0[face][0]);
+                    SDF_VU0_COPYVECTOR_NOMEM(output[1], D_003C2EA0[face][1]);
+                    SDF_VU0_COPYVECTOR_NOMEM(output[2], D_003C2EA0[face][2]);
                     triangleRequest.faceCount++;
                     triangleRequest.pointCount += 3;
                 } else {
                     f32 (*output)[4] = &triangleVertices[triangleRequest.pointCount];
-                    PCP_COPY_VECTOR_UNCLOBBERED(output[0], D_003C2EA0[face][2]);
-                    PCP_COPY_VECTOR_UNCLOBBERED(output[1], D_003C2EA0[face][1]);
-                    PCP_COPY_VECTOR_UNCLOBBERED(output[2], D_003C2EA0[face][0]);
+                    SDF_VU0_COPYVECTOR_NOMEM(output[0], D_003C2EA0[face][2]);
+                    SDF_VU0_COPYVECTOR_NOMEM(output[1], D_003C2EA0[face][1]);
+                    SDF_VU0_COPYVECTOR_NOMEM(output[2], D_003C2EA0[face][0]);
                     triangleRequest.faceCount++;
                     triangleRequest.pointCount += 3;
                 }
@@ -1553,10 +1550,10 @@ void fldDrawEffectObjectShadow(dds3Basic_t *object) {
             for (edgeFrom = 0; edgeFrom < vertexCount; edgeFrom++) {
                 for (j = 0; j < vertexCount; j++) {
                     if (D_003C3800[edgeFrom][j][0] != 1) continue;
-                    PCP_COPY_VECTOR_UNCLOBBERED(firstVertex, D_003C3D50[edgeFrom][j]);
-                    PCP_COPY_VECTOR_UNCLOBBERED(secondVertex, D_003C6790[edgeFrom][j]);
-                    PCP_COPY_VECTOR_UNCLOBBERED(edgeStart, firstVertex);
-                    PCP_COPY_VECTOR_UNCLOBBERED(edgeEnd, secondVertex);
+                    SDF_VU0_COPYVECTOR_NOMEM(firstVertex, D_003C3D50[edgeFrom][j]);
+                    SDF_VU0_COPYVECTOR_NOMEM(secondVertex, D_003C6790[edgeFrom][j]);
+                    SDF_VU0_COPYVECTOR_NOMEM(edgeStart, firstVertex);
+                    SDF_VU0_COPYVECTOR_NOMEM(edgeEnd, secondVertex);
                     extrudedEnd[0] = secondVertex[0] + slotExtrusion[slot][0];
                     extrudedEnd[1] = secondVertex[1] + slotExtrusion[slot][1];
                     extrudedEnd[2] = secondVertex[2] + slotExtrusion[slot][2];
@@ -1564,37 +1561,37 @@ void fldDrawEffectObjectShadow(dds3Basic_t *object) {
                     extrudedStart[1] = firstVertex[1] + slotExtrusion[slot][1];
                     extrudedStart[2] = firstVertex[2] + slotExtrusion[slot][2];
                     if (pass == 0) {
-                        VU0_LOAD_VF_PTR(vf10, edgeStart);
+                        SDF_VU0_LOADVECTOR_F32_NV(edgeStart);
                         SDF_VU0_APPLYMATRIX_XYZ1();
                         SDF_VU0_PERSVECTOR();
-                        VU0_APPLY_VIEWPORT(vf10, vf10, vf11, vf12);
+                        VU0_MUL_ADD_VF10_VF11_VF12();
                         SDF_VU0_STOREVECTOR_NOMEM(projectedStart);
                         if (projectedStart[0] < minimumX) minimumX = projectedStart[0];
                         else if (projectedStart[0] > maximumX) maximumX = projectedStart[0];
                         if (projectedStart[1] < minimumY) minimumY = projectedStart[1];
                         else if (projectedStart[1] > maximumY) maximumY = projectedStart[1];
-                        VU0_LOAD_VF_PTR(vf10, edgeEnd);
+                        SDF_VU0_LOADVECTOR_F32_NV(edgeEnd);
                         SDF_VU0_APPLYMATRIX_XYZ1();
                         SDF_VU0_PERSVECTOR();
-                        VU0_APPLY_VIEWPORT(vf10, vf10, vf11, vf12);
+                        VU0_MUL_ADD_VF10_VF11_VF12();
                         SDF_VU0_STOREVECTOR_NOMEM(projectedEnd);
                         if (projectedEnd[0] < minimumX) minimumX = projectedEnd[0];
                         else if (projectedEnd[0] > maximumX) maximumX = projectedEnd[0];
                         if (projectedEnd[1] < minimumY) minimumY = projectedEnd[1];
                         else if (projectedEnd[1] > maximumY) maximumY = projectedEnd[1];
-                        VU0_LOAD_VF_PTR(vf10, extrudedEnd);
+                        SDF_VU0_LOADVECTOR_F32_NV(extrudedEnd);
                         SDF_VU0_APPLYMATRIX_XYZ1();
                         SDF_VU0_PERSVECTOR();
-                        VU0_APPLY_VIEWPORT(vf10, vf10, vf11, vf12);
+                        VU0_MUL_ADD_VF10_VF11_VF12();
                         SDF_VU0_STOREVECTOR_NOMEM(projectedExtrudedEnd);
                         if (projectedExtrudedEnd[0] < minimumX) minimumX = projectedExtrudedEnd[0];
                         else if (projectedExtrudedEnd[0] > maximumX) maximumX = projectedExtrudedEnd[0];
                         if (projectedExtrudedEnd[1] < minimumY) minimumY = projectedExtrudedEnd[1];
                         else if (projectedExtrudedEnd[1] > maximumY) maximumY = projectedExtrudedEnd[1];
-                        VU0_LOAD_VF_PTR(vf10, extrudedStart);
+                        SDF_VU0_LOADVECTOR_F32_NV(extrudedStart);
                         SDF_VU0_APPLYMATRIX_XYZ1();
                         SDF_VU0_PERSVECTOR();
-                        VU0_APPLY_VIEWPORT(vf10, vf10, vf11, vf12);
+                        VU0_MUL_ADD_VF10_VF11_VF12();
                         SDF_VU0_STOREVECTOR_NOMEM(projectedExtrudedStart);
                         if (projectedExtrudedStart[0] < minimumX) minimumX = projectedExtrudedStart[0];
                         else if (projectedExtrudedStart[0] > maximumX) maximumX = projectedExtrudedStart[0];
@@ -1605,36 +1602,36 @@ void fldDrawEffectObjectShadow(dds3Basic_t *object) {
                         if (D_003C3800[edgeFrom][j][1]) {
                             if (pass == 0) {
                                 f32 (*output)[4] = &quadVertices[quadRequest.pointCount];
-                                PCP_COPY_VECTOR_UNCLOBBERED(output[0], edgeStart);
-                                PCP_COPY_VECTOR_UNCLOBBERED(output[1], edgeEnd);
-                                PCP_COPY_VECTOR_UNCLOBBERED(output[2], extrudedEnd);
-                                PCP_COPY_VECTOR_UNCLOBBERED(output[3], extrudedStart);
+                                SDF_VU0_COPYVECTOR_NOMEM(output[0], edgeStart);
+                                SDF_VU0_COPYVECTOR_NOMEM(output[1], edgeEnd);
+                                SDF_VU0_COPYVECTOR_NOMEM(output[2], extrudedEnd);
+                                SDF_VU0_COPYVECTOR_NOMEM(output[3], extrudedStart);
                                 quadRequest.faceCount += 2;
                                 quadRequest.pointCount += 4;
                             } else {
                                 f32 (*output)[4] = &quadVertices[quadRequest.pointCount];
-                                PCP_COPY_VECTOR_UNCLOBBERED(output[0], edgeStart);
-                                PCP_COPY_VECTOR_UNCLOBBERED(output[1], extrudedStart);
-                                PCP_COPY_VECTOR_UNCLOBBERED(output[2], extrudedEnd);
-                                PCP_COPY_VECTOR_UNCLOBBERED(output[3], edgeEnd);
+                                SDF_VU0_COPYVECTOR_NOMEM(output[0], edgeStart);
+                                SDF_VU0_COPYVECTOR_NOMEM(output[1], extrudedStart);
+                                SDF_VU0_COPYVECTOR_NOMEM(output[2], extrudedEnd);
+                                SDF_VU0_COPYVECTOR_NOMEM(output[3], edgeEnd);
                                 quadRequest.faceCount += 2;
                                 quadRequest.pointCount += 4;
                             }
                         } else {
                             if (pass == 0) {
                                 f32 (*output)[4] = &quadVertices[quadRequest.pointCount];
-                                PCP_COPY_VECTOR_UNCLOBBERED(output[0], edgeStart);
-                                PCP_COPY_VECTOR_UNCLOBBERED(output[1], extrudedStart);
-                                PCP_COPY_VECTOR_UNCLOBBERED(output[2], extrudedEnd);
-                                PCP_COPY_VECTOR_UNCLOBBERED(output[3], edgeEnd);
+                                SDF_VU0_COPYVECTOR_NOMEM(output[0], edgeStart);
+                                SDF_VU0_COPYVECTOR_NOMEM(output[1], extrudedStart);
+                                SDF_VU0_COPYVECTOR_NOMEM(output[2], extrudedEnd);
+                                SDF_VU0_COPYVECTOR_NOMEM(output[3], edgeEnd);
                                 quadRequest.faceCount += 2;
                                 quadRequest.pointCount += 4;
                             } else {
                                 f32 (*output)[4] = &quadVertices[quadRequest.pointCount];
-                                PCP_COPY_VECTOR_UNCLOBBERED(output[0], edgeStart);
-                                PCP_COPY_VECTOR_UNCLOBBERED(output[1], edgeEnd);
-                                PCP_COPY_VECTOR_UNCLOBBERED(output[2], extrudedEnd);
-                                PCP_COPY_VECTOR_UNCLOBBERED(output[3], extrudedStart);
+                                SDF_VU0_COPYVECTOR_NOMEM(output[0], edgeStart);
+                                SDF_VU0_COPYVECTOR_NOMEM(output[1], edgeEnd);
+                                SDF_VU0_COPYVECTOR_NOMEM(output[2], extrudedEnd);
+                                SDF_VU0_COPYVECTOR_NOMEM(output[3], extrudedStart);
                                 quadRequest.faceCount += 2;
                                 quadRequest.pointCount += 4;
                             }
@@ -2286,10 +2283,8 @@ void fldMarkStageExplorationCellsAroundPosition(s32 room, s32 stage, f32 x, f32 
 #include "fld_area_work.h"
 #include "fld_npc_motion.h"
 #include "sdf_packet_list.h"
-#include "ee_mmi.h"
 #include "kernel.h"
 #include "dds3_task_create.h"
-#include "pcp_vu0.h"
 #include "common.h"
 #include "fld_scene_ready_api.h"
 #include "fld_encounter_runtime_api.h"

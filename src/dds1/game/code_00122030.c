@@ -6,21 +6,19 @@
 #include "fld_runtime_reset_api.h"
 #include "fld_area_encounter_table.h"
 #include "sdf_packet_list.h"
-#include "ee_mmi.h"
+#include "ps2asm.h"
 #include "kernel.h"
 #include "dds3_task_runner.h"
 #include "dds3_task_priority_query.h"
 #include "dds3_admin_control_api.h"
 #include "dds3_task_create.h"
 #include "dds3_fade.h"
-#include "pcp_vu0.h"
 #include "common.h"
 #include "fld_camera_link_mode.h"
 #include "pty_status_query_api.h"
 #include "pty_field_hp_attrition_api.h"
 #include "sdf_delayed_resource_check_api.h"
 #include "dds3_object_flags.h"
-#include "sdf_vu0.h"
 #include "eff_inner_float_api.h"
 #include "sdf_trig.h"
 #include "sdf_vu_matrix.h"
@@ -697,8 +695,8 @@ void fldInitializeDisplayAndTables(void) {
 void fldResetPlayerSceneTransformState(void) {
     FieldPlayerSceneWork *sceneWork = &fldSceneParam;
 
-    VU0_STORE_VF(vf0, &sceneWork->position);
-    VU0_STORE_VF(vf0, &sceneWork->rotation);
+    SDF_VU0_STOREIDENTITYVECTOR(&sceneWork->position);
+    SDF_VU0_STOREIDENTITYVECTOR(&sceneWork->rotation);
     fldPlayerObject = 0;
     *fldGetPlayerSceneStateAddress() = 0;
 }

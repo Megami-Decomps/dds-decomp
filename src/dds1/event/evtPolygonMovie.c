@@ -2,7 +2,20 @@
 #include "common.h"
 #include "sdf_file_existence_api.h"
 #include "dds3_object_flags.h"
-#include "sdf_vu0.h"
+#include "ps2asm.h"
+
+static inline void UnpackRGBAWordFloat(u32 color, f32 unit) {
+    u32 rgba[4];
+    rgba[0] = color;
+    EE_MMI_RGBA_UNPACK(rgba, unit);
+}
+
+static inline u32 PackRGBAWord(f32 unit) {
+    u32 rgba[4];
+    MMI_RGBA_PACK_UNIT(rgba[0], unit);
+    return rgba[0];
+}
+
 #include "eff.h"
 #include "eff_event_draw.h"
 #include "sdf_chip.h"
@@ -10,8 +23,6 @@
 #include "kernel.h"
 #include "dds3_task_create.h"
 #include "sdf_heap_api.h"
-#include "ee_mmi.h"
-#include "pcp_vu0.h"
 #include "fld.h"
 #include "evt_polygon_movie.h"
 #include "evt_polygon_movie_load_api.h"
@@ -110,13 +121,13 @@ u32 evtHokanColor(s32 enable, f32 t, u32 a, u32 b)
     if (enable) {
         color1[0] = a;
         EE_MMI_RGBA_UNPACK(color1, 1.0f / 128.0f);
-        VU0_SCALE_VF(vf10, 1.0f - t);
+        SDF_VU0_SCALEVECTOR_BITS(1.0f - t);
         SDF_VU0_COPYVECTOR_A_TO_B();
         color2[0] = b;
         EE_MMI_RGBA_UNPACK(color2, 1.0f / 128.0f);
-        VU0_SCALE_VF(vf10, t);
+        SDF_VU0_SCALEVECTOR_BITS(t);
         SDF_VU0_ADDVECTOR();
-        EE_MMI_RGBA_PACK_UNIT(packed, 128.0f);
+        MMI_RGBA_PACK_UNIT(packed, 128.0f);
         blended[0] = packed;
         return blended[0];
     }
@@ -134,13 +145,13 @@ void evtHokanSceneLight(s32 enable, f32 t, const f32 *a, const f32 *b, f32 *out)
     } else {
         SDF_VU0_LOADVECTOR(D_00368540);
     }
-    VU0_SCALAR_OP(1.0f - t, "vmulx.xyzw vf10, vf10, vf2x");
+    SDF_VU0_SCALEVECTOR_V0(1.0f - t);
     if (b != NULL) {
         SDF_VU0_LOADVECTOR_B(b);
     } else {
         SDF_VU0_LOADVECTOR_B(D_00368540);
     }
-    VU0_SCALAR_OP(t, "vmulx.xyzw vf11, vf11, vf2x");
+    SDF_VU0_SCALEVECTOR_B_V0(t);
     SDF_VU0_ADDVECTOR();
     SDF_VU0_STOREVECTOR(out);
     if (a != NULL) {
@@ -148,13 +159,13 @@ void evtHokanSceneLight(s32 enable, f32 t, const f32 *a, const f32 *b, f32 *out)
     } else {
         SDF_VU0_LOADVECTOR(D_00368550);
     }
-    VU0_SCALAR_OP(1.0f - t, "vmulx.xyzw vf10, vf10, vf2x");
+    SDF_VU0_SCALEVECTOR_V0(1.0f - t);
     if (b != NULL) {
         SDF_VU0_LOADVECTOR_B(b + 4);
     } else {
         SDF_VU0_LOADVECTOR_B(D_00368550);
     }
-    VU0_SCALAR_OP(t, "vmulx.xyzw vf11, vf11, vf2x");
+    SDF_VU0_SCALEVECTOR_B_V0(t);
     SDF_VU0_ADDVECTOR();
     SDF_VU0_STOREVECTOR(out + 4);
     if (a != NULL) {
@@ -162,13 +173,13 @@ void evtHokanSceneLight(s32 enable, f32 t, const f32 *a, const f32 *b, f32 *out)
     } else {
         SDF_VU0_LOADVECTOR(D_00368560);
     }
-    VU0_SCALAR_OP(1.0f - t, "vmulx.xyzw vf10, vf10, vf2x");
+    SDF_VU0_SCALEVECTOR_V0(1.0f - t);
     if (b != NULL) {
         SDF_VU0_LOADVECTOR_B(b + 8);
     } else {
         SDF_VU0_LOADVECTOR_B(D_00368560);
     }
-    VU0_SCALAR_OP(t, "vmulx.xyzw vf11, vf11, vf2x");
+    SDF_VU0_SCALEVECTOR_B_V0(t);
     SDF_VU0_ADDVECTOR();
     SDF_VU0_VECTOR_W_SET_ONE();
     SDF_VU0_STOREVECTOR(out + 8);
@@ -180,7 +191,7 @@ extern u32 D_00368580[4];
 /* One asm location for every arm's w set, so jump2 can cross-jump them. */
 static inline void evtSetBlendVecW(f32 w)
 {
-    VU0_SCALAR_OP_CLOBBER(w, "vmulx.w vf10, vf0, vf2x");
+    SDF_VU0_SETVECTOR_W(w);
 }
 
 /* vu0 routine: blend a vector and an RGBA8888 colour by t (missing input =
@@ -192,50 +203,50 @@ void evtHokanSceneFog(s32 enable, f32 t, const EvtBlendVecColor *a, const EvtBle
         t = 0.0f;
     }
     if (a != NULL) {
-        VU0_SET_VF10_COMPONENT(x, a->vec[0]);
-        VU0_SET_VF10_COMPONENT(y, a->vec[1]);
-        VU0_SET_VF10_COMPONENT(z, a->vec[2]);
+        SDF_VU0_SETVECTOR_X(a->vec[0]);
+        SDF_VU0_SETVECTOR_Y(a->vec[1]);
+        SDF_VU0_SETVECTOR_Z(a->vec[2]);
         evtSetBlendVecW(a->vec[3]);
     } else {
-        VU0_SET_VF10_COMPONENT(x, D_00368570[1]);
-        VU0_SET_VF10_COMPONENT(y, D_00368570[0]);
-        VU0_SET_VF10_COMPONENT(z, D_00368570[2]);
+        SDF_VU0_SETVECTOR_X(D_00368570[1]);
+        SDF_VU0_SETVECTOR_Y(D_00368570[0]);
+        SDF_VU0_SETVECTOR_Z(D_00368570[2]);
         evtSetBlendVecW(D_00368570[3]);
     }
-    VU0_SCALE_VF(vf10, 1.0f - t);
+    SDF_VU0_SCALEVECTOR_BITS(1.0f - t);
     SDF_VU0_COPYVECTOR_A_TO_B();
     if (b != NULL) {
-        VU0_SET_VF10_COMPONENT(x, b->vec[0]);
-        VU0_SET_VF10_COMPONENT(y, b->vec[1]);
-        VU0_SET_VF10_COMPONENT(z, b->vec[2]);
+        SDF_VU0_SETVECTOR_X(b->vec[0]);
+        SDF_VU0_SETVECTOR_Y(b->vec[1]);
+        SDF_VU0_SETVECTOR_Z(b->vec[2]);
         evtSetBlendVecW(b->vec[3]);
     } else {
-        VU0_SET_VF10_COMPONENT(x, D_00368570[1]);
-        VU0_SET_VF10_COMPONENT(y, D_00368570[0]);
-        VU0_SET_VF10_COMPONENT(z, D_00368570[2]);
+        SDF_VU0_SETVECTOR_X(D_00368570[1]);
+        SDF_VU0_SETVECTOR_Y(D_00368570[0]);
+        SDF_VU0_SETVECTOR_Z(D_00368570[2]);
         evtSetBlendVecW(D_00368570[3]);
     }
-    VU0_SCALE_VF(vf10, t);
+    SDF_VU0_SCALEVECTOR_BITS(t);
     SDF_VU0_ADDVECTOR();
     SDF_VU0_GETVECTOR_X(out->vec[0]);
     SDF_VU0_GETVECTOR_Y(out->vec[1]);
     SDF_VU0_GETVECTOR_Z(out->vec[2]);
     SDF_VU0_GETVECTOR_W(out->vec[3]);
     if (a != NULL) {
-        eeUnpackRGBAWordFloat(a->color, 1.0f / 128.0f);
+        UnpackRGBAWordFloat(a->color, 1.0f / 128.0f);
     } else {
-        eeUnpackRGBAWordFloat(D_00368580[0], 1.0f / 128.0f);
+        UnpackRGBAWordFloat(D_00368580[0], 1.0f / 128.0f);
     }
-    VU0_SCALE_VF(vf10, 1.0f - t);
+    SDF_VU0_SCALEVECTOR_BITS(1.0f - t);
     SDF_VU0_COPYVECTOR_A_TO_B();
     if (b != NULL) {
-        eeUnpackRGBAWordFloat(b->color, 1.0f / 128.0f);
+        UnpackRGBAWordFloat(b->color, 1.0f / 128.0f);
     } else {
-        eeUnpackRGBAWordFloat(D_00368580[0], 1.0f / 128.0f);
+        UnpackRGBAWordFloat(D_00368580[0], 1.0f / 128.0f);
     }
-    VU0_SCALE_VF(vf10, t);
+    SDF_VU0_SCALEVECTOR_BITS(t);
     SDF_VU0_ADDVECTOR();
-    out->color = eePackRGBAWord(128.0f);
+    out->color = PackRGBAWord(128.0f);
 }
 
 void evtHokanBlur2(s32 enable, f32 t, const dds3Effect_Blur_t *a, const dds3Effect_Blur_t *b, dds3Effect_Blur_t *out)

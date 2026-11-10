@@ -4,7 +4,7 @@
 #include "sdf_packet_list.h"
 #include "common.h"
 #include "sdf_map_position_api.h"
-#include "sdf_vu0.h"
+#include "ps2asm.h"
 #include "sdf_vu_rotation_axes.h"
 #include "sdf_sif_command.h"
 #include "sdf_trig.h"
@@ -12,7 +12,6 @@
 #include "sdf_chip.h"
 #include "eff_param.h"
 #include "sdf_heap_api.h"
-#include "ee_mmi.h"
 #include "btl_sound.h"
 #include "eff_blur.h"
 #include "eff_rectangle_blur_api.h"
@@ -28,7 +27,6 @@
 #include "eff_event_setup_readiness.h"
 #include "eff_event_bill.h"
 #include "eff_event_bill_batch.h"
-#include "pcp_vu0.h"
 #include "sdf_vu_transform_api.h"
 #include "sdf_texture_primary_buffer_api.h"
 #include "sdf_vu_matrix.h"
@@ -688,7 +686,7 @@ void effEventUpdateEffectParameters(effEveBEDCutHandle_t *work) {
     SDF_VU0_LOADVECTOR_B(D_00414A00);
     Mult();
     ToMatrix();
-    VU0_STORE_MATRIX_NOCLOBBER(rotationMatrix);
+    SDF_VU0_STOREMATRIX_NOMEM(rotationMatrix);
     count = list->count;
     entry = list->entries;
     color = work->init.color;
@@ -709,7 +707,7 @@ void effEventUpdateEffectParameters(effEveBEDCutHandle_t *work) {
                     sdfModelGetMarkPosMatrix(model, entry->aimParams.count);
                     SDF_VU0_LOADMATRIX_B(rotationMatrix);
                     MultMatrixNoArg();
-                    VU0_STORE_MATRIX_NOCLOBBER(matrix);
+                    SDF_VU0_STOREMATRIX_NOMEM(matrix);
                     dds3EffectPartSetRotateMatrix(effect->parameterWorks[entryIndex], matrix);
                 } else {
                     mdlGetScale(work->actor->owner);
@@ -717,10 +715,10 @@ void effEventUpdateEffectParameters(effEveBEDCutHandle_t *work) {
                     sdfModelGetMarkPosMatrix(model, entry->aimParams.count);
                     if (scale != 0.0f) {
                         SDF_VU0_SETSCALE1VECTOR();
-                        VU0_SCALAR_OP(1.0f / scale, "vmulx.xyzw vf10, vf10, vf2x");
+                        SDF_VU0_SCALEVECTOR_V0(1.0f / scale);
                         SDF_VU0_SCALE_XYZ();
                     }
-                    VU0_STORE_MATRIX_NOCLOBBER(matrix);
+                    SDF_VU0_STOREMATRIX_NOMEM(matrix);
                     dds3EffectPartSetRotateMatrix(effect->parameterWorks[entryIndex], matrix);
                 }
             }
@@ -1135,7 +1133,7 @@ void effEVECombParSmokeDraw(EffEventBillSet *work) {
     textureBytes = sdfTexGetPacketLength(secondaryTexture);
     sdf3DMakeDirectRefPacket(texturePacket, (u32)textureBuffer, textureBytes);
     sdfDrawTagLinkRef(secondaryList, (u32)texturePacket);
-    EE_MMI_UNIT_MATRIX(matrix);
+    SDF_VU0_STOREIDENTITY(matrix);
     geometryPacket = (u8 *)sdfGrAllocPacketBuff(0x38);
     sdfBillBoardMakeTMPacket(geometryPacket, matrix[0]);
     sdfDrawTagLink(primaryList, (u32)geometryPacket);

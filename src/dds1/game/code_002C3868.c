@@ -1,6 +1,6 @@
 #include "sdk_ps2.h"
 #include "common.h"
-#include "sdf_vu0.h"
+#include "ps2asm.h"
 #include "snd_sequence_volume_pan.h"
 #include "sdf_vector_latch.h"
 #include "sdf_counter_display.h"
@@ -77,7 +77,6 @@ void sdfInitInnerVectors(void) {
     fldLocalMapCameraObject->ops->update(fldLocalMapCameraObject);
 }
 
-#include "pcp_vu0.h"
 extern char D_003B3D48[];
 s32 sdfLoadMapCounterCameraVectorsForMask(s32 mask) {
     f32 position[4];
@@ -575,7 +574,6 @@ void sdfCounterDrawLabelPlateRow(s32 x, s32 y, s32 z, struct MenuList *rt, s32 d
 #include "fld_map_resource.h"
 #include "mdl_flag_api.h"
 #include "dds3_world_secondary.h"
-#include "pcp_vu0.h"
 
 extern void eglSetOt(u32 surfaceIndex);
 extern void evtSubmitPrimaryGsTest(s32, s32, s32, s32, s32, s32, s32, s32);

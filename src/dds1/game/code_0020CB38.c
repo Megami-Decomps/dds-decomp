@@ -7,7 +7,7 @@
 #include "btl_referenced_battle_effect_task.h"
 #include "btl_actor_category_flag_api.h"
 #include "btl_linked_actor_eligibility.h"
-#include "sdf_vu0.h"
+#include "ps2asm.h"
 #include "sdf_vu_rotation_axes.h"
 #include "btl_effect_position.h"
 #include "eff_random_mod.h"
@@ -19,8 +19,6 @@
 #include "btl_command.h"
 #include "btl_action.h"
 #include "btl_task.h"
-#include "ee_mmi.h"
-#include "pcp_vu0.h"
 #include "sdf_vu_matrix.h"
 
 
@@ -231,7 +229,7 @@ void btlUpdateBossUnitScaleTransition(void) {
                             SDF_VU0_LOADVECTOR(unit->position);
                             SDF_VU0_LOADVECTOR_B(effectPosition);
                             SDF_VU0_SUBVECTOR();
-                            VU0_SCALE_VF(vf10, progress);
+                            SDF_VU0_SCALEVECTOR_BITS(progress);
                             SDF_VU0_ADDVECTOR();
                             SDF_VU0_STOREVECTOR(unit->currentPosition);
                             nextScale = transition->scale + (1.0f - transition->scale) * progress;
@@ -252,7 +250,7 @@ void btlUpdateBossUnitScaleTransition(void) {
                         }
                         btlSetUnitPosition(unit, position);
                         SDF_VU0_SETSCALE1VECTOR();
-                        VU0_SCALE_VF(vf10, unit->scale);
+                        SDF_VU0_SCALEVECTOR_BITS(unit->scale);
                         inner = unit->effectObject->poseset;
                         inner->flags = (inner->flags | 1) & ~2;
                         SDF_VU0_STOREVECTOR(inner->scale);

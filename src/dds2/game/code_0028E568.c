@@ -1,5 +1,5 @@
 #include "sdk_ps2.h"
-#include "pcp_vu0.h"
+#include "ps2asm.h"
 #include "mnu_mantra.h"
 #include "mnu_mantra_position_api.h"
 #include "mdl_flag_api.h"
@@ -240,7 +240,7 @@ s32 mnuAdvanceMantraSelectionCursor(MnuStatusResource *object, s32 centerOnNode)
     memset(movement, 0, sizeof(movement));
     movement[0] = target[0] - work->scrollX;
     movement[1] = target[1] - work->scrollY;
-    VU0_LOAD_VF_PTR(vf10, movement);
+    SDF_VU0_LOADVECTOR_F32_NV(movement);
     SDF_VU0_GETLENGTH(distance);
     SDF_VU0_NORMALIZE();
     step = distance - distance * 0.9f;
@@ -250,8 +250,8 @@ s32 mnuAdvanceMantraSelectionCursor(MnuStatusResource *object, s32 centerOnNode)
     if (distance < step) {
         step = distance;
     }
-    VU0_SCALAR_OP_CLOBBER(step, "vmulx.xyzw vf10, vf10, vf2x");
-    VU0_STORE_VF_PTR(vf10, movement);
+    SDF_VU0_SCALEVECTOR_V0_CLOBBER(step);
+    SDF_VU0_STOREVECTOR_F32_NV(movement);
     work->scrollX += movement[0];
     work->scrollY += movement[1];
     work->scrollEndX = work->scrollX + layouts[layout][4];

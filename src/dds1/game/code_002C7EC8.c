@@ -7,7 +7,7 @@
 #include "fr_font.h"
 #include "sdf_heap_api.h"
 #include "fpu.h"
-#include "pcp_vu0.h"
+#include "ps2asm.h"
 typedef struct Vec3 {
     float x; // 0x00
     float y; // 0x04

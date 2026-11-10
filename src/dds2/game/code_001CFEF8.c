@@ -19,7 +19,7 @@
 #include "btl_sound.h"
 #include "btl_sound_release_task.h"
 #include "btl_task_condition.h"
-#include "pcp_vu0.h"
+#include "ps2asm.h"
 #include "btl_state.h"
 #include "btl_floor_resource_readiness_api.h"
 #include "btl_terminal_outcome.h"
@@ -214,7 +214,7 @@ void fldBattleSceneEnterInit(u8 *scene) {
     btlRequestSceneEventResources();
     btlInitializeBossCallbacks(((BtlState *)scene)->battleMode);
     btlSelectSceneAudioTrack(((BtlState *)scene)->encounterPack, ((BtlState *)scene)->battleMode);
-    VU0_STORE_VF($vf0, scene);
+    SDF_VU0_STOREIDENTITYVECTOR(scene);
 }
 
 extern s32 btlIsFadeInPhaseOrIdle(void);

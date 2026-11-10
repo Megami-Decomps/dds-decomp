@@ -9,7 +9,10 @@
 #include "btl_camera_mode_index.h"
 #include "btl_command_target_policy.h"
 #include "btl_actor_category_flag_api.h"
-#include "sdf_vu0.h"
+#include "ps2asm.h"
+
+#define VEC3_SPLAT(v, x) ((v)[0] = (x), (v)[1] = (x), (v)[2] = (x))
+
 #include "btl_actor_resource_table_kind.h"
 #include "sdf_vu_rotation_axes.h"
 #include "btl_skill_max_api.h"
@@ -24,10 +27,8 @@
 #include "btl_command.h"
 #include "btl_command_affinity_api.h"
 #include "btl_camera_pose_api.h"
-#include "pcp_vu0.h"
 #include "sdf_vu_matrix.h"
 #include "sdf_vu_matrix_multiply_api.h"
-#include "ee_mmi.h"
 #include "btl_action.h"
 #include "btl_ai_table.h"
 #include "btl_ai_scratch.h"
@@ -542,10 +543,8 @@ BtlIndexList *btlBuildActorIndexListAndCount(ActionStateLink *actor, BtlCommandT
 #include "btl_command.h"
 #include "btl_command_affinity_api.h"
 #include "btl_camera_pose_api.h"
-#include "pcp_vu0.h"
 #include "sdf_vu_matrix.h"
 #include "sdf_vu_matrix_multiply_api.h"
-#include "ee_mmi.h"
 #include "btl_action.h"
 #include "btl_ai_table.h"
 #include "btl_ai_scratch.h"
@@ -1599,7 +1598,7 @@ void btlBuildAngledApproachCameraPose(BtlLinkedCommand *command, BtlCamState *ou
     length *= 0.6f;
     SDF_VU0_NORMALIZE();
     SDF_VU0_STOREVECTOR(dir);
-    VU0_SCALE_VF_MFC1(vf10, length);
+    SDF_VU0_SCALEVECTOR_V0_BARRIER(length);
     SDF_VU0_ADDVECTOR();
     SDF_VU0_STOREVECTOR(out->position);
     angle *= 0.017453293f;
@@ -3094,7 +3093,7 @@ void btlFadeAndTintNamedChunkTree(sdfModelNode_t *node, s32 color) {
     tint[0] = node->color | 0x808080;
     EE_MMI_RGBA_UNPACK(tint, 1.0f / 128.0f);
     SDF_VU0_MULVECTOR();
-    EE_MMI_RGBA_PACK(packed[0]);
+    SDF_VU0_dds3ColorFtoI(packed[0], 128.0f);
     child = node->children;
     node->color = packed[0];
     if (child != NULL) {
@@ -3350,10 +3349,8 @@ void btlReturnUnitToGroup(ActionStateLink *task) {
 #include "btl_command.h"
 #include "btl_command_affinity_api.h"
 #include "btl_camera_pose_api.h"
-#include "pcp_vu0.h"
 #include "sdf_vu_matrix.h"
 #include "sdf_vu_matrix_multiply_api.h"
-#include "ee_mmi.h"
 #include "btl_action.h"
 #include "btl_ai_table.h"
 #include "btl_ai_scratch.h"
@@ -6498,7 +6495,7 @@ void btlRestoreLinkedActorSceneColor(void) {
         actor = effect->action.actor;
         if (actor != NULL && (actor->status.flags & 2)) {
             SDF_VU0_LOADVECTOR(dds3LightParam[0]);
-            EE_MMI_RGBA_PACK(packed[0]);
+            SDF_VU0_dds3ColorFtoI(packed[0], 128.0f);
             evtSetUnitColorRGB(actor->ext, 0, packed[0]);
         }
     }

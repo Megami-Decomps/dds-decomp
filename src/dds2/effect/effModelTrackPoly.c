@@ -1,7 +1,10 @@
 #include "sdk_ps2.h"
 #include "common.h"
 #include "sdf_map_position_api.h"
-#include "sdf_vu0.h"
+#include "ps2asm.h"
+
+#define VEC3_SPLAT(v, x) ((v)[0] = (x), (v)[1] = (x), (v)[2] = (x))
+
 #include "sdf_asset_state.h"
 #include "sdf_asset_create.h"
 #include "sdf_chip.h"
@@ -14,7 +17,6 @@
 #include "mdl.h"
 #include "sdf.h"
 #include "sdf_chunk.h"
-#include "pcp_vu0.h"
 #include "eff_track_poly_data.h"
 #include "eff_packet_params.h"
 

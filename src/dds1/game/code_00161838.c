@@ -1,8 +1,7 @@
 #include "common.h"
-#include "sdf_vu0.h"
+#include "ps2asm.h"
 #include "btl.h"
 #include "eff_field_color.h"
-#include "pcp_vu0.h"
 #include "sdf_debug_api.h"
 
 extern u32 effFieldColorFlags;

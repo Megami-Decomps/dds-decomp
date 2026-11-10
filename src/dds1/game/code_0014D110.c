@@ -15,7 +15,7 @@ extern const char *fldEveHitResName_Find(struct dds3ProcessID_t *task);
 extern void fldApplyCurrentTaskScene(const char *name);
 #include "sdf.h"
 #include "fpu.h"
-#include "pcp_vu0.h"
+#include "ps2asm.h"
 #include "dds3obj.h"
 #include "dds3_basic_array_cursor.h"
 #include "dds3_object_mode.h"

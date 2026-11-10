@@ -1,5 +1,5 @@
 #include "common.h"
-#include "sdf_vu0.h"
+#include "ps2asm.h"
 #include "sdf_chip.h"
 #include "eff_param.h"
 #include "eff_param_operations.h"
@@ -10,10 +10,8 @@
 #include "eff.h"
 #include "eff_battle_color_keyframe.h"
 #include "eff_battle_transition_duration.h"
-#include "ee_mmi.h"
 #include "evt_unit.h"
 #include "evt_unit_color_transition.h"
-#include "pcp_vu0.h"
 #include "eff_matrix4.h"
 #include "mdl.h"
 #include "btl_grouped_entity_api.h"
@@ -112,10 +110,10 @@ void effBattleApplyUnitColorDirection(BtlUnit *unit, EffBattleUnitColorCommand *
                 secondColor = btlBlendColorVec(battle->ambientColor, selected[index]->colorEnd, 0.3f);
             } else {
                 SDF_VU0_LOADVECTOR(selected[index]->colorStart);
-                EE_MMI_RGBA_PACK_UNIT(packedStart[0], 128.0f);
+                MMI_RGBA_PACK_UNIT(packedStart[0], 128.0f);
                 firstColor = packedStart[0];
                 SDF_VU0_LOADVECTOR(selected[index]->colorEnd);
-                EE_MMI_RGBA_PACK_UNIT(packedEnd[0], 128.0f);
+                MMI_RGBA_PACK_UNIT(packedEnd[0], 128.0f);
                 secondColor = packedEnd[0];
             }
             evtSetUnitLightAndAmbient(eventUnit, endDuration, firstColor, secondColor);

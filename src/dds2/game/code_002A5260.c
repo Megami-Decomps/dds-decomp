@@ -27,7 +27,7 @@
 #include "dds3_fade.h"
 #include "sdf_packet_alloc.h"
 #include "sdf_packet_list.h"
-#include "ee_mmi.h"
+#include "ps2asm.h"
 /* Declared before first use (were implicit int). */
 extern void dds3AdminiCallSequence(s32 requestedMode, const void *requestData, u32 dataBytes, s32 markHistory);
 extern void frFontUploadClearedTexture(void);
@@ -1752,8 +1752,8 @@ void mnuSubmitMovieDrawPacket(movieStream_t *movie, sdfGrOt_t *pool) {
     heightLog2 = height - 1;
     widthLog2 = width - 1;
     bufferWidth = width >> 6;
-    EE_MMI_BIT_LENGTH(heightLog2);
-    EE_MMI_BIT_LENGTH(widthLog2);
+    heightLog2 = PS2_WORD_BIT_LENGTH(heightLog2);
+    widthLog2 = PS2_WORD_BIT_LENGTH(widthLog2);
     basePointer = (u32)movie->soundNode.resourceWord >> 6;
     if (bufferWidth == 0) {
         bufferWidth = 1;

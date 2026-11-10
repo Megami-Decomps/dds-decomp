@@ -26,7 +26,7 @@
 #include "sdf_chip.h"
 #include "kernel.h"
 #include "dds3_task_create.h"
-#include "pcp_vu0.h"
+#include "ps2asm.h"
 #include "btl_scene_fade.h"
 #include "btl_resource.h"
 #include "eff.h"

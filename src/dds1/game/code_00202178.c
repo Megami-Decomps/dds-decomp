@@ -12,7 +12,7 @@
 #include "btl_command_target_policy.h"
 #include "btl_actor_category_flag_api.h"
 #include "btl_linked_actor_eligibility.h"
-#include "sdf_vu0.h"
+#include "ps2asm.h"
 #include "btl_actor_resource_bank_api.h"
 #include "sdf_vu_rotation_axes.h"
 #include "btl_skill_max_api.h"
@@ -38,8 +38,6 @@
 #include "sdf_model_node_index_api.h"
 #include "evt_unit.h"
 #include "mdl.h"
-#include "ee_mmi.h"
-#include "pcp_vu0.h"
 #include "sdf_vu_matrix.h"
 #include "btl_action.h"
 #include "btl_find_actor_for_owner_api.h"
@@ -312,8 +310,6 @@ BtlIndexList *btlBuildActorIndexListAndCount(BtlTask *actor, BtlCommandTargetPol
 #include "sdf_draw.h"
 #include "evt_unit.h"
 #include "mdl.h"
-#include "ee_mmi.h"
-#include "pcp_vu0.h"
 #include "sdf_vu_matrix.h"
 #include "btl_action.h"
 #include "btl_ai_table.h"
@@ -1271,7 +1267,7 @@ void btlBuildProgressiveApproachCameraPose(BtlLinkedCommand *command, BtlCamStat
     length *= ratio * (0.6f - 0.55f) + 0.55f;
     SDF_VU0_NORMALIZE();
     SDF_VU0_STOREVECTOR(dir);
-    VU0_SCALE_VF_MFC1(vf10, length);
+    SDF_VU0_SCALEVECTOR_V0_BARRIER(length);
     SDF_VU0_ADDVECTOR();
     SDF_VU0_STOREVECTOR(out->position);
     angle = ratio * 0.0f;
@@ -3241,7 +3237,7 @@ void btlFadeAndTintNamedChunkTree(sdfModelNode_t *node, s32 color)
     tint[0] = node->color | 0x808080;
     EE_MMI_RGBA_UNPACK(tint, 1.0f / 128.0f);
     SDF_VU0_MULVECTOR();
-    EE_MMI_RGBA_PACK(packed[0]);
+    SDF_VU0_dds3ColorFtoI(packed[0], 128.0f);
     child = node->children;
     node->color = packed[0];
     if (child != NULL) {
@@ -3300,9 +3296,9 @@ void btlAlignCerberusPartTransforms(void) {
         if (unit->status.flags & 1) {
             if (unit->status.flags & 0x400) {
                 if (unit != selected) {
-                    PCP_COPY_VECTOR_F32(unit->position, selected->position);
+                    SDF_VU0_COPYVECTOR_F32(unit->position, selected->position);
                     btlSetUnitPosition(unit, selected->position);
-                    PCP_COPY_VECTOR_F32(unit->rotation, selected->rotation);
+                    SDF_VU0_COPYVECTOR_F32(unit->rotation, selected->rotation);
                     btlSetUnitRotation(unit, selected->rotation);
                 }
             }
@@ -3311,10 +3307,10 @@ void btlAlignCerberusPartTransforms(void) {
     effect = state->effect;
     actor = effect->actor;
     if (actor != NULL) {
-        PCP_COPY_VECTOR_F32(actor->position, selected->position);
+        SDF_VU0_COPYVECTOR_F32(actor->position, selected->position);
         btlSetUnitPosition(actor, selected->position);
         actor = effect->actor;
-        PCP_COPY_VECTOR_F32(actor->rotation, selected->rotation);
+        SDF_VU0_COPYVECTOR_F32(actor->rotation, selected->rotation);
         btlSetUnitRotation(actor, selected->rotation);
     }
 }
@@ -3825,7 +3821,7 @@ void btlUpdateNidhoggrScaleAndPosition(void) {
     }
 
     SDF_VU0_SETSCALE1VECTOR();
-    VU0_SCALAR_OP(currentScale, "vmulx.xyzw vf10, vf10, vf2x");
+    SDF_VU0_SCALEVECTOR_V0(currentScale);
     inner = selected->effectObject->poseset;
     inner->flags = (inner->flags | OBJECT_TRANSFORM_FLAG_UPDATE_PENDING) &
         ~OBJECT_TRANSFORM_FLAG_MATRIX_CACHE_VALID;

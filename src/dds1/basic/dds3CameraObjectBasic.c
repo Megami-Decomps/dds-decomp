@@ -1,12 +1,11 @@
 #include "sdf_projection.h"
 #include "common.h"
 #include "dds3_camera_update_flags.h"
-#include "sdf_vu0.h"
+#include "ps2asm.h"
 #include "sdf_chip.h"
 #include "dds3obj.h"
 #include "sdf_vu_matrix.h"
 
-#include "pcp_vu0.h"
 
 typedef struct {
     f32 components[4];
@@ -90,7 +89,7 @@ void MakeCamera(dds3Basic_t *camera) {
         SDF_VU0_STOREVECTOR(&data->worldEye);
     }
     LookAtMatrix((const f32 *)&data->worldEye, inner->pos, (const f32 *)&data->worldUp);
-    VU0_STORE_MATRIX(data->matrix);
+    SDF_VU0_STOREMATRIX(data->matrix);
 }
 
 /* Return the base handle owned by the camera data. */
@@ -170,7 +169,7 @@ void dds3DeleteCameraObjectBasic(dds3Basic_t *node) {
 
 /* Load the owned look-at matrix into vf28-vf31. */
 void dds3LoadObjectMatrixPointerIntoVu(dds3Basic_t *camera) {
-    VU0_LOAD_MATRIX(((CameraData *)camera->workdata)->matrix);
+    SDF_VU0_LOADMATRIX(((CameraData *)camera->workdata)->matrix);
 }
 
 /* Copy the supplied vector to the camera's world-space eye position. */

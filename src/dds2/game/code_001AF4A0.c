@@ -51,7 +51,7 @@
 #include "dds3_task_priority_query.h"
 #include "dds3_task_create.h"
 #include "sdf_heap_api.h"
-#include "pcp_vu0.h"
+#include "ps2asm.h"
 #include "btl_scene_fade.h"
 #include "btl_resource.h"
 #include "eff.h"
@@ -884,9 +884,9 @@ void btlSortActorMuzzleDirections(BtlUnit *unit, BtlIndexList *targets, s32 acti
                 pair[0] = btlGetIndexListEntry(targets, i);
                 pair[1] = btlGetIndexListEntry(targets, i + 1);
                 effBTLModelGetSphereCenter(pair[0]);
-                VU0_STORE_VF(vf10, muzzle[0]);
+                SDF_VU0_STOREVECTOR(muzzle[0]);
                 effBTLModelGetSphereCenter(pair[1]);
-                VU0_STORE_VF(vf10, muzzle[1]);
+                SDF_VU0_STOREVECTOR(muzzle[1]);
                 if ((pair[0]->status.flags & 0x400) && (pair[1]->status.flags & 0x400)) {
                     if (mode == 1) {
                         if (muzzle[0][0] > muzzle[1][0]) {

@@ -10,7 +10,7 @@
 #include "common.h"
 #include "dat_assigned_item_id.h"
 #include "pty_record_slot_value_api.h"
-#include "sdf_vu0.h"
+#include "ps2asm.h"
 #include "pty_bullet_item_count_api.h"
 #include "sdf_vu_matrix.h"
 #include "dds3_draw_buffer.h"
@@ -35,7 +35,6 @@
 #include "sdf_pac_state.h"
 #include "sdf_projection.h"
 #include "sdf_sif_command.h"
-#include "pcp_vu0.h"
 #include "mnu.h"
 #include "mnu_party_row_draw_state.h"
 #include "mnu_ability_target_category.h"
@@ -4020,7 +4019,7 @@ void evtStageTestResetViewAndLighting(void)
     SDF_VU0_COPYVECTOR(aViewEye, evtStageTestViewTargetVector);
     SDF_VU0_COPYVECTOR(aViewTarget, evtStageTestViewEyeVector);
     SDF_VU0_COPYVECTOR(aViewDown, evtStageTestViewUpVector);
-    VU0_LOAD_MATRIX(&sdfViewMatrix);
+    SDF_VU0_LOADMATRIX(&sdfViewMatrix);
     sdf3DSetCamera(&dds3ScreenParam, &sdfViewMatrix);
 }
 
@@ -4331,7 +4330,7 @@ void evtStageTestUpdateCamera(void)
     SDF_VU0_LOADVECTOR_B(aViewEye);
     SDF_VU0_SUBVECTOR();
     SDF_VU0_NORMALIZE();
-    VU0_SCALAR_OP(600.0f, "vmulx.xyzw vf10, vf10, vf2x");
+    SDF_VU0_SCALEVECTOR_V0(600.0f);
     SDF_VU0_ADDVECTOR();
     SDF_VU0_LOADVECTOR_B(sdfViewShakeVector);
     SDF_VU0_ADDVECTOR();
@@ -4340,7 +4339,7 @@ void evtStageTestUpdateCamera(void)
     SDF_VU0_ADDVECTOR();
     SDF_VU0_STOREVECTOR_NOMEM(&target);
     LookAtMatrix((const f32 *)&eye, (const f32 *)&target, aViewDown);
-    VU0_STORE_MATRIX_UNCLOBBERED(&sdfViewMatrix);
+    SDF_VU0_STOREMATRIX_NOMEM(&sdfViewMatrix);
     sdf3DMakeViewportPacket((struct ConsMatrixPacket *)(D_003820F0 + drawBufferIndex * 8000), &dds3ScreenParam, &sdfViewMatrix);
     sdf3DSetCamera(&dds3ScreenParam, &sdfViewMatrix);
 }

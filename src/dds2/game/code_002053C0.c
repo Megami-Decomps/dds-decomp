@@ -5,7 +5,7 @@
 #include "btl_horizontal_aim_api.h"
 #include "mnu_title_sound.h"
 #include "mnu_title_sound_buffer_status.h"
-#include "sdf_vu0.h"
+#include "ps2asm.h"
 #include "btl_actor_resource_bank_api.h"
 #include "sdf_trig.h"
 #include "sdf_packet_list.h"
@@ -41,8 +41,6 @@
 #include "eff_object.h"
 #include "mdl.h"
 #include "file_request_api.h"
-#include "pcp_vu0.h"
-#include "ee_mmi.h"
 #include "fpu.h"
 #include "dat_state.h"
 #include "dat_command.h"
@@ -637,7 +635,7 @@ void btlPlaceTripleFormationAroundTarget(ActionStateLink *link, BtlUnit *first, 
         ToMatrix();
         SDF_VU0_LOADVECTOR(D_003E9130);
         SDF_VU0_APPLYMATRIX_XYZ();
-        VU0_SCALAR_OP(radius, "vmulx.xyzw vf10, vf10, vf2x");
+        SDF_VU0_SCALEVECTOR_V0(radius);
         SDF_VU0_LOADVECTOR_B(center);
         SDF_VU0_ADDVECTOR();
         SDF_VU0_STOREVECTOR_NOMEM(pos);
@@ -645,7 +643,7 @@ void btlPlaceTripleFormationAroundTarget(ActionStateLink *link, BtlUnit *first, 
         btlUnitFaceTarget(slot[1], target);
         SDF_VU0_LOADVECTOR(D_003E9120);
         SDF_VU0_APPLYMATRIX_XYZ();
-        VU0_SCALAR_OP(radius, "vmulx.xyzw vf10, vf10, vf2x");
+        SDF_VU0_SCALEVECTOR_V0(radius);
         SDF_VU0_LOADVECTOR_B(center);
         SDF_VU0_ADDVECTOR();
         SDF_VU0_STOREVECTOR_NOMEM(pos);
@@ -654,7 +652,7 @@ void btlPlaceTripleFormationAroundTarget(ActionStateLink *link, BtlUnit *first, 
         SDF_VU0_LOADVECTOR(D_003E9120);
         SDF_VU0_NEGVECTOR_XYZ();
         SDF_VU0_APPLYMATRIX_XYZ();
-        VU0_SCALAR_OP(radius, "vmulx.xyzw vf10, vf10, vf2x");
+        SDF_VU0_SCALEVECTOR_V0(radius);
         SDF_VU0_LOADVECTOR_B(center);
         SDF_VU0_ADDVECTOR();
         SDF_VU0_STOREVECTOR_NOMEM(pos);
@@ -699,11 +697,11 @@ void btlPlaceTripleFormationAroundMiddleActor(ActionStateLink *link, BtlUnit *fi
         SDF_VU0_LOADVECTOR(D_003E9130);
         SDF_VU0_APPLYMATRIX_XYZ();
         SDF_VU0_COPYVECTOR_A_TO_B();
-        VU0_NEGATE_XYZ(vf11);
+        SDF_VU0_NEGVECTOR_B_XYZ();
         SDF_VU0_STOREVECTOR_B(dir);
         radius = slot[1]->bodyRadius * slot[1]->scale;
         radius += 100.0f;
-        VU0_SCALAR_OP(radius, "vmulx.xyzw vf10, vf10, vf2x");
+        SDF_VU0_SCALEVECTOR_V0(radius);
         SDF_VU0_STOREVECTOR_NOMEM(center);
         effBTLModelGetSphereCenter(slot[1]);
         SDF_VU0_LOADVECTOR_B(center);
@@ -733,7 +731,7 @@ void btlPlaceTripleFormationAroundMiddleActor(ActionStateLink *link, BtlUnit *fi
             } else {
                 SDF_VU0_LOADVECTOR(dir);
             }
-            VU0_SCALAR_OP(radius, "vmulx.xyzw vf10, vf10, vf2x");
+            SDF_VU0_SCALEVECTOR_V0(radius);
             SDF_VU0_LOADVECTOR_B(center);
             SDF_VU0_ADDVECTOR();
             SDF_VU0_STOREVECTOR_NOMEM(pos);
@@ -923,7 +921,7 @@ void btlPlacePairedFormationAtFixedCenter(ActionStateLink *link, BtlUnit *other)
         btlMeasureUnitIndexListBounds(link->indexWork.indices, 0, 0);
     }
     SDF_VU0_STOREVECTOR(muzzle);
-    VU0_SCALAR_OP_CLOBBER(0.0f, "vaddx.y vf10, vf0, vf2x");
+    SDF_VU0_SETVECTOR_Y(0.0f);
     SDF_VU0_LOADVECTOR_B(&D_003BE0A0);
     SDF_VU0_SUBVECTOR();
     SDF_VU0_NORMALIZE();
@@ -939,7 +937,7 @@ void btlPlacePairedFormationAtFixedCenter(ActionStateLink *link, BtlUnit *other)
         }
         SDF_VU0_LOADVECTOR(dir);
         SDF_VU0_APPLYMATRIX_XYZ();
-        VU0_SCALAR_OP(radius, "vmulx.xyzw vf10, vf10, vf2x");
+        SDF_VU0_SCALEVECTOR_V0(radius);
         SDF_VU0_LOADVECTOR_B(&D_003BE0A0);
         SDF_VU0_ADDVECTOR();
         SDF_VU0_STOREVECTOR_NOMEM(pos);
@@ -1020,7 +1018,7 @@ void btlPlacePairedFormationNearTarget(ActionStateLink *link, BtlUnit *other) {
             reach = 0.0f;
         }
         SDF_VU0_STOREVECTOR(muzzle);
-        VU0_SCALAR_OP_CLOBBER(0.0f, "vaddx.y vf10, vf0, vf2x");
+        SDF_VU0_SETVECTOR_Y(0.0f);
         SDF_VU0_LOADVECTOR_B(&D_003BE0B0);
         SDF_VU0_ADDVECTOR();
         SDF_VU0_STOREVECTOR(center);
@@ -1063,7 +1061,7 @@ void btlPlacePairedFormationNearTarget(ActionStateLink *link, BtlUnit *other) {
             }
             SDF_VU0_LOADVECTOR(&D_003BE0C0);
             SDF_VU0_APPLYMATRIX_XYZ();
-            VU0_SCALAR_OP_CLOBBER(radius, "vmulx.xyzw vf10, vf10, vf2x");
+            SDF_VU0_SCALEVECTOR_V0_CLOBBER(radius);
             SDF_VU0_LOADVECTOR_B(center);
             SDF_VU0_ADDVECTOR();
             SDF_VU0_STOREVECTOR(position);
@@ -1125,9 +1123,9 @@ void btlApplyRadialLinkageFormation(BtlLinkedCommand *command) {
         effBTLModelGetSphereCenter(participants[i]);
         SDF_VU0_LOADVECTOR_B(targetPosition);
         SDF_VU0_SUBVECTOR();
-        VU0_SET_VF10_COMPONENT(y, flatY);
+        SDF_VU0_SETVECTOR_Y(flatY);
         SDF_VU0_NORMALIZE();
-        VU0_SCALAR_OP_CLOBBER(distance, "vmulx.xyzw vf10, vf10, vf2x");
+        SDF_VU0_SCALEVECTOR_V0_CLOBBER(distance);
         SDF_VU0_LOADVECTOR_B(targetPosition);
         SDF_VU0_ADDVECTOR();
         /* The vector is complete here; Y is replaced, then the callee consumes it. */
@@ -1185,7 +1183,7 @@ void btlPlaceBothSidesInRadialFormation(ActionStateLink *link, BtlUnit *firstAct
             radius = second[slot]->bodyRadius * second[slot]->scale;
             radius += 500.0f;
             SDF_VU0_LOADVECTOR(secondDirection);
-            VU0_SCALE_VF(vf10, radius);
+            SDF_VU0_SCALEVECTOR_BITS(radius);
             SDF_VU0_LOADVECTOR_B(effZeroVector);
             SDF_VU0_ADDVECTOR();
             SDF_VU0_STOREVECTOR_NOMEM(position);
@@ -1200,9 +1198,9 @@ void btlPlaceBothSidesInRadialFormation(ActionStateLink *link, BtlUnit *firstAct
             radius += 100.0f;
             SDF_VU0_LOADVECTOR(firstDirection);
             SDF_VU0_COPYVECTOR_A_TO_B();
-            VU0_SCALE_VF(vf10, radius);
-            VU0_SCALE_VF(vf11, 200.0f);
-            VU0_ADD(vf11, vf11, vf10);
+            SDF_VU0_SCALEVECTOR_BITS(radius);
+            SDF_VU0_SCALEVECTOR_B_BITS(200.0f);
+            SDF_VU0_ADDVECTOR_B_A();
             SDF_VU0_STOREVECTOR_B_NOMEM(target);
             SDF_VU0_LOADVECTOR_B(effZeroVector);
             SDF_VU0_ADDVECTOR();

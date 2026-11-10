@@ -1,4 +1,13 @@
-#include "sdf_vu0.h"
+#include "ps2asm.h"
+
+#define VEC3_SPLAT(v, x) ((v)[0] = (x), (v)[1] = (x), (v)[2] = (x))
+
+static inline void UnpackRGBAWordFloat(u32 color, f32 unit) {
+    u32 rgba[4];
+    rgba[0] = color;
+    EE_MMI_RGBA_UNPACK(rgba, unit);
+}
+
 #include "eff.h"
 #include "eff_magatuhi_api.h"
 #include "eff_magatuhi_orbit.h"
@@ -7,8 +16,6 @@
 #include "eff_random.h"
 #include "eff_math.h"
 #include "sdf_heap_api.h"
-#include "pcp_vu0.h"
-#include "ee_mmi.h"
 
 #define EFF_MAGATUHI_VECTOR_WORD_COUNT 4
 #define EFF_MAGATUHI_MATRIX_WORD_COUNT 16
@@ -122,7 +129,7 @@ extern sdfGrOt_t *D_00355720[4];
 /* Fixed-scale form of the SDK's four-word RGBA packing scratch buffer. */
 static inline u32 packMagatuhiTrailColor(void) {
     u32 rgba[4];
-    EE_MMI_RGBA_PACK_UNIT(rgba[0], 128.0f);
+    MMI_RGBA_PACK_UNIT(rgba[0], 128.0f);
     return rgba[0];
 }
 extern const sdfTexPacket_t * sdfTexGetPacket(const sdfTexHandle_t *texture);
@@ -166,7 +173,7 @@ void effSwordTrackDrawTex(EffMagatuhiValueWork *work) {
         (u32)sdfTexGetPacket(work->texture),
         sdfTexGetPacketLength((sdfTexHandle_t *)work->texture));
     sdfDrawTagLinkRef(list, packet);
-    EE_MMI_UNIT_MATRIX(matrix);
+    SDF_VU0_STOREIDENTITY(matrix);
     historyOffset = 0;
     packet = sdfGrAllocPacketBuff(0x38);
     sdfBillBoardMakeTMPacket((u8 *)packet, matrix);
@@ -205,9 +212,9 @@ void effSwordTrackDrawTex(EffMagatuhiValueWork *work) {
                     SDF_VU0_LOADVECTOR_B(historyPositions[index]);
                     SDF_VU0_ADDVECTOR();
                     SDF_VU0_STOREVECTOR(point);
-                    eeUnpackRGBAWordFloat(slotColor, 0.0078125f);
+                    UnpackRGBAWordFloat(slotColor, 0.0078125f);
                     SDF_VU0_COPYVECTOR_A_TO_B();
-                    eeUnpackRGBAWordFloat(palette[historyIndex], 0.0078125f);
+                    UnpackRGBAWordFloat(palette[historyIndex], 0.0078125f);
                     SDF_VU0_MULVECTOR();
                     packed = packMagatuhiTrailColor();
                     colors[pendingCount] = packed;
@@ -417,7 +424,7 @@ void effMagaSmokeConvPartInit(EffMagatuhiWideFirst *work, s32 index) {
     direction[2] = random + random;
     SDF_VU0_LOADVECTOR_MEMOPS(*(u128 *)direction);
     SDF_VU0_NORMALIZE();
-    VU0_STORE_VF_TO_MEMORY(vf10, *(u128 *)direction);
+    SDF_VU0_STOREVECTOR_MEMOPS_BARRIER(*(u128 *)direction);
     particle->position[0] = radius * direction[0];
     particle->position[1] = 0.0f;
     particle->position[2] = radius * direction[2];
@@ -803,7 +810,7 @@ void effMagaP4Randomize(EffNode *callback) {
         for (sampleIndex = 0; sampleIndex < sampleSpan; sampleIndex++) {
             SDF_VU0_LOADVECTOR(startPosition);
             SDF_VU0_LOADVECTOR_B(endPosition);
-            VU0_LERP_VF10(blendFraction);
+            SDF_VU0_INTERPOLATE(blendFraction);
             SDF_VU0_STOREVECTOR(samplePosition);
             effMagaCylinderSetPartPos(valueWork, particleIndex, samplePosition);
             blendFraction += blendStep;
@@ -878,7 +885,7 @@ EffMagatuhiRingWork *effMagaCylinderCreate(EffMagatuhiRingParams *src) {
     work->particles = particle;
     work->tintColor = EFF_MAGATUHI_NEUTRAL_COLOR;
     work->allocationHandle = allocation;
-    EE_MMI_UNIT_MATRIX(work->matrix);
+    SDF_VU0_STOREIDENTITY(work->matrix);
     if (work->head.delaySpread <= 0) {
         work->head.delaySpread = 1;
     }
@@ -944,8 +951,8 @@ void effMagaCylinderDraw(EffMagatuhiRingWork *work) {
     fadeOut = work->head.fadeOut;
     tintColor = work->tintColor;
     valueWork = work->managedResource->valueWork;
-    PCP_COPY_VECTOR_F32(origin, work->head.origin);
-    VU0_LOAD_MATRIX(work->matrix);
+    SDF_VU0_COPYVECTOR_F32(origin, work->head.origin);
+    SDF_VU0_LOADMATRIX(work->matrix);
     for (i = 0; i < count; i++, particle++) {
         age = particle->age;
         if (age == 0) {
@@ -1029,7 +1036,7 @@ void effMagaCylinderRandomize(EffNode *callback) {
             frames = work->head.lifetimeFrames;
             particle = work->particles;
             SDF_VU0_COPYVECTOR(origin, work->head.origin);
-            VU0_LOAD_MATRIX(work->matrix);
+            SDF_VU0_LOADMATRIX(work->matrix);
             for (i = 0; i < count; i += EFF_MAGATUHI_REPLAY_GROUP_STRIDE, particle += EFF_MAGATUHI_REPLAY_GROUP_STRIDE) {
                 effMagaCylinderPartInit(work, i);
                 frameOffset = dds3GetRandA((EffRandState *)effDefaultRandomState) % frames;
@@ -1082,7 +1089,7 @@ EffMagatuhiOrbitWork *effMagaSpiralCreate(EffMagatuhiOrbitParams *src) {
     work->particles = particle;
     work->tintColor = EFF_MAGATUHI_NEUTRAL_COLOR;
     work->allocationHandle = allocation;
-    EE_MMI_UNIT_MATRIX(work->matrix);
+    SDF_VU0_STOREIDENTITY(work->matrix);
     if (work->head.delaySpread <= 0) {
         work->head.delaySpread = 1;
     }
@@ -1150,8 +1157,8 @@ void effMagaSpiralDraw(EffMagatuhiOrbitWork *work) {
     fadeOut = work->head.fadeOut;
     tintColor = work->tintColor;
     valueWork = work->managedResource->valueWork;
-    PCP_COPY_VECTOR_F32(origin, work->head.origin);
-    VU0_LOAD_MATRIX(work->matrix);
+    SDF_VU0_COPYVECTOR_F32(origin, work->head.origin);
+    SDF_VU0_LOADMATRIX(work->matrix);
     for (i = 0; i < count; i++, particle++) {
         age = particle->age;
         if (age == 0) {
@@ -1237,7 +1244,7 @@ void effMagaSpiralRandomize(EffNode *callback) {
             frames = work->head.lifetimeFrames;
             particle = work->particles;
             SDF_VU0_COPYVECTOR(origin, work->head.origin);
-            VU0_LOAD_MATRIX(work->matrix);
+            SDF_VU0_LOADMATRIX(work->matrix);
             for (i = 0; i < count; i += EFF_MAGATUHI_REPLAY_GROUP_STRIDE, particle += EFF_MAGATUHI_REPLAY_GROUP_STRIDE) {
                 effMagaSpiralPartInit(work, i);
                 frameOffset = dds3GetRandA((EffRandState *)effDefaultRandomState) % frames;
@@ -1304,7 +1311,7 @@ EffMagatuhiDriftWork *effMagaSmokeCreate(EffMagatuhiDriftParams *src) {
     work->particles = particle;
     work->tintColor = EFF_MAGATUHI_NEUTRAL_COLOR;
     work->allocationHandle = allocation;
-    EE_MMI_UNIT_MATRIX(work->matrix);
+    SDF_VU0_STOREIDENTITY(work->matrix);
     if (work->head.delaySpread <= 0) {
         work->head.delaySpread = 1;
     }
@@ -1339,7 +1346,7 @@ void effMagaSmokePartInit(EffMagatuhiDriftWork *work, s32 index) {
     direction[2] = random + random;
     SDF_VU0_LOADVECTOR_MEMOPS(*(u128 *)direction);
     SDF_VU0_NORMALIZE();
-    VU0_STORE_VF_TO_MEMORY(vf10, *(u128 *)direction);
+    SDF_VU0_STOREVECTOR_MEMOPS_BARRIER(*(u128 *)direction);
     particle->position[0] = radius * direction[0];
     particle->position[1] = 0.0f;
     particle->position[2] = radius * direction[2];
@@ -1392,8 +1399,8 @@ void effMagaSmokeDraw(EffMagatuhiDriftWork *work) {
     fadeIn = work->head.fadeIn;
     fadeOut = work->head.fadeOut;
     valueWork = work->managedResource->valueWork;
-    PCP_COPY_VECTOR_F32(origin, work->head.origin);
-    VU0_LOAD_MATRIX(work->matrix);
+    SDF_VU0_COPYVECTOR_F32(origin, work->head.origin);
+    SDF_VU0_LOADMATRIX(work->matrix);
     for (i = 0; i < count; i++, particle++) {
         age = particle->age;
         if (age == 0) {
@@ -1478,7 +1485,7 @@ void effMagaSmokeRandomize(EffNode *callback) {
             frames = work->head.lifetimeFrames;
             particle = work->particles;
             SDF_VU0_COPYVECTOR(origin, work->head.origin);
-            VU0_LOAD_MATRIX(work->matrix);
+            SDF_VU0_LOADMATRIX(work->matrix);
             for (i = 0; i < count; i += EFF_MAGATUHI_REPLAY_GROUP_STRIDE, particle += EFF_MAGATUHI_REPLAY_GROUP_STRIDE) {
                 effMagaSmokePartInit(work, i);
                 frameOffset = dds3GetRandA((EffRandState *)effDefaultRandomState) % frames;

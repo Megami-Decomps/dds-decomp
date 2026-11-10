@@ -17,7 +17,7 @@
 #include "fld_camera_model_motion_request.h"
 #include "fld_elv_camera_scene_api.h"
 #include "fld_placement_batch_mode.h"
-#include "sdf_vu0.h"
+#include "ps2asm.h"
 #include "sdf_resource_list_release_api.h"
 #include "dds3_background_fade_api.h"
 #include "fld_movement_hold_state_api.h"
@@ -409,7 +409,6 @@ void fldMakeResouceBasicFL1(FldSpawnBatch *batch, u32 batchCount) {
 #include "sdf_pac_work.h"
 
 #include "fpu.h"
-#include "pcp_vu0.h"
 #include "sdf.h"
 #include "sdf_sif_command.h"
 #include "evt_unit.h"
@@ -1793,7 +1792,6 @@ const struct sdfMemHandle_t *fldLoadAreaRoomResources(const char *resourceName) 
 #include "evt_unit.h"
 #include "evt_unit_color_transition.h"
 #include "fpu.h"
-#include "pcp_vu0.h"
 #include "sdf.h"
 #include "sdf_sif_command.h"
 #include "mdl.h"
@@ -2286,7 +2284,7 @@ void fldPoint3To2(f32 *dstX, f32 *dstY, f32 x, f32 y, f32 z) {
     f32 vec[4] = { x, y, z, 1.0f };
     f32 result[4];
 
-    VU0_LOAD_MATRIX_MEMORY(sdfViewMatrix);
+    SDF_VU0_LOADMATRIX_BARRIER(sdfViewMatrix);
     MultMatrixRev((const struct Matrix4 *)sdfProjectionMatrix);
     SDF_VU0_COPYMATRIX_A_TO_B();
     SDF_VU0_LOADVECTOR_BARRIER(vec);
@@ -2305,7 +2303,7 @@ void fldPoint3To2H(f32 *dstX, f32 *dstY, f32 x, f32 y, f32 z) {
     f32 vec[4] = { x, y, z, 1.0f };
     f32 result[4];
 
-    VU0_LOAD_MATRIX_MEMORY(D_00384790);
+    SDF_VU0_LOADMATRIX_BARRIER(D_00384790);
     MultMatrixRev((const struct Matrix4 *)D_0037F9B0);
     SDF_VU0_COPYMATRIX_A_TO_B();
     SDF_VU0_LOADVECTOR_BARRIER(vec);
@@ -2322,13 +2320,13 @@ void fldPoint3To2H(f32 *dstX, f32 *dstY, f32 x, f32 y, f32 z) {
 
 void fldPrepareProjectionMatrix(void) {
     u8 *matrix;
-    VU0_LOAD_MATRIX_MEMORY(sdfViewMatrix);
+    SDF_VU0_LOADMATRIX_BARRIER(sdfViewMatrix);
     matrix = sdfProjectionMatrix;
     MultMatrixRev((const struct Matrix4 *)matrix);
     SDF_VU0_COPYMATRIX_A_TO_B();
     matrix += 0x40;
     SDF_VU0_LOADVECTOR_B_BARRIER(matrix);
-    VU0_LOAD_VF_MEMORY(vf12, D_0037F660);
+    SDF_VU0_LOADVECTOR_C_BARRIER(D_0037F660);
 }
 
 void fldProjectPointWithPreparedMatrix(f32 *dstX, f32 *dstY, f32 x, f32 y, f32 z) {
@@ -2820,7 +2818,7 @@ void drawSprite3D(sdfTexHandle_t *texture, FldMarkerPacket *modelData) {
     sdf3DMakeDirectRefPacket(header, (u32)sdfTexGetPacket(texture), sdfTexGetPacketLength(texture));
     sdfDrawTagLinkRef(command, (u32)header);
     SetRotateMatrixZ(modelData->scale);
-    VU0_STORE_MATRIX(mat);
+    SDF_VU0_STOREMATRIX(mat);
     packet = (u8 *)sdfGrAllocPacketBuff(0x38);
     sdfBillBoardMakeTMPacket(packet, mat);
     sdfDrawTagLink(command, (u32)packet);
@@ -3244,7 +3242,7 @@ void fldDbgPrint3D(f32 x, f32 y, f32 z, s32 drawValue) {
     f32 screenX;
     f32 screenY;
 
-    VU0_LOAD_MATRIX(sdfViewMatrix);
+    SDF_VU0_LOADMATRIX(sdfViewMatrix);
     InversMatrix();
     fldPoint3To2(&screenX, &screenY, x, y, z);
     if (screenX < -4000.0f || screenX > 4000.0f ||
@@ -3720,8 +3718,8 @@ void fldInitializeCameraViewFromPlayer(void) {
     rowDistance = fldCameraFollowRows[area->cameraFollowRowIndex].dist;
     positionZ = area->z;
     farPoint.f[2] = positionZ + trigResult * rowDistance;
-    PCP_COPY_VECTOR_UNCLOBBERED(fldLookAtNearPoint, &nearPoint);
-    PCP_COPY_VECTOR_UNCLOBBERED(fldCamTarget, &farPoint);
+    SDF_VU0_COPYVECTOR_NOMEM(fldLookAtNearPoint, &nearPoint);
+    SDF_VU0_COPYVECTOR_NOMEM(fldCamTarget, &farPoint);
 
     area->cameraSupportHeightOffset = 0.0f;
     area->overrideSupportRecordIndex = -1;
@@ -3781,7 +3779,7 @@ void func_0012F400(void) {
     dds3GetRotPoseSet((dds3Basic_t *)fldPlayerObject);
     fldGlobalBase.angle = EulerAngleAxisY() * 180.0f / 3.14f;
     dds3GetPosPoseSet((dds3Basic_t *)fldPlayerObject);
-    VU0_STORE_VF_UNCLOBBERED(vf10, &playerPosition);
+    SDF_VU0_STOREVECTOR_NOMEM(&playerPosition);
     camera = &fldGlobalBase;
     camera->previousX = camera->x;
     camera->previousY = camera->y;
@@ -3798,8 +3796,8 @@ void func_0012F400(void) {
     farPoint.f[1] = camera->y + fldCameraFollowRows[camera->cameraFollowRowIndex].targetY;
     farPoint.f[2] = camera->z + sdfCos(camera->negatedAngle * 3.14f / 180.0f) *
                                     fldCameraFollowRows[camera->cameraFollowRowIndex].dist;
-    PCP_COPY_VECTOR_UNCLOBBERED(fldLookAtNearPoint, nearPoint.f);
-    PCP_COPY_VECTOR_UNCLOBBERED(fldCamTarget, farPoint.f);
+    SDF_VU0_COPYVECTOR_NOMEM(fldLookAtNearPoint, nearPoint.f);
+    SDF_VU0_COPYVECTOR_NOMEM(fldCamTarget, farPoint.f);
 
     previousHeight = camera->unk60;
     heightOffset = previousHeight + (camera->cameraSupportHeightOffset - previousHeight) * 0.0625f;
@@ -3808,8 +3806,8 @@ void func_0012F400(void) {
     referencePoint.f[0] = camera->x;
     referencePoint.f[1] = camera->y + fldCameraFollowRows[camera->cameraFollowRowIndex].y;
     referencePoint.f[2] = camera->z;
-    PCP_COPY_VECTOR_UNCLOBBERED(referenceCopy.f, referencePoint.f);
-    PCP_COPY_VECTOR_UNCLOBBERED(farCopy.f, farPoint.f);
+    SDF_VU0_COPYVECTOR_NOMEM(referenceCopy.f, referencePoint.f);
+    SDF_VU0_COPYVECTOR_NOMEM(farCopy.f, farPoint.f);
     fldHitChkCamera(farCopy.f, referenceCopy.f, projectedPoint.f);
 
     ratio = D_004360A0 / D_004360A8;
@@ -3831,8 +3829,8 @@ void func_0012F400(void) {
     farPoint.f[2] = referencePoint.f[2] - backZ / distance * scale;
     farPoint.f[0] = referencePoint.f[0] - backX / distance * scale;
     dds3SetPosPoseSet(node, &farPoint.q);
-    PCP_COPY_VECTOR_UNCLOBBERED(fldLookAtNearPoint, nearPoint.f);
-    PCP_COPY_VECTOR_UNCLOBBERED(fldCamTarget, farPoint.f);
+    SDF_VU0_COPYVECTOR_NOMEM(fldLookAtNearPoint, nearPoint.f);
+    SDF_VU0_COPYVECTOR_NOMEM(fldCamTarget, farPoint.f);
     node = *world;
     node->ops->update(node);
     fldUpdateLookAtSegmentDistance();
@@ -4152,7 +4150,6 @@ void fldUpdateCameraViewFromPlayer(void) {
 #include "evt_unit.h"
 #include "evt_unit_color_transition.h"
 #include "fpu.h"
-#include "pcp_vu0.h"
 #include "sdf.h"
 #include "sdf_sif_command.h"
 #include "mdl.h"
@@ -4478,7 +4475,7 @@ void fldUpdateCameraProximity(void) {
     if (slot >= 0) {
         model = *modelRef;
         matrices = ((FldModelMatrices *)model)->rows;
-        VU0_LOAD_MATRIX(matrices[slot] + 0xC0);
+        SDF_VU0_LOADMATRIX(matrices[slot] + 0xC0);
         SDF_VU0_LOADVECTOR(vec);
         SDF_VU0_APPLYMATRIX();
         SDF_VU0_STOREVECTOR(vec);
@@ -4879,7 +4876,7 @@ void fldUpdateCameraTarget(void) {
     }
 }
 
-extern const PcpVectorCopyF32 D_00413280;
+extern const ps2asm_float_vector4_t D_00413280;
 extern f32 fldAngleDifference(f32 fromAngle, f32 toAngle);
 extern void FromRotation(f32 angle);
 extern void fldRefreshAreaStateFromPosition(f32 *);
@@ -4891,7 +4888,7 @@ void fldUpdateModeOneCameraPose(void) {
     f32 position[4] __attribute__((aligned(16)));
     f32 smoothed[4] __attribute__((aligned(16)));
     f32 quaternion[4] __attribute__((aligned(16)));
-    PcpVectorCopyF32 axis;
+    ps2asm_float_vector4_t axis;
     f32 current[3];
     f32 difference;
     f32 distance;
@@ -4942,7 +4939,7 @@ void fldUpdateModeOneCameraPose(void) {
     dds3GetRotPoseSet(fldPlayerObject);
     SDF_VU0_STOREVECTOR_NOMEM(quaternion);
     EulerAngleAxisY();
-    VU0_LOAD_MATRIX(sdfViewMatrix);
+    SDF_VU0_LOADMATRIX(sdfViewMatrix);
     InversMatrix();
     motion = 23;
     difference = fldAngleDifference(fldGlobalBase.angle, fldGlobalBase.modeOneCameraHeadingTarget);
@@ -4975,7 +4972,7 @@ void fldUpdateModeOneCameraPose(void) {
         }
         dds3GetPosPoseSet(fldPlayerObject);
         SDF_VU0_STOREVECTOR_NOMEM(position);
-        PCP_COPY_VECTOR_F32(smoothed, fldPlayerObject->poseset->smoothedPosition);
+        SDF_VU0_COPYVECTOR_F32(smoothed, fldPlayerObject->poseset->smoothedPosition);
         if (ffabsf(smoothed[0] - position[0]) < 1.0f) {
             fldPlayerObject->poseset->smoothedPosition[0] = position[0];
         } else {
@@ -5189,7 +5186,7 @@ s32 fldUpdateFieldPlayerMovement(void) {
     f32 position[4] __attribute__((aligned(16)));
     f32 smoothed[4] __attribute__((aligned(16)));
     f32 quaternion[4] __attribute__((aligned(16)));
-    PcpVectorCopyF32 axis = {{0.0f, 1.0f, 0.0f, 1.0f}};
+    ps2asm_float_vector4_t axis = {{0.0f, 1.0f, 0.0f, 1.0f}};
     f32 directionAngles[16] = {
         0.0f, -22.5f, -45.0f, -67.5f, -90.0f, -112.5f, -135.0f, -157.5f,
         180.0f, 157.5f, 135.0f, 112.5f, 90.0f, 67.5f, 45.0f, 22.5f
@@ -5341,7 +5338,7 @@ s32 fldUpdateFieldPlayerMovement(void) {
     }
     dds3GetRotPoseSet(fldPlayerObject);
     SDF_VU0_STOREVECTOR_NOMEM(quaternion);
-    VU0_LOAD_MATRIX(sdfViewMatrix);
+    SDF_VU0_LOADMATRIX(sdfViewMatrix);
     InversMatrix();
     dds3OnPoseSetFlag(fldPlayerObject->poseset,
                       OBJECT_TRANSFORM_FLAG_USE_SMOOTHED_POSITION);
@@ -5466,7 +5463,7 @@ s32 fldUpdateFieldPlayerMovement(void) {
         }
         dds3GetPosPoseSet(fldPlayerObject);
         SDF_VU0_STOREVECTOR_NOMEM(position);
-        PCP_COPY_VECTOR_F32(smoothed, fldPlayerObject->poseset->smoothedPosition);
+        SDF_VU0_COPYVECTOR_F32(smoothed, fldPlayerObject->poseset->smoothedPosition);
         if (ffabsf(smoothed[0] - position[0]) < 1.0f) {
             fldPlayerObject->poseset->smoothedPosition[0] = position[0];
         } else {
@@ -5899,7 +5896,6 @@ void fldApplyPendingCameraHeading(void) {
 #include "eff_transform.h"
 #include "dds3obj.h"
 #include "fld_area_work.h"
-#include "pcp_vu0.h"
 #include "fpu.h"
 
 /* As field/fldFileResolver declares them. */
@@ -5927,7 +5923,7 @@ void fldUpdateCameraHeadingTransition(void) {
         u128 q;
         f32 f[4];
     } quaternion;
-    PcpVectorCopyF32 axis = {{0.0f, 1.0f, 0.0f, 1.0f}};
+    ps2asm_float_vector4_t axis = {{0.0f, 1.0f, 0.0f, 1.0f}};
     f32 difference;
     f32 step;
     u32 player;
@@ -5956,9 +5952,9 @@ void fldUpdateCameraHeadingTransition(void) {
             difference = fldGlobalBase.angle + step;
         }
         fldGlobalBase.angle = difference;
-        VU0_LOAD_VF(vf10, axis.components);
+        SDF_VU0_LOADVECTOR(axis.components);
         FromRotation(fldGlobalBase.angle * 3.14f / 180.0f);
-        VU0_STORE_VF_UNCLOBBERED(vf10, quaternion.f);
+        SDF_VU0_STOREVECTOR_NOMEM(quaternion.f);
         dds3SetRotPoseSet((dds3Basic_t *)fldPlayerObject, &quaternion.q);
     } else {
         f32 angle;
@@ -5970,7 +5966,7 @@ void fldUpdateCameraHeadingTransition(void) {
     }
 
     dds3GetPosPoseSet((dds3Basic_t *)fldPlayerObject);
-    VU0_STORE_VF(vf10, position);
+    SDF_VU0_STOREVECTOR(position);
     fldGlobalBase.previousX = fldGlobalBase.x;
     fldGlobalBase.previousY = fldGlobalBase.y;
     fldGlobalBase.previousZ = fldGlobalBase.z;
@@ -5989,7 +5985,7 @@ void fldUpdateCameraHeadingTransition(void) {
         SDF_VU0_COPYVECTOR(((dds3Basic_t *)player)->poseset->smoothedPosition, ((dds3Basic_t *)player)->poseset->pos);
     } else {
         fldMarkPrimaryObjectByPeerPresence();
-        PCP_COPY_VECTOR_F32(smoothed, ((dds3Basic_t *)fldPlayerObject)->poseset->smoothedPosition);
+        SDF_VU0_COPYVECTOR_F32(smoothed, ((dds3Basic_t *)fldPlayerObject)->poseset->smoothedPosition);
         if (ffabsf(smoothed[0] - position[0]) < 1.0f) {
             ((dds3Basic_t *)fldPlayerObject)->poseset->smoothedPosition[0] = position[0];
         } else {

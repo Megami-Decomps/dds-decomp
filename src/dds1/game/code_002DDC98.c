@@ -1,6 +1,6 @@
 #include "sdf_gs_header.h"
 #include "common.h"
-#include "sdf_vu0.h"
+#include "ps2asm.h"
 #include "sdf_vu_color_transform.h"
 #include "kernel.h"
 #include "sdf_asset_packets.h"
@@ -15,11 +15,9 @@
 #include "sdf.h"
 #include "sdf_draw.h"
 #include "sdf_projection.h"
-#include "pcp_vu0.h"
 #include "sdf_vu_transform_api.h"
 #include "sdf_vu_matrix.h"
 #include "sdf_vu_matrix_multiply_api.h"
-#include "ee_mmi.h"
 #include "sdf_texture_file.h"
 #include "sdfCorePacketPointBuff_tag.h"
 #include "sdfCorePacketCb_t.h"
@@ -38,13 +36,13 @@ extern s32 corePktPointBuff;
 /* VU0 macro math via inline asm (plain C cannot emit COP2 macro insns) */
 /* vu0 routine: vf28-vf31 = vf20-vf23 * vf28-vf31 (4x4 product) */
 void MultMatrixNoArg_C(void) {
-        VU0_MATRIX4_MUL_PRIMARY_LEFT();
+        VU0_MATRIX4_MUL_BANK_C_RIGHT_BARRIER();
 }
 
 /* VU0 macro math via inline asm (plain C cannot emit COP2 macro insns) */
 /* vu0 routine: vf28-vf31 = vf28-vf31 * vf20-vf23 (4x4 product) */
 void MultMatrixRevNoArg_C(void) {
-        VU0_MATRIX4_MUL_SCRATCH_LEFT();
+        VU0_MATRIX4_MUL_BANK_C_LEFT_BARRIER();
 }
 
 /* VU0 macro math via inline asm (plain C cannot emit COP2 macro insns) */
@@ -175,8 +173,7 @@ void corePktMakeFaceDivParm(SdfVuColorTransform *result,
     scaledY = y * scale;
     result->scale = scale;
     result->scaledY = scaledY;
-    VU0_BUILD_PACKED_COLOR_TRANSFORM(result, reference, packedColor,
-                                     firstColor, secondColor, blend);
+    VU0_BUILD_PACKED_COLOR_TRANSFORM(result, reference, packedColor, firstColor, secondColor, blend);
 }
 
 void corePktSetFaceDivParm(SdfVuColorTransform *out, sdfMatPacket_t *work, u32 packedColor, f32 deltaX, f32 deltaY) {
