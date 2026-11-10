@@ -10,7 +10,7 @@ typedef s32 MdlPartInfoPacketResult;
 #define MDL_PART_INFO_PACKET_MATCH ((MdlPartInfoPacketResult)1)
 
 /* Read the number of attached resource parts from a borrowed PIB record. */
-u16 mdlPibGetPartCount(const MdlRecord *record);
+u16 mdlPibGetEffectCount(const MdlRecord *record);
 
 /* Test a borrowed PAC packet header for the grouped part-info command/tag. */
 MdlPartInfoPacketResult mdlIsPartInfoPacket(const PacWork *packetWork);

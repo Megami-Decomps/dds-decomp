@@ -316,7 +316,7 @@ s32 mdlPibCheckItemType(MdlRecord *record, s32 kind) {
     return record->kind == kind;
 }
 
-u16 mdlPibGetPartCount(const MdlRecord *record) {
+u16 mdlPibGetEffectCount(const MdlRecord *record) {
     return record->parameter.part.partIndex;
 }
 

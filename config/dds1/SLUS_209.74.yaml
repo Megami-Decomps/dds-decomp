@@ -398,6 +398,7 @@ segments:
       - [0x2A7580, .rodata, game/code_0020EA40]
       - [0x2A76F0, .rodata, game/code_0020F8E0]
       - [0x2A7700, .rodata, game/code_0020FC48]
+      - [0x2ACA68, .rodata, model/mdlManager]
       - [0x2ACA80, .rodata, model/mdlEffect]
       - [0x2ACFB8, .rodata, game/code_0021F4B8]
       - [0x2AD008, .rodata, event/evtStage]
