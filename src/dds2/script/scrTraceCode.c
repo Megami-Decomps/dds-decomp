@@ -84,7 +84,7 @@ u32 CodeFunc_PushI(scrProcessWork_s *script) {
 
     operandPc = script->pc + 1;
     script->pc = operandPc;
-    PushInt(script, script->instructions[operandPc].iOperand);
+    PushInt(script, script->instructions[operandPc].i);
     script->pc = script->pc + 1;
     return 1;
 }
@@ -93,44 +93,44 @@ extern ScrOpcodeHandlerResult (*codefunc[])(scrProcessWork_s *scr);
 
 extern const ScrCommand D_00411408[];
 ScrOpcodeHandlerResult CodeFunc_PushIS(scrProcessWork_s *scr) {
-    PushInt(scr, scr->instructions[scr->pc].parts.sOperand);
+    PushInt(scr, scr->instructions[scr->pc].s.s1);
     scr->pc++;
     return SCR_OPCODE_HANDLER_RESULT_CONTINUE;
 }
 
 ScrOpcodeHandlerResult CodeFunc_PushF(scrProcessWork_s *scr) {
     scr->pc++;
-    PushFloat(scr, scr->instructions[scr->pc].fOperand);
+    PushFloat(scr, scr->instructions[scr->pc].f);
     scr->pc++;
     return SCR_OPCODE_HANDLER_RESULT_CONTINUE;
 }
 
 ScrOpcodeHandlerResult CodeFunc_PushIX(scrProcessWork_s *scr) {
-    PushInt(scr, DDS3_GBWK->script.ints[(ScrGlobalIntegerIndex)scr->instructions[scr->pc].parts.sOperand]);
+    PushInt(scr, DDS3_GBWK->script.ints[(ScrGlobalIntegerIndex)scr->instructions[scr->pc].s.s1]);
     scr->pc++;
     return SCR_OPCODE_HANDLER_RESULT_CONTINUE;
 }
 
 ScrOpcodeHandlerResult CodeFunc_PushFX(scrProcessWork_s *scr) {
-    PushFloat(scr, DDS3_GBWK->script.floats[(ScrGlobalFloatIndex)scr->instructions[scr->pc].parts.sOperand]);
+    PushFloat(scr, DDS3_GBWK->script.floats[(ScrGlobalFloatIndex)scr->instructions[scr->pc].s.s1]);
     scr->pc++;
     return SCR_OPCODE_HANDLER_RESULT_CONTINUE;
 }
 
 ScrOpcodeHandlerResult CodeFunc_PushLIX(scrProcessWork_s *scr) {
-    PushInt(scr, scr->localInt[scr->instructions[scr->pc].localInteger.localIndex]);
+    PushInt(scr, scr->localInt[scr->instructions[scr->pc].s.s1]);
     scr->pc++;
     return SCR_OPCODE_HANDLER_RESULT_CONTINUE;
 }
 
 ScrOpcodeHandlerResult CodeFunc_PushLFX(scrProcessWork_s *scr) {
-    PushFloat(scr, scr->localFloat[scr->instructions[scr->pc].localFloat.localIndex]);
+    PushFloat(scr, scr->localFloat[scr->instructions[scr->pc].s.s1]);
     scr->pc++;
     return SCR_OPCODE_HANDLER_RESULT_CONTINUE;
 }
 
 ScrOpcodeHandlerResult CodeFunc_PushSTR(scrProcessWork_s *scr) {
-    PushStr(scr, scr->strings + scr->instructions[scr->pc].parts.sOperand);
+    PushStr(scr, scr->strings + scr->instructions[scr->pc].s.s1);
     scr->pc++;
     return SCR_OPCODE_HANDLER_RESULT_CONTINUE;
 }
@@ -145,7 +145,7 @@ ScrOpcodeHandlerResult CodeFunc_PushReg(scrProcessWork_s *scr) {
 }
 
 ScrOpcodeHandlerResult CodeFunc_PopIX(scrProcessWork_s *scr) {
-    DDS3_GBWK->script.ints[(ScrGlobalIntegerIndex)scr->instructions[scr->pc].parts.sOperand] = PopInt(scr);
+    DDS3_GBWK->script.ints[(ScrGlobalIntegerIndex)scr->instructions[scr->pc].s.s1] = PopInt(scr);
     scr->pc++;
     return SCR_OPCODE_HANDLER_RESULT_CONTINUE;
 }
@@ -154,7 +154,7 @@ ScrOpcodeHandlerResult CodeFunc_PopFX(scrProcessWork_s *scr) {
     f32 floatValue;
 
     floatValue = PopFloat(scr);
-    DDS3_GBWK->script.floats[(ScrGlobalFloatIndex)scr->instructions[scr->pc].parts.sOperand] = floatValue;
+    DDS3_GBWK->script.floats[(ScrGlobalFloatIndex)scr->instructions[scr->pc].s.s1] = floatValue;
     scr->pc++;
     return SCR_OPCODE_HANDLER_RESULT_CONTINUE;
 }
@@ -163,13 +163,13 @@ ScrOpcodeHandlerResult CodeFunc_PopLIX(scrProcessWork_s *scr) {
     ScrVmInteger integerValue;
 
     integerValue = PopInt(scr);
-    scr->localInt[scr->instructions[scr->pc].localInteger.localIndex] = integerValue;
+    scr->localInt[scr->instructions[scr->pc].s.s1] = integerValue;
     scr->pc++;
     return SCR_OPCODE_HANDLER_RESULT_CONTINUE;
 }
 
 ScrOpcodeHandlerResult CodeFunc_PopLFX(scrProcessWork_s *scr) {
-    scr->localFloat[scr->instructions[scr->pc].localFloat.localIndex] = PopFloat(scr);
+    scr->localFloat[scr->instructions[scr->pc].s.s1] = PopFloat(scr);
     scr->pc++;
     return SCR_OPCODE_HANDLER_RESULT_CONTINUE;
 }
@@ -182,7 +182,7 @@ ScrOpcodeHandlerResult CodeFunc_Proc(scrProcessWork_s *scr) {
 /* Yield without consuming operands until the command completes. */
 ScrOpcodeHandlerResult CodeFunc_Comm(scrProcessWork_s *scr) {
     s32 programCounter = scr->pc;
-    ScrCommandIndex commandIndex = scr->instructions[programCounter].command.commandIndex;
+    ScrCommandIndex commandIndex = scr->instructions[programCounter].s.s1;
     ScrCommandResult commandResult;
 
     nowpwork = scr;
@@ -210,14 +210,14 @@ ScrOpcodeHandlerResult CodeFunc_End(scrProcessWork_s *scr)
 }
 
 ScrOpcodeHandlerResult CodeFunc_Jump(scrProcessWork_s *scr) {
-    scr->pc = scr->procedures[scr->instructions[scr->pc].procedureIndex.procedureIndex].addr;
+    scr->pc = scr->procedures[scr->instructions[scr->pc].s.s1].addr;
     return SCR_OPCODE_HANDLER_RESULT_CONTINUE;
 }
 
 /* Save the return PC before transferring control to a procedure. */
 ScrOpcodeHandlerResult CodeFunc_Call(scrProcessWork_s *scr) {
     PushRet(scr, scr->pc);
-    scr->pc = scr->procedures[scr->instructions[scr->pc].procedureIndex.procedureIndex].addr;
+    scr->pc = scr->procedures[scr->instructions[scr->pc].s.s1].addr;
     return SCR_OPCODE_HANDLER_RESULT_CONTINUE;
 }
 
@@ -227,7 +227,7 @@ ScrOpcodeHandlerResult CodeFunc_Run(scrProcessWork_s *scr) {
 }
 
 ScrOpcodeHandlerResult CodeFunc_Goto(scrProcessWork_s *scr) {
-    scr->pc = scr->labels[scr->instructions[scr->pc].labelIndex.labelIndex].addr;
+    scr->pc = scr->labels[scr->instructions[scr->pc].s.s1].addr;
     return SCR_OPCODE_HANDLER_RESULT_CONTINUE;
 }
 
@@ -548,7 +548,7 @@ ScrOpcodeHandlerResult CodeFunc_IF(scrProcessWork_s *scr)
     if (conditionIsTruthy != 0)
         scr->pc++;
     else
-        scr->pc = scr->labels[scr->instructions[scr->pc].labelIndex.labelIndex].addr;
+        scr->pc = scr->labels[scr->instructions[scr->pc].s.s1].addr;
     return SCR_OPCODE_HANDLER_RESULT_CONTINUE;
 }
 
@@ -558,7 +558,7 @@ ScrTraceResult scrTraceCode(scrProcessWork_s *scr) {
     ScrOpcodeHandlerResult handlerResult;
 
     while (1) {
-        handlerResult = codefunc[scr->instructions[scr->pc].parts.opCode](scr);
+        handlerResult = codefunc[scr->instructions[scr->pc].s.s0](scr);
         if (handlerResult == SCR_OPCODE_HANDLER_RESULT_FINISHED) {
             scr->cmdTimer = 0;
             return SCR_TRACE_RESULT_FINISHED;

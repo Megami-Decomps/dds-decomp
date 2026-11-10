@@ -32,47 +32,6 @@ typedef s32 ScrStackValueIndex;
 #define SCR_STACK_STORAGE_SLOT_COUNT 28
 #define SCR_STACK_RETURN_VALUE_SLOT 27
 
-/* Script instruction handler table indices (35 entries in codefunc[]). */
-typedef s16 ScrOpcode;
-enum {
-    SCR_OPCODE_PUSH_INTEGER = 0,
-    SCR_OPCODE_PUSH_FLOAT = 1,
-    SCR_OPCODE_PUSH_GLOBAL_INTEGER = 2,
-    SCR_OPCODE_PUSH_GLOBAL_FLOAT = 3,
-    SCR_OPCODE_PUSH_RETURN_VALUE = 4,
-    SCR_OPCODE_POP_GLOBAL_INTEGER = 5,
-    SCR_OPCODE_POP_GLOBAL_FLOAT = 6,
-    SCR_OPCODE_PROCEDURE = 7,
-    SCR_OPCODE_COMMAND = 8,
-    SCR_OPCODE_END = 9,
-    SCR_OPCODE_JUMP_PROCEDURE = 10,
-    SCR_OPCODE_CALL_PROCEDURE = 11,
-    SCR_OPCODE_RUN = 12,
-    SCR_OPCODE_GOTO_LABEL = 13,
-    SCR_OPCODE_ADD = 14,
-    SCR_OPCODE_SUBTRACT = 15,
-    SCR_OPCODE_MULTIPLY = 16,
-    SCR_OPCODE_DIVIDE = 17,
-    SCR_OPCODE_NEGATE = 18,
-    SCR_OPCODE_NOT = 19,
-    SCR_OPCODE_LOGICAL_OR = 20,
-    SCR_OPCODE_LOGICAL_AND = 21,
-    SCR_OPCODE_EQUAL = 22,
-    SCR_OPCODE_NOT_EQUAL = 23,
-    SCR_OPCODE_LESS_THAN = 24,
-    SCR_OPCODE_GREATER_THAN = 25,
-    SCR_OPCODE_LESS_OR_EQUAL = 26,
-    SCR_OPCODE_GREATER_OR_EQUAL = 27,
-    SCR_OPCODE_IF = 28,
-    SCR_OPCODE_PUSH_SIGNED_SHORT = 29,
-    SCR_OPCODE_PUSH_LOCAL_INTEGER = 30,
-    SCR_OPCODE_PUSH_LOCAL_FLOAT = 31,
-    SCR_OPCODE_POP_LOCAL_INTEGER = 32,
-    SCR_OPCODE_POP_LOCAL_FLOAT = 33,
-    SCR_OPCODE_PUSH_STRING = 34,
-    SCR_OPCODE_COUNT = 35
-};
-
 /* One 4-byte script operand slot; the type tag determines whether a word is
  * a scalar, a global-register index, a return address, or a borrowed string. */
 typedef union ScrStackValue {
@@ -87,65 +46,26 @@ typedef union ScrStackValue {
 
 typedef s8 ScrStackValueType;
 
-/* SCR_OPCODE_COMMAND uses this instruction view's second halfword to select
- * a callback and parameter count from the command table. */
-typedef struct ScrCommandInstruction {
-    ScrOpcode opCode;
-    ScrCommandIndex commandIndex;
-} ScrCommandInstruction;
-
-typedef char ScrCommandInstruction_size_must_be_0x04[
-    (sizeof(ScrCommandInstruction) == 4) ? 1 : -1];
-
-/* Local-variable opcodes use the second halfword as a typed slot index. */
-typedef struct ScrLocalIntegerInstruction {
-    ScrOpcode opCode;
-    ScrLocalIntegerIndex localIndex;
-} ScrLocalIntegerInstruction;
-
-typedef struct ScrLocalFloatInstruction {
-    ScrOpcode opCode;
-    ScrLocalFloatIndex localIndex;
-} ScrLocalFloatInstruction;
-
-/* Control-flow instruction operands are signed halfword indexes into FLW0
- * procedure and label tables, distinct from the VM program counter. */
-typedef s16 ScrProcedureTableIndexOperand;
-typedef s16 ScrLabelTableIndexOperand;
-
-typedef struct ScrProcedureIndexInstruction {
-    ScrOpcode opCode;
-    ScrProcedureTableIndexOperand procedureIndex;
-} ScrProcedureIndexInstruction;
-
-typedef struct ScrLabelIndexInstruction {
-    ScrOpcode opCode;
-    ScrLabelTableIndexOperand labelIndex;
-} ScrLabelIndexInstruction;
-
-typedef char ScrLocalIntegerInstruction_size_must_be_0x04[
-    (sizeof(ScrLocalIntegerInstruction) == 4) ? 1 : -1];
-typedef char ScrLocalFloatInstruction_size_must_be_0x04[
-    (sizeof(ScrLocalFloatInstruction) == 4) ? 1 : -1];
-typedef char ScrProcedureIndexInstruction_size_must_be_0x04[
-    (sizeof(ScrProcedureIndexInstruction) == 4) ? 1 : -1];
-typedef char ScrLabelIndexInstruction_size_must_be_0x04[
-    (sizeof(ScrLabelIndexInstruction) == 4) ? 1 : -1];
-
-/* Four-byte decoded VM instruction with opcode-specific operand overlays. */
-typedef union ScrInstr {
-    struct {
-        ScrOpcode opCode;
-        s16 sOperand;
-    } parts;
-    ScrCommandInstruction command;
-    ScrLocalIntegerInstruction localInteger;
-    ScrLocalFloatInstruction localFloat;
-    ScrProcedureIndexInstruction procedureIndex;
-    ScrLabelIndexInstruction labelIndex;
-    s32 iOperand;
-    f32 fOperand;
-} ScrInstr;
+/* One bytecode word: s0 is the opcode, s1 its operand, and the other members
+ * read the same four bytes as an immediate. */
+typedef union scrCode_u scrCode_u;
+union scrCode_u
+{
+    s32 i;
+    f32 f;
+    struct
+    {
+        s16 s0;
+        s16 s1;
+    } s;
+    struct
+    {
+        u8 c0;
+        u8 c1;
+        u8 c2;
+        u8 c3;
+    } c;
+};
 
 /* FLW0 label-table entry (0x20); its instruction address is at 0x18. */
 typedef struct ScrLabel {
@@ -200,7 +120,7 @@ typedef struct scrProcessWork_s {
     const ScrSection *procedureSection; /* FLW0 descriptor; count bounds the procedure table */
     const ScrProcedure *procedures; /* FLW0 PROCEDURES section */
     const ScrLabel *labels;          /* FLW0 LABELS section */
-    const ScrInstr *instructions;
+    const scrCode_u *instructions;
     struct ItfMesSub *auxiliaryData; /* mutable: message initialization relocates it */
     const char *strings;          /* borrowed read-only view; lifetime follows source owner/caller */
     ScrProcedureIndex procedureIndex;
@@ -280,5 +200,46 @@ enum {
     SCR_STACK_TYPE_FLOAT_REFERENCE = 3,
     SCR_STACK_TYPE_RETURN_ADDRESS = 4,
     SCR_STACK_TYPE_STRING = 5
+};
+
+/* Bytecode opcodes, the index into scrTraceCode's codefunc table. */
+enum code_type
+{
+    CODE_TYPE_PUSHI = 0,
+    CODE_TYPE_PUSHF = 1,
+    CODE_TYPE_PUSHIX = 2,
+    CODE_TYPE_PUSHIY = 3,
+    CODE_TYPE_PUSHREG = 4,
+    CODE_TYPE_POPIX = 5,
+    CODE_TYPE_POPIY = 6,
+    CODE_TYPE_PROC = 7,
+    CODE_TYPE_COMM = 8,
+    CODE_TYPE_END = 9,
+    CODE_TYPE_JUMP = 10,
+    CODE_TYPE_CALL = 11,
+    CODE_TYPE_RUN = 12,
+    CODE_TYPE_GOTO = 13,
+    CODE_TYPE_ADD = 14,
+    CODE_TYPE_SUB = 15,
+    CODE_TYPE_MUL = 16,
+    CODE_TYPE_DIV = 17,
+    CODE_TYPE_MINUS = 18,
+    CODE_TYPE_NOT = 19,
+    CODE_TYPE_OR = 20,
+    CODE_TYPE_AND = 21,
+    CODE_TYPE_EQ = 22,
+    CODE_TYPE_NEQ = 23,
+    CODE_TYPE_S = 24,
+    CODE_TYPE_L = 25,
+    CODE_TYPE_SE = 26,
+    CODE_TYPE_LE = 27,
+    CODE_TYPE_IF = 28,
+    CODE_TYPE_PUSHIS = 29,
+    CODE_TYPE_PUSHLIX = 30,
+    CODE_TYPE_PUSHLFX = 31,
+    CODE_TYPE_POPLIX = 32,
+    CODE_TYPE_POPLFX = 33,
+    CODE_TYPE_PUSHSTR = 34,
+    CODE_TYPE_MAX = 35
 };
 #endif /* SCR_H */

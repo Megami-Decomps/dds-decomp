@@ -2050,7 +2050,7 @@ INCLUDE_RODATA(const s32, "game/code_00107FD8", D_0039E238);
 
 scrProcessWork_s *bfContextCreate(const BfFlw0Header *header, const ScrSection *procedureSection,
                         const ScrProcedure *procedures, const ScrLabel *labels,
-                        const ScrInstr *instructions, struct ItfMesSub *auxiliaryData,
+                        const scrCode_u *instructions, struct ItfMesSub *auxiliaryData,
                         const char *strings, ScrProcedureIndex procedureIndex) {
     scrProcessWork_s *process;
     s32 i;
@@ -2159,7 +2159,7 @@ scrProcessWork_s *fldFlowParse(const BfFlw0Header *header, ScrProcedureIndex pro
         }
     }
     return bfContextCreate(header, sections, procedures, labels,
-                           (const ScrInstr *)instructionSection,
+                           (const scrCode_u *)instructionSection,
                            auxiliaryData, strings, procedureIndex);
 }
 
