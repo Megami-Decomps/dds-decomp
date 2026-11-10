@@ -10496,7 +10496,12 @@
 0x0040BAB0	sdfQuatPoleUp	inferred	SMT3HD name via SLUS_209.11 0x00529BA0, sdf/sdfQuat SMT3 rename; was D_0040BAB0
 0x0040BAC0	sdfMathConstants	inferred	SMT3HD name via SLUS_209.11 0x00529BB0, sdf/sdfQuat SMT3 rename; was D_0040BAC0
 0x0040BAE8	sdfDefaultRandCB	inferred	SMT3HD data name via SLUS_209.11 0x00529BD8, sdfRandomize twin reference; was sdfDefaultRandCB
+0x0040BAF8	sdfSndPcmFileName	inferred	SMT3HD name via SLUS_209.11 0x00529BE8, sdf/sdfSound SMT3 rename; was D_0040BAF8
 0x0040BB18	sdfDmaTagNameTable	inferred	SMT3HD name via SLUS_209.11 0x00529C08, sdfSound data twin; was D_0040BB18
+0x0040BB78	sdfGrVifUnpackNames	inferred	SMT3HD name via SLUS_209.11 0x00529C68, sdf/sdfSound SMT3 rename; was D_0040BB78
+0x0040BB98	sdfGrVifUnpackBits	inferred	SMT3HD name via SLUS_209.11 0x00529C88, sdf/sdfSound SMT3 rename; was D_0040BB98
+0x0040BBD8	sdfGsMemTypeNames	inferred	SMT3HD name via SLUS_209.11 0x00529CC8, sdf/sdfSound SMT3 rename; was D_0040BBD8
+0x0040BBE8	sdfGsMemTypeNamesTail	inferred	SMT3HD name via SLUS_209.11 0x00529CD8, sdf/sdfSound SMT3 rename; was D_0040BBE8
 0x0040BBF8	sdfIpuAudioModeIdecBits	inferred	Per stream audio mode, IDEC's OFM bit then its DTE bit, which sdfIpuDecode sets. DDS1 twin 0x00398A48.
 0x0040BE00	mcModuleNames	inferred	SMT3HD name via SLUS_209.11 0x00529F00, sdfTmx twin; was D_0040BE00
 0x0040D9A0	ipuDefaultQuantizerMatrices	inferred	libipu: the intra and non-intra quantizer matrices sceIpuInit loads; read by its routines. DDS1 twin 0x0039A820.
@@ -10569,8 +10574,12 @@
 0x0042BAF0	fileConfigLoadTaskName	inferred	confidence=high; data D_0042BAF0; matched-C-users=2; src/dds2/game/code_002C96D0.c:2686:dds3ConfigProcessStart; src/dds2/game/code_002C96D0.c:2696:dds3ConfigProcessEnd; Configuration create/destroy pair uses this name for queued-load callback task; data-twin=D_003B29D8, supported by 2 independently paired matched functions.; retail-data-start=asm/dds2/data/game/code_002C96D0.rodata.s:499.; seed-placeholder=D_0042BAF0; current asm label and source default identifier verified; source=names_reviewed36.tsv. [names_qp10_seed.tsv]
 0x0042BB00	fileConfigOwnerTaskName	inferred	confidence=high; data D_0042BB00; matched-C-users=2; src/dds2/game/code_002C96D0.c:2686:dds3ConfigProcessStart; src/dds2/game/code_002C96D0.c:2696:dds3ConfigProcessEnd; Configuration create/destroy pair uses this name for failure-monitor task owning cleanup callback; data-twin=D_003B29E8, supported by 2 independently paired matched functions.; retail-data-start=asm/dds2/data/game/code_002C96D0.rodata.s:511.; naming-boundary: Configuration create/destroy pair uses this name for failure-monitor task owning fileConfigTaskDestroy cleanup callback.; seed-placeholder=D_0042BB00; current asm label and source default identifier verified; source=names_reviewed36.tsv. [names_qp10_seed.tsv]
 0x0042D240	fldLocalMapTaskName	inferred	confidence=high; data D_0042D240; matched-C-users=3; src/dds2/game/code_0030A128.c:246:fldStartLmapTask; src/dds2/game/code_0030A128.c:260:fldStopLmapTask; src/dds2/game/code_0030A128.c:265:fldLmapTaskExists; Local-map task start, stop and existence query use same task-name string; data-twin=D_003B3CA0, supported by 2 independently paired matched functions.; retail-data-start=asm/dds2/data/game/code_0030A128.rodata.s:10.; seed-placeholder=D_0042D240; current asm label and source default identifier verified; source=names_reviewed36.tsv. [names_qp10_seed.tsv]
-0x0042EAC8	sdfGsMemoryDumpHeader	inferred	confidence=high; data D_0042EAC8; matched-C-users=2; src/dds2/game/code_003425B0.c:393:sdfDumpGsMemory; src/dds2/game/code_003425B0.c:419:sdfDumpGsMemory2; Both forward/backward GS memory dumps print this common header string; data-twin=D_003B4DB8, supported by 2 independently paired matched functions.; retail-data-start=asm/dds2/data/game/code_003425B0.rodata.s:633.; seed-placeholder=D_0042EAC8; current asm label and source default identifier verified; source=names_reviewed36.tsv. [names_qp10_seed.tsv]
-0x0042EB40	sdfGsMemoryDumpRowFormat	inferred	confidence=high; data D_0042EB40; matched-C-users=2; src/dds2/game/code_003425B0.c:393:sdfDumpGsMemory; src/dds2/game/code_003425B0.c:419:sdfDumpGsMemory2; Both GS memory list dump directions use this row format with node/link/type/extent operands; data-twin=D_003B4E30, supported by 2 independently paired matched functions.; retail-data-start=asm/dds2/data/game/code_003425B0.rodata.s:645.; seed-placeholder=D_0042EB40; current asm label and source default identifier verified; source=names_reviewed36.tsv. [names_qp10_seed.tsv]
+0x0042E590	sdfDmaDumpStartFmt	inferred	SMT3HD name via SLUS_209.11 0x00549B50, sdf/sdfSound SMT3 rename; was D_0042E590
+0x0042E5B0	sdfDmaNotQwordFmt	inferred	SMT3HD name via SLUS_209.11 0x00549B70, sdf/sdfSound SMT3 rename; was D_0042E5B0
+0x0042E5C8	sdfDmaTagLineFmt	inferred	SMT3HD name via SLUS_209.11 0x00549B88, sdf/sdfSound SMT3 rename; was D_0042E5C8
+0x0042E5F0	sdfDmaNestOverflowMsg	inferred	SMT3HD name via SLUS_209.11 0x00549BB0, sdf/sdfSound SMT3 rename; was D_0042E5F0
+0x0042EAC8	sdfGsMemInfoTitle	inferred	SMT3HD name via SLUS_209.11 0x0054A088, sdf/sdfSound SMT3 rename; was sdfGsMemoryDumpHeader
+0x0042EB40	sdfGsMemNodeFmt	inferred	SMT3HD name via SLUS_209.11 0x0054A100, sdf/sdfSound SMT3 rename; was sdfGsMemoryDumpRowFormat
 0x0042F9D0	at3decOutputFirTaps	inferred	libat3dec: 48 taps of the final FIR that at3decFilterOutput applies; read by its routines. DDS1 twin 0x003B5C80.
 0x0042FA30	at3decQmfTaps	inferred	libat3dec: 24 half-band QMF synthesis taps, forward order; read by its routines. DDS1 twin 0x003B5CE0.
 0x0042FA60	at3decQmfTapsReversed	inferred	libat3dec: the same 24 QMF taps in reverse order; read by its routines. DDS1 twin 0x003B5D10.
@@ -10977,9 +10986,20 @@
 0x00438B88	p2sdPcmState	inferred	SMT3HD data name via SLUS_209.11 0x005519C8, 4 agreeing references; was p2sdPcmState
 0x00438B8C	p2sdPcmBusy	inferred	SMT3HD data name via SLUS_209.11 0x005519CC, 5 agreeing references; was p2sdPcmBusy
 0x00438B90	sdfSndSendCmd_cmd_id	inferred	SMT3HD name via SLUS_209.11 0x005519D0, sdfSound data twin; was D_00438B90
+0x00438B94	sdfSifRpcThreadId	inferred	SMT3HD name via SLUS_209.11 0x005519D4, sdf/sdfSound SMT3 rename; was D_00438B94
 0x00438B98	p2sdSmgBuf	inferred	SMT3HD data name via SLUS_209.11 0x005519D8, 2 agreeing references; was p2sdSmgBuf
+0x00438BE0	sdfDumpAddrFmt	inferred	SMT3HD name via SLUS_209.11 0x00551A20, sdf/sdfSound SMT3 rename; was D_00438BE0
+0x00438BE8	sdfDumpPadStr	inferred	SMT3HD name via SLUS_209.11 0x00551A28, sdf/sdfSound SMT3 rename; was D_00438BE8
+0x00438BF0	sdfDumpMidGapStr	inferred	SMT3HD name via SLUS_209.11 0x00551A30, sdf/sdfSound SMT3 rename; was D_00438BF0
+0x00438BF8	sdfDumpByteSepStr	inferred	SMT3HD name via SLUS_209.11 0x00551A38, sdf/sdfSound SMT3 rename; was D_00438BF8
+0x00438C00	sdfDumpByteFmt	inferred	SMT3HD name via SLUS_209.11 0x00551A40, sdf/sdfSound SMT3 rename; was D_00438C00
 0x00438C08	sdfDumpLineBuf	inferred	SMT3HD name via SLUS_209.11 0x00551A48, sdfSound data twin; was D_00438C08
-0x00438D00	sdfGsMemoryTypeFormat	inferred	confidence=high; data D_00438D00; matched-C-users=2; src/dds2/game/code_003425B0.c:393:sdfDumpGsMemory; src/dds2/game/code_003425B0.c:419:sdfDumpGsMemory2; Unknown GS memory block kinds are formatted with this fallback format string; data-twin=D_003BD610, supported by 2 independently paired matched functions.; retail-data-start=asm/dds2/data/game/code_003425B0.sdata.s:416.; seed-placeholder=D_00438D00; current asm label and source default identifier verified; source=names_reviewed36.tsv. [names_qp10_seed.tsv]
+0x00438C10	sdfDumpEndStr	inferred	SMT3HD name via SLUS_209.11 0x00551A50, sdf/sdfSound SMT3 rename; was D_00438C10
+0x00438C18	sdfVifMaskedName	inferred	SMT3HD name via SLUS_209.11 0x00551A58, sdf/sdfSound SMT3 rename; was D_00438C18
+0x00438C20	sdfVifXferOkName	inferred	SMT3HD name via SLUS_209.11 0x00551A60, sdf/sdfSound SMT3 rename; was D_00438C20
+0x00438CD0	sdfDumpIndentStr	inferred	SMT3HD name via SLUS_209.11 0x00551B10, sdf/sdfSound SMT3 rename; was D_00438CD0
+0x00438CD8	sdfDumpWordFmt	inferred	SMT3HD name via SLUS_209.11 0x00551B18, sdf/sdfSound SMT3 rename; was D_00438CD8
+0x00438D00	sdfGsMemTypeFmt	inferred	SMT3HD name via SLUS_209.11 0x00551B40, sdf/sdfSound SMT3 rename; was sdfGsMemoryTypeFormat
 0x00438D08	movieStreamSema	inferred	SMT3HD data name via SLUS_209.11 0x00551B48, 6 agreeing references; was movieStreamSema
 0x00438D10	sdfMovieDrawLeft	inferred	The movie sprite's left edge (GS coordinates), set by sdfSetGridScaledDrawBounds. DDS1 twin 0x003BD620.
 0x00438D14	sdfMovieDrawTop	inferred	The movie sprite's top edge (GS coordinates), set by sdfSetGridScaledDrawBounds. DDS1 twin 0x003BD624.
@@ -11162,6 +11182,7 @@
 0x004391C4	sdfDiscRequestSemaphore	inferred	high confidence; src/dds2/game/code_0033D5D0.c sdfDevSignalPendingSemaphore(): SignalSema(D_004391C4); Instruction-aligned data counterpart of DDS1 D_003BDA64 in the matched sdfDevSignalPendingSemaphore() twin. Semaphore signaled when a gated disc request is pending. [names_reviewed26.tsv]
 0x004391C8	sdfFileLengthWork	inferred	SMT3HD data name via SLUS_209.11 0x00552114, 2 agreeing references; was sdfFileLengthWork
 0x004391CC	sdfFileSeekWork	inferred	SMT3HD data name via SLUS_209.11 0x00552118, 2 agreeing references; was sdfFileSeekWork
+0x004391D0	sdfSndPcmBufferAddr	inferred	SMT3HD name via SLUS_209.11 0x00552120, sdf/sdfSound SMT3 rename; was D_004391D0
 0x004391D4	sdfFileRpcResult	inferred	SMT3HD name via SLUS_209.11 0x00552124, sdfSound data twin; was D_004391D4
 0x004391D8	sdfFileRpcCmdState	inferred	SMT3HD name via SLUS_209.11 0x00552128, sdfSound data twin; was D_004391D8
 0x004391DC	sdfFileRpcArg	inferred	SMT3HD name via SLUS_209.11 0x0055212C, sdfSound data twin; was D_004391DC
@@ -11169,6 +11190,7 @@
 0x004391E2	sdfSndCmdIndex	inferred	SMT3HD data name via SLUS_209.11 0x00552132, 2 agreeing references; was sdfSndCmdIndex
 0x004391E4	sdfSndCmdTailIndex	inferred	SMT3HD data name via SLUS_209.11 0x00552134, 3 agreeing references; was sdfSndCmdTailIndex
 0x004391E8	sdfSndCmdBuf	inferred	SMT3HD data name via SLUS_209.11 0x00552138, 2 agreeing references; was sdfSndCmdBuf
+0x004391EC	sdfSndIopWorkAddr	inferred	SMT3HD name via SLUS_209.11 0x0055213C, sdf/sdfSound SMT3 rename; was D_004391EC
 0x004391F0	sifRpcServerSema	inferred	SMT3HD data name via SLUS_209.11 0x00552140, 6 agreeing references; was sifRpcServerSema
 0x004391F4	sdfIpuDoneFrame	inferred	SMT3HD name via SLUS_209.11 0x00552144, sdf/sdfIpu SMT3 rename; was D_004391F4
 0x004391F8	sdfIpuTaskLink	inferred	SMT3HD data name via SLUS_209.11 0x00552148, 2 agreeing references; was sdfIpuTaskLink
@@ -11319,14 +11341,15 @@
 0x00476940	sdfCdImageSearchFileDirect_ent	inferred	SMT3HD name via SLUS_209.11 0x0058F780, sdfCd data twin, the record sdfCdImageSearchFileDirect returns; was D_00476940
 0x00476980	sdfCdSectorBuf	inferred	SMT3HD name via SLUS_209.11 0x0058F7C0, sdf/sdfCd SMT3 rename; was sdfDevReadSectorBuffer
 0x00477180	sdfHddPowerOffStack	inferred	SMT3HD name via SLUS_209.11 0x0058FFC0, sdf/sdfHdd SMT3 rename; was D_00477180
-0x00477980	sndCommandThreadParameters	inferred	confidence=high; Sound startup fills entry, stack, stackSize0x1000, priority0x42 and gp, then passes this0x30 SdfKernelThreadParam to CreateThread. Opaque descriptor bytes stay untouched. Same role in DDS1 at 0x003FB000. No source-owned import or native ASM root/interior reference. [PurC5 readability data b7; matched-C/native-twin evidence; identifier-only]
-0x004779B0	sndCachedListenerState	inferred	confidence=high; p2sdSetStandPos compares all six scaled integer values, sends command0x160 on change and copies the local state into this cache. Existing opaque two-word prefix and32-byte copy remain. Same role in DDS1 at 0x003FB030. No source-owned import or native ASM root/interior reference. [PurC5 readability data b7; matched-C/native-twin evidence; identifier-only]
-0x00477A00	sndCommandRing	inferred	confidence=high; Producer and worker index this32-entry SndRingPacket bank; native entry/header owner is0x80 bytes. Existing bounds, payload copies and length packing remain unchanged. Same role in DDS1 at 0x003FB080. No source-owned import or native ASM root/interior reference. [PurC5 readability data b7; matched-C/native-twin evidence; identifier-only]
-0x00478A00	sndCommandThreadStack	inferred	confidence=high; The same native CreateThread descriptor assigns this unsized byte array as the command worker stack and stackSize0x1000. Same role in DDS1 at 0x003FC080. No source-owned import or native ASM root/interior reference. [PurC5 readability data b7; matched-C/native-twin evidence; identifier-only]
+0x00477980	sdfSndCmdThreadParam	inferred	SMT3HD name via SLUS_209.11 0x005907C0, sdf/sdfSound SMT3 rename; was sndCommandThreadParameters
+0x004779B0	sdfSndListenerPrevState	inferred	SMT3HD name via SLUS_209.11 0x005907F0, sdf/sdfSound SMT3 rename; was sndCachedListenerState
+0x00477A00	sdfSndCmdPacketRing	inferred	SMT3HD name via SLUS_209.11 0x00590840, sdf/sdfSound SMT3 rename; was sndCommandRing
+0x00478A00	sdfSndCmdThreadStack	inferred	SMT3HD name via SLUS_209.11 0x00591840, sdf/sdfSound SMT3 rename; was sndCommandThreadStack
 0x00479A00	sdfSndTransBuf	inferred	SMT3HD data name via SLUS_209.11 0x00592840, 3 agreeing references; was sdfSndTransBuf
-0x00479A40	sndRpcServerThreadStack	inferred	confidence=high; Sound startup passes this byte array to CreateThreadSimple with SifRpcServerThreadProc, stackSize0x1000 and priority0x43. Same role in DDS1 at 0x003FD0C0. No source-owned import or native ASM root/interior reference. [PurC5 readability data b7; matched-C/native-twin evidence; identifier-only]
+0x00479A40	sdfSifRpcThreadStack	inferred	SMT3HD name via SLUS_209.11 0x00592880, sdf/sdfSound SMT3 rename; was sndRpcServerThreadStack
 0x0047AA40	sdfSndMap	inferred	SMT3HD data name via SLUS_209.11 0x00593880, 3 agreeing references; was sdfSndMap
 0x0047ABD0	LastLoad	inferred	SMT3HD data name via SLUS_209.11 0x00593A10, 2 agreeing references; was LastLoad
+0x0047B310	sdfSndPcmRequest	inferred	SMT3HD name via SLUS_209.11 0x00593E20, sdf/sdfSound SMT3 rename; was D_0047B310
 0x0047B418	p2sdPcmBuffer	inferred	SMT3HD name via SLUS_209.11 0x00593F28, sdfSound data twin; was D_0047B418
 0x0047B440	sdfFileRpcQueue	inferred	SMT3HD name via SLUS_209.11 0x00593F40, sdfSound data twin; was D_0047B440
 0x0047B480	sdfIpuDecodeThStack	inferred	SMT3HD data name via SLUS_209.11 0x00593F80, 1 agreeing references; was sdfIpuDecodeThStack

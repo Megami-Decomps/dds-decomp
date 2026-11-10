@@ -14505,7 +14505,7 @@ parameter numerically instead, so no artificial counterpart is introduced.
 
 ## Sound command transport and startup storage
 
-`sndCommandRing` is the existing thirty-two-entry, 0x80-byte packet ring.
+`sdfSndCmdPacketRing` is the existing thirty-two-entry, 0x80-byte packet ring.
 `sdfSndCmdIndex` and `sdfSndCmdTailIndex` retain their volatile u16
 declarations, signed cursor casts and unchecked payload-copy contract.
 The worker consumes entries and advances the read cursor; the producer
@@ -14514,13 +14514,13 @@ publishes the write cursor. No synchronization or wrap logic changes.
 `sdfSndBurstReqMode` is set only during sound initialization: the
 producer dispatches commands itself while this flag is nonzero, and otherwise
 wakes `sdfSndCmdBuf`. The startup descriptor
-`sndCommandThreadParameters` retains its 0x30-byte owner, priority 0x42 and
-0x1000-byte `sndCommandThreadStack`; `sndRpcServerThreadStack` is the separate
+`sdfSndCmdThreadParam` retains its 0x30-byte owner, priority 0x42 and
+0x1000-byte `sdfSndCmdThreadStack`; `sdfSifRpcThreadStack` is the separate
 0x1000-byte RPC-server stack submitted at priority 0x43.
 
 `sdfSndTransBuf` is the existing SIF transfer descriptor filled before
 `sceSifSetDma`. Naming leaves its type, fields and existing retry body alone.
-`sndCachedListenerState` caches six scaled integer values for command 0x160;
+`sdfSndListenerPrevState` caches six scaled integer values for command 0x160;
 preserve the opaque two-word prefix and the complete 32-byte copy rather
 than initializing or reinterpreting those words. All names are inferred
 from matched consumers and paired native storage; no code, flags, layouts,

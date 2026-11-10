@@ -14,14 +14,14 @@ typedef void *(*sceSifRpcFunc)(s32 function, void *request, s32 size);
 
 #define SND_VOICE_IOP_BYTES 0x21600
 
-#define D_0054A088 sdfGsMemoryDumpHeader
-#define D_0054A100 sdfGsMemoryDumpRowFormat
-#define D_00551B40 sdfGsMemoryTypeFormat
-#define D_005907C0 sndCommandThreadParameters
-#define D_005907F0 sndCachedListenerState
-#define D_00590840 sndCommandRing
-#define D_00591840 sndCommandThreadStack
-#define D_00592880 sndRpcServerThreadStack
+#define D_0054A088 sdfGsMemInfoTitle
+#define D_0054A100 sdfGsMemNodeFmt
+#define D_00551B40 sdfGsMemTypeFmt
+#define D_005907C0 sdfSndCmdThreadParam
+#define D_005907F0 sdfSndListenerPrevState
+#define D_00590840 sdfSndCmdPacketRing
+#define D_00591840 sdfSndCmdThreadStack
+#define D_00592880 sdfSifRpcThreadStack
 #define sdfSndMakeFilename mnuBuildSoundResourcePath
 #define p2sd_2C1788 sndQueueNoPayloadCommand210
 #define p2sd_2C17D8 sndDispatchCommandWithoutPayload
@@ -43,30 +43,30 @@ typedef void *(*sceSifRpcFunc)(s32 function, void *request, s32 size);
 #define p2sd_2C22B0 sndSendChannelGroupCommand110Duplicate
 #define sdf_2C2618 sdfSoundSetTableEntry
 #define sdf_2C27F8 sdfSoundGetTableEntry
-#define D_00529BE8 D_00398948
-#define D_00529C68 D_003989C8
-#define D_00529C88 D_003989E8
-#define D_00529CC8 D_00398A28
-#define D_00529CD8 D_00398A38
-#define D_00549B50 D_003B4880
-#define D_00549B70 D_003B48A0
-#define D_00549B88 D_003B48B8
-#define D_00549BB0 D_003B48E0
-#define D_005519D4 D_003BD4A4
-#define D_00551A20 D_003BD4F0
-#define D_00551A28 D_003BD4F8
-#define D_00551A30 D_003BD500
-#define D_00551A38 D_003BD508
-#define D_00551A40 D_003BD510
-#define D_00551A50 D_003BD520
-#define D_00551A58 D_003BD528
-#define D_00551A60 D_003BD530
-#define D_00551B10 D_003BD5E0
-#define D_00551B18 D_003BD5E8
-#define D_00552120 D_003BDA70
-#define D_0055213C D_003BDA8C
+#define D_00529BE8 sdfSndPcmFileName
+#define D_00529C68 sdfGrVifUnpackNames
+#define D_00529C88 sdfGrVifUnpackBits
+#define D_00529CC8 sdfGsMemTypeNames
+#define D_00529CD8 sdfGsMemTypeNamesTail
+#define D_00549B50 sdfDmaDumpStartFmt
+#define D_00549B70 sdfDmaNotQwordFmt
+#define D_00549B88 sdfDmaTagLineFmt
+#define D_00549BB0 sdfDmaNestOverflowMsg
+#define D_005519D4 sdfSifRpcThreadId
+#define D_00551A20 sdfDumpAddrFmt
+#define D_00551A28 sdfDumpPadStr
+#define D_00551A30 sdfDumpMidGapStr
+#define D_00551A38 sdfDumpByteSepStr
+#define D_00551A40 sdfDumpByteFmt
+#define D_00551A50 sdfDumpEndStr
+#define D_00551A58 sdfVifMaskedName
+#define D_00551A60 sdfVifXferOkName
+#define D_00551B10 sdfDumpIndentStr
+#define D_00551B18 sdfDumpWordFmt
+#define D_00552120 sdfSndPcmBufferAddr
+#define D_0055213C sdfSndIopWorkAddr
 #define D_00593890 D_003FE0D0
-#define D_00593E20 D_003FE990
+#define D_00593E20 sdfSndPcmRequest
 
 struct sdfGsMemSlice_t;
 
@@ -1423,13 +1423,13 @@ void sdfDumpHexLine(const u8 *data, s32 size) {
     }
 }
 
-INCLUDE_RODATA(const s32, "sdf/sdfSound", D_003B4880);
+INCLUDE_RODATA(const s32, "sdf/sdfSound", sdfDmaDumpStartFmt);
 
-INCLUDE_RODATA(const s32, "sdf/sdfSound", D_003B48A0);
+INCLUDE_RODATA(const s32, "sdf/sdfSound", sdfDmaNotQwordFmt);
 
-INCLUDE_RODATA(const s32, "sdf/sdfSound", D_003B48B8);
+INCLUDE_RODATA(const s32, "sdf/sdfSound", sdfDmaTagLineFmt);
 
-INCLUDE_RODATA(const s32, "sdf/sdfSound", D_003B48E0);
+INCLUDE_RODATA(const s32, "sdf/sdfSound", sdfDmaNestOverflowMsg);
 
 INCLUDE_RODATA(const s32, "sdf/sdfSound", D_003B4900);
 
@@ -1830,9 +1830,9 @@ void sdfDumpGsMemory2(void) {
     }
 }
 
-INCLUDE_RODATA(const s32, "sdf/sdfSound", sdfGsMemoryDumpHeader);
+INCLUDE_RODATA(const s32, "sdf/sdfSound", sdfGsMemInfoTitle);
 
-INCLUDE_RODATA(const s32, "sdf/sdfSound", sdfGsMemoryDumpRowFormat);
+INCLUDE_RODATA(const s32, "sdf/sdfSound", sdfGsMemNodeFmt);
 
 void sdfDumpMemory(void) {
     sdfMemInfo_t info;
@@ -1874,7 +1874,7 @@ INCLUDE_SDATA(const s32, "sdf/sdfSound", p2sdPcmBusy);
 
 INCLUDE_SDATA(const s32, "sdf/sdfSound", sdfSndSendCmd_cmd_id);
 
-INCLUDE_SDATA(const s32, "sdf/sdfSound", D_003BD4A4);
+INCLUDE_SDATA(const s32, "sdf/sdfSound", sdfSifRpcThreadId);
 
 INCLUDE_SDATA(const s32, "sdf/sdfSound", p2sdSmgBuf);
 
@@ -1894,23 +1894,23 @@ INCLUDE_SDATA(const s32, "sdf/sdfSound", D_003BD4E0);
 
 INCLUDE_SDATA(const s32, "sdf/sdfSound", D_003BD4E8);
 
-INCLUDE_SDATA(const s32, "sdf/sdfSound", D_003BD4F0);
+INCLUDE_SDATA(const s32, "sdf/sdfSound", sdfDumpAddrFmt);
 
-INCLUDE_SDATA(const s32, "sdf/sdfSound", D_003BD4F8);
+INCLUDE_SDATA(const s32, "sdf/sdfSound", sdfDumpPadStr);
 
-INCLUDE_SDATA(const s32, "sdf/sdfSound", D_003BD500);
+INCLUDE_SDATA(const s32, "sdf/sdfSound", sdfDumpMidGapStr);
 
-INCLUDE_SDATA(const s32, "sdf/sdfSound", D_003BD508);
+INCLUDE_SDATA(const s32, "sdf/sdfSound", sdfDumpByteSepStr);
 
-INCLUDE_SDATA(const s32, "sdf/sdfSound", D_003BD510);
+INCLUDE_SDATA(const s32, "sdf/sdfSound", sdfDumpByteFmt);
 
 INCLUDE_SDATA(const s32, "sdf/sdfSound", sdfDumpLineBuf);
 
-INCLUDE_SDATA(const s32, "sdf/sdfSound", D_003BD520);
+INCLUDE_SDATA(const s32, "sdf/sdfSound", sdfDumpEndStr);
 
-INCLUDE_SDATA(const s32, "sdf/sdfSound", D_003BD528);
+INCLUDE_SDATA(const s32, "sdf/sdfSound", sdfVifMaskedName);
 
-INCLUDE_SDATA(const s32, "sdf/sdfSound", D_003BD530);
+INCLUDE_SDATA(const s32, "sdf/sdfSound", sdfVifXferOkName);
 
 INCLUDE_SDATA(const s32, "sdf/sdfSound", D_003BD538);
 
@@ -1954,9 +1954,9 @@ INCLUDE_SDATA(const s32, "sdf/sdfSound", D_003BD5D0);
 
 INCLUDE_SDATA(const s32, "sdf/sdfSound", D_003BD5D8);
 
-INCLUDE_SDATA(const s32, "sdf/sdfSound", D_003BD5E0);
+INCLUDE_SDATA(const s32, "sdf/sdfSound", sdfDumpIndentStr);
 
-INCLUDE_SDATA(const s32, "sdf/sdfSound", D_003BD5E8);
+INCLUDE_SDATA(const s32, "sdf/sdfSound", sdfDumpWordFmt);
 
 INCLUDE_SDATA(const s32, "sdf/sdfSound", D_003BD5F0);
 
@@ -1966,4 +1966,4 @@ INCLUDE_SDATA(const s32, "sdf/sdfSound", D_003BD600);
 
 INCLUDE_SDATA(const s32, "sdf/sdfSound", D_003BD608);
 
-INCLUDE_SDATA(const s32, "sdf/sdfSound", sdfGsMemoryTypeFormat);
+INCLUDE_SDATA(const s32, "sdf/sdfSound", sdfGsMemTypeFmt);
