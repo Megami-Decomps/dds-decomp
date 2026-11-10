@@ -1,7 +1,7 @@
 #include "sdk_ps2.h"
 #include "evt_run_context_api.h"
 #include "common.h"
-#include "bf_flw0_header.h"
+#include "scr.h"
 #include "sdf_vu0.h"
 #include "sdf_channel.h"
 #include "scr_work_task_api.h"
@@ -31,10 +31,10 @@
 #include "fld_runtime_reset_api.h"
 #include "mdl_flag_api.h"
 
-extern BfFlw0Header *D_00435E80;
+extern scrHeader_t *D_00435E80;
 
 
-extern void dds3WorkInit(const BfFlw0Header *header);
+extern void dds3WorkInit(const scrHeader_t *header);
 extern s32 sdfDispatchPrimaryUnitScript(u32 unitIndex, datUnitWork_t *sourceRecord,
     datUnitWork_t *targetRecord, u8 mode);
 extern char sdfRuntimeTaskName[]; /* "GBWK" */

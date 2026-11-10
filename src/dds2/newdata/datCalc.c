@@ -2,7 +2,7 @@
 #include "common.h"
 #include "pty_experience_threshold_type.h"
 #include "scr_integer_parameter_api.h"
-#include "bf_flw0_header.h"
+#include "scr.h"
 #include "scr_procedure_start_api.h"
 #include "evt_script_context.h"
 #include "evt_solar.h"
@@ -1762,7 +1762,7 @@ ScrVmInteger evtRunContext(ScrProcedureIndex procedureIndex, s32 firstArgument, 
 }
 
 /* Create the script task and clear its separate 24-byte context. */
-void dds3WorkInit(const BfFlw0Header *header) {
+void dds3WorkInit(const scrHeader_t *header) {
     evtWorkScriptTask = scrCreateTaskWithDefaultOption(header);
     memset(&evtWorkScriptContext, 0, sizeof(evtWorkScriptContext));
 }

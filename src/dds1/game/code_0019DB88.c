@@ -17,7 +17,7 @@
 #include "itf_mes_state_api.h"
 #include "pcp_vu0.h"
 #include "scr.h"
-#include "bf_flw0_header.h"
+#include "scr.h"
 #include "sdf_sif_command.h"
 #include "sdf_projection.h"
 #include "itf_panel_draw.h"
@@ -1122,7 +1122,7 @@ extern char D_003A1500[]; /* "TestMsgMngD" */
 
 extern s32 D_003BA8EC;
 
-extern dds3ProcessID_t *scrStartScript2(u32 priority, const BfFlw0Header *script, ScrProcedureIndex procedureIndex);
+extern dds3ProcessID_t *scrStartScript2(u32 priority, const scrHeader_t *script, ScrProcedureIndex procedureIndex);
 
 
 extern void TestMsgReloadTexture(void);
@@ -1137,7 +1137,7 @@ extern s32 TestMsgMngD_Process(dds3ProcessID_t *task);
 void itfDebugMesMngInitialize(void) {
     D_003BA8EC = 0x80FFFFFF;
     TestMsgReloadTexture();
-    itfMesMngSetKutiCallback(((scrProcessWork_s *)dds3GetProcessData(scrStartScript2(0x3E8, (const BfFlw0Header *)D_00358038, 0)))->messageWindowIndex, itfDebugPrintMark);
+    itfMesMngSetKutiCallback(((scrProcessWork_s *)dds3GetProcessData(scrStartScript2(0x3E8, (const scrHeader_t *)D_00358038, 0)))->messageWindowIndex, itfDebugPrintMark);
     dds3StartProcess(D_003A14F0, 0x3EF, 0, 0, TestMsgMngC_Process, 0, 0);
     dds3StartProcess(D_003A1500, 0x2AFE, 0, 0, TestMsgMngD_Process, 0, 0);
 }

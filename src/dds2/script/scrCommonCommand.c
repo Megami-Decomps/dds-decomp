@@ -289,7 +289,7 @@ ScrCommandResult bfWaitCbCreateTask(void)
     {
         return SCR_COMMAND_RESULT_COMPLETE;
     }
-    if (procedureIndex < 0 || procedureIndex >= ctx->procedureSection->count)
+    if (procedureIndex < 0 || procedureIndex >= ctx->procedureSection->ItemCount)
     {
         return SCR_COMMAND_RESULT_COMPLETE;
     }

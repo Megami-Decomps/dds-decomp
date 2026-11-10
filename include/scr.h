@@ -14,7 +14,6 @@
 #include "itf_mes_window_index.h"
 
 struct sdfMemHandle_t;
-struct BfFlw0Header;
 struct ItfMesSub;
 
 typedef s32 ScrProgramCounter;
@@ -23,9 +22,6 @@ typedef s32 ScrGlobalFloatIndex;
 /* Zero-based signed halfword selectors for the VM's per-process local arrays. */
 typedef s16 ScrLocalIntegerIndex;
 typedef s16 ScrLocalFloatIndex;
-/* Signed halfword slot counts stored in the FLW0 header. */
-typedef s16 ScrLocalIntegerCount;
-typedef s16 ScrLocalFloatCount;
 typedef s32 ScrStackDepth;
 typedef s32 ScrStackValueIndex;
 
@@ -75,45 +71,51 @@ union scrCode_u
     } c;
 };
 
-/* FLW0 label-table entry (0x20); its instruction address is at 0x18. */
-typedef struct ScrLabel {
-    char name[24];
-    ScrProgramCounter addr; /* 0x18 */
-    s32 unk1C;
-} ScrLabel;
+typedef struct scrHeader_t scrHeader_t;
+typedef struct scrTypeTable_t scrTypeTable_t;
+typedef struct scrProcTable_t scrProcTable_t;
+typedef struct scrLabelTable_t scrLabelTable_t;
 
-typedef char ScrLabel_size_must_be_0x20[
-    (sizeof(ScrLabel) == 0x20) ? 1 : -1];
-
-/* Procedure-table entry; distinct from a label despite sharing its 0x20 layout. */
-typedef struct ScrProcedure {
-    char name[24];
-    ScrProgramCounter addr; /* 0x18 */
-    s32 unk1C;
-} ScrProcedure;
-
-typedef char ScrProcedure_size_must_be_0x20[
-    (sizeof(ScrProcedure) == 0x20) ? 1 : -1];
-
-/* FLW0 section descriptor (0x10), including the file-relative data offset. */
-typedef s32 BfFlw0SectionKind;
-enum {
-    BF_FLW0_SECTION_PROCEDURES = 0,
-    BF_FLW0_SECTION_LABELS = 1,
-    BF_FLW0_SECTION_INSTRUCTIONS = 2,
-    BF_FLW0_SECTION_AUXILIARY = 3,
-    BF_FLW0_SECTION_STRINGS = 4
+/* File header. MagicCode is "FLW0" compared as a word, so it is four bytes
+ * inline, not a pointer. The type table starts right after, at +32. */
+struct scrHeader_t
+{
+    u8 FileType;
+    u8 FileFormat;
+    u16 UserID;
+    s32 FileSize;
+    char MagicCode[4];
+    s32 ExpandSize;
+    s32 TypeTableCount;
+    s16 LocalIntCount;
+    s16 LocalFloatCount;
+    s32 Resrve2;
+    s32 Resrve3;
 };
 
-typedef struct ScrSection {
-    BfFlw0SectionKind type;
-    s32 unk04;
-    s32 count;
-    s32 offset;
-} ScrSection;
+/* One entry per section of the file. ItemAddress is a byte offset from the
+ * header, so the section pointer is (u8 *)header + ItemAddress. */
+struct scrTypeTable_t
+{
+    s32 Type; /* enum scr_datatype */
+    s32 ItemSize;
+    s32 ItemCount;
+    s32 ItemAddress;
+};
 
-typedef char ScrSection_size_must_be_0x10[
-    (sizeof(ScrSection) == 0x10) ? 1 : -1];
+struct scrProcTable_t
+{
+    u8 Name[24];
+    s32 CodeAddress;
+    s32 Reserve1;
+};
+
+struct scrLabelTable_t
+{
+    u8 Name[24];
+    s32 CodeAddress;
+    s32 Reserve1;
+};
 
 /* Native 0xF4-byte process allocated by bfContextCreate in both games.
  * The interpreter, scheduler attachment and named-process list share this owner. */
@@ -124,10 +126,10 @@ typedef struct scrProcessWork_s {
     ScrStackValueType stackTypes[SCR_STACK_STORAGE_SLOT_COUNT];
     scrStackData_u stackValues[SCR_STACK_STORAGE_SLOT_COUNT];
     /* Borrowed FLW0 source views; the VM reads them but does not edit them. */
-    const struct BfFlw0Header *scriptHeader;
-    const ScrSection *procedureSection; /* FLW0 descriptor; count bounds the procedure table */
-    const ScrProcedure *procedures; /* FLW0 PROCEDURES section */
-    const ScrLabel *labels;          /* FLW0 LABELS section */
+    const struct scrHeader_t *scriptHeader;
+    const scrTypeTable_t *procedureSection; /* FLW0 descriptor; count bounds the procedure table */
+    const scrProcTable_t *procedures; /* FLW0 PROCEDURES section */
+    const scrLabelTable_t *labels;          /* FLW0 LABELS section */
     const scrCode_u *instructions;
     struct ItfMesSub *auxiliaryData; /* mutable: message initialization relocates it */
     const char *strings;          /* borrowed read-only view; lifetime follows source owner/caller */
@@ -166,13 +168,15 @@ void scrRunScript(scrProcessWork_s *context);
 KwlnTaskUpdateResult scrScriptProcess(dds3ProcessID_t *task);
 ScrTraceResult scrTraceCode(scrProcessWork_s *context);
 void scrProcDestroyTask(scrProcessWork_s *process);
-scrProcessWork_s *scrCreateTaskWithDefaultOption(const struct BfFlw0Header *header);
+scrProcessWork_s *scrCreateTaskWithDefaultOption(const struct scrHeader_t *header);
 void PushInt(scrProcessWork_s *script, ScrVmInteger value);
 void PushFloat(scrProcessWork_s *script, f32 value);
 void PushStr(scrProcessWork_s *script, const char *value);
 void PushRet(scrProcessWork_s *script, ScrProgramCounter returnAddress);
 ScrVmInteger PopInt(scrProcessWork_s *script);
 f32 PopFloat(scrProcessWork_s *script);
+/* Return the procedure-table index for an exact name match, or NOT_FOUND. */
+ScrProcedureIndex scrSearchProcedureName(const scrHeader_t *header, const char *name);
 /* Command callback plus operand count (0x8); DDS1 script/scrTraceCode.c. */
 typedef struct ScrCommand {
     ScrCommandResult (*func)(void);
@@ -199,6 +203,17 @@ typedef struct {
 } ScrVec4;
 
 /* ScrVmOperand is intentionally local: DDS1's +0x04 is u16, DDS2's is u8. */
+
+/* scrTypeTable_t.Type: which section of the file the entry describes. */
+enum scr_datatype
+{
+    SCR_DATATYPE_PROCTABLE = 0,
+    SCR_DATATYPE_LABELTABLE = 1,
+    SCR_DATATYPE_SCRDATA = 2,
+    SCR_DATATYPE_MESSAGE = 3,
+    SCR_DATATYPE_STRINGS = 4,
+    SCR_DATATYPE_MAX = 5
+};
 
 enum scr_stack_type
 {

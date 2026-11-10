@@ -10,7 +10,7 @@
 #include "kwln.h"
 #include "kwln_process_registration.h"
 #include "scr.h"
-#include "bf_flw0_header.h"
+#include "scr.h"
 
 ScrProcedureIndex btlFindScriptResource(const char *name) {
     char path[128];
@@ -19,10 +19,10 @@ ScrProcedureIndex btlFindScriptResource(const char *name) {
         return SCR_PROCEDURE_INDEX_NOT_FOUND;
     }
     sprintf(path, "e%03d_%s", battle->eventPackId, name);
-    return scrSearchProcedureName((const BfFlw0Header *)battle->scriptHandle, path);
+    return scrSearchProcedureName((const scrHeader_t *)battle->scriptHandle, path);
 }
 
-extern dds3ProcessID_t *scrStartScript2(u32 priority, const BfFlw0Header *script, ScrProcedureIndex procedureIndex);
+extern dds3ProcessID_t *scrStartScript2(u32 priority, const scrHeader_t *script, ScrProcedureIndex procedureIndex);
 
 /* Start the requested skill script as a child of the battle owner task.
  * The new task uses the owner's scheduler priority minus one. */
@@ -33,7 +33,7 @@ void btlStartSkillEventTask(s32 skill) {
         return;
     }
     taskId = scrStartScript2(battle->scriptOwner->priority - 1,
-                            (const BfFlw0Header *)battle->scriptHandle, skill);
+                            (const scrHeader_t *)battle->scriptHandle, skill);
     scrSetUserData(taskId, NULL);
     dds3LinkProcess(battle->scriptOwner, taskId);
     battle->scriptTask = taskId;
@@ -83,7 +83,7 @@ void btlStartPrimaryScriptTask(void) {
         return;
     }
     taskId = scrStartScript2(battle->scriptOwner->priority - 1,
-                            (const BfFlw0Header *)battle->scriptHandle, scriptId);
+                            (const scrHeader_t *)battle->scriptHandle, scriptId);
     scrSetUserData(taskId, NULL);
     dds3LinkProcess(battle->scriptOwner, taskId);
     battle->scriptTask = taskId;
@@ -124,7 +124,7 @@ void btlStartSecondaryScriptTask(void) {
         return;
     }
     taskId = scrStartScript2(battle->scriptOwner->priority - 1,
-                            (const BfFlw0Header *)battle->scriptHandle, scriptId);
+                            (const scrHeader_t *)battle->scriptHandle, scriptId);
     scrSetUserData(taskId, NULL);
     dds3LinkProcess(battle->scriptOwner, taskId);
     battle->scriptTask = taskId;

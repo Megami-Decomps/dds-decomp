@@ -6,11 +6,11 @@
 #include "evt_world.h"
 #include "kwln.h"
 #include "kwln_task_lifecycle.h"
-#include "bf_flw0_header.h"
+#include "scr.h"
 
 struct sdfMemHandle_t;
 
-extern dds3ProcessID_t *scrStartScript2(u32 priority, const BfFlw0Header *script, ScrProcedureIndex procedureIndex);
+extern dds3ProcessID_t *scrStartScript2(u32 priority, const scrHeader_t *script, ScrProcedureIndex procedureIndex);
 
 extern void fldReleaseFieldResources(void);
 
@@ -44,7 +44,7 @@ Dds3SceneScriptAttachResult evtLoadSceneResourceFrom(
         return DDS3_SCENE_SCRIPT_ATTACH_FAILED;
     }
     worldData->sceneResourceHandle = resourceHandle;
-    worldData->sceneScript = (const struct BfFlw0Header *)resolvedAddress;
+    worldData->sceneScript = (const struct scrHeader_t *)resolvedAddress;
     return DDS3_SCENE_SCRIPT_ATTACH_SUCCEEDED;
 }
 
@@ -68,7 +68,7 @@ Dds3SceneScriptAttachResult dds3SceneBasicLoadScriptFile_FromMem(
     resourceAddress = sdfMemLock(resourceHandle);
     if (resourceAddress != 0) {
         worldData->sceneResourceHandle = resourceHandle;
-        worldData->sceneScript = (const struct BfFlw0Header *)resourceAddress;
+        worldData->sceneScript = (const struct scrHeader_t *)resourceAddress;
         return DDS3_SCENE_SCRIPT_ATTACH_SUCCEEDED;
     }
     return notAttachedStatus;
@@ -91,7 +91,7 @@ void dds3SceneBasicReleaseScriptFile(dds3Basic_t *worldNode) {
  * asm because it has no plain-C shape. */
 dds3ProcessID_t *evtStartSceneResourceTask(const dds3Basic_t *worldNode, const char *taskName) {
     const evtWorldTable_t *worldData = worldNode->workdata;
-    const struct BfFlw0Header *sceneScript = worldData->sceneScript;
+    const struct scrHeader_t *sceneScript = worldData->sceneScript;
     ScrProcedureIndex scriptIndex;
 
     if (sceneScript == NULL) {

@@ -65,7 +65,7 @@
 #include "sdf_projection.h"
 #include "btl_action.h"
 #include "scr.h"
-#include "bf_flw0_header.h"
+#include "scr.h"
 #include "dat_state.h"
 #include "btl_resolve_unit_value_api.h"
 #include "btl_select_transform_parameters_api.h"
@@ -186,7 +186,7 @@ extern s32 TestMsgMngC_Process(dds3ProcessID_t *task);
 
 extern u8 D_003B4A28[];
 
-extern dds3ProcessID_t *scrStartScript2(u32 priority, const BfFlw0Header *script, ScrProcedureIndex procedureIndex);
+extern dds3ProcessID_t *scrStartScript2(u32 priority, const scrHeader_t *script, ScrProcedureIndex procedureIndex);
 
 void TestMsgReloadTexture(void);
 

@@ -1,7 +1,7 @@
 #include "sdk_ps2.h"
 #include "scr_integer_parameter_api.h"
 #include "scr.h"
-#include "bf_flw0_header.h"
+#include "scr.h"
 #include "dsp_entry_api.h"
 #include "dsp_message_window_api.h"
 #include "dsp_channel.h"
@@ -132,13 +132,13 @@ s32 fclScriptForcedEnd(dds3ProcessID_t *task) {
     }
 }
 
-extern dds3ProcessID_t *scrStartScript2(u32 priority, const BfFlw0Header *script, ScrProcedureIndex procedureIndex);
+extern dds3ProcessID_t *scrStartScript2(u32 priority, const scrHeader_t *script, ScrProcedureIndex procedureIndex);
 
 void evtClearActiveFlag(s32 flagIndex);
 
 /* Replace an optional task slot, clear active flag zero, and return the new task.
  * Creation is still attempted if no slot is supplied. */
-dds3ProcessID_t *fclScriptStart(BfFlw0Header *script, ScrProcedureIndex procedureIndex, dds3ProcessID_t **taskSlot) {
+dds3ProcessID_t *fclScriptStart(scrHeader_t *script, ScrProcedureIndex procedureIndex, dds3ProcessID_t **taskSlot) {
     dds3ProcessID_t *task;
 
     if (taskSlot != NULL) {

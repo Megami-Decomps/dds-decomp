@@ -42,7 +42,7 @@
 #include "sdf_sif_command.h"
 #include "scr.h"
 #include "scr_instruction_stream_api.h"
-#include "bf_flw0_header.h"
+#include "scr.h"
 #include "kwln_task_lifecycle.h"
 #include "brs_task.h"
 #include "fld_resource_wait_api.h"
@@ -1072,7 +1072,7 @@ u32 evtCheckSelectionState(void) {
 #include "sdf_general_heap_api.h"
 #include "sdf_sif_command.h"
 #include "scr.h"
-#include "bf_flw0_header.h"
+#include "scr.h"
 #include "kwln_task_lifecycle.h"
 #include "brs_task.h"
 #include "fld_resource_wait_api.h"
@@ -2048,8 +2048,8 @@ INCLUDE_RODATA(const s32, "game/code_00107FD8", D_0039E220);
 
 INCLUDE_RODATA(const s32, "game/code_00107FD8", D_0039E238);
 
-scrProcessWork_s *bfContextCreate(const BfFlw0Header *header, const ScrSection *procedureSection,
-                        const ScrProcedure *procedures, const ScrLabel *labels,
+scrProcessWork_s *bfContextCreate(const scrHeader_t *header, const scrTypeTable_t *procedureSection,
+                        const scrProcTable_t *procedures, const scrLabelTable_t *labels,
                         const scrCode_u *instructions, struct ItfMesSub *auxiliaryData,
                         const char *strings, ScrProcedureIndex procedureIndex) {
     scrProcessWork_s *process;
@@ -2059,7 +2059,7 @@ scrProcessWork_s *bfContextCreate(const BfFlw0Header *header, const ScrSection *
 
     if (header == NULL || procedureSection == NULL || procedures == NULL ||
         instructions == NULL || procedureIndex < 0 ||
-        procedureIndex >= procedureSection->count) {
+        procedureIndex >= procedureSection->ItemCount) {
         return NULL;
     }
     process = sdfChipAllocDirect(sizeof(scrProcessWork_s));
@@ -2067,10 +2067,10 @@ scrProcessWork_s *bfContextCreate(const BfFlw0Header *header, const ScrSection *
         return NULL;
     }
     i = 0;
-    while ((process->name[i] = procedures[procedureIndex].name[i]) != '\0') {
+    while ((process->name[i] = procedures[procedureIndex].Name[i]) != '\0') {
         i++;
     }
-    process->pc = procedures[procedureIndex].addr;
+    process->pc = procedures[procedureIndex].CodeAddress;
     process->sp = 0;
     values = process->stackValues;
     types = process->stackTypes;
@@ -2095,17 +2095,17 @@ scrProcessWork_s *bfContextCreate(const BfFlw0Header *header, const ScrSection *
     process->task = NULL;
     process->previous = NULL;
     process->next = NULL;
-    if (header->localIntegerCount > 0) {
-        process->localInt = sdfChipAllocDirect(header->localIntegerCount * sizeof(ScrVmInteger));
-        for (i = 0; i < header->localIntegerCount; i++) {
+    if (header->LocalIntCount > 0) {
+        process->localInt = sdfChipAllocDirect(header->LocalIntCount * sizeof(ScrVmInteger));
+        for (i = 0; i < header->LocalIntCount; i++) {
             process->localInt[i] = 0;
         }
     } else {
         process->localInt = NULL;
     }
-    if (header->localFloatCount > 0) {
-        process->localFloat = sdfChipAllocDirect(header->localFloatCount * sizeof(f32));
-        for (i = 0; i < header->localFloatCount; i++) {
+    if (header->LocalFloatCount > 0) {
+        process->localFloat = sdfChipAllocDirect(header->LocalFloatCount * sizeof(f32));
+        for (i = 0; i < header->LocalFloatCount; i++) {
             process->localFloat[i] = 0;
         }
     } else {
@@ -2115,44 +2115,44 @@ scrProcessWork_s *bfContextCreate(const BfFlw0Header *header, const ScrSection *
         process->messageWindowIndex = itfMesMngInitialize(auxiliaryData);
     }
     scrLinkHandle(process);
-    evtPrintDeveloperConsoleMessage("start <%s>\n", procedures[procedureIndex].name);
+    evtPrintDeveloperConsoleMessage("start <%s>\n", procedures[procedureIndex].Name);
     return process;
 }
 
 
 /* Resolve supported FLW0 sections relative to the header; reject bad magic/unknown kinds.
    Zero-count auxiliary sections are ignored, and absent sections remain null. */
-scrProcessWork_s *fldFlowParse(const BfFlw0Header *header, ScrProcedureIndex procedureIndex) {
-    const ScrSection *sections;
-    const ScrProcedure *procedures = NULL;
-    const ScrLabel *labels = NULL;
+scrProcessWork_s *fldFlowParse(const scrHeader_t *header, ScrProcedureIndex procedureIndex) {
+    const scrTypeTable_t *sections;
+    const scrProcTable_t *procedures = NULL;
+    const scrLabelTable_t *labels = NULL;
     const u8 *instructionSection = NULL;
     struct ItfMesSub *auxiliaryData = NULL;
     const char *strings = NULL;
     s32 i;
 
-    sections = header->sections;
-    if (header->magic != BF_FLW0_MAGIC) {
+    sections = (const scrTypeTable_t *)(header + 1);
+    if (*(s32 *)header->MagicCode != BF_FLW0_MAGIC) {
         return 0;
     }
-    for (i = 0; i < header->sectionCount; i++) {
-        switch (sections[i].type) {
-            case BF_FLW0_SECTION_PROCEDURES:
-                procedures = (const ScrProcedure *)((const u8 *)header + sections[i].offset);
+    for (i = 0; i < header->TypeTableCount; i++) {
+        switch (sections[i].Type) {
+            case SCR_DATATYPE_PROCTABLE:
+                procedures = (const scrProcTable_t *)((const u8 *)header + sections[i].ItemAddress);
                 break;
-            case BF_FLW0_SECTION_LABELS:
-                labels = (const ScrLabel *)((const u8 *)header + sections[i].offset);
+            case SCR_DATATYPE_LABELTABLE:
+                labels = (const scrLabelTable_t *)((const u8 *)header + sections[i].ItemAddress);
                 break;
-            case BF_FLW0_SECTION_INSTRUCTIONS:
-                instructionSection = (const u8 *)header + sections[i].offset;
+            case SCR_DATATYPE_SCRDATA:
+                instructionSection = (const u8 *)header + sections[i].ItemAddress;
                 break;
-            case BF_FLW0_SECTION_AUXILIARY:
-                if (sections[i].count != 0) {
-                    auxiliaryData = (struct ItfMesSub *)((u8 *)header + sections[i].offset);
+            case SCR_DATATYPE_MESSAGE:
+                if (sections[i].ItemCount != 0) {
+                    auxiliaryData = (struct ItfMesSub *)((u8 *)header + sections[i].ItemAddress);
                 }
                 break;
-            case BF_FLW0_SECTION_STRINGS:
-                strings = (const char *)header + sections[i].offset;
+            case SCR_DATATYPE_STRINGS:
+                strings = (const char *)header + sections[i].ItemAddress;
                 break;
             default:
                 return 0;

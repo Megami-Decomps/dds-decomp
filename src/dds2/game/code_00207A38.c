@@ -44,7 +44,7 @@
 #include "kwln.h"
 #include "scr.h"
 #include "scr_current_process_user_data_api.h"
-#include "bf_flw0_header.h"
+#include "scr.h"
 #include "scr_arg_read.h"
 #include "sdf.h"
 #include "btl_resource_name.h"
@@ -2993,7 +2993,7 @@ u32 btlScriptReturnOneBasedAiBucket(void) {
     return 1;
 }
 
-extern dds3ProcessID_t *scrStartScript2(u32 priority, const BfFlw0Header *script, ScrProcedureIndex procedureIndex);
+extern dds3ProcessID_t *scrStartScript2(u32 priority, const scrHeader_t *script, ScrProcedureIndex procedureIndex);
 extern void itfMesSetTextSlotFromValue(s32, s32, s32, s32);
 
 void btlBindActorSlot(ActionStateLink *aiTask, s32 option) {
@@ -3001,7 +3001,7 @@ void btlBindActorSlot(ActionStateLink *aiTask, s32 option) {
     dds3ProcessID_t *task;
     s32 window;
 
-    task = scrStartScript2(((BtlState *)battle)->scriptOwner->priority - 1, (const BfFlw0Header *)D_00435E7C, option);
+    task = scrStartScript2(((BtlState *)battle)->scriptOwner->priority - 1, (const scrHeader_t *)D_00435E7C, option);
     scrSetUserData(task, aiTask);
     window = ((scrProcessWork_s *)dds3GetProcessData(task))->messageWindowIndex;
     if (window >= 0) {

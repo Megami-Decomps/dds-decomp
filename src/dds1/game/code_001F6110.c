@@ -42,7 +42,7 @@
 #include "kwln.h"
 #include "scr.h"
 #include "scr_current_process_user_data_api.h"
-#include "bf_flw0_header.h"
+#include "scr.h"
 #include "scr_arg_read.h"
 #include "sdf.h"
 #include "btl_resource_name.h"
@@ -2692,11 +2692,11 @@ u32 btlCmdClearSpecialEnemyFlags(void) {
 extern u8 *D_003BAAA8;
 extern void itfMesSetTextSlotFromValue(s32, s32, s32, s32);
 
-extern dds3ProcessID_t *scrStartScript2(u32 priority, const BfFlw0Header *script, ScrProcedureIndex procedureIndex);
+extern dds3ProcessID_t *scrStartScript2(u32 priority, const scrHeader_t *script, ScrProcedureIndex procedureIndex);
 
 void btlBindActorSlot(BtlTask *task, s32 taskArg) {
     BtlState *state = (BtlState *)btlGetRuntime();
-    dds3ProcessID_t *slot = scrStartScript2(state->scriptOwner->priority - 1, (const BfFlw0Header *)D_003BAAA8, taskArg);
+    dds3ProcessID_t *slot = scrStartScript2(state->scriptOwner->priority - 1, (const scrHeader_t *)D_003BAAA8, taskArg);
     s32 handle;
     scrSetUserData(slot, task);
     handle = ((scrProcessWork_s *)dds3GetProcessData(slot))->messageWindowIndex;

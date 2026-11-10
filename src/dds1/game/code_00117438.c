@@ -1,7 +1,7 @@
 #include "sdk_ps2.h"
 #include "evt_run_context_api.h"
 #include "common.h"
-#include "bf_flw0_header.h"
+#include "scr.h"
 #include "sdf_vu0.h"
 #include "sdf_channel.h"
 #include "scr_work_task_api.h"
@@ -31,9 +31,9 @@
 #include "mdl_flag_api.h"
 
 extern void scrDestroyWorkTask(void);
-extern void dds3WorkInit(const BfFlw0Header *header);
+extern void dds3WorkInit(const scrHeader_t *header);
 
-extern BfFlw0Header *D_003BAAAC;
+extern scrHeader_t *D_003BAAAC;
 
 /* Channel mask occupies the low 15 bits; the high status bit survives updates. */
 #define SDF_PACKED_STATUS_BIT 0x8000

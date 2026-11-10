@@ -10,13 +10,13 @@
 #include "scr_procedure_start_api.h"
 #include "scr_instruction_stream_api.h"
 #include "scr_work_task_api.h"
-#include "bf_flw0_header.h"
+#include "scr.h"
 #include "sdf.h"
 #include "kwln_task_lifecycle.h"
 #include "scr_trace_result.h"
 #include "kwln_task_runner.h"
 
-scrProcessWork_s *fldFlowParse(const BfFlw0Header *header, ScrProcedureIndex procedureIndex);
+scrProcessWork_s *fldFlowParse(const scrHeader_t *header, ScrProcedureIndex procedureIndex);
 
 /* Load a script resource, create its VM process and retain its resource handle. */
 scrProcessWork_s *scrLoadScriptFile(const char *path, ScrProcedureIndex procedureIndex)
@@ -31,7 +31,7 @@ scrProcessWork_s *scrLoadScriptFile(const char *path, ScrProcedureIndex procedur
     {
         return 0;
     }
-    process = fldFlowParse((const BfFlw0Header *)resourceAddress, procedureIndex);
+    process = fldFlowParse((const scrHeader_t *)resourceAddress, procedureIndex);
     if (process != NULL)
     {
         process->scriptHandle = handle;
@@ -42,7 +42,7 @@ scrProcessWork_s *scrLoadScriptFile(const char *path, ScrProcedureIndex procedur
 dds3ProcessID_t *scrStartScriptProcess(u32 priority, ScrProcessTaskOwner process)
 {
     dds3ProcessID_t *task;
-    task = dds3StartProcess(process->procedures[process->procedureIndex].name,
+    task = dds3StartProcess(process->procedures[process->procedureIndex].Name,
                           priority, 1, 1, scrScriptProcess, scrScriptShutdown,
                           scrProcessTaskOwnerToUserValue(process));
     process->task = task;
@@ -70,25 +70,25 @@ scrProcessWork_s *scrCreateProcessWithDefaultOption(const char *path)
     return scrLoadScriptFile(path, 0);
 }
 
-dds3ProcessID_t *scrStartScript2(u32 priority, const BfFlw0Header *script, ScrProcedureIndex procedureIndex)
+dds3ProcessID_t *scrStartScript2(u32 priority, const scrHeader_t *script, ScrProcedureIndex procedureIndex)
 {
     return scrStartScriptProcess(priority, fldFlowParse(script, procedureIndex));
 }
 
-scrProcessWork_s *scrCreateTaskWithDefaultOption(const BfFlw0Header *header)
+scrProcessWork_s *scrCreateTaskWithDefaultOption(const scrHeader_t *header)
 {
     return fldFlowParse(header, 0);
 }
 
-dds3ProcessID_t *scrRunScriptEx(u32 priority, const BfFlw0Header *header,
-    const ScrSection *procedureSection, const ScrProcedure *procedures, const ScrLabel *labels,
+dds3ProcessID_t *scrRunScriptEx(u32 priority, const scrHeader_t *header,
+    const scrTypeTable_t *procedureSection, const scrProcTable_t *procedures, const scrLabelTable_t *labels,
     const scrCode_u *instructions, struct ItfMesSub *auxiliaryData, const char *strings, ScrProcedureIndex procedureIndex)
 {
     return scrStartScriptProcess(priority, bfContextCreate(header, procedureSection, procedures, labels, instructions, auxiliaryData, strings, procedureIndex));
 }
 
-scrProcessWork_s *scrCreateProcessAtFirstProcedure(const BfFlw0Header *header, const ScrSection *procedureSection,
-    const ScrProcedure *procedures, const ScrLabel *labels, const scrCode_u *instructions,
+scrProcessWork_s *scrCreateProcessAtFirstProcedure(const scrHeader_t *header, const scrTypeTable_t *procedureSection,
+    const scrProcTable_t *procedures, const scrLabelTable_t *labels, const scrCode_u *instructions,
     struct ItfMesSub *auxiliaryData, const char *strings)
 {
     return bfContextCreate(header, procedureSection, procedures, labels, instructions, auxiliaryData, strings, 0);
@@ -102,7 +102,7 @@ extern void scrUnlinkHandle(scrProcessWork_s *process);
 
 /* Log the process name, release its VM buffers and resource, then unlink and free it. */
 void scrProcDestroyTask(scrProcessWork_s *process) {
-    evtPrintDeveloperConsoleMessage("end <%s>\n", process->procedures[process->procedureIndex].name);
+    evtPrintDeveloperConsoleMessage("end <%s>\n", process->procedures[process->procedureIndex].Name);
     if (process->localInt != NULL) {
         sdfChipFreeDirect(process->localInt);
     }
@@ -151,12 +151,12 @@ ScrProcedureStartResult scrStartProcessProcedure(scrProcessWork_s *process,
 {
     s32 cursor;
 
-    if (procedureIndex < 0 || procedureIndex >= process->procedureSection->count) {
+    if (procedureIndex < 0 || procedureIndex >= process->procedureSection->ItemCount) {
         return SCR_PROCEDURE_START_INVALID_INDEX;
     }
-    for (cursor = 0; (process->name[cursor] = process->procedures[procedureIndex].name[cursor]) != 0; cursor++) {
+    for (cursor = 0; (process->name[cursor] = process->procedures[procedureIndex].Name[cursor]) != 0; cursor++) {
     }
-    process->pc = process->procedures[procedureIndex].addr;
+    process->pc = process->procedures[procedureIndex].CodeAddress;
     process->sp = 0;
     {
         scrStackData_u *stackValue = process->stackValues;
@@ -187,27 +187,27 @@ scrProcessWork_s *scrSearchScriptName(const char *name) {
 }
 
 /* Index of the named procedure in the FLW0 procedure section, or -1. */
-ScrProcedureIndex scrSearchProcedureName(const BfFlw0Header *header, const char *procedureName) {
-    const ScrProcedure *procedures = NULL;
-    const ScrSection *sections;
+ScrProcedureIndex scrSearchProcedureName(const scrHeader_t *header, const char *procedureName) {
+    const scrProcTable_t *procedures = NULL;
+    const scrTypeTable_t *sections;
     s32 sectionIndex;
     ScrProcedureIndex procedureIndex;
 
     if (header == NULL) {
         return SCR_PROCEDURE_INDEX_NOT_FOUND;
     }
-    sections = header->sections;
-    for (sectionIndex = 0; sectionIndex < header->sectionCount; sectionIndex++) {
-        if (sections[sectionIndex].type == BF_FLW0_SECTION_PROCEDURES) {
-            procedures = (const ScrProcedure *)((const u8 *)header + sections[sectionIndex].offset);
+    sections = (const scrTypeTable_t *)(header + 1);
+    for (sectionIndex = 0; sectionIndex < header->TypeTableCount; sectionIndex++) {
+        if (sections[sectionIndex].Type == SCR_DATATYPE_PROCTABLE) {
+            procedures = (const scrProcTable_t *)((const u8 *)header + sections[sectionIndex].ItemAddress);
             break;
         }
     }
     if (procedures == NULL) {
         return SCR_PROCEDURE_INDEX_NOT_FOUND;
     }
-    for (procedureIndex = 0; procedureIndex < sections[sectionIndex].count; procedureIndex++) {
-        if (strcmp(procedures[procedureIndex].name, procedureName) == 0) {
+    for (procedureIndex = 0; procedureIndex < sections[sectionIndex].ItemCount; procedureIndex++) {
+        if (strcmp(procedures[procedureIndex].Name, procedureName) == 0) {
             return procedureIndex;
         }
     }

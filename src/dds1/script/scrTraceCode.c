@@ -224,7 +224,7 @@ ScrOpcodeHandlerResult CodeFunc_End(scrProcessWork_s *scr)
 
 ScrOpcodeHandlerResult CodeFunc_Jump(scrProcessWork_s *scr)
 {
-    scr->pc = scr->procedures[scr->instructions[scr->pc].s.s1].addr;
+    scr->pc = scr->procedures[scr->instructions[scr->pc].s.s1].CodeAddress;
     return SCR_OPCODE_HANDLER_RESULT_CONTINUE;
 }
 
@@ -232,7 +232,7 @@ ScrOpcodeHandlerResult CodeFunc_Jump(scrProcessWork_s *scr)
 ScrOpcodeHandlerResult CodeFunc_Call(scrProcessWork_s *scr)
 {
     PushRet(scr, scr->pc);
-    scr->pc = scr->procedures[scr->instructions[scr->pc].s.s1].addr;
+    scr->pc = scr->procedures[scr->instructions[scr->pc].s.s1].CodeAddress;
     return SCR_OPCODE_HANDLER_RESULT_CONTINUE;
 }
 
@@ -244,7 +244,7 @@ ScrOpcodeHandlerResult CodeFunc_Run(scrProcessWork_s *scr)
 
 ScrOpcodeHandlerResult CodeFunc_Goto(scrProcessWork_s *scr)
 {
-    scr->pc = scr->labels[scr->instructions[scr->pc].s.s1].addr;
+    scr->pc = scr->labels[scr->instructions[scr->pc].s.s1].CodeAddress;
     return SCR_OPCODE_HANDLER_RESULT_CONTINUE;
 }
 
@@ -577,7 +577,7 @@ ScrOpcodeHandlerResult CodeFunc_IF(scrProcessWork_s *scr)
     if (conditionIsTruthy != 0)
         scr->pc++;
     else
-        scr->pc = scr->labels[scr->instructions[scr->pc].s.s1].addr;
+        scr->pc = scr->labels[scr->instructions[scr->pc].s.s1].CodeAddress;
     return SCR_OPCODE_HANDLER_RESULT_CONTINUE;
 }
 
@@ -692,11 +692,11 @@ scrProcessWork_s *scrSetFloatReturnValue(f32 retVal)
 }
 
 ScrProgramCounter scrGetProcedureCodeAddress(ScrProcedureIndex procedureIndex) {
-    return nowpwork->procedures[procedureIndex].addr;
+    return nowpwork->procedures[procedureIndex].CodeAddress;
 }
 
 ScrProgramCounter scrGetLabelCodeAddress(ScrLabelIndex labelIndex) {
-    return nowpwork->labels[labelIndex].addr;
+    return nowpwork->labels[labelIndex].CodeAddress;
 }
 
 ScrProgramCounter scrGetCodePointer(void) {
