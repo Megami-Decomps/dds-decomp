@@ -365,10 +365,10 @@ typedef struct sdfGrOt_t {
     struct sdfGrOt_t *next; /* 0x00 */
     sdfDrawTag_t *tagHead;       /* 0x04 */
     sdfDrawTag_t *tagTail;        /* 0x08 */
-    u32 noSortTag;
+    sdfDrawTag_t *noSortTag; /* name unconfirmed; sdfGrOtInit zeroes it */
     void (*regFunc)(struct sdfGrOt_t *, sdfDrawTag_t *);      /* 0x10 */
-    s32 (*callbackFunc)(struct sdfGrOt_t *, s32, sdfDrawTag_t *); /* 0x14 */
-    u32 data;
+    void *callbackFunc;
+    void *data; /* name unconfirmed; sdfGrOtInit zeroes it */
     u32 pad;
 } sdfGrOt_t;
 
@@ -577,20 +577,18 @@ typedef char sdfMatPacket_t_cmd_call_spec_at_0x98[
     ((u32)&((sdfMatPacket_t *)0)->cmd_call_spec == 0x98) ? 1 : -1];
 typedef char sdfMatPacket_t_cmd_call_kind_at_0x9C[
     ((u32)&((sdfMatPacket_t *)0)->cmd_call_kind == 0x9C) ? 1 : -1];
-typedef char sdfMat_t_id_at_0x00[
-    ((u32)&((sdfMat_t *)0)->id == 0x00) ? 1 : -1];
 typedef char sdfMat_t_flags_at_0x04[
     ((u32)&((sdfMat_t *)0)->flags == 0x04) ? 1 : -1];
 typedef char sdfMat_t_duty_at_0x06[
     ((u32)&((sdfMat_t *)0)->duty == 0x06) ? 1 : -1];
+typedef char sdfMat_t_packet_at_0x08[
+    ((u32)&((sdfMat_t *)0)->packet == 0x08) ? 1 : -1];
 typedef char sdfMat_t_ambient_at_0x10[
     ((u32)&((sdfMat_t *)0)->ambient == 0x10) ? 1 : -1];
 typedef char sdfMat_t_diffuse_at_0x14[
     ((u32)&((sdfMat_t *)0)->diffuse == 0x14) ? 1 : -1];
-typedef char sdfMat_t_constant_at_0x1C[
-    ((u32)&((sdfMat_t *)0)->constant == 0x1C) ? 1 : -1];
-typedef char sdfMat_t_specular_at_0x20[
-    ((u32)&((sdfMat_t *)0)->specular == 0x20) ? 1 : -1];
+typedef char sdfMat_t_multiTexDiffuse_at_0x18[
+    ((u32)&((sdfMat_t *)0)->multiTexDiffuse == 0x18) ? 1 : -1];
 typedef char sdfMat_t_specularParm_at_0x24[
     ((u32)&((sdfMat_t *)0)->specularParm == 0x24) ? 1 : -1];
 typedef char sdfMat_t_refmap_at_0x28[
@@ -599,10 +597,14 @@ typedef char sdfMat_t_texHandle_at_0x2C[
     ((u32)&((sdfMat_t *)0)->texHandle == 0x2C) ? 1 : -1];
 typedef char sdfMat_t_multiTexHandle_at_0x30[
     ((u32)&((sdfMat_t *)0)->multiTexHandle == 0x30) ? 1 : -1];
+typedef char sdfMat_t_multiTexMethod_at_0x34[
+    ((u32)&((sdfMat_t *)0)->multiTexMethod == 0x34) ? 1 : -1];
 typedef char sdfMat_t_uvwParm_at_0x38[
     ((u32)&((sdfMat_t *)0)->uvwParm == 0x38) ? 1 : -1];
 typedef char sdfMat_t_multiTexUvwParm_at_0x3C[
     ((u32)&((sdfMat_t *)0)->multiTexUvwParm == 0x3C) ? 1 : -1];
+typedef char sdfMat_t_fdBias_at_0x40[
+    ((u32)&((sdfMat_t *)0)->fdBias == 0x40) ? 1 : -1];
 typedef char sdfMat_t_fdSoften_at_0x44[
     ((u32)&((sdfMat_t *)0)->fdSoften == 0x44) ? 1 : -1];
 
