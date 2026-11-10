@@ -11563,13 +11563,13 @@ semaphore. It ignores the passed device/callback context and returns zero.
 `SdfFileRpcServerThreadProc` registers the synchronous stream dispatcher, loads
 `SDFIOPFL.IRX`, wakes its creator and enters the RPC loop.
 
-`sndGetTrackBalanceFirstComponent` and `sndGetTrackBalanceSecondComponent` name only their
+`sdfSndGetTrackBalanceFirstComponent` and `sdfSndGetTrackBalanceSecondComponent` name only their
 observable arithmetic roles in the nonnegative balance query.
-`sndGetMidiChannelTable` returns the channel-array address at the MIDI state
+`sdfSndGetMidiChannelTable` returns the channel-array address at the MIDI state
 prefix, established by `SndWork` layout assertions and its startup initializer;
 the existing game-specific return types remain unchanged.
-`sndGetMidiStateWordPair` retains the opaque adjacent-word semantics, while
-`sndCopyGroupedMidiStateBytes` packs the two 24-byte groups into caller storage.
+`sdfSndGetMidiStateWordPair` retains the opaque adjacent-word semantics, while
+`sdfSndCopyGroupedMidiStateBytes` packs the two 24-byte groups into caller storage.
 No voice, pause, or playback interpretation is inferred.
 
 DDS1's direct fixed-size icon renderer now shares DDS2's established

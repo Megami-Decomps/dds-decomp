@@ -8851,14 +8851,14 @@
 0x002E94B0	sdfSndSendChannelControlCommand	inferred	SMT3HD name via SLUS_209.11 0x002C1E10, SMT3 sdfSound prefix (was sndSendChannelControlCommand); was sndSendChannelControlCommand
 0x002E94E0	sdfSndSendChannelGroupCommand140	inferred	SMT3HD name via SLUS_209.11 0x002C1E40, SMT3 sdfSound prefix (was sndSendChannelGroupCommand140); was sndSendChannelGroupCommand140
 0x002E9510	sdfSndSendChannelGroupCommand150	inferred	SMT3HD name via SLUS_209.11 0x002C1E70, SMT3 sdfSound prefix (was sndSendChannelGroupCommand150); was sndSendChannelGroupCommand150
-0x002E9540	sndReleaseMidiTrack	inferred	snd sound tasks and playback in game/code_002E9140.c
-0x002E9598	sndGetTrackBalanceFirstComponent	inferred	Returns raw byte 0x4 from the indexed LastLoad record; the sibling getter returns byte 0x5. No callers currently have recovered C names, so the two component roles remain positional.
-0x002E95B0	sndGetTrackBalanceSecondComponent	inferred	Returns raw byte 0x5 from the indexed LastLoad record; the sibling getter returns byte 0x4. No callers currently have recovered C names, so the two component roles remain positional.
-0x002E95C8	sndGetNonnegativeEntryBalance	inferred	Returns the nonnegative difference between two sound-system entry counters. [names_reviewed16.tsv]
-0x002E95F0	sndGetMidiChannelTable	inferred	confidence=high; returns sdfSndMap+0x10, the channels array identified by SndWork layout assertions and startup initialization; existing return type retained; DDS2 twin 0x00342498. [Namer1 naming batch 44]
-0x002E9600	sndGetTrackSlotTable	inferred	confidence=high; matched-C; src/dds1/game/code_002E9140.c:204:func_002E9600; confidence=high; matched-C; src/dds1/game/code_002E9140.c:204:func_002E9600; Returns LastLoad unchanged; semantic DDS2 counterpart is already sndGetTrackSlotTable in game/code_00341FE8.c.; source=names_R_Names36.tsv:13 [names_qp11.tsv]
-0x002E9610	sndGetMidiStateWordPair	inferred	confidence=high; returns the opaque MIDI word at +0x208 and optionally writes the adjacent +0x20C word; meanings remain opaque; DDS2 twin 0x003424B8. [Namer1 naming batch 44]
-0x002E9630	sndCopyGroupedMidiStateBytes	inferred	confidence=high; packs two 24-byte state groups into caller storage, ignoring NULL output; DDS2 twin 0x003424D8. [Namer1 naming batch 44]
+0x002E9540	sdfSndReleaseMidiTrack	inferred	SMT3HD name via SLUS_209.11 0x002C1EA0, SMT3 sdfSound prefix (was sndReleaseMidiTrack); was sndReleaseMidiTrack
+0x002E9598	sdfSndGetTrackBalanceFirstComponent	inferred	SMT3HD name via SLUS_209.11 0x002C1EF8, SMT3 sdfSound prefix (was sndGetTrackBalanceFirstComponent); was sndGetTrackBalanceFirstComponent
+0x002E95B0	sdfSndGetTrackBalanceSecondComponent	inferred	SMT3HD name via SLUS_209.11 0x002C1F10, SMT3 sdfSound prefix (was sndGetTrackBalanceSecondComponent); was sndGetTrackBalanceSecondComponent
+0x002E95C8	sdfSndGetNonnegativeEntryBalance	inferred	SMT3HD name via SLUS_209.11 0x002C1F28, SMT3 sdfSound prefix (was sndGetNonnegativeEntryBalance); was sndGetNonnegativeEntryBalance
+0x002E95F0	sdfSndGetMidiChannelTable	inferred	SMT3HD name via SLUS_209.11 0x002C1F50, SMT3 sdfSound prefix (was sndGetMidiChannelTable); was sndGetMidiChannelTable
+0x002E9600	sdfSndGetTrackSlotTable	inferred	SMT3HD name via SLUS_209.11 0x002C1F60, SMT3 sdfSound prefix (was sndGetTrackSlotTable); was sndGetTrackSlotTable
+0x002E9610	sdfSndGetMidiStateWordPair	inferred	SMT3HD name via SLUS_209.11 0x002C1F70, SMT3 sdfSound prefix (was sndGetMidiStateWordPair); was sndGetMidiStateWordPair
+0x002E9630	sdfSndCopyGroupedMidiStateBytes	inferred	SMT3HD name via SLUS_209.11 0x002C1F90, SMT3 sdfSound prefix (was sndCopyGroupedMidiStateBytes); was sndCopyGroupedMidiStateBytes
 0x002E9690	p2sdPlayBGMFade	inferred	SMT3HD name via SLUS_209.11 0x002C1FF0, reloc-identical; was sndStartTrackExtended
 0x002E96D8	p2sdStopBGM	inferred	SMT3HD name via SLUS_209.11 0x002C2070, reloc-identical; was sndReleaseTrackHandle
 0x002E9708	p2sdBgmVolDown	inferred	SMT3HD name via SLUS_209.11 0x002C20A0, reloc-identical; was sndStartReducedBgm
@@ -8868,16 +8868,17 @@
 0x002E97E0	p2sdGetPcmState	inferred	SMT3HD name via SLUS_209.11 0x002C2178, shared-hash-in-run; was sdfSoundIsCommandBusy
 0x002E97E8	p2sdSyncSound	inferred	SMT3HD name via SLUS_209.11 0x002C2180, shared-hash-in-run; was sdfSoundStopNamedPlayback
 0x002E9810	sdfSndSendChannelGroupCommand110	inferred	SMT3HD name via SLUS_209.11 0x002C21A8, SMT3 sdfSound prefix (was sndSendChannelGroupCommand110); was sndSendChannelGroupCommand110
-0x002E9840	sdfSoundSetChannelCount	inferred	Clamps a channel count to one through sixteen and sends its encoded sound command.
+0x002E9840	sdfSndSetChannelCount	inferred	SMT3HD name via SLUS_209.11 0x002C21D8, SMT3 sdfSound prefix (was sdfSoundSetChannelCount); was sdfSoundSetChannelCount
 0x002E9880	p2sdSetPcmCallback	inferred	SMT3HD name via SLUS_209.11 0x002C2218, reloc-identical; was sdfSoundTryQueueCommand
 0x002E98A0	p2sdPlayPcm	inferred	SMT3HD name via SLUS_209.11 0x002C2238, reloc-identical; was sndTrySendChannelGroupCommand120
+0x002E98E8	sdfSndGetCommandStatus	inferred	SMT3HD name via SLUS_209.11 0x002C2280, SMT3 sdfSound prefix (was sdfSoundGetCommandStatus); was sdfSoundGetCommandStatus
 0x002E98F0	p2sdSyncMovie	inferred	SMT3HD name via SLUS_209.11 0x002C2288, shared-hash-in-run; was sdfSoundStopMoviePlayback
 0x002E9918	sdfSndSendChannelGroupCommand110Duplicate	inferred	SMT3HD name via SLUS_209.11 0x002C22B0, SMT3 sdfSound prefix (was sndSendChannelGroupCommand110Duplicate); was sndSendChannelGroupCommand110Duplicate
 0x002E9948	sdfFileRpcCallback	inferred	SMT3HD name via SLUS_209.11 0x002C22E0, reloc-identical; was sdfSoundHandleRpcEvent
 0x002E99A0	sdfFileRpcHandleCmd	inferred	SMT3HD name via SLUS_209.11 0x002C2338, reloc-identical; was sdfSoundHandleRpcRequest
 0x002E9BE8	SifRpcServerThreadProc	inferred	SMT3HD name via SLUS_209.11 0x002C2580, reloc-identical; was sdfSoundStartRpcServer
-0x002E9C80	sdfSoundSetTableEntry	inferred	Sets a sound-table entry; paired getter provides contrast. [names_qp9.tsv]
-0x002E9FB0	sdfSoundGetTableEntry	inferred	copies a sound table entry (13 kinds) out of D_003FE0C0
+0x002E9C80	sdfSndSetTableEntry	inferred	SMT3HD name via SLUS_209.11 0x002C2618, SMT3 sdfSound prefix (was sdfSoundSetTableEntry); was sdfSoundSetTableEntry
+0x002E9FB0	sdfSndGetTableEntry	inferred	SMT3HD name via SLUS_209.11 0x002C27F8, SMT3 sdfSound prefix (was sdfSoundGetTableEntry); was sdfSoundGetTableEntry
 0x002EA2E0	sdfDumpHexLine	inferred	SMT3HD name via SLUS_209.11 0x002C29D0, unique-masked-hash; was sdfPrintHexMemoryDump
 0x002EA448	sdfDumpDmaChain	inferred	SMT3HD name via SLUS_209.11 0x002C2B38, reloc-identical; was sdfPrintDmaChain
 0x002EA5C0	sdfGrFlushOtChain	inferred	SMT3HD name via SLUS_209.11 0x002C2CB0, unique-masked-hash; was func_002EA5C0

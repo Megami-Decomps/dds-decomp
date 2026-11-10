@@ -1789,7 +1789,7 @@ extern char D_0042A348[];
 extern char D_0042A380[];
 
 extern u32 D_00437AD0;
-extern u32 sdfSoundGetCommandStatus(void);
+extern u32 sdfSndGetCommandStatus(void);
 extern SdfMovieDescriptor mnuMoviePlaybackDescriptor;
 extern char mnuMovieRestartFileNameBuffer[];
 extern char D_0042A3B0[];
@@ -1821,7 +1821,7 @@ s32 mnuRestartMovieStreamAfterStop(dds3ProcessID_t *task) {
         }
         return -1;
     }
-    if (sdfSoundGetCommandStatus() == 0) {
+    if (sdfSndGetCommandStatus() == 0) {
         movie = &mnuMovieDrawContext;
         movieOpenStream(movie, &mnuMoviePlaybackDescriptor, mnuMovieRestartFileNameBuffer);
         movie->soundNode.textureHead = D_00437AD8;

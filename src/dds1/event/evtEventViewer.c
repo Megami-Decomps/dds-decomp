@@ -2136,7 +2136,7 @@ void evtViewerCountFlaggedUpdates(evtViewerInfo_t *viewer) {
 extern s32 campAnyPackedFlagSet(evtViewerInfo_t *scene);
 extern ScrCommandResult scrCommandIsProcessControlFlagClear(void);
 extern void mnuReleaseCampSceneRegisteredIds(evtViewerInfo_t *viewer);
-extern void sdfSoundSetChannelCount(u32 channels);
+extern void sdfSndSetChannelCount(u32 channels);
 void evtViewerCleanupMessageWindow(evtViewerInfo_t *viewer);
 
 void evtEventViewerStartEndCountdown(evtViewerInfo_t *viewer) {
@@ -2164,7 +2164,7 @@ void evtEventViewerStartEndCountdown(evtViewerInfo_t *viewer) {
     if (mnuQueryTitleSoundBusy() == MNU_TITLE_SOUND_BUSY) {
         mnuStopTitleVoicePlayback();
     } else if (viewer->timedActive == 1) {
-        sdfSoundSetChannelCount(10);
+        sdfSndSetChannelCount(10);
     }
     if (fldTitleIsActive() == 1) {
         fldSetTitleDrawMode(0);

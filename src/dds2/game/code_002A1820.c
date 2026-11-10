@@ -914,7 +914,7 @@ extern s32 mnuUpdateMovieMenuInputState(void);
 extern void mnuResetTitleMovieMenuStateAndStartTrack(void);
 extern void mnuStartTitleMovieDraw(void);
 extern void p2sdStopBGM(u32);
-extern void sdfSoundSetChannelCount(u32);
+extern void sdfSndSetChannelCount(u32);
 extern void p2sdPlayBGMFade(s32);
 extern void dds3AdminiCallSequence(s32, const void *, u32, s32);
 extern void mnuRestartRuntimeAfterViewer(s32);
@@ -1116,7 +1116,7 @@ KwlnTaskUpdateResult mnuUpdateTitleMenuTask(dds3ProcessID_t *task) {
             titleWork->state = 18;
             titleWork->cursor = 0;
             dds3FadeOut(0, 0, 0, 0x16);
-            sdfSoundSetChannelCount(0x2D);
+            sdfSndSetChannelCount(0x2D);
             titleWork->movieOpened = 1;
         }
         if (mnuIsMoviePlaybackFinished() != SDF_MOVIE_COMPLETION_INCOMPLETE) {

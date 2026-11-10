@@ -14,18 +14,6 @@ typedef void *(*sceSifRpcFunc)(s32 function, void *request, s32 size);
 
 #define SND_VOICE_IOP_BYTES 0x3B600
 
-#define p2sd_2C1EA0 sndReleaseMidiTrack
-#define p2sd_2C1EF8 sndGetTrackBalanceFirstComponent
-#define p2sd_2C1F10 sndGetTrackBalanceSecondComponent
-#define p2sd_2C1F28 sndGetNonnegativeEntryBalance
-#define p2sd_2C1F50 sndGetMidiChannelTable
-#define p2sd_2C1F60 sndGetTrackSlotTable
-#define p2sd_2C1F70 sndGetMidiStateWordPair
-#define p2sd_2C1F90 sndCopyGroupedMidiStateBytes
-#define p2sd_2C21D8 sdfSoundSetChannelCount
-#define p2sd_2C2280 sdfSoundGetCommandStatus
-#define sdf_2C2618 sdfSoundSetTableEntry
-#define sdf_2C27F8 sdfSoundGetTableEntry
 
 struct sdfGsMemSlice_t;
 
@@ -831,7 +819,7 @@ u64 sdfSndSendChannelGroupCommand150(u8 aCh)
     return sdfSndSendSyncCmd(((aCh >> 3) & 0xF) | 0x150, 0, NULL, 0);
 }
 
-void p2sd_2C1EA0(s32 id) {
+void sdfSndReleaseMidiTrack(s32 id) {
     u32 packet[4];
     if (p2sdLoadCheckMidi(id) != 0) {
         packet[0] = id;
@@ -843,17 +831,17 @@ void p2sd_2C1EA0(s32 id) {
     }
 }
 
-u8 p2sd_2C1EF8(s32 aIndex)
+u8 sdfSndGetTrackBalanceFirstComponent(s32 aIndex)
 {
     return LastLoad[aIndex].unk4;
 }
 
-u8 p2sd_2C1F10(s32 aIndex)
+u8 sdfSndGetTrackBalanceSecondComponent(s32 aIndex)
 {
     return LastLoad[aIndex].unk5;
 }
 
-s32 p2sd_2C1F28(s32 aIndex)
+s32 sdfSndGetNonnegativeEntryBalance(s32 aIndex)
 {
     s32 remaining = LastLoad[aIndex].unk4 - LastLoad[aIndex].unk5;
 
@@ -863,17 +851,17 @@ s32 p2sd_2C1F28(s32 aIndex)
     return 0;
 }
 
-u8 *p2sd_2C1F50(void)
+u8 *sdfSndGetMidiChannelTable(void)
 {
     return D_0047AA50;
 }
 
-p2sdLoadEntry_t *p2sd_2C1F60(void)
+p2sdLoadEntry_t *sdfSndGetTrackSlotTable(void)
 {
     return LastLoad;
 }
 
-u32 p2sd_2C1F70(u32 *aOutValue)
+u32 sdfSndGetMidiStateWordPair(u32 *aOutValue)
 {
     if (aOutValue != NULL) {
         *aOutValue = sdfSndWork.opaque1DC;
@@ -882,7 +870,7 @@ u32 p2sd_2C1F70(u32 *aOutValue)
 }
 
 /* Pack two 24-byte MIDI state groups into out; NULL leaves the state untouched. */
-void p2sd_2C1F90(u8 *out) {
+void sdfSndCopyGroupedMidiStateBytes(u8 *out) {
     s32 group;
     if (out == NULL) {
         return;
@@ -952,7 +940,7 @@ void sdfSndSendChannelGroupCommand110(u8 channel) {
     sdfSndSendSyncCmd(((channel >> 3) & 0xF) | 0x110, 0, 0, 0);
 }
 
-s32 p2sd_2C21D8(u32 aCh)
+s32 sdfSndSetChannelCount(u32 aCh)
 {
     if (aCh > 16) {
         aCh = 16;
@@ -983,7 +971,7 @@ s32 p2sdPlayPcm(u8 channel) {
     return 0;
 }
 
-u32 p2sd_2C2280(void)
+u32 sdfSndGetCommandStatus(void)
 {
     return p2sdPcmBusy;
 }
@@ -1150,7 +1138,7 @@ void SifRpcServerThreadProc(void)
 }
 
 
-void sdf_2C2618(u32 kind, const u8 *src)
+void sdfSndSetTableEntry(u32 kind, const u8 *src)
 {
     u8 *table;
     u8 *dst;
@@ -1253,7 +1241,7 @@ void sdf_2C2618(u32 kind, const u8 *src)
     sdfSndSendSyncCmd(0x1F0, 0, 0, 0);
 }
 
-void sdf_2C27F8(u32 kind, u8 *dst)
+void sdfSndGetTableEntry(u32 kind, u8 *dst)
 {
     u8 *table;
     u8 *src;

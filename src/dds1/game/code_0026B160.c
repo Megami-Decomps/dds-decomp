@@ -56,7 +56,7 @@ extern void mnuDrawMovieMenuSpriteSlot18(s32 volume);
 extern u8 mnuIsAnyMenuInputPressed(void);
 extern void dds3PlayMovieByIndex(s32 index);
 extern u8 mnuGetMoviePlaybackMode(void);
-extern void sdfSoundSetChannelCount(u32 channelCount);
+extern void sdfSndSetChannelCount(u32 channelCount);
 extern void mnuRequestDefaultMovieResource(void);
 extern void mnuDrawMovieMenuSpriteLayers(s32 context);
 extern void mnuResetMovieMenuOpeningAnimation(void);
@@ -261,7 +261,7 @@ KwlnTaskUpdateResult mnuUpdateMovieMenuTask(dds3ProcessID_t *task) {
             mnuMovieMenuState->state = 0x11;
             mnuMovieMenuState->cursor = 0;
             dds3FadeOut(0, 0, 0, 0x16);
-            sdfSoundSetChannelCount(0x2D);
+            sdfSndSetChannelCount(0x2D);
             mnuMovieMenuState->movieSkipped = 1;
         }
         if (mnuIsMoviePlaybackFinished() != SDF_MOVIE_COMPLETION_INCOMPLETE) {

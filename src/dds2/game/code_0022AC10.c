@@ -414,7 +414,7 @@ extern char D_0041B710[]; /* "btl:BSE free\n" */
 extern SndPackedTrackLoadStatus p2sdLoadCheckMidi(s32);
 extern void p2sdLoadSMGFile(s32);
 
-extern void sndReleaseMidiTrack(s32);
+extern void sdfSndReleaseMidiTrack(s32);
 
 /* Reset event state and request the scene's script/task resources.
  * The raw unsigned event word is deliberately converted to signed 16-bit.
@@ -454,11 +454,11 @@ void btlRequestSceneEventResources(void) {
     dds3LinkProcess(battleState->scriptOwner, eventTask);
     battleState->sequenceHandle = BTL_EVENT_SEQUENCE_BASE + ((battleState->eventPackId - BTL_EVENT_SEQUENCE_ID_BIAS) << 16);
     if (p2sdLoadCheckMidi(battleState->sequenceHandle) != SND_PACKED_TRACK_LOAD_NOT_PRESENT) {
-        sndReleaseMidiTrack(battleState->sequenceHandle);
+        sdfSndReleaseMidiTrack(battleState->sequenceHandle);
         btlBossDebugPrintf(D_0041B6F8, battleState->sequenceHandle);
     }
     if (p2sdLoadCheckMidi(0x10000) != SND_PACKED_TRACK_LOAD_NOT_PRESENT) {
-        sndReleaseMidiTrack(0x10000);
+        sdfSndReleaseMidiTrack(0x10000);
         btlBossDebugPrintf(D_0041B710);
     }
     battleState->eventFlags |= 6;

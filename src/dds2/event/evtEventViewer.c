@@ -2339,7 +2339,7 @@ extern u32 mnuShouldBlockViewerEndCountdown(void);
 extern ScrCommandResult scrCommandIsProcessControlFlagClear(void);
 extern void mnuReleaseCampSceneRegisteredIds(evtViewerInfo_t *viewer);
 extern void mnuStopTitleVoicePlayback(void);
-extern void sdfSoundSetChannelCount(u32 channels);
+extern void sdfSndSetChannelCount(u32 channels);
 extern u8 fldTitleIsActive(void);
 extern void fldSetTitleDrawMode(u32 active);
 void evtViewerCleanupMessageWindow(evtViewerInfo_t *viewer);
@@ -2369,7 +2369,7 @@ void evtEventViewerStartEndCountdown(evtViewerInfo_t *viewer) {
     if (mnuQueryTitleSoundBusy() == MNU_TITLE_SOUND_BUSY) {
         mnuStopTitleVoicePlayback();
     } else if (viewer->timedActive == 1) {
-        sdfSoundSetChannelCount(10);
+        sdfSndSetChannelCount(10);
     }
     if (fldTitleIsActive() == 1) {
         fldSetTitleDrawMode(0);
