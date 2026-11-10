@@ -132,7 +132,7 @@ enum SdfTexResourceAllocationMode {
 typedef struct sdfGsMemSlice_t {
     struct sdfGsMemSlice_t *prev; /* 0x00 */
     struct sdfGsMemSlice_t *next; /* 0x04 */
-    u32 type;         /* 0x08: known categories above; unknown values remain valid */
+    s32 type;         /* 0x08: known categories above; unknown values remain valid */
     u32 addr;                   /* 0x0C: VRAM offset in 32-bit words */
     s32 size;                   /* 0x10: range length in 32-bit words */
     s16 w;                  /* 0x14 */
