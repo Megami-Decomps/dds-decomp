@@ -31,9 +31,9 @@ dds3TaskUpdateResult_t evtUpdatePictureWhenFlagged(dds3ProcessID_t *task) {
         if (picture->texture != 0) {
             evtSubmitPictureDrawPacket(picture->texture);
         }
-        return KWLN_TASK_UPDATE_RETAIN_CALLBACK;
+        return DDS3_TASK_UPDATE_RETAIN_CALLBACK;
     }
-    return KWLN_TASK_UPDATE_RETAIN_CALLBACK;
+    return DDS3_TASK_UPDATE_RETAIN_CALLBACK;
 }
 
 /* Drop the picture's texture, then free the task data. */

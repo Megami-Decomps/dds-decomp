@@ -143,22 +143,22 @@ dds3TaskUpdateResult_t evtMotionSeProcess1(dds3ProcessID_t *task) {
 
     motionSeParams = (EvtMotionSeTaskParams *)dds3GetProcessData(task);
     if (dds3GetActiveScene() == NULL) {
-        return KWLN_TASK_UPDATE_FINISH_CALLBACK;
+        return DDS3_TASK_UPDATE_FINISH_CALLBACK;
     }
     motionNode = dds3SearchSceneBasic(dds3GetActiveScene(), motionSeParams->modelKey, EFF_WORLD_KIND_FOLLOW_MODEL);
     if (motionNode == NULL) {
-        return KWLN_TASK_UPDATE_FINISH_CALLBACK;
+        return DDS3_TASK_UPDATE_FINISH_CALLBACK;
     }
     packState = evtGetPackProcessDataView(motionSeParams->eventId);
     if (packState == NULL) {
-        return KWLN_TASK_UPDATE_FINISH_CALLBACK;
+        return DDS3_TASK_UPDATE_FINISH_CALLBACK;
     }
     if (motionSeParams->eventId < 600) {
-        return KWLN_TASK_UPDATE_RETAIN_CALLBACK;
+        return DDS3_TASK_UPDATE_RETAIN_CALLBACK;
     }
     unit = ((EvtMotionSeUnitLink *)motionNode->workdata)->unit;
     if (unit == NULL) {
-        return KWLN_TASK_UPDATE_FINISH_CALLBACK;
+        return DDS3_TASK_UPDATE_FINISH_CALLBACK;
     }
     motionId = mdlGetMotionCtrlr(unit->owner, 0)->motionIndex;
     motionFrame = unit->owner->first->currentFrame;
@@ -176,7 +176,7 @@ dds3TaskUpdateResult_t evtMotionSeProcess1(dds3ProcessID_t *task) {
             }
         }
     }
-    return KWLN_TASK_UPDATE_RETAIN_CALLBACK;
+    return DDS3_TASK_UPDATE_RETAIN_CALLBACK;
 }
 
 /* Free the three-word parameter block owned by the motion-SE task. */
@@ -276,7 +276,7 @@ dds3TaskUpdateResult_t evtTickPackLoad(dds3ProcessID_t *task) {
         evtCheckEventScriptLoaded(packState);
         break;
     }
-    return KWLN_TASK_UPDATE_RETAIN_CALLBACK;
+    return DDS3_TASK_UPDATE_RETAIN_CALLBACK;
 }
 
 extern void fileSyncAll(void);

@@ -563,26 +563,26 @@ void fldDrawMapLabelBanner(); /* no prototype: called here with arguments */
 
 dds3TaskUpdateResult_t fldFieldTaskUpdate(dds3ProcessID_t *task) {
     if (fldProcCampChk() != FLD_CAMP_CHECK_STATE_ENCOUNTER_FLAG_SET) {
-        return KWLN_TASK_UPDATE_RETAIN_CALLBACK;
+        return DDS3_TASK_UPDATE_RETAIN_CALLBACK;
     }
     if (fldProcAmChk() != FLD_SCENE_TRANSITION_GATE_PROCEED) {
-        return KWLN_TASK_UPDATE_RETAIN_CALLBACK;
+        return DDS3_TASK_UPDATE_RETAIN_CALLBACK;
     }
     if (fileMenuTaskExists() != 0) {
-        return KWLN_TASK_UPDATE_RETAIN_CALLBACK;
+        return DDS3_TASK_UPDATE_RETAIN_CALLBACK;
     }
     if (fldTitleIsActive() != 0) {
-        return KWLN_TASK_UPDATE_RETAIN_CALLBACK;
+        return DDS3_TASK_UPDATE_RETAIN_CALLBACK;
     }
     if (fldGlobalBase.deferredExit == FLD_DEFERRED_EXIT_REQUESTED) {
-        return KWLN_TASK_UPDATE_RETAIN_CALLBACK;
+        return DDS3_TASK_UPDATE_RETAIN_CALLBACK;
     }
     if (gFldElvFloorNow != -0x3e7) {
         fldDrawAnimatedFieldBanner(0x80, 0, 0);
     } else {
         fldDrawMapLabelBanner(0);
     }
-    return KWLN_TASK_UPDATE_RETAIN_CALLBACK;
+    return DDS3_TASK_UPDATE_RETAIN_CALLBACK;
 }
 
 dds3TaskUpdateResult_t fldAddressProcess1(dds3ProcessID_t *task) {
@@ -5140,7 +5140,7 @@ dds3TaskUpdateResult_t fldTitleTaskUpdate(dds3ProcessID_t *task) {
             D_00436354 = 1;
             D_00436350 = 0;
         }
-        return KWLN_TASK_UPDATE_RETAIN_CALLBACK;
+        return DDS3_TASK_UPDATE_RETAIN_CALLBACK;
     case 1:
         if (D_00436350 >= 20) {
             alpha = (D_00436350 - 19) * 128 / 15;
@@ -5228,9 +5228,9 @@ dds3TaskUpdateResult_t fldTitleTaskUpdate(dds3ProcessID_t *task) {
         }
         break;
     default:
-        return KWLN_TASK_UPDATE_FINISH_CALLBACK;
+        return DDS3_TASK_UPDATE_FINISH_CALLBACK;
     }
-    return KWLN_TASK_UPDATE_RETAIN_CALLBACK;
+    return DDS3_TASK_UPDATE_RETAIN_CALLBACK;
 }
 
 void fldReleaseTitleTextures(dds3ProcessID_t *task) {

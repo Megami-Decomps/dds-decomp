@@ -1926,7 +1926,7 @@ u32 btlIsNamedBattleTaskRegistered(void) {
 
     task = btlGetTrackedProcess(BTL_TRACKED_PROCESS_MAHEN_PANEL);
     if (task != 0) {
-        if (dds3ExistProcess(task) != KWLN_PROCESS_NOT_REGISTERED) {
+        if (dds3ExistProcess(task) != DDS3_PROCESS_NOT_REGISTERED) {
             task = dds3SearchProcessName(btlMahenPanelTaskNameRef);
             if (task != 0) {
                 return 1;
@@ -1996,7 +1996,7 @@ u32 btlHasRegisteredAnalysisPanelTask(void) {
 
     task = btlGetTrackedProcess(BTL_TRACKED_PROCESS_ANALYSIS_PANEL);
     if (task != 0) {
-        if (dds3ExistProcess(task) != KWLN_PROCESS_NOT_REGISTERED) {
+        if (dds3ExistProcess(task) != DDS3_PROCESS_NOT_REGISTERED) {
             task = dds3SearchProcessName(btlAnalyzPanelTaskNameRef);
             if (task != 0) {
                 return 1;
@@ -2081,7 +2081,7 @@ u32 btlHasRegisteredGuidePanelTask(void) {
 
     task = btlGetTrackedProcess(BTL_TRACKED_PROCESS_GUIDE_PANEL);
     if (task != 0) {
-        if (dds3ExistProcess(task) != KWLN_PROCESS_NOT_REGISTERED) {
+        if (dds3ExistProcess(task) != DDS3_PROCESS_NOT_REGISTERED) {
             task = dds3SearchProcessName(D_003BB3C4);
             if (task != 0) {
                 return 1;
@@ -2130,7 +2130,7 @@ u32 btlHasRegisteredPsechgPanelTask(void) {
 
     task = btlGetTrackedProcess(BTL_TRACKED_PROCESS_PHASE_CHANGE_PANEL);
     if (task != 0) {
-        if (dds3ExistProcess(task) != KWLN_PROCESS_NOT_REGISTERED) {
+        if (dds3ExistProcess(task) != DDS3_PROCESS_NOT_REGISTERED) {
             task = dds3SearchProcessName(D_003BB3BC);
             if (task != 0) {
                 return 1;
@@ -2197,7 +2197,7 @@ u32 btlHasRegisteredSkillNamePanelTask(void) {
 
     task = btlGetTrackedProcess(BTL_TRACKED_PROCESS_SKILL_NAME_PANEL);
     if (task != 0) {
-        if (dds3ExistProcess(task) != KWLN_PROCESS_NOT_REGISTERED) {
+        if (dds3ExistProcess(task) != DDS3_PROCESS_NOT_REGISTERED) {
             task = dds3SearchProcessName(D_003BB3AC);
             if (task != 0) {
                 return 1;
@@ -2256,7 +2256,7 @@ u32 btlHasRegisteredAphNamePanelTask(void) {
 
     task = btlGetTrackedProcess(BTL_TRACKED_PROCESS_APH_NAME_PANEL);
     if (task != 0) {
-        if (dds3ExistProcess(task) != KWLN_PROCESS_NOT_REGISTERED) {
+        if (dds3ExistProcess(task) != DDS3_PROCESS_NOT_REGISTERED) {
             task = dds3SearchProcessName(D_003BB3A8);
             if (task != 0) {
                 return 1;

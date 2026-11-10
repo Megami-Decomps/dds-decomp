@@ -82,9 +82,9 @@ s32 evtLoadArea(s32 area, s32 room)
     } else {
         dds3SetScreenFovy(0.75398216f);
     }
-    dds3SetLight((f32 (*)[4])D_003C8BA0, KWLN_LIGHT_SOURCE_SLOT_0);
-    dds3SetLight((f32 (*)[4])(D_003C8BA0 + 0x10), KWLN_LIGHT_SOURCE_SLOT_1);
-    dds3SetLight((f32 (*)[4])(D_003C8BA0 + 0x20), KWLN_LIGHT_SOURCE_SLOT_2);
+    dds3SetLight((f32 (*)[4])D_003C8BA0, DDS3_LIGHT_SOURCE_SLOT_0);
+    dds3SetLight((f32 (*)[4])(D_003C8BA0 + 0x10), DDS3_LIGHT_SOURCE_SLOT_1);
+    dds3SetLight((f32 (*)[4])(D_003C8BA0 + 0x20), DDS3_LIGHT_SOURCE_SLOT_2);
     dds3SetFog(D_003C8C60);
     dds3SetAmbient((const u128 *)D_003C8C80);
     return 1;
@@ -108,9 +108,9 @@ s32 evtLoadArea_FromMemory(s32 area, s32 room, u8 *resource0Data, u8 *resource1D
     dds3SceneBasicMakeScene_FromMemory(worldObject, area, room, resource0Data, resource1Data, textureOffsets, flags);
     evtSetTestCamera();
     dds3SetScreenFovy(0.75398216f);
-    dds3SetLight((f32 (*)[4])D_003C8BA0, KWLN_LIGHT_SOURCE_SLOT_0);
-    dds3SetLight((f32 (*)[4])(D_003C8BA0 + 0x10), KWLN_LIGHT_SOURCE_SLOT_1);
-    dds3SetLight((f32 (*)[4])(D_003C8BA0 + 0x20), KWLN_LIGHT_SOURCE_SLOT_2);
+    dds3SetLight((f32 (*)[4])D_003C8BA0, DDS3_LIGHT_SOURCE_SLOT_0);
+    dds3SetLight((f32 (*)[4])(D_003C8BA0 + 0x10), DDS3_LIGHT_SOURCE_SLOT_1);
+    dds3SetLight((f32 (*)[4])(D_003C8BA0 + 0x20), DDS3_LIGHT_SOURCE_SLOT_2);
     dds3SetFog(D_003C8C60);
     dds3SetAmbient((const u128 *)D_003C8C80);
     while (sdfDelayedResrcCheck() != 0) {
@@ -134,7 +134,7 @@ void evtKillFieldScript(void) {
     dds3TaskQueueIndex_t taskIndex;
     dds3ProcessID_t *task;
 
-    for (taskState = KWLN_TASK_DELAYED_START; (s32)taskState < KWLN_TASK_DESTROY_PENDING; taskState++) {
+    for (taskState = DDS3_TASK_DELAYED_START; (s32)taskState < DDS3_TASK_DESTROY_PENDING; taskState++) {
     restartStateScan:
         for (taskIndex = 0; taskIndex < dds3GetProcessCount(taskState); taskIndex++) {
             task = dds3SearchProcessNumber(taskState, taskIndex);

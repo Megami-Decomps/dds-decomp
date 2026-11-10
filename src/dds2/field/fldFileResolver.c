@@ -3547,7 +3547,7 @@ dds3TaskUpdateResult_t fldEncProc(dds3ProcessID_t *task) {
             btlUpdateRuntimeFadeState();
         }
     }
-    return KWLN_TASK_UPDATE_RETAIN_CALLBACK;
+    return DDS3_TASK_UPDATE_RETAIN_CALLBACK;
 }
 
 extern void p2sdPlaySE(s32 sequence, s32 volume, s32 pan);

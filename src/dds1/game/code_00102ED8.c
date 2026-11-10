@@ -218,24 +218,24 @@ static inline void dds3SetNamedSlotState(s32 index, s32 kind, dds3ProcessFunc_t 
     D_003C1C90[index].userValue = userValue;
 }
 
-#define KWLN_PAD_INPUTS_PER_SET 16
-#define KWLN_PAD_REPEAT_BIT 2
-#define KWLN_ALT_CONFIRM_INPUT 0x11
-#define KWLN_ALT_CANCEL_INPUT 0x13
-#define KWLN_PAD_SMALL_MOTOR 0
-#define KWLN_PAD_LARGE_MOTOR 1
-#define KWLN_PAD_MOTOR_COUNT 2
-#define KWLN_DEBUG_RUMBLE_PERIOD 0x4650
-#define KWLN_DEBUG_SMALL_PULSE_FRAMES 0xF
-#define KWLN_DEBUG_LARGE_PULSE_FRAMES 30
-#define KWLN_DEBUG_RUMBLE_VARIATION 150
-#define KWLN_DEBUG_RUMBLE_BASE 100
-#define KWLN_SHARED_RANDOM_SEED 0x12345678
-#define KWLN_CELL_COLUMN_SPAN 0xC0
-#define KWLN_CELL_ROW_SPAN 0x60
-#define KWLN_PREVIEW_MAX_TEXELS 0x100
-#define KWLN_PREVIEW_WRAP_TEXELS 0x400
-#define KWLN_DIAG_DEPTH 0x0FFFFF80
+#define DDS3_PAD_INPUTS_PER_SET 16
+#define DDS3_PAD_REPEAT_BIT 2
+#define DDS3_ALT_CONFIRM_INPUT 0x11
+#define DDS3_ALT_CANCEL_INPUT 0x13
+#define DDS3_PAD_SMALL_MOTOR 0
+#define DDS3_PAD_LARGE_MOTOR 1
+#define DDS3_PAD_MOTOR_COUNT 2
+#define DDS3_DEBUG_RUMBLE_PERIOD 0x4650
+#define DDS3_DEBUG_SMALL_PULSE_FRAMES 0xF
+#define DDS3_DEBUG_LARGE_PULSE_FRAMES 30
+#define DDS3_DEBUG_RUMBLE_VARIATION 150
+#define DDS3_DEBUG_RUMBLE_BASE 100
+#define DDS3_SHARED_RANDOM_SEED 0x12345678
+#define DDS3_CELL_COLUMN_SPAN 0xC0
+#define DDS3_CELL_ROW_SPAN 0x60
+#define DDS3_PREVIEW_MAX_TEXELS 0x100
+#define DDS3_PREVIEW_WRAP_TEXELS 0x400
+#define DDS3_DIAG_DEPTH 0x0FFFFF80
 
 /* Find an exact NUL-terminated name along the linked slot indices, or return -1. */
 s32 fclEncycFreeEntry(const char *name) {
@@ -271,7 +271,7 @@ s32 fclEncycFreeEntries(const char *name) {
     }
     if (D_003C1C90[slotIndex].kind > 0) {
         if (D_003C1C90[slotIndex].kind < 3) {
-            if (dds3ExistProcess(D_003C1C90[slotIndex].task) == KWLN_PROCESS_REGISTERED) {
+            if (dds3ExistProcess(D_003C1C90[slotIndex].task) == DDS3_PROCESS_REGISTERED) {
                 dds3KillProcess(D_003C1C90[D_003BA85C].task, 1);
             }
         }
@@ -341,7 +341,7 @@ void SelectSub(s32 *scrollOffset, s32 *cursorRow, s32 itemCount, s32 visibleRows
     if (itemCount < 2) {
         return;
     }
-    backwardState = dds3PadButtonState[backwardInput + padSet * KWLN_PAD_INPUTS_PER_SET];
+    backwardState = dds3PadButtonState[backwardInput + padSet * DDS3_PAD_INPUTS_PER_SET];
     if (backwardState < 0) {
         if (scrollOffset == NULL) {
             if (*cursorRow > 0) {
@@ -361,7 +361,7 @@ void SelectSub(s32 *scrollOffset, s32 *cursorRow, s32 itemCount, s32 visibleRows
         } else {
             *cursorRow = itemCount - 1;
         }
-    } else if (dds3PadButtonState[backwardInput + padSet * KWLN_PAD_INPUTS_PER_SET] & KWLN_PAD_REPEAT_BIT) {
+    } else if (dds3PadButtonState[backwardInput + padSet * DDS3_PAD_INPUTS_PER_SET] & DDS3_PAD_REPEAT_BIT) {
         if (scrollOffset == NULL) {
             if (*cursorRow > 0) {
                 (*cursorRow)--;
@@ -372,7 +372,7 @@ void SelectSub(s32 *scrollOffset, s32 *cursorRow, s32 itemCount, s32 visibleRows
             (*scrollOffset)--;
         }
     }
-    forwardState = dds3PadButtonState[forwardInput + padSet * KWLN_PAD_INPUTS_PER_SET];
+    forwardState = dds3PadButtonState[forwardInput + padSet * DDS3_PAD_INPUTS_PER_SET];
     if (forwardState < 0) {
         if (scrollOffset == NULL) {
             if (*cursorRow < visibleRows - 1) {
@@ -388,7 +388,7 @@ void SelectSub(s32 *scrollOffset, s32 *cursorRow, s32 itemCount, s32 visibleRows
             *scrollOffset = 0;
             *cursorRow = 0;
         }
-    } else if (dds3PadButtonState[forwardInput + padSet * KWLN_PAD_INPUTS_PER_SET] & KWLN_PAD_REPEAT_BIT) {
+    } else if (dds3PadButtonState[forwardInput + padSet * DDS3_PAD_INPUTS_PER_SET] & DDS3_PAD_REPEAT_BIT) {
         if (scrollOffset == NULL) {
             if (*cursorRow < visibleRows - 1) {
                 (*cursorRow)++;
@@ -414,10 +414,10 @@ s32 dds3SelectMenu(s32 padSet, s32 secondaryCount, s32 primaryCount, s32 seconda
             return -1;
         }
     } else {
-        if (dds3PadButtonState[KWLN_ALT_CONFIRM_INPUT] < 0) {
+        if (dds3PadButtonState[DDS3_ALT_CONFIRM_INPUT] < 0) {
             return 1;
         }
-        if (dds3PadButtonState[KWLN_ALT_CANCEL_INPUT] < 0) {
+        if (dds3PadButtonState[DDS3_ALT_CANCEL_INPUT] < 0) {
             return -1;
         }
     }
@@ -426,7 +426,7 @@ s32 dds3SelectMenu(s32 padSet, s32 secondaryCount, s32 primaryCount, s32 seconda
 
 /* Append a cell rectangle; rowSpan also supplies the horizontal padding. */
 void dds3ConsPanelTagLink(sdfDrawTag_t *packetList, s32 column, s32 row, s32 columnCount, s32 rowCount) {
-    s32 columnSpan = KWLN_CELL_COLUMN_SPAN, rowSpan = KWLN_CELL_ROW_SPAN;
+    s32 columnSpan = DDS3_CELL_COLUMN_SPAN, rowSpan = DDS3_CELL_ROW_SPAN;
     sdfDrawTagLink(packetList, (u32)dds3PrimFrameRect(column * 0x10 + 0x6FD0, row * 8 + 0x78E8, 0xFEFFFF,
                                            columnCount * columnSpan + rowSpan, rowCount * rowSpan + 0x30,
                                            0x60000000, 0x40806020));
@@ -434,7 +434,7 @@ void dds3ConsPanelTagLink(sdfDrawTag_t *packetList, s32 column, s32 row, s32 col
 
 /* Append the same cell rectangle with caller-selected depth. */
 void dds3ConsPanelTagLinkZ(sdfDrawTag_t *packetList, s32 column, s32 row, s32 columnCount, s32 rowCount, s32 depth) {
-    s32 columnSpan = KWLN_CELL_COLUMN_SPAN, rowSpan = KWLN_CELL_ROW_SPAN;
+    s32 columnSpan = DDS3_CELL_COLUMN_SPAN, rowSpan = DDS3_CELL_ROW_SPAN;
     sdfDrawTagLink(packetList, (u32)dds3PrimFrameRect(column * 0x10 + 0x6FD0, row * 8 + 0x78E8, depth,
                                            columnCount * columnSpan + rowSpan, rowCount * rowSpan + 0x30,
                                            0x60000000, 0x40806020));
@@ -442,9 +442,9 @@ void dds3ConsPanelTagLinkZ(sdfDrawTag_t *packetList, s32 column, s32 row, s32 co
 
 /* Periodically pulses both pad motors, varying the large-motor level. */
 s32 dds3PadVibrationTest(dds3ProcessID_t *task) {
-    if (dds3GetProcessRunTime(task) % KWLN_DEBUG_RUMBLE_PERIOD == 0) {
-        dds3PadVibrationSet(KWLN_PAD_SMALL_MOTOR, 1, KWLN_DEBUG_SMALL_PULSE_FRAMES);
-        dds3PadVibrationSet(KWLN_PAD_LARGE_MOTOR, (u8)(dds3GetRandIntA(0, KWLN_DEBUG_RUMBLE_VARIATION) + KWLN_DEBUG_RUMBLE_BASE), KWLN_DEBUG_LARGE_PULSE_FRAMES);
+    if (dds3GetProcessRunTime(task) % DDS3_DEBUG_RUMBLE_PERIOD == 0) {
+        dds3PadVibrationSet(DDS3_PAD_SMALL_MOTOR, 1, DDS3_DEBUG_SMALL_PULSE_FRAMES);
+        dds3PadVibrationSet(DDS3_PAD_LARGE_MOTOR, (u8)(dds3GetRandIntA(0, DDS3_DEBUG_RUMBLE_VARIATION) + DDS3_DEBUG_RUMBLE_BASE), DDS3_DEBUG_LARGE_PULSE_FRAMES);
     }
     return 0;
 }
@@ -482,12 +482,12 @@ void dds3PadInitialize(void) {
             D_003BA878[port][i] = 0;
         }
     }
-    dds3PadVibrationState[KWLN_PAD_SMALL_MOTOR] = 0;
-    D_003BD698[KWLN_PAD_SMALL_MOTOR] = 0;
-    D_003BD6A0[KWLN_PAD_SMALL_MOTOR] = 0;
-    dds3PadVibrationState[KWLN_PAD_LARGE_MOTOR] = 0;
-    D_003BD698[KWLN_PAD_LARGE_MOTOR] = 0;
-    D_003BD6A0[KWLN_PAD_LARGE_MOTOR] = 0;
+    dds3PadVibrationState[DDS3_PAD_SMALL_MOTOR] = 0;
+    D_003BD698[DDS3_PAD_SMALL_MOTOR] = 0;
+    D_003BD6A0[DDS3_PAD_SMALL_MOTOR] = 0;
+    dds3PadVibrationState[DDS3_PAD_LARGE_MOTOR] = 0;
+    D_003BD698[DDS3_PAD_LARGE_MOTOR] = 0;
+    D_003BD6A0[DDS3_PAD_LARGE_MOTOR] = 0;
 }
 
 extern u8 sdfPadAnalogSticks[8];
@@ -661,22 +661,22 @@ void dds3PadVibrationSet(u32 motor, u8 level, s32 duration) {
     if (fileTestSavedSlotFlags(FILE_CONFIG_OPTION_RUMBLE) == 0) {
         return;
     }
-    if (motor == KWLN_PAD_SMALL_MOTOR) {
+    if (motor == DDS3_PAD_SMALL_MOTOR) {
         if (level != 0) {
             level = 1;
         }
-    } else if (motor >= KWLN_PAD_MOTOR_COUNT) {
-        motor = KWLN_PAD_LARGE_MOTOR;
+    } else if (motor >= DDS3_PAD_MOTOR_COUNT) {
+        motor = DDS3_PAD_LARGE_MOTOR;
     }
-    if (motor == KWLN_PAD_SMALL_MOTOR) {
-        D_003BD698[KWLN_PAD_SMALL_MOTOR] = level;
-        dds3PadVibrationState[KWLN_PAD_SMALL_MOTOR] = level;
+    if (motor == DDS3_PAD_SMALL_MOTOR) {
+        D_003BD698[DDS3_PAD_SMALL_MOTOR] = level;
+        dds3PadVibrationState[DDS3_PAD_SMALL_MOTOR] = level;
     } else {
         D_003BD698[motor] = level;
         kwlnPadStepLargeMotorLevel();
     }
     D_003BD6A0[motor] = duration;
-    if (motor == KWLN_PAD_SMALL_MOTOR) {
+    if (motor == DDS3_PAD_SMALL_MOTOR) {
         sdfPadSetAct0(0, level);
     } else {
         sdfPadSetAct1(0, dds3PadVibrationState[motor]);
@@ -685,35 +685,35 @@ void dds3PadVibrationSet(u32 motor, u8 level, s32 duration) {
 
 /* Clear motor levels and countdowns, then send both zero strengths to pad 0. */
 void kwlnPadResetMotorLevelsAndOutput(void) {
-    dds3PadVibrationState[KWLN_PAD_SMALL_MOTOR] = 0;
-    D_003BD6A0[KWLN_PAD_SMALL_MOTOR] = 0;
-    dds3PadVibrationState[KWLN_PAD_LARGE_MOTOR] = 0;
-    D_003BD6A0[KWLN_PAD_LARGE_MOTOR] = 0;
+    dds3PadVibrationState[DDS3_PAD_SMALL_MOTOR] = 0;
+    D_003BD6A0[DDS3_PAD_SMALL_MOTOR] = 0;
+    dds3PadVibrationState[DDS3_PAD_LARGE_MOTOR] = 0;
+    D_003BD6A0[DDS3_PAD_LARGE_MOTOR] = 0;
     sdfPadSetAct(0, 0, 0);
 }
 
 /* Tick both rumble countdowns; stop expired motors and refresh the active large motor. */
 void dds3UpdateVibrationSlots(void) {
-    s32 largeMotor = KWLN_PAD_LARGE_MOTOR;
+    s32 largeMotor = DDS3_PAD_LARGE_MOTOR;
     u8 *levels = dds3PadVibrationState;
     u8 *targets = D_003BD698;
     u8 *largeLevel;
     s32 motor;
 
-    for (motor = 0; motor < KWLN_PAD_MOTOR_COUNT; motor++) {
+    for (motor = 0; motor < DDS3_PAD_MOTOR_COUNT; motor++) {
         if (D_003BD6A0[motor] != 0) {
             /* The native countdown wraps as a 32-bit word, including negative durations. */
             D_003BD6A0[motor] = (s32)((u32)D_003BD6A0[motor] - 1);
             if (D_003BD6A0[motor] == 0) {
                 levels[motor] = 0;
-                if (motor == KWLN_PAD_SMALL_MOTOR) {
+                if (motor == DDS3_PAD_SMALL_MOTOR) {
                     sdfPadSetAct0(0, 0);
                 } else {
                     sdfPadSetAct1(0, 0);
                 }
             } else if (motor == largeMotor) {
-                largeLevel = levels + KWLN_PAD_LARGE_MOTOR;
-                if (*largeLevel != targets[KWLN_PAD_LARGE_MOTOR]) {
+                largeLevel = levels + DDS3_PAD_LARGE_MOTOR;
+                if (*largeLevel != targets[DDS3_PAD_LARGE_MOTOR]) {
                     kwlnPadStepLargeMotorLevel();
                     sdfPadSetAct1(0, *largeLevel);
                 }
@@ -728,7 +728,7 @@ s32 dds3TaskNoopCallback(dds3ProcessID_t *task) {
 
 /* Seed the shared effect random state with the fixed initialization seed. */
 void dds3InitRandCB(void) {
-    sdfRandomize(effSharedRandomState, KWLN_SHARED_RANDOM_SEED);
+    sdfRandomize(effSharedRandomState, DDS3_SHARED_RANDOM_SEED);
 }
 
 extern s16 D_003BA728;
@@ -821,22 +821,22 @@ void dds3DrawImageOutline(sdfDrawTag_t *packetList, sdfTexHandle_t *image) {
     drawWidth = width * 0x10;
     drawHeight = height * 8;
     if (width < height) {
-        if (height > KWLN_PREVIEW_MAX_TEXELS) {
+        if (height > DDS3_PREVIEW_MAX_TEXELS) {
             drawHeight = 0x800;
             drawWidth = (width << 8) / height * 0x10;
         }
-    } else if (width > KWLN_PREVIEW_MAX_TEXELS) {
+    } else if (width > DDS3_PREVIEW_MAX_TEXELS) {
         drawWidth = 0x1000;
         drawHeight = (height << 8) / width * 8;
     }
-    if (width == KWLN_PREVIEW_WRAP_TEXELS) {
+    if (width == DDS3_PREVIEW_WRAP_TEXELS) {
         width--;
     }
-    if (height == KWLN_PREVIEW_WRAP_TEXELS) {
+    if (height == DDS3_PREVIEW_WRAP_TEXELS) {
         height--;
     }
     sdfPrimLinkSprite(packetList, 0x80808080, 0, 0x7180, 0x7A60, 0, 0, drawWidth + 0x7180, drawHeight + 0x7A60,
-                                width * 0x10, height * 0x10, KWLN_DIAG_DEPTH, 0);
+                                width * 0x10, height * 0x10, DDS3_DIAG_DEPTH, 0);
 }
 
 extern u32 dds3TextureGetPageIndex(void);
@@ -847,7 +847,7 @@ void dds3TextureDrawPageCounter(sdfDrawTag_t *packetList) {
     s32 pageIndex = dds3TextureGetPageIndex();
     s32 resourceCount = dds3TextureCountIncompleteResources();
     sprintf(pageText, "TEX VIEWER [%d/%d]", pageIndex, resourceCount - 1);
-    sdfDrawTagLink(packetList, (u32)sdfDevPrintf(0x7180, 0x79C0, KWLN_DIAG_DEPTH, 0, pageText));
+    sdfDrawTagLink(packetList, (u32)sdfDevPrintf(0x7180, 0x79C0, DDS3_DIAG_DEPTH, 0, pageText));
 }
 
 extern const char *D_00324560[];
@@ -881,25 +881,25 @@ void dds3DrawTextureResourceDetails(sdfDrawTag_t *packetList, sdfTexHandle_t *te
     sdfDrawTagLink(packetList, (u32)sdfDevPrintf(0x77C0, 0x8300, 0x0FFFFF80, 0, text));
 }
 
-#define KWLN_DIAG_PACKET_LIST_BYTES 0x20
-#define KWLN_VIEWER_FAST_PAGE_STEP 10
-#define KWLN_MAP_ROW_UNITS 0x1000
-#define KWLN_MAP_ROW_SHIFT 12
-#define KWLN_MAP_ROW_MASK 0xFFF
-#define KWLN_MAP_COLUMN_SHIFT 5
-#define KWLN_MAP_COLUMN_UNITS 32
-#define KWLN_MAP_COLUMN_COUNT 128
-#define KWLN_MAP_ROW_SPAN 0x800
-#define KWLN_MAP_BORDER_WIDTH 0x840
-#define KWLN_MAP_CELL_X_STEP 16
-#define KWLN_MAP_ROW_Y_STEP 8
-#define KWLN_MAP_CELL_X_SHIFT 4
-#define KWLN_MAP_GREEN 0x80008000
-#define KWLN_MAP_YELLOW 0x80008080
-#define KWLN_MAP_RED 0x80000080
-#define KWLN_MAP_BLUE 0x80800000
-#define KWLN_MAP_CYAN 0x80808000
-#define KWLN_HELD_TEXTURE_CLAMP_MODE 5
+#define DDS3_DIAG_PACKET_LIST_BYTES 0x20
+#define DDS3_VIEWER_FAST_PAGE_STEP 10
+#define DDS3_MAP_ROW_UNITS 0x1000
+#define DDS3_MAP_ROW_SHIFT 12
+#define DDS3_MAP_ROW_MASK 0xFFF
+#define DDS3_MAP_COLUMN_SHIFT 5
+#define DDS3_MAP_COLUMN_UNITS 32
+#define DDS3_MAP_COLUMN_COUNT 128
+#define DDS3_MAP_ROW_SPAN 0x800
+#define DDS3_MAP_BORDER_WIDTH 0x840
+#define DDS3_MAP_CELL_X_STEP 16
+#define DDS3_MAP_ROW_Y_STEP 8
+#define DDS3_MAP_CELL_X_SHIFT 4
+#define DDS3_MAP_GREEN 0x80008000
+#define DDS3_MAP_YELLOW 0x80008080
+#define DDS3_MAP_RED 0x80000080
+#define DDS3_MAP_BLUE 0x80800000
+#define DDS3_MAP_CYAN 0x80808000
+#define DDS3_HELD_TEXTURE_CLAMP_MODE 5
 
 /* Count texture entries without a reference clone source. */
 s32 dds3TextureCountIncompleteResources(void) {
@@ -960,14 +960,14 @@ s32 dds3TextureViewerHandlePad(void) {
     if (dds3PadBitTable[0x13] < 0) {
         return 0;
     }
-    if (dds3PadBitTable[0x14] & KWLN_PAD_REPEAT_BIT) {
+    if (dds3PadBitTable[0x14] & DDS3_PAD_REPEAT_BIT) {
         dds3TextureViewerPageIndex -= 1;
-    } else if (dds3PadBitTable[0x15] & KWLN_PAD_REPEAT_BIT) {
+    } else if (dds3PadBitTable[0x15] & DDS3_PAD_REPEAT_BIT) {
         dds3TextureViewerPageIndex += 1;
-    } else if ((dds3PadBitTable[0x18] & KWLN_PAD_REPEAT_BIT) || (dds3PadBitTable[0x19] & KWLN_PAD_REPEAT_BIT)) {
-        dds3TextureViewerPageIndex -= KWLN_VIEWER_FAST_PAGE_STEP;
-    } else if ((dds3PadBitTable[0x1A] & KWLN_PAD_REPEAT_BIT) || (dds3PadBitTable[0x1B] & KWLN_PAD_REPEAT_BIT)) {
-        dds3TextureViewerPageIndex += KWLN_VIEWER_FAST_PAGE_STEP;
+    } else if ((dds3PadBitTable[0x18] & DDS3_PAD_REPEAT_BIT) || (dds3PadBitTable[0x19] & DDS3_PAD_REPEAT_BIT)) {
+        dds3TextureViewerPageIndex -= DDS3_VIEWER_FAST_PAGE_STEP;
+    } else if ((dds3PadBitTable[0x1A] & DDS3_PAD_REPEAT_BIT) || (dds3PadBitTable[0x1B] & DDS3_PAD_REPEAT_BIT)) {
+        dds3TextureViewerPageIndex += DDS3_VIEWER_FAST_PAGE_STEP;
     }
     dds3TextureViewerPageIndex = dds3SelectIncompleteResourceAtPageIndex(dds3TextureViewerPageIndex);
     if (dds3PadBitTable[0x12] < 0) {
@@ -1075,54 +1075,54 @@ void dds3DrawTextureAllocationMapBlock(void *packetList, s32 x, s32 y, sdfGsMemS
     if (mode == 0) {
         switch ((s32)block->type) {
         case 1:
-            color = KWLN_MAP_GREEN;
+            color = DDS3_MAP_GREEN;
             break;
         case 2:
-            color = KWLN_MAP_YELLOW;
+            color = DDS3_MAP_YELLOW;
             break;
         case 3:
-            color = KWLN_MAP_RED;
+            color = DDS3_MAP_RED;
             break;
         default:
             color = 0;
             break;
         }
     } else {
-        color = mode == 1 ? KWLN_MAP_BLUE : KWLN_MAP_CYAN;
+        color = mode == 1 ? DDS3_MAP_BLUE : DDS3_MAP_CYAN;
     }
     remainingUnits = block->size;
-    topY = y + (block->addr >> KWLN_MAP_ROW_SHIFT) * KWLN_MAP_ROW_Y_STEP;
-    columnIndex = (block->addr & KWLN_MAP_ROW_MASK) >> KWLN_MAP_COLUMN_SHIFT;
-    leftX = x + columnIndex * KWLN_MAP_CELL_X_STEP;
+    topY = y + (block->addr >> DDS3_MAP_ROW_SHIFT) * DDS3_MAP_ROW_Y_STEP;
+    columnIndex = (block->addr & DDS3_MAP_ROW_MASK) >> DDS3_MAP_COLUMN_SHIFT;
+    leftX = x + columnIndex * DDS3_MAP_CELL_X_STEP;
     if (columnIndex > 0) {
-        rowUnits = (KWLN_MAP_COLUMN_COUNT - columnIndex) * KWLN_MAP_COLUMN_UNITS;
+        rowUnits = (DDS3_MAP_COLUMN_COUNT - columnIndex) * DDS3_MAP_COLUMN_UNITS;
         if (remainingUnits >= rowUnits) {
             sdfPrimLinkLine(packetList, color, 0, leftX, topY,
-                                         leftX + (KWLN_MAP_COLUMN_COUNT - columnIndex) * KWLN_MAP_CELL_X_STEP, topY + KWLN_MAP_ROW_Y_STEP,
-                                         KWLN_DIAG_DEPTH, NULL);
+                                         leftX + (DDS3_MAP_COLUMN_COUNT - columnIndex) * DDS3_MAP_CELL_X_STEP, topY + DDS3_MAP_ROW_Y_STEP,
+                                         DDS3_DIAG_DEPTH, NULL);
             remainingUnits -= rowUnits;
         } else {
-            cellCount = remainingUnits >> KWLN_MAP_COLUMN_SHIFT;
+            cellCount = remainingUnits >> DDS3_MAP_COLUMN_SHIFT;
             if (cellCount == 0) {
                 cellCount = remainingUnits != 0;
             }
             sdfPrimLinkLine(packetList, color, 0, leftX, topY,
-                                         leftX + cellCount * KWLN_MAP_CELL_X_STEP, topY + KWLN_MAP_ROW_Y_STEP,
-                                         KWLN_DIAG_DEPTH, NULL);
+                                         leftX + cellCount * DDS3_MAP_CELL_X_STEP, topY + DDS3_MAP_ROW_Y_STEP,
+                                         DDS3_DIAG_DEPTH, NULL);
             remainingUnits = 0;
         }
-        topY += KWLN_MAP_ROW_Y_STEP;
+        topY += DDS3_MAP_ROW_Y_STEP;
     }
-    while (remainingUnits >= KWLN_MAP_ROW_UNITS) {
-        sdfPrimLinkLine(packetList, color, 0, x, topY, x + KWLN_MAP_ROW_SPAN, topY + KWLN_MAP_ROW_Y_STEP,
-                                     KWLN_DIAG_DEPTH, NULL);
-        remainingUnits -= KWLN_MAP_ROW_UNITS;
-        topY += KWLN_MAP_ROW_Y_STEP;
+    while (remainingUnits >= DDS3_MAP_ROW_UNITS) {
+        sdfPrimLinkLine(packetList, color, 0, x, topY, x + DDS3_MAP_ROW_SPAN, topY + DDS3_MAP_ROW_Y_STEP,
+                                     DDS3_DIAG_DEPTH, NULL);
+        remainingUnits -= DDS3_MAP_ROW_UNITS;
+        topY += DDS3_MAP_ROW_Y_STEP;
     }
     if (remainingUnits != 0) {
         sdfPrimLinkLine(packetList, color, 0, x, topY,
-                                     x + ((remainingUnits >> KWLN_MAP_COLUMN_SHIFT) << KWLN_MAP_CELL_X_SHIFT), topY + KWLN_MAP_ROW_Y_STEP,
-                                     KWLN_DIAG_DEPTH, NULL);
+                                     x + ((remainingUnits >> DDS3_MAP_COLUMN_SHIFT) << DDS3_MAP_CELL_X_SHIFT), topY + DDS3_MAP_ROW_Y_STEP,
+                                     DDS3_DIAG_DEPTH, NULL);
     }
 }
 
@@ -1133,7 +1133,7 @@ void dds3DrawTextureListDiagnostic(sdfDrawTag_t *packetList, s32 x, s32 y) {
 
     if (block != NULL) {
         sdfDrawTagLink(packetList, (u32)dds3PrimFrameRect(x - 0x20, y - 0x10,
-                                          0x0FFFFF7F, KWLN_MAP_BORDER_WIDTH, 0x820,
+                                          0x0FFFFF7F, DDS3_MAP_BORDER_WIDTH, 0x820,
                                           0x80000000, 0x80806020));
         do {
             dds3DrawTextureAllocationMapBlock(packetList, x, y, block, 0);
@@ -1144,7 +1144,7 @@ void dds3DrawTextureListDiagnostic(sdfDrawTag_t *packetList, s32 x, s32 y) {
 
 /* Build an allocation-map packet list and submit it through the surface callback. */
 void dds3TextureAttachTask(sdfGrOt_t *surface) {
-    sdfDrawTag_t *packetList = (sdfDrawTag_t *)sdfGrAllocPacketBuff(KWLN_DIAG_PACKET_LIST_BYTES);
+    sdfDrawTag_t *packetList = (sdfDrawTag_t *)sdfGrAllocPacketBuff(DDS3_DIAG_PACKET_LIST_BYTES);
     sdfDrawTagInit(packetList);
     dds3DrawTextureListDiagnostic(packetList, 0x7180, 0x79C0);
     surface->regFunc(surface, packetList);
@@ -1286,7 +1286,7 @@ s32 dds3AllocRenderTexture(u16 width, u16 height, f32 aspect) {
         return 0;
     }
     dds3RenderTexture = texture;
-    sdfTexSetWrapMode(texture, KWLN_HELD_TEXTURE_CLAMP_MODE);
+    sdfTexSetWrapMode(texture, DDS3_HELD_TEXTURE_CLAMP_MODE);
     sdfTexMakeGIFPacket(texture);
     D_003247B0.camera.aspect = aspect;
     D_003247B0.camera.width = width;
@@ -1382,24 +1382,24 @@ void kwlnAdvanceShakeOffsets(void) {
     }
 }
 
-#define KWLN_FADE_TICKS_PER_FRAME 10
-#define KWLN_FADE_MARK_NUMERATOR 4
-#define KWLN_FADE_COUNT_DOWN_BIT 1
-#define KWLN_FADE_COUNT_UP_BIT 2
-#define KWLN_FADE_DIRECTION_BITS 3
-#define KWLN_FADE_MAX_ALPHA 0x80
-#define KWLN_FADE_ALPHA_SHIFT 7
-#define KWLN_COLOR_ALPHA_CHANNEL 3
-#define KWLN_BGFADE_COUNT_DOWN_BIT 0x04000000
-#define KWLN_BGFADE_COUNT_UP_BIT 0x08000000
-#define KWLN_BGFADE_DIRECTION_BITS 0x0C000000
-#define KWLN_BGFADE_KEEP_OTHER_BITS 0xF3FFFFFF
-#define KWLN_BGFADE_CLEAR_UP_MASK 0xF7FFFFFF
-#define KWLN_BGFADE_CLEAR_DOWN_MASK 0xFBFFFFFF
-#define KWLN_BGFADE_FIRST_RAMP_MAX 0x31
-#define KWLN_BGFADE_SECOND_RAMP_MAX 0x4F
-#define KWLN_BGFADE_FIRST_RAMP_SCALE 49.0f
-#define KWLN_BGFADE_SECOND_RAMP_SCALE 79.0f
+#define DDS3_FADE_TICKS_PER_FRAME 10
+#define DDS3_FADE_MARK_NUMERATOR 4
+#define DDS3_FADE_COUNT_DOWN_BIT 1
+#define DDS3_FADE_COUNT_UP_BIT 2
+#define DDS3_FADE_DIRECTION_BITS 3
+#define DDS3_FADE_MAX_ALPHA 0x80
+#define DDS3_FADE_ALPHA_SHIFT 7
+#define DDS3_COLOR_ALPHA_CHANNEL 3
+#define DDS3_BGFADE_COUNT_DOWN_BIT 0x04000000
+#define DDS3_BGFADE_COUNT_UP_BIT 0x08000000
+#define DDS3_BGFADE_DIRECTION_BITS 0x0C000000
+#define DDS3_BGFADE_KEEP_OTHER_BITS 0xF3FFFFFF
+#define DDS3_BGFADE_CLEAR_UP_MASK 0xF7FFFFFF
+#define DDS3_BGFADE_CLEAR_DOWN_MASK 0xFBFFFFFF
+#define DDS3_BGFADE_FIRST_RAMP_MAX 0x31
+#define DDS3_BGFADE_SECOND_RAMP_MAX 0x4F
+#define DDS3_BGFADE_FIRST_RAMP_SCALE 49.0f
+#define DDS3_BGFADE_SECOND_RAMP_SCALE 79.0f
 
 /* Store tenths in the 16-bit duration before deriving its forty-percent mark.
  * Zero frames only disables the configuration; mode zero stores the -1 sentinel. */
@@ -1414,8 +1414,8 @@ void dds3SetQuake(s32 fadeMode, s32 frames) {
     } else {
         D_003BA91A = fadeMode;
     }
-    D_003BA91E = frames * KWLN_FADE_TICKS_PER_FRAME;
-    D_003BA91C = D_003BA91E * KWLN_FADE_MARK_NUMERATOR / KWLN_FADE_TICKS_PER_FRAME;
+    D_003BA91E = frames * DDS3_FADE_TICKS_PER_FRAME;
+    D_003BA91C = D_003BA91E * DDS3_FADE_MARK_NUMERATOR / DDS3_FADE_TICKS_PER_FRAME;
 }
 
 /* Disable the configured fade without clearing its stored timing parameters. */
@@ -1474,7 +1474,7 @@ sdfDrawTag_t *dds3LinkZClearDrawTag(s32 stateIndex) {
 
 /* Cancel the foreground direction and zero RGBA; timing words are unchanged. */
 void dds3FadeClear(void) {
-    dds3DrawFlag &= ~KWLN_FADE_DIRECTION_BITS;
+    dds3DrawFlag &= ~DDS3_FADE_DIRECTION_BITS;
     fadergba.r = 0;
     fadergba.g = 0;
     fadergba.b = 0;
@@ -1483,7 +1483,7 @@ void dds3FadeClear(void) {
 
 /* Store RGBA and cancel foreground direction flags without changing timing. */
 void dds3FadeSet(s32 red, s32 green, s32 blue, s32 alpha) {
-    dds3DrawFlag &= ~KWLN_FADE_DIRECTION_BITS;
+    dds3DrawFlag &= ~DDS3_FADE_DIRECTION_BITS;
     fadergba.r = red;
     fadergba.g = green;
     fadergba.b = blue;
@@ -1508,7 +1508,7 @@ void dds3FadeIn(s32 red, s32 green, s32 blue, s32 duration) {
     fadergba.r = red;
     fadergba.g = green;
     fadergba.b = blue;
-    fadergba.a = -KWLN_FADE_MAX_ALPHA;
+    fadergba.a = -DDS3_FADE_MAX_ALPHA;
     if (duration == 0) {
         fadergba.a = 0;
         fadenow = 0;
@@ -1518,21 +1518,21 @@ void dds3FadeIn(s32 red, s32 green, s32 blue, s32 duration) {
     }
     fademax = duration;
     fadenow = duration;
-    dds3DrawFlag = (dds3DrawFlag | KWLN_FADE_COUNT_DOWN_BIT) & ~KWLN_FADE_COUNT_UP_BIT;
+    dds3DrawFlag = (dds3DrawFlag | DDS3_FADE_COUNT_DOWN_BIT) & ~DDS3_FADE_COUNT_UP_BIT;
 }
 
 /* Start the same countdown using existing RGB; zero duration preserves RGB. */
 void dds3FadeIn2(s32 duration) {
-    fadergba.a = -KWLN_FADE_MAX_ALPHA;
+    fadergba.a = -DDS3_FADE_MAX_ALPHA;
     if (duration == 0) {
         fadergba.a = 0;
-        dds3DrawFlag &= ~KWLN_FADE_DIRECTION_BITS;
+        dds3DrawFlag &= ~DDS3_FADE_DIRECTION_BITS;
         fadenow = 0;
         fademax = 0;
     } else {
         fademax = duration;
         fadenow = duration;
-        dds3DrawFlag = (dds3DrawFlag | KWLN_FADE_COUNT_DOWN_BIT) & ~KWLN_FADE_COUNT_UP_BIT;
+        dds3DrawFlag = (dds3DrawFlag | DDS3_FADE_COUNT_DOWN_BIT) & ~DDS3_FADE_COUNT_UP_BIT;
     }
 }
 
@@ -1545,13 +1545,13 @@ void dds3FadeOut(s32 red, s32 green, s32 blue, s32 duration) {
     if (duration == 0) {
         fadenow = 0;
         fademax = 0;
-        fadergba.a = -KWLN_FADE_MAX_ALPHA;
-        dds3DrawFlag &= ~KWLN_FADE_DIRECTION_BITS;
+        fadergba.a = -DDS3_FADE_MAX_ALPHA;
+        dds3DrawFlag &= ~DDS3_FADE_DIRECTION_BITS;
         return;
     }
     fademax = duration;
     fadenow = 0;
-    dds3DrawFlag = (dds3DrawFlag & ~KWLN_FADE_COUNT_DOWN_BIT) | KWLN_FADE_COUNT_UP_BIT;
+    dds3DrawFlag = (dds3DrawFlag & ~DDS3_FADE_COUNT_DOWN_BIT) | DDS3_FADE_COUNT_UP_BIT;
 }
 
 /* Start the same count-up using existing RGB; zero duration preserves RGB. */
@@ -1559,35 +1559,35 @@ void dds3FadeOut2(s32 duration) {
     fadergba.a = 0;
     if (duration == 0) {
         fadenow = 0;
-        fadergba.a = -KWLN_FADE_MAX_ALPHA;
-        dds3DrawFlag &= ~KWLN_FADE_DIRECTION_BITS;
+        fadergba.a = -DDS3_FADE_MAX_ALPHA;
+        dds3DrawFlag &= ~DDS3_FADE_DIRECTION_BITS;
         fademax = 0;
     } else {
         fademax = duration;
         fadenow = 0;
-        dds3DrawFlag = (dds3DrawFlag & ~KWLN_FADE_COUNT_DOWN_BIT) | KWLN_FADE_COUNT_UP_BIT;
+        dds3DrawFlag = (dds3DrawFlag & ~DDS3_FADE_COUNT_DOWN_BIT) | DDS3_FADE_COUNT_UP_BIT;
     }
 }
 
 /* Return whether either foreground counter direction is enabled. */
 s32 dds3FadeCheck(void) {
-    return (dds3DrawFlag & KWLN_FADE_DIRECTION_BITS) != 0;
+    return (dds3DrawFlag & DDS3_FADE_DIRECTION_BITS) != 0;
 }
 
 /* Step the u16 counter and sample alpha before testing exact completion.
  * Completion clears timing/flags but leaves the sampled endpoint alpha intact. */
 void dds3FadeUpdate(void) {
     if (dds3FadeCheck() != 0) {
-        if (dds3DrawFlag & KWLN_FADE_COUNT_DOWN_BIT) {
+        if (dds3DrawFlag & DDS3_FADE_COUNT_DOWN_BIT) {
             fadenow -= 1;
         } else {
             fadenow += 1;
         }
-        fadergba.a = (fadenow << KWLN_FADE_ALPHA_SHIFT) / fademax;
-        if (((dds3DrawFlag & KWLN_FADE_COUNT_DOWN_BIT) && fadenow == 0) || ((dds3DrawFlag & KWLN_FADE_COUNT_UP_BIT) && fadenow == fademax)) {
+        fadergba.a = (fadenow << DDS3_FADE_ALPHA_SHIFT) / fademax;
+        if (((dds3DrawFlag & DDS3_FADE_COUNT_DOWN_BIT) && fadenow == 0) || ((dds3DrawFlag & DDS3_FADE_COUNT_UP_BIT) && fadenow == fademax)) {
             fadenow = 0;
             fademax = 0;
-            dds3DrawFlag &= ~KWLN_FADE_DIRECTION_BITS;
+            dds3DrawFlag &= ~DDS3_FADE_DIRECTION_BITS;
         }
     }
 }
@@ -1599,7 +1599,7 @@ void dds3DrawDistRipOverError(void) {
 
     if (D_003BA724 != 0) {
         if (distblurovercnt != 0 || ripblurovercnt != 0) {
-            packetList = (sdfDrawTag_t *)sdfGrAllocPacketBuff(KWLN_DIAG_PACKET_LIST_BYTES);
+            packetList = (sdfDrawTag_t *)sdfGrAllocPacketBuff(DDS3_DIAG_PACKET_LIST_BYTES);
             sdfDrawTagInit(packetList);
             if (distblurovercnt > 0) {
                 sdfDrawTagLink(packetList, (u32)sdfDevPrintf(0x73C0, 0x7AE0, 0xFEFFFF, 0xE, D_0039E170, distblurovercnt));
@@ -1626,17 +1626,17 @@ extern u8 kwlnBackgroundFadeOverlayPackets[]; /* the overlay packet, one per dra
 extern sdfGrOt_t sdfGrOtTable[];
 extern s32 dds3FadeIsBackgroundOverlayActive(void);
 
-#define KWLN_FADE_OVERLAY_SURFACE 92
-#define KWLN_FADE_MAX_ALPHA 0x80
-#define KWLN_GS_PABE 0x49
-#define KWLN_GS_FBA_1 0x4A
-#define KWLN_OVERLAY_TEST 0x31003       /* alpha and depth tests always pass */
-#define KWLN_OVERLAY_ALPHA 0x01         /* (Cd - Cs) * As / 128 + Cs */
-#define KWLN_OVERLAY_DEPTH 0xFEFFFFULL
-#define KWLN_OVERLAY_LEFT 0x7000
-#define KWLN_OVERLAY_RIGHT 0x9000
-#define KWLN_OVERLAY_TOP 0x7900
-#define KWLN_OVERLAY_BOTTOM 0x8700
+#define DDS3_FADE_OVERLAY_SURFACE 92
+#define DDS3_FADE_MAX_ALPHA 0x80
+#define DDS3_GS_PABE 0x49
+#define DDS3_GS_FBA_1 0x4A
+#define DDS3_OVERLAY_TEST 0x31003       /* alpha and depth tests always pass */
+#define DDS3_OVERLAY_ALPHA 0x01         /* (Cd - Cs) * As / 128 + Cs */
+#define DDS3_OVERLAY_DEPTH 0xFEFFFFULL
+#define DDS3_OVERLAY_LEFT 0x7000
+#define DDS3_OVERLAY_RIGHT 0x9000
+#define DDS3_OVERLAY_TOP 0x7900
+#define DDS3_OVERLAY_BOTTOM 0x8700
 
 /* An end tag carrying VIF DIRECT of ten quadwords: four A+D register writes,
  * then a blended sprite of two vertices. */
@@ -1659,7 +1659,7 @@ static void dds3WriteRegister(SdfGsRegisterWrite *write, u64 value, u64 register
 }
 
 static u64 dds3OverlayVertex(u32 x, u32 y) {
-    return (KWLN_OVERLAY_DEPTH << 32) | (u32)(y << 16) | x;
+    return (DDS3_OVERLAY_DEPTH << 32) | (u32)(y << 16) | x;
 }
 
 /* While the fade colour has any alpha, cover the screen with it: the sprite
@@ -1668,15 +1668,15 @@ static u64 dds3OverlayVertex(u32 x, u32 y) {
  * both games; same packet as the retail routine. */
 void kwlnQueueBackgroundFadeOverlayPacket(void) {
     u32 buffer = dds3GetFrameID();
-    s32 overlayAlpha = KWLN_FADE_MAX_ALPHA - fadergba.a;
+    s32 overlayAlpha = DDS3_FADE_MAX_ALPHA - fadergba.a;
     dds3FadePacket_t *packet;
-    u32 top = KWLN_OVERLAY_TOP;
-    u32 bottom = KWLN_OVERLAY_BOTTOM;
+    u32 top = DDS3_OVERLAY_TOP;
+    u32 bottom = DDS3_OVERLAY_BOTTOM;
     u64 color;
     sdfDrawTag_t *packets;
     sdfGrOt_t *surface;
 
-    if (overlayAlpha >= KWLN_FADE_MAX_ALPHA) {
+    if (overlayAlpha >= DDS3_FADE_MAX_ALPHA) {
         return;
     }
     packet = (dds3FadePacket_t *)(kwlnBackgroundFadeOverlayPackets + buffer * sizeof(dds3FadePacket_t));
@@ -1684,10 +1684,10 @@ void kwlnQueueBackgroundFadeOverlayPacket(void) {
     packet->header.vifCommands = 0x5000000AULL << 32; /* NOP; DIRECT ten quadwords */
     packet->header.gifTag = 0x1000000000000004ULL;    /* NLOOP 4, NREG 1 */
     packet->header.gifRegisters = SDF_GIF_REGISTER_AD;
-    dds3WriteRegister(&packet->alpha, KWLN_OVERLAY_ALPHA, SDF_GS_ALPHA_1);
-    dds3WriteRegister(&packet->pabe, 0, KWLN_GS_PABE);
-    dds3WriteRegister(&packet->fba, 0, KWLN_GS_FBA_1);
-    dds3WriteRegister(&packet->test, KWLN_OVERLAY_TEST, SDF_GS_TEST_1);
+    dds3WriteRegister(&packet->alpha, DDS3_OVERLAY_ALPHA, SDF_GS_ALPHA_1);
+    dds3WriteRegister(&packet->pabe, 0, DDS3_GS_PABE);
+    dds3WriteRegister(&packet->fba, 0, DDS3_GS_FBA_1);
+    dds3WriteRegister(&packet->test, DDS3_OVERLAY_TEST, SDF_GS_TEST_1);
     packet->spriteTag = 0x1023400000008004ULL; /* NLOOP 4, EOP, PRE, PRIM blended sprite, NREG 1 */
     packet->spriteRegisters = SDF_GIF_REGISTER_AD;
 
@@ -1701,13 +1701,13 @@ void kwlnQueueBackgroundFadeOverlayPacket(void) {
     color = 0x3F80000000000000ULL /* Q = 1.0 */ | (u64)(s64)(s32)((u32)overlayAlpha << 24) |
             ((u64)fadergba.b << 16) | ((u64)fadergba.g << 8) | fadergba.r;
     dds3WriteRegister(&packet->vertices[0], color, SDF_GS_RGBAQ);
-    dds3WriteRegister(&packet->vertices[1], dds3OverlayVertex(KWLN_OVERLAY_LEFT, top), SDF_GS_XYZ2);
+    dds3WriteRegister(&packet->vertices[1], dds3OverlayVertex(DDS3_OVERLAY_LEFT, top), SDF_GS_XYZ2);
     dds3WriteRegister(&packet->vertices[2], color, SDF_GS_RGBAQ);
-    dds3WriteRegister(&packet->vertices[3], dds3OverlayVertex(KWLN_OVERLAY_RIGHT, bottom), SDF_GS_XYZ2);
+    dds3WriteRegister(&packet->vertices[3], dds3OverlayVertex(DDS3_OVERLAY_RIGHT, bottom), SDF_GS_XYZ2);
 
     packets = dds3FontReqAllocDrawTag();
     sdfDrawTagLink(packets, (u32)packet);
-    surface = &sdfGrOtTable[KWLN_FADE_OVERLAY_SURFACE];
+    surface = &sdfGrOtTable[DDS3_FADE_OVERLAY_SURFACE];
     surface->append(surface, packets);
 }
 #else
@@ -1717,13 +1717,13 @@ INCLUDE_ASM(const s32, "game/code_00102ED8", kwlnQueueBackgroundFadeOverlayPacke
 /* Cancel background direction, zero RGBA and restore the inactive ramp maxima.
  * This reset does not rewrite the background counter or duration. */
 void dds3FadeResetBackground(void) {
-    dds3DrawFlag &= KWLN_BGFADE_KEEP_OTHER_BITS;
+    dds3DrawFlag &= DDS3_BGFADE_KEEP_OTHER_BITS;
     dds3BackgroundFadeColor[0] = 0;
     dds3BackgroundFadeColor[1] = 0;
     dds3BackgroundFadeColor[2] = 0;
-    dds3BackgroundFadeColor[KWLN_COLOR_ALPHA_CHANNEL] = 0;
-    dds3BackgroundFadeFirstRamp = KWLN_BGFADE_FIRST_RAMP_MAX;
-    dds3BackgroundFadeSecondRamp = KWLN_BGFADE_SECOND_RAMP_MAX;
+    dds3BackgroundFadeColor[DDS3_COLOR_ALPHA_CHANNEL] = 0;
+    dds3BackgroundFadeFirstRamp = DDS3_BGFADE_FIRST_RAMP_MAX;
+    dds3BackgroundFadeSecondRamp = DDS3_BGFADE_SECOND_RAMP_MAX;
 }
 
 /* Start the background countdown; zero duration performs the full background reset. */
@@ -1731,18 +1731,18 @@ void dds3FadeBackgroundStartOut(s32 duration) {
     dds3BackgroundFadeColor[0] = 0;
     dds3BackgroundFadeColor[1] = 0;
     dds3BackgroundFadeColor[2] = 0;
-    dds3BackgroundFadeColor[KWLN_COLOR_ALPHA_CHANNEL] = KWLN_FADE_MAX_ALPHA;
+    dds3BackgroundFadeColor[DDS3_COLOR_ALPHA_CHANNEL] = DDS3_FADE_MAX_ALPHA;
     if (duration == 0) {
-        dds3BackgroundFadeColor[KWLN_COLOR_ALPHA_CHANNEL] = 0;
+        dds3BackgroundFadeColor[DDS3_COLOR_ALPHA_CHANNEL] = 0;
         dds3BackgroundFadeCounter = 0;
         dds3BackgroundFadeDuration = 0;
-        dds3BackgroundFadeFirstRamp = KWLN_BGFADE_FIRST_RAMP_MAX;
-        dds3BackgroundFadeSecondRamp = KWLN_BGFADE_SECOND_RAMP_MAX;
+        dds3BackgroundFadeFirstRamp = DDS3_BGFADE_FIRST_RAMP_MAX;
+        dds3BackgroundFadeSecondRamp = DDS3_BGFADE_SECOND_RAMP_MAX;
         dds3FadeResetBackground();
     } else {
         dds3BackgroundFadeDuration = duration;
         dds3BackgroundFadeCounter = duration;
-        dds3DrawFlag = (dds3DrawFlag | KWLN_BGFADE_COUNT_DOWN_BIT) & KWLN_BGFADE_CLEAR_UP_MASK;
+        dds3DrawFlag = (dds3DrawFlag | DDS3_BGFADE_COUNT_DOWN_BIT) & DDS3_BGFADE_CLEAR_UP_MASK;
     }
     D_003245EC[2] = 2048.0f;
 }
@@ -1752,18 +1752,18 @@ void dds3FadeBackgroundStartIn(s32 duration) {
     dds3BackgroundFadeColor[0] = 0;
     dds3BackgroundFadeColor[1] = 0;
     dds3BackgroundFadeColor[2] = 0;
-    dds3BackgroundFadeColor[KWLN_COLOR_ALPHA_CHANNEL] = 0;
+    dds3BackgroundFadeColor[DDS3_COLOR_ALPHA_CHANNEL] = 0;
     if (duration == 0) {
         dds3BackgroundFadeCounter = 0;
         dds3BackgroundFadeDuration = 0;
-        dds3BackgroundFadeColor[KWLN_COLOR_ALPHA_CHANNEL] = KWLN_FADE_MAX_ALPHA;
-        dds3DrawFlag &= KWLN_BGFADE_KEEP_OTHER_BITS;
+        dds3BackgroundFadeColor[DDS3_COLOR_ALPHA_CHANNEL] = DDS3_FADE_MAX_ALPHA;
+        dds3DrawFlag &= DDS3_BGFADE_KEEP_OTHER_BITS;
         dds3BackgroundFadeFirstRamp = 0;
         dds3BackgroundFadeSecondRamp = 0;
     } else {
         dds3BackgroundFadeDuration = duration;
         dds3BackgroundFadeCounter = 0;
-        dds3DrawFlag = (dds3DrawFlag & KWLN_BGFADE_CLEAR_DOWN_MASK) | KWLN_BGFADE_COUNT_UP_BIT;
+        dds3DrawFlag = (dds3DrawFlag & DDS3_BGFADE_CLEAR_DOWN_MASK) | DDS3_BGFADE_COUNT_UP_BIT;
     }
     D_003245EC[2] = 2041.0f;
 }
@@ -1771,17 +1771,17 @@ void dds3FadeBackgroundStartIn(s32 duration) {
 /* Direction flags take precedence; idle visibility uses alpha in mode zero,
  * otherwise it tests whether the first ramp differs from its inactive maximum. */
 dds3BackgroundOverlayActivity_t dds3FadeIsBackgroundOverlayActive(void) {
-    if (dds3DrawFlag & KWLN_BGFADE_DIRECTION_BITS) {
-        return KWLN_BACKGROUND_OVERLAY_ACTIVE;
+    if (dds3DrawFlag & DDS3_BGFADE_DIRECTION_BITS) {
+        return DDS3_BACKGROUND_OVERLAY_ACTIVE;
     }
     if (dds3BackgroundFadeMode == 0) {
-        if (KWLN_FADE_MAX_ALPHA - dds3BackgroundFadeColor[KWLN_COLOR_ALPHA_CHANNEL] >= KWLN_FADE_MAX_ALPHA) {
-            return KWLN_BACKGROUND_OVERLAY_INACTIVE;
+        if (DDS3_FADE_MAX_ALPHA - dds3BackgroundFadeColor[DDS3_COLOR_ALPHA_CHANNEL] >= DDS3_FADE_MAX_ALPHA) {
+            return DDS3_BACKGROUND_OVERLAY_INACTIVE;
         }
-    } else if (dds3BackgroundFadeFirstRamp == KWLN_BGFADE_FIRST_RAMP_MAX) {
-        return KWLN_BACKGROUND_OVERLAY_INACTIVE;
+    } else if (dds3BackgroundFadeFirstRamp == DDS3_BGFADE_FIRST_RAMP_MAX) {
+        return DDS3_BACKGROUND_OVERLAY_INACTIVE;
     }
-    return KWLN_BACKGROUND_OVERLAY_ACTIVE;
+    return DDS3_BACKGROUND_OVERLAY_ACTIVE;
 }
 
 /* Store the visibility mode; its stored zero value clears ramps, otherwise
@@ -1792,7 +1792,7 @@ void dds3FadeSetMode(s32 visibilityMode) {
         dds3BackgroundFadeFirstRamp = 0;
         dds3BackgroundFadeSecondRamp = 0;
     } else {
-        dds3BackgroundFadeColor[KWLN_COLOR_ALPHA_CHANNEL] = KWLN_FADE_MAX_ALPHA;
+        dds3BackgroundFadeColor[DDS3_COLOR_ALPHA_CHANNEL] = DDS3_FADE_MAX_ALPHA;
     }
 }
 
@@ -1801,21 +1801,21 @@ void dds3FadeSetMode(s32 visibilityMode) {
 void dds3StepBackgroundFade(void) {
     f32 fadeRatio;
 
-    if (dds3DrawFlag & KWLN_BGFADE_DIRECTION_BITS) {
-        if (dds3DrawFlag & KWLN_BGFADE_COUNT_DOWN_BIT) {
+    if (dds3DrawFlag & DDS3_BGFADE_DIRECTION_BITS) {
+        if (dds3DrawFlag & DDS3_BGFADE_COUNT_DOWN_BIT) {
             dds3BackgroundFadeCounter--;
         } else {
             dds3BackgroundFadeCounter++;
         }
         fadeRatio = (f32)dds3BackgroundFadeCounter / (f32)dds3BackgroundFadeDuration;
-        dds3BackgroundFadeColor[KWLN_COLOR_ALPHA_CHANNEL] = (dds3BackgroundFadeCounter << KWLN_FADE_ALPHA_SHIFT) / dds3BackgroundFadeDuration;
-        dds3BackgroundFadeFirstRamp = KWLN_BGFADE_FIRST_RAMP_SCALE - fadeRatio * KWLN_BGFADE_FIRST_RAMP_SCALE;
-        dds3BackgroundFadeSecondRamp = KWLN_BGFADE_SECOND_RAMP_SCALE - fadeRatio * KWLN_BGFADE_SECOND_RAMP_SCALE;
-        if (((dds3DrawFlag & KWLN_BGFADE_COUNT_DOWN_BIT) && dds3BackgroundFadeCounter == 0) ||
-            ((dds3DrawFlag & KWLN_BGFADE_COUNT_UP_BIT) && dds3BackgroundFadeCounter == dds3BackgroundFadeDuration)) {
+        dds3BackgroundFadeColor[DDS3_COLOR_ALPHA_CHANNEL] = (dds3BackgroundFadeCounter << DDS3_FADE_ALPHA_SHIFT) / dds3BackgroundFadeDuration;
+        dds3BackgroundFadeFirstRamp = DDS3_BGFADE_FIRST_RAMP_SCALE - fadeRatio * DDS3_BGFADE_FIRST_RAMP_SCALE;
+        dds3BackgroundFadeSecondRamp = DDS3_BGFADE_SECOND_RAMP_SCALE - fadeRatio * DDS3_BGFADE_SECOND_RAMP_SCALE;
+        if (((dds3DrawFlag & DDS3_BGFADE_COUNT_DOWN_BIT) && dds3BackgroundFadeCounter == 0) ||
+            ((dds3DrawFlag & DDS3_BGFADE_COUNT_UP_BIT) && dds3BackgroundFadeCounter == dds3BackgroundFadeDuration)) {
             dds3BackgroundFadeCounter = 0;
             dds3BackgroundFadeDuration = 0;
-            dds3DrawFlag &= KWLN_BGFADE_KEEP_OTHER_BITS;
+            dds3DrawFlag &= DDS3_BGFADE_KEEP_OTHER_BITS;
         }
     }
 }
@@ -1827,23 +1827,23 @@ void dds3DrawBackgroundFadeBands(void) {
     s32 alpha;
 
     if (dds3BackgroundFadeMode == 0) {
-        fade = KWLN_FADE_MAX_ALPHA - dds3BackgroundFadeColor[KWLN_COLOR_ALPHA_CHANNEL];
+        fade = DDS3_FADE_MAX_ALPHA - dds3BackgroundFadeColor[DDS3_COLOR_ALPHA_CHANNEL];
     } else {
         firstRamp = dds3BackgroundFadeFirstRamp;
         fade = 0;
         secondRamp = dds3BackgroundFadeSecondRamp;
-        if (firstRamp == KWLN_BGFADE_FIRST_RAMP_MAX) {
+        if (firstRamp == DDS3_BGFADE_FIRST_RAMP_MAX) {
             return;
         }
     }
-    if (fade >= KWLN_FADE_MAX_ALPHA) {
+    if (fade >= DDS3_FADE_MAX_ALPHA) {
         return;
     }
 
     eglSetOt(0x4F);
     evtSubmitPrimaryAlphaBlendMode(0);
     evtSubmitPrimaryGsTest(1, 0, 0x80, 3, 0, 0, 1, 1);
-    alpha = (KWLN_FADE_MAX_ALPHA - fade) << 24;
+    alpha = (DDS3_FADE_MAX_ALPHA - fade) << 24;
     evtSubmitDefaultDepthGradientRect(0, -2 - firstRamp, 0x200, 0x33, alpha, alpha, alpha, alpha);
     evtSubmitDefaultDepthGradientRect(0, secondRamp + 0x171, 0x200, 0x51, alpha, alpha, alpha, alpha);
 }

@@ -216,7 +216,7 @@ void effBlurDrawFramebufferQuad(const dds3Effect_Blur_t *source)
         clampPacket[1] = 0x5000000210000000ULL;
         clampPacket[2] = 0x1000000000008001ULL;
         clampPacket[3] = 0xE;
-        if (dds3FadeIsBackgroundOverlayActive() != KWLN_BACKGROUND_OVERLAY_INACTIVE) {
+        if (dds3FadeIsBackgroundOverlayActive() != DDS3_BACKGROUND_OVERLAY_INACTIVE) {
             clampPacket[4] = 0x2DC19000009ULL;
         } else {
             clampPacket[4] = 0x37C00000009ULL;

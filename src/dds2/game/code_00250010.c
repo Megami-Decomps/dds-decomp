@@ -239,7 +239,7 @@ dds3TaskUpdateResult_t evtUpdateFrameVariableTask(dds3ProcessID_t *task) {
     u8 unused[16]; /* retail frame 0x20: unused local storage */
 
     dds3GetProcessData(task->parent);
-    return KWLN_TASK_UPDATE_RETAIN_CALLBACK;
+    return DDS3_TASK_UPDATE_RETAIN_CALLBACK;
 }
 
 extern char D_00423380[]; /* "FrameVar" */
@@ -3247,7 +3247,7 @@ dds3TaskUpdateResult_t evtSynchronizeSelectedEntry(dds3ProcessID_t *task) {
 
     if (mfilterRun() == EFF_EVENT_SETUP_NOT_READY) {
         runtime->controlState = 0;
-        return KWLN_TASK_UPDATE_FINISH_CALLBACK;
+        return DDS3_TASK_UPDATE_FINISH_CALLBACK;
     }
     if (dds3GetProcessRunTime(task) == 0) {
         s32 selected = runtime->selectedEntry;
@@ -3264,7 +3264,7 @@ dds3TaskUpdateResult_t evtSynchronizeSelectedEntry(dds3ProcessID_t *task) {
             D_00436518->selectedEntry = selected;
         }
     }
-    return KWLN_TASK_UPDATE_RETAIN_CALLBACK;
+    return DDS3_TASK_UPDATE_RETAIN_CALLBACK;
 }
 
 /* Poll solid-rectangle setup until it clears runtime control and finishes. */
@@ -3272,9 +3272,9 @@ dds3TaskUpdateResult_t evtPollRuntimeControlReady(dds3ProcessID_t *task) {
     evtViewerInfo_t *runtime = (evtViewerInfo_t *)dds3GetProcessData(task);
     if (evtViewerCheckDirty() == EFF_EVENT_SETUP_NOT_READY) {
         runtime->controlState = 0;
-        return KWLN_TASK_UPDATE_FINISH_CALLBACK;
+        return DDS3_TASK_UPDATE_FINISH_CALLBACK;
     }
-    return KWLN_TASK_UPDATE_RETAIN_CALLBACK;
+    return DDS3_TASK_UPDATE_RETAIN_CALLBACK;
 }
 
 

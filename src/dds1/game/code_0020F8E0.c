@@ -43,7 +43,7 @@ BtlScriptResourceReleaseReadiness btlReleaseScriptResource(void) {
     if (battle->eventPackId == BTL_EVENT_PACK_ID_NONE) {
         return BTL_SCRIPT_RESOURCE_RELEASE_READY;
     }
-    if (dds3ExistProcess(battle->scriptTask) == KWLN_PROCESS_NOT_REGISTERED) {
+    if (dds3ExistProcess(battle->scriptTask) == DDS3_PROCESS_NOT_REGISTERED) {
         battle->scriptTask = 0;
         return BTL_SCRIPT_RESOURCE_RELEASE_READY;
     }

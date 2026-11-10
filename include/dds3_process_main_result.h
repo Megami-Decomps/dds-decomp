@@ -6,7 +6,7 @@
 /* Main-loop scheduler step result: STOP breaks the frame loop; CONTINUE advances it. */
 typedef s32 dds3ProcessMainResult_t;
 
-#define KWLN_PROCESS_MAIN_STOP 0
-#define KWLN_PROCESS_MAIN_CONTINUE 1
+#define DDS3_PROCESS_MAIN_STOP 0
+#define DDS3_PROCESS_MAIN_CONTINUE 1
 
 #endif /* DDS3_PROCESS_MAIN_RESULT_H */

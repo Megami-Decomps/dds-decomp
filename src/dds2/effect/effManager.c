@@ -67,7 +67,7 @@ dds3TaskUpdateResult_t effSubmitFieldBlendStateTask(dds3ProcessID_t *task) {
     surface->regFunc(surface, list);
 
     effObjectListCountersReset();
-    return KWLN_TASK_UPDATE_RETAIN_CALLBACK;
+    return DDS3_TASK_UPDATE_RETAIN_CALLBACK;
 }
 
 extern void billFlushPendingChildPackets(void);
@@ -83,7 +83,7 @@ dds3TaskUpdateResult_t dds3EffectManagerRun(dds3ProcessID_t *task) {
     billFlushPendingRenderPairs();
     dds3CrossfadeRun();
     effDispatchActive();
-    return KWLN_TASK_UPDATE_RETAIN_CALLBACK;
+    return DDS3_TASK_UPDATE_RETAIN_CALLBACK;
 }
 
 /* Parameter-node optional flag callback; the retail implementation is empty. */

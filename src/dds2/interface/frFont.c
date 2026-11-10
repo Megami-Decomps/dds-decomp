@@ -930,7 +930,7 @@ dds3TaskUpdateResult_t frFlipPacketBuf(dds3ProcessID_t *task) {
     s32 queueIndex = (dds3GetFrameID() & FR_FONT_BYTE_MASK) == 0;
 
     frFontWork.glyphSlots[queueIndex] = frFontReleaseGlyphChain(frFontWork.glyphSlots[queueIndex]);
-    return KWLN_TASK_UPDATE_RETAIN_CALLBACK;
+    return DDS3_TASK_UPDATE_RETAIN_CALLBACK;
 }
 
 /* Link chains with the renderer's relative-positioning option enabled. */

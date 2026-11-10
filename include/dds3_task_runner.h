@@ -6,14 +6,14 @@
 
 typedef enum dds3TaskCursorAction_t {
     /* The callback finished an active task; EndProcess may unlink and free it. */
-    KWLN_TASK_CURSOR_ACTION_RELOAD = 0,
+    DDS3_TASK_CURSOR_ACTION_RELOAD = 0,
     /* RunProcess did not perform the finish transition. */
-    KWLN_TASK_CURSOR_ACTION_ADVANCE = 1
+    DDS3_TASK_CURSOR_ACTION_ADVANCE = 1
 } dds3TaskCursorAction_t;
 
 /* Sentinel callback results interpreted by RunProcess. */
-#define KWLN_TASK_UPDATE_RETAIN_CALLBACK 0
-#define KWLN_TASK_UPDATE_FINISH_CALLBACK (-1)
+#define DDS3_TASK_UPDATE_RETAIN_CALLBACK 0
+#define DDS3_TASK_UPDATE_FINISH_CALLBACK (-1)
 
 /*
  * Run one task update. A FINISH_CALLBACK result from an active task routes it

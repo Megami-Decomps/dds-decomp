@@ -6,8 +6,8 @@
 typedef s32 dds3BackgroundOverlayActivity_t;
 
 enum {
-    KWLN_BACKGROUND_OVERLAY_INACTIVE = 0,
-    KWLN_BACKGROUND_OVERLAY_ACTIVE = 1
+    DDS3_BACKGROUND_OVERLAY_INACTIVE = 0,
+    DDS3_BACKGROUND_OVERLAY_ACTIVE = 1
 };
 
 /* Start the background fade-out countdown; zero clears the transition. */

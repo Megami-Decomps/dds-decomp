@@ -118,7 +118,7 @@ u32 evtCommand_TEX_ON(void) {
 
     task = scrVmIntegerToProcessHandle(scrGetIntPara(0));
     registered = dds3ExistProcess(task);
-    if (registered != KWLN_PROCESS_NOT_REGISTERED) {
+    if (registered != DDS3_PROCESS_NOT_REGISTERED) {
         evtPictureDrawOn(task);
     }
     return 1;
@@ -130,7 +130,7 @@ u32 evtCommand_TEX_OFF(void) {
 
     task = scrVmIntegerToProcessHandle(scrGetIntPara(0));
     registered = dds3ExistProcess(task);
-    if (registered != KWLN_PROCESS_NOT_REGISTERED) {
+    if (registered != DDS3_PROCESS_NOT_REGISTERED) {
         evtPictureDrawOff(task);
     }
     return 1;
@@ -144,7 +144,7 @@ u32 evtCommand_TEX_CLS(void) {
 
     task = scrVmIntegerToProcessHandle(scrGetIntPara(0));
     registered = dds3ExistProcess(task);
-    if (registered != KWLN_PROCESS_NOT_REGISTERED) {
+    if (registered != DDS3_PROCESS_NOT_REGISTERED) {
         evtKillPictureProcess(task);
     }
     return 1;
@@ -388,7 +388,7 @@ dds3TaskUpdateResult_t evtUpdateSolarOverlayFade(dds3ProcessID_t *task) {
 
     f = 0.0f;
     if ((fileMenuTaskExists() != 0) || (dds3NullDrawProc() != 0)) {
-        return KWLN_TASK_UPDATE_RETAIN_CALLBACK;
+        return DDS3_TASK_UPDATE_RETAIN_CALLBACK;
     }
     overlay = (SolarOverlayWork *)dds3GetProcessData(task);
     state = &DDS3_GBWK->world;
@@ -416,7 +416,7 @@ dds3TaskUpdateResult_t evtUpdateSolarOverlayFade(dds3ProcessID_t *task) {
     } else if (alpha > 0.0f) {
         evtAdvanceSolarOverlayFadeAndDraw(0, 0, 1, (s32)(alpha * 128.0f), overlay, 0x53);
     }
-    return KWLN_TASK_UPDATE_RETAIN_CALLBACK;
+    return DDS3_TASK_UPDATE_RETAIN_CALLBACK;
 }
 
 extern s32 D_004371FC;

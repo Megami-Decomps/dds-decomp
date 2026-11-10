@@ -126,7 +126,7 @@ dds3TaskUpdateResult_t dds3AdminiStartSequence(dds3ProcessID_t *task) {
     if ((flags & DDS3_ADMIN_CONTROL_REQUEST_PENDING) != 0 && work->NextSequence >= 0) {
         if (work->CallCount != 0) {
             work->CallCount--;
-            return KWLN_TASK_UPDATE_RETAIN_CALLBACK;
+            return DDS3_TASK_UPDATE_RETAIN_CALLBACK;
         }
         work->NowSequence = work->NextSequence;
         work->NextSequence = -1;
@@ -173,7 +173,7 @@ dds3TaskUpdateResult_t dds3AdminiEndCheck(dds3ProcessID_t *task) {
         if (destroy != NULL) {
             destroyResult = destroy();
             if (destroyResult < 0) {
-                return KWLN_TASK_UPDATE_RETAIN_CALLBACK;
+                return DDS3_TASK_UPDATE_RETAIN_CALLBACK;
             }
             work->CallCount = destroyResult + 1;
             work->NowSequence = -1;
@@ -223,7 +223,7 @@ dds3TaskUpdateResult_t dds3AdminiNeoProcess(dds3ProcessID_t *task) {
     if ((work->Stat & DDS3_ADMIN_CONTROL_REQUEST_PENDING) != 0 && work->NextSequence >= 0) {
         return (dds3TaskUpdateResult_t)dds3AdminiEndCheck;
     }
-    return KWLN_TASK_UPDATE_RETAIN_CALLBACK;
+    return DDS3_TASK_UPDATE_RETAIN_CALLBACK;
 }
 
 /* Run the mode's destroy callback (the row's second pointer), then release the

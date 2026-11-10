@@ -250,7 +250,7 @@ void dds3KernelMain(void) {
         if (D_003BA70C == 0) {
             startTick = sdfGetRunTimeCountBase();
             kwlnUpdatePadInputState();
-            if (dds3ProcessMain() == KWLN_PROCESS_MAIN_STOP) {
+            if (dds3ProcessMain() == DDS3_PROCESS_MAIN_STOP) {
                 break;
             }
             D_003BA700++;

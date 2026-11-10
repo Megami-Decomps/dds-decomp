@@ -29,9 +29,9 @@ extern struct dds3Basic_t *dds3TheWorld;
 
 extern const s32 sdfDefaultCdMode;
 
-#define KWLN_FRAME_POOL_NODE_COUNT 0x62
+#define DDS3_FRAME_POOL_NODE_COUNT 0x62
 
-extern sdfGrOt_t sdfGrOtTable[KWLN_FRAME_POOL_NODE_COUNT];
+extern sdfGrOt_t sdfGrOtTable[DDS3_FRAME_POOL_NODE_COUNT];
 
 extern u8 D_00380860[];
 
@@ -43,55 +43,55 @@ extern void sdfGrOtInit(sdfGrOt_t *, s32);
 
 extern void dds3InitializeFrameDrawPackets(s32 bufferIndex);
 
-#define KWLN_FRAME_BUFFER_BYTES 0x1F40
+#define DDS3_FRAME_BUFFER_BYTES 0x1F40
 
-#define KWLN_FRAME_LAST_GROUP_INDEX 12
+#define DDS3_FRAME_LAST_GROUP_INDEX 12
 
-#define KWLN_FRAME_PACKET_LIST_BYTES 0x20
+#define DDS3_FRAME_PACKET_LIST_BYTES 0x20
 
-#define KWLN_FRAME_GS_PACKET_BYTES 0x40
+#define DDS3_FRAME_GS_PACKET_BYTES 0x40
 
-#define KWLN_FRAME_GIF_AD_REGISTER 0xE
+#define DDS3_FRAME_GIF_AD_REGISTER 0xE
 
-#define KWLN_FRAME_GIF_SINGLE_REG_FIELD 0x10000000
+#define DDS3_FRAME_GIF_SINGLE_REG_FIELD 0x10000000
 
-#define KWLN_FRAME_GIF_TWO_WRITES_EOP 0x8002
+#define DDS3_FRAME_GIF_TWO_WRITES_EOP 0x8002
 
-#define KWLN_FRAME_GS_TEXA 0x3B
+#define DDS3_FRAME_GS_TEXA 0x3B
 
-#define KWLN_FRAME_GS_TEXFLUSH 0x3F
+#define DDS3_FRAME_GS_TEXFLUSH 0x3F
 
-#define KWLN_FRAME_GS_TEST_PRIMARY 0x47
+#define DDS3_FRAME_GS_TEST_PRIMARY 0x47
 
-#define KWLN_FRAME_GS_ALPHA_PRIMARY 0x42
+#define DDS3_FRAME_GS_ALPHA_PRIMARY 0x42
 
-#define KWLN_FRAME_NEUTRAL_COLOR 0x80
+#define DDS3_FRAME_NEUTRAL_COLOR 0x80
 
-#define KWLN_FRAME_HALF_WIDTH 0x100
+#define DDS3_FRAME_HALF_WIDTH 0x100
 
-#define KWLN_FRAME_HALF_HEIGHT 0xE0
+#define DDS3_FRAME_HALF_HEIGHT 0xE0
 
-#define KWLN_FRAME_SCALE_FRACTION_BITS 12
+#define DDS3_FRAME_SCALE_FRACTION_BITS 12
 
-#define KWLN_FRAME_X_UNITS_PER_PIXEL 16
+#define DDS3_FRAME_X_UNITS_PER_PIXEL 16
 
-#define KWLN_FRAME_Y_UNITS_PER_PIXEL 8
+#define DDS3_FRAME_Y_UNITS_PER_PIXEL 8
 
-#define KWLN_FRAME_LEFT_BASE 0x7000
+#define DDS3_FRAME_LEFT_BASE 0x7000
 
-#define KWLN_FRAME_TOP_BASE 0x7900
+#define DDS3_FRAME_TOP_BASE 0x7900
 
-#define KWLN_FRAME_RIGHT_BASE 0x9000
+#define DDS3_FRAME_RIGHT_BASE 0x9000
 
-#define KWLN_FRAME_BOTTOM_BASE 0x8700
+#define DDS3_FRAME_BOTTOM_BASE 0x8700
 
-#define KWLN_FRAME_U_EXTENT 0x2000
+#define DDS3_FRAME_U_EXTENT 0x2000
 
-#define KWLN_FRAME_V_EXTENT 0xE00
+#define DDS3_FRAME_V_EXTENT 0xE00
 
-#define KWLN_FRAME_SKIP_POOL_QUEUE_BIT 0x2000000
+#define DDS3_FRAME_SKIP_POOL_QUEUE_BIT 0x2000000
 
-#define KWLN_FRAME_CLEAR_SKIP_POOL_QUEUE 0xFDFFFFFF
+#define DDS3_FRAME_CLEAR_SKIP_POOL_QUEUE 0xFDFFFFFF
 
 /* Prepare the selected buffer's thirteen packet groups and link its draw sink.
  * The buffer index is sampled before waiting/selecting; keep that ordering. */
@@ -102,11 +102,11 @@ s32 dds3FirstProcess(dds3ProcessID_t *task) {
     sdfGrOt_t *drawSink;
 
     sdfGrInitNewFrame();
-    sdfGrOtInit(sdfGrOtTable, KWLN_FRAME_POOL_NODE_COUNT);
+    sdfGrOtInit(sdfGrOtTable, DDS3_FRAME_POOL_NODE_COUNT);
     sdfPreDrawChainInit((SdfPacketChain *)D_00380860);
     dds3InitializeFrameDrawPackets(bufferIndex);
     packetGroups = dds3DrawEnv[bufferIndex].packetGroups;
-    for (groupIndex = KWLN_FRAME_LAST_GROUP_INDEX; groupIndex >= 0; groupIndex--) {
+    for (groupIndex = DDS3_FRAME_LAST_GROUP_INDEX; groupIndex >= 0; groupIndex--) {
         sdfModelSetDrawEnv(packetGroups);
         packetGroups++;
     }
@@ -196,9 +196,9 @@ s32 dds3DrawFirstProcess(dds3ProcessID_t *task) {
     evtCheckSelectionState();
     dds3SceneLightUpdateFirst();
     if (dds3RenderTex != 0) {
-        sdf3DMakeLightParallelPacket((sdf3DLightParallelPacket_t *)(dds3HeldTextureLightingPackets + bufferIndex * KWLN_FRAME_BUFFER_BYTES),
+        sdf3DMakeLightParallelPacket((sdf3DLightParallelPacket_t *)(dds3HeldTextureLightingPackets + bufferIndex * DDS3_FRAME_BUFFER_BYTES),
             dds3RenderLightParallel, dds3RenderAmbientColor);
-        *(u32 *)(dds3HeldTextureLightingPackets - 0x140 + bufferIndex * KWLN_FRAME_BUFFER_BYTES) = dds3RenderDrawEnv;
+        *(u32 *)(dds3HeldTextureLightingPackets - 0x140 + bufferIndex * DDS3_FRAME_BUFFER_BYTES) = dds3RenderDrawEnv;
         if (dds3RenderTex != 0) {
             sdfGrOt_t *sceneNode;
             sdfDrawTag_t *sceneList;
@@ -206,11 +206,11 @@ s32 dds3DrawFirstProcess(dds3ProcessID_t *task) {
             sdf3DMakeScreenParam(&D_0037F7B0.camera);
             LookAtMatrix(dds3RenderTargetVector, dds3RenderEyeVector, kwlnHeldTextureUpVector);
             VU0_STORE_MATRIX_UNCLOBBERED(&dds3RenderViewportMatrix);
-            sdf3DMakeViewportPacket((struct ConsMatrixPacket *)(dds3HeldTextureMatrixPackets + bufferIndex * KWLN_FRAME_BUFFER_BYTES),
+            sdf3DMakeViewportPacket((struct ConsMatrixPacket *)(dds3HeldTextureMatrixPackets + bufferIndex * DDS3_FRAME_BUFFER_BYTES),
                 &D_0037F7B0, &dds3RenderViewportMatrix);
             sceneNode = &sdfGrOtTable[1];
             sceneNode->regFunc(sceneNode,
-                (sdfDrawTag_t *)(dds3HeldTextureMatrixPackets - 0x190 + bufferIndex * KWLN_FRAME_BUFFER_BYTES));
+                (sdfDrawTag_t *)(dds3HeldTextureMatrixPackets - 0x190 + bufferIndex * DDS3_FRAME_BUFFER_BYTES));
             sceneList = dds3FontReqAllocDrawTag();
             sceneFrustum = (u64 *)sdfGrAllocPacketBuff(0x50);
             sdf3DMakeFogPacket((struct ConsFrustumPacket *)sceneFrustum, &kwlnHeldTextureFrustumParameters);
@@ -222,22 +222,22 @@ s32 dds3DrawFirstProcess(dds3ProcessID_t *task) {
         sdfGrOt_t *overlayNode;
         sdfDrawTag_t *overlayList;
         u64 *overlayFrustum;
-        sdf3DMakeLightParallelPacket((sdf3DLightParallelPacket_t *)(dds3OverlayLightingPackets + bufferIndex * KWLN_FRAME_BUFFER_BYTES),
+        sdf3DMakeLightParallelPacket((sdf3DLightParallelPacket_t *)(dds3OverlayLightingPackets + bufferIndex * DDS3_FRAME_BUFFER_BYTES),
             kwlnOverlayLightSources, kwlnOverlayAmbientColor);
         sdf3DMakeScreenParam(&D_0037F980.camera);
         LookAtMatrix(D_0037FA20, kwlnOverlayEyeVector, kwlnOverlayUpVector);
         VU0_STORE_MATRIX_UNCLOBBERED(&D_00384790);
-        sdf3DMakeViewportPacket((struct ConsMatrixPacket *)(dds3OverlayMatrixPackets + bufferIndex * KWLN_FRAME_BUFFER_BYTES), &D_0037F980, &D_00384790);
+        sdf3DMakeViewportPacket((struct ConsMatrixPacket *)(dds3OverlayMatrixPackets + bufferIndex * DDS3_FRAME_BUFFER_BYTES), &D_0037F980, &D_00384790);
         overlayNode = &sdfGrOtTable[85];
-        overlayNode->regFunc(overlayNode, (sdfDrawTag_t *)(dds3OverlayMatrixPackets - 0x20 + bufferIndex * KWLN_FRAME_BUFFER_BYTES));
+        overlayNode->regFunc(overlayNode, (sdfDrawTag_t *)(dds3OverlayMatrixPackets - 0x20 + bufferIndex * DDS3_FRAME_BUFFER_BYTES));
         overlayList = dds3FontReqAllocDrawTag();
         overlayFrustum = (u64 *)sdfGrAllocPacketBuff(0x50);
         sdf3DMakeFogPacket((struct ConsFrustumPacket *)overlayFrustum, &kwlnOverlayFrustumParameters);
         sdfDrawTagLink(overlayList, (u32)overlayFrustum);
         overlayNode->regFunc(overlayNode, overlayList);
 
-        sdf3DMakeLightParallelPacket((sdf3DLightParallelPacket_t *)(dds3OverlayMatrixPackets - 0x440 + bufferIndex * KWLN_FRAME_BUFFER_BYTES), D_0037F770, kwlnDefaultColorVector);
-        *(u32 *)(dds3OverlayMatrixPackets - 0x620 + bufferIndex * KWLN_FRAME_BUFFER_BYTES) = D_00435CBC;
+        sdf3DMakeLightParallelPacket((sdf3DLightParallelPacket_t *)(dds3OverlayMatrixPackets - 0x440 + bufferIndex * DDS3_FRAME_BUFFER_BYTES), D_0037F770, kwlnDefaultColorVector);
+        *(u32 *)(dds3OverlayMatrixPackets - 0x620 + bufferIndex * DDS3_FRAME_BUFFER_BYTES) = D_00435CBC;
     }
     sdf3DMakeScreenParam(&dds3ScreenParam.camera);
     SDF_VU0_LOADVECTOR(aViewTarget);
@@ -258,11 +258,11 @@ s32 dds3DrawFirstProcess(dds3ProcessID_t *task) {
         sdfGrOt_t *viewNode;
         sdfDrawTag_t *viewList;
         u64 *viewFrustum;
-        sdf3DMakeViewportPacket((struct ConsMatrixPacket *)(D_003820F0 + bufferIndex * KWLN_FRAME_BUFFER_BYTES),
+        sdf3DMakeViewportPacket((struct ConsMatrixPacket *)(D_003820F0 + bufferIndex * DDS3_FRAME_BUFFER_BYTES),
             &dds3ScreenParam, &sdfViewMatrix);
         sdf3DSetCamera(&dds3ScreenParam, &sdfViewMatrix);
         viewNode = &sdfGrOtTable[7];
-        viewNode->regFunc(viewNode, (sdfDrawTag_t *)(D_003820F0 - 0x250 + bufferIndex * KWLN_FRAME_BUFFER_BYTES));
+        viewNode->regFunc(viewNode, (sdfDrawTag_t *)(D_003820F0 - 0x250 + bufferIndex * DDS3_FRAME_BUFFER_BYTES));
         viewList = dds3FontReqAllocDrawTag();
         viewFrustum = (u64 *)sdfGrAllocPacketBuff(0x50);
         sdf3DMakeFogPacket((struct ConsFrustumPacket *)viewFrustum, &kwlnDrawVector);
@@ -270,7 +270,7 @@ s32 dds3DrawFirstProcess(dds3ProcessID_t *task) {
         viewNode->regFunc(viewNode, viewList);
 
         sdfPreDrawChainLink((SdfPacketChain *)D_00380860,
-            (sdfPreDrawTag_t *)(D_003820F0 - 0x230 + bufferIndex * KWLN_FRAME_BUFFER_BYTES));
+            (sdfPreDrawTag_t *)(D_003820F0 - 0x230 + bufferIndex * DDS3_FRAME_BUFFER_BYTES));
         providerSurfaces = &sdfGrOtTable[7];
         sdfModelOtInit(kwlnSceneSurfaceSets[0], &providerSurfaces[32], &providerSurfaces[33],
                                               &providerSurfaces[48], &providerSurfaces[49]);
@@ -395,60 +395,60 @@ s32 dds3DrawProcess(dds3ProcessID_t *task) {
     dds3BlurUpdate();
     groupHeads = kwlnSceneSurfaceSets;
     packetGroups = dds3DrawEnv[bufferIndex].packetGroups;
-    for (i = KWLN_FRAME_LAST_GROUP_INDEX; i >= 0; i--) {
+    for (i = DDS3_FRAME_LAST_GROUP_INDEX; i >= 0; i--) {
         sdfModelDrawEnvLinkOt(*groupHeads, packetGroups);
         groupHeads++;
         packetGroups++;
     }
     if (dds3ScreenBlurFlag != 0 && dds3NullDrawProc() == 0) {
-        packetList = (sdfDrawTag_t *)sdfGrAllocPacketBuff(KWLN_FRAME_PACKET_LIST_BYTES);
+        packetList = (sdfDrawTag_t *)sdfGrAllocPacketBuff(DDS3_FRAME_PACKET_LIST_BYTES);
         sdfDrawTagInit(packetList);
-        sdfGrLinkDispFrameTex(packetList, (u32)(dds3FrameDrawPacketRecords[bufferIndex].baseBytes), (sdfGrRefPacketHeader_t *)sdfGrAllocPacketBuff(KWLN_FRAME_PACKET_LIST_BYTES));
-        texturePacket = (u64 *)sdfGrAllocPacketBuff(KWLN_FRAME_GS_PACKET_BYTES);
+        sdfGrLinkDispFrameTex(packetList, (u32)(dds3FrameDrawPacketRecords[bufferIndex].baseBytes), (sdfGrRefPacketHeader_t *)sdfGrAllocPacketBuff(DDS3_FRAME_PACKET_LIST_BYTES));
+        texturePacket = (u64 *)sdfGrAllocPacketBuff(DDS3_FRAME_GS_PACKET_BYTES);
         texturePacket[0] = 3;
         /* VIF FLUSHA, then DIRECT for the three following quadwords. */
         texturePacket[1] = ((u64)0x50000003 << 16 | 0x1000) << 16;
-        texturePacket[2] = ((u64)KWLN_FRAME_GIF_SINGLE_REG_FIELD << 32) | KWLN_FRAME_GIF_TWO_WRITES_EOP;
-        texturePacket[3] = KWLN_FRAME_GIF_AD_REGISTER;
-        texturePacket[4] = ((u64)KWLN_FRAME_NEUTRAL_COLOR << 32) | KWLN_FRAME_NEUTRAL_COLOR;
-        texturePacket[5] = KWLN_FRAME_GS_TEXA;
+        texturePacket[2] = ((u64)DDS3_FRAME_GIF_SINGLE_REG_FIELD << 32) | DDS3_FRAME_GIF_TWO_WRITES_EOP;
+        texturePacket[3] = DDS3_FRAME_GIF_AD_REGISTER;
+        texturePacket[4] = ((u64)DDS3_FRAME_NEUTRAL_COLOR << 32) | DDS3_FRAME_NEUTRAL_COLOR;
+        texturePacket[5] = DDS3_FRAME_GS_TEXA;
         texturePacket[6] = 0;
-        texturePacket[7] = KWLN_FRAME_GS_TEXFLUSH;
+        texturePacket[7] = DDS3_FRAME_GS_TEXFLUSH;
         sdfDrawTagLink(packetList, (u32)texturePacket);
-        blendPacket = (u64 *)sdfGrAllocPacketBuff(KWLN_FRAME_GS_PACKET_BYTES);
+        blendPacket = (u64 *)sdfGrAllocPacketBuff(DDS3_FRAME_GS_PACKET_BYTES);
         blendPacket[0] = 3;
         blendPacket[1] = ((u64)0x50000003 << 16 | 0x1000) << 16;
-        blendPacket[2] = ((u64)KWLN_FRAME_GIF_SINGLE_REG_FIELD << 32) | KWLN_FRAME_GIF_TWO_WRITES_EOP;
-        blendPacket[3] = KWLN_FRAME_GIF_AD_REGISTER;
+        blendPacket[2] = ((u64)DDS3_FRAME_GIF_SINGLE_REG_FIELD << 32) | DDS3_FRAME_GIF_TWO_WRITES_EOP;
+        blendPacket[3] = DDS3_FRAME_GIF_AD_REGISTER;
         blendPacket[4] = 0x31001;
-        blendPacket[5] = KWLN_FRAME_GS_TEST_PRIMARY;
+        blendPacket[5] = DDS3_FRAME_GS_TEST_PRIMARY;
         blendPacket[6] = 0x44;
-        blendPacket[7] = KWLN_FRAME_GS_ALPHA_PRIMARY;
+        blendPacket[7] = DDS3_FRAME_GS_ALPHA_PRIMARY;
         sdfDrawTagLink(packetList, (u32)blendPacket);
-        edgeDistances[0] = D_00435CE0[0] + KWLN_FRAME_HALF_WIDTH;
-        edgeDistances[1] = D_00435CE0[1] + KWLN_FRAME_HALF_HEIGHT;
-        edgeDistances[2] = KWLN_FRAME_HALF_WIDTH - D_00435CE0[0];
-        edgeDistances[3] = KWLN_FRAME_HALF_HEIGHT - D_00435CE0[1];
+        edgeDistances[0] = D_00435CE0[0] + DDS3_FRAME_HALF_WIDTH;
+        edgeDistances[1] = D_00435CE0[1] + DDS3_FRAME_HALF_HEIGHT;
+        edgeDistances[2] = DDS3_FRAME_HALF_WIDTH - D_00435CE0[0];
+        edgeDistances[3] = DDS3_FRAME_HALF_HEIGHT - D_00435CE0[1];
         /* Signed Q12 scale; X and Y use distinct GS coordinate units below. */
         for (i = 0; i != 4; i++) {
-            edgeDistances[i] = edgeDistances[i] * dds3ScreenBlurScale >> KWLN_FRAME_SCALE_FRACTION_BITS;
+            edgeDistances[i] = edgeDistances[i] * dds3ScreenBlurScale >> DDS3_FRAME_SCALE_FRACTION_BITS;
         }
         spritePacket = sdf2DAllocSprite(1);
         vertex = (dds3EffectSpriteVertex_t *)sdf2DGetPrimPtr(spritePacket);
-        vertex->r = KWLN_FRAME_NEUTRAL_COLOR;
-        vertex->g = KWLN_FRAME_NEUTRAL_COLOR;
-        vertex->b = KWLN_FRAME_NEUTRAL_COLOR;
+        vertex->r = DDS3_FRAME_NEUTRAL_COLOR;
+        vertex->g = DDS3_FRAME_NEUTRAL_COLOR;
+        vertex->b = DDS3_FRAME_NEUTRAL_COLOR;
         vertex->a = dds3ScreenBlurAlpha;
         vertex->corner[0].u = 0;
         vertex->corner[0].v = 0;
-        vertex->corner[0].x = KWLN_FRAME_LEFT_BASE - edgeDistances[0] * KWLN_FRAME_X_UNITS_PER_PIXEL;
-        vertex->corner[0].y = KWLN_FRAME_TOP_BASE - edgeDistances[1] * KWLN_FRAME_Y_UNITS_PER_PIXEL;
+        vertex->corner[0].x = DDS3_FRAME_LEFT_BASE - edgeDistances[0] * DDS3_FRAME_X_UNITS_PER_PIXEL;
+        vertex->corner[0].y = DDS3_FRAME_TOP_BASE - edgeDistances[1] * DDS3_FRAME_Y_UNITS_PER_PIXEL;
         vertex->corner[0].mask = 0;
         vertex->corner[0].flag = 0;
-        vertex->corner[1].u = KWLN_FRAME_U_EXTENT;
-        vertex->corner[1].v = KWLN_FRAME_V_EXTENT;
-        vertex->corner[1].x = KWLN_FRAME_RIGHT_BASE + edgeDistances[2] * KWLN_FRAME_X_UNITS_PER_PIXEL;
-        vertex->corner[1].y = KWLN_FRAME_BOTTOM_BASE + edgeDistances[3] * KWLN_FRAME_Y_UNITS_PER_PIXEL;
+        vertex->corner[1].u = DDS3_FRAME_U_EXTENT;
+        vertex->corner[1].v = DDS3_FRAME_V_EXTENT;
+        vertex->corner[1].x = DDS3_FRAME_RIGHT_BASE + edgeDistances[2] * DDS3_FRAME_X_UNITS_PER_PIXEL;
+        vertex->corner[1].y = DDS3_FRAME_BOTTOM_BASE + edgeDistances[3] * DDS3_FRAME_Y_UNITS_PER_PIXEL;
         vertex->corner[1].mask = 0;
         vertex->corner[1].flag = 0;
         sdfDrawTagLink(packetList, (u32)spritePacket);
@@ -460,10 +460,10 @@ s32 dds3DrawProcess(dds3ProcessID_t *task) {
         sdfGrFlushOtChain(poolHead->head);
         D_00435BC8 = 0;
     }
-    if (!(dds3DrawFlag & KWLN_FRAME_SKIP_POOL_QUEUE_BIT)) {
+    if (!(dds3DrawFlag & DDS3_FRAME_SKIP_POOL_QUEUE_BIT)) {
         sdfGrReqDraw(poolHead, (SdfPacketChain *)D_00380860);
     } else {
-        dds3DrawFlag &= KWLN_FRAME_CLEAR_SKIP_POOL_QUEUE;
+        dds3DrawFlag &= DDS3_FRAME_CLEAR_SKIP_POOL_QUEUE;
     }
     sdfDrawPublishFlag = 0;
     return 0;

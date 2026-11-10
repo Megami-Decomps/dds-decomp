@@ -72,7 +72,7 @@ void movieStop(void);
 
 dds3TaskUpdateResult_t movieMan_Process(dds3ProcessID_t *task) {
     sdfIpuRunDecode(0x3c / dds3VblanksPerFrame);
-    return KWLN_TASK_UPDATE_RETAIN_CALLBACK;
+    return DDS3_TASK_UPDATE_RETAIN_CALLBACK;
 }
 
 void dds3StartMovieManager(void) {
@@ -378,7 +378,7 @@ dds3TaskUpdateResult_t mnuMovieViewer(dds3ProcessID_t *task) {
     MovieViewerDrawFrameInfo();
     D_003255A8.regFunc(&D_003255A8, mnuMovieList.packets);
     D_003BD8E4 = sdfPadButtons[0];
-    return KWLN_TASK_UPDATE_RETAIN_CALLBACK;
+    return DDS3_TASK_UPDATE_RETAIN_CALLBACK;
 }
 
 void InitMovieViewer(void) {

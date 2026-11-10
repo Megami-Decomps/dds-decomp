@@ -71,15 +71,15 @@ extern u32 distblurovercnt;
 extern u32 ripblurovercnt;
 extern void Normalize(void);
 
-#define KWLN_DRAW_VECTOR_PARAM_BYTES 0x14
-#define KWLN_DRAW_ALPHA_CHANNEL 3
-#define KWLN_DRAW_COLOR_FADE_BIT 0x80000
-#define KWLN_DRAW_COLOR_TRANSITION_BIT 0x100000
-#define KWLN_DRAW_SQUARE_FADE_BIT 0x200000
-#define KWLN_DRAW_SQUARE_TRANSITION_BIT 0x400000
-#define KWLN_DRAW_CLEAR_SQUARE_TRANSITION 0xFFBFFFFF
-#define KWLN_DRAW_OVERLAY_TRANSITION_BIT 0x800
-#define KWLN_DRAW_CLEAR_OVERLAY_TRANSITION 0xfffff7ff
+#define DDS3_DRAW_VECTOR_PARAM_BYTES 0x14
+#define DDS3_DRAW_ALPHA_CHANNEL 3
+#define DDS3_DRAW_COLOR_FADE_BIT 0x80000
+#define DDS3_DRAW_COLOR_TRANSITION_BIT 0x100000
+#define DDS3_DRAW_SQUARE_FADE_BIT 0x200000
+#define DDS3_DRAW_SQUARE_TRANSITION_BIT 0x400000
+#define DDS3_DRAW_CLEAR_SQUARE_TRANSITION 0xFFBFFFFF
+#define DDS3_DRAW_OVERLAY_TRANSITION_BIT 0x800
+#define DDS3_DRAW_CLEAR_OVERLAY_TRANSITION 0xfffff7ff
 
 /* Copy one complete vector into the default draw color state; retain no source pointer. */
 void dds3SetAmbient(const u128 *source) {
@@ -89,7 +89,7 @@ void dds3SetAmbient(const u128 *source) {
 
 /* Copy the five-word draw vector parameter body without interpreting or retaining it. */
 void dds3SetFog(const KwlnDrawVectorParams *source) {
-    memcpy(&kwlnDrawVector, source, KWLN_DRAW_VECTOR_PARAM_BYTES);
+    memcpy(&kwlnDrawVector, source, DDS3_DRAW_VECTOR_PARAM_BYTES);
 }
 
 /* Retain the caller-owned light-data pointer in its draw slot. */
@@ -127,11 +127,11 @@ void dds3Filter2Swap(s32 duration) {
     filter2swapnow = 0;
     filter2swapmax = duration;
     if (duration == 0) {
-        dds3DrawFlag &= ~KWLN_DRAW_COLOR_TRANSITION_BIT;
+        dds3DrawFlag &= ~DDS3_DRAW_COLOR_TRANSITION_BIT;
         setdraw_xy(filter2target.corners);
         Eve_FilterSetParam(&filter2target);
     } else {
-        dds3DrawFlag |= KWLN_DRAW_COLOR_TRANSITION_BIT;
+        dds3DrawFlag |= DDS3_DRAW_COLOR_TRANSITION_BIT;
     }
 }
 
@@ -145,13 +145,13 @@ void dds3Filter2On(s32 duration) {
     filter2atarget = (params->color >> 24);
     filter2max = requestedDuration;
     if (requestedDuration == 0) {
-        dds3DrawFlag &= ~KWLN_DRAW_COLOR_FADE_BIT;
+        dds3DrawFlag &= ~DDS3_DRAW_COLOR_FADE_BIT;
         setdraw_xy(params->corners);
         Eve_FilterSetParam(params);
         Eve_FilterON();
     }
     else {
-        dds3DrawFlag |= KWLN_DRAW_COLOR_FADE_BIT;
+        dds3DrawFlag |= DDS3_DRAW_COLOR_FADE_BIT;
     }
 }
 
@@ -162,12 +162,12 @@ void dds3Filter2Off(s32 duration) {
     filter2now = 0;
     filter2max = duration;
     if (duration == 0) {
-        dds3DrawFlag &= ~KWLN_DRAW_COLOR_FADE_BIT;
-        dds3DrawFlag &= ~KWLN_DRAW_COLOR_TRANSITION_BIT;
+        dds3DrawFlag &= ~DDS3_DRAW_COLOR_FADE_BIT;
+        dds3DrawFlag &= ~DDS3_DRAW_COLOR_TRANSITION_BIT;
         Eve_FilterOFF();
     }
     else {
-        dds3DrawFlag |= KWLN_DRAW_COLOR_FADE_BIT;
+        dds3DrawFlag |= DDS3_DRAW_COLOR_FADE_BIT;
     }
 }
 
@@ -198,10 +198,10 @@ void dds3MFilterSwap(s32 duration) {
     mfilterswapnow = 0;
     mfilterswapmax = duration;
     if (duration == 0) {
-        dds3DrawFlag &= KWLN_DRAW_CLEAR_SQUARE_TRANSITION;
+        dds3DrawFlag &= DDS3_DRAW_CLEAR_SQUARE_TRANSITION;
         Eve_PartialMultiFilterSetParam(&mfiltertarget);
     } else {
-        dds3DrawFlag |= KWLN_DRAW_SQUARE_TRANSITION_BIT;
+        dds3DrawFlag |= DDS3_DRAW_SQUARE_TRANSITION_BIT;
     }
 }
 
@@ -212,31 +212,31 @@ void dds3MFilterOn(s32 duration) {
 
     mfilterabase = 0;
     mfilternow = 0;
-    mfilteratarget = params->draw.color[KWLN_DRAW_ALPHA_CHANNEL];
+    mfilteratarget = params->draw.color[DDS3_DRAW_ALPHA_CHANNEL];
     mfiltermax = requestedDuration;
     if (requestedDuration == 0) {
-        dds3DrawFlag &= ~KWLN_DRAW_SQUARE_FADE_BIT;
+        dds3DrawFlag &= ~DDS3_DRAW_SQUARE_FADE_BIT;
         Eve_PartialMultiFilterSetParam(params);
         Eve_PartialMultiFilterON();
     }
     else {
-        dds3DrawFlag |= KWLN_DRAW_SQUARE_FADE_BIT;
+        dds3DrawFlag |= DDS3_DRAW_SQUARE_FADE_BIT;
     }
 }
 
 /* Fade staged square alpha toward zero, or disable it now when duration is zero. */
 void dds3MFilterOff(s32 duration) {
     mfilteratarget = 0;
-    mfilterabase = mfiltertarget.draw.color[KWLN_DRAW_ALPHA_CHANNEL];
+    mfilterabase = mfiltertarget.draw.color[DDS3_DRAW_ALPHA_CHANNEL];
     mfilternow = 0;
     mfiltermax = duration;
     if (duration == 0) {
-        dds3DrawFlag &= ~KWLN_DRAW_SQUARE_FADE_BIT;
-        dds3DrawFlag &= ~KWLN_DRAW_SQUARE_TRANSITION_BIT;
+        dds3DrawFlag &= ~DDS3_DRAW_SQUARE_FADE_BIT;
+        dds3DrawFlag &= ~DDS3_DRAW_SQUARE_TRANSITION_BIT;
         Eve_PartialMultiFilterOFF();
     }
     else {
-        dds3DrawFlag |= KWLN_DRAW_SQUARE_FADE_BIT;
+        dds3DrawFlag |= DDS3_DRAW_SQUARE_FADE_BIT;
     }
 }
 
@@ -252,7 +252,7 @@ void dds3SetBlur(s32 duration, s32 alpha, s32 scale) {
         else {
             dds3ScreenBlurFlag = 1;
         }
-        dds3DrawFlag = dds3DrawFlag & KWLN_DRAW_CLEAR_OVERLAY_TRANSITION;
+        dds3DrawFlag = dds3DrawFlag & DDS3_DRAW_CLEAR_OVERLAY_TRANSITION;
         return;
     }
     bluralphabase = dds3ScreenBlurAlpha;
@@ -260,16 +260,16 @@ void dds3SetBlur(s32 duration, s32 alpha, s32 scale) {
     bluralphatarget = (s16)alpha;
     blurscaletarget = (s16)scale;
     blurmax = (s16)duration;
-    dds3DrawFlag = dds3DrawFlag | KWLN_DRAW_OVERLAY_TRANSITION_BIT;
+    dds3DrawFlag = dds3DrawFlag | DDS3_DRAW_OVERLAY_TRANSITION_BIT;
     blurnow = 0;
 }
 
-#define KWLN_DRAW_RECT_FADE_BIT 0x20000
-#define KWLN_DRAW_RECT_TRANSITION_BIT 0x40000
-#define KWLN_DRAW_CLEAR_RECT_TRANSITION 0xFFFBFFFF
-#define KWLN_DRAW_TEXTURE_FADE_BIT 0x1000
-#define KWLN_DRAW_TEXTURE_TRANSITION_BIT 0x8000
-#define KWLN_DRAW_CLEAR_TEXTURE_TRANSITION 0xFFFF7FFF
+#define DDS3_DRAW_RECT_FADE_BIT 0x20000
+#define DDS3_DRAW_RECT_TRANSITION_BIT 0x40000
+#define DDS3_DRAW_CLEAR_RECT_TRANSITION 0xFFFBFFFF
+#define DDS3_DRAW_TEXTURE_FADE_BIT 0x1000
+#define DDS3_DRAW_TEXTURE_TRANSITION_BIT 0x8000
+#define DDS3_DRAW_CLEAR_TEXTURE_TRANSITION 0xFFFF7FFF
 
 /* Stage rectangle-blur rotation, scale and blend control, in the original order. */
 void dds3SetBlur2Para(f32 rotation, f32 scale, u32 blendControl) {
@@ -299,11 +299,11 @@ void dds3Blur2Swap(s32 duration) {
     blur2swapnow = 0;
     blur2swapmax = duration;
     if (duration == 0) {
-        dds3DrawFlag &= KWLN_DRAW_CLEAR_RECT_TRANSITION;
+        dds3DrawFlag &= DDS3_DRAW_CLEAR_RECT_TRANSITION;
         setdraw_xy(blur2target.corners);
         Eve_BlurSetParam(&blur2target);
     } else {
-        dds3DrawFlag |= KWLN_DRAW_RECT_TRANSITION_BIT;
+        dds3DrawFlag |= DDS3_DRAW_RECT_TRANSITION_BIT;
     }
 }
 
@@ -317,13 +317,13 @@ void dds3Blur2On(s32 duration) {
     blur2atarget = (params->color >> 24);
     blur2max = requestedDuration;
     if (requestedDuration == 0) {
-        dds3DrawFlag &= ~KWLN_DRAW_RECT_FADE_BIT;
+        dds3DrawFlag &= ~DDS3_DRAW_RECT_FADE_BIT;
         setdraw_xy(params->corners);
         Eve_BlurSetParam(params);
         Eve_BlurON();
     }
     else {
-        dds3DrawFlag |= KWLN_DRAW_RECT_FADE_BIT;
+        dds3DrawFlag |= DDS3_DRAW_RECT_FADE_BIT;
     }
 }
 
@@ -334,12 +334,12 @@ void dds3Blur2Off(s32 duration) {
     blur2now = 0;
     blur2max = duration;
     if (duration == 0) {
-        dds3DrawFlag &= ~KWLN_DRAW_RECT_FADE_BIT;
-        dds3DrawFlag &= ~KWLN_DRAW_RECT_TRANSITION_BIT;
+        dds3DrawFlag &= ~DDS3_DRAW_RECT_FADE_BIT;
+        dds3DrawFlag &= ~DDS3_DRAW_RECT_TRANSITION_BIT;
         Eve_BlurOFF();
     }
     else {
-        dds3DrawFlag |= KWLN_DRAW_RECT_FADE_BIT;
+        dds3DrawFlag |= DDS3_DRAW_RECT_FADE_BIT;
     }
 }
 
@@ -372,10 +372,10 @@ void dds3MultiBlurSwap(s32 duration) {
     mulblurswapnow = 0;
     mulblurswapmax = duration;
     if (duration == 0) {
-        dds3DrawFlag &= KWLN_DRAW_CLEAR_TEXTURE_TRANSITION;
+        dds3DrawFlag &= DDS3_DRAW_CLEAR_TEXTURE_TRANSITION;
         Eve_PartialMultiBlurSetParam(&mulblurtarget);
     } else {
-        dds3DrawFlag |= KWLN_DRAW_TEXTURE_TRANSITION_BIT;
+        dds3DrawFlag |= DDS3_DRAW_TEXTURE_TRANSITION_BIT;
     }
 }
 
@@ -389,12 +389,12 @@ void dds3MultiBlurOn(s32 duration) {
     mulbluratarget = (params->source.color >> 24);
     mulblurmax = requestedDuration;
     if (requestedDuration == 0) {
-        dds3DrawFlag &= ~KWLN_DRAW_TEXTURE_FADE_BIT;
+        dds3DrawFlag &= ~DDS3_DRAW_TEXTURE_FADE_BIT;
         Eve_PartialMultiBlurSetParam(params);
         Eve_PartialMultiBlurON();
     }
     else {
-        dds3DrawFlag |= KWLN_DRAW_TEXTURE_FADE_BIT;
+        dds3DrawFlag |= DDS3_DRAW_TEXTURE_FADE_BIT;
     }
 }
 
@@ -408,35 +408,35 @@ void dds3MultiBlurOff(s32 duration) {
     mulblurabase = (params->source.color >> 24);
     mulblurmax = requestedDuration;
     if (requestedDuration == 0) {
-        dds3DrawFlag &= ~KWLN_DRAW_TEXTURE_FADE_BIT;
-        dds3DrawFlag &= ~KWLN_DRAW_TEXTURE_TRANSITION_BIT;
+        dds3DrawFlag &= ~DDS3_DRAW_TEXTURE_FADE_BIT;
+        dds3DrawFlag &= ~DDS3_DRAW_TEXTURE_TRANSITION_BIT;
         Eve_PartialMultiBlurSetParam(params);
         Eve_PartialMultiBlurOFF();
     }
     else {
-        dds3DrawFlag |= KWLN_DRAW_TEXTURE_FADE_BIT;
+        dds3DrawFlag |= DDS3_DRAW_TEXTURE_FADE_BIT;
     }
 }
 
-#define KWLN_DRAW_FILTER_FADE_BIT 0x2000
-#define KWLN_DRAW_FILTER_TRANSITION_BIT 0x10000
-#define KWLN_DRAW_CLEAR_FILTER_TRANSITION 0xFFFEFFFF
-#define KWLN_DRAW_STAGGERED_FADE_BIT 0x800000
-#define KWLN_DRAW_STAGGERED_TRANSITION_BIT 0x1000000
-#define KWLN_DRAW_CLEAR_STAGGERED_TRANSITION 0xFEFFFFFF
-#define KWLN_DRAW_FILTER_COUNT_LIMIT 0x65
-#define KWLN_DRAW_FILTER_MAX_COUNT 0x64
-#define KWLN_DRAW_STAGGERED_COUNT_LIMIT 0x29
-#define KWLN_DRAW_STAGGERED_MAX_COUNT 0x28
+#define DDS3_DRAW_FILTER_FADE_BIT 0x2000
+#define DDS3_DRAW_FILTER_TRANSITION_BIT 0x10000
+#define DDS3_DRAW_CLEAR_FILTER_TRANSITION 0xFFFEFFFF
+#define DDS3_DRAW_STAGGERED_FADE_BIT 0x800000
+#define DDS3_DRAW_STAGGERED_TRANSITION_BIT 0x1000000
+#define DDS3_DRAW_CLEAR_STAGGERED_TRANSITION 0xFEFFFFFF
+#define DDS3_DRAW_FILTER_COUNT_LIMIT 0x65
+#define DDS3_DRAW_FILTER_MAX_COUNT 0x64
+#define DDS3_DRAW_STAGGERED_COUNT_LIMIT 0x29
+#define DDS3_DRAW_STAGGERED_MAX_COUNT 0x28
 
 /* Stage filter-blur parameters, counting/clamping only counts above 100.
  * The secondary values are forwarded into the shared effect parameter body. */
 void dds3SetDistBlurPara(s32 filterCount, s32 size, s32 delaySpread, f32 angleStep,
                            f32 uvDisplacementAngleDegrees, f32 uvDisplacementAmplitude,
                            s32 blendControl) {
-    if (filterCount >= KWLN_DRAW_FILTER_COUNT_LIMIT) {
+    if (filterCount >= DDS3_DRAW_FILTER_COUNT_LIMIT) {
         distblurovercnt++;
-        filterCount = KWLN_DRAW_FILTER_MAX_COUNT;
+        filterCount = DDS3_DRAW_FILTER_MAX_COUNT;
     }
     distblurtarget.count = filterCount;
     distblurtarget.size = size;
@@ -465,10 +465,10 @@ void dds3DistBlurSwap(s32 duration) {
     distblurswapnow = 0;
     distblurswapmax = duration;
     if (duration == 0) {
-        dds3DrawFlag &= KWLN_DRAW_CLEAR_FILTER_TRANSITION;
+        dds3DrawFlag &= DDS3_DRAW_CLEAR_FILTER_TRANSITION;
         Eve_DistortionBlurSetParam(&distblurtarget);
     } else {
-        dds3DrawFlag |= KWLN_DRAW_FILTER_TRANSITION_BIT;
+        dds3DrawFlag |= DDS3_DRAW_FILTER_TRANSITION_BIT;
     }
 }
 
@@ -483,12 +483,12 @@ void dds3DistBlurOn(s32 duration) {
     distbluratarget = (params->color >> 24);
     distblurmax = requestedDuration;
     if (requestedDuration == 0) {
-        dds3DrawFlag &= ~KWLN_DRAW_FILTER_FADE_BIT;
+        dds3DrawFlag &= ~DDS3_DRAW_FILTER_FADE_BIT;
         Eve_DistortionBlurSetParam(params);
         Eve_DistortionBlurON();
     }
     else {
-        dds3DrawFlag |= KWLN_DRAW_FILTER_FADE_BIT;
+        dds3DrawFlag |= DDS3_DRAW_FILTER_FADE_BIT;
         Eve_DistortionBlurSetParam(params);
         Eve_DistortionBlurOFF();
     }
@@ -501,12 +501,12 @@ void dds3DistBlurOff(s32 duration) {
     distblurnow = 0;
     distblurmax = duration;
     if (duration == 0) {
-        dds3DrawFlag &= ~KWLN_DRAW_FILTER_FADE_BIT;
-        dds3DrawFlag &= ~KWLN_DRAW_FILTER_TRANSITION_BIT;
+        dds3DrawFlag &= ~DDS3_DRAW_FILTER_FADE_BIT;
+        dds3DrawFlag &= ~DDS3_DRAW_FILTER_TRANSITION_BIT;
         Eve_DistortionBlurOFF();
     }
     else {
-        dds3DrawFlag |= KWLN_DRAW_FILTER_FADE_BIT;
+        dds3DrawFlag |= DDS3_DRAW_FILTER_FADE_BIT;
     }
 }
 
@@ -515,9 +515,9 @@ void dds3DistBlurOff(s32 duration) {
 void dds3SetRipBlurPara(s32 count, f32 phaseStep, f32 spacing,
                            f32 uvDisplacementAngleDegrees,
                            f32 uvDisplacementAmplitude, f32 angleStep, s32 blendControl) {
-    if (count >= KWLN_DRAW_STAGGERED_COUNT_LIMIT) {
+    if (count >= DDS3_DRAW_STAGGERED_COUNT_LIMIT) {
         ripblurovercnt++;
-        count = KWLN_DRAW_STAGGERED_MAX_COUNT;
+        count = DDS3_DRAW_STAGGERED_MAX_COUNT;
     }
     ripblurtarget.count = count;
     ripblurtarget.phaseStep = phaseStep;
@@ -546,10 +546,10 @@ void dds3RipBlurSwap(s32 duration) {
     ripblurswapnow = 0;
     ripblurswapmax = duration;
     if (duration == 0) {
-        dds3DrawFlag &= KWLN_DRAW_CLEAR_STAGGERED_TRANSITION;
+        dds3DrawFlag &= DDS3_DRAW_CLEAR_STAGGERED_TRANSITION;
         Eve_RippleBlurSetParam(&ripblurtarget);
     } else {
-        dds3DrawFlag |= KWLN_DRAW_STAGGERED_TRANSITION_BIT;
+        dds3DrawFlag |= DDS3_DRAW_STAGGERED_TRANSITION_BIT;
     }
 }
 
@@ -564,12 +564,12 @@ void dds3RipBlurOn(s32 duration) {
     ripbluratarget = (params->color >> 24);
     ripblurmax = requestedDuration;
     if (requestedDuration == 0) {
-        dds3DrawFlag &= ~KWLN_DRAW_STAGGERED_FADE_BIT;
+        dds3DrawFlag &= ~DDS3_DRAW_STAGGERED_FADE_BIT;
         Eve_RippleBlurSetParam(params);
         Eve_RippleBlurON();
     }
     else {
-        dds3DrawFlag |= KWLN_DRAW_STAGGERED_FADE_BIT;
+        dds3DrawFlag |= DDS3_DRAW_STAGGERED_FADE_BIT;
         Eve_RippleBlurSetParam(params);
         Eve_RippleBlurOFF();
     }
@@ -582,12 +582,12 @@ void dds3RipBlurOff(s32 duration) {
     ripblurnow = 0;
     ripblurmax = duration;
     if (duration == 0) {
-        dds3DrawFlag &= ~KWLN_DRAW_STAGGERED_FADE_BIT;
-        dds3DrawFlag &= ~KWLN_DRAW_STAGGERED_TRANSITION_BIT;
+        dds3DrawFlag &= ~DDS3_DRAW_STAGGERED_FADE_BIT;
+        dds3DrawFlag &= ~DDS3_DRAW_STAGGERED_TRANSITION_BIT;
         Eve_RippleBlurOFF();
     }
     else {
-        dds3DrawFlag |= KWLN_DRAW_STAGGERED_FADE_BIT;
+        dds3DrawFlag |= DDS3_DRAW_STAGGERED_FADE_BIT;
     }
 }
 
@@ -619,7 +619,7 @@ extern void evtHokanFilter(s32 enable, f32 t, const dds3Effect_Filter_t *from, c
 void dds3BlurUpdate(void) {
     s32 alpha;
 
-    if (dds3DrawFlag & KWLN_DRAW_OVERLAY_TRANSITION_BIT) {
+    if (dds3DrawFlag & DDS3_DRAW_OVERLAY_TRANSITION_BIT) {
         blurnow++;
         dds3ScreenBlurAlpha = bluralphabase + blurnow * (bluralphatarget - bluralphabase) / blurmax;
         dds3ScreenBlurScale = blurscalebase + blurnow * (blurscaletarget - blurscalebase) / blurmax;
@@ -630,10 +630,10 @@ void dds3BlurUpdate(void) {
             dds3ScreenBlurFlag = 1;
         }
         if (blurnow >= blurmax) {
-            dds3DrawFlag &= KWLN_DRAW_CLEAR_OVERLAY_TRANSITION;
+            dds3DrawFlag &= DDS3_DRAW_CLEAR_OVERLAY_TRANSITION;
         }
     }
-    if (dds3DrawFlag & KWLN_DRAW_RECT_TRANSITION_BIT) {
+    if (dds3DrawFlag & DDS3_DRAW_RECT_TRANSITION_BIT) {
         if (blur2swapnow < blur2swapmax) {
             blur2swapnow++;
         }
@@ -648,10 +648,10 @@ void dds3BlurUpdate(void) {
             Eve_BlurOFF();
         }
         if (blur2swapnow >= blur2swapmax) {
-            dds3DrawFlag &= ~KWLN_DRAW_RECT_TRANSITION_BIT;
+            dds3DrawFlag &= ~DDS3_DRAW_RECT_TRANSITION_BIT;
         }
     }
-    if (dds3DrawFlag & KWLN_DRAW_RECT_FADE_BIT) {
+    if (dds3DrawFlag & DDS3_DRAW_RECT_FADE_BIT) {
         if (blur2now < blur2max) {
             blur2now++;
         }
@@ -669,10 +669,10 @@ void dds3BlurUpdate(void) {
             Eve_BlurON();
         }
         if (blur2now >= blur2max) {
-            dds3DrawFlag &= ~KWLN_DRAW_RECT_FADE_BIT;
+            dds3DrawFlag &= ~DDS3_DRAW_RECT_FADE_BIT;
         }
     }
-    if (dds3DrawFlag & KWLN_DRAW_TEXTURE_TRANSITION_BIT) {
+    if (dds3DrawFlag & DDS3_DRAW_TEXTURE_TRANSITION_BIT) {
         if (mulblurswapnow < mulblurswapmax) {
             mulblurswapnow++;
         }
@@ -686,10 +686,10 @@ void dds3BlurUpdate(void) {
             Eve_PartialMultiBlurOFF();
         }
         if (mulblurswapnow >= mulblurswapmax) {
-            dds3DrawFlag &= ~KWLN_DRAW_TEXTURE_TRANSITION_BIT;
+            dds3DrawFlag &= ~DDS3_DRAW_TEXTURE_TRANSITION_BIT;
         }
     }
-    if (dds3DrawFlag & KWLN_DRAW_TEXTURE_FADE_BIT) {
+    if (dds3DrawFlag & DDS3_DRAW_TEXTURE_FADE_BIT) {
         if (mulblurnow < mulblurmax) {
             mulblurnow++;
         }
@@ -706,10 +706,10 @@ void dds3BlurUpdate(void) {
             Eve_PartialMultiBlurON();
         }
         if (mulblurnow >= mulblurmax) {
-            dds3DrawFlag &= ~KWLN_DRAW_TEXTURE_FADE_BIT;
+            dds3DrawFlag &= ~DDS3_DRAW_TEXTURE_FADE_BIT;
         }
     }
-    if (dds3DrawFlag & KWLN_DRAW_FILTER_TRANSITION_BIT) {
+    if (dds3DrawFlag & DDS3_DRAW_FILTER_TRANSITION_BIT) {
         if (distblurswapnow < distblurswapmax) {
             distblurswapnow++;
         }
@@ -723,10 +723,10 @@ void dds3BlurUpdate(void) {
             Eve_DistortionBlurOFF();
         }
         if (distblurswapnow >= distblurswapmax) {
-            dds3DrawFlag &= ~KWLN_DRAW_FILTER_TRANSITION_BIT;
+            dds3DrawFlag &= ~DDS3_DRAW_FILTER_TRANSITION_BIT;
         }
     }
-    if (dds3DrawFlag & KWLN_DRAW_FILTER_FADE_BIT) {
+    if (dds3DrawFlag & DDS3_DRAW_FILTER_FADE_BIT) {
         if (distblurnow < distblurmax) {
             distblurnow++;
         }
@@ -743,10 +743,10 @@ void dds3BlurUpdate(void) {
             Eve_DistortionBlurON();
         }
         if (distblurnow >= distblurmax) {
-            dds3DrawFlag &= ~KWLN_DRAW_FILTER_FADE_BIT;
+            dds3DrawFlag &= ~DDS3_DRAW_FILTER_FADE_BIT;
         }
     }
-    if (dds3DrawFlag & KWLN_DRAW_STAGGERED_TRANSITION_BIT) {
+    if (dds3DrawFlag & DDS3_DRAW_STAGGERED_TRANSITION_BIT) {
         if (ripblurswapnow < ripblurswapmax) {
             ripblurswapnow++;
         }
@@ -760,10 +760,10 @@ void dds3BlurUpdate(void) {
             Eve_RippleBlurOFF();
         }
         if (ripblurswapnow >= ripblurswapmax) {
-            dds3DrawFlag &= ~KWLN_DRAW_STAGGERED_TRANSITION_BIT;
+            dds3DrawFlag &= ~DDS3_DRAW_STAGGERED_TRANSITION_BIT;
         }
     }
-    if (dds3DrawFlag & KWLN_DRAW_STAGGERED_FADE_BIT) {
+    if (dds3DrawFlag & DDS3_DRAW_STAGGERED_FADE_BIT) {
         if (ripblurnow < ripblurmax) {
             ripblurnow++;
         }
@@ -781,10 +781,10 @@ void dds3BlurUpdate(void) {
             Eve_RippleBlurON();
         }
         if (ripblurnow >= ripblurmax) {
-            dds3DrawFlag &= ~KWLN_DRAW_STAGGERED_FADE_BIT;
+            dds3DrawFlag &= ~DDS3_DRAW_STAGGERED_FADE_BIT;
         }
     }
-    if (dds3DrawFlag & KWLN_DRAW_COLOR_TRANSITION_BIT) {
+    if (dds3DrawFlag & DDS3_DRAW_COLOR_TRANSITION_BIT) {
         if (filter2swapnow < filter2swapmax) {
             filter2swapnow++;
         }
@@ -799,10 +799,10 @@ void dds3BlurUpdate(void) {
             Eve_FilterOFF();
         }
         if (filter2swapnow >= filter2swapmax) {
-            dds3DrawFlag &= ~KWLN_DRAW_COLOR_TRANSITION_BIT;
+            dds3DrawFlag &= ~DDS3_DRAW_COLOR_TRANSITION_BIT;
         }
     }
-    if (dds3DrawFlag & KWLN_DRAW_COLOR_FADE_BIT) {
+    if (dds3DrawFlag & DDS3_DRAW_COLOR_FADE_BIT) {
         if (filter2now < filter2max) {
             filter2now++;
         }
@@ -820,27 +820,27 @@ void dds3BlurUpdate(void) {
             Eve_FilterON();
         }
         if (filter2now >= filter2max) {
-            dds3DrawFlag &= ~KWLN_DRAW_COLOR_FADE_BIT;
+            dds3DrawFlag &= ~DDS3_DRAW_COLOR_FADE_BIT;
         }
     }
-    if (dds3DrawFlag & KWLN_DRAW_SQUARE_TRANSITION_BIT) {
+    if (dds3DrawFlag & DDS3_DRAW_SQUARE_TRANSITION_BIT) {
         if (mfilterswapnow < mfilterswapmax) {
             mfilterswapnow++;
         }
         evtHokanMultFilter(1, (f32)mfilterswapnow / (f32)mfilterswapmax, &dds3MFilterBuf,
                         &mfiltertarget, &dds3MFilterCurrent);
         Eve_PartialMultiFilterSetParam(&dds3MFilterCurrent);
-        if (dds3MFilterCurrent.draw.color[KWLN_DRAW_ALPHA_CHANNEL] != 0) {
+        if (dds3MFilterCurrent.draw.color[DDS3_DRAW_ALPHA_CHANNEL] != 0) {
             Eve_PartialMultiFilterON();
         }
         else {
             Eve_PartialMultiFilterOFF();
         }
         if (mfilterswapnow >= mfilterswapmax) {
-            dds3DrawFlag &= ~KWLN_DRAW_SQUARE_TRANSITION_BIT;
+            dds3DrawFlag &= ~DDS3_DRAW_SQUARE_TRANSITION_BIT;
         }
     }
-    if (dds3DrawFlag & KWLN_DRAW_SQUARE_FADE_BIT) {
+    if (dds3DrawFlag & DDS3_DRAW_SQUARE_FADE_BIT) {
         if (mfilternow < mfiltermax) {
             mfilternow++;
         }
@@ -857,7 +857,7 @@ void dds3BlurUpdate(void) {
             Eve_PartialMultiFilterON();
         }
         if (mfilternow >= mfiltermax) {
-            dds3DrawFlag &= ~KWLN_DRAW_SQUARE_FADE_BIT;
+            dds3DrawFlag &= ~DDS3_DRAW_SQUARE_FADE_BIT;
         }
     }
 }

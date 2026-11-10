@@ -2027,7 +2027,7 @@ void btlActivateRuntime(u8 fadeMode) {
     battle->active = 1;
     battle->pending = 0;
     battle->options = 0;
-    if (dds3FadeIsBackgroundOverlayActive() != KWLN_BACKGROUND_OVERLAY_INACTIVE) {
+    if (dds3FadeIsBackgroundOverlayActive() != DDS3_BACKGROUND_OVERLAY_INACTIVE) {
         battle->options |= 4;
     }
 }

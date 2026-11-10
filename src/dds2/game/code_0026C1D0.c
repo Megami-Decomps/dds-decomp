@@ -126,7 +126,7 @@ void fclInitPanelPos(u32 firstWord, u32 secondWord, u32 thirdWord, s16 firstHalf
 /* Destroy a nonzero, registered task. The declared return value is not set. */
 s32 fclScriptForcedEnd(dds3ProcessID_t *task) {
     if (task != 0) {
-        if (dds3GetProcessStat(task) != KWLN_TASK_DETACHED) {
+        if (dds3GetProcessStat(task) != DDS3_TASK_DETACHED) {
             dds3KillProcess(task, 0);
         }
     }
@@ -464,13 +464,13 @@ void evtMoveMessageWindowWithPanelOffset(s32 x, s32 y) {
 
 /* Recognize all three scheduler queues. Preserve the repeated queries. */
 s32 fclChkMessageDraw(dds3ProcessID_t *task) {
-    if (dds3GetProcessStat(task) == KWLN_TASK_DELAYED_START) {
+    if (dds3GetProcessStat(task) == DDS3_TASK_DELAYED_START) {
         return 1;
     }
-    if (dds3GetProcessStat(task) == KWLN_TASK_ACTIVE) {
+    if (dds3GetProcessStat(task) == DDS3_TASK_ACTIVE) {
         return 1;
     }
-    return dds3GetProcessStat(task) == KWLN_TASK_DESTROY_PENDING;
+    return dds3GetProcessStat(task) == DDS3_TASK_DESTROY_PENDING;
 }
 
 extern s8 evtActiveEntryFlags[8];

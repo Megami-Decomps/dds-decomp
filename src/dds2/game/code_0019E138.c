@@ -1320,7 +1320,7 @@ s32 itfDrawBackgroundAndGetTaskReadyMask(dds3ProcessID_t *task) {
     itfDrawBackgroundSprite();
     taskState = dds3GetProcessStat(itfFontTestScriptTask);
     readyMask = 0xffffffff;
-    if (taskState != KWLN_TASK_DESTROY_PENDING) {
+    if (taskState != DDS3_TASK_DESTROY_PENDING) {
         readyMask = 0;
     }
     return readyMask;

@@ -1291,7 +1291,7 @@ dds3TaskUpdateResult_t mnuUpdateTitleMenuTask(dds3ProcessID_t *task) {
     mnuAdvanceSlideBarValue(&titleWork->barB, 0x52);
     mnuAdvanceSlideBar(&titleWork->paired, 0x53);
     mnuDrawAndAdvanceMovieMenuBar(&titleWork->bar, 0x53);
-    return KWLN_TASK_UPDATE_RETAIN_CALLBACK;
+    return DDS3_TASK_UPDATE_RETAIN_CALLBACK;
 }
 
 u32 mnuOpenTitleMenuForMode(s32 mode) {

@@ -811,7 +811,7 @@ s32 btlAiTaskUpdate(BtlTask *task) {
                     } else {
                         btlDispatchStateHandler(task, 0xC);
                     }
-                } else if (dds3ExistProcess(scene->boundTask) == KWLN_PROCESS_NOT_REGISTERED) {
+                } else if (dds3ExistProcess(scene->boundTask) == DDS3_PROCESS_NOT_REGISTERED) {
                     if (task->indexWork.phase == -1) {
                         btlBossDebugPrintf("btl:AI script return NULL[%p]\n", task);
                         btlDebugPrintf("AI script return NULL\n");

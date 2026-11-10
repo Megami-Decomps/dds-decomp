@@ -499,7 +499,7 @@ dds3TaskUpdateResult_t mnuUpdateMovieMenuTask(dds3ProcessID_t *task) {
         mnuDrawMovieMenuBackgroundQuad(0x80);
         break;
     }
-    return KWLN_TASK_UPDATE_RETAIN_CALLBACK;
+    return DDS3_TASK_UPDATE_RETAIN_CALLBACK;
 }
 
 extern dds3ProcessID_t *mnuCreateTitleMenuTask(s32 mode);

@@ -365,23 +365,23 @@ extern s32 gFldElvFloorNow;
 
 dds3TaskUpdateResult_t fldFieldTaskUpdate(dds3ProcessID_t *task) {
     if (fldProcCampChk() != FLD_CAMP_CHECK_STATE_ENCOUNTER_FLAG_SET) {
-        return KWLN_TASK_UPDATE_RETAIN_CALLBACK;
+        return DDS3_TASK_UPDATE_RETAIN_CALLBACK;
     }
     if (fldProcAmChk() != FLD_SCENE_TRANSITION_GATE_PROCEED) {
-        return KWLN_TASK_UPDATE_RETAIN_CALLBACK;
+        return DDS3_TASK_UPDATE_RETAIN_CALLBACK;
     }
     if (fileMenuTaskExists() != 0) {
-        return KWLN_TASK_UPDATE_RETAIN_CALLBACK;
+        return DDS3_TASK_UPDATE_RETAIN_CALLBACK;
     }
     if (fldTitleIsActive() != 0) {
-        return KWLN_TASK_UPDATE_RETAIN_CALLBACK;
+        return DDS3_TASK_UPDATE_RETAIN_CALLBACK;
     }
     if (gFldElvFloorNow != -999) {
         fldDrawAnimatedFieldBanner(0x80, 0, 0);
     } else {
         fldDrawMapLabelBanner(0);
     }
-    return KWLN_TASK_UPDATE_RETAIN_CALLBACK;
+    return DDS3_TASK_UPDATE_RETAIN_CALLBACK;
 }
 
 dds3TaskUpdateResult_t fldAddressProcess1(dds3ProcessID_t *task) {
@@ -4754,9 +4754,9 @@ dds3TaskUpdateResult_t fldTitle(dds3ProcessID_t *task) {
         }
         break;
     default:
-        return KWLN_TASK_UPDATE_FINISH_CALLBACK;
+        return DDS3_TASK_UPDATE_FINISH_CALLBACK;
     }
-    return KWLN_TASK_UPDATE_RETAIN_CALLBACK;
+    return DDS3_TASK_UPDATE_RETAIN_CALLBACK;
 }
 
 void fldReleaseTitleTextureReference(dds3ProcessID_t *task) {

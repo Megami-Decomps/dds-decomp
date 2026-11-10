@@ -1432,7 +1432,7 @@ s32 fldEveHit_ScriptEnd(char *flag, u32 slot) {
 u32 fldEveHit_ScriptEnd2(u32 slot) {
     dds3ProcessID_t **task = &fldRoomTaskHandles[slot];
 
-    if (dds3ExistProcess(*task) != KWLN_PROCESS_NOT_REGISTERED) {
+    if (dds3ExistProcess(*task) != DDS3_PROCESS_NOT_REGISTERED) {
         dds3KillProcess(*task, 0);
     }
     *task = NULL;
@@ -1896,7 +1896,7 @@ void fldPurgeEveRngProcesses(void) {
     if (count > 0) {
         dds3ProcessID_t **taskSlot = fldRoomTaskHandles;
         do {
-            if (dds3ExistProcess(*taskSlot) == KWLN_PROCESS_NOT_REGISTERED) {
+            if (dds3ExistProcess(*taskSlot) == DDS3_PROCESS_NOT_REGISTERED) {
                 *taskSlot = NULL;
             }
             slotIndex++;

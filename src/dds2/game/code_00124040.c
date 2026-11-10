@@ -2228,15 +2228,15 @@ dds3TaskUpdateResult_t fldUpdateFieldSceneTask(dds3ProcessID_t *task) {
     s32 mode;
     FldLocationCoordinateFlags coordinateFlags;
 
-    if (dds3AdminiGetNextSequence() != -1) return KWLN_TASK_UPDATE_RETAIN_CALLBACK;
-    if (fileMenuTaskExists() != 0) return KWLN_TASK_UPDATE_RETAIN_CALLBACK;
+    if (dds3AdminiGetNextSequence() != -1) return DDS3_TASK_UPDATE_RETAIN_CALLBACK;
+    if (fileMenuTaskExists() != 0) return DDS3_TASK_UPDATE_RETAIN_CALLBACK;
     fldPollAreaResourceLoad();
     if (controller->phase == FLD_SEQUENCE_PHASE_INITIALIZE) {
-        if (fldGetNextFileLoadState() == FLD_NEXT_FILE_LOAD_PENDING) return KWLN_TASK_UPDATE_RETAIN_CALLBACK;
+        if (fldGetNextFileLoadState() == FLD_NEXT_FILE_LOAD_PENDING) return DDS3_TASK_UPDATE_RETAIN_CALLBACK;
         if (D_00389874[0] == 0 && mnuPollTitleStreamStateLocked() != MNU_STREAM_LOAD_IDLE) {
             mnuMarkTitleStreamResetPending();
             mnuResetTitleStreamLocked();
-            return KWLN_TASK_UPDATE_RETAIN_CALLBACK;
+            return DDS3_TASK_UPDATE_RETAIN_CALLBACK;
         }
     }
     mode = fldProcCampChk();
@@ -2246,7 +2246,7 @@ dds3TaskUpdateResult_t fldUpdateFieldSceneTask(dds3ProcessID_t *task) {
             if (controller->phase == FLD_SEQUENCE_PHASE_ACTIVE && D_003898AC[0] != 0 && fldRunDanteGunFlag[0x5C / 4] != 0) {
                 fldReportCampVolumeError();
             }
-            return KWLN_TASK_UPDATE_RETAIN_CALLBACK;
+            return DDS3_TASK_UPDATE_RETAIN_CALLBACK;
         }
     }
     if (fldEncountTestFlag(0x40) == 0) fldUpdateCameraHeadingTransition();
@@ -2337,7 +2337,7 @@ dds3TaskUpdateResult_t fldUpdateFieldSceneTask(dds3ProcessID_t *task) {
         controller->phase++;
         break;
     case FLD_SEQUENCE_PHASE_WAIT_FOR_AREA_ARCHIVE:
-        if (fldGetArchiveLoadPending() != 0) return KWLN_TASK_UPDATE_RETAIN_CALLBACK;
+        if (fldGetArchiveLoadPending() != 0) return DDS3_TASK_UPDATE_RETAIN_CALLBACK;
         controller->phase++;
         if (fldGlobalBase.fieldTransitionMovementGate == 0 && fldGlobalBase.skipFade == 0 &&
             fldGlobalBase.titleFade == 0 && dds3FadeCheck() == 0) {
@@ -2356,7 +2356,7 @@ dds3TaskUpdateResult_t fldUpdateFieldSceneTask(dds3ProcessID_t *task) {
     case FLD_SEQUENCE_PHASE_ACTIVE:
         if (fldGlobalBase.targetGuideEnabled != 0 && fldRunDanteGunFlag[0x5C / 4] != 0) fldUpdateTargetGuideController();
         D_004360E8 = 1;
-        if (fldEncountTestFlag(0x40) != 0 && fldEveHit_ChkEveHitAfter() != 0) return KWLN_TASK_UPDATE_RETAIN_CALLBACK;
+        if (fldEncountTestFlag(0x40) != 0 && fldEveHit_ChkEveHitAfter() != 0) return DDS3_TASK_UPDATE_RETAIN_CALLBACK;
         if (fldEncountTestFlag(0x40) != 0 && fldGlobalBase.titleFade != 0) {
             fldUpdateRoomTriggers(fldPlayerObject);
             break;
@@ -2402,7 +2402,7 @@ dds3TaskUpdateResult_t fldUpdateFieldSceneTask(dds3ProcessID_t *task) {
         if (fldGlobalBase.pendingSceneRequest == FLD_SCENE_ADVANCE_REQUEST_NONE) D_00435F78 = 1;
         else fldGlobalBase.pendingSceneRequest = FLD_SCENE_ADVANCE_REQUEST_NONE;
         dds3AdminiCallSequence(14, &D_00435F98, sizeof(D_00435F98), 1);
-        return KWLN_TASK_UPDATE_FINISH_CALLBACK;
+        return DDS3_TASK_UPDATE_FINISH_CALLBACK;
     case FLD_SEQUENCE_PHASE_NOOP:
         break;
     default:
@@ -2445,7 +2445,7 @@ dds3TaskUpdateResult_t fldUpdateFieldSceneTask(dds3ProcessID_t *task) {
         }
     }
     if (fldProcCampChk() != FLD_CAMP_CHECK_STATE_MENU_ACTIVE) fldUpdateCameraFollow();
-    return KWLN_TASK_UPDATE_RETAIN_CALLBACK;
+    return DDS3_TASK_UPDATE_RETAIN_CALLBACK;
 }
 
 #include "fld_encounter_runtime_api.h"
@@ -2463,28 +2463,28 @@ dds3TaskUpdateResult_t fldProcDraw(dds3ProcessID_t *task) {
     FldSequenceController *lifecycle = &fldAutoMapSeqFlags;
 
     if (dds3AdminiGetNextSequence() != -1) {
-        return KWLN_TASK_UPDATE_RETAIN_CALLBACK;
+        return DDS3_TASK_UPDATE_RETAIN_CALLBACK;
     }
     if (fldGetNextFileLoadState() == FLD_NEXT_FILE_LOAD_PENDING) {
         if (D_003899A8[0] == 1) {
             fldDbgPrint2D(0x40, 0xC0, "NowLoading...");
         }
         if (lifecycle->phase == FLD_SEQUENCE_PHASE_INITIALIZE) {
-            return KWLN_TASK_UPDATE_RETAIN_CALLBACK;
+            return DDS3_TASK_UPDATE_RETAIN_CALLBACK;
         }
     } else {
         if (lifecycle->phase == FLD_SEQUENCE_PHASE_INITIALIZE) {
-            return KWLN_TASK_UPDATE_RETAIN_CALLBACK;
+            return DDS3_TASK_UPDATE_RETAIN_CALLBACK;
         }
     }
     if (fldGetEncounterRuntimeResult() != FLD_ENCOUNTER_RESULT_NONE) {
-        return KWLN_TASK_UPDATE_RETAIN_CALLBACK;
+        return DDS3_TASK_UPDATE_RETAIN_CALLBACK;
     }
     if (fileMenuTaskExists() != 0) {
-        return KWLN_TASK_UPDATE_RETAIN_CALLBACK;
+        return DDS3_TASK_UPDATE_RETAIN_CALLBACK;
     }
     if (fldProcCampChk() == FLD_CAMP_CHECK_STATE_MENU_ACTIVE) {
-        return KWLN_TASK_UPDATE_RETAIN_CALLBACK;
+        return DDS3_TASK_UPDATE_RETAIN_CALLBACK;
     }
     if (fldAutoMapChkMode() == FLD_SCENE_NOT_READY && fldProcCampChk() == FLD_CAMP_CHECK_STATE_ENCOUNTER_FLAG_SET &&
         fldIsEventPhaseAtLeastTwo() == 0) {
@@ -2500,13 +2500,13 @@ dds3TaskUpdateResult_t fldProcDraw(dds3ProcessID_t *task) {
     flags = fldGetLocationCoordinateFlags(fldGlobalBase.area, fldGlobalBase.floor + 1);
     if (flags & FLD_LOCATION_COORDINATE_FLAG_FIELD_EFFECT_TEXTURES) {
         effBlurStepScatterSlotsAndDraw(D_00435F74);
-        return KWLN_TASK_UPDATE_RETAIN_CALLBACK;
+        return DDS3_TASK_UPDATE_RETAIN_CALLBACK;
     }
     if (flags & 0x80) {
         effBlurStepScatterSlotsAndDraw(D_00435F74);
     }
     }
-    return KWLN_TASK_UPDATE_RETAIN_CALLBACK;
+    return DDS3_TASK_UPDATE_RETAIN_CALLBACK;
 }
 
 void fldAutoMapSeqSetFlag(u32 mask) {

@@ -961,7 +961,7 @@ dds3TaskUpdateResult_t CalcMsgMng_Process(dds3ProcessID_t *task) {
         itfUpdateBattleDisplayAndFadeIndicator(node->state);
         node = node->next;
     }
-    return KWLN_TASK_UPDATE_RETAIN_CALLBACK;
+    return DDS3_TASK_UPDATE_RETAIN_CALLBACK;
 }
 
 extern void DestructFlow(s32 window);
@@ -971,13 +971,13 @@ dds3TaskUpdateResult_t DrawMsgMng_Process(dds3ProcessID_t *task) {
     mesflow_tag *node;
 
     if (dds3NullDrawProc() != 0) {
-        return KWLN_TASK_UPDATE_RETAIN_CALLBACK;
+        return DDS3_TASK_UPDATE_RETAIN_CALLBACK;
     }
     for (node = itfMesMngManager.pool.activeHead; node != NULL; node = node->next) {
         itfUpdateSoundSelectorPanel(node->state);
     }
     itfMesMngManager.drawTickCount++;
-    return KWLN_TASK_UPDATE_RETAIN_CALLBACK;
+    return DDS3_TASK_UPDATE_RETAIN_CALLBACK;
 }
 
 void DrawMsgMng_Shutdown(dds3ProcessID_t *task) {
