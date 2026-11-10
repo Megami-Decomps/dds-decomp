@@ -209,7 +209,7 @@ extern s32 D_00436228;
 
 extern s32 D_0039A0B8[];
 
-extern s32 D_0039A028[];
+extern s32 fldSceneBgmTrackTable[];
 
 
 extern char D_00413F20[];
@@ -983,7 +983,7 @@ void fldSelectBgmMode(s32 selection) {
         D_00436228 = volume;
         break;
     case FLD_MAP_BANNER_FADE_OUT:
-        volume = D_0039A028[0] + 1;
+        volume = fldSceneBgmTrackTable[0] + 1;
         p2sdPlayBGM(volume);
         D_00436228 = volume;
         break;

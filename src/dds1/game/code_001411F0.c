@@ -755,7 +755,7 @@ void fldSetSequenceVolume(s32 category, s32 volume) {
 
 extern s32 fldCurrentBgmMode;
 
-extern s32 D_0033EAE8[];
+extern s32 fldSceneBgmTrackTable[];
 
 extern void p2sdStopBGM(u32 trackHandle);
 
@@ -780,7 +780,7 @@ void fldSetBgmMode(s32 mode) {
         fldCurrentBgmMode = mode;
         break;
     case FLD_MAP_BANNER_FADE_OUT:
-        mode = D_0033EAE8[0] + 1;
+        mode = fldSceneBgmTrackTable[0] + 1;
         p2sdPlayBGM(mode);
         fldCurrentBgmMode = mode;
         break;

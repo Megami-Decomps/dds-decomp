@@ -11555,3 +11555,4 @@
 0x00483540	ctorFrameObject	inferred	SMT3HD name via SLUS_209.11 0x0059AD40, __do_global_ctors static object; was D_00483540
 0x00483558	mainCtorsDone	inferred	SMT3HD name via SLUS_209.11 0x0059AD58, __main static flag; was D_00483558
 0x00483560	frameObjectList	inferred	SMT3HD name via SLUS_209.11 0x0059AD60, __register_frame_info object list head; was D_00483560
+0x0039A028	fldSceneBgmTrackTable	inferred	MIDI bank ids << 16, read by the bgm mode switch; SMT3 twin D_0030A2D8 (fldSe.c case 2) named the same
