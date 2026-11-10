@@ -5,12 +5,6 @@
 
 #include "ps2asm.h"
 
-#define D_00529388 sdfGrFrameSet
-#define D_00552080 sdfDispThreadCB
-#define D_00577F80 sdfGrStoreImage
-#define D_00577FF0 sdfDispThreadStack
-#define D_00578FF0 sdfDrawThreadStack
-#define D_00580FF0 sdfGrDispEnv
 typedef struct
 {
     u64 pmode;
@@ -30,8 +24,8 @@ extern void sdfGsMemFree(sdfGsMemSlice_t *aHandle);
 extern sdfGsMemSlice_t *sdfGsAllocFrameBuff(s32 aW, s32 aH, s32 aPixelFormat);
 
 extern sdfGrScreenDef_t sdfGrFrameModes[4];
-extern sdfGrFrameSet_t D_00529388;
-extern sceGsDispEnv D_00580FF0;
+extern sdfGrFrameSet_t sdfGrFrameSet;
+extern sceGsDispEnv sdfGrDispEnv;
 
 extern u8 reqMakeFrameBuff;
 extern u8 sdfGrScreenMode;
@@ -43,6 +37,9 @@ extern s32 WakeupThread(s32 thread);
 extern void sdfWaitVblank(s32 mode);
 extern volatile s8 sdfGrDrawBusy;
 extern s32 sdfGrCaptureReq;
+/* The capture hook, held as an address and called through a cast. */
+typedef void (*sdfGrCaptureFunc_t)(u8 *);
+
 extern s32 sdfGrCaptureTarget;
 extern s8 sdfGrCaptureBuff;
 
@@ -51,10 +48,10 @@ void sdfGrFreeFrameSet(sdfGrFrameSet_t *aFrame);
 
 /* GS store-image packet and tracked-thread node are only passed to the SDK. */
 typedef struct sceGsStoreImage sceGsStoreImage;
-extern sceGsStoreImage D_00577F80;
-extern sdfThCB_t D_00552080;
-extern u8 D_00578FF0[0x8000];
-extern u8 D_00577FF0[0x1000];
+extern sceGsStoreImage sdfGrStoreImage;
+extern sdfThCB_t sdfDispThreadCB;
+extern u8 sdfDrawThreadStack[0x8000];
+extern u8 sdfDispThreadStack[0x1000];
 extern volatile u8 sdfDispThreadFlag;
 extern volatile u8 sdfFrameId;
 extern s8 reqGsReset;
@@ -81,7 +78,7 @@ extern s32 sceGsSetDefStoreImage(sceGsStoreImage *, s16, s16, s16, s16, s16, s16
 extern s32 sceGsExecStoreImage(sceGsStoreImage *, void *);
 extern s32 sceGsSyncPath(s32 mode, s32 timeout);
 extern void sceGsResetPath(void);
-extern void *memcpy(void *a, const void *b, u32 c);
+extern void *memcpy(void *a, const void *b, size_t c);
 extern void sdfGrDrawFrame(void);
 extern void sdfGrMakePacketBuff(s32 aPacketBuffSize);
 extern void sdfGrInitDraw(void);
@@ -99,41 +96,43 @@ extern void sdfCoreDrawReset(void);
 
 
 
-/* NON_MATCHING: 11 of 22 words differ (first at +0x1C). */
-#ifdef NON_MATCHING
 void sdfGrSetFrameSetMode(sdfGrFrameSet_t *aFrame, s32 aMode, s32 aReqHandleClear)
 {
-    sdfGrScreenDef_t *def = &sdfGrFrameModes[aMode];
+    /* Target-specific allocation aid: retain the native row, destination and
+     * depth-format homes. The read constraints order the live depth-format
+     * value without adding accesses or extending it beyond its real store.
+     * This is not evidence of the original source spelling. */
+    FAKEMATCH_ASM_REG(sdfGrScreenDef_t *, def, "$2") = &sdfGrFrameModes[aMode];
+    FAKEMATCH_ASM_REG(sdfGrFrameSet_t *, frame, "$10") = aFrame;
     s16 w;
     s16 h;
     s16 buffH;
     u16 pixelFormat;
-    u16 zbuffFormat;
+    FAKEMATCH_ASM_REG(u16, zbuffFormat, "$9");
 
     if (aReqHandleClear != 0) {
-        aFrame->frameHandle[0] = NULL;
-        aFrame->frameHandle[1] = NULL;
-        aFrame->zbuffHandle = NULL;
+        frame->frameHandle[0] = NULL;
+        frame->frameHandle[1] = NULL;
+        frame->zbuffHandle = NULL;
     }
+    zbuffFormat = def->zbuffFormat;
+    FAKEMATCH_ASM_READ(zbuffFormat);
     w = def->w;
     h = def->h;
     buffH = def->buffH;
     pixelFormat = def->pixelFormat;
-    zbuffFormat = def->zbuffFormat;
-    aFrame->w = w;
-    aFrame->h = h;
-    aFrame->buffH = buffH;
-    aFrame->zbuffFormat = zbuffFormat;
-    aFrame->pixelFormat = pixelFormat;
+    frame->w = w;
+    frame->h = h;
+    frame->buffH = buffH;
+    FAKEMATCH_ASM_READ(zbuffFormat);
+    frame->zbuffFormat = zbuffFormat;
+    frame->pixelFormat = pixelFormat;
 }
-#else
-INCLUDE_ASM(const s32, "sdf/sdfGraph", sdfGrSetFrameSetMode);
-#endif
 
 void sdfGrSetScreen(s32 aMode)
 {
     sdfGrScreenMode = aMode;
-    sdfGrSetFrameSetMode(&D_00529388, aMode, 0);
+    sdfGrSetFrameSetMode(&sdfGrFrameSet, aMode, 0);
     reqMakeFrameBuff = 1;
 }
 
@@ -164,14 +163,14 @@ void sdfGrMakeFrameSet(sdfGrFrameSet_t *aFrame)
 
 void sdfGrSetDisp(s32 aEvenOdd)
 {
-    sdfGsMemSlice_t *buff = D_00529388.frameHandle[aEvenOdd];
+    sdfGsMemSlice_t *buff = sdfGrFrameSet.frameHandle[aEvenOdd];
     u32 fbp;
 
-    sceGsSetDefDispEnv((sceGsDispEnv *)EE_UNCACHED((u32)&D_00580FF0 & 0x0FFFFFFF), 0,
-                       D_00529388.w, D_00529388.buffH, 0, 0);
+    sceGsSetDefDispEnv((sceGsDispEnv *)EE_UNCACHED(EE_PHYSICAL(EE_ADDR(&sdfGrDispEnv))), 0,
+                       sdfGrFrameSet.w, sdfGrFrameSet.buffH, 0, 0);
     fbp = (buff->addr >> 11) & 0x1FF;
-    D_00580FF0.dispfb = (D_00580FF0.dispfb & ~0x1FF) | fbp;
-    sceGsPutDispEnv(&D_00580FF0);
+    sdfGrDispEnv.dispfb = (sdfGrDispEnv.dispfb & ~0x1FF) | fbp;
+    sceGsPutDispEnv(&sdfGrDispEnv);
 }
 
 void sdfGrGsReset(void)
@@ -232,9 +231,9 @@ void sdfGrCapture(void) {
     u8 *destination;
 
     if (*(u8 *)&sdfGrCaptureBuff) {
-        width = D_00529388.w;
-        height = D_00529388.buffH;
-        format = D_00529388.pixelFormat;
+        width = sdfGrFrameSet.w;
+        height = sdfGrFrameSet.buffH;
+        format = sdfGrFrameSet.pixelFormat;
         pixelBytes = 4;
         if (format == 2) {
             pixelBytes = 2;
@@ -245,12 +244,12 @@ void sdfGrCapture(void) {
         allocation = sdfMemAllocDirect(rowBytes * height);
         pixels = (u8 *)sdfMemLock(allocation);
         sceGsSetDefStoreImage(
-            (sceGsStoreImage *)EE_UNCACHED((u32)&D_00577F80 & 0x0FFFFFFF),
-            D_00529388.frameHandle[1]->addr >> 6,
+            (sceGsStoreImage *)EE_UNCACHED(EE_PHYSICAL(EE_ADDR(&sdfGrStoreImage))),
+            sdfGrFrameSet.frameHandle[1]->addr >> 6,
             width / 64, format, 0, 0, width, height);
-        sceGsExecStoreImage(&D_00577F80, pixels);
+        sceGsExecStoreImage(&sdfGrStoreImage, pixels);
         sceGsSyncPath(0, 0);
-        destination = (u8 *)sdfGrCaptureReq;
+        destination = EE_ADDR_AS(u8 *, sdfGrCaptureReq);
         source = pixels;
         rows = height;
         do {
@@ -259,12 +258,12 @@ void sdfGrCapture(void) {
             source += rowBytes;
         } while (--rows != 0);
         sceGsSetDefStoreImage(
-            (sceGsStoreImage *)EE_UNCACHED((u32)&D_00577F80 & 0x0FFFFFFF),
-            D_00529388.frameHandle[0]->addr >> 6,
+            (sceGsStoreImage *)EE_UNCACHED(EE_PHYSICAL(EE_ADDR(&sdfGrStoreImage))),
+            sdfGrFrameSet.frameHandle[0]->addr >> 6,
             width / 64, format, 0, 0, width, height);
-        sceGsExecStoreImage(&D_00577F80, pixels);
+        sceGsExecStoreImage(&sdfGrStoreImage, pixels);
         sceGsSyncPath(0, 0);
-        destination = (u8 *)sdfGrCaptureReq + rowBytes;
+        destination = EE_ADDR_AS(u8 *, sdfGrCaptureReq) + rowBytes;
         source = pixels;
         rows = height;
         do {
@@ -275,7 +274,7 @@ void sdfGrCapture(void) {
         sdfMemFreeDirect(allocation);
         sdfGrCaptureBuff = 0;
         if (sdfGrCaptureTarget) {
-            ((void (*)(u8 *))sdfGrCaptureTarget)((u8 *)sdfGrCaptureReq);
+            EE_ADDR_AS(sdfGrCaptureFunc_t, sdfGrCaptureTarget)(EE_ADDR_AS(u8 *, sdfGrCaptureReq));
         }
     }
 }
@@ -288,7 +287,7 @@ void sdfDeliverDrawStart(s32 frameId, s32 buffId)
     if (sdfDispFrameId[1] == frameId) {
         sdfDispFrameId[1] = frameId ^ 1;
     }
-    sdfGrDrawBusy = buffId;
+    SDF_FLAG_SET(&sdfGrDrawBusy, sdfGrDrawBusy, buffId);
 }
 
 void sdfDeliverDrawEnd(s32 mode, s32 frameId, s32 halfOffset) {
@@ -298,7 +297,7 @@ void sdfDeliverDrawEnd(s32 mode, s32 frameId, s32 halfOffset) {
     } else {
         sdfDispFrameId[halfOffset] = frameId;
     }
-    sdfGrDrawBusy = -1;
+    SDF_FLAG_SET(&sdfGrDrawBusy, sdfGrDrawBusy, -1);
 }
 
 void sdfDrawThread(void) {
@@ -315,15 +314,15 @@ void sdfDrawThread(void) {
         WaitSema(dds3GsSema);
         if (*(s8 *)&reqMakeFrameBuff != 0) {
             reqMakeFrameBuff = 0;
-            sdfGrMakeFrameSet(&D_00529388);
+            sdfGrMakeFrameSet(&sdfGrFrameSet);
         }
         if (reqGsReset != 0) {
             reqGsReset = 0;
             sdfGrGsReset();
         }
-        sdfDrawSyncFlag = 1;
+        SDF_FLAG_SET(&sdfDrawSyncFlag, sdfDrawSyncFlag, 1);
         sdfGrDrawFrame();
-        sdfDrawSyncFlag = 0;
+        SDF_FLAG_SET(&sdfDrawSyncFlag, sdfDrawSyncFlag, 0);
         if (sdfDrawFrameFlag != 0) {
             /* Preserve the controller enable state while stopping VIF1. */
             u32 enabledChannels = HW_READ(D_ENABLER);
@@ -362,14 +361,15 @@ void sdfDispThread(void) {
             sdfGrSetDisp(bufferIndex);
         }
         if (sdfReqDrawDelayCount != 0) {
-            sdfReqDrawDelayCount--;
+            SDF_FLAG_SET(&sdfReqDrawDelayCount, sdfReqDrawDelayCount,
+                         sdfReqDrawDelayCount - 1);
         }
     }
 }
 
 void sdfGrInit(s32 aPacketBuffSize) {
     s32 thread;
-    sdfGrFrameSet_t *graph = &D_00529388;
+    sdfGrFrameSet_t *graph = &sdfGrFrameSet;
 
     sceGsResetPath();
     sdfGrScreenMode = 1;
@@ -377,6 +377,7 @@ void sdfGrInit(s32 aPacketBuffSize) {
     sdfGrMakeFrameSet(graph);
     sdfGrGsResetDone = 0;
     sdfDispFrameId[0] = sdfDispFrameId[1] = -1;
+    /* Plain: runs before the draw thread exists, so no waiter. */
     sdfGrDrawBusy = -1;
     reqGsReset = 1;
     sdfGrMakePacketBuff(aPacketBuffSize);
@@ -384,10 +385,10 @@ void sdfGrInit(s32 aPacketBuffSize) {
     sdfTexInit();
     dds3GsSema = sdfCreateSema(1, 0x20, 0);
     dds3GsThreadId = sdfCreateSema(0, 0x20, 0);
-    thread = CreateThreadSimple((void *)sdfDrawThread, D_00578FF0, 0x8000, 0x44);
+    thread = CreateThreadSimple((void *)sdfDrawThread, sdfDrawThreadStack, 0x8000, 0x44);
     sdfDrawThreadId = thread;
     _StartThread(thread, 0);
-    sdfStartThreadAndWait(&D_00552080, sdfDispThread, D_00577FF0,
+    sdfStartThreadAndWait(&sdfDispThreadCB, sdfDispThread, sdfDispThreadStack,
                           0x1000, 0x40, 0);
 }
 
@@ -395,8 +396,7 @@ void sdfGrInitNewFrame(void) {
     s8 nextBuffer = sdfFrameId ^ 1;
 
     /* Do not select a buffer while its index is the busy-buffer status. */
-    while (sdfGrDrawBusy == nextBuffer) {
-    }
+    SDF_FLAG_WAIT(&sdfGrDrawBusy, sdfGrDrawBusy == nextBuffer);
     sdfFrameId = nextBuffer;
     sdfGrSetupPacketBuff((s8)sdfFrameId);
     sdfCoreDrawReset();
