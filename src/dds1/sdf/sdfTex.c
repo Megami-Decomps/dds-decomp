@@ -18,7 +18,7 @@ extern void *sdfAllocAuto(s32 size);
 extern void sdfFreeAuto(void *ptr);
 extern void sdfGsMemFree(sdfGsMemSlice_t *aHandle);
 extern sdfGsMemSlice_t *sdfGsMemAllocFromTail(s32 aSize, s32 aType);
-extern void *memcpy(void *a, const void *b, u32 c);
+extern void *memcpy(void *a, const void *b, size_t c);
 
 extern sdfTexHandle_t *sdfTexSetEx(TMX_HEADER_t *aTex, s32 aMemMode);
 
@@ -503,7 +503,9 @@ void sdfTexFreeDelayed(sdfTexHandle_t *aHandle)
  * are exact. What is left is the schedule of the first fifty instructions:
  * cc1 models the four-instruction bit-length asm block as one unit-latency
  * insn, so the ready list around it differs from the hand-written order, and
- * swapping the two bit-length statements leaves the output byte-identical. */
+ * swapping the two bit-length statements leaves the output byte-identical.
+ * Behaviour checked against retail: 4 of 4 PCSX2 call vectors give the same
+ * packet bytes, battle savestate (sdfport a1f0fdd, tools/funcvec, tests/funcvec.sh). */
 #ifdef NON_MATCHING
 void sdfTexSetPacket(sdfTexPacket_t *aPacket, s32 aWidth, s32 aHeight, s32 aGsAddr,
                      s32 aPixelFormat, s32 aClutAddr, s32 aClutFormat, s32 aColorComp,
