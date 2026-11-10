@@ -64,19 +64,15 @@ enum sdf_stream_playback {
     SDF_STREAM_PLAYBACK_CADENCED = 2
 };
 
-extern void *memcpy(void *, const void *, unsigned int);
+extern void *memcpy(void *, const void *, size_t);
 
 #include "sdk_libmrpc.h"
 
-#define D_0058F310 sdfPrintRpcClient
-
-extern sifRpcClientContextView_t D_0058F310;
+extern sifRpcClientContextView_t sdfPrintRpcClient;
 
 extern s8 sdfPrintIopFlag;
 
-#define D_00551908 sdfPrintStrFmt
-
-extern char D_00551908[];
+extern char sdfPrintStrFmt[];
 
 extern s32 scePrintf(const char *, ...);
 
@@ -88,7 +84,7 @@ extern s32 (*p2sdSmgBuf)(void);
 void *sdfPrintRpcFunc(s32 unused, sifCommand_t *packet) {
     s32 copyBytes = packet->end - packet->source;
     if (copyBytes > 0) {
-        memcpy(packet, (void *)packet->source, copyBytes);
+        memcpy(packet, EE_ADDR_AS(void *, packet->source), copyBytes);
         return packet;
     }
     return NULL;
@@ -119,10 +115,8 @@ struct sifPrintRpcServerData_t {
     sifRpcDataQueue_t *queue;
 };
 
-typedef char sifRpcDataQueue_size_must_be_0x20[
-    sizeof(sifRpcDataQueue_t) == 0x20 ? 1 : -1];
-typedef char sifPrintRpcServerData_size_must_be_0x44[
-    sizeof(sifPrintRpcServerData_t) == 0x44 ? 1 : -1];
+SIZE_CHECK(sifRpcDataQueue_size_must_be_0x20, sifRpcDataQueue_t, 0x20);
+SIZE_CHECK(sifPrintRpcServerData_size_must_be_0x44, sifPrintRpcServerData_t, 0x44);
 
 extern void *sdfPrintRpcFunc(s32 unused, sifCommand_t *packet);
 extern s32 GetThreadId(void);
@@ -146,7 +140,7 @@ void sdfPrintRpcThread(void)
 }
 
 
-extern char D_005495C8[];
+extern char sdfPrintIopBindErrMsg[];
 
 #include "sdk_libc.h"
 
@@ -164,8 +158,8 @@ void sdfPrintIopInit(void)
     s32 startTicks;
 
     _StartThread(sdfCreateThreadWithStack(sdfPrintRpcThread, 0x1000, 0x4C), 0);
-    while (sceSifMBindRpc(&D_0058F310.client, 0x646E7270, 0) >= 0) {
-        if (D_0058F310.client.server != NULL) {
+    while (sceSifMBindRpc(&sdfPrintRpcClient.client, 0x646E7270, 0) >= 0) {
+        if (sdfPrintRpcClient.client.server != NULL) {
             sdfPrintIopFlag = 1;
             break;
         }
@@ -183,12 +177,12 @@ void sdfPuts(const char *str) {
     if (sdfPrintIopFlag != 0) {
         length = strlen(str);
         if (length != 0) {
-            alignedBuffer = (u8 *)(((u32)&buffer[0x3F]) & ~0x3F);
+            alignedBuffer = EE_ADDR_AS(u8 *, ((EE_ADDR(&buffer[0x3F])) & ~0x3F));
             memcpy(alignedBuffer, str, length);
-            sceSifMCallRpc((sceSifMClientData *)&D_0058F310.client, 0x7D1, 0, alignedBuffer, length, NULL, 0, NULL, NULL);
+            sceSifMCallRpc((sceSifMClientData *)&sdfPrintRpcClient.client, 0x7D1, 0, alignedBuffer, length, NULL, 0, NULL, NULL);
         }
     } else {
-        scePrintf(D_00551908, str);
+        scePrintf(sdfPrintStrFmt, str);
     }
 }
 
@@ -204,3 +198,4 @@ s32 sdfPrintf(const char *str, ...) {
 INCLUDE_SDATA(const s32, "sdf/sdfPrint", sdfPrintIopFlag);
 
 INCLUDE_SDATA(const s32, "sdf/sdfPrint", sdfPrintStrFmt);
+
