@@ -1762,15 +1762,15 @@ extern s8 D_00398629[];
 
 extern u8 D_003BD888;
 
-extern s8 D_003BD360;
+extern s8 sdf3DScreenAdjust;
 
-extern f32 D_003BD364;
+extern f32 sdf3DScreenAdjustScaleX;
 
-extern f32 D_003BD368;
+extern f32 sdf3DScreenAdjustScaleY;
 
-extern f32 D_003BD36C;
+extern f32 sdf3DScreenAdjustOffsetX;
 
-extern f32 D_003BD370;
+extern f32 sdf3DScreenAdjustOffsetY;
 
 /* Final workspace publication: see docs/idioms.md, "Publishing viewer workspace". */
 void mdlUpdateViewerWorkspaceSetup(void) {
@@ -1787,15 +1787,15 @@ void mdlUpdateViewerWorkspaceSetup(void) {
             mdlViewerState.taskPhase = -1;
             D_003BD888 = mdlViewerState.unitStepMode;
             mdlViewerState.unitStepMode = initialPhase;
-            D_003BD360 = initialPhase;
-            D_003BD368 = D_003BD364 = scale;
+            sdf3DScreenAdjust = initialPhase;
+            sdf3DScreenAdjustScaleY = sdf3DScreenAdjustScaleX = scale;
             mdlViewerState.workspaceSetupPhase = initialPhase;
         }
         break;
     case 1:
-        D_003BD36C = mdlViewerState.captureDivX * 0x100 -
+        sdf3DScreenAdjustOffsetX = mdlViewerState.captureDivX * 0x100 -
                    mdlViewerState.unk50 * 0x200 - 0x100;
-        D_003BD370 = mdlViewerState.captureDivY * 0x70 -
+        sdf3DScreenAdjustOffsetY = mdlViewerState.captureDivY * 0x70 -
                    mdlViewerState.unk52 * 0xE0 - 0x70;
         mdlViewerState.workspaceSetupPhase = 2;
         break;

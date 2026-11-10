@@ -308,11 +308,6 @@ void sdf3DSetDefaultFog(u8 *aFog) {
 extern f32 tanf(f32 angle);
 extern void MultMatrix(const void *matrix);
 
-#define sdf3DScreenAdjust D_00438A50
-#define sdf3DScreenAdjustScaleX D_00438A54
-#define sdf3DScreenAdjustScaleY D_00438A58
-#define sdf3DScreenAdjustOffsetX D_00438A5C
-#define sdf3DScreenAdjustOffsetY D_00438A60
 /* Nonzero scales and offsets every screen sdf3DMakeScreenParam builds. */
 extern s8 sdf3DScreenAdjust;
 extern f32 sdf3DScreenAdjustScaleX;
@@ -555,15 +550,15 @@ void sdf3DInit(void) {
     sdfMatInitSystem();
 }
 
-INCLUDE_SDATA(const s32, "sdf/sdf3D", D_00438A50);
+INCLUDE_SDATA(const s32, "sdf/sdf3D", sdf3DScreenAdjust);
 
-INCLUDE_SDATA(const s32, "sdf/sdf3D", D_00438A54);
+INCLUDE_SDATA(const s32, "sdf/sdf3D", sdf3DScreenAdjustScaleX);
 
-INCLUDE_SDATA(const s32, "sdf/sdf3D", D_00438A58);
+INCLUDE_SDATA(const s32, "sdf/sdf3D", sdf3DScreenAdjustScaleY);
 
-INCLUDE_SDATA(const s32, "sdf/sdf3D", D_00438A5C);
+INCLUDE_SDATA(const s32, "sdf/sdf3D", sdf3DScreenAdjustOffsetX);
 
-INCLUDE_SDATA(const s32, "sdf/sdf3D", D_00438A60);
+INCLUDE_SDATA(const s32, "sdf/sdf3D", sdf3DScreenAdjustOffsetY);
 
 INCLUDE_SDATA(const s32, "sdf/sdf3D", sdf3DLightDefault);
 

@@ -10551,6 +10551,7 @@
 0x00412688	scrSceneLightDirectionZeroWarning	inferred	confidence=high; Existing C-defined WARNING: SCENE_LIGHT_DIR length zero string, emitted when all direction components have abs<=0.01; native allocation40B including padding, C literal38B including NUL. DDS1 twin 0x0039F508; existing const char[], native 0x28-byte allocation and padding unchanged. No import or active ASM reader. [PurD readability data b7; native/matched-C twin; identifier-only]
 0x004127C0	dds3PlayerModelName	inferred	confidence=high; Existing C-defined player_a selector string with explicit16-byte storage; chooses the p_a chunk family. DDS1 twin 0x0039F640; existing const char[16], native 0x10-byte allocation and padding unchanged. No import or active ASM reader. [PurD readability data b6; native/matched-C twin; identifier-only]
 0x00413C10	fldTitleTaskName	inferred	confidence=high; data D_00413C10; matched-C-users=3; src/dds2/game/code_001442D0.c:2185:fldTitleIsActive; src/dds2/game/code_001442D0.c:2209:fldStartTitle; src/dds2/game/code_001442D0.c:2241:fldDestroyTitleTask; Title existence, creation and teardown use same task-name string; data-twin=D_003A0800, supported by 2 independently paired matched functions.; retail-data-start=asm/dds2/data/game/code_001442D0.rodata.s:609.; seed-placeholder=D_00413C10; current asm label and source default identifier verified; source=names_reviewed36.tsv. [names_qp10_seed.tsv]
+0x00414430	dds3CrossfadeEndMessage	inferred	SMT3HD name via SLUS_209.11 ?, effect/effPacket DDS-only data, name from its use; was D_00414430
 0x00417AE0	btlUnitWarpFormat	inferred	confidence=high; native string btl:warp[%p]\n is printed by matched btlWarpUnitToMotionReach after moving the effect origin to the motion-reach anchor and setting stateFlags bit0x8000. DDS1 twin at0x003A3BB8. Preserve existing C-owned const char[16] initializer,storage and bytes. [PurA5 readability battle b3; native string and matched-C twin evidence; identifier-only]
 0x00421578	evtStageResourcePathFormat	inferred	confidence=high; Native %sf%03d_%03d format is used by evtLoadArea to combine the field directory and area/room into the stage resource path. Existing const char[0x10] record retained. Same role in DDS1 at 0x003AC008. Preserve declarations, bounds, types, data and control flow. No source-owned import or current native ASM root/interior reference. [PurC5 readability data b2; matched-C/native-twin evidence; identifier-only]
 0x004215A8	evtFieldScriptTerminationFormat	inferred	confidence=high; Native kill field script -> [%s] diagnostic supplies the task name immediately before destroying priority0x3EA script tasks during the state-list scan. Existing const char[0x28] record and restart control flow retained. Same role in DDS1 at 0x003AC038. Preserve declarations, bounds, types, data and control flow. No source-owned import or current native ASM root/interior reference. [PurC5 readability data b2; matched-C/native-twin evidence; identifier-only]
@@ -10987,6 +10988,11 @@
 0x00438A40	sdfCoreDrawBuffHandle	inferred	SMT3HD name via SLUS_209.11 0x005518A4, sdfCoreDraw reference; was D_00438A40
 0x00438A48	sdfFaceDivSoften	inferred	SMT3HD data name via SLUS_209.11 0x005518A8, 8 agreeing references; was sdfFaceDivSoften
 0x00438A4C	sdfFaceDivBias	inferred	SMT3HD data name via SLUS_209.11 0x005518AC, 8 agreeing references; was sdfFaceDivBias
+0x00438A50	sdf3DScreenAdjust	inferred	SMT3HD name via SLUS_209.11 ?, sdf/sdf3D DDS-only data, name from its use; was D_00438A50
+0x00438A54	sdf3DScreenAdjustScaleX	inferred	SMT3HD name via SLUS_209.11 ?, sdf/sdf3D DDS-only data, name from its use; was D_00438A54
+0x00438A58	sdf3DScreenAdjustScaleY	inferred	SMT3HD name via SLUS_209.11 ?, sdf/sdf3D DDS-only data, name from its use; was D_00438A58
+0x00438A5C	sdf3DScreenAdjustOffsetX	inferred	SMT3HD name via SLUS_209.11 ?, sdf/sdf3D DDS-only data, name from its use; was D_00438A5C
+0x00438A60	sdf3DScreenAdjustOffsetY	inferred	SMT3HD name via SLUS_209.11 ?, sdf/sdf3D DDS-only data, name from its use; was D_00438A60
 0x00438A64	sdf3DLightDefault	inferred	SMT3HD data name via SLUS_209.11 0x005518B0, 2 agreeing references; was sdf3DLightDefault
 0x00438A68	sdf3DFogDefault	inferred	SMT3HD data name via SLUS_209.11 0x005518B4, 2 agreeing references; was sdf3DFogDefault
 0x00438A6C	sdf3DSlot2Tex	inferred	SMT3HD name via SLUS_209.11 0x005518B8, sdf/sdf3D SMT3 rename; was D_00438A6C
@@ -11052,7 +11058,9 @@
 0x00438CD0	sdfDumpIndentStr	inferred	SMT3HD name via SLUS_209.11 0x00551B10, sdf/sdfSound SMT3 rename; was D_00438CD0
 0x00438CD8	sdfDumpWordFmt	inferred	SMT3HD name via SLUS_209.11 0x00551B18, sdf/sdfSound SMT3 rename; was D_00438CD8
 0x00438D00	sdfGsMemTypeFmt	inferred	SMT3HD name via SLUS_209.11 0x00551B40, sdf/sdfSound SMT3 rename; was sdfGsMemoryTypeFormat
+0x00438D04	sdfIpuPaused	inferred	SMT3HD name via SLUS_209.11 ?, sdf/sdfIpu DDS-only data, name from its use; was D_00438D04
 0x00438D08	movieStreamSema	inferred	SMT3HD data name via SLUS_209.11 0x00551B48, 6 agreeing references; was movieStreamSema
+0x00438D0C	movieDrawMode	inferred	SMT3HD name via SLUS_209.11 ?, sdf/sdfMovie DDS-only data, name from its use; was D_00438D0C
 0x00438D10	sdfMovieDrawLeft	inferred	The movie sprite's left edge (GS coordinates), set by sdfSetGridScaledDrawBounds. DDS1 twin 0x003BD620.
 0x00438D14	sdfMovieDrawTop	inferred	The movie sprite's top edge (GS coordinates), set by sdfSetGridScaledDrawBounds. DDS1 twin 0x003BD624.
 0x00438D18	sdfMovieDrawRight	inferred	The movie sprite's right edge (GS coordinates), set by sdfSetGridScaledDrawBounds. DDS1 twin 0x003BD628.

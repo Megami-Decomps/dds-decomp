@@ -34,7 +34,6 @@ s32 movieParseHeader(sdfIpuDecodeCb_t *aNode, sdfMovieCb_t *stream, s32 aOp, voi
 extern s32 movieStreamSema;
 extern u32 movieSemaCount;
 extern sdfMovieCb_t *movieSemaId;
-#define movieDrawMode D_003BD61C
 extern const char sdfMovieIpsExt[];
 
 #define movie_2C5080 sdfPrintTextLine
@@ -792,7 +791,7 @@ s32 sdfMovieIsFinished(sdfMovieCb_t *aMov)
 }
 INCLUDE_SDATA(const s32, "sdf/sdfMovie", movieStreamSema);
 
-INCLUDE_SDATA(const s32, "sdf/sdfMovie", D_003BD61C);
+INCLUDE_SDATA(const s32, "sdf/sdfMovie", movieDrawMode);
 
 INCLUDE_SDATA(const s32, "sdf/sdfMovie", sdfMovieDrawLeft);
 

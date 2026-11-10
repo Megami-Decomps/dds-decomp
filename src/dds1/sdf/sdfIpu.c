@@ -921,7 +921,6 @@ s32 sdfIpuSetChainTag(sdfIpuDecodeCb_t *cb)
 }
 
 /* DDS skips the cadence and the refill while the movie is paused. */
-#define sdfIpuPaused D_003BD614
 extern u32 sdfIpuPaused;
 
 void sdfIpuRunDecode(s32 frames)
@@ -1030,5 +1029,5 @@ s32 sdfIpuClose(void) {
     return DisableDmac(4);
 }
 
-INCLUDE_SDATA(const s32, "sdf/sdfIpu", D_003BD614);
+INCLUDE_SDATA(const s32, "sdf/sdfIpu", sdfIpuPaused);
 

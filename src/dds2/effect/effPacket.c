@@ -4,7 +4,6 @@
 #include "sdfFrame.h"
 
 /* DDS's names for the same objects. */
-#define dds3CrossfadeEndMessage D_00414430
 
 /* DDS keeps the end message as data: its rodata block has 8 more bytes than
  * the literal emits. */
@@ -448,7 +447,7 @@ void dds3CrossfadeEnd(void) {
     printf(dds3CrossfadeEndMessage);
 }
 
-INCLUDE_RODATA(const s32, "effect/effPacket", D_00414430);
+INCLUDE_RODATA(const s32, "effect/effPacket", dds3CrossfadeEndMessage);
 
 INCLUDE_SDATA(const s32, "effect/effPacket", dds3CrossfadeRunFlag);
 
