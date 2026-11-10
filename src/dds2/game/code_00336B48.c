@@ -41,7 +41,7 @@ typedef struct {
     u32 orgAttrBits;             /* 0x4C */
     s16 drawFaceCount;         /* 0x50: geometry references submitted to VU in chunks */
     u8 pad52[2];
-    SdfAssetEntry *matPacketPtr;  /* 0x54 */
+    struct sdfMatPacket_t *matPacketPtr;  /* 0x54 */
     u32 color;       /* 0x58: packed RGBA word */
     f32 fdSoften;           /* 0x5C */
     f32 fdBias;           /* 0x60 */
@@ -212,10 +212,10 @@ void corePktMakeFaceDivParm(SdfVuColorTransform *result,
                                      firstColor, secondColor, blend);
 }
 
-void corePktSetFaceDivParm(SdfVuColorTransform *out, SdfAssetEntry *work, u32 packedColor, f32 deltaX, f32 deltaY) {
+void corePktSetFaceDivParm(SdfVuColorTransform *out, sdfMatPacket_t *work, u32 packedColor, f32 deltaX, f32 deltaY) {
     corePktMakeFaceDivParm(out, corePktCurrLight, packedColor,
-                  work->unk08, work->unk04,
-                  work->unk1C,
-                  work->x + deltaX,
-                  work->y + deltaY);
+                  work->diffuse, work->ambient,
+                  work->constant,
+                  work->fdSoften + deltaX,
+                  work->fdBias + deltaY);
 }

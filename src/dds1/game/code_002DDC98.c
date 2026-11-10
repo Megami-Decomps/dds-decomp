@@ -179,10 +179,10 @@ void corePktMakeFaceDivParm(SdfVuColorTransform *result,
                                      firstColor, secondColor, blend);
 }
 
-void corePktSetFaceDivParm(SdfVuColorTransform *out, SdfAssetEntry *work, u32 packedColor, f32 deltaX, f32 deltaY) {
+void corePktSetFaceDivParm(SdfVuColorTransform *out, sdfMatPacket_t *work, u32 packedColor, f32 deltaX, f32 deltaY) {
     corePktMakeFaceDivParm(out, corePktCurrLight, packedColor,
-                  work->unk08, work->unk04,
-                  work->unk1C,
-                  work->x + deltaX,
-                  work->y + deltaY);
+                  work->diffuse, work->ambient,
+                  work->constant,
+                  work->fdSoften + deltaX,
+                  work->fdBias + deltaY);
 }
