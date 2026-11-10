@@ -1,4 +1,5 @@
 #include "common.h"
+#include "libdma.h"
 #include "eeregs.h"
 #include "ps2asm.h"
 #include "model.h"
@@ -7,16 +8,15 @@
 #define SDF_DMA_QWORD_SHIFT 4
 #define SDF_DMA_CHCR_TTE 0x40
 
-extern u32 corePktCurrLight;
+extern addr_t corePktCurrLight;
 extern f32 corePktZBias;
-extern u32 corePktCurrFog;
+extern addr_t corePktCurrFog;
 extern u128 corePktFogParm;
 extern u8 vu0MicroPacket[];
 extern u8 vu1MicroPacket[];
-extern s32 corePktPointBuff;
+extern saddr_t corePktPointBuff;
 extern sdfMemHandle_t *sdfCoreDrawBuffHandle;
 
-extern s32 sceDmaSync(void *, s32, s32);
 extern void *sceDmaGetChan(s32);
 extern void sceDmaSendN(void *, void *, s32);
 extern sdfMemHandle_t *sdfMemAllocDirect(s32 size);
@@ -30,10 +30,9 @@ extern u8 *sdfModelAllocTmPacket(sdfModelNode_t *node);
 #ifdef NON_MATCHING
 typedef struct sdfCorePacketPointBuff_tag sdfCorePacketPointBuff_tag;
 typedef struct sdfCorePacketFaceDivParm_t sdfCorePacketFaceDivParm_t;
-#define CORE_ALIGN16(p) ((u8 *)(((u32)(p) + 15) & ~15))
+#define CORE_ALIGN16(p) ((u8 *)((EE_ADDR(p) + 15) & ~15))
 extern sdfCorePacketFaceDivParm_t corePktFaceDivParm;
 extern sdfMatrix4_t sdf3DScreenTm;
-extern u128 coreLightConst1, coreLightConst2;
 void MultMatrixRev(void *matrix);
 void corePktInitCb(corePktCb_t *cb, u16 *header, u32 attrMask);
 void corePktSetFaceDivParm(sdfCorePacketFaceDivParm_t *, sdfMatPacket_t *, u32, f32, f32);
@@ -105,9 +104,9 @@ void *sdfCorePacketGen(sdfModelNode_t *node, void *packetData, u32 attrMask,
         vu[0xDD] = ((const u128 *)&sdf3DScreenTm)[1];
         vu[0xDE] = ((const u128 *)&sdf3DScreenTm)[2];
         vu[0xDF] = ((const u128 *)&sdf3DScreenTm)[3];
-        vu[0xE0] = ((const u128 *)corePktCurrLight)[1];
-        vu[0xE1] = ((const u128 *)corePktCurrLight)[2];
-        vu[0xE2] = ((const u128 *)corePktCurrLight)[3];
+        vu[0xE0] = (EE_ADDR_AS(const u128 *, corePktCurrLight))[1];
+        vu[0xE1] = (EE_ADDR_AS(const u128 *, corePktCurrLight))[2];
+        vu[0xE2] = (EE_ADDR_AS(const u128 *, corePktCurrLight))[3];
         PS2_STORE_QUAD_GPR(&vu[0xE6], matPacket2->texTm.q[0]);
         PS2_STORE_QUAD_GPR(&vu[0xE7], matPacket2->texTm.q[1]);
         PS2_STORE_QUAD_GPR(&vu[0xE8], matPacket2->texTm.q[2]);
@@ -141,8 +140,8 @@ void *sdfCorePacketGen(sdfModelNode_t *node, void *packetData, u32 attrMask,
         PS2_STORE_QUAD_GPR(&vu[0xE7], matPacket2->texTm.q[1]);
         PS2_STORE_QUAD_GPR(&vu[0xE8], matPacket2->texTm.q[2]);
         vu[0xE3] = ((const u128 *)&corePktFaceDivParm)[0];
-        vu[0xE4] = coreLightConst1;
-        vu[0xE5] = coreLightConst2;
+        vu[0xE4] = ((const u128 *)&corePktFaceDivParm)[1];
+        vu[0xE5] = ((const u128 *)&corePktFaceDivParm)[2];
         cursor = corePktVu0Run(points, cursor, pointCount, 0x1C, 0x20);
     } else {
         goto ordinaryGeometry;
@@ -321,12 +320,12 @@ void sdfCoreDrawScanOneSkinNodes(sdfModelRootNode_t *root, sdfCorePacket_t *p) {
 }
 
 void sdfCoreDrawSetLight(u8 *light) {
-    corePktCurrLight = (u32)light;
+    corePktCurrLight = EE_ADDR(light);
 }
 
 void sdfCoreDrawSetFog(u8 *fog) {
-    if (corePktCurrFog != (u32)fog) {
-        corePktCurrFog = (u32)fog;
+    if (corePktCurrFog != EE_ADDR(fog)) {
+        corePktCurrFog = EE_ADDR(fog);
         SDF_VU0_COPYVECTOR(&corePktFogParm, fog + 0x10);
     }
 }
@@ -344,10 +343,10 @@ void sdfCoreDrawInit(s32 buffSize) {
     u32 *dmaChannel = sceDmaGetChan(0);
     HW_WRITE(dmaChannel, HW_READ(dmaChannel) & ~SDF_DMA_CHCR_TTE);
     sceDmaSendN(dmaChannel, vu0MicroPacket, (vu1MicroPacket - vu0MicroPacket) >> SDF_DMA_QWORD_SHIFT);
-    sceDmaSync(dmaChannel, 0, 0);
+    sceDmaSync((sceDmaChan *)dmaChannel, 0, 0);
     sdfMemFreeHandleDirect(&sdfCoreDrawBuffHandle);
     sdfCoreDrawBuffHandle = sdfMemAllocDirect(buffSize);
-    corePktPointBuff = (u32)sdfMemLock(sdfCoreDrawBuffHandle);
+    corePktPointBuff = EE_ADDR(sdfMemLock(sdfCoreDrawBuffHandle));
 }
 
 INCLUDE_SDATA(const s32, "sdf/sdfCoreDraw", sdfCoreDrawBuffHandle);
@@ -355,3 +354,4 @@ INCLUDE_SDATA(const s32, "sdf/sdfCoreDraw", sdfCoreDrawBuffHandle);
 INCLUDE_SDATA(const s32, "sdf/sdfCoreDraw", sdfFaceDivSoften);
 
 INCLUDE_SDATA(const s32, "sdf/sdfCoreDraw", sdfFaceDivBias);
+
