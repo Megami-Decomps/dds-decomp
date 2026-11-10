@@ -6,17 +6,6 @@
 #include "motion.h"
 
 /* DDS's names for the same functions. */
-#define dds3_1B09C0 effSplRun
-#define func_001B0A60 effSplCalc
-#define func_001B0B90 effSplCalcRegist
-#define func_001B0CC0 effSplRewind
-#define func_001B0CD0 effSplSetStep
-#define dds3_1B1238 effCreateChannel
-#define dds3_1B12B0 effReleaseInterpolationChannel
-#define dds3_1B12D0 effAdvanceChanCursor
-#define func_001B1370 effSampleChannelBezier
-#define func_001B1478 effClearChanCursor
-#define func_001B1488 effSetChanStep
 
 /* Cubic spline fitted over a point list; dds3AllocSplineHandle takes 0x2C. */
 typedef struct dds3Spline_t {
@@ -34,7 +23,7 @@ typedef struct dds3Spline_t {
     f32 unk28;
 } dds3Spline_t;
 
-/* Walks a point list at a fixed step; dds3_1B1238 takes 0x18. */
+/* Walks a point list at a fixed step; effCreateChannel takes 0x18. */
 typedef struct dds3SplineWalk_t {
     void *handle;
     s32 count;
@@ -63,9 +52,9 @@ void SolveTridiagonal(f32 *solution, f32 *rhs, s32 count);
 
 void dds3BuildSplineCoefsSkipDup(dds3Spline_t *spline, f32 *tangents);
 
-void func_001B1370(sdfVector4_t *vertex, dds3SplineWalk_t *channel, s32 index, f32 t);
+void effSampleChannelBezier(sdfVector4_t *vertex, dds3SplineWalk_t *channel, s32 index, f32 t);
 
-void func_001B0A60(sdfVector4_t *vertex, dds3Spline_t *primitive, s32 recordIndex, f32 t);
+void effSplCalc(sdfVector4_t *vertex, dds3Spline_t *primitive, s32 recordIndex, f32 t);
 
 dds3Spline_t *dds3AllocSplineHandle(f32 *points, u32 count, s32 flattenEqualComponents) {
     sdfMemHandle_t *primaryResource = sdfMemAllocDirect(0x2C);
@@ -113,13 +102,13 @@ void dds3FreeSplineHandle(dds3Spline_t *pSpline)
     sdfMemFreeDirect(pSpline->handle);
 }
 
-s32 dds3_1B09C0(sdfVector4_t *pVertex, dds3Spline_t *pSpline)
+s32 effSplRun(sdfVector4_t *pVertex, dds3Spline_t *pSpline)
 {
     f32 t = pSpline->unk24;
     s32 index = pSpline->unk20;
     s32 running = 1;
 
-    func_001B0A60(pVertex, pSpline, index, t);
+    effSplCalc(pVertex, pSpline, index, t);
     t += SDF_FRAME_STEP(pSpline->unk28);
     if (t > 1.0f) {
         t -= 1.0f;
@@ -135,7 +124,7 @@ s32 dds3_1B09C0(sdfVector4_t *pVertex, dds3Spline_t *pSpline)
     return running;
 }
 
-void func_001B0A60(sdfVector4_t *vertex, dds3Spline_t *primitive, s32 recordIndex, f32 t) {
+void effSplCalc(sdfVector4_t *vertex, dds3Spline_t *primitive, s32 recordIndex, f32 t) {
     f32 *a;
     f32 *b;
     f32 *c;
@@ -160,7 +149,7 @@ void func_001B0A60(sdfVector4_t *vertex, dds3Spline_t *primitive, s32 recordInde
 }
 
 /* vu0 routine: sample the curve into vf10. */
-void func_001B0B90(dds3Spline_t *primitive, s32 recordIndex, f32 t)
+void effSplCalcRegist(dds3Spline_t *primitive, s32 recordIndex, f32 t)
 {
     sdfVector4_t vertex;
     f32 *a;
@@ -187,13 +176,13 @@ void func_001B0B90(dds3Spline_t *primitive, s32 recordIndex, f32 t)
     SDF_VU0_LOADVECTOR_MEMOPS(*(u128 *)&vertex);
 }
 
-void func_001B0CC0(dds3Spline_t *pSpline)
+void effSplRewind(dds3Spline_t *pSpline)
 {
     pSpline->unk20 = 0;
     pSpline->unk24 = 0;
 }
 
-void func_001B0CD0(dds3Spline_t *pSpline, f32 value)
+void effSplSetStep(dds3Spline_t *pSpline, f32 value)
 {
     pSpline->unk28 = value;
 }
@@ -316,7 +305,7 @@ void dds3BuildSplineCoefsSkipDup(dds3Spline_t *primitive, f32 *tangents) {
     }
 }
 
-void *dds3_1B1238(void *rows, u32 count) {
+void *effCreateChannel(void *rows, u32 count) {
     void *channel = NULL;
     sdfMemHandle_t *handle;
     dds3SplineWalk_t *channelObject;
@@ -336,19 +325,19 @@ void *dds3_1B1238(void *rows, u32 count) {
     return channel;
 }
 
-s32 dds3_1B12B0(dds3SplineWalk_t *pWalk)
+s32 effReleaseInterpolationChannel(dds3SplineWalk_t *pWalk)
 {
     if (pWalk != NULL) {
         sdfMemFreeDirect(pWalk->handle);
     }
 }
 
-s32 dds3_1B12D0(void *vertex, dds3SplineWalk_t *channel) {
+s32 effAdvanceChanCursor(void *vertex, dds3SplineWalk_t *channel) {
     s32 continuing = 1;
     f32 position = channel->t;
     u32 recordIndex = channel->index;
 
-    func_001B1370(vertex, channel, recordIndex, position);
+    effSampleChannelBezier(vertex, channel, recordIndex, position);
     position += SDF_FRAME_STEP(channel->step);
     if (position > 1.0f) {
         position -= 1.0f;
@@ -364,7 +353,7 @@ s32 dds3_1B12D0(void *vertex, dds3SplineWalk_t *channel) {
     return continuing;
 }
 
-void func_001B1370(sdfVector4_t *vertex, dds3SplineWalk_t *channel, s32 recordIndex, f32 t) {
+void effSampleChannelBezier(sdfVector4_t *vertex, dds3SplineWalk_t *channel, s32 recordIndex, f32 t) {
     sdfVector4_t weights;
     f32 oneMinusT = 1.0f - t;
     f32 *p0 = channel->points + recordIndex * 3;
@@ -382,13 +371,13 @@ void func_001B1370(sdfVector4_t *vertex, dds3SplineWalk_t *channel, s32 recordIn
     vertex->w = 1.0f;
 }
 
-void func_001B1478(dds3SplineWalk_t *pWalk)
+void effClearChanCursor(dds3SplineWalk_t *pWalk)
 {
     pWalk->index = 0;
     pWalk->t = 0.0f;
 }
 
-void func_001B1488(dds3SplineWalk_t *pWalk, f32 step)
+void effSetChanStep(dds3SplineWalk_t *pWalk, f32 step)
 {
     pWalk->step = step;
 }
