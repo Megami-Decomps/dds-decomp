@@ -1411,7 +1411,7 @@ void mnuDrawRangeSpriteVariant(u32 x, u32 y, u32 depth, u32 color,
     effDrawTextureSlotWithBlendedCornerColors(x, y, depth, color, 1, drawArg, rangeIndex + 8, texture);
 }
 
-#ifdef NON_MATCHING
+
 #include "common.h"
 #include "sdk_ps2.h"
 #include "fr_font.h"
@@ -1428,97 +1428,108 @@ void mnuDrawRepeatedPanelSprites(s32 x, s32 y, s32 depth, s32 fade, s32 count, E
                                  s32 texture);
 extern u8 (*datSkillNames)[17];
 
-/* A party member's skill list: two columns of rows, 2, 3 or 4 of them as the
- * member's level step is 4, 6 or anything else, drawn over a frame whose two
- * row backings repeat per row and whose foot sprites are picked by the row
- * count. The columns list the record's skills in order; an empty slot shows
- * eight blank cells. Everything fades with the panel. Upstream: INCLUDE_ASM
- * in game/code_002BE628. */
+/* Draw the copied frame pieces, then the skill-name or blank-cell grid.
+ * The coordinate banks are [names/blank cells][column][X/Y]. Each repeated piece's
+ * resource and slot are captured before its draw callbacks. The same selected
+ * piece feeds both fixed and row-count-dependent table accesses.
+ *
+ * Reuse the horizontal/vertical workspaces for the subsequent column/row
+ * indices only after their frame-coordinate values have been consumed.
+ * Qualified compiler evidence: docs/matching/party-skill-list-panel.md. */
+extern const s32 D_0042B160[2][2][2];
+extern const MenuPanelSprite D_0042B180[10];
 void mnuDrawPartySkillListPanel(s32 x, s32 y, s32 depth, datUnitWork_t *record, MenuSpriteState *panel, s32 surface) {
-    /* Skill-name column origins (left, right), then blank-row origins. */
-    MenuPoint text[4] = { { 0x1010, 0x9F0 }, { 0x1880, 0x9F0 }, { 0x1010, 0xA18 }, { 0x1880, 0xA18 } };
-    /* Row backings 0 and 6 repeat per row; 1 and 2 head the frame; 3..5 and
-     * 7..9 are the feet for 2, 3 and 4 rows. */
-    MenuPanelSprite sprites[10] = {
-        { 2, 0x18, { 0xDA0, 0x9E8 } },
-        { 0, 0x4B, { 0xE00, 0x908 } },
-        { 1, 2, { 0x1000, 0x928 } },
-        { 0, 0x4D, { 0x17A0, 0x9D0 } },
-        { 0, 0x4E, { 0x17A0, 0x9D0 } },
-        { 0, 0x4F, { 0x17A0, 0x9D0 } },
-        { 0, 0x4C, { 0xF70, 0xA80 } },
-        { 0, 0x50, { 0xF70, 0xB30 } },
-        { 0, 0x50, { 0xF70, 0xBE0 } },
-        { 0, 0x50, { 0xF70, 0xC88 } },
-    };
+    s32 positions[2][2][2];
+    MenuPanelSprite sprites[10];
     s32 fade = panel->initialValue;
-    u8 step;
-    s32 rows;
-    s32 i;
-    s32 drawX;
-    s32 drawY;
-    s32 column;
-    s32 row;
-    s32 first;
-    s32 rowOffset;
-    u16 *skill;
+    s32 skillSlotCount;
+    s32 rowCount;
+    s32 remainingRows;
+    s32 horizontal;
+    s32 vertical;
+    s32 spriteIndex;
     u16 skillId;
     _FRQ *glyph;
+    EffectSlotSet *resource;
+    s32 slot;
 
-    step = brsGetLevelStepForValue(record->level);
-    rows = 2;
-    if (step != 4) {
-        rows = step == 6 ? 3 : 4;
+    skillSlotCount = brsGetLevelStepForValue(record->level);
+    memcpy(positions, D_0042B160, sizeof(positions));
+    memcpy(sprites, D_0042B180, sizeof(sprites));
+    switch (skillSlotCount) {
+    case PTY_SKILL_SLOT_COUNT_INITIAL:
+        rowCount = 2;
+        break;
+    case PTY_SKILL_SLOT_COUNT_AFTER_FIRST_UNLOCK:
+        rowCount = 3;
+        break;
+    default:
+        rowCount = 4;
+        break;
     }
 
-    drawX = x + sprites[0].offset.x;
-    drawY = y + sprites[0].offset.y;
-    for (i = 0; i < rows; i++) {
-        effDrawTextureSlotWithBlendedCornerColors(drawX, drawY, depth, fade, 1, panel->resourceSets[sprites[0].set],
-                                                  sprites[0].slot, surface);
-        drawY += 0xB0;
+    spriteIndex = 0;
+    resource = panel->resourceSets[sprites[spriteIndex].set];
+    slot = sprites[spriteIndex].slot;
+    horizontal = x + sprites[spriteIndex].offset.x;
+    vertical = y + sprites[spriteIndex].offset.y;
+    if (rowCount != 0) {
+        remainingRows = rowCount;
+        do {
+            effDrawTextureSlotWithBlendedCornerColors(horizontal, vertical, depth, fade, 1, resource, slot, surface);
+            vertical += 0xB0;
+        } while (--remainingRows != 0);
     }
-    effDrawTextureSlotWithBlendedCornerColors(x + sprites[1].offset.x, y + sprites[1].offset.y, depth, fade, 1,
-                                              panel->resourceSets[sprites[1].set], sprites[1].slot, surface);
-    effDrawTextureSlotWithBlendedCornerColors(x + sprites[2].offset.x, y + sprites[2].offset.y, depth, fade, 1,
-                                              panel->resourceSets[sprites[2].set], sprites[2].slot, surface);
-    effDrawTextureSlotWithBlendedCornerColors(x + sprites[rows + 1].offset.x, y + sprites[rows + 1].offset.y, depth,
-                                              fade, 1, panel->resourceSets[sprites[rows + 1].set],
-                                              sprites[rows + 1].slot, surface);
-    drawX = x + sprites[6].offset.x;
-    drawY = y + sprites[6].offset.y;
-    for (i = 0; i < rows; i++) {
-        effDrawTextureSlotWithBlendedCornerColors(drawX, drawY, depth, fade, 1, panel->resourceSets[sprites[6].set],
-                                                  sprites[6].slot, surface);
-        drawY += 0xB0;
+    spriteIndex = 1;
+    effDrawTextureSlotWithBlendedCornerColors(x + sprites[spriteIndex].offset.x, y + sprites[spriteIndex].offset.y, depth, fade, 1,
+                                              panel->resourceSets[sprites[spriteIndex].set], sprites[spriteIndex].slot, surface);
+    spriteIndex = 2;
+    effDrawTextureSlotWithBlendedCornerColors(x + sprites[spriteIndex].offset.x, y + sprites[spriteIndex].offset.y, depth, fade, 1,
+                                              panel->resourceSets[sprites[spriteIndex].set], sprites[spriteIndex].slot, surface);
+    spriteIndex = rowCount + 1;
+    resource = panel->resourceSets[sprites[spriteIndex].set];
+    slot = sprites[spriteIndex].slot;
+    horizontal = x + sprites[spriteIndex].offset.x;
+    vertical = y + sprites[spriteIndex].offset.y;
+    effDrawTextureSlotWithBlendedCornerColors(horizontal, vertical, depth, fade, 1, resource, slot, surface);
+    spriteIndex = 6;
+    resource = panel->resourceSets[sprites[spriteIndex].set];
+    slot = sprites[spriteIndex].slot;
+    horizontal = x + sprites[spriteIndex].offset.x;
+    vertical = y + sprites[spriteIndex].offset.y;
+    if (rowCount != 0) {
+        remainingRows = rowCount;
+        do {
+            effDrawTextureSlotWithBlendedCornerColors(horizontal, vertical, depth, fade, 1, resource, slot, surface);
+            vertical += 0xB0;
+        } while (--remainingRows != 0);
     }
-    effDrawTextureSlotWithBlendedCornerColors(x + sprites[rows + 5].offset.x, y + sprites[rows + 5].offset.y, depth,
-                                              fade, 1, panel->resourceSets[sprites[rows + 5].set],
-                                              sprites[rows + 5].slot, surface);
+    spriteIndex = rowCount + 5;
+    resource = panel->resourceSets[sprites[spriteIndex].set];
+    slot = sprites[spriteIndex].slot;
+    horizontal = x + sprites[spriteIndex].offset.x;
+    vertical = y + sprites[spriteIndex].offset.y;
+    effDrawTextureSlotWithBlendedCornerColors(horizontal, vertical, depth, fade, 1, resource, slot, surface);
 
-    first = 0;
-    for (column = 0; column < 2; column++) {
-        skill = &record->effectData[first];
-        rowOffset = 0;
-        for (row = 0; row < rows; row++) {
-            skillId = *skill++;
-            if (skillId != 0) {
-                glyph = itfCreateConvertedTextGlyph(x + text[column].x, y + text[column].y + rowOffset, depth,
-                                                    0xA09DC380, datSkillNames[skillId], NULL);
-                frFontDrawGlyphChain(glyph, 1, surface);
-                frDestroyFontRequestAfter(glyph);
-            } else {
-                mnuDrawRepeatedPanelSprites(x + text[2 + column].x, y + (rowOffset + text[2 + column].y) + 0x18, depth,
-                                            fade, 8, panel->resourceSets[0], 0x1B, surface);
-            }
-            rowOffset += 0xB0;
+    for (horizontal = 0; horizontal < 2; horizontal++) {
+        vertical = 0;
+        if (rowCount != 0) {
+            do {
+                skillId = record->effectData[horizontal * rowCount + vertical];
+                if (skillId != 0) {
+                    glyph = itfCreateConvertedTextGlyph(x + positions[0][horizontal][0], y + positions[0][horizontal][1] + vertical * 0xB0, depth,
+                                                        0xA09DC380, datSkillNames[skillId], NULL);
+                    frFontDrawGlyphChain(glyph, 1, surface);
+                    frDestroyFontRequestAfter(glyph);
+                } else {
+                    mnuDrawRepeatedPanelSprites(x + positions[1][horizontal][0], y + (vertical * 0xB0 + positions[1][horizontal][1]) + 0x18, depth,
+                                                fade, 8, panel->resourceSets[0], 0x1B, surface);
+                }
+            } while (++vertical < rowCount);
         }
-        first += rows;
     }
 }
-#else
-INCLUDE_ASM(const s32, "game/code_002BE628", mnuDrawPartySkillListPanel);
-#endif
+
 
 /* Create the DDS2 simple sprite state from its three resource sets. */
 MenuSpriteState *mnuAllocateSimpleSprite(struct EffectSlotSet *resourceSet0,
