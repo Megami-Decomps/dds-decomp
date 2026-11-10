@@ -10903,7 +10903,7 @@
 0x004389FC	sdfDelayedResrcSemaId	inferred	SMT3HD data name via SLUS_209.11 0x00551864, 6 agreeing references; was sdfDelayedResrcSemaId
 0x00438A00	sdfGrPacketBuffHandle	inferred	SMT3HD data name via SLUS_209.11 0x00551868, 3 agreeing references; was sdfGrPacketBuffHandle
 0x00438A04	sdfGrPacketBuffSize	inferred	SMT3HD data name via SLUS_209.11 0x0055186C, 2 agreeing references; was sdfGrPacketBuffSize
-0x00438A08	sdfPacketBuffers	inferred	high confidence; src/dds2/game/code_0032C278.c sdfGrMakePacketBuff(): D_00438A08[0] = memory; Instruction-aligned data counterpart of DDS1 D_003BD318 in the matched sdfGrMakePacketBuff() twin. Array of double-buffer base addresses used to select the packet allocation buffer. [names_reviewed26.tsv]
+0x00438A08	sdfGrPacketBuffBase	inferred	SMT3HD name via SLUS_209.11 0x00551870, sdf/sdfPacketBuff SMT3 rename; was sdfPacketBuffers
 0x00438A10	sdfGrPacketBuffPtr	inferred	SMT3HD data name via SLUS_209.11 0x00551878, 6 agreeing references; was sdfGrPacketBuffPtr
 0x00438A14	sdfGrPacketBuffLimit	inferred	SMT3HD data name via SLUS_209.11 0x0055187C, 2 agreeing references; was sdfGrPacketBuffLimit
 0x00438A1C	sdfDrawFrameFlag	inferred	SMT3HD data name via SLUS_209.11 0x00551884, 8 agreeing references; was sdfDrawFrameFlag
