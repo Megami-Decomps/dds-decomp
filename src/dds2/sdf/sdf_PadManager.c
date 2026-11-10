@@ -391,5 +391,5 @@ INCLUDE_SDATA(const s32, "sdf/sdf_PadManager", sdfPadButtons);
 
 INCLUDE_SDATA(const s32, "sdf/sdf_PadManager", sdfPadAnalogSticks);
 
-INCLUDE_SDATA(const s32, "sdf/sdf_PadManager", D_00438A99);
+INCLUDE_SDATA(const s32, "sdf/sdf_PadManager", D_00438AA0);
 
