@@ -2333,7 +2333,7 @@ void fldApplyActorEntryTrigger(s32 useTaskRecord) {
     doormovetbl_s *entry;
 
     if (useTaskRecord != 0) {
-        record = fldEveHitResName_Find(scrGetScriptHandle()->task);
+        record = fldEveHitResName_Find(scrGetScriptHandle()->ProcessID);
         if (record == 0) {
             return;
         }

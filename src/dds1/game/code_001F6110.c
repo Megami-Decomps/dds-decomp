@@ -2699,7 +2699,7 @@ void btlBindActorSlot(BtlTask *task, s32 taskArg) {
     dds3ProcessID_t *slot = scrStartScript2(state->scriptOwner->priority - 1, (const scrHeader_t *)D_003BAAA8, taskArg);
     s32 handle;
     scrSetUserData(slot, task);
-    handle = ((scrProcessWork_s *)dds3GetProcessData(slot))->messageWindowIndex;
+    handle = ((scrProcessWork_s *)dds3GetProcessData(slot))->MesHandle;
     if (handle >= 0) {
         BtlUnit *unit = task->unit;
         itfMesSetTextSlotFromValue(handle, 0, unit->partyRecord.unitId, (unit->partyRecord.flags & 0x20) ? 1 : 2);

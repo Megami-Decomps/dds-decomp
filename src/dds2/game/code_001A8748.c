@@ -226,7 +226,7 @@ void TestMsgReloadTexture(void);
 void itfDebugMesMngInitialize(void) {
     D_00435CBC = 0x80FFFFFF;
     TestMsgReloadTexture();
-    itfMesMngSetKutiCallback(((scrProcessWork_s *)dds3GetProcessData(scrStartScript2(0x3E8, (const scrHeader_t *)D_003B4A28, 0)))->messageWindowIndex, itfDebugPrintMark);
+    itfMesMngSetKutiCallback(((scrProcessWork_s *)dds3GetProcessData(scrStartScript2(0x3E8, (const scrHeader_t *)D_003B4A28, 0)))->MesHandle, itfDebugPrintMark);
     dds3StartProcess("TestMsgMngC", 0x3EF, 0, 0, TestMsgMngC_Process, 0, 0);
     dds3StartProcess("TestMsgMngD", 0x2AFE, 0, 0, TestMsgMngD_Process, 0, 0);
 }

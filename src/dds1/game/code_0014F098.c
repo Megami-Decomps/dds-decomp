@@ -74,7 +74,7 @@ u32 fldCommand_FLD_WARP_RUN_START(void) {
     if (fldDoor_ChkWarp()) {
         scene = 0;
     } else {
-        scene = fldEveHitResID_Find(scrGetScriptHandle()->task);
+        scene = fldEveHitResID_Find(scrGetScriptHandle()->ProcessID);
     }
     fldApplyActorEntryTrigger(scene);
     return 1;
@@ -189,7 +189,7 @@ s32 fldCommand_FLD_SET_ENCOUNT(void) {
 /* Look up the command's task record before applying its associated entry. */
 s32 fldCommand_FLD_EXIT_CAMERA(void) {
     scrProcessWork_s *command = scrGetScriptHandle();
-    const char *record = fldEveHitResName_Find(command->task);
+    const char *record = fldEveHitResName_Find(command->ProcessID);
 
     if (record != NULL) {
         fldDoor_ExitCamera(record);

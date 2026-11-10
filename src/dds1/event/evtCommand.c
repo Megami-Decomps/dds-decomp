@@ -1014,7 +1014,7 @@ ScrCommandResult evtCommand_LOAD_BE(void) {
         message = D_003AC958;
         evtPrintDeveloperConsoleMessage(message, eventId);
         sdfPrintf(message, eventId);
-        dds3LinkProcess(commandWork->task, evtLoadEventPack(eventId));
+        dds3LinkProcess(commandWork->ProcessID, evtLoadEventPack(eventId));
         return SCR_COMMAND_RESULT_PENDING;
     }
     if (evtGetEventPackStat(eventId) == EVT_PACK_LOAD_COMPLETE) {
@@ -1039,7 +1039,7 @@ ScrCommandResult evtCommand_READ_BE(void) {
         return SCR_COMMAND_RESULT_COMPLETE;
     }
     evtPrintDeveloperConsoleMessage(D_003AC978, eventId);
-    dds3LinkProcess(commandWork->task, evtLoadEventPack(eventId));
+    dds3LinkProcess(commandWork->ProcessID, evtLoadEventPack(eventId));
     return SCR_COMMAND_RESULT_COMPLETE;
 }
 
@@ -1087,15 +1087,15 @@ ScrCommandResult evtCommandStartPolygonMovie(void) {
     if (commandWork == NULL) {
         return 1;
     }
-    if (commandWork->task == 0) {
+    if (commandWork->ProcessID == 0) {
         printf(D_003AC998);
         return 1;
     }
     eventId = scrGetIntPara(0);
     sceneId = scrGetIntPara(1);
-    movieTask = evtViewerCreateTask(commandWork->task->priority, eventId, sceneId);
+    movieTask = evtViewerCreateTask(commandWork->ProcessID->priority, eventId, sceneId);
     evtPrintDeveloperConsoleMessage(D_003AC9E0, scrGetIntPara(0), scrGetIntPara(1));
-    dds3LinkProcess(commandWork->task, movieTask);
+    dds3LinkProcess(commandWork->ProcessID, movieTask);
     evtPolygonMovieSetFlagBits(movieTask, EVT_POLY_MOVIE_SCRIPT_STARTUP_HOLD);
     scrSetIntReturnValue(scrProcessHandleToVmInteger(movieTask));
     return 1;
@@ -1123,14 +1123,14 @@ ScrCommandResult evtCommand_PMV_RUN(void) {
     if (commandWork == NULL) {
         return 1;
     }
-    if (commandWork->task == 0) {
+    if (commandWork->ProcessID == 0) {
         printf(D_003AC9F8);
         return 1;
     }
     eventId = scrGetIntPara(0);
     sceneId = scrGetIntPara(1);
-    movieTask = evtViewerCreateTask(commandWork->task->priority, eventId, sceneId);
-    dds3LinkProcess(commandWork->task, movieTask);
+    movieTask = evtViewerCreateTask(commandWork->ProcessID->priority, eventId, sceneId);
+    dds3LinkProcess(commandWork->ProcessID, movieTask);
     scrSetIntReturnValue(scrProcessHandleToVmInteger(movieTask));
     return 1;
 }

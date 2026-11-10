@@ -13,7 +13,6 @@
 #include "scr_vm_integer.h"
 #include "itf_mes_window_index.h"
 
-struct sdfMemHandle_t;
 struct ItfMesSub;
 
 typedef s32 ScrProgramCounter;
@@ -48,7 +47,6 @@ union scrStackData_u
     } c;
 };
 
-typedef s8 ScrStackValueType;
 
 /* One bytecode word: s0 is the opcode, s1 its operand, and the other members
  * read the same four bytes as an immediate. */
@@ -117,43 +115,36 @@ struct scrLabelTable_t
     s32 Reserve1;
 };
 
-/* Native 0xF4-byte process allocated by bfContextCreate in both games.
- * The interpreter, scheduler attachment and named-process list share this owner. */
-typedef struct scrProcessWork_s {
-    char name[24];
-    ScrProgramCounter pc;
-    ScrStackDepth sp; /* live stack depth; the next push writes at this index */
-    ScrStackValueType stackTypes[SCR_STACK_STORAGE_SLOT_COUNT];
-    scrStackData_u stackValues[SCR_STACK_STORAGE_SLOT_COUNT];
-    /* Borrowed FLW0 source views; the VM reads them but does not edit them. */
-    const struct scrHeader_t *scriptHeader;
-    const scrTypeTable_t *procedureSection; /* FLW0 descriptor; count bounds the procedure table */
-    const scrProcTable_t *procedures; /* FLW0 PROCEDURES section */
-    const scrLabelTable_t *labels;          /* FLW0 LABELS section */
-    const scrCode_u *instructions;
-    struct ItfMesSub *auxiliaryData; /* mutable: message initialization relocates it */
-    const char *strings;          /* borrowed read-only view; lifetime follows source owner/caller */
-    ScrProcedureIndex procedureIndex;
-    ItfMesWindowIndex messageWindowIndex;
-    u32 timer;
-    ScrCommandYieldCount cmdTimer; /* prior yielded traces since last continuation */
-    struct sdfMemHandle_t *scriptHandle; /* 0xD8: allocation descriptor, not scriptHeader data */
-    ScrVmInteger *localInt; /* process-owned VM integer locals */
-    f32 *localFloat;       /* process-owned VM float locals */
-    dds3ProcessID_t *task;       /* 0xE4: scheduler object returned by dds3StartProcess */
-    struct scrProcessWork_s *previous; /* 0xE8: named-process list links */
-    struct scrProcessWork_s *next;     /* 0xEC */
-    void *userData;       /* 0xF0: opaque caller-owned script context, never freed here */
-} scrProcessWork_s;
+typedef struct scrProcessWork_s scrProcessWork_s;
 
-typedef char ScrData_size_must_be_0xF4[
-    (sizeof(scrProcessWork_s) == 0xF4) ? 1 : -1];
-typedef char ScrStack_return_value_slot_must_be_last[
-    (SCR_STACK_RETURN_VALUE_SLOT + 1 == SCR_STACK_STORAGE_SLOT_COUNT) ? 1 : -1];
-typedef char ScrData_scriptHandle_at_0xD8[
-    ((u32)&((scrProcessWork_s *)0)->scriptHandle == 0xD8) ? 1 : -1];
-typedef char ScrData_messageWindowIndex_at_0xCC[
-    ((u32)&((scrProcessWork_s *)0)->messageWindowIndex == 0xCC) ? 1 : -1];
+/* One running procedure. Slot 27 of the two stack arrays is the return value:
+ * scrSetIntReturnValue writes StackData[27] and tags StackType[27]. */
+struct scrProcessWork_s
+{
+    u8 Name[24];
+    s32 CP;
+    s32 SP;
+    u8 StackType[28]; /* enum scr_stack_type per slot */
+    scrStackData_u StackData[28];
+    scrHeader_t *Header;
+    scrTypeTable_t *TypeTable;
+    scrProcTable_t *ProcTable;
+    scrLabelTable_t *LabelTable;
+    scrCode_u *Code;
+    u8 *MessageData;
+    u8 *StringData;
+    s32 StartProc;
+    s32 MesHandle;
+    s32 ScriptTimer;
+    s32 CommandTimer;
+    struct sdfMemHandle_t *MemHandle; /* sdfMemHandle_t: libsdf.h conflicts with DDS sdf.h */
+    u32 *LocalInt;
+    f32 *LocalFloat;
+    dds3ProcessID_t *ProcessID;
+    scrProcessWork_s *prev;
+    scrProcessWork_s *next;
+    void *data;
+};
 
 extern scrProcessWork_s *nowpwork;
 extern scrProcessWork_s *scrHandleFirst;

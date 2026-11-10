@@ -34,7 +34,7 @@ scrProcessWork_s *scrLoadScriptFile(const char *path, ScrProcedureIndex procedur
     process = fldFlowParse((const scrHeader_t *)resourceAddress, procedureIndex);
     if (process != NULL)
     {
-        process->scriptHandle = handle;
+        process->MemHandle = handle;
     }
     return process;
 }
@@ -42,10 +42,10 @@ scrProcessWork_s *scrLoadScriptFile(const char *path, ScrProcedureIndex procedur
 dds3ProcessID_t *scrStartScriptProcess(u32 priority, ScrProcessTaskOwner process)
 {
     dds3ProcessID_t *task;
-    task = dds3StartProcess(process->procedures[process->procedureIndex].Name,
+    task = dds3StartProcess(process->ProcTable[process->StartProc].Name,
                           priority, 1, 1, scrScriptProcess, scrScriptShutdown,
                           scrProcessTaskOwnerToUserValue(process));
-    process->task = task;
+    process->ProcessID = task;
     return task;
 }
 
@@ -102,18 +102,18 @@ extern void scrUnlinkHandle(scrProcessWork_s *process);
 
 /* Log the process name, release its VM buffers and resource, then unlink and free it. */
 void scrProcDestroyTask(scrProcessWork_s *process) {
-    evtPrintDeveloperConsoleMessage("end <%s>\n", process->procedures[process->procedureIndex].Name);
-    if (process->localInt != NULL) {
-        sdfChipFreeDirect(process->localInt);
+    evtPrintDeveloperConsoleMessage("end <%s>\n", process->ProcTable[process->StartProc].Name);
+    if (process->LocalInt != NULL) {
+        sdfChipFreeDirect(process->LocalInt);
     }
-    if (process->localFloat != NULL) {
-        sdfChipFreeDirect(process->localFloat);
+    if (process->LocalFloat != NULL) {
+        sdfChipFreeDirect(process->LocalFloat);
     }
-    if (process->messageWindowIndex >= 0) {
-        itfMesMngRelease(process->messageWindowIndex);
+    if (process->MesHandle >= 0) {
+        itfMesMngRelease(process->MesHandle);
     }
-    if (process->scriptHandle != 0) {
-        sdfMemFreeDirect(process->scriptHandle);
+    if (process->MemHandle != 0) {
+        sdfMemFreeDirect(process->MemHandle);
     }
     scrUnlinkHandle(process);
     sdfChipFreeDirect(process);
@@ -132,8 +132,8 @@ void scrDestroyAllNamedProcesses(void)
     while (1) {
         nextProcessNode = processNode->next;
         if (scrIsCurrentWorkTask(processNode) == SCR_WORK_TASK_NOT_CURRENT) {
-            if (processNode->task != NULL) {
-                dds3KillProcess(processNode->task, 0);
+            if (processNode->ProcessID != NULL) {
+                dds3KillProcess(processNode->ProcessID, 0);
             } else {
                 scrProcDestroyTask(processNode);
             }
@@ -151,25 +151,25 @@ ScrProcedureStartResult scrStartProcessProcedure(scrProcessWork_s *process,
 {
     s32 cursor;
 
-    if (procedureIndex < 0 || procedureIndex >= process->procedureSection->ItemCount) {
+    if (procedureIndex < 0 || procedureIndex >= process->TypeTable->ItemCount) {
         return SCR_PROCEDURE_START_INVALID_INDEX;
     }
-    for (cursor = 0; (process->name[cursor] = process->procedures[procedureIndex].Name[cursor]) != 0; cursor++) {
+    for (cursor = 0; (((char *)process->Name)[cursor] = process->ProcTable[procedureIndex].Name[cursor]) != 0; cursor++) {
     }
-    process->pc = process->procedures[procedureIndex].CodeAddress;
-    process->sp = 0;
+    process->CP = process->ProcTable[procedureIndex].CodeAddress;
+    process->SP = 0;
     {
-        scrStackData_u *stackValue = process->stackValues;
-        ScrStackValueType *stackType = process->stackTypes;
+        scrStackData_u *stackValue = process->StackData;
+        u8 *stackType = process->StackType;
 
         for (cursor = SCR_STACK_RETURN_VALUE_SLOT; cursor >= 0; cursor--) {
             *stackType++ = 0;
             stackValue++->i = 0;
         }
     }
-    process->procedureIndex = procedureIndex;
-    process->timer = 0;
-    process->cmdTimer = 0;
+    process->StartProc = procedureIndex;
+    process->ScriptTimer = 0;
+    process->CommandTimer = 0;
     return SCR_PROCEDURE_START_INITIALIZED;
 }
 
@@ -178,7 +178,7 @@ scrProcessWork_s *scrSearchScriptName(const char *name) {
     scrProcessWork_s *processNode = scrHandleFirst;
 
     while (processNode != NULL) {
-        if (strcmp(name, processNode->name) == 0) {
+        if (strcmp(name, processNode->Name) == 0) {
             return processNode;
         }
         processNode = processNode->next;
@@ -218,14 +218,14 @@ void scrSetUserData(dds3ProcessID_t *task, void *userData) {
     scrProcessWork_s *context;
 
     context = (scrProcessWork_s *)dds3GetProcessData(task);
-    context->userData = userData;
+    context->data = userData;
 }
 
 void *scrGetUserData(dds3ProcessID_t *task) {
     scrProcessWork_s *context;
 
     context = (scrProcessWork_s *)dds3GetProcessData(task);
-    return context->userData;
+    return context->data;
 }
 
 void scrScriptShutdown(dds3ProcessID_t *task) {

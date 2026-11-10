@@ -285,18 +285,18 @@ ScrCommandResult bfWaitCbCreateTask(void)
     {
         return SCR_COMMAND_RESULT_COMPLETE;
     }
-    if (ctx->task == NULL)
+    if (ctx->ProcessID == NULL)
     {
         return SCR_COMMAND_RESULT_COMPLETE;
     }
-    if (procedureIndex < 0 || procedureIndex >= ctx->procedureSection->ItemCount)
+    if (procedureIndex < 0 || procedureIndex >= ctx->TypeTable->ItemCount)
     {
         return SCR_COMMAND_RESULT_COMPLETE;
     }
     scrSetIntReturnValue(scrProcessHandleToVmInteger(scrRunScriptEx(
-        ctx->task->priority + scrGetIntPara(1), ctx->scriptHeader,
-        ctx->procedureSection, ctx->procedures, ctx->labels,
-        ctx->instructions, ctx->auxiliaryData, ctx->strings, procedureIndex)));
+        ctx->ProcessID->priority + scrGetIntPara(1), ctx->Header,
+        ctx->TypeTable, ctx->ProcTable, ctx->LabelTable,
+        ctx->Code, ctx->MessageData, ctx->StringData, procedureIndex)));
     return SCR_COMMAND_RESULT_COMPLETE;
 }
 

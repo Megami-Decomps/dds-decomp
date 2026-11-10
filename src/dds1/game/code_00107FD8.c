@@ -2010,11 +2010,11 @@ void scrLinkHandle(scrProcessWork_s *node) {
     if (tail == NULL) {
         scrHandleFirst = node;
         scrHandleLast = node;
-        node->previous = NULL;
+        node->prev = NULL;
         node->next = NULL;
     }
     else {
-        node->previous = tail;
+        node->prev = tail;
         tail->next = node;
         node->next = NULL;
         scrHandleLast = node;
@@ -2028,15 +2028,15 @@ void scrUnlinkHandle(scrProcessWork_s *node) {
         scrHandleFirst = node->next;
     }
     else {
-        node->previous->next = node->next;
+        node->prev->next = node->next;
     }
     if (scrHandleLast == node) {
-        scrHandleLast = node->previous;
+        scrHandleLast = node->prev;
     }
     else {
-        node->next->previous = node->previous;
+        node->next->prev = node->prev;
     }
-    node->previous = NULL;
+    node->prev = NULL;
     node->next = NULL;
     scrHandleCount--;
 }
@@ -2054,7 +2054,7 @@ scrProcessWork_s *bfContextCreate(const scrHeader_t *header, const scrTypeTable_
                         const char *strings, ScrProcedureIndex procedureIndex) {
     scrProcessWork_s *process;
     s32 i;
-    ScrStackValueType *types;
+    u8 *types;
     scrStackData_u *values;
 
     if (header == NULL || procedureSection == NULL || procedures == NULL ||
@@ -2067,52 +2067,52 @@ scrProcessWork_s *bfContextCreate(const scrHeader_t *header, const scrTypeTable_
         return NULL;
     }
     i = 0;
-    while ((process->name[i] = procedures[procedureIndex].Name[i]) != '\0') {
+    while ((((char *)process->Name)[i] = procedures[procedureIndex].Name[i]) != '\0') {
         i++;
     }
-    process->pc = procedures[procedureIndex].CodeAddress;
-    process->sp = 0;
-    values = process->stackValues;
-    types = process->stackTypes;
+    process->CP = procedures[procedureIndex].CodeAddress;
+    process->SP = 0;
+    values = process->StackData;
+    types = process->StackType;
     for (i = SCR_STACK_RETURN_VALUE_SLOT; i >= 0; i--) {
         *types++ = 0;
         values++->i = 0;
     }
-    process->procedureSection = procedureSection;
-    process->labels = labels;
-    process->instructions = instructions;
-    process->strings = strings;
-    process->procedureIndex = procedureIndex;
-    process->messageWindowIndex = ITF_MES_WINDOW_INDEX_INVALID;
-    process->scriptHeader = header;
-    process->procedures = procedures;
-    process->auxiliaryData = auxiliaryData;
-    process->timer = 0;
-    process->cmdTimer = 0;
-    process->scriptHandle = NULL;
-    process->localInt = NULL;
-    process->localFloat = NULL;
-    process->task = NULL;
-    process->previous = NULL;
+    process->TypeTable = procedureSection;
+    process->LabelTable = labels;
+    process->Code = instructions;
+    process->StringData = (u8 *)strings;
+    process->StartProc = procedureIndex;
+    process->MesHandle = ITF_MES_WINDOW_INDEX_INVALID;
+    process->Header = header;
+    process->ProcTable = procedures;
+    process->MessageData = (u8 *)auxiliaryData;
+    process->ScriptTimer = 0;
+    process->CommandTimer = 0;
+    process->MemHandle = NULL;
+    process->LocalInt = NULL;
+    process->LocalFloat = NULL;
+    process->ProcessID = NULL;
+    process->prev = NULL;
     process->next = NULL;
     if (header->LocalIntCount > 0) {
-        process->localInt = sdfChipAllocDirect(header->LocalIntCount * sizeof(ScrVmInteger));
+        process->LocalInt = sdfChipAllocDirect(header->LocalIntCount * sizeof(ScrVmInteger));
         for (i = 0; i < header->LocalIntCount; i++) {
-            process->localInt[i] = 0;
+            process->LocalInt[i] = 0;
         }
     } else {
-        process->localInt = NULL;
+        process->LocalInt = NULL;
     }
     if (header->LocalFloatCount > 0) {
-        process->localFloat = sdfChipAllocDirect(header->LocalFloatCount * sizeof(f32));
+        process->LocalFloat = sdfChipAllocDirect(header->LocalFloatCount * sizeof(f32));
         for (i = 0; i < header->LocalFloatCount; i++) {
-            process->localFloat[i] = 0;
+            process->LocalFloat[i] = 0;
         }
     } else {
-        process->localFloat = NULL;
+        process->LocalFloat = NULL;
     }
     if (auxiliaryData != NULL) {
-        process->messageWindowIndex = itfMesMngInitialize(auxiliaryData);
+        process->MesHandle = itfMesMngInitialize(auxiliaryData);
     }
     scrLinkHandle(process);
     evtPrintDeveloperConsoleMessage("start <%s>\n", procedures[procedureIndex].Name);

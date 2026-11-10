@@ -80,7 +80,7 @@ u32 evtCommand_TEX_BE(void) {
     if (work == NULL) {
         return 1;
     }
-    if (work->task == NULL) {
+    if (work->ProcessID == NULL) {
         printf(D_003ACA78);
         return 1;
     }
@@ -91,7 +91,7 @@ u32 evtCommand_TEX_BE(void) {
         return 1;
     }
     task = evtStartPictureProcess(0x2AFE, entry);
-    dds3LinkProcess(work->task, task);
+    dds3LinkProcess(work->ProcessID, task);
     scrSetIntReturnValue(scrProcessHandleToVmInteger(task));
     return 1;
 }
@@ -104,12 +104,12 @@ u32 evtCommand_TEX_LOAD(void) {
     if (work == NULL) {
         return 1;
     }
-    if (work->task == NULL) {
+    if (work->ProcessID == NULL) {
         printf(D_003ACAE0);
         return 1;
     }
     task = evtStartPictureProcess2(0x2afe, scrGetStrPara(0));
-    dds3LinkProcess(work->task, task);
+    dds3LinkProcess(work->ProcessID, task);
     scrSetIntReturnValue(scrProcessHandleToVmInteger(task));
     return 1;
 }

@@ -3003,7 +3003,7 @@ void btlBindActorSlot(ActionStateLink *aiTask, s32 option) {
 
     task = scrStartScript2(((BtlState *)battle)->scriptOwner->priority - 1, (const scrHeader_t *)D_00435E7C, option);
     scrSetUserData(task, aiTask);
-    window = ((scrProcessWork_s *)dds3GetProcessData(task))->messageWindowIndex;
+    window = ((scrProcessWork_s *)dds3GetProcessData(task))->MesHandle;
     if (window >= 0) {
         BtlUnit *unit = aiTask->unit;
         s32 width = 2;
