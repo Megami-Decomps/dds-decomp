@@ -8769,6 +8769,7 @@ PlayingNo = 0x00437ACC;
 mnuMovieShutdownCounter = 0x00437AE8;
 campExitState = 0x00437B72;
 mnuCampInputTaskName = 0x00437B78;
+fileCallbackStatus = 0x00437CC0;
 fileMemoryCardRequestIndex = 0x00437CD0; // dds1 0x003BC7E8
 slLoadKillFlag = 0x00437CD4;
 fileWaitTicksRemaining = 0x00437CE8;
