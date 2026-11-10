@@ -1728,7 +1728,7 @@ void kwlnQueueBackgroundFadeOverlayPacket(void) {
     packets = dds3FontReqAllocDrawTag();
     sdfDrawTagLink(packets, (u32)packet);
     surface = &sdfGrOtTable[DDS3_FADE_OVERLAY_SURFACE];
-    surface->append(surface, packets);
+    surface->regFunc(surface, packets);
 }
 #else
 INCLUDE_ASM(const s32, "game/code_00102DC8", kwlnQueueBackgroundFadeOverlayPacket);

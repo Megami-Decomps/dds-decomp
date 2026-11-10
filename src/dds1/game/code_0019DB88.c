@@ -907,7 +907,7 @@ void itfDrawSoundSelectorOptionPanel(instanceMes_tag *panel) {
         itfMiscDrawSpritePrim(bounds, &uv, &color, panel->renderValue, itfMesMngManager.windowTexture, 0, list);
     }
     surface = &sdfGrOtTable[panel->drawSurfaceIndex];
-    surface->append(surface, list);
+    surface->regFunc(surface, list);
 }
 #else
 INCLUDE_ASM(const s32, "game/code_0019DB88", itfDrawSoundSelectorOptionPanel);

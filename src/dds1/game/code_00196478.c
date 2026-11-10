@@ -475,11 +475,11 @@ void frDumpFontTexture(s32 x, s32 y, s32 depth) {
     frCreateDrawEnvPacket(setup);
     sdfDrawTagInit(&frFontSetupPacketLists[buffer]);
     sdfDrawTagLink(&frFontSetupPacketLists[buffer], (u32)setup);
-    sdfGrOtTable[FR_FONT_ATLAS_SURFACE].append(&sdfGrOtTable[FR_FONT_ATLAS_SURFACE],
+    sdfGrOtTable[FR_FONT_ATLAS_SURFACE].regFunc(&sdfGrOtTable[FR_FONT_ATLAS_SURFACE],
                                                    &frFontSetupPacketLists[buffer]);
     sdfDrawTagInit(&frFontAtlasPacketLists[buffer]);
     sdfDrawTagLink(&frFontAtlasPacketLists[buffer], (u32)packet);
-    sdfGrOtTable[FR_FONT_ATLAS_SURFACE].append(&sdfGrOtTable[FR_FONT_ATLAS_SURFACE],
+    sdfGrOtTable[FR_FONT_ATLAS_SURFACE].regFunc(&sdfGrOtTable[FR_FONT_ATLAS_SURFACE],
                                                    &frFontAtlasPacketLists[buffer]);
 }
 #else

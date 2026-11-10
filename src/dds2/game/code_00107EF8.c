@@ -764,7 +764,7 @@ void evtSubmitTexturedGradientQuadPoints(f32 topLeftX, f32 topLeftY, f32 topRigh
                    color2,
                    -1, NULL);
     surface = &sdfGrOtTable[egl_OT_Offset];
-    surface->append(surface, list);
+    surface->regFunc(surface, list);
 }
 #else
 INCLUDE_ASM(const s32, "game/code_00107EF8", evtSubmitTexturedGradientQuadPoints);

@@ -1268,7 +1268,7 @@ void fldAutoMapDrawIconOfsRF(s32 index, f32 x, f32 y, f32 rotation) {
 
     appendTarget = fldDrawGetOt();
     drawSurface = fldDrawGetOt();
-    drawSurface->append(appendTarget, packetList);
+    drawSurface->regFunc(appendTarget, packetList);
 }
 #else
 INCLUDE_ASM(const s32, "game/code_001411F0", fldAutoMapDrawIconOfsRF);

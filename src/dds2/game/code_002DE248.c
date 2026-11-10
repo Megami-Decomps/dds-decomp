@@ -944,7 +944,7 @@ void effDrawLensFlare(EffFadeVectorWork *work) {
             sdfDrawTagLink(list, (u32)packet);
         }
     }
-    sdfGrOtTable[83].append(&sdfGrOtTable[83], list);
+    sdfGrOtTable[83].regFunc(&sdfGrOtTable[83], list);
     work->frame++;
 }
 #else
@@ -7068,7 +7068,7 @@ void effDrawQuadWork(EffQuadWork *work) {
         packet->registerAddress = 0x47;
         sdfDrawTagLink(list, (u32)packet);
     }
-    effLayerSurfaces[work->source.alphaTrack.surfaceIndex]->append(effLayerSurfaces[work->source.alphaTrack.surfaceIndex], list);
+    effLayerSurfaces[work->source.alphaTrack.surfaceIndex]->regFunc(effLayerSurfaces[work->source.alphaTrack.surfaceIndex], list);
     if (!(effModelUpdateControlFlags & EFF_MODEL_UPDATE_PAUSE_EFFECT_FRAME_ADVANCE)) {
         work->frame++;
     }

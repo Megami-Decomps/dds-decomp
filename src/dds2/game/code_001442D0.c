@@ -1432,7 +1432,7 @@ void func_00145A08(s32 index, f32 x, f32 y, f32 rotation) {
 
     appendTarget = fldDrawGetOt();
     drawSurface = fldDrawGetOt();
-    drawSurface->append(appendTarget, packetList);
+    drawSurface->regFunc(appendTarget, packetList);
 }
 #else
 INCLUDE_ASM(const s32, "game/code_001442D0", func_00145A08);
@@ -1601,7 +1601,7 @@ void func_00145D48(s32 index, s32 alpha, f32 x, f32 y, f32 rotation) {
 
     appendTarget = fldDrawGetOt();
     drawSurface = fldDrawGetOt();
-    drawSurface->append(appendTarget, packetList);
+    drawSurface->regFunc(appendTarget, packetList);
 }
 #else
 INCLUDE_ASM(const s32, "game/code_001442D0", func_00145D48);

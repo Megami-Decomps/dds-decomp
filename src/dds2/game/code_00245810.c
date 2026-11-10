@@ -165,8 +165,8 @@ s32 evtSceneDispProcess(void *task) {
     sdfDrawTagInit(background);
     dds3ConsPanelTagLink(background, 24, (2 - dpy) * 12, 39, line);
     surface = &sdfGrOtTable[EVT_SCENE_DISP_SURFACE];
-    surface->append(surface, background);
-    surface->append(surface, list);
+    surface->regFunc(surface, background);
+    surface->regFunc(surface, list);
     if (!selected) {
         curbase = 0;
         curpoint = 0;
