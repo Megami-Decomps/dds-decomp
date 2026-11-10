@@ -353,7 +353,7 @@ extern void btlRefreshActionPoseBlendSnapshot();
 
 extern void btlAimEffectPoseAtUnit();
 
-extern extern f32 btlGetActorStateScale(ActionStateLink *);
+extern f32 btlGetActorStateScale(ActionStateLink *);
 
 void btlBeginActionEndCameraPullback();
 
