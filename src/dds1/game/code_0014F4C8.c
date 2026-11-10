@@ -126,7 +126,7 @@ extern void dds3PolygonManagerInit(void);
 
 extern void dds3ParticleManagerInit(void);
 
-extern void effFieldTaskStartupHook(void);
+extern void effDebugInit(void);
 
 extern void Eve_EffectInit(void);
 
@@ -144,7 +144,7 @@ void fldCreateFieldEffectTask(void) {
     dds3ParticleManagerInit();
     dds3StartProcess("effect_f", 0x2B04, 0, 0, effSubmitFieldBlendStateTask, NULL, 0);
     dds3StartProcess(D_003BB008, 0x2B18, 0, 0, dds3EffectManagerRun, effManagerInitializeSubsystems, 0);
-    effFieldTaskStartupHook();
+    effDebugInit();
     Eve_EffectInit();
     effBTLFieldColorResetFlags();
 }

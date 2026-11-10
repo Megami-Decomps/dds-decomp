@@ -8,7 +8,7 @@
 #include "dds3_effect_sprite.h"
 #include "sdf_packet_list.h"
 #include "sdf_column_packet_api.h"
-#include "eff_event_setup.h"
+#include "effDebug.h"
 #include "sdf_heap_api.h"
 #include "fpu.h"
 #include "eff.h"
@@ -54,7 +54,7 @@ extern EffTypeDispatch D_00355730[];
 
 extern u8 sdfHddValid;
 
-extern s8 D_003BB04D;
+extern s8 effDebugEnabled;
 
 extern u32 effDataDirectoryIndex;
 
@@ -220,75 +220,71 @@ void InitMagatuhiEditorProcess(void) {
     dds3AdminiCallSequence(0, 0, 0, 0);
 }
 
-/* Return the setup-record address word unchanged; no record access or validation is made. */
-u32 effReturnEventSetupWord(u32 value) {
-    return value;
+/* Retail DDS keeps the effect debug menu entry points as empty stubs. */
+effDebugMenu_t *dblurUpdateHandle(effDebugMenu_t *menu) {
+    return menu;
 }
 
-void func_0018CDD8(void) {
+void effDebugDrawRect3(s32 x, s32 y, u32 fillColor) {
 }
 
-void func_0018CDE0(void) {
+void effDebugDrawRect2(s32 x, s32 y) {
 }
 
-void func_0018CDE8(void) {
+void effDebugDrawRectLine(s32 x, s32 y, s32 radius, s32 drawCross) {
 }
 
-/* Setup paths supply a record address; this matching empty entry ignores it. */
-void effEventSetupRecordNoOp(void) {
+void effDebugDrawMenu(effDebugMenu_t *menu) {
 }
 
-/* Empty stage immediately before the per-record entry in the paired setup paths. */
-void effEventSetupBeforeRecordNoOp(void) {
+void effDebugAllocDrawTag(void) {
 }
 
-/* Empty stage immediately after the per-record entry in the paired setup paths. */
-void effEventSetupAfterRecordNoOp(void) {
+void effDebugLinkDrawTag(void) {
 }
 
-void func_0018CE08(void) {
+void effDebugSetPos(s32 x, s32 y) {
 }
 
-void func_0018CE10(void) {
+void effDebugSetAttr(u32 attributes) {
 }
 
-void func_0018CE18(void) {
+void effDebugPrintf(const char *text) {
 }
 
-void func_0018CE20(void) {
+void effDebugDrawRectFull(void) {
 }
 
-void func_0018CE28(void) {
+void effDebugDrawRect4(s32 x, s32 y, s32 width, s32 height) {
 }
 
-/* Return the callback word unchanged, retaining this entry's unsigned C surface. */
-u32 effReturnCallbackValue(u32 value) {
-    return value;
+effDebugMenu_t *effDebugResetMenu(effDebugMenu_t *viewer) {
+    return viewer;
 }
 
-void effFieldTaskStartupHook(void) {
+void effDebugInit(void) {
 }
 
-u32 func_0018CE40(void) {
+s32 effDebugUpdate(void) {
     return 0;
 }
 
-u32 func_0018CE48(void) {
+s32 effDebugDraw(void) {
     return 0;
 }
 
 void func_0018CE50(void) {
 }
 
-u32 func_0018CE58(void) {
+s32 effDebugClearPad(void) {
     return 0;
 }
 
-void func_0018CE60(void) {
+void effDebugMoveCamera(void) {
 }
 
-s32 func_0018CE68(void) {
-    return D_003BB04D;
+s32 effDebugIsEnabled(void) {
+    return effDebugEnabled;
 }
 
 /* Debug filesystem mode opens the formatted pfs0 directory; otherwise reset built-in iteration.

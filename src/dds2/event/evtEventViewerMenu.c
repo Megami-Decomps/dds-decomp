@@ -24,7 +24,6 @@
 #include "evt_sound_variation.h"
 #include "evt_sky_alpha_animation_status.h"
 #include "eff_object.h"
-#include "eff_event_setup_readiness.h"
 #include "mdl.h"
 #include "mdl_motion_controller_lookup_api.h"
 #include "sdf_sif_command.h"
@@ -38,6 +37,14 @@
 #include "sdf_texture_file.h"
 #include "btl.h"
 #include "sdf_debug_api.h"
+
+extern s32 effUpdateCh72Params(void);
+extern s32 mblurProcess(void);
+extern s32 dblurProcess(void);
+extern s32 effEventAdvanceScreenDrawSetup(void);
+extern s32 evtViewerCheckDirty(void);
+extern s32 mfilterRun(void);
+extern s32 rblurProcess(void);
 
 /* Declared before first use (were implicit int). */
 extern void evtViewerPushCommandHistory(s32 actionMode, s32 first, s32 second, evtViewerInfo_t *viewer);
@@ -3067,7 +3074,7 @@ extern s32 evtActiveEntryFlags;
 dds3TaskUpdateResult_t mfilter_Process(dds3ProcessID_t *task) {
     evtViewerInfo_t *runtime = (evtViewerInfo_t *)dds3GetProcessData(task);
 
-    if (mfilterRun() == EFF_EVENT_SETUP_NOT_READY) {
+    if (mfilterRun() == 0) {
         runtime->controlState = 0;
         return DDS3_TASK_UPDATE_FINISH_CALLBACK;
     }
@@ -3092,7 +3099,7 @@ dds3TaskUpdateResult_t mfilter_Process(dds3ProcessID_t *task) {
 /* Poll solid-rectangle setup until it clears runtime control and finishes. */
 dds3TaskUpdateResult_t evtViewerExit(dds3ProcessID_t *task) {
     evtViewerInfo_t *runtime = (evtViewerInfo_t *)dds3GetProcessData(task);
-    if (evtViewerCheckDirty() == EFF_EVENT_SETUP_NOT_READY) {
+    if (evtViewerCheckDirty() == 0) {
         runtime->controlState = 0;
         return DDS3_TASK_UPDATE_FINISH_CALLBACK;
     }

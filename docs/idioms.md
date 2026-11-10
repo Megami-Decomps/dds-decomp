@@ -10359,7 +10359,7 @@ their consumers, not guessed skill identities or unnamed scalar fields:
 | `dds3Particle_BlurDelete` | 0x00159CD8 / 0x001618C8 | Releases the table's point/slot allocation, not a separate node. |
 | `dds3Particle_BlurClearItem` | 0x00159F30 / 0x00161B20 | Clears the selected slot's point count, not a bit flag. |
 | `dds3Particle_Track2SetExp` | 0x0015A118 / 0x00161D08 | Three-vertex history variant: center plus opposing width edges; the DDS2 name now agrees with DDS1. |
-| `effReturnCallbackValue` | 0x0018CE30 / 0x00194A68 | Returns the incoming callback word unchanged; the unsigned DDS1 and signed DDS2 C surfaces are retained. |
+| `effDebugResetMenu` | 0x0018CE30 / 0x00194A68 | Empty stub returning its menu argument; SMT3's body destroys and recreates the menu. |
 
 The width factor is not an angle or an opacity, and this function does not
 normalize its input axis. The reflecting emitter uses the radius captured
@@ -12057,16 +12057,12 @@ Constructor input is the payload base for types zero/one and payload
 +0x40 for two through four, not an owner-record +0x04/+0x44 slot.
 Its original void surface and native result propagation are retained.
 
-Seven event-setup paths in each game use the same exact sequence:
-`effReturnEventSetupWord(recordAddressWord)`,
-`effEventSetupBeforeRecordNoOp()`, `effEventSetupRecordNoOp(record)`,
-then `effEventSetupAfterRecordNoOp()`. The first returns the input word
-unchanged; the other three are matched empty entries. Names describe
-observed order and record argument only, without inventing a hidden
-operation. Preserve zero-formal definitions, DDS1's pointer extern and
-DDS2's unprototyped externs; the shared word-returning declaration is
-otherwise identical. Unregistered stubs, all-zero admin-mode request
-forwarders and the unknown control-byte reader remain unnamed.
+Seven event-setup paths in each game run SMT3's effect debug menu sequence on
+their `effDebugMenu_t`: `dblurUpdateHandle(menu)`, `effDebugAllocDrawTag()`,
+`effDebugDrawMenu(menu)`, `effDebugLinkDrawTag()`. DDS keeps the whole
+`effDebug*` block (DDS1 0x0018CDD0..0x0018CE68) as empty stubs in SMT3's
+order and with SMT3's prototypes; `dblurUpdateHandle` and `effDebugResetMenu`
+return their argument.
 
 ## Parameter-node default callbacks
 

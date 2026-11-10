@@ -23,8 +23,7 @@
 #include "eff_event.h"
 #include "eff_event_work_api.h"
 #include "eff_event_sound.h"
-#include "eff_event_setup.h"
-#include "eff_event_setup_readiness.h"
+#include "effDebug.h"
 #include "eff_event_bill.h"
 #include "eff_event_bill_batch.h"
 #include "sdf_vu_transform_api.h"
@@ -91,19 +90,19 @@ extern u8 D_003B2278[];
 
 extern u8 D_003B22A0[];
 
-extern EffScreenDrawParams D_003B22D0;
+extern EffScreenDrawParams evtUnityCalcArea;
 
-extern dds3Effect_PartialMultiBlurParam_t effTexturedBlurSetupParameters;
+extern dds3Effect_PartialMultiBlurParam_t mblurParam;
 
-extern dds3Effect_DistortionBlurParam_t effScatterBlurSetupParameters;
+extern dds3Effect_DistortionBlurParam_t dblurParam;
 
 extern EffScreenDrawParams D_003B2778;
 
 extern dds3Effect_Filter_t D_003B28B8;
 
-extern dds3Effect_PartialMultiFilterParam_t effResourceRectangleSetupParameters;
+extern dds3Effect_PartialMultiFilterParam_t mfilterParam;
 
-extern dds3Effect_RippleBlurParam_t effStaggeredBlurSetupParameters;
+extern dds3Effect_RippleBlurParam_t rblurParam;
 
 extern s8 Eve_PartialMultiFilterShow;
 
@@ -325,25 +324,25 @@ void Eve_EffectDraw(void) {
     }
 }
 
-/* callbackResult must be valid whenever callback is present. */
-extern EffEventSetupRecord effRectangleBlurSetupRecord;
+/* The result slot must be valid whenever the create callback is present. */
+extern effDebugMenu_t effRectangleBlurSetupRecord;
+
+extern s8 dds3PadBitTable[];
 
 extern s8 effRectangleBlurSetupReady;
 
-extern s8 D_0040B7DB[];
 
-extern void effEventSetupRecordNoOp();
 
-extern void effEventSetupBeforeRecordNoOp();
+extern void effDebugAllocDrawTag(void);
 
-extern void effEventSetupAfterRecordNoOp();
+extern void effDebugLinkDrawTag(void);
 
 /* Prepare once per flag cycle, then run the registered operations while ready.
  * A negative control byte clears readiness only after those operations. */
-EffEventSetupReadiness effUpdateCh72Params(void) {
+s32 effUpdateCh72Params(void) {
     if (effRectangleBlurSetupReady == 0) {
-        if (effRectangleBlurSetupRecord.callback != 0) {
-            *effRectangleBlurSetupRecord.callbackResult = effRectangleBlurSetupRecord.callback(effRectangleBlurSetupRecord.source);
+        if (effRectangleBlurSetupRecord.create != 0) {
+            *effRectangleBlurSetupRecord.param = effRectangleBlurSetupRecord.create(effRectangleBlurSetupRecord.source);
         }
         if (effRectangleBlurSetupRecord.destination != 0 && effRectangleBlurSetupRecord.source != 0) {
             memcpy(effRectangleBlurSetupRecord.destination, effRectangleBlurSetupRecord.source, effRectangleBlurSetupRecord.copyBytes);
@@ -351,12 +350,12 @@ EffEventSetupReadiness effUpdateCh72Params(void) {
         effRectangleBlurSetupReady = 1;
     }
     if ((u8)effRectangleBlurSetupReady != 0) {
-        effReturnEventSetupWord((u32)&effRectangleBlurSetupRecord);
-        effEventSetupBeforeRecordNoOp();
-        effEventSetupRecordNoOp(&effRectangleBlurSetupRecord);
-        effEventSetupAfterRecordNoOp();
+        dblurUpdateHandle(&effRectangleBlurSetupRecord);
+        effDebugAllocDrawTag();
+        effDebugDrawMenu(&effRectangleBlurSetupRecord);
+        effDebugLinkDrawTag();
     }
-    if (D_0040B7DB[0] < 0) {
+    if (dds3PadBitTable[3] < 0) {
         effRectangleBlurSetupReady = 0;
     }
     return effRectangleBlurSetupReady;
@@ -364,24 +363,24 @@ EffEventSetupReadiness effUpdateCh72Params(void) {
 
 /* Expose this screen-draw setup block; no parameter copy is made. */
 EffScreenDrawParams *evtGetUnityCalcArea(void) {
-    return &D_003B22D0;
+    return &evtUnityCalcArea;
 }
 
 /* Replace the screen-draw source prefix while preserving the trailing bytes. */
 void evtSetUnityCalcArea(const dds3Effect_Blur_t *parameters) {
-    memcpy(&D_003B22D0, parameters, EFF_EVENT_BLUR_SOURCE_BYTES);
+    memcpy(&evtUnityCalcArea, parameters, EFF_EVENT_BLUR_SOURCE_BYTES);
 }
 
-extern EffEventSetupRecord mblurDebugMenu;
+extern effDebugMenu_t mblurDebugMenu;
 
 extern s8 mblurDone;
 
 /* Prepare the blur-template callback from its explicit parameter block,
  * then process the channel; its optional copy still uses source/destination. */
-EffEventSetupReadiness mblurProcess(void) {
+s32 mblurProcess(void) {
     if (mblurDone == 0) {
-        if (mblurDebugMenu.callback != 0) {
-            *mblurDebugMenu.callbackResult = mblurDebugMenu.callback(&effTexturedBlurSetupParameters);
+        if (mblurDebugMenu.create != 0) {
+            *mblurDebugMenu.param = mblurDebugMenu.create(&mblurParam);
         }
         if (mblurDebugMenu.destination != 0 && mblurDebugMenu.source != 0) {
             memcpy(mblurDebugMenu.destination, mblurDebugMenu.source, mblurDebugMenu.copyBytes);
@@ -389,12 +388,12 @@ EffEventSetupReadiness mblurProcess(void) {
         mblurDone = 1;
     }
     if ((u8)mblurDone != 0) {
-        effReturnEventSetupWord((u32)&mblurDebugMenu);
-        effEventSetupBeforeRecordNoOp();
-        effEventSetupRecordNoOp(&mblurDebugMenu);
-        effEventSetupAfterRecordNoOp();
+        dblurUpdateHandle(&mblurDebugMenu);
+        effDebugAllocDrawTag();
+        effDebugDrawMenu(&mblurDebugMenu);
+        effDebugLinkDrawTag();
     }
-    if (D_0040B7DB[0] < 0) {
+    if (dds3PadBitTable[3] < 0) {
         mblurDone = 0;
     }
     return mblurDone;
@@ -402,23 +401,23 @@ EffEventSetupReadiness mblurProcess(void) {
 
 /* Expose the blur-template setup parameters by address. */
 dds3Effect_PartialMultiBlurParam_t *mblurGetParam(void) {
-    return &effTexturedBlurSetupParameters;
+    return &mblurParam;
 }
 
 /* Replace the setup template; this does not modify the active blur work. */
 void mblurSetParam(dds3Effect_PartialMultiBlurParam_t *parameters) {
-    effTexturedBlurSetupParameters = *parameters;
+    mblurParam = *parameters;
 }
 
-extern EffEventSetupRecord dblurDebugMenu;
+extern effDebugMenu_t dblurDebugMenu;
 
 extern s8 dblurDone;
 
 /* Prepare scatter setup from its explicit parameters, then process the channel. */
-EffEventSetupReadiness dblurProcess(void) {
+s32 dblurProcess(void) {
     if (dblurDone == 0) {
-        if (dblurDebugMenu.callback != 0) {
-            *dblurDebugMenu.callbackResult = dblurDebugMenu.callback(&effScatterBlurSetupParameters);
+        if (dblurDebugMenu.create != 0) {
+            *dblurDebugMenu.param = dblurDebugMenu.create(&dblurParam);
         }
         if (dblurDebugMenu.destination != 0 && dblurDebugMenu.source != 0) {
             memcpy(dblurDebugMenu.destination, dblurDebugMenu.source, dblurDebugMenu.copyBytes);
@@ -426,12 +425,12 @@ EffEventSetupReadiness dblurProcess(void) {
         dblurDone = 1;
     }
     if ((u8)dblurDone != 0) {
-        effReturnEventSetupWord((u32)&dblurDebugMenu);
-        effEventSetupBeforeRecordNoOp();
-        effEventSetupRecordNoOp(&dblurDebugMenu);
-        effEventSetupAfterRecordNoOp();
+        dblurUpdateHandle(&dblurDebugMenu);
+        effDebugAllocDrawTag();
+        effDebugDrawMenu(&dblurDebugMenu);
+        effDebugLinkDrawTag();
     }
-    if (D_0040B7DB[0] < 0) {
+    if (dds3PadBitTable[3] < 0) {
         dblurDone = 0;
     }
     return dblurDone;
@@ -439,23 +438,23 @@ EffEventSetupReadiness dblurProcess(void) {
 
 /* Expose the scatter-blur setup parameters by address. */
 dds3Effect_DistortionBlurParam_t *dblurGetParam(void) {
-    return &effScatterBlurSetupParameters;
+    return &dblurParam;
 }
 
 /* Replace setup parameters without replacing the active filter-blur work. */
 void dblurSetParam(dds3Effect_DistortionBlurParam_t *parameters) {
-    effScatterBlurSetupParameters = *parameters;
+    dblurParam = *parameters;
 }
 
-extern EffEventSetupRecord effFramebufferQuadSetupRecord;
+extern effDebugMenu_t effFramebufferQuadSetupRecord;
 
 extern s8 D_00436504;
 
 /* Prepare from the channel's source, process it, then honor the control-byte reset. */
-EffEventSetupReadiness effEventAdvanceScreenDrawSetup(void) {
+s32 effEventAdvanceScreenDrawSetup(void) {
     if (D_00436504 == 0) {
-        if (effFramebufferQuadSetupRecord.callback != 0) {
-            *effFramebufferQuadSetupRecord.callbackResult = effFramebufferQuadSetupRecord.callback(effFramebufferQuadSetupRecord.source);
+        if (effFramebufferQuadSetupRecord.create != 0) {
+            *effFramebufferQuadSetupRecord.param = effFramebufferQuadSetupRecord.create(effFramebufferQuadSetupRecord.source);
         }
         if (effFramebufferQuadSetupRecord.destination != 0 && effFramebufferQuadSetupRecord.source != 0) {
             memcpy(effFramebufferQuadSetupRecord.destination, effFramebufferQuadSetupRecord.source, effFramebufferQuadSetupRecord.copyBytes);
@@ -463,12 +462,12 @@ EffEventSetupReadiness effEventAdvanceScreenDrawSetup(void) {
         D_00436504 = 1;
     }
     if ((u8)D_00436504 != 0) {
-        effReturnEventSetupWord((u32)&effFramebufferQuadSetupRecord);
-        effEventSetupBeforeRecordNoOp();
-        effEventSetupRecordNoOp(&effFramebufferQuadSetupRecord);
-        effEventSetupAfterRecordNoOp();
+        dblurUpdateHandle(&effFramebufferQuadSetupRecord);
+        effDebugAllocDrawTag();
+        effDebugDrawMenu(&effFramebufferQuadSetupRecord);
+        effDebugLinkDrawTag();
     }
-    if (D_0040B7DB[0] < 0) {
+    if (dds3PadBitTable[3] < 0) {
         D_00436504 = 0;
     }
     return D_00436504;
@@ -484,15 +483,15 @@ void effSetLoadDescD(const dds3Effect_Blur_t *parameters) {
     memcpy(&D_003B2778, parameters, EFF_EVENT_BLUR_SOURCE_BYTES);
 }
 
-extern EffEventSetupRecord filterDebugMenu;
+extern effDebugMenu_t filterDebugMenu;
 
 extern s8 evtViewerDirty;
 
 /* Prepare solid-rectangle setup from the channel source, then process it. */
-EffEventSetupReadiness evtViewerCheckDirty(void) {
+s32 evtViewerCheckDirty(void) {
     if (evtViewerDirty == 0) {
-        if (filterDebugMenu.callback != 0) {
-            *filterDebugMenu.callbackResult = filterDebugMenu.callback(filterDebugMenu.source);
+        if (filterDebugMenu.create != 0) {
+            *filterDebugMenu.param = filterDebugMenu.create(filterDebugMenu.source);
         }
         if (filterDebugMenu.destination != 0 && filterDebugMenu.source != 0) {
             memcpy(filterDebugMenu.destination, filterDebugMenu.source, filterDebugMenu.copyBytes);
@@ -500,12 +499,12 @@ EffEventSetupReadiness evtViewerCheckDirty(void) {
         evtViewerDirty = 1;
     }
     if ((u8)evtViewerDirty != 0) {
-        effReturnEventSetupWord((u32)&filterDebugMenu);
-        effEventSetupBeforeRecordNoOp();
-        effEventSetupRecordNoOp(&filterDebugMenu);
-        effEventSetupAfterRecordNoOp();
+        dblurUpdateHandle(&filterDebugMenu);
+        effDebugAllocDrawTag();
+        effDebugDrawMenu(&filterDebugMenu);
+        effDebugLinkDrawTag();
     }
-    if (D_0040B7DB[0] < 0) {
+    if (dds3PadBitTable[3] < 0) {
         evtViewerDirty = 0;
     }
     return evtViewerDirty;
@@ -521,52 +520,52 @@ void dblurSetParam2(dds3Effect_Filter_t *parameters) {
     D_003B28B8 = *parameters;
 }
 
-extern EffEventSetupRecord mfilterDebugMenu;
+extern effDebugMenu_t mfilterDebugMenu;
 
-extern s8 D_0043651C;
+extern s8 mfilterDone;
 
 /* Prepare resource-template setup from its explicit body, then process the channel. */
-EffEventSetupReadiness mfilterRun(void) {
-    if (D_0043651C == 0) {
-        if (mfilterDebugMenu.callback != 0) {
-            *mfilterDebugMenu.callbackResult = mfilterDebugMenu.callback(&effResourceRectangleSetupParameters);
+s32 mfilterRun(void) {
+    if (mfilterDone == 0) {
+        if (mfilterDebugMenu.create != 0) {
+            *mfilterDebugMenu.param = mfilterDebugMenu.create(&mfilterParam);
         }
         if (mfilterDebugMenu.destination != 0 && mfilterDebugMenu.source != 0) {
             memcpy(mfilterDebugMenu.destination, mfilterDebugMenu.source, mfilterDebugMenu.copyBytes);
         }
-        D_0043651C = 1;
+        mfilterDone = 1;
     }
-    if ((u8)D_0043651C != 0) {
-        effReturnEventSetupWord((u32)&mfilterDebugMenu);
-        effEventSetupBeforeRecordNoOp();
-        effEventSetupRecordNoOp(&mfilterDebugMenu);
-        effEventSetupAfterRecordNoOp();
+    if ((u8)mfilterDone != 0) {
+        dblurUpdateHandle(&mfilterDebugMenu);
+        effDebugAllocDrawTag();
+        effDebugDrawMenu(&mfilterDebugMenu);
+        effDebugLinkDrawTag();
     }
-    if (D_0040B7DB[0] < 0) {
-        D_0043651C = 0;
+    if (dds3PadBitTable[3] < 0) {
+        mfilterDone = 0;
     }
-    return D_0043651C;
+    return mfilterDone;
 }
 
 /* Expose the resource-template setup body by address. */
 dds3Effect_PartialMultiFilterParam_t *mfilterGetParam(void) {
-    return &effResourceRectangleSetupParameters;
+    return &mfilterParam;
 }
 
 /* Replace the setup body without replacing the active textured-square work. */
 void mfilterSetParam(dds3Effect_PartialMultiFilterParam_t *parameters) {
-    effResourceRectangleSetupParameters = *parameters;
+    mfilterParam = *parameters;
 }
 
-extern EffEventSetupRecord rblurDebugMenu;
+extern effDebugMenu_t rblurDebugMenu;
 
 extern s8 rblurDone;
 
 /* Prepare scale-blur setup from its explicit parameters, then process the channel. */
-EffEventSetupReadiness rblurProcess(void) {
+s32 rblurProcess(void) {
     if (rblurDone == 0) {
-        if (rblurDebugMenu.callback != 0) {
-            *rblurDebugMenu.callbackResult = rblurDebugMenu.callback(&effStaggeredBlurSetupParameters);
+        if (rblurDebugMenu.create != 0) {
+            *rblurDebugMenu.param = rblurDebugMenu.create(&rblurParam);
         }
         if (rblurDebugMenu.destination != 0 && rblurDebugMenu.source != 0) {
             memcpy(rblurDebugMenu.destination, rblurDebugMenu.source, rblurDebugMenu.copyBytes);
@@ -574,12 +573,12 @@ EffEventSetupReadiness rblurProcess(void) {
         rblurDone = 1;
     }
     if ((u8)rblurDone != 0) {
-        effReturnEventSetupWord((u32)&rblurDebugMenu);
-        effEventSetupBeforeRecordNoOp();
-        effEventSetupRecordNoOp(&rblurDebugMenu);
-        effEventSetupAfterRecordNoOp();
+        dblurUpdateHandle(&rblurDebugMenu);
+        effDebugAllocDrawTag();
+        effDebugDrawMenu(&rblurDebugMenu);
+        effDebugLinkDrawTag();
     }
-    if (D_0040B7DB[0] < 0) {
+    if (dds3PadBitTable[3] < 0) {
         rblurDone = 0;
     }
     return rblurDone;
@@ -587,12 +586,12 @@ EffEventSetupReadiness rblurProcess(void) {
 
 /* Expose the scale-blur setup parameters by address. */
 dds3Effect_RippleBlurParam_t *rblurGetParam(void) {
-    return &effStaggeredBlurSetupParameters;
+    return &rblurParam;
 }
 
 /* Replace setup parameters without replacing the active staggered-blur work. */
 void rblurSetParam(dds3Effect_RippleBlurParam_t *parameters) {
-    effStaggeredBlurSetupParameters = *parameters;
+    rblurParam = *parameters;
 }
 
 SoundMixer *effEveBEDCreate(SoundMixer *source) {
@@ -1767,7 +1766,7 @@ INCLUDE_SDATA(const s32, "effect/effEvent", D_00436510);
 
 INCLUDE_SDATA(const s32, "effect/effEvent", D_00436518);
 
-INCLUDE_SDATA(const s32, "effect/effEvent", D_0043651C);
+INCLUDE_SDATA(const s32, "effect/effEvent", mfilterDone);
 
 INCLUDE_SDATA(const s32, "effect/effEvent", D_00436520);
 

@@ -2758,12 +2758,25 @@
 0x00194988	dds3MagatuhiParCopy	inferred	SMT3HD name via SLUS_209.11 0x001A8E58, reloc-identical; was effAllocSubWork
 0x001949D8	effDispatchNodeScaleNoOp	inferred	confidence=high; Empty native node type3 applyScale slot3AA804; paired DDS1 slot34DED4, invoked by dds3EffectSetScale. [Namer1 b55]
 0x001949E0	InitMagatuhiEditorProcess	inferred	SMT3HD name via SLUS_209.11 0x001A8EB0, shared-hash-in-run; was effSubmitAdminModeRequestZero
-0x00194A08	effReturnEventSetupWord	inferred	confidence=high; Returns u32 input unchanged; seven effEvent setup paths pass EffEventSetupRecord address word before no-op stages. No processing inferred. Shared twin18CDD0. [Namer1 b55]
-0x00194A28	effEventSetupRecordNoOp	inferred	confidence=high; Empty entry called with setup-record address between before/after stages in all seven paths/game; zero-formal definition and unprototyped extern preserved. Shared twin18CDF0. [Namer1 b55]
-0x00194A30	effEventSetupBeforeRecordNoOp	inferred	confidence=high; Empty entry immediately before per-record no-op in all seven setup paths/game; observable order only. Shared twin18CDF8. [Namer1 b55]
-0x00194A38	effEventSetupAfterRecordNoOp	inferred	confidence=high; Empty entry immediately after per-record no-op in all seven setup paths/game; observable order only. Shared twin18CE00. [Namer1 b55]
-0x00194A68	effReturnCallbackValue	inferred	medium confidence; src/dds2/game/code_00194700.c func_00194A68: Returns the signed callback argument unchanged. [names_reviewed25.tsv]
-0x00194A70	effFieldTaskStartupHook	inferred	confidence=high; Empty retail hook called only by fldCreateFieldEffectTask after both field-effect tasks are created and before Eve_EffectInit and field-color flags reset. No initialization work inferred from its empty body. DDS1 twin0018CE38. [PurD readability b7; paired native callers and startup sequence]
+0x00194A08	dblurUpdateHandle	inferred	SMT3HD name via SLUS_209.11 001A8ED8, effMagatuhi debug block, same order as SMT3 with DDS bodies empty; was effReturnEventSetupWord
+0x00194A10	effDebugDrawRect3	inferred	SMT3HD name via SLUS_209.11 001A9828, effMagatuhi debug block, same order as SMT3 with DDS bodies empty; was func_00194A10
+0x00194A18	effDebugDrawRect2	inferred	SMT3HD name via SLUS_209.11 001A9878, effMagatuhi debug block, same order as SMT3 with DDS bodies empty; was func_00194A18
+0x00194A20	effDebugDrawRectLine	inferred	SMT3HD name via SLUS_209.11 001A98D0, effMagatuhi debug block, same order as SMT3 with DDS bodies empty; was func_00194A20
+0x00194A28	effDebugDrawMenu	inferred	SMT3HD name via SLUS_209.11 001A9A28, effMagatuhi debug block, same order as SMT3 with DDS bodies empty; was effEventSetupRecordNoOp
+0x00194A30	effDebugAllocDrawTag	inferred	SMT3HD name via SLUS_209.11 001AA190, effMagatuhi debug block, same order as SMT3 with DDS bodies empty; was effEventSetupBeforeRecordNoOp
+0x00194A38	effDebugLinkDrawTag	inferred	SMT3HD name via SLUS_209.11 001AA1B8, effMagatuhi debug block, same order as SMT3 with DDS bodies empty; was effEventSetupAfterRecordNoOp
+0x00194A40	effDebugSetPos	inferred	SMT3HD name via SLUS_209.11 001AA1E0, effMagatuhi debug block, same order as SMT3 with DDS bodies empty; was func_00194A40
+0x00194A48	effDebugSetAttr	inferred	SMT3HD name via SLUS_209.11 001AA1F0, effMagatuhi debug block, same order as SMT3 with DDS bodies empty; was func_00194A48
+0x00194A50	effDebugPrintf	inferred	SMT3HD name via SLUS_209.11 001AA1F8, effMagatuhi debug block, same order as SMT3 with DDS bodies empty; was func_00194A50
+0x00194A58	effDebugDrawRectFull	inferred	SMT3HD name via SLUS_209.11 001AA250, effMagatuhi debug block, same order as SMT3 with DDS bodies empty; was D_00194A58
+0x00194A60	effDebugDrawRect4	inferred	SMT3HD name via SLUS_209.11 001AA2B0, effMagatuhi debug block, same order as SMT3 with DDS bodies empty; was D_00194A60
+0x00194A68	effDebugResetMenu	inferred	SMT3HD name via SLUS_209.11 001AA310, effMagatuhi debug block, same order as SMT3 with DDS bodies empty; was effReturnCallbackValue
+0x00194A70	effDebugInit	inferred	SMT3HD name via SLUS_209.11 001AA3A8, effMagatuhi debug block, same order as SMT3 with DDS bodies empty; was effFieldTaskStartupHook
+0x00194A78	effDebugUpdate	inferred	SMT3HD name via SLUS_209.11 001AA3B0, effMagatuhi debug block, same order as SMT3 with DDS bodies empty; was func_00194A78
+0x00194A80	effDebugDraw	inferred	SMT3HD name via SLUS_209.11 001AA550, effMagatuhi debug block, same order as SMT3 with DDS bodies empty; was func_00194A80
+0x00194A90	effDebugClearPad	inferred	SMT3HD name via SLUS_209.11 001AA5A0, effMagatuhi debug block, same order as SMT3 with DDS bodies empty; was D_00194A90
+0x00194A98	effDebugMoveCamera	inferred	SMT3HD name via SLUS_209.11 001AA6D0, effMagatuhi debug block, same order as SMT3 with DDS bodies empty; was D_00194A98
+0x00194AA0	effDebugIsEnabled	inferred	SMT3HD name via SLUS_209.11 001AACF8, effMagatuhi debug block, same order as SMT3 with DDS bodies empty; was D_00194AA0
 0x00194AA8	dds3EffectDirOpen	inferred	SMT3HD name via SLUS_209.11 0x001AAD00, shared-hash-in-run; was effOpenDataDir
 0x00194AF8	dds3EffectDirClose	inferred	SMT3HD name via SLUS_209.11 0x001AAD50, shared-hash-in-run; was effRunIfEnabled
 0x00194B28	dds3EffectDirRead	inferred	SMT3HD name via SLUS_209.11 0x001AAD80, reloc-identical; was effNextDataDirEntry
@@ -10186,16 +10199,17 @@
 0x003B21A0	effDebugTriColors	inferred	SMT3HD name via SLUS_209.11 0x003201C0, effect/effDebug SMT3 rename; was D_003B21A0
 0x003B21B0	Eve_Blur	inferred	SMT3HD data name via SLUS_209.11 0x003201D0, 2 agreeing references; was Eve_Blur
 0x003B2260	Eve_Filter	inferred	SMT3HD data name via SLUS_209.11 0x00320258, 2 agreeing references; was Eve_Filter
+0x003B22D0	evtUnityCalcArea	inferred	SMT3HD name via SLUS_209.11 003202C8, block returned by evtGetUnityCalcArea; was D_003B22D0
 0x003B23E8	effRectangleBlurSetupRecord	inferred	confidence=high; EffEventSetupRecord for the rectangle blur setup pass. Identifier-only; twin 0x00355AB8 in DDS1. [PurC data b14; matched-C evidence]
-0x003B2428	effTexturedBlurSetupParameters	inferred	confidence=high; dds3Effect_PartialMultiBlurParam_t setup parameters read by mblurGetParam and written by mblurSetParam. Identifier-only; twin 0x00355AF8 in DDS1. [PurC data b14; matched-C evidence]
+0x003B2428	mblurParam	inferred	SMT3HD name via SLUS_209.11 00320420, parameter block passed to the mblur create callback in mblurProcess; was effTexturedBlurSetupParameters
 0x003B2560	mblurDebugMenu	inferred	SMT3HD data name via SLUS_209.11 0x00320558, 2 agreeing references; was mblurDebugMenu
-0x003B25A0	effScatterBlurSetupParameters	inferred	confidence=high; dds3Effect_DistortionBlurParam_t setup parameters read by dblurGetParam. Identifier-only; twin 0x00355C70 in DDS1. [PurC data b14; matched-C evidence]
+0x003B25A0	dblurParam	inferred	SMT3HD name via SLUS_209.11 00320598, parameter block passed to the dblur create callback in dblurProcess; was effScatterBlurSetupParameters
 0x003B2738	dblurDebugMenu	inferred	SMT3HD data name via SLUS_209.11 0x00320730, 2 agreeing references; was dblurDebugMenu
 0x003B2878	effFramebufferQuadSetupRecord	inferred	confidence=high; EffEventSetupRecord for the framebuffer-quad setup pass. Identifier-only; twin 0x00355F48 in DDS1. [PurC data b14; matched-C evidence]
 0x003B2978	filterDebugMenu	inferred	SMT3HD data name via SLUS_209.11 0x00320830, 2 agreeing references; was filterDebugMenu
-0x003B29B8	effResourceRectangleSetupParameters	inferred	confidence=high; dds3Effect_PartialMultiFilterParam_t setup body read by mfilterGetParam. Identifier-only; twin 0x00356088 in DDS1. [PurC data b14; matched-C evidence]
+0x003B29B8	mfilterParam	inferred	SMT3HD name via SLUS_209.11 00320870, parameter block passed to the mfilter create callback in mfilterRun; was effResourceRectangleSetupParameters
 0x003B2AB8	mfilterDebugMenu	inferred	SMT3HD data name via SLUS_209.11 0x00320970, 2 agreeing references; was mfilterDebugMenu
-0x003B2AF8	effStaggeredBlurSetupParameters	inferred	confidence=high; dds3Effect_RippleBlurParam_t setup parameters read by rblurGetParam. Identifier-only; twin 0x003561C8 in DDS1. [PurC data b14; matched-C evidence]
+0x003B2AF8	rblurParam	inferred	SMT3HD name via SLUS_209.11 003209B0, parameter block passed to the rblur create callback in rblurProcess; was effStaggeredBlurSetupParameters
 0x003B2C90	rblurDebugMenu	inferred	SMT3HD data name via SLUS_209.11 0x00320B48, 2 agreeing references; was rblurDebugMenu
 0x003B2DA0	gFontBaseWidth	inferred	SMT3HD data name via SLUS_209.11 0x00326060, 1 agreeing references; was gFontBaseWidth
 0x003B2DA8	frFontClutTable	inferred	SMT3HD data name via SLUS_209.11 0x00326068, 1 agreeing references; was frFontClutTable
@@ -10890,6 +10904,7 @@
 0x00436420	effBTLSkillID	inferred	SMT3HD data name via SLUS_209.11 0x00551D7C, 1 agreeing references; was effBTLSkillID
 0x00436424	effFieldColorFinalSelector	inferred	confidence=high; data D_00436424; matched-C-users=2; src/dds2/game/code_00169418.c:22:effBTLFieldColorSetSelectors; src/dds2/game/code_00169418.c:47:effBTLFieldColorGetFinalSelector; Color selector setup stores final-or-base selector here; final getter returns it; data-twin=D_003BB034, supported by 2 independently paired matched functions.; retail-data-start=asm/dds2/data/game/code_00169418.sdata.s:33.; seed-placeholder=D_00436424; current asm label and source default identifier verified; source=names_reviewed36.tsv. [names_qp10_seed.tsv]
 0x00436434	effPartModelSerial	inferred	SMT3HD name via SLUS_209.11 0x0054F1E4, effect/effPart SMT3 rename; was D_00436434
+0x0043643D	effDebugEnabled	inferred	SMT3HD name via SLUS_209.11 0054F220, byte returned by effDebugIsEnabled; was D_0043643D
 0x00436458	effDebugSelectCursorMat	inferred	SMT3HD name via SLUS_209.11 0x0054F270, effect/effDebug SMT3 rename; was D_00436458
 0x0043645C	effDebugSelectCursorAngle	inferred	SMT3HD name via SLUS_209.11 0x0054F274, effect/effDebug SMT3 rename; was D_0043645C
 0x00436460	Eve_BlurShow	inferred	SMT3HD data name via SLUS_209.11 0x0054F278, 2 agreeing references; was Eve_BlurShow
@@ -10902,6 +10917,7 @@
 0x004364BD	mblurDone	inferred	SMT3HD data name via SLUS_209.11 0x0054F2D5, 6 agreeing references; was mblurDone
 0x004364EF	dblurDone	inferred	SMT3HD data name via SLUS_209.11 0x0054F307, 6 agreeing references; was dblurDone
 0x00436517	evtViewerDirty	inferred	SMT3HD data name via SLUS_209.11 0x0054F317, 6 agreeing references; was evtViewerDirty
+0x0043651C	mfilterDone	inferred	SMT3HD name via SLUS_209.11 0054F31C, readiness byte of mfilterRun; was D_0043651C
 0x0043652F	rblurDone	inferred	SMT3HD data name via SLUS_209.11 0x0054F32F, 6 agreeing references; was rblurDone
 0x00436550	gMessageSpaceX	inferred	SMT3HD name via SLUS_209.11 0x0054F408, saved and restored by MessageRequestNS, was frFontEncodedTextGlyphSpacing; was frFontEncodedTextGlyphSpacing
 0x00436554	gMessageStepY	inferred	SMT3HD data name via SLUS_209.11 0x0054F40C, 3 agreeing references; was gMessageStepY

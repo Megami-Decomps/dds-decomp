@@ -5692,5 +5692,5 @@ INCLUDE_SDATA(const s32, "effect/effPCPMisc", D_00436438);
 
 INCLUDE_SDATA(const s32, "effect/effPCPMisc", D_0043643C);
 
-INCLUDE_SDATA(const s32, "effect/effPCPMisc", D_0043643D);
+INCLUDE_SDATA(const s32, "effect/effPCPMisc", effDebugEnabled);
 
