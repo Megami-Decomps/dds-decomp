@@ -1,4 +1,5 @@
 #include "common.h"
+#include "ps2asm.h"
 #include "sdf_lighting.h"
 #include "sdf_resource.h"
 
@@ -71,7 +72,7 @@ typedef struct sdf2DTexPacket_t {
     sdfGrTagStdReg_t clamp;
 } sdf2DTexPacket_t;
 
-void sdfDrawTagLink(struct sdfDrawTag_t *aTag, u32 aPacket);
+void sdfDrawTagLink(struct sdfDrawTag_t *aTag, addr_t aPacket);
 
 /* Per-texture reference count and non-owning clone source (0x8). */
 /* Texture buffer GPU command words (0x40); DDS1/2 game/code_002D10B0/00329F60.c. */
@@ -144,14 +145,14 @@ sdf2DTexPacket_t *sdf2DMakeTexPacket(sdf2DTexPacket_t *aPacket, sdfTexHandle_t *
 
 s32 sdf2DLinkTexPacket(sdfDrawTag_t *aTag, sdfTexHandle_t *aTexHndl, s32 aCtx) {
     s32 packetBytes = sdf2DGetTexPacketSize(aTexHndl);
-    sdf2DTexPacket_t *packet = (sdf2DTexPacket_t *)sdfGrAllocPacketBuff(packetBytes);
-    s32 packetAddress = (s32)sdf2DMakeTexPacket(packet, aTexHndl, aCtx);
+    sdf2DTexPacket_t *packet = EE_ADDR_AS(sdf2DTexPacket_t *, sdfGrAllocPacketBuff(packetBytes));
+    saddr_t packetAddress = EE_ADDR_S(sdf2DMakeTexPacket(packet, aTexHndl, aCtx));
     sdfDrawTagLink(aTag, packetAddress);
     return packetAddress;
 }
 
 u32 sdf2DMakeStdPacket(u32 aPacket, s32 aLeng) {
-    sdfGrSetRegsPacketHeader((sdfGrPacketHeader_t *)aPacket, (aLeng >> SDF_DMA_QWORD_SHIFT) - 2);
+    sdfGrSetRegsPacketHeader(EE_ADDR_AS(sdfGrPacketHeader_t *, aPacket), (aLeng >> SDF_DMA_QWORD_SHIFT) - 2);
     return aPacket;
 }
 
@@ -178,7 +179,7 @@ sdfGrPacketHeader_t *sdf2DMakePrimPacketHeader(sdfGrPacketHeader_t *aPacketPtr, 
 }
 
 sdfGrPacketHeader_t *sdf2DAllocSprite(s32 aNumOfSpr) {
-    sdfGrPacketHeader_t *packet = (sdfGrPacketHeader_t *)sdfGrAllocPacketBuff(sdf2DGetPrimPacketSize(5, aNumOfSpr));
+    sdfGrPacketHeader_t *packet = EE_ADDR_AS(sdfGrPacketHeader_t *, sdfGrAllocPacketBuff(sdf2DGetPrimPacketSize(5, aNumOfSpr)));
     sdf2DMakePrimPacketHeader(packet, 0x156, 5, 0x53531, aNumOfSpr);
     return packet;
 }
