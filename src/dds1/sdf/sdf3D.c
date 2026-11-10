@@ -6,12 +6,8 @@
 #include "libsdf.h"
 #include "sdf_resource.h"
 
-#define D_002E8ED0 sdf3DSlot2TmxData
-#define D_002ECF10 sdf3DSlot1TmxData
-#define D_002F5600 vu1MicroPacketEnd
 #define D_00529630 D_00398390
-#define D_005518B8 sdf3DSlot2Tex
-#define D_005518C8 sdf3DSlot1Tex
+#include "eeregs.h"
 
 /* Register selectors carried by GIF A+D writes in the two GS contexts. */
 enum {
@@ -125,15 +121,14 @@ void sdfMatInitSystem(void);
 /* Initialize the buffered object-list release queue with its object destructor. */
 void sdfModelInitSystem(void);
 
-extern u32 sdf3DLightDefault;
+extern addr_t sdf3DLightDefault;
 
-extern u32 sdf3DFogDefault;
+extern addr_t sdf3DFogDefault;
 
 extern f32 sdf3DEyeOffset[4];
 
+/* Shared byte-storage view: the local screen structs are not compatible C types. */
 extern u8 sdf3DScreenParam[];
-
-#define SDF_DMA_ADDRESS_MASK 0x0FFFFFFF
 
 #define SDF_DMA_QWORD_SHIFT 4
 
@@ -148,6 +143,10 @@ extern u8 sdf3DScreenParam[];
 #define SDF_VIF_MSCAL_COMMAND 0x14000000
 
 extern u8 vu1MicroPacket[];
+
+/* One past the last byte of the vu1MicroPacket VIF packet, so the packet's
+ * length is the distance between the two. */
+SYMBOL_AT_REGION(u8, vu1MicroPacketEnd, vu1MicroPacket, 0x3D20);
 
 extern u8 sdf3DScreenTm[];
 
@@ -172,13 +171,11 @@ typedef struct sdf3DFogPacket_t {
     u32 reservedC;
 } sdf3DFogPacket_t;
 
-extern u8 D_002F5600[];
-
 extern u64 sdf3DRefMapParam;
 
-extern u8 D_002E8ED0[];
+extern u8 sdf3DSlot2TmxData[];
 
-extern u8 D_002ECF10[];
+extern u8 sdf3DSlot1TmxData[];
 
 /* The camera, as sdf3DMakeScreenParam derives it: twelve inputs, then the
  * matrix and the clip-to-screen mapping it computes. cameraPos is the inverted
@@ -203,7 +200,7 @@ typedef struct sdf3DScreenParam_t {
     f32 cameraPos[4]; /* 0x90 */
 } sdf3DScreenParam_t;
 
-void sdfDrawTagLinkRef(struct sdfDrawTag_t *aTag, u32 aPacket);
+void sdfDrawTagLinkRef(struct sdfDrawTag_t *aTag, addr_t aPacket);
 
 
 
@@ -233,11 +230,11 @@ typedef struct sdf3DSpecularTexImage_t {
     u8 indices[64][128];         /* 0x0440 */
 } sdf3DSpecularTexImage_t;
 
-extern sdfTexHandle_t *D_005518B8;
+extern sdfTexHandle_t *sdf3DSlot2Tex;
 
 extern sdfTexHandle_t *sdf3DSpecularTex;
 
-extern sdfTexHandle_t *D_005518C8;
+extern sdfTexHandle_t *sdf3DSlot1Tex;
 
 extern void sdfTmxSetHeader(TMX_HEADER_t *, s32, s32, s32, s32, s32);
 
@@ -247,7 +244,7 @@ extern s32 vu1Tex0Slot2[];
 
 extern s32 vu1Tex0Slot1[];
 
-extern void *memcpy(void *, const void *, unsigned int);
+extern void *memcpy(void *, const void *, size_t);
 
 void ReverseMatrix(void);
 
@@ -259,7 +256,7 @@ void sdf3DSetCamera(sdf3DScreenParam_t *aParam, void *aCamera);
 
 void sdf3DMakeFogPacket(sdf3DFogPacket_t *aPacket, sdf3DFogParam_t *aParam);
 
-void sdf3DMakeDirectRefPacket(DmaPacketHeader *aPacket, u32 aData, s32 aLeng);
+void sdf3DMakeDirectRefPacket(DmaPacketHeader *aPacket, addr_t aData, s32 aLeng);
 
 void sdf3DLinkInitPacket(sdfDrawTag_t *aTag, DmaPacketHeader *aPacket);
 
@@ -302,11 +299,11 @@ void sdf3DSetCamera(sdf3DScreenParam_t *aParam, void *aCamera) {
 }
 
 void sdf3DSetDefaultLight(u8 *aLight) {
-    sdf3DLightDefault = (u32)aLight;
+    sdf3DLightDefault = EE_ADDR(aLight);
 }
 
 void sdf3DSetDefaultFog(u8 *aFog) {
-    sdf3DFogDefault = (u32)aFog;
+    sdf3DFogDefault = EE_ADDR(aFog);
 }
 
 extern f32 tanf(f32 angle);
@@ -379,7 +376,7 @@ void sdf3DMakeScreenParam(sdf3DScreenParam_t *camera)
 extern f32 D_00529630[];
 extern void DiagMatrix(void);
 extern sdfMemHandle_t *sdfMemAllocDirect(s32 size);
-extern void *memset(void *dst, s32 value, u32 size);
+extern void *memset(void *dst, s32 value, size_t size);
 
 /* vu0 routine: parallel-light packet and lighting basis construction */
 void sdf3DMakeLightParallelPacket(sdf3DLightParallelPacket_t *aPacket, sdf3DLight_t **aLights, sdfVector4_t *aAmbient) {
@@ -487,10 +484,10 @@ void sdf3DMakeFogPacket(sdf3DFogPacket_t *aPacket, sdf3DFogParam_t *aParam) {
     aPacket->scale = ((farZ * nearZ) * (rangeMin - rangeMax)) / depthRange;
 }
 
-void sdf3DMakeDirectRefPacket(DmaPacketHeader *aPacket, u32 aData, s32 aLeng) {
+void sdf3DMakeDirectRefPacket(DmaPacketHeader *aPacket, addr_t aData, s32 aLeng) {
     s32 quadwordCount = (aLeng + 15) >> SDF_DMA_QWORD_SHIFT;
     aPacket->quadwords = quadwordCount;
-    aPacket->address = aData & SDF_DMA_ADDRESS_MASK;
+    aPacket->address = EE_PHYSICAL(aData);
     aPacket->tag = SDF_VIF_FLUSHA_COMMAND;
     aPacket->command = quadwordCount | SDF_VIF_DIRECT_COMMAND;
     aPacket->unknown10 = 0;
@@ -499,22 +496,22 @@ void sdf3DMakeDirectRefPacket(DmaPacketHeader *aPacket, u32 aData, s32 aLeng) {
 }
 
 void sdf3DLinkInitPacket(sdfDrawTag_t *aTag, DmaPacketHeader *aPacket) {
-    aPacket->address = (u32)vu1MicroPacket & SDF_DMA_ADDRESS_MASK;
-    aPacket->quadwords = (D_002F5600 - vu1MicroPacket) >> SDF_DMA_QWORD_SHIFT;
+    aPacket->address = EE_PHYSICAL(EE_ADDR(vu1MicroPacket));
+    aPacket->quadwords = (vu1MicroPacketEnd - vu1MicroPacket) >> SDF_DMA_QWORD_SHIFT;
     aPacket->tag = 0;
     aPacket->command = 0;
     aPacket->unknown10 = 0;
     aPacket->unknown18 = 0;
     aPacket->unknown1C = 0;
-    sdfDrawTagLinkRef(aTag, (u32)aPacket);
+    sdfDrawTagLinkRef(aTag, EE_ADDR(aPacket));
 }
 
 extern sdfMemHandle_t *sdfMemAllocDirect(s32 size);
-extern void *memset(void *dst, s32 value, u32 size);
+extern void *memset(void *dst, s32 value, size_t size);
 
 void sdf3DInitSpecularTex2(void) {
     struct sdfMemHandle_t *allocation = sdfMemAllocDirect(0x2440);
-    sdf3DSpecularTexImage_t *texture = (sdf3DSpecularTexImage_t *)(u32)sdfMemLock(allocation);
+    sdf3DSpecularTexImage_t *texture = (sdf3DSpecularTexImage_t *)EE_ADDR_PTR(sdfMemLock(allocation));
     s32 i;
     s32 j;
 
@@ -547,12 +544,12 @@ void sdf3DInit(void) {
     sdf3DRefMapParam = textureWord;
     vu1Tex0Slot0[0] = textureWord;
     vu1Tex0Slot0[1] = textureWord >> 32;
-    D_005518B8 = sdfTexSetDirect((TMX_HEADER_t *)D_002E8ED0);
-    textureWord = sdfTexGetTex0Reg(D_005518B8);
+    sdf3DSlot2Tex = sdfTexSetDirect((TMX_HEADER_t *)sdf3DSlot2TmxData);
+    textureWord = sdfTexGetTex0Reg(sdf3DSlot2Tex);
     vu1Tex0Slot2[0] = textureWord;
     vu1Tex0Slot2[1] = textureWord >> 32;
-    D_005518C8 = sdfTexSetDirect((TMX_HEADER_t *)D_002ECF10);
-    textureWord = sdfTexGetTex0Reg(D_005518C8);
+    sdf3DSlot1Tex = sdfTexSetDirect((TMX_HEADER_t *)sdf3DSlot1TmxData);
+    textureWord = sdfTexGetTex0Reg(sdf3DSlot1Tex);
     vu1Tex0Slot1[0] = textureWord;
     vu1Tex0Slot1[1] = textureWord >> 32;
     sdfModelInitSystem();
@@ -582,3 +579,4 @@ INCLUDE_SDATA(const s32, "sdf/sdf3D", sdf3DRefMapParam);
 INCLUDE_SDATA(const s32, "sdf/sdf3D", sdf3DSlot1Tex);
 
 INCLUDE_SDATA(const s32, "sdf/sdf3D", sdfPadPortSlotPairs);
+
