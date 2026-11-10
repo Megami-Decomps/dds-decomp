@@ -35,7 +35,7 @@ extern sdfGrOt_t sdfGrOtTable[KWLN_FRAME_POOL_NODE_COUNT];
 
 extern u8 D_00380860[];
 
-extern KwlnFrameDrawBank dds3DrawEnv[2];
+extern dds3FrameDrawBank_t dds3DrawEnv[2];
 
 extern void sdfGrInitNewFrame(void);
 
@@ -352,7 +352,7 @@ extern void sdfGrFlushOtChain(u32 sourceAddress);
 
 extern void sdfGrReqDraw(sdfDrawTag_t *, SdfPacketChain *);
 
-extern KwlnFrameDrawBuffer dds3FrameDrawPacketRecords[];
+extern dds3FrameDrawBuffer_t dds3FrameDrawPacketRecords[];
 
 extern sdfGrOt_t D_00380708;
 
@@ -381,7 +381,7 @@ s32 dds3DrawProcess(dds3ProcessID_t *task) {
     sdfDrawTag_t *packetList;
     u64 *texturePacket;
     u64 *blendPacket;
-    KwlnSpriteVertex *vertex;
+    dds3EffectSpriteVertex_t *vertex;
     void *spritePacket;
     sdfDrawTag_t *poolHead;
     s32 edgeDistances[4];
@@ -434,7 +434,7 @@ s32 dds3DrawProcess(dds3ProcessID_t *task) {
             edgeDistances[i] = edgeDistances[i] * dds3ScreenBlurScale >> KWLN_FRAME_SCALE_FRACTION_BITS;
         }
         spritePacket = sdf2DAllocSprite(1);
-        vertex = (KwlnSpriteVertex *)sdf2DGetPrimPtr(spritePacket);
+        vertex = (dds3EffectSpriteVertex_t *)sdf2DGetPrimPtr(spritePacket);
         vertex->r = KWLN_FRAME_NEUTRAL_COLOR;
         vertex->g = KWLN_FRAME_NEUTRAL_COLOR;
         vertex->b = KWLN_FRAME_NEUTRAL_COLOR;
@@ -472,7 +472,7 @@ s32 dds3DrawProcess(dds3ProcessID_t *task) {
 extern s32 dds3CallBasicMainProc(struct dds3Basic_t *holder);
 
 /* Invoke the active world's first callback column; this task step returns zero. */
-KwlnTaskUpdateResult dds3BasicMainProcess(dds3ProcessID_t *task) {
+dds3TaskUpdateResult_t dds3BasicMainProcess(dds3ProcessID_t *task) {
     dds3CallBasicMainProc(dds3TheWorld);
     return 0;
 }
@@ -480,7 +480,7 @@ KwlnTaskUpdateResult dds3BasicMainProcess(dds3ProcessID_t *task) {
 extern s32 dds3CallBasicDrawProc(struct dds3Basic_t *holder);
 
 /* Invoke the active world's second callback column; this task step returns zero. */
-KwlnTaskUpdateResult dds3BasicDrawProcess(dds3ProcessID_t *task) {
+dds3TaskUpdateResult_t dds3BasicDrawProcess(dds3ProcessID_t *task) {
     dds3CallBasicDrawProc(dds3TheWorld);
     return 0;
 }

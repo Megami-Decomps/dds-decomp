@@ -2469,7 +2469,7 @@ void itfDrawSoundSelectorFadeLayers(instanceMes_tag *panel) {
     surface->regFunc(surface, packet);
 }
 
-KwlnTaskUpdateResult CalcMsgMng_Process(dds3ProcessID_t *task) {
+dds3TaskUpdateResult_t CalcMsgMng_Process(dds3ProcessID_t *task) {
     mesflow_tag *node;
     for (node = itfMesMngManager.pool.activeHead; node != 0; node = node->next) {
         itfUpdateBattleDisplayAndFadeIndicator(node->state);
@@ -2479,7 +2479,7 @@ KwlnTaskUpdateResult CalcMsgMng_Process(dds3ProcessID_t *task) {
 
 extern u32 dds3NullDrawProc(void);
 
-KwlnTaskUpdateResult DrawMsgMng_Process(dds3ProcessID_t *task) {
+dds3TaskUpdateResult_t DrawMsgMng_Process(dds3ProcessID_t *task) {
     mesflow_tag *node;
 
     if (dds3NullDrawProc() != 0) {

@@ -30,7 +30,7 @@ void effManagerInitializeSubsystems(dds3ProcessID_t *task) {
 }
 
 /* Submit the test and alpha state packets to both field draw buffers. */
-KwlnTaskUpdateResult effSubmitFieldBlendStateTask(dds3ProcessID_t *task) {
+dds3TaskUpdateResult_t effSubmitFieldBlendStateTask(dds3ProcessID_t *task) {
     sdfDrawTag_t *list;
     sdfPrimTransPacket_t *state;
     sdfGrOt_t *surface;
@@ -75,7 +75,7 @@ extern void billFlushPendingRenderPairs(void);
 extern void dds3CrossfadeRun(void);
 extern void effDispatchActive(void);
 
-KwlnTaskUpdateResult dds3EffectManagerRun(dds3ProcessID_t *task) {
+dds3TaskUpdateResult_t dds3EffectManagerRun(dds3ProcessID_t *task) {
     (void)task;
     dds3PolygonLinkOt();
     dds3TrackPolyLinkOt();

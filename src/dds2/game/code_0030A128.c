@@ -65,7 +65,7 @@ extern u32 itfGetGridListLinkFlags(LmapList *);
 extern void uiDrawUniformRgbRange(s32 *, s32 *, s32, u32, s32);
 extern LmapNode *fldLmapExpandWindowBackward(LmapList *);
 extern s32 fldLocalMapTrackSlotFromMode(s32);
-extern KwlnTaskUpdateResult fldLmapTaskUpdate(dds3ProcessID_t *);
+extern dds3TaskUpdateResult_t fldLmapTaskUpdate(dds3ProcessID_t *);
 extern s32 D_00438890;
 extern void p2sdStopBGM(u32);
 extern void sdfReleaseAllSpriteSlots(void);
@@ -327,7 +327,7 @@ extern void fldInitializeLocalMapScene(void);
 extern s32 fldUpdateLocalMapCounterSelection(void);
 extern void fldDrawLocalMapOverlay(void);
 
-KwlnTaskUpdateResult fldLmapTaskUpdate(dds3ProcessID_t *task) {
+dds3TaskUpdateResult_t fldLmapTaskUpdate(dds3ProcessID_t *task) {
     LmapTaskState *state = (LmapTaskState *)dds3GetProcessData(task);
     LmapTaskPhase phase = state->phase;
     s32 result;

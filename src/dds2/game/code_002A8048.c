@@ -45,13 +45,13 @@ extern sdfGrOt_t D_003805A8;
 extern sdfGrOt_t D_00380708;
 extern char D_0042A428[];
 
-extern KwlnTaskUpdateResult mnuMovieViewer(dds3ProcessID_t *task);
+extern dds3TaskUpdateResult_t mnuMovieViewer(dds3ProcessID_t *task);
 extern void mnuStartMovieDrawTaskForResource(const char *, const SdfMovieDescriptor *);
 void mnuRequestIndexedMovieResource(s32 index);
 
 void movieStop(void);
 
-KwlnTaskUpdateResult movieMan_Process(dds3ProcessID_t *task) {
+dds3TaskUpdateResult_t movieMan_Process(dds3ProcessID_t *task) {
     sdfIpuRunDecode(0x3c / dds3VblanksPerFrame);
     return KWLN_TASK_UPDATE_RETAIN_CALLBACK;
 }
@@ -311,7 +311,7 @@ void MovieViewerDrawFrameInfo(void) {
     }
 }
 
-KwlnTaskUpdateResult mnuMovieViewer(dds3ProcessID_t *task) {
+dds3TaskUpdateResult_t mnuMovieViewer(dds3ProcessID_t *task) {
     MnuMovieListNode *node;
     s32 nextTop;
 

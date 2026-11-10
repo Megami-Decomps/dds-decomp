@@ -926,7 +926,7 @@ s32 frFontDrawGlyphChain(_FRQ *glyph, s8 mode, u32 renderFlags) {
 }
 
 /* Release the selected frame queue and retain this scheduler callback. */
-KwlnTaskUpdateResult frFlipPacketBuf(dds3ProcessID_t *task) {
+dds3TaskUpdateResult_t frFlipPacketBuf(dds3ProcessID_t *task) {
     s32 queueIndex = (dds3GetFrameID() & FR_FONT_BYTE_MASK) == 0;
 
     frFontWork.glyphSlots[queueIndex] = frFontReleaseGlyphChain(frFontWork.glyphSlots[queueIndex]);

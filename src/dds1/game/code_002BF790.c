@@ -848,7 +848,7 @@ void cmpDraw3DPoly(const f32 *first, const f32 *second, const f32 *third,
     surface->regFunc(surface, list);
 }
 
-extern KwlnFrameDrawBuffer dds3FrameDrawPacketRecords[];
+extern dds3FrameDrawBuffer_t dds3FrameDrawPacketRecords[];
 
 extern void sdfGrSetFrameMaskRGB(const u8 *, SdfDmaReferenceChainPacket *, s32);
 

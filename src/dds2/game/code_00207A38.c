@@ -3846,7 +3846,7 @@ extern u8 *sdf2DGetPrimPtr(SdfDrawPacket *packet);
 void btlDrawResourcePreview(BtlResourceDescriptor *descriptor) {
     sdfDrawTag_t *list;
     void *sprite;
-    KwlnSpriteVertex *vertex;
+    dds3EffectSpriteVertex_t *vertex;
     sdfTexHandle_t *texture;
     sdfGrOt_t *surface;
 
@@ -3854,7 +3854,7 @@ void btlDrawResourcePreview(BtlResourceDescriptor *descriptor) {
         list = (sdfDrawTag_t *)sdfGrAllocPacketBuff(0x20);
         sdfDrawTagInit(list);
         sprite = sdf2DAllocSprite(1);
-        vertex = (KwlnSpriteVertex *)sdf2DGetPrimPtr(sprite);
+        vertex = (dds3EffectSpriteVertex_t *)sdf2DGetPrimPtr(sprite);
         vertex->a = 0x80;
         vertex->b = 0x80;
         vertex->g = 0x80;

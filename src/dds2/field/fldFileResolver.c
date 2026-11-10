@@ -595,7 +595,7 @@ extern s32 sdf2DGetPrimPacketSize(s32 registerCount, s32 loopCount);
 extern u8 *sdf2DGetPrimPtr(SdfDrawPacket *packet);
 
 
-extern KwlnFrameDrawBuffer dds3FrameDrawPacketRecords[];
+extern dds3FrameDrawBuffer_t dds3FrameDrawPacketRecords[];
 
 extern void sdfGrSetFrameMaskRGB(const u8 *, SdfDmaReferenceChainPacket *, s32);
 
@@ -3539,7 +3539,7 @@ void fldSetEncounterPendingValue(u32 pendingValue) {
     D_00436088 = pendingValue;
 }
 
-KwlnTaskUpdateResult fldEncProc(dds3ProcessID_t *task) {
+dds3TaskUpdateResult_t fldEncProc(dds3ProcessID_t *task) {
     FldEncounterRuntimeMode state = fldEncounterRuntimeState;
 
     if (state < FLD_ENCOUNTER_MODE_BYPASS_BATTLE_RUNTIME) {

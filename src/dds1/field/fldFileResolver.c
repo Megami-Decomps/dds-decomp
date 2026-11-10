@@ -3006,7 +3006,7 @@ void drawSprite3D(sdfTexHandle_t *texture, FldMarkerPacket *modelData) {
     descriptor->regFunc(descriptor, command);
 }
 
-extern KwlnFrameDrawBuffer dds3FrameDrawPacketRecords[];
+extern dds3FrameDrawBuffer_t dds3FrameDrawPacketRecords[];
 
 extern void sdfGrSetFrameMaskRGB(const u8 *, SdfDmaReferenceChainPacket *, s32);
 
@@ -3716,7 +3716,7 @@ void fldSetEncounterPendingValue(u32 pendingValue) {
     D_003BACF8 = pendingValue;
 }
 
-KwlnTaskUpdateResult fldEncProc(dds3ProcessID_t *task) {
+dds3TaskUpdateResult_t fldEncProc(dds3ProcessID_t *task) {
     FldEncounterRuntimeMode state = fldEncounterRuntimeState;
 
     if (state < FLD_ENCOUNTER_MODE_BYPASS_BATTLE_RUNTIME) {

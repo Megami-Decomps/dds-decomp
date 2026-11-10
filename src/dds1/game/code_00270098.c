@@ -56,7 +56,7 @@ extern MnuMovieList mnuMovieList;
 extern u64 *dds3PrimFrameRect(s32, s32, s32, s32, s32, u32, u32);
 
 
-extern KwlnTaskUpdateResult mnuMovieViewer(dds3ProcessID_t *task);
+extern dds3TaskUpdateResult_t mnuMovieViewer(dds3ProcessID_t *task);
 
 extern char D_003B1A78[]; /* "mnuMovieDraw" */
 
@@ -70,7 +70,7 @@ u8 mnuGetMoviePlaybackMode(void);
 
 void movieStop(void);
 
-KwlnTaskUpdateResult movieMan_Process(dds3ProcessID_t *task) {
+dds3TaskUpdateResult_t movieMan_Process(dds3ProcessID_t *task) {
     sdfIpuRunDecode(0x3c / dds3VblanksPerFrame);
     return KWLN_TASK_UPDATE_RETAIN_CALLBACK;
 }
@@ -318,7 +318,7 @@ extern u16 D_003BD8E4;
 extern sdfGrOt_t D_003255A8;
 extern void mnuStartMovieDrawTaskForResource(const char *fileName, const SdfMovieDescriptor *descriptor);
 
-KwlnTaskUpdateResult mnuMovieViewer(dds3ProcessID_t *task) {
+dds3TaskUpdateResult_t mnuMovieViewer(dds3ProcessID_t *task) {
     MnuMovieListNode *node;
     s32 nextTop;
 

@@ -738,7 +738,7 @@ u8 sdfIsPrimaryTaskRegistered(TaskWork *work) {
     return registered;
 }
 
-KwlnProcessRegistrationResult sdfTaskExists(const char *name) {
+dds3ProcessRegistrationResult_t sdfTaskExists(const char *name) {
     return dds3SearchProcessName(name) != NULL;
 }
 

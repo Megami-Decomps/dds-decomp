@@ -658,14 +658,14 @@ extern sdfGrOt_t D_003805A8;
 void dds3EffectFileListWindowDrawSprite(EffResourceDescriptor *overlay) {
     sdfDrawTag_t *list;
     void *sprite;
-    KwlnSpriteVertex *vertex;
+    dds3EffectSpriteVertex_t *vertex;
     sdfTexHandle_t *texture;
 
     if (overlay->textureHandle != 0) {
         list = (sdfDrawTag_t *)sdfGrAllocPacketBuff(0x20);
         sdfDrawTagInit(list);
         sprite = sdf2DAllocSprite(1);
-        vertex = (KwlnSpriteVertex *)sdf2DGetPrimPtr(sprite);
+        vertex = (dds3EffectSpriteVertex_t *)sdf2DGetPrimPtr(sprite);
         vertex->a = 0x80;
         vertex->b = 0x80;
         vertex->g = 0x80;

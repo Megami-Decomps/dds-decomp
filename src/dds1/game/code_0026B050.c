@@ -14,7 +14,7 @@ extern void mnuRecreateMenuSelectionList(void);
 extern void mnuSelectMenuListCursorByAdvance(s32);
 extern void mnuLoadTitleMenuAssets(void);
 extern MnuSpriteResourceGroup *mnuCreateMovieSpriteResource(s32, u8, u8);
-extern KwlnTaskUpdateResult mnuUpdateMovieMenuTask(dds3ProcessID_t *);
+extern dds3TaskUpdateResult_t mnuUpdateMovieMenuTask(dds3ProcessID_t *);
 extern u32 D_003BA8EC;
 extern char D_003AFD80[];
 

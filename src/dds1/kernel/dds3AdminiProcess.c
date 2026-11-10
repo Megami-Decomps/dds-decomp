@@ -67,7 +67,7 @@ void dds3AdminiCallSequence(s32 requestedMode, const void *requestData, u32 data
     }
 }
 
-extern KwlnTaskUpdateResult dds3AdminiNeoProcess(dds3ProcessID_t *task);
+extern dds3TaskUpdateResult_t dds3AdminiNeoProcess(dds3ProcessID_t *task);
 
 /* Replace the pending mode request without advancing the history slot. */
 void dds3AdminiOverwriteSequence(s32 requestedMode, const void *requestData, u32 dataBytes)
@@ -117,7 +117,7 @@ Dds3AdminHistoryFlags dds3AdminiGetPrevHistoryFlag(void)
 }
 
 /* Activate a pending mode request and continue through the mode dispatcher. */
-KwlnTaskUpdateResult dds3AdminiStartSequence(dds3ProcessID_t *task) {
+dds3TaskUpdateResult_t dds3AdminiStartSequence(dds3ProcessID_t *task) {
     dds3AdminiData_t *work = (dds3AdminiData_t *)dds3GetProcessData(task);
     Dds3AdminControlFlags flags = work->Stat;
     s32 isRestoringHistory;
@@ -156,13 +156,13 @@ KwlnTaskUpdateResult dds3AdminiStartSequence(dds3ProcessID_t *task) {
             modeEntryCallback(isRestoringHistory, work->CallData);
         }
     }
-    return (KwlnTaskUpdateResult)dds3AdminiNeoProcess;
+    return (dds3TaskUpdateResult_t)dds3AdminiNeoProcess;
 }
 
 /* Run the mode's destroy callback; a non-negative result is stored (+1) as
    the transition delay and the mode cleared. Return the next update address,
    or retain this callback when destruction reports failure. */
-KwlnTaskUpdateResult dds3AdminiEndCheck(dds3ProcessID_t *task) {
+dds3TaskUpdateResult_t dds3AdminiEndCheck(dds3ProcessID_t *task) {
     dds3AdminiData_t *work = (dds3AdminiData_t *)dds3GetProcessData(task);
     s32 activeMode = work->NowSequence;
     s32 (*destroy)(void);
@@ -179,10 +179,10 @@ KwlnTaskUpdateResult dds3AdminiEndCheck(dds3ProcessID_t *task) {
             work->NowSequence = -1;
         }
     }
-    return (KwlnTaskUpdateResult)dds3AdminiStartSequence;
+    return (dds3TaskUpdateResult_t)dds3AdminiStartSequence;
 }
 
-KwlnTaskUpdateResult dds3AdminiNeoProcess(dds3ProcessID_t *task) {
+dds3TaskUpdateResult_t dds3AdminiNeoProcess(dds3ProcessID_t *task) {
     dds3AdminiData_t *work = (dds3AdminiData_t *)dds3GetProcessData(task);
     Dds3AdminControlFlags flags = work->Stat;
     Dds3AdminModeCleanupResult (*cleanup)(void);
@@ -221,7 +221,7 @@ KwlnTaskUpdateResult dds3AdminiNeoProcess(dds3ProcessID_t *task) {
         work->Stat &= ~DDS3_ADMIN_CONTROL_EXIT_REQUESTED;
     }
     if ((work->Stat & DDS3_ADMIN_CONTROL_REQUEST_PENDING) != 0 && work->NextSequence >= 0) {
-        return (KwlnTaskUpdateResult)dds3AdminiEndCheck;
+        return (dds3TaskUpdateResult_t)dds3AdminiEndCheck;
     }
     return KWLN_TASK_UPDATE_RETAIN_CALLBACK;
 }

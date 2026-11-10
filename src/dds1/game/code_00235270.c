@@ -62,7 +62,7 @@ extern void evtWriteSerializedBytes(s32 output, void *data, s32 size);
 
 extern SndPackedTrackLoadStatus p2sdLoadCheckMidi(s32 sequence);
 extern void p2sdLoadSMGFile(s32 sequence);
-extern KwlnTaskUpdateResult evtUpdateFrameVariableTask(dds3ProcessID_t *task);
+extern dds3TaskUpdateResult_t evtUpdateFrameVariableTask(dds3ProcessID_t *task);
 extern void dds3EffectObjectBasicStatOn(dds3Basic_t *object, u32 flags);
 struct SoundMixer;
 extern dds3Basic_t *dds3AddBEDEffectObjectBasic2(struct SoundMixer *resource, const void *position, const void *scale);
@@ -215,7 +215,7 @@ dds3ProcessID_t *evtInitSky(void) {
 }
 
 /* Frame-variable task update: polls the parent task's user value each frame. */
-KwlnTaskUpdateResult evtUpdateFrameVariableTask(dds3ProcessID_t *task) {
+dds3TaskUpdateResult_t evtUpdateFrameVariableTask(dds3ProcessID_t *task) {
     u8 unused[16]; /* retail frame 0x20: unused local storage */
 
     dds3GetProcessData(task->parent);
@@ -3125,7 +3125,7 @@ extern s32 evtActiveEntryFlags;
 
 /* Cache nonzero selections and publish first-tick flags at timer zero. A zero
  * setup status clears runtime control and finishes the polling task. */
-KwlnTaskUpdateResult evtSynchronizeSelectedEntry(dds3ProcessID_t *task) {
+dds3TaskUpdateResult_t evtSynchronizeSelectedEntry(dds3ProcessID_t *task) {
     evtViewerInfo_t *runtime = (evtViewerInfo_t *)dds3GetProcessData(task);
     if (mfilterRun() == EFF_EVENT_SETUP_NOT_READY) {
         runtime->controlState = 0;
@@ -3148,7 +3148,7 @@ KwlnTaskUpdateResult evtSynchronizeSelectedEntry(dds3ProcessID_t *task) {
 }
 
 /* Poll solid-rectangle setup until it clears runtime control and finishes. */
-KwlnTaskUpdateResult evtPollRuntimeControlReady(dds3ProcessID_t *task) {
+dds3TaskUpdateResult_t evtPollRuntimeControlReady(dds3ProcessID_t *task) {
     evtViewerInfo_t *runtime;
 
     runtime = (evtViewerInfo_t *)dds3GetProcessData(task);

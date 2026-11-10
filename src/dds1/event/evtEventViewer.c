@@ -76,10 +76,10 @@ struct evtViewerInfo_t;
 
 extern char evtViewerTaskName[]; /* "EventViewer" */
 u8 evtViewerHasUpdateFlag(struct evtViewerInfo_t *viewer);
-KwlnTaskUpdateResult evtViewerUpdateFrame(dds3ProcessID_t *task);
+dds3TaskUpdateResult_t evtViewerUpdateFrame(dds3ProcessID_t *task);
 void fldInitializeCameraColorResource(void);
 dds3ProcessID_t *evtInitFrameVar(void);
-KwlnTaskUpdateResult evtViewerScheduleFrameVariableTask(dds3ProcessID_t *task);
+dds3TaskUpdateResult_t evtViewerScheduleFrameVariableTask(dds3ProcessID_t *task);
 extern void evtEventViewerPollMovieResources(PolyMovieWork *assets);
 
 /* Effect-channel assignments driven by the viewer's timeline tracks. */
@@ -3072,8 +3072,8 @@ extern char D_003BBF68[];
 extern char D_003BBF70[];
 extern u8 corePktSoftenBias;
 extern s32 mdlDebugPrintEffectScale2(dds3ProcessID_t *task);
-extern KwlnTaskUpdateResult evtPollRuntimeControlReady(dds3ProcessID_t *task);
-extern KwlnTaskUpdateResult evtSynchronizeSelectedEntry(dds3ProcessID_t *task);
+extern dds3TaskUpdateResult_t evtPollRuntimeControlReady(dds3ProcessID_t *task);
+extern dds3TaskUpdateResult_t evtSynchronizeSelectedEntry(dds3ProcessID_t *task);
 extern void dds3SetFogPara(s32 blendFrames, f32 x, f32 y, f32 z, f32 w);
 
 INCLUDE_RODATA(const s32, "event/evtEventViewer", D_003AD4B0);
@@ -4206,7 +4206,7 @@ s32 evtEventViewerCopyEffectSetupPayload(s32 unused0, s32 unused1, evtViewerInfo
 
 
 /* Hand control back to the frame update whether or not the task still owns a viewer. */
-KwlnTaskUpdateResult evtViewerPickNextHandler(dds3ProcessID_t *task) {
+dds3TaskUpdateResult_t evtViewerPickNextHandler(dds3ProcessID_t *task) {
     if (dds3GetProcessData(task) != 0) {
         return (s32)evtViewerUpdateFrame;
     }
@@ -4217,10 +4217,10 @@ extern s16 D_003BBE7C;
 extern s8 dds3PadButtonState[];
 extern void mnuAdvanceShopMenuState(struct evtViewerInfo_t *);
 extern u8 mnuGetMoviePlaybackMode(void);
-extern KwlnTaskUpdateResult evtViewerPickNextHandler(dds3ProcessID_t *task);
+extern dds3TaskUpdateResult_t evtViewerPickNextHandler(dds3ProcessID_t *task);
 
 /* Advance the viewer timeline, deferred voice and task-update handoff. */
-KwlnTaskUpdateResult evtViewerUpdateFrame(dds3ProcessID_t *task) {
+dds3TaskUpdateResult_t evtViewerUpdateFrame(dds3ProcessID_t *task) {
     evtViewerInfo_t *viewer = (evtViewerInfo_t *)dds3GetProcessData(task);
     s32 flags;
 
@@ -4296,7 +4296,7 @@ KwlnTaskUpdateResult evtViewerUpdateFrame(dds3ProcessID_t *task) {
 }
 
 /* Update the active viewer, then switch to its frame-variable task. */
-KwlnTaskUpdateResult evtViewerScheduleFrameVariableTask(dds3ProcessID_t *task) {
+dds3TaskUpdateResult_t evtViewerScheduleFrameVariableTask(dds3ProcessID_t *task) {
     evtViewerInfo_t *viewer;
 
     viewer = (evtViewerInfo_t *)dds3GetProcessData(task);
@@ -4307,7 +4307,7 @@ KwlnTaskUpdateResult evtViewerScheduleFrameVariableTask(dds3ProcessID_t *task) {
 }
 
 /* Initialize the active viewer and schedule its next update callback. */
-KwlnTaskUpdateResult evtViewerInitializeUpdateSequence(dds3ProcessID_t *task) {
+dds3TaskUpdateResult_t evtViewerInitializeUpdateSequence(dds3ProcessID_t *task) {
     struct evtViewerInfo_t *viewer;
 
     viewer = (struct evtViewerInfo_t *)dds3GetProcessData(task);
@@ -4318,7 +4318,7 @@ KwlnTaskUpdateResult evtViewerInitializeUpdateSequence(dds3ProcessID_t *task) {
 }
 
 /* Advance the viewer update: tick the timed action or hand over to the next task. */
-KwlnTaskUpdateResult evtViewerAdvanceUpdate(dds3ProcessID_t *task) {
+dds3TaskUpdateResult_t evtViewerAdvanceUpdate(dds3ProcessID_t *task) {
     evtViewerInfo_t *viewer = (evtViewerInfo_t *)dds3GetProcessData(task);
     PolyMovieWork *window;
     EvtPolygonMovieWorkFlags windowFlags;
@@ -4349,7 +4349,7 @@ KwlnTaskUpdateResult evtViewerAdvanceUpdate(dds3ProcessID_t *task) {
     }
 }
 
-KwlnTaskUpdateResult evtViewerStartUpdate(dds3ProcessID_t *task) {
+dds3TaskUpdateResult_t evtViewerStartUpdate(dds3ProcessID_t *task) {
     evtViewerInfo_t *viewer = (evtViewerInfo_t *)dds3GetProcessData(task);
     PolyMovieWork *context;
     u16 eventId;

@@ -50,7 +50,7 @@ extern void evtDisableMoonDraw(void);
 extern void evtFreeStage(void);
 extern sdfMemHandle_t *D_003BD254;
 extern s32 fldLocalMapTrackSlotFromMode(s32 mode);
-extern KwlnTaskUpdateResult fldLmapTaskUpdate(dds3ProcessID_t *task);
+extern dds3TaskUpdateResult_t fldLmapTaskUpdate(dds3ProcessID_t *task);
 extern s32 D_003BD23C;
 extern s32 D_003BD96C;
 extern void fldInitializeLmapState(void);
@@ -331,7 +331,7 @@ void fldLmapSubmitScaledSpritePacket(s32 x, s32 y, s32 z, s32 width, s32 height,
     drawSurface->regFunc(drawSurface, packetList);
 }
 
-KwlnTaskUpdateResult fldLmapTaskUpdate(dds3ProcessID_t *task) {
+dds3TaskUpdateResult_t fldLmapTaskUpdate(dds3ProcessID_t *task) {
     s32 state = D_003BD96C;
     s32 result;
 

@@ -7581,7 +7581,7 @@ retain their existing contracts.
 ## Battle texture preview retains its allocated CPU packet
 
 `btlDrawResourcePreview` keeps the column factory's true `void *` result
-beside the existing `KwlnSpriteVertex *` payload cursor. Only the latter
+beside the existing `dds3EffectSpriteVertex_t *` payload cursor. Only the latter
 owns the vertex fields. The SDK `+0x20` helper still takes and returns a
 scalar address/extent word, and append still consumes a physical `u32`;
 those are the two explicit word boundaries, not alternate CPU views.

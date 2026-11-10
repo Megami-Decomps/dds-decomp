@@ -133,7 +133,7 @@ extern u8 kwlnLargeMotorTarget;
 
 extern u8 dds3PadVibrationState[2];
 
-extern KwlnTaskUpdateResult dds3AdminiNeoProcess(dds3ProcessID_t *task);
+extern dds3TaskUpdateResult_t dds3AdminiNeoProcess(dds3ProcessID_t *task);
 extern void dds3AdminiNeoShutdown(dds3ProcessID_t *task);
 extern char dds3AdminTaskName[];
 extern u16 dds3BackgroundFadeCounter;
@@ -164,7 +164,7 @@ void dds3InitAdmini(void) {
     }
 }
 
-extern KwlnNamedSlot D_0043D410[];
+extern fclNamedSlot_t D_0043D410[];
 extern char D_00411198[];
 extern s32 D_00435C20;
 extern s32 D_00435C24;
@@ -224,7 +224,7 @@ s32 fclEncycFindFreeSlot(const char *name) {
 }
 
 /* One shared initializer for the three configure modes and unregister. */
-static inline void dds3SetNamedSlotState(s32 index, s32 kind, KwlnTaskUpdateCallback update, KwlnTaskDestroyCallback destroy,
+static inline void dds3SetNamedSlotState(s32 index, s32 kind, dds3ProcessFunc_t update, dds3ProcessShutdownFunc_t destroy,
                                          void (*setState)(s32), void *userValue) {
     D_0043D410[index].kind = kind;
     D_0043D410[index].task = NULL;
@@ -324,7 +324,7 @@ s32 kwlnConfigureNamedSlotMode3(const char *name, void (*setState)(s32)) {
     return 1;
 }
 
-s32 fclEncycAllocEntry(const char *name, KwlnTaskUpdateCallback update, KwlnTaskDestroyCallback destroy, void *userValue) {
+s32 fclEncycAllocEntry(const char *name, dds3ProcessFunc_t update, dds3ProcessShutdownFunc_t destroy, void *userValue) {
     s32 index = fclEncycFindFreeSlot(name);
     if (index < 0) {
         return 0;
@@ -333,7 +333,7 @@ s32 fclEncycAllocEntry(const char *name, KwlnTaskUpdateCallback update, KwlnTask
     return 1;
 }
 
-s32 kwlnConfigureNamedSlotMode2(const char *name, KwlnTaskUpdateCallback update, KwlnTaskDestroyCallback destroy, void *userValue) {
+s32 kwlnConfigureNamedSlotMode2(const char *name, dds3ProcessFunc_t update, dds3ProcessShutdownFunc_t destroy, void *userValue) {
     s32 index = fclEncycFindFreeSlot(name);
     if (index < 0) {
         return 0;
@@ -1180,9 +1180,9 @@ s32 dds3EnsureDefaultResource(void) {
 
 /* Two fixed frame banks: thirteen draw groups and their scene/overlay packets. */
 #include "kwln_frame_draw_bank.h"
-typedef char KwlnFrameDrawBank_size_check[sizeof(KwlnFrameDrawBank) == 0x1F40 ? 1 : -1];
+typedef char dds3FrameDrawBank_size_check[sizeof(dds3FrameDrawBank_t) == 0x1F40 ? 1 : -1];
 
-extern KwlnFrameDrawBank dds3DrawEnv[2];
+extern dds3FrameDrawBank_t dds3DrawEnv[2];
 extern u32 D_00435CBC;
 extern sdfGrFrameSet_t sdfGrFrameSet;
 extern sdf3DLight_t *D_0037F770[3];
@@ -1511,7 +1511,7 @@ void dds3FadeSet(s32 red, s32 green, s32 blue, s32 alpha) {
 }
 
 /* Return the live color address through outColor, rather than copying channels. */
-void dds3FadeColorGet(KwlnFadeColor **outColor) {
+void dds3FadeColorGet(dds3FadeColor_t **outColor) {
     *outColor = &fadergba;
 }
 
@@ -1660,7 +1660,7 @@ extern s32 dds3FadeIsBackgroundOverlayActive(void);
 
 /* An end tag carrying VIF DIRECT of ten quadwords: four A+D register writes,
  * then a blended sprite of two vertices. */
-typedef struct KwlnFadeOverlayPacket {
+typedef struct dds3FadePacket_t {
     SdfGsPacketHeader header;
     SdfGsRegisterWrite alpha;
     SdfGsRegisterWrite pabe;
@@ -1669,9 +1669,9 @@ typedef struct KwlnFadeOverlayPacket {
     u64 spriteTag;
     u64 spriteRegisters;
     SdfGsRegisterWrite vertices[4];
-} KwlnFadeOverlayPacket;
+} dds3FadePacket_t;
 
-typedef char KwlnFadeOverlayPacket_size_must_be_0xB0[(sizeof(KwlnFadeOverlayPacket) == 0xB0) ? 1 : -1];
+typedef char dds3FadePacket_size_must_be_0xB0[(sizeof(dds3FadePacket_t) == 0xB0) ? 1 : -1];
 
 static void dds3WriteRegister(SdfGsRegisterWrite *write, u64 value, u64 registerId) {
     write->value = value;
@@ -1689,7 +1689,7 @@ static u64 dds3OverlayVertex(u32 x, u32 y) {
 void kwlnQueueBackgroundFadeOverlayPacket(void) {
     u32 buffer = dds3GetFrameID();
     s32 overlayAlpha = KWLN_FADE_MAX_ALPHA - fadergba.a;
-    KwlnFadeOverlayPacket *packet;
+    dds3FadePacket_t *packet;
     u32 top = KWLN_OVERLAY_TOP;
     u32 bottom = KWLN_OVERLAY_BOTTOM;
     u64 color;
@@ -1699,7 +1699,7 @@ void kwlnQueueBackgroundFadeOverlayPacket(void) {
     if (overlayAlpha >= KWLN_FADE_MAX_ALPHA) {
         return;
     }
-    packet = (KwlnFadeOverlayPacket *)(kwlnBackgroundFadeOverlayPackets + buffer * sizeof(KwlnFadeOverlayPacket));
+    packet = (dds3FadePacket_t *)(kwlnBackgroundFadeOverlayPackets + buffer * sizeof(dds3FadePacket_t));
     packet->header.dmaTag = 0x7000000A;              /* end, ten quadwords */
     packet->header.vifCommands = 0x5000000AULL << 32; /* NOP; DIRECT ten quadwords */
     packet->header.gifTag = 0x1000000000000004ULL;    /* NLOOP 4, NREG 1 */
@@ -1790,7 +1790,7 @@ void dds3FadeBackgroundStartIn(s32 duration) {
 
 /* Direction flags take precedence; idle visibility uses alpha in mode zero,
  * otherwise it tests whether the first ramp differs from its inactive maximum. */
-KwlnBackgroundOverlayActivity dds3FadeIsBackgroundOverlayActive(void) {
+dds3BackgroundOverlayActivity_t dds3FadeIsBackgroundOverlayActive(void) {
     if (dds3DrawFlag & KWLN_BGFADE_DIRECTION_BITS) {
         return KWLN_BACKGROUND_OVERLAY_ACTIVE;
     }

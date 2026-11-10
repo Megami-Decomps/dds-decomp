@@ -765,7 +765,7 @@ static inline void effBlendFlareBaseColor(u32 color, u32 workColor, f32 *baseCol
 }
 
 /* One textured sprite quadrant of a flare element. */
-static inline void effSetFlareSprite(KwlnSpriteVertex *vertex, u32 red, u32 green, u32 blue, u32 alpha, s32 u0,
+static inline void effSetFlareSprite(dds3EffectSpriteVertex_t *vertex, u32 red, u32 green, u32 blue, u32 alpha, s32 u0,
                                      s32 v0, s32 x0, s32 y0, s32 u1, s32 v1, s32 x1, s32 y1) {
     vertex->r = red;
     vertex->g = green;
@@ -881,7 +881,7 @@ void effDrawLensFlare(EffFadeVectorWork *work) {
             u32 b;
             u32 a;
             SdfDrawPacket *packet;
-            KwlnSpriteVertex *vertex;
+            dds3EffectSpriteVertex_t *vertex;
 
             texture = dds3BillboardGetGeneralTex(element->textureIndex);
             x = screenX * element->positionScale;
@@ -901,7 +901,7 @@ void effDrawLensFlare(EffFadeVectorWork *work) {
             textureWidth = texture->width;
             textureHeight = texture->height;
             packet = sdf2DAllocSprite(1);
-            vertex = (KwlnSpriteVertex *)(u32)sdf2DGetPrimPtr((s32)packet);
+            vertex = (dds3EffectSpriteVertex_t *)(u32)sdf2DGetPrimPtr((s32)packet);
             radiusX -= 16;
             radiusY -= 8;
             centerY >>= 1;
@@ -926,19 +926,19 @@ void effDrawLensFlare(EffFadeVectorWork *work) {
             sdfDrawTagLink(list, (u32)packet);
 
             packet = sdf2DAllocSprite(1);
-            vertex = (KwlnSpriteVertex *)(u32)sdf2DGetPrimPtr((s32)packet);
+            vertex = (dds3EffectSpriteVertex_t *)(u32)sdf2DGetPrimPtr((s32)packet);
             effSetFlareSprite(vertex, r, g, b, a, textureWidth, 0, gsCenterX, top, 0, textureHeight, right, middleY);
             sdf2DLinkTexPacket(list, texture, 0);
             sdfDrawTagLink(list, (u32)packet);
 
             packet = sdf2DAllocSprite(1);
-            vertex = (KwlnSpriteVertex *)(u32)sdf2DGetPrimPtr((s32)packet);
+            vertex = (dds3EffectSpriteVertex_t *)(u32)sdf2DGetPrimPtr((s32)packet);
             effSetFlareSprite(vertex, r, g, b, a, 0, textureHeight, left, centerY, textureWidth, 0, middleX, bottom);
             sdf2DLinkTexPacket(list, texture, 0);
             sdfDrawTagLink(list, (u32)packet);
 
             packet = sdf2DAllocSprite(1);
-            vertex = (KwlnSpriteVertex *)(u32)sdf2DGetPrimPtr((s32)packet);
+            vertex = (dds3EffectSpriteVertex_t *)(u32)sdf2DGetPrimPtr((s32)packet);
             effSetFlareSprite(vertex, r, g, b, a, textureWidth, textureHeight, gsCenterX, centerY, 0, 0, right, bottom);
             sdf2DLinkTexPacket(list, texture, 0);
             sdfDrawTagLink(list, (u32)packet);

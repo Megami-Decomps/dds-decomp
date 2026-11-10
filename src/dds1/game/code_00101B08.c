@@ -47,11 +47,11 @@ void dds3UnlinkProcess(dds3ProcessID_t *task) {
 }
 
 /* Set mask bits on the object selection described by object and scope. */
-void dds3SetProcessFlag(dds3ProcessID_t *object, u32 mask, KwlnTaskFlagScope scope) {
+void dds3SetProcessFlag(dds3ProcessID_t *object, u32 mask, dds3TaskFlagScope_t scope) {
     ChangeProcessFlag(KWLN_TASK_FLAG_UPDATE_SET, object, mask, scope);
 }
 
 /* Clear the same scoped object mask bits without changing the selection. */
-void dds3ResetProcessFlag(dds3ProcessID_t *object, u32 mask, KwlnTaskFlagScope scope) {
+void dds3ResetProcessFlag(dds3ProcessID_t *object, u32 mask, dds3TaskFlagScope_t scope) {
     ChangeProcessFlag(KWLN_TASK_FLAG_UPDATE_CLEAR, object, mask, scope);
 }

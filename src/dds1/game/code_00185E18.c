@@ -103,7 +103,7 @@ struct sdfDrawTag_t;
 struct sdfGrRefPacketHeader_t;
 
 extern sdfGrOt_t D_003253E8;
-extern KwlnFrameDrawBuffer dds3FrameDrawPacketRecords[];
+extern dds3FrameDrawBuffer_t dds3FrameDrawPacketRecords[];
 #include "sdf_packet_alloc.h"
 extern void sdfGrSetFrameMaskReset(const u8 *source, SdfDmaReferenceChainPacket *packet, s32 gsContext);
 

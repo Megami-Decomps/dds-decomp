@@ -184,7 +184,7 @@ void billFlushPendingChildPackets(void) {
     dds3BillboardTag = NULL;
 }
 
-extern KwlnFrameDrawBuffer dds3FrameDrawPacketRecords[];
+extern dds3FrameDrawBuffer_t dds3FrameDrawPacketRecords[];
 extern void sdfGrSetFrameMaskRGB(const u8 *source, SdfDmaReferenceChainPacket *packet, s32 gsContext);
 extern f32 billPairFacingReferenceAxis[4];
 extern f32 billPairFacingScale[4];

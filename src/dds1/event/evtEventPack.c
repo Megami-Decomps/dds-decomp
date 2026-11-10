@@ -129,7 +129,7 @@ s32 evtRegistBEField(EvtPackEventId eventId, EvtPackFieldResourceId resourceId) 
     return 0;
 }
 
-KwlnTaskUpdateResult evtMotionSeProcess1(dds3ProcessID_t *task) {
+dds3TaskUpdateResult_t evtMotionSeProcess1(dds3ProcessID_t *task) {
     EvtMotionSeTaskParams *motionSeParams;
     dds3Basic_t *motionNode;
     const EvtPackLoadState *packState;
@@ -261,7 +261,7 @@ void evtCheckEventScriptLoaded(EvtPackLoadState *state) {
     }
 }
 
-KwlnTaskUpdateResult evtTickPackLoad(dds3ProcessID_t *task) {
+dds3TaskUpdateResult_t evtTickPackLoad(dds3ProcessID_t *task) {
     EvtPackLoadState *packState = (EvtPackLoadState *)dds3GetProcessData(task);
 
     switch (packState->loadPhase) {

@@ -725,7 +725,7 @@ void mnuLoadTitleMenuAssets(void) {
 extern void mnuStopTitleMovieDraw(void);
 extern void mnuRecreateMenuSelectionList(void);
 extern void mnuSelectMenuListCursorByAdvance(s32);
-extern KwlnTaskUpdateResult mnuUpdateTitleMenuTask(dds3ProcessID_t *);
+extern dds3TaskUpdateResult_t mnuUpdateTitleMenuTask(dds3ProcessID_t *);
 extern u32 D_00435CBC;
 
 dds3ProcessID_t *mnuCreateTitleMenuTask(s32 mode) {
@@ -930,7 +930,7 @@ extern void mnuDrawAndAdvanceMovieMenuBar(SlideBar *, s32);
 extern void fileCacheSlotFlagsFromState(void);
 extern void fileRestoreSlotFlagsToState(void);
 
-KwlnTaskUpdateResult mnuUpdateTitleMenuTask(dds3ProcessID_t *task) {
+dds3TaskUpdateResult_t mnuUpdateTitleMenuTask(dds3ProcessID_t *task) {
     s32 volume;
     MnuMovieMenuPollResult menuAction;
     MnuMovieMenuSelectionIndex selectedItem;

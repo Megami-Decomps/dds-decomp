@@ -2105,7 +2105,7 @@ INCLUDE_RODATA(const s32, "game/code_00122030", D_0039FCB0);
 
 INCLUDE_RODATA(const s32, "game/code_00122030", D_0039FCC8);
 
-KwlnTaskUpdateResult fldProcSequence(dds3ProcessID_t *task) {
+dds3TaskUpdateResult_t fldProcSequence(dds3ProcessID_t *task) {
     dds3Effect_DistortionBlurParam_t blur;
     FieldPlayerSceneWork *scene = &fldSceneParam;
     FldSequenceController *controller = &fldAutoMapSeqFlags;
@@ -2322,7 +2322,7 @@ extern void fldTickWeatherEffectNodes(void);
 extern s32 D_0032E590[];
 extern s32 D_0032E598[];
 extern s32 D_003BABFC;
-KwlnTaskUpdateResult fldProcDraw(dds3ProcessID_t *task) {
+dds3TaskUpdateResult_t fldProcDraw(dds3ProcessID_t *task) {
     FldLocationCoordinateFlags flags;
     FldSequenceController *lifecycle = &fldAutoMapSeqFlags;
 
@@ -2403,7 +2403,7 @@ u8 fldEncountTestFlag(u32 mask) {
 
 extern s32 D_003BABF4;
 extern char D_0039FD30[], D_0039FD40[];
-extern KwlnTaskUpdateResult fldProcDraw(dds3ProcessID_t *task);
+extern dds3TaskUpdateResult_t fldProcDraw(dds3ProcessID_t *task);
 
 /* Start the field scene tasks; a zero mode copies the caller's sequence record into the scene work. */
 void fldProcTrigSequence(const fldSceneParam_t *record, u32 mode) {

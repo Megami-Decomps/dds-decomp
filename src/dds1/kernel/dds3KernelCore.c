@@ -98,10 +98,10 @@ void StartingProcess(void)
     }
 }
 
-KwlnTaskCursorAction RunProcess(dds3ProcessID_t *task) {
+dds3TaskCursorAction_t RunProcess(dds3ProcessID_t *task) {
     s32 port;
     s32 inputIndex;
-    KwlnTaskUpdateResult nextUpdate;
+    dds3TaskUpdateResult_t nextUpdate;
 
     if (task->flag & KWLN_TASK_SKIP_UPDATE) {
         return KWLN_TASK_CURSOR_ACTION_ADVANCE;
@@ -134,10 +134,10 @@ KwlnTaskCursorAction RunProcess(dds3ProcessID_t *task) {
         }
     }
 
-    if (task->processfunc != NULL && task->processfunc != (KwlnTaskUpdateCallback)KWLN_TASK_UPDATE_FINISH_CALLBACK) {
+    if (task->processfunc != NULL && task->processfunc != (dds3ProcessFunc_t)KWLN_TASK_UPDATE_FINISH_CALLBACK) {
         nextUpdate = task->processfunc(task);
         if (nextUpdate != KWLN_TASK_UPDATE_RETAIN_CALLBACK) {
-            task->processfunc = (KwlnTaskUpdateCallback)nextUpdate;
+            task->processfunc = (dds3ProcessFunc_t)nextUpdate;
         }
         if (nextUpdate == KWLN_TASK_UPDATE_FINISH_CALLBACK &&
             (task->flag & KWLN_TASK_STATE_MASK) == KWLN_TASK_ACTIVE) {
@@ -275,7 +275,7 @@ void dds3EndingProcess(void)
     }
 }
 
-void ChangeProcessFlagChild(KwlnTaskFlagUpdateAction action, dds3ProcessID_t* task, u32 flags)
+void ChangeProcessFlagChild(dds3TaskFlagUpdateAction_t action, dds3ProcessID_t* task, u32 flags)
 {
     dds3ProcessID_t* child;
 
@@ -291,8 +291,8 @@ void ChangeProcessFlagChild(KwlnTaskFlagUpdateAction action, dds3ProcessID_t* ta
     }
 }
 
-void ChangeProcessFlag(KwlnTaskFlagUpdateAction action, dds3ProcessID_t *task, u32 flags,
-                       KwlnTaskFlagScope scopeArg)
+void ChangeProcessFlag(dds3TaskFlagUpdateAction_t action, dds3ProcessID_t *task, u32 flags,
+                       dds3TaskFlagScope_t scopeArg)
 {
     dds3ProcessID_t *node = NULL;
     s32 state;
@@ -343,7 +343,7 @@ void ChangeProcessFlag(KwlnTaskFlagUpdateAction action, dds3ProcessID_t *task, u
     }
 }
 
-KwlnTaskQueueCount dds3GetProcessCount(KwlnTaskState state)
+dds3TaskQueueCount_t dds3GetProcessCount(dds3TaskState_t state)
 {
     switch (state & KWLN_TASK_STATE_MASK) {
     case KWLN_TASK_DELAYED_START:
@@ -357,10 +357,10 @@ KwlnTaskQueueCount dds3GetProcessCount(KwlnTaskState state)
     }
 }
 
-dds3ProcessID_t *dds3SearchProcessNumber(KwlnTaskState taskState, KwlnTaskQueueIndex queueIndex)
+dds3ProcessID_t *dds3SearchProcessNumber(dds3TaskState_t taskState, dds3TaskQueueIndex_t queueIndex)
 {
     dds3ProcessID_t *task = startinglistf;
-    KwlnTaskQueueIndex listPosition;
+    dds3TaskQueueIndex_t listPosition;
 
     switch (taskState & KWLN_TASK_STATE_MASK) {
     case KWLN_TASK_DELAYED_START:
@@ -457,7 +457,7 @@ void dds3PrintProcessTree(void)
     }
 }
 
-KwlnProcessMainResult dds3ProcessMain(void)
+dds3ProcessMainResult_t dds3ProcessMain(void)
 {
     StartingProcess();
     RunningProcess();
@@ -466,7 +466,7 @@ KwlnProcessMainResult dds3ProcessMain(void)
 }
 
 dds3ProcessID_t *dds3StartProcess(const char *name, u32 priority, s32 startDelay, s32 destroyDelay,
-                         KwlnTaskUpdateCallback update, KwlnTaskDestroyCallback destroy, u32 userValue) {
+                         dds3ProcessFunc_t update, dds3ProcessShutdownFunc_t destroy, u32 userValue) {
     dds3ProcessID_t *task = sdfChipAllocDirect(sizeof(dds3ProcessID_t));
     s32 taskNameByteIndex = 0;
 
@@ -500,7 +500,7 @@ dds3ProcessID_t *dds3StartProcess(const char *name, u32 priority, s32 startDelay
     return task;
 }
 
-KwlnTaskKillRequestResult dds3KillProcessName(const char* name, s32 delayTicks)
+dds3TaskKillRequestResult_t dds3KillProcessName(const char* name, s32 delayTicks)
 {
     dds3ProcessID_t* task;
 
@@ -513,7 +513,7 @@ KwlnTaskKillRequestResult dds3KillProcessName(const char* name, s32 delayTicks)
 
 /* Queued and active tasks move to destruction pending; a pending task
  * finalizes immediately when its delay is reset to zero. */
-KwlnTaskKillRequestResult dds3KillProcess(dds3ProcessID_t* task, s32 delayTicks)
+dds3TaskKillRequestResult_t dds3KillProcess(dds3ProcessID_t* task, s32 delayTicks)
 {
     if (task == 0 || task == KWLN_TASK_HANDLE_INVALID) {
         return KWLN_TASK_KILL_REQUEST_REJECTED;
@@ -561,7 +561,7 @@ void dds3SetShutdownTimer(dds3ProcessID_t* task, s32 delayTicks)
     }
 }
 
-KwlnTaskState dds3GetProcessStat(const dds3ProcessID_t* task)
+dds3TaskState_t dds3GetProcessStat(const dds3ProcessID_t* task)
 {
     u32 state;
 
@@ -652,7 +652,7 @@ dds3ProcessID_t* dds3SearchProcessPriority(u32 prio)
 }
 
 /* Persona 4 func_00452490 @ 00452490 (src/Kernel/sdkTask.c), recompiled unchanged */
-KwlnProcessRegistrationResult dds3ExistProcess(const dds3ProcessID_t* target)
+dds3ProcessRegistrationResult_t dds3ExistProcess(const dds3ProcessID_t* target)
 {
     s32 taskListIndex;
     dds3ProcessID_t* node;
@@ -690,7 +690,7 @@ u32 dds3GetProcessStartTime(const dds3ProcessID_t* task)
 }
 
 /* Persona 4 dds3GetProcessRunTime @ 00452540 (src/Kernel/sdkTask.c), recompiled unchanged */
-KwlnTaskUpdateCount dds3GetProcessRunTime(const dds3ProcessID_t* task)
+dds3TaskUpdateCount_t dds3GetProcessRunTime(const dds3ProcessID_t* task)
 {
     return task->runtime;
 }

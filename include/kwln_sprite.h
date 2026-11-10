@@ -4,21 +4,21 @@
 #include "common.h"
 
 /* Sprite vertex record of a column packet: colour, then two corners of the quad. */
-typedef struct KwlnSpriteCorner {
+typedef struct dds3EffectSpriteCorner_t {
     s32 u, v;
     u8 pad08[8];
     s32 x, y;
     s32 mask;
     s16 flag;
     u8 pad1E[2];
-} KwlnSpriteCorner;
+} dds3EffectSpriteCorner_t;
 
-typedef struct KwlnSpriteVertex {
+typedef struct dds3EffectSpriteVertex_t {
     s32 r, g, b, a;
-    KwlnSpriteCorner corner[2];
-} KwlnSpriteVertex;
+    dds3EffectSpriteCorner_t corner[2];
+} dds3EffectSpriteVertex_t;
 
-typedef char KwlnSpriteCornerSize[(sizeof(KwlnSpriteCorner) == 0x20) ? 1 : -1];
-typedef char KwlnSpriteVertexSize[(sizeof(KwlnSpriteVertex) == 0x50) ? 1 : -1];
+typedef char dds3EffectSpriteCorner_size[(sizeof(dds3EffectSpriteCorner_t) == 0x20) ? 1 : -1];
+typedef char dds3EffectSpriteVertex_size[(sizeof(dds3EffectSpriteVertex_t) == 0x50) ? 1 : -1];
 
 #endif /* KWLN_SPRITE_H */

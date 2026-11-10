@@ -23,7 +23,7 @@ void evtSubmitPictureDrawPacket(const struct sdfTexHandle_t *borrowedTexture) {
 }
 
 /* This recurring task keeps its callback installed while drawing or idle. */
-KwlnTaskUpdateResult evtUpdatePictureWhenFlagged(dds3ProcessID_t *task) {
+dds3TaskUpdateResult_t evtUpdatePictureWhenFlagged(dds3ProcessID_t *task) {
     EvtPictureWork *picture;
 
     picture = (EvtPictureWork *)dds3GetProcessData(task);

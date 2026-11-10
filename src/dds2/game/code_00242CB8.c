@@ -114,7 +114,7 @@ u32 evtCommand_TEX_LOAD(void) {
 
 u32 evtCommand_TEX_ON(void) {
     dds3ProcessID_t *task;
-    KwlnProcessRegistrationResult registered;
+    dds3ProcessRegistrationResult_t registered;
 
     task = scrVmIntegerToProcessHandle(scrGetIntPara(0));
     registered = dds3ExistProcess(task);
@@ -126,7 +126,7 @@ u32 evtCommand_TEX_ON(void) {
 
 u32 evtCommand_TEX_OFF(void) {
     dds3ProcessID_t *task;
-    KwlnProcessRegistrationResult registered;
+    dds3ProcessRegistrationResult_t registered;
 
     task = scrVmIntegerToProcessHandle(scrGetIntPara(0));
     registered = dds3ExistProcess(task);
@@ -140,7 +140,7 @@ extern void evtKillPictureProcess(dds3ProcessID_t *task);
 
 u32 evtCommand_TEX_CLS(void) {
     dds3ProcessID_t *task;
-    KwlnProcessRegistrationResult registered;
+    dds3ProcessRegistrationResult_t registered;
 
     task = scrVmIntegerToProcessHandle(scrGetIntPara(0));
     registered = dds3ExistProcess(task);
@@ -380,7 +380,7 @@ void evtDisableMoonDraw2(void) {
     DDS3_GBWK->world.flags = DDS3_GBWK->world.flags & ~SOLAR_ALPHA_ENABLED_FLAG;
 }
 
-KwlnTaskUpdateResult evtUpdateSolarOverlayFade(dds3ProcessID_t *task) {
+dds3TaskUpdateResult_t evtUpdateSolarOverlayFade(dds3ProcessID_t *task) {
     DatWorldState *state;
     SolarOverlayWork *overlay;
     f32 alpha;
@@ -465,14 +465,14 @@ void evtAdvanceSolarClockAndExpireControls(f32 travelDistance) {
 
 
 
-KwlnTaskUpdateResult evtCreateSolarOverlayWork(dds3ProcessID_t *task) {
+dds3TaskUpdateResult_t evtCreateSolarOverlayWork(dds3ProcessID_t *task) {
     SolarOverlayWork *overlay;
 
     overlay = sdfChipAllocDirect(0x104);
     evtInitializeVisualData(overlay);
     evtLoadSolarNoiseSprite(&overlay->noiseSprite);
     dds3SetProcessData(task, (u32)overlay);
-    return (KwlnTaskUpdateResult)evtUpdateSolarOverlayFade;
+    return (dds3TaskUpdateResult_t)evtUpdateSolarOverlayFade;
 }
 
 void evtFreeSolarOverlayWork(dds3ProcessID_t *task) {

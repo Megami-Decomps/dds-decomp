@@ -130,8 +130,8 @@ void evtStartEvent(EvtScriptEventId eventId) {
 const char evtFieldScriptTerminationFormat[0x28] = "kill field script -> [%s]\n";
 
 void evtKillFieldScript(void) {
-    KwlnTaskState taskState;
-    KwlnTaskQueueIndex taskIndex;
+    dds3TaskState_t taskState;
+    dds3TaskQueueIndex_t taskIndex;
     dds3ProcessID_t *task;
 
     for (taskState = KWLN_TASK_DELAYED_START; (s32)taskState < KWLN_TASK_DESTROY_PENDING; taskState++) {

@@ -22,12 +22,12 @@ typedef char KwlnDrawVectorParams_size[(sizeof(KwlnDrawVectorParams) == 0x14) ? 
 typedef struct dds3ProcessID_t dds3ProcessID_t;
 /* Callback result: 0 retains the callback, -1 finishes the task, and
  * other words select a replacement callback. */
-typedef s32 KwlnTaskUpdateResult;
-typedef KwlnTaskUpdateResult (*KwlnTaskUpdateCallback)(dds3ProcessID_t *task);
+typedef s32 dds3TaskUpdateResult_t;
+typedef dds3TaskUpdateResult_t (*dds3ProcessFunc_t)(dds3ProcessID_t *task);
 /* Called after linked children receive immediate kill requests and the task
  * leaves scheduler queues, while its allocation is still valid; the scheduler
  * frees it after the callback returns. */
-typedef void (*KwlnTaskDestroyCallback)(dds3ProcessID_t *task);
+typedef void (*dds3ProcessShutdownFunc_t)(dds3ProcessID_t *task);
 
 struct dds3ProcessID_t {
     char name[0x18];          /* 0x00: NUL-padded task name, compared byte-wise */
@@ -38,8 +38,8 @@ struct dds3ProcessID_t {
     u32 runtime;      /* 0x28 */
     s16 starttimer;     /* 0x2C: signed; positive values count down, zero activates, negatives remain queued. */
     s16 shutdowntimer;   /* 0x2E: signed; positive values count down, zero destroys, negatives stay pending. */
-    KwlnTaskUpdateCallback processfunc; /* 0x30 */
-    KwlnTaskDestroyCallback shutdownfunc; /* 0x34 */
+    dds3ProcessFunc_t processfunc; /* 0x30 */
+    dds3ProcessShutdownFunc_t shutdownfunc; /* 0x34 */
     u32 workdata;           /* 0x38: caller-supplied value exposed by accessors. */
     dds3ProcessID_t *next;      /* 0x3C */
     dds3ProcessID_t *prev;      /* 0x40 */

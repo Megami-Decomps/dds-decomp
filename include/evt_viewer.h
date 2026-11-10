@@ -141,7 +141,7 @@ typedef union EvtFrameRange {
 EvtRuntimeGroup *mnuCampFindEntryByName(evtViewerInfo_t *scene, const char *name);
 
 /* Start the viewer task's scheduler callback chain. */
-KwlnTaskUpdateResult evtViewerStartUpdate(struct dds3ProcessID_t *task);
+dds3TaskUpdateResult_t evtViewerStartUpdate(struct dds3ProcessID_t *task);
 struct dds3ProcessID_t *evtViewerCreateTask(u32 priority, s32 eventId, s32 sceneId);
 
 typedef char EvtRuntimeChild_size[(sizeof(EvtRuntimeChild) == 0x38) ? 1 : -1];

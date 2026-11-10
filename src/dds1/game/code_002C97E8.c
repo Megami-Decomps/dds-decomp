@@ -733,7 +733,7 @@ u8 sdfIsPrimaryTaskRegistered(TaskWork *work) {
     return registered;
 }
 
-KwlnProcessRegistrationResult sdfTaskExists(const char *name) {
+dds3ProcessRegistrationResult_t sdfTaskExists(const char *name) {
     return dds3SearchProcessName(name) != NULL;
 }
 
@@ -950,7 +950,7 @@ SdfTaskWorkStepResult sdfTaskWorkStep(TaskWork *work) {
     return SDF_TASK_WORK_STEP_RESULT_NODE_VISITED;
 }
 
-KwlnTaskUpdateResult sdfTaskWorkRunAllEntries(dds3ProcessID_t *task) {
+dds3TaskUpdateResult_t sdfTaskWorkRunAllEntries(dds3ProcessID_t *task) {
     TaskWork *work = (TaskWork *)dds3GetProcessData(task);
 
     if (work->currentNode == NULL) {
@@ -961,7 +961,7 @@ KwlnTaskUpdateResult sdfTaskWorkRunAllEntries(dds3ProcessID_t *task) {
     return 0;
 }
 
-KwlnTaskUpdateResult sdfTaskWorkRunAll(dds3ProcessID_t *task) {
+dds3TaskUpdateResult_t sdfTaskWorkRunAll(dds3ProcessID_t *task) {
     TaskWork *work = (TaskWork *)dds3GetProcessData(task);
 
     if (work->currentNode == NULL) {

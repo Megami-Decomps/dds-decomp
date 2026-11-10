@@ -59,7 +59,7 @@ void dds3EffectRippleBlurDelete(EffBlurScaleWork *work) {
 
 extern sdfGrOt_t D_003253E8;
 extern sdfGrOt_t D_003253C8;
-extern KwlnFrameDrawBuffer dds3FrameDrawPacketRecords[];
+extern dds3FrameDrawBuffer_t dds3FrameDrawPacketRecords[];
 #include "sdf_packet_alloc.h"
 extern u32 dds3NullDrawProc();
 extern u64 *effPkt2DAllocF4(u32 flags);

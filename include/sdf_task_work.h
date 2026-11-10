@@ -117,8 +117,8 @@ s32 sdfGetTaskValueByKey(TaskWork *work, s32 key);
 
 /* These scheduler updates drain the current entry/callback pass. They finish
  * the task when no current entry remains, otherwise retain the callback. */
-KwlnTaskUpdateResult sdfTaskWorkRunAllEntries(struct dds3ProcessID_t *task);
-KwlnTaskUpdateResult sdfTaskWorkRunAll(struct dds3ProcessID_t *task);
+dds3TaskUpdateResult_t sdfTaskWorkRunAllEntries(struct dds3ProcessID_t *task);
+dds3TaskUpdateResult_t sdfTaskWorkRunAll(struct dds3ProcessID_t *task);
 /* The scheduler destroy callback releases the TaskWork owned by task's user value. */
 void sdfReleaseCurrentTaskOwnedResources(struct dds3ProcessID_t *task);
 

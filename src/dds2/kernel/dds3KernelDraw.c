@@ -11,7 +11,7 @@
 #include "eff_event_work_api.h"
 #include "eff.h"
 
-extern KwlnDrawLightSourceTable D_0037F770;
+extern dds3LightSourceTable_t D_0037F770;
 
 extern u32 dds3DrawFlag;
 
@@ -132,7 +132,7 @@ void dds3SetFog(const KwlnDrawVectorParams *source) {
 }
 
 /* Retain the caller-owned light-data pointer in its draw slot. */
-void dds3SetLight(f32 (*lightSource)[4], KwlnLightSourceSlot slot) {
+void dds3SetLight(f32 (*lightSource)[4], dds3LightSourceSlot_t slot) {
     D_0037F770[slot] = lightSource;
 }
 

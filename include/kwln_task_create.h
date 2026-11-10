@@ -9,7 +9,7 @@
  * its destroy callback; callers may borrow the handle only until finalization.
  */
 dds3ProcessID_t *dds3StartProcess(const char *name, u32 priority, s32 startDelay,
-                         s32 destroyDelay, KwlnTaskUpdateCallback update,
-                         KwlnTaskDestroyCallback destroy, u32 userValue);
+                         s32 destroyDelay, dds3ProcessFunc_t update,
+                         dds3ProcessShutdownFunc_t destroy, u32 userValue);
 
 #endif /* KWLN_TASK_CREATE_H */

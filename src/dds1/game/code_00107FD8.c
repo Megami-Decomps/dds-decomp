@@ -222,11 +222,11 @@ extern s32 evtDrawGeneralHeapUsageGraph(struct dds3ProcessID_t *);
 extern void *D_003BD764;
 
 
-typedef struct KwlnResourceNode {
+typedef struct dds3ResourceNode_t {
     s32 unk0;
-    struct KwlnResourceNode *next;
+    struct dds3ResourceNode_t *next;
     s32 *ready;
-} KwlnResourceNode;
+} dds3ResourceNode_t;
 
 extern s32 sdfPrintIopFlag;
 
@@ -659,7 +659,7 @@ void evtSubmitFixedAlphaBlend(s32 fixedAlpha) {
     }
 }
 
-extern KwlnFrameDrawBuffer dds3FrameDrawPacketRecords[];
+extern dds3FrameDrawBuffer_t dds3FrameDrawPacketRecords[];
 
 extern void sdfGrSetFrameMaskRGB(const u8 *, SdfDmaReferenceChainPacket *, s32);
 

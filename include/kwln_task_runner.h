@@ -4,12 +4,12 @@
 #include "common.h"
 #include "kwln.h"
 
-typedef enum KwlnTaskCursorAction {
+typedef enum dds3TaskCursorAction_t {
     /* The callback finished an active task; EndProcess may unlink and free it. */
     KWLN_TASK_CURSOR_ACTION_RELOAD = 0,
     /* RunProcess did not perform the finish transition. */
     KWLN_TASK_CURSOR_ACTION_ADVANCE = 1
-} KwlnTaskCursorAction;
+} dds3TaskCursorAction_t;
 
 /* Sentinel callback results interpreted by RunProcess. */
 #define KWLN_TASK_UPDATE_RETAIN_CALLBACK 0
@@ -21,6 +21,6 @@ typedef enum KwlnTaskCursorAction {
  * immediately free the task; the queue runner must not read its links. Other
  * paths return ADVANCE.
  */
-KwlnTaskCursorAction RunProcess(dds3ProcessID_t *task);
+dds3TaskCursorAction_t RunProcess(dds3ProcessID_t *task);
 
 #endif /* KWLN_TASK_RUNNER_H */

@@ -288,7 +288,7 @@ extern s32 D_00436358;
 extern s32 D_00436360;
 
 
-extern KwlnTaskUpdateResult fldTitleTaskUpdate(dds3ProcessID_t *task);
+extern dds3TaskUpdateResult_t fldTitleTaskUpdate(dds3ProcessID_t *task);
 
 extern sdfTexHandle_t *D_0043637C;
 
@@ -313,7 +313,7 @@ extern void fldInitializeHuntSparkUnit(evtUnitHandle_t *unit);
 extern s32 fldFindEffectByName(const char *name);
 
 
-extern KwlnTaskUpdateResult fldFieldTaskUpdate(dds3ProcessID_t *task);
+extern dds3TaskUpdateResult_t fldFieldTaskUpdate(dds3ProcessID_t *task);
 
 extern u8 D_00436208[];
 
@@ -561,7 +561,7 @@ extern void fldDrawAnimatedFieldBanner(s32 alpha, s32 x, s32 y);
 
 void fldDrawMapLabelBanner(); /* no prototype: called here with arguments */
 
-KwlnTaskUpdateResult fldFieldTaskUpdate(dds3ProcessID_t *task) {
+dds3TaskUpdateResult_t fldFieldTaskUpdate(dds3ProcessID_t *task) {
     if (fldProcCampChk() != FLD_CAMP_CHECK_STATE_ENCOUNTER_FLAG_SET) {
         return KWLN_TASK_UPDATE_RETAIN_CALLBACK;
     }
@@ -585,7 +585,7 @@ KwlnTaskUpdateResult fldFieldTaskUpdate(dds3ProcessID_t *task) {
     return KWLN_TASK_UPDATE_RETAIN_CALLBACK;
 }
 
-KwlnTaskUpdateResult fldAddressProcess1(dds3ProcessID_t *task) {
+dds3TaskUpdateResult_t fldAddressProcess1(dds3ProcessID_t *task) {
     s32 *work;
 
     work = sdfChipAllocDirect(0x10);
@@ -594,7 +594,7 @@ KwlnTaskUpdateResult fldAddressProcess1(dds3ProcessID_t *task) {
     work[2] = 0;
     work[3] = 0;
     dds3SetProcessData(task, (u32)work);
-    return (KwlnTaskUpdateResult)(u32)fldFieldTaskUpdate;
+    return (dds3TaskUpdateResult_t)(u32)fldFieldTaskUpdate;
 }
 
 void fldAddressShutdown(dds3ProcessID_t *task) {
@@ -5119,7 +5119,7 @@ void nbPanelAnalyzeStart(void) {
 }
 
 /* Render the field title through delay, fade-in, hold and fade-out phases. */
-KwlnTaskUpdateResult fldTitleTaskUpdate(dds3ProcessID_t *task) {
+dds3TaskUpdateResult_t fldTitleTaskUpdate(dds3ProcessID_t *task) {
     s32 alpha;
     u32 color;
     s32 nextFrame;

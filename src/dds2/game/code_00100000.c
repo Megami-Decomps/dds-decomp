@@ -43,9 +43,9 @@ extern u8 D_00435BC0[];
 extern s32 dds3FirstProcess(dds3ProcessID_t *task);
 extern s32 dds3DrawFirstProcess(dds3ProcessID_t *task);
 extern s32 dds3DrawProcess(dds3ProcessID_t *task);
-extern KwlnTaskUpdateResult dds3BasicMainProcess(dds3ProcessID_t *task);
-extern KwlnTaskUpdateResult dds3BasicDrawProcess(dds3ProcessID_t *task);
-extern KwlnTaskUpdateResult frFlipPacketBuf(dds3ProcessID_t *task);
+extern dds3TaskUpdateResult_t dds3BasicMainProcess(dds3ProcessID_t *task);
+extern dds3TaskUpdateResult_t dds3BasicDrawProcess(dds3ProcessID_t *task);
+extern dds3TaskUpdateResult_t frFlipPacketBuf(dds3ProcessID_t *task);
 extern void frDestroyFontTable(dds3ProcessID_t *task);
 extern s32 dds3DebugDevDumpProcess(dds3ProcessID_t *task);
 
@@ -184,7 +184,7 @@ extern void sdfPadWork(void);
 extern void sdfFileCmdThreadSetLoPrio(void);
 extern void sdfFileCmdThreadSetHiPrio(void);
 
-extern KwlnProcessMainResult dds3ProcessMain(void);
+extern dds3ProcessMainResult_t dds3ProcessMain(void);
 
 void dds3KernelMain(void) {
     u32 startTick;

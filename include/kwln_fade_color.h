@@ -11,8 +11,8 @@ typedef struct {
     u8 g;
     u8 b;
     u8 a;
-} KwlnFadeColor;
+} dds3FadeColor_t;
 
-extern KwlnFadeColor fadergba;
+extern dds3FadeColor_t fadergba;
 
 #endif /* KWLN_FADE_COLOR_H */

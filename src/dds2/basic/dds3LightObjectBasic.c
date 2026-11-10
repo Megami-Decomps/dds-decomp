@@ -9,7 +9,7 @@
 
 void dds3FreePoseSet(dds3Basic_t *object);
 void dds3ObjectBaseFreeControlWorkData(dds3ObjectBaseControlWorkData_t *object);
-extern KwlnDrawLightSourceTable D_0037F770;
+extern dds3LightSourceTable_t D_0037F770;
 extern f32 kwlnDefaultColorVector[4];
 
 

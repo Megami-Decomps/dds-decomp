@@ -230,7 +230,7 @@ extern void p2sdStopSe(u32 soundId);
 
 
 
-extern KwlnTaskUpdateResult fldFieldTaskUpdate(dds3ProcessID_t *task);
+extern dds3TaskUpdateResult_t fldFieldTaskUpdate(dds3ProcessID_t *task);
 
 extern s32 D_0032E3C0[];
 
@@ -363,7 +363,7 @@ extern void fldDrawMapLabelBanner(s32);
 
 extern s32 gFldElvFloorNow;
 
-KwlnTaskUpdateResult fldFieldTaskUpdate(dds3ProcessID_t *task) {
+dds3TaskUpdateResult_t fldFieldTaskUpdate(dds3ProcessID_t *task) {
     if (fldProcCampChk() != FLD_CAMP_CHECK_STATE_ENCOUNTER_FLAG_SET) {
         return KWLN_TASK_UPDATE_RETAIN_CALLBACK;
     }
@@ -384,7 +384,7 @@ KwlnTaskUpdateResult fldFieldTaskUpdate(dds3ProcessID_t *task) {
     return KWLN_TASK_UPDATE_RETAIN_CALLBACK;
 }
 
-KwlnTaskUpdateResult fldAddressProcess1(dds3ProcessID_t *task) {
+dds3TaskUpdateResult_t fldAddressProcess1(dds3ProcessID_t *task) {
     s32 *work;
 
     work = sdfChipAllocDirect(0x10);
@@ -393,7 +393,7 @@ KwlnTaskUpdateResult fldAddressProcess1(dds3ProcessID_t *task) {
     work[2] = 0;
     work[3] = 0;
     dds3SetProcessData(task, (u32)work);
-    return (KwlnTaskUpdateResult)(u32)fldFieldTaskUpdate;
+    return (dds3TaskUpdateResult_t)(u32)fldFieldTaskUpdate;
 }
 
 void fldAddressShutdown(dds3ProcessID_t *task) {
@@ -4651,7 +4651,7 @@ void nbPanelAnalyzeStart(void) {
     D_003BAFA0 = 1;
 }
 
-KwlnTaskUpdateResult fldTitle(dds3ProcessID_t *task) {
+dds3TaskUpdateResult_t fldTitle(dds3ProcessID_t *task) {
     s32 nextFrame;
     s32 alpha;
     s32 nextPhase;
@@ -4766,7 +4766,7 @@ void fldReleaseTitleTextureReference(dds3ProcessID_t *task) {
     }
 }
 
-extern KwlnTaskUpdateResult fldTitle(dds3ProcessID_t *task);
+extern dds3TaskUpdateResult_t fldTitle(dds3ProcessID_t *task);
 
 
 extern u32 D_003BAFA4;

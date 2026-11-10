@@ -22,7 +22,7 @@ extern s16 blurscalebase;
 extern s16 bluralphatarget;
 extern s16 blurscaletarget;
 
-extern KwlnDrawLightSourceTable D_00324770;
+extern dds3LightSourceTable_t D_00324770;
 
 /* Pending, saved, and frame blocks share the effect owner's parameter type.
  * dds3DrawFlag tracks each family's running fades and transitions. */
@@ -93,7 +93,7 @@ void dds3SetFog(const KwlnDrawVectorParams *source) {
 }
 
 /* Retain the caller-owned light-data pointer in its draw slot. */
-void dds3SetLight(f32 (*lightSource)[4], KwlnLightSourceSlot slot) {
+void dds3SetLight(f32 (*lightSource)[4], dds3LightSourceSlot_t slot) {
     D_00324770[slot] = lightSource;
 }
 

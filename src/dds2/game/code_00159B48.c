@@ -685,7 +685,7 @@ void effSubmitGeneratedTexturePacket(sdfGrOt_t *surface, EffGeneratedTextureDesc
     surface->regFunc(surface, packetList);
 }
 
-extern KwlnFrameDrawBuffer dds3FrameDrawPacketRecords[];
+extern dds3FrameDrawBuffer_t dds3FrameDrawPacketRecords[];
 
 extern void sdfGrSetFrameMaskRGB(const u8 *, SdfDmaReferenceChainPacket *, s32);
 

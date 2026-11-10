@@ -225,7 +225,7 @@ extern s32 sdf2DGetPrimPacketSize(s32 registerCount, s32 loopCount);
 
 extern u8 *sdf2DGetPrimPtr(SdfDrawPacket *packet);
 
-extern KwlnFrameDrawBuffer dds3FrameDrawPacketRecords[];
+extern dds3FrameDrawBuffer_t dds3FrameDrawPacketRecords[];
 
 extern void sdfGrSetFrameMaskRGB(const u8 *, SdfDmaReferenceChainPacket *, s32);
 

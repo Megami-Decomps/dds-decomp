@@ -1276,7 +1276,7 @@ void btlDrawScaledHeldTextureQuad(sdfDrawTag_t *list, s32 primitive, s32 color, 
                          depth, 0);
 }
 
-extern KwlnFrameDrawBuffer dds3FrameDrawPacketRecords[];
+extern dds3FrameDrawBuffer_t dds3FrameDrawPacketRecords[];
 
 #include "sdf_packet_alloc.h"
 
