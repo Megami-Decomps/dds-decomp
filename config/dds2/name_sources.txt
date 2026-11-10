@@ -2159,13 +2159,13 @@
 0x0017E068	effPCPNeedleSpiralCopy	inferred	SMT3HD name via SLUS_209.11 0x00189428, shared-hash-in-run; was effNeedleCreateFromParams
 0x0017E080	effPCPNeedleSpiralDraw	inferred	SMT3HD name via SLUS_209.11 0x00189440, reloc-identical; was effNeedleUpdateTrails
 0x0017E658	effPCPNeedleSpiralSetPosition	inferred	SMT3HD name via SLUS_209.11 0x00189A18, shared-hash-in-run; was effPCPNeedleCopyVector
-0x0017E668	effNeedleSetResourceMatrix	inferred	confidence=high; copies its matrix argument into work->resource->matrix with dds3NeedleModelSetMatrix; DDS1 twin 0x00176A10. Namer1 batch 27.
+0x0017E668	effPCPNeedleSpiralSetRotateMatrix	inferred	SMT3HD name via SLUS_209.11 0x00189A28, effect/effPCPNeedle SMT3 rename; was effNeedleSetResourceMatrix
 0x0017E680	effPCPNeedleSpiralSetColor	inferred	SMT3HD name via SLUS_209.11 0x00189A40, shared-hash-in-run; was effSetResourceNormalStream
 0x0017E688	dds3NeedleModelCreate	inferred	SMT3HD name via SLUS_209.11 0x00189A48, reloc-identical; was effCreateResourceEntryWork
 0x0017E7A8	dds3NeedleModelDelete	inferred	SMT3HD name via SLUS_209.11 0x00189B68, reloc-identical; was effReleaseAttachedResources
 0x0017E7E0	dds3NeedleModelDraw	inferred	SMT3HD name via SLUS_209.11 0x00189BA0, reloc-identical; was effDrawInstancedResourceTrianglesVU
-0x0017EA78	effBuildRadialFanStreams	inferred	readability/matching review (QP16)
-0x0017ECA0	effReleaseOptionalResource	inferred	Releases the nested effect resource at +0x68 only if present.
+0x0017EA78	dds3NeedleModelVNCListCreate	inferred	SMT3HD name via SLUS_209.11 0x00189E38, effect/effPCPNeedle SMT3 rename; was effBuildRadialFanStreams
+0x0017ECA0	dds3NeedleModelVNCListDelete	inferred	SMT3HD name via SLUS_209.11 0x0018A070, effect/effPCPNeedle SMT3 rename; was effReleaseOptionalResource
 0x0017ECD0	dds3NeedleModelSetPosition	inferred	SMT3HD name via SLUS_209.11 0x0018A0C0, byte-identical; was effSetResourceEntryPosition
 0x0017ED00	dds3NeedleModelGetPosition	inferred	SMT3HD name via SLUS_209.11 0x0018A0F0, byte-identical; was effGetResourceEntryPosition
 0x0017ED30	dds3NeedleModelSetColor	inferred	SMT3HD name via SLUS_209.11 0x0018A120, byte-identical; was effSetResourceEntryValue

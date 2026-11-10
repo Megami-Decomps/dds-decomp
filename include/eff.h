@@ -862,13 +862,13 @@ extern EffPCPNeedleWork *effPCPNeedleSpiralCreate(EffPCPNeedleParams *);
 extern EffResourceWork *dds3NeedleModelCreate(u32);
 #endif
 
-extern void effReleaseOptionalResource(EffResourceWork *);
+extern void dds3NeedleModelVNCListDelete(EffResourceWork *);
 extern void dds3NeedleModelDelete(EffResourceWork *);
 extern void dds3NeedleModelSetPosition(EffResourceWork *, s32, f32 *);
 extern void dds3NeedleModelGetPosition(EffResourceWork *, s32, f32 *);
 extern void dds3NeedleModelSetColor(EffResourceWork *work, s32 index, u32 color);
 extern void dds3NeedleModelDraw(EffResourceWork *);
-extern void effBuildRadialFanStreams(EffResourceWork *, u32, u32, u32, f32, f32);
+extern void dds3NeedleModelVNCListCreate(EffResourceWork *, u32, u32, u32, f32, f32);
 
 /* Native 0x14-byte timed state embedded in a slot's kind-specific payload. */
 typedef struct EffTimedState {
