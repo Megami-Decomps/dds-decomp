@@ -54,7 +54,7 @@ enum sdf_stream_playback {
 };
 
 /* DDS names the asin table; SMT3 has no name for it yet. */
-#define D_0052D944 sdfNormalizedAsinSamples
+#define D_0052D944 sdfAsinTable
 
 extern f32 D_0052D944[];
 
