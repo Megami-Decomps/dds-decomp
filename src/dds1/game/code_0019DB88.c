@@ -1310,7 +1310,7 @@ extern s32 D_003BA910[2];
 extern u8 dds3ScreenBlurFlag;
 extern s16 dds3ScreenBlurAlpha;
 extern s16 dds3ScreenBlurScale;
-extern sdfGrOt_t kwlnPositionedTextSurface;
+extern sdfGrOt_t sdfDebugGrOt;
 extern char D_003BB260[];
 extern char D_003BB268[];
 extern char D_003BB270[];
@@ -1371,7 +1371,7 @@ s32 pbDebugPrintPanel2(void) {
     sdfDrawTagLink(list,
         (u32)dds3PrimFrameRect((D_003BA910[0] * 16) + 0x7FC0, (D_003BA910[1] * 8) + 0x7FE0,
             0xFF0000, 0x80, 0x40, 0x80008080, 0x80000000));
-    kwlnPositionedTextSurface.regFunc(&kwlnPositionedTextSurface, list);
+    sdfDebugGrOt.regFunc(&sdfDebugGrOt, list);
 
     if ((s8)dds3PadButtonState.secondaryTriangle < 0) {
         dds3ScreenBlurFlag ^= 1;

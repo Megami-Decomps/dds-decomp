@@ -987,7 +987,7 @@ extern char D_00436610[];
 extern char D_00436618[];
 extern char D_00436620[];
 extern char D_00436628[];
-extern sdfGrOt_t kwlnPositionedTextSurface;
+extern sdfGrOt_t sdfDebugGrOt;
 extern void *sdfDevPrintf(s32, s32, s32, s32, const char *, ...);
 extern ItfMesWindowRec *DebugChangeInstance(ItfMesWindowRec *window);
 extern void DebugMoveWinVert(ItfMesBlkA4 *panel, s32 boundsMode);
@@ -1107,7 +1107,7 @@ s32 itfMesMngDebugProc(void) {
                                                  bounds[1] >> 3,
                                                  bounds[2] >> 4,
                                                  bounds[3] >> 3));
-    kwlnPositionedTextSurface.regFunc(&kwlnPositionedTextSurface, packetList);
+    sdfDebugGrOt.regFunc(&sdfDebugGrOt, packetList);
     return 0;
 }
 

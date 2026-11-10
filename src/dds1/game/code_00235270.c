@@ -316,7 +316,7 @@ void evtDrawFloatValueEditorRow(sdfDrawTag_t *list, s32 x, s32 y, s32 index, evt
     }
 }
 
-extern sdfGrOt_t kwlnPositionedTextSurface;
+extern sdfGrOt_t sdfDebugGrOt;
 extern EvtPad dds3PadButtonState;
 
 extern void evtDrawFloatValueEditorRow();
@@ -329,7 +329,7 @@ s32 evtViewerFloatValueUpdate(s32 x, s32 y, evtViewerInfo_t *ctx) {
 
     list = dds3FontReqAllocDrawTag();
     evtDrawMenuFrame(list, x, y, 0x16, 9, 0, 1, ctx, evtAppendValueChangeDebugLabel, evtDrawFloatValueEditorRow);
-    kwlnPositionedTextSurface.regFunc(&kwlnPositionedTextSurface, list);
+    sdfDebugGrOt.regFunc(&sdfDebugGrOt, list);
     if (ctx->actionMode != 8) {
         return 0;
     }
@@ -397,7 +397,7 @@ s32 evtUpdateValueChangeDialog(s32 x, s32 y, evtViewerInfo_t *ctx) {
 
     list = dds3FontReqAllocDrawTag();
     evtDrawMenuFrame(list, x, y, 0x16, 9, 0, 1, ctx, evtDrawValueChangeNoticeRow, evtDrawValueChangeInstructionRow);
-    kwlnPositionedTextSurface.regFunc(&kwlnPositionedTextSurface, list);
+    sdfDebugGrOt.regFunc(&sdfDebugGrOt, list);
     if (ctx->actionMode != 7) {
         return 0;
     }
@@ -471,7 +471,7 @@ s32 evtViewerFrameChangeUpdate(s32 x, s32 y, evtViewerInfo_t *ctx) {
 
     list = dds3FontReqAllocDrawTag();
     evtDrawMenuFrame(list, x, y, 0x16, 0xB, 0, 1, ctx, evtFrameChangeHead, evtViewerDrawFrameChangeRow);
-    kwlnPositionedTextSurface.regFunc(&kwlnPositionedTextSurface, list);
+    sdfDebugGrOt.regFunc(&sdfDebugGrOt, list);
     if (ctx->actionMode != 6) {
         return 0;
     }
@@ -574,7 +574,7 @@ extern s32 dds3SelectMenu(s32 padSet, s32 secondaryCount, s32 primaryCount, s32 
 s32 mnuDrawInfoWindowA(s32 x, s32 y, evtViewerInfo_t *work) {
     sdfDrawTag_t *packets = dds3FontReqAllocDrawTag();
     evtDrawMenuFrame(packets, x, y, 0xF, 0xB, 0, 0xB, work, 0, evtDrawProjectCommandRow);
-    kwlnPositionedTextSurface.regFunc(&kwlnPositionedTextSurface, packets);
+    sdfDebugGrOt.regFunc(&sdfDebugGrOt, packets);
     if (work->actionMode != 1) {
         return 0;
     }
@@ -621,7 +621,7 @@ s32 evtUpdateTextSelectionDialog(s32 x, s32 y, evtViewerInfo_t *work) {
         }
     }
     evtDrawMenuFrame(packets, x, y, width, work->itemCount + 3, 0, work->itemCount, work, evtDrawStringEntry, evtDrawSelectableTextRow);
-    kwlnPositionedTextSurface.regFunc(&kwlnPositionedTextSurface, packets);
+    sdfDebugGrOt.regFunc(&sdfDebugGrOt, packets);
     if (work->actionMode != 2) {
         return 0;
     }
@@ -668,7 +668,7 @@ s32 evtUpdateNameEntryDialog(s32 x, s32 y, evtViewerInfo_t *ctx) {
     list = dds3FontReqAllocDrawTag();
     evtDrawMenuFrame(list, x, y, 14, 6, 0, 4, ctx,
                      evtDrawInputValueRow, evtDrawKeyboardRow);
-    kwlnPositionedTextSurface.regFunc(&kwlnPositionedTextSurface,
+    sdfDebugGrOt.regFunc(&sdfDebugGrOt,
                                     list);
     if (ctx->actionMode != 3) {
         return 0;
@@ -761,7 +761,7 @@ s32 evtUpdateEventCutSelectDialog(s32 x, s32 y, evtViewerInfo_t *ctx) {
 
     list = dds3FontReqAllocDrawTag();
     evtDrawMenuFrame(list, x, y, 0x12, 0xB, 0, 8, ctx, evtDrawEventFileNameRow, evtDrawEventCutSelectRow);
-    kwlnPositionedTextSurface.regFunc(&kwlnPositionedTextSurface, list);
+    sdfDebugGrOt.regFunc(&sdfDebugGrOt, list);
     if (ctx->actionMode != 9) {
         return 0;
     }
@@ -929,7 +929,7 @@ s32 evtUpdateEntrySelectionDialog(s32 x, s32 y, evtViewerInfo_t *work) {
     s32 shown;
 
     evtDrawMenuFrame(packets, x, y, 8, 0x1D, work->entryFirst, work->entryCount, work, 0, evtDrawEntrySelectionRow);
-    kwlnPositionedTextSurface.regFunc(&kwlnPositionedTextSurface, packets);
+    sdfDebugGrOt.regFunc(&sdfDebugGrOt, packets);
     if (work->actionMode != 4) {
         return 0;
     }
@@ -1386,7 +1386,7 @@ s32 evtUpdateFrameListDialog(s32 x, s32 y, evtViewerInfo_t *ctx) {
     list = dds3FontReqAllocDrawTag();
     evtDrawMenuFrame(list, x, y, 28, 21, ctx->frameCursor,
                  group->childCount + 1, ctx, evtDrawFrameListColumnHeadings, (EvtMenuRowFn)evtFrameListItem);
-    kwlnPositionedTextSurface.regFunc(&kwlnPositionedTextSurface, list);
+    sdfDebugGrOt.regFunc(&sdfDebugGrOt, list);
     if (ctx->actionMode != 5) {
         return 0;
     }
@@ -1475,7 +1475,7 @@ s32 evtUpdateWorldNodeListDialog(s32 x, s32 y, evtViewerInfo_t *ctx) {
     count++;
     evtDrawMenuFrame(list, x, y, 0x1A, 0x17, ctx->groupFirst, count, ctx,
                      NULL, evtViewerDrawWorldNodeRow);
-    kwlnPositionedTextSurface.regFunc(&kwlnPositionedTextSurface,
+    sdfDebugGrOt.regFunc(&sdfDebugGrOt,
                                     list);
     if (ctx->actionMode != 10) {
         return 0;
@@ -1529,7 +1529,7 @@ s32 mnuDrawInfoWindowB(s32 x, s32 y, evtViewerInfo_t *work) {
         return -1;
     }
     evtDrawMenuFrame(packets, x, y, 0x1C, rows, 0, rows, work, 0, evtViewerDrawPendingNodeRow);
-    kwlnPositionedTextSurface.regFunc(&kwlnPositionedTextSurface, packets);
+    sdfDebugGrOt.regFunc(&sdfDebugGrOt, packets);
     if (work->actionMode != 0xC) {
         return 0;
     }
@@ -1635,7 +1635,7 @@ s32 evtUpdateMessageValueDialog(s32 x, s32 y, evtViewerInfo_t *ctx) {
 
     list = dds3FontReqAllocDrawTag();
     evtDrawMenuFrame(list, x, y, 0x18, 0xA, 0, 1, ctx, mnuDrawMessageMenuLabel, evtDrawMessageDataRow);
-    kwlnPositionedTextSurface.regFunc(&kwlnPositionedTextSurface, list);
+    sdfDebugGrOt.regFunc(&sdfDebugGrOt, list);
     if (ctx->actionMode != 0xD) {
         return 0;
     }
@@ -1737,7 +1737,7 @@ s32 evtUpdateComparisonValueDialog(s32 x, s32 y, evtViewerInfo_t *ctx) {
 
     list = dds3FontReqAllocDrawTag();
     evtDrawMenuFrame(list, x, y, 0x18, 0xA, 0, 1, ctx, mnuDrawCutFlagLabel, evtDrawComparisonValueRow);
-    kwlnPositionedTextSurface.regFunc(&kwlnPositionedTextSurface, list);
+    sdfDebugGrOt.regFunc(&sdfDebugGrOt, list);
     if (ctx->actionMode != 0xE) {
         return 0;
     }
@@ -1864,7 +1864,7 @@ s32 evtHandleGroupPropertyMenu(s32 x, s32 y, evtViewerInfo_t *runtime) {
         return 0;
     }
     evtDrawMenuFrame(packets, x, y, 28, 3, 0, 1, runtime, NULL, evtDrawGroupPropertyTable);
-    kwlnPositionedTextSurface.regFunc(&kwlnPositionedTextSurface, packets);
+    sdfDebugGrOt.regFunc(&sdfDebugGrOt, packets);
     if (runtime->actionMode != 15) {
         return 0;
     }
@@ -2224,7 +2224,7 @@ s32 evtUpdateMotionChangeRow(s32 x, s32 y, evtViewerInfo_t *ctx) {
     list = dds3FontReqAllocDrawTag();
     model = (dds3ModelHandle_t *)((EffectObjectData *)ctx->frameGroup->info->workdata)->modelHolder->resourceHandle;
     evtDrawMenuFrame(list, x, y, 0x14, 0xA, 0, 1, ctx, mnuDrawMotionChangeLabel, evtDrawMotionChangeRow);
-    kwlnPositionedTextSurface.regFunc(&kwlnPositionedTextSurface, list);
+    sdfDebugGrOt.regFunc(&sdfDebugGrOt, list);
     if (ctx->actionMode != 0x10) {
         return 0;
     }
@@ -2358,7 +2358,7 @@ s32 evtUpdateGroupListDialog(s32 x, s32 y, evtViewerInfo_t *ctx) {
     count += 3;
     packets = dds3FontReqAllocDrawTag();
     evtDrawMenuFrame(packets, x, y, 20, 15, ctx->groupFirst, count, ctx, NULL, evtDrawGroupListRow);
-    kwlnPositionedTextSurface.regFunc(&kwlnPositionedTextSurface, packets);
+    sdfDebugGrOt.regFunc(&sdfDebugGrOt, packets);
     if (ctx->actionMode != 17) {
         return 0;
     }
@@ -2462,7 +2462,7 @@ s32 evtUpdateLightAndBackgroundEditor(s32 x, s32 y, evtViewerInfo_t *runtime) {
 
     evtDrawMenuFrame(list, (s32)((u32)x + 0x64u), y, 0xD, 0x10, 0, 1, (u8 *)runtime,
                      NULL, evtNoOpRGBEditorRow);
-    kwlnPositionedTextSurface.regFunc(&kwlnPositionedTextSurface, list);
+    sdfDebugGrOt.regFunc(&sdfDebugGrOt, list);
 
     sdfDrawTagLink(list, (u32)sdfDevPrintf(
         (s32)(0x8680u + ((u32)runtime->lightPanelOffset << 4)),
@@ -2691,7 +2691,7 @@ s32 evtDrawAndHandleXYSlotVectorEditor(s32 x, s32 y, evtViewerInfo_t *runtime) {
     list = dds3FontReqAllocDrawTag();
     evtDrawMenuFrame(list, x + runtime->horizontalOffset + 0x60, y,
                      0xF, 6, 0, 1, runtime, NULL, evtNoOpXYSlotVectorEditorRow);
-    kwlnPositionedTextSurface.regFunc(&kwlnPositionedTextSurface,
+    sdfDebugGrOt.regFunc(&sdfDebugGrOt,
                                      list);
 
     sdfDrawTagLink(list, (u32)sdfDevPrintf(
@@ -2890,7 +2890,7 @@ s32 mnuDrawTimedPrompt(s32 x, s32 y, evtViewerInfo_t *work) {
     sdfDrawTag_t *packets = dds3FontReqAllocDrawTag();
     s32 count;
     evtDrawMenuFrame(packets, x, y, 0x19, 2, 0, 1, work, 0, evtDrawOptionalPromptText);
-    kwlnPositionedTextSurface.regFunc(&kwlnPositionedTextSurface, packets);
+    sdfDebugGrOt.regFunc(&sdfDebugGrOt, packets);
     if (work->actionMode != 0x14) {
         return 0;
     }
@@ -2966,7 +2966,7 @@ s32 evtViewerDrawGroupWindow(s32 x, s32 y, evtViewerInfo_t *ctx) {
     count += 2;
     packets = dds3FontReqAllocDrawTag();
     evtDrawMenuFrame(packets, x, y, 20, 15, ctx->groupFirst, count, ctx, NULL, evtViewerDrawGroupRow);
-    kwlnPositionedTextSurface.regFunc(&kwlnPositionedTextSurface, packets);
+    sdfDebugGrOt.regFunc(&sdfDebugGrOt, packets);
     if (ctx->actionMode != 21) {
         return 0;
     }
@@ -3014,7 +3014,7 @@ s32 evtViewerEditShadowProperties(s32 x, s32 y, evtViewerInfo_t *ctx) {
     s32 lastMode = 0;
 
     evtDrawMenuFrame(list, x, y, 0x16, 6, 0, 0, ctx, 0, evtDrawShadowSettingsRow);
-    kwlnPositionedTextSurface.regFunc(&kwlnPositionedTextSurface, list);
+    sdfDebugGrOt.regFunc(&sdfDebugGrOt, list);
     if (ctx->actionMode != 0x16) {
         return 0;
     }
@@ -3258,7 +3258,7 @@ s32 evtEditEffectSpriteFrame(evtViewerInfo_t *runtime) {
     sdfDrawTagLink(packetList, (u32)sdfDevPrintf(
         0x7780, 0x85C0, 0xFEFFFF, style, D_003AEC30,
         key->p18.f));
-    kwlnPositionedTextSurface.regFunc(&kwlnPositionedTextSurface,
+    sdfDebugGrOt.regFunc(&sdfDebugGrOt,
                                      packetList);
 
     step = 0;
@@ -3528,7 +3528,7 @@ s32 evtEditCameraColorKeyFrame(evtViewerInfo_t *runtime) {
             "          %d", key->parameters.z[bank]));
     }
 
-    kwlnPositionedTextSurface.regFunc(&kwlnPositionedTextSurface,
+    sdfDebugGrOt.regFunc(&sdfDebugGrOt,
                                      (sdfDrawTag_t *)packetList);
     fldApplyCameraColorKeyWords(runtime, &key->parameters);
 

@@ -498,13 +498,13 @@ void dds3SetDistBlurArea(s32 positionSpread, s32 x, s32 y) {
     distblurtarget.position[1] = y;
 }
 
-extern dds3Effect_DistortionBlurParam_t kwlnFilterBlurTransitionStartParameters;
+extern dds3Effect_DistortionBlurParam_t dds3DistBlurBuf;
 extern u16 distblurswapnow;
 extern u16 distblurswapmax;
 
 /* Save live filter-blur params; zero copies the staged body immediately. */
 void dds3DistBlurSwap(s32 duration) {
-    kwlnFilterBlurTransitionStartParameters = Eve_DistortionBlurGetParams()->params;
+    dds3DistBlurBuf = Eve_DistortionBlurGetParams()->params;
     distblurswapnow = 0;
     distblurswapmax = duration;
     if (duration == 0) {
@@ -643,11 +643,11 @@ void dds3RipBlurOff(s32 duration) {
  * started with the staged block into one of these, and the effCopy* call then
  * hands the result to the effect. */
 extern dds3Effect_PartialMultiBlurParam_t key2;
-extern dds3Effect_DistortionBlurParam_t kwlnFilterBlurFrameParameters;
+extern dds3Effect_DistortionBlurParam_t dds3DistBlurCurrent;
 extern dds3Effect_RippleBlurParam_t dds3BlurState __attribute__((aligned(8)));
 extern dds3Effect_Blur_t kwlnRectangleBlurFrameParameters;
 extern dds3Effect_Filter_t dds3BlurParam;
-extern dds3Effect_PartialMultiFilterParam_t kwlnTexturedSquareFrameParameters;
+extern dds3Effect_PartialMultiFilterParam_t dds3MFilterCurrent;
 
 /* The blend helpers replace the parameters, which are the leading fields the
  * staged block shares with their own parameter block. */
@@ -760,10 +760,10 @@ void dds3BlurUpdate(void) {
         if (distblurswapnow < distblurswapmax) {
             distblurswapnow++;
         }
-        evtHokanDistBlur(1, (f32)distblurswapnow / (f32)distblurswapmax, &kwlnFilterBlurTransitionStartParameters,
-                        &distblurtarget, &kwlnFilterBlurFrameParameters);
-        Eve_DistortionBlurSetParam(&kwlnFilterBlurFrameParameters);
-        if ((kwlnFilterBlurFrameParameters.color >> 24) != 0) {
+        evtHokanDistBlur(1, (f32)distblurswapnow / (f32)distblurswapmax, &dds3DistBlurBuf,
+                        &distblurtarget, &dds3DistBlurCurrent);
+        Eve_DistortionBlurSetParam(&dds3DistBlurCurrent);
+        if ((dds3DistBlurCurrent.color >> 24) != 0) {
             Eve_DistortionBlurON();
         }
         else {
@@ -777,12 +777,12 @@ void dds3BlurUpdate(void) {
         if (distblurnow < distblurmax) {
             distblurnow++;
         }
-        kwlnFilterBlurFrameParameters = distblurtarget;
+        dds3DistBlurCurrent = distblurtarget;
         alpha = distblurabase + distblurnow *
                 (distbluratarget - distblurabase) /
                 distblurmax;
-        kwlnFilterBlurFrameParameters.color = (kwlnFilterBlurFrameParameters.color & 0xFFFFFF) | (alpha << 24);
-        Eve_DistortionBlurSetParam(&kwlnFilterBlurFrameParameters);
+        dds3DistBlurCurrent.color = (dds3DistBlurCurrent.color & 0xFFFFFF) | (alpha << 24);
+        Eve_DistortionBlurSetParam(&dds3DistBlurCurrent);
         if (alpha == 0) {
             Eve_DistortionBlurOFF();
         }
@@ -875,9 +875,9 @@ void dds3BlurUpdate(void) {
             mfilterswapnow++;
         }
         evtHokanMultFilter(1, (f32)mfilterswapnow / (f32)mfilterswapmax, &dds3MFilterBuf,
-                        &mfiltertarget, &kwlnTexturedSquareFrameParameters);
-        Eve_PartialMultiFilterSetParam(&kwlnTexturedSquareFrameParameters);
-        if (kwlnTexturedSquareFrameParameters.draw.color[KWLN_DRAW_ALPHA_CHANNEL] != 0) {
+                        &mfiltertarget, &dds3MFilterCurrent);
+        Eve_PartialMultiFilterSetParam(&dds3MFilterCurrent);
+        if (dds3MFilterCurrent.draw.color[KWLN_DRAW_ALPHA_CHANNEL] != 0) {
             Eve_PartialMultiFilterON();
         }
         else {
@@ -891,12 +891,12 @@ void dds3BlurUpdate(void) {
         if (mfilternow < mfiltermax) {
             mfilternow++;
         }
-        kwlnTexturedSquareFrameParameters = mfiltertarget;
+        dds3MFilterCurrent = mfiltertarget;
         alpha = mfilterabase + mfilternow *
                 (mfilteratarget - mfilterabase) /
                 mfiltermax;
-        kwlnTexturedSquareFrameParameters.draw.rgba = (kwlnTexturedSquareFrameParameters.draw.rgba & 0xFFFFFF) | (alpha << 24);
-        Eve_PartialMultiFilterSetParam(&kwlnTexturedSquareFrameParameters);
+        dds3MFilterCurrent.draw.rgba = (dds3MFilterCurrent.draw.rgba & 0xFFFFFF) | (alpha << 24);
+        Eve_PartialMultiFilterSetParam(&dds3MFilterCurrent);
         if (alpha == 0) {
             Eve_PartialMultiFilterOFF();
         }

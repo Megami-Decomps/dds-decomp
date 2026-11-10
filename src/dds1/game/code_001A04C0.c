@@ -76,7 +76,7 @@ typedef char ItfColorPanelWorkSizeCheck[sizeof(ItfColorPanelWork) == 0x10 ? 1 : 
 extern ItfColorPanelWork pbDebugPanel3X;
 extern ItfColorPanelRow itfOverlayColorEditorRows[6];
 extern SndPad dds3PadButtonState;
-extern sdfGrOt_t kwlnPositionedTextSurface;
+extern sdfGrOt_t sdfDebugGrOt;
 extern s32 itfTestOverlayPhaseStep;
 extern u8 D_003BB2B4;
 extern char D_003BB2B8[]; /* "FILTER:" */
@@ -128,7 +128,7 @@ s32 pbDebugPrintPanel3(void) {
         }
         y += 0x60;
     }
-    kwlnPositionedTextSurface.regFunc(&kwlnPositionedTextSurface, list);
+    sdfDebugGrOt.regFunc(&sdfDebugGrOt, list);
     pbDebugPanel3State += itfTestOverlayPhaseStep;
     pbDrawRotatedPrim(0x52);
     if ((s8)dds3PadButtonState.secondaryTriangle < 0) {

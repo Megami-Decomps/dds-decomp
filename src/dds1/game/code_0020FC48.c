@@ -2324,7 +2324,7 @@ extern void *sdfDevPrintf(s32, s32, s32, s32, const char *, ...);
 
 extern u8 D_003BBAA8[];
 
-extern sdfGrOt_t kwlnPositionedTextSurface;
+extern sdfGrOt_t sdfDebugGrOt;
 
 /* Submit formatted indices in one packet list, then draw the text column.
  * Preserve the separate fixed-point and pixel-coordinate arithmetic. */
@@ -2355,7 +2355,7 @@ s32 mnuDrawSelectableMenuRows(s32 x, s32 y, s32 frameWidth, BtlDebugMenuCursor *
             rowY += MNU_LIST_FIXED_ROW_HEIGHT;
         }
     }
-    kwlnPositionedTextSurface.regFunc(&kwlnPositionedTextSurface, (sdfDrawTag_t *)indexPackets);
+    sdfDebugGrOt.regFunc(&sdfDebugGrOt, (sdfDrawTag_t *)indexPackets);
     return btlDrawSelectableListRows(x + MNU_LIST_LABEL_OFFSET, y, frameWidth, selectionState, rowTexts);
 }
 

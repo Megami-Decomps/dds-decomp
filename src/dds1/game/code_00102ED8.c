@@ -78,7 +78,7 @@ extern f32 D_003245EC[];
 
 
 
-extern sdfGrOt_t kwlnPositionedTextSurface;
+extern sdfGrOt_t sdfDebugGrOt;
 
 extern u8 dds3PadVibrationState[2];
 
@@ -781,7 +781,7 @@ s32 kwlnDebugGraphUpdate(dds3ProcessID_t *task) {
                     0x8630,
                     originX + 0x20 + ((pixels + 0x2B) << 4),
                     0x8670, 0xFF0000, NULL);
-    kwlnPositionedTextSurface.regFunc(&kwlnPositionedTextSurface, packetList);
+    sdfDebugGrOt.regFunc(&sdfDebugGrOt, packetList);
     if (D_003BA884 >= 0x47 || D_003BA880 < (u16)D_003BA728) {
         D_003BA880 = D_003BA728;
         D_003BA884 = 0;
@@ -1036,7 +1036,7 @@ s32 kwlnLoadDefaultResource(void) {
     if (kwlnTextureViewerHandlePad() == 0) {
         return -1;
     }
-    kwlnDrawTextureViewerFrame(&kwlnPositionedTextSurface, kwlnCurrentIncompleteResource);
+    kwlnDrawTextureViewerFrame(&sdfDebugGrOt, kwlnCurrentIncompleteResource);
     return 0;
 }
 
@@ -1155,7 +1155,7 @@ s32 kwlnEnsureDefaultResource(void) {
     if (D_0032453B[0] != 0) {
         return 0;
     }
-    kwlnTextureAttachTask(&kwlnPositionedTextSurface);
+    kwlnTextureAttachTask(&sdfDebugGrOt);
     return 0;
 }
 
@@ -1231,9 +1231,9 @@ extern sdfGrFrameSet_t dds3RenderTexId;
 extern u16 D_003BA8FC;
 extern u16 D_003BA8FE;
 extern u32 dds3RenderDrawEnv;
-extern sdf3DLight_t *kwlnHeldTextureLightSources[3];
-extern f32 kwlnHeldTextureAmbientColor[4];
-extern Matrix4 kwlnHeldTextureViewMatrix;
+extern sdf3DLight_t *dds3RenderLightParallel[3];
+extern f32 dds3RenderAmbientColor[4];
+extern Matrix4 dds3RenderViewportMatrix;
 
 /* Rebuild the held-texture render target's view and both frame banks. */
 void dds3InitRenderDrawEnv(void) {
@@ -1253,9 +1253,9 @@ void dds3InitRenderDrawEnv(void) {
         sdfGrSetDrawEnv(&dds3DrawEnv[i].heldTexture.scene, &dds3RenderTexId, 0);
         *(u32 *)&dds3DrawEnv[i].heldTexture.scene.centeredBounds.rgbaq.value = dds3RenderDrawEnv;
         sdfDrawTagLink(&dds3DrawEnv[i].heldTexture.list, (u32)&dds3DrawEnv[i].heldTexture.scene);
-        sdf3DMakeViewportPacket(&dds3DrawEnv[i].heldTexture.matrix, &D_003247B0, &kwlnHeldTextureViewMatrix);
+        sdf3DMakeViewportPacket(&dds3DrawEnv[i].heldTexture.matrix, &D_003247B0, &dds3RenderViewportMatrix);
         sdfDrawTagLink(&dds3DrawEnv[i].heldTexture.list, (u32)&dds3DrawEnv[i].heldTexture.matrix);
-        sdf3DMakeLightParallelPacket(&dds3DrawEnv[i].heldTexture.lighting, kwlnHeldTextureLightSources, kwlnHeldTextureAmbientColor);
+        sdf3DMakeLightParallelPacket(&dds3DrawEnv[i].heldTexture.lighting, dds3RenderLightParallel, dds3RenderAmbientColor);
         sdfDrawTagLink(&dds3DrawEnv[i].heldTexture.list, (u32)&dds3DrawEnv[i].heldTexture.lighting);
     }
 }

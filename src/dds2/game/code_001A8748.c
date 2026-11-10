@@ -411,7 +411,7 @@ extern char D_00436680[];
 
 extern char D_00436688[];
 
-extern sdfGrOt_t kwlnPositionedTextSurface;
+extern sdfGrOt_t sdfDebugGrOt;
 
 /* Draw the blur settings and handle selection, editing and cancellation. */
 s32 pbDebugPrintPanel2(void) {
@@ -466,7 +466,7 @@ s32 pbDebugPrintPanel2(void) {
     sdfDrawTagLink(list,
         (u32)dds3PrimFrameRect((D_00435CE0[0] * 16) + 0x7FC0, (D_00435CE0[1] * 8) + 0x7FE0,
             0xFF0000, 0x80, 0x40, 0x80008080, 0x80000000));
-    kwlnPositionedTextSurface.regFunc(&kwlnPositionedTextSurface, list);
+    sdfDebugGrOt.regFunc(&sdfDebugGrOt, list);
 
     if ((s8)dds3PadButtonState.secondaryTriangle < 0) {
         dds3ScreenBlurFlag ^= 1;
@@ -621,7 +621,7 @@ s32 pbDebugPrintPanel3(void) {
         }
         y += 0x60;
     }
-    kwlnPositionedTextSurface.regFunc(&kwlnPositionedTextSurface, list);
+    sdfDebugGrOt.regFunc(&sdfDebugGrOt, list);
     pbDebugPanel3State += itfTestOverlayPhaseStep;
     pbDrawRotatedPrim(0x52);
     if ((s8)dds3PadButtonState.secondaryTriangle < 0) {

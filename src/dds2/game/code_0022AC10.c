@@ -265,7 +265,7 @@ extern void *sdfDevPrintf(s32, s32, s32, s32, const char *, ...);
 
 extern u8 D_00436EF8[];
 
-extern sdfGrOt_t kwlnPositionedTextSurface;
+extern sdfGrOt_t sdfDebugGrOt;
 
 extern s32 abs(s32);
 
@@ -2352,7 +2352,7 @@ s32 mnuDrawSelectableMenuRows(s32 x, s32 y, s32 frameWidth, MenuList *selectionS
             rowY += MNU_LIST_FIXED_ROW_HEIGHT;
         }
     }
-    kwlnPositionedTextSurface.regFunc(&kwlnPositionedTextSurface, (sdfDrawTag_t *)indexPackets);
+    sdfDebugGrOt.regFunc(&sdfDebugGrOt, (sdfDrawTag_t *)indexPackets);
     return btlDrawSelectableListRows(x + MNU_LIST_LABEL_OFFSET, y, frameWidth, selectionState, rowTexts);
 }
 

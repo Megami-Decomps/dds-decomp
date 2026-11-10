@@ -173,7 +173,7 @@ extern void fldStartLmapTask(s32 mode);
 extern u32 scrHandleCount;
 
 
-extern sdfGrOt_t kwlnPositionedTextSurface;
+extern sdfGrOt_t sdfDebugGrOt;
 
 extern s8 D_0037F53B[];
 
@@ -1029,7 +1029,7 @@ void eglLinkPrint(s32 x, s32 y, s32 packetArg, s32 drawArg) {
     sdfDrawTagLink(list, (u32)packet);
     sdfDevSetPrintCB(&sifParameters, x * 16 + 0x7000, y * 8 + 0x7900, 0x0FFFFF80, packetArg);
     sdfDrawTagLink(list, (u32)sdfDevPrintfEx(&sifParameters, (const char *)drawArg));
-    surface = &kwlnPositionedTextSurface;
+    surface = &sdfDebugGrOt;
     surface->regFunc(surface, list);
 }
 
@@ -1860,7 +1860,7 @@ s32 evtDrawGeneralHeapUsageGraph(struct dds3ProcessID_t *task) {
     sdfPrimLinkRect(list, 0x8000C000, 0, 0x73A0, 0x85F0, currentColumn * 16 + originX, 0x8600, 0xFF0000, 0);
     peakColumn = (s32)((f32)D_00435D40 / 100.0f * 200.0f) + 0x2B;
     sdfPrimLinkRect(list, 0x8000FFFF, 0, peakColumn * 16 + originX, 0x85D0, (peakColumn + 2) * 16 + originX, 0x8610, 0xFF0000, 0);
-    kwlnPositionedTextSurface.regFunc(&kwlnPositionedTextSurface, list);
+    sdfDebugGrOt.regFunc(&sdfDebugGrOt, list);
     if (D_00435D42 >= 0x47 || D_00435D40 < freePercent) {
         D_00435D40 = freePercent;
         D_00435D42 = 0;
@@ -2045,7 +2045,7 @@ s32 evtDrawConditionalHeapUsageOverlay(void) {
     if (D_0037F53B[0] != 0) {
         return 0;
     }
-    evtDrawHeapUsageOverlay(&kwlnPositionedTextSurface);
+    evtDrawHeapUsageOverlay(&sdfDebugGrOt);
     return 0;
 }
 
@@ -2078,7 +2078,7 @@ s32 evtDrawResourceCountDebugTask(dds3ProcessID_t *task) {
     gsCount = effGetFontListCount();
     sdfDrawTagLink(list, (u32)sdfDevPrintf(0x7100, 0x7980,
                     0xffff80, 0, D_004113A0, fontCount, textCount, gsCount));
-    kwlnPositionedTextSurface.regFunc(&kwlnPositionedTextSurface, list);
+    sdfDebugGrOt.regFunc(&sdfDebugGrOt, list);
     return 0;
 }
 

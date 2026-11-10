@@ -3408,7 +3408,7 @@ void initDrawTag(FldQuadState *quad) {
 
 extern sdfGrOt_t D_00325708;
 
-extern sdfGrOt_t kwlnPositionedTextSurface;
+extern sdfGrOt_t sdfDebugGrOt;
 
 extern void InversMatrix(void);
 
@@ -3462,7 +3462,7 @@ void fldDbgPrint2D(s32 x, s32 y, const char *format) {
     sdfDevSetPrintCB(&packet, quad.rowX + x, quad.rowY + y, quad.drawDepth, 0);
     sdfDrawTagLink(quad.packetList, (u32)sdfDevPrintfEx(&packet, format));
     LF(&quad);
-    kwlnPositionedTextSurface.regFunc(&kwlnPositionedTextSurface, quad.packetList);
+    sdfDebugGrOt.regFunc(&sdfDebugGrOt, quad.packetList);
 }
 
 void fldDbgPrint2DC(s32 x, s32 y, s32 packetField, s32 drawValue) {

@@ -133,13 +133,13 @@ extern u8 kwlnOverlayMatrixPackets[];
 
 extern u8 D_003820F0[];
 
-extern sdf3DLight_t *kwlnHeldTextureLightSources[3];
+extern sdf3DLight_t *dds3RenderLightParallel[3];
 
 extern sdf3DLight_t *kwlnOverlayLightSources[3];
 
 extern sdf3DLight_t *D_0037F770[3];
 
-extern f32 kwlnHeldTextureAmbientColor[4];
+extern f32 dds3RenderAmbientColor[4];
 
 extern f32 kwlnOverlayAmbientColor[4];
 
@@ -151,7 +151,7 @@ extern f32 D_0037FA20[4], kwlnOverlayEyeVector[4], kwlnOverlayUpVector[4];
 
 extern KwlnDrawVectorParams kwlnHeldTextureFrustumParameters, kwlnOverlayFrustumParameters, kwlnDrawVector;
 
-extern Matrix4 kwlnHeldTextureViewMatrix;
+extern Matrix4 dds3RenderViewportMatrix;
 
 extern Matrix4 D_00384790;
 
@@ -197,7 +197,7 @@ s32 dds3DrawFirstProcess(dds3ProcessID_t *task) {
     dds3SceneLightUpdateFirst();
     if (dds3RenderTex != 0) {
         sdf3DMakeLightParallelPacket((sdf3DLightParallelPacket_t *)(kwlnHeldTextureLightingPackets + bufferIndex * KWLN_FRAME_BUFFER_BYTES),
-            kwlnHeldTextureLightSources, kwlnHeldTextureAmbientColor);
+            dds3RenderLightParallel, dds3RenderAmbientColor);
         *(u32 *)(kwlnHeldTextureLightingPackets - 0x140 + bufferIndex * KWLN_FRAME_BUFFER_BYTES) = dds3RenderDrawEnv;
         if (dds3RenderTex != 0) {
             sdfGrOt_t *sceneNode;
@@ -205,9 +205,9 @@ s32 dds3DrawFirstProcess(dds3ProcessID_t *task) {
             u64 *sceneFrustum;
             sdf3DMakeScreenParam(&D_0037F7B0.camera);
             LookAtMatrix(kwlnHeldTextureTargetVector, kwlnHeldTextureEyeVector, kwlnHeldTextureUpVector);
-            VU0_STORE_MATRIX_UNCLOBBERED(&kwlnHeldTextureViewMatrix);
+            VU0_STORE_MATRIX_UNCLOBBERED(&dds3RenderViewportMatrix);
             sdf3DMakeViewportPacket((struct ConsMatrixPacket *)(kwlnHeldTextureMatrixPackets + bufferIndex * KWLN_FRAME_BUFFER_BYTES),
-                &D_0037F7B0, &kwlnHeldTextureViewMatrix);
+                &D_0037F7B0, &dds3RenderViewportMatrix);
             sceneNode = &sdfGrOtTable[1];
             sceneNode->regFunc(sceneNode,
                 (sdfDrawTag_t *)(kwlnHeldTextureMatrixPackets - 0x190 + bufferIndex * KWLN_FRAME_BUFFER_BYTES));
