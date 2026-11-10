@@ -543,14 +543,24 @@ typedef struct sdfMatPacket_t
     u32 cmd_call_kind;
 } sdfMatPacket_t;
 
-typedef char sdfMatPacket_t_mtexDiffuse_at_0x0C[
-    ((u32)&((sdfMatPacket_t *)0)->mtexDiffuse == 0x0C) ? 1 : -1];
+typedef char sdfMatPacket_t_ambient_at_0x04[
+    ((u32)&((sdfMatPacket_t *)0)->ambient == 0x04) ? 1 : -1];
+typedef char sdfMatPacket_t_diffuse_at_0x08[
+    ((u32)&((sdfMatPacket_t *)0)->diffuse == 0x08) ? 1 : -1];
 typedef char sdfMatPacket_t_specularColor_at_0x10[
     ((u32)&((sdfMatPacket_t *)0)->specularColor == 0x10) ? 1 : -1];
 typedef char sdfMatPacket_t_constant_at_0x1C[
     ((u32)&((sdfMatPacket_t *)0)->constant == 0x1C) ? 1 : -1];
-typedef char sdfMatPacket_t_tex1Data_at_0x38[
-    ((u32)&((sdfMatPacket_t *)0)->tex1Data == 0x38) ? 1 : -1];
+typedef char sdfMatPacket_t_mtexAlpha_at_0x20[
+    ((u32)&((sdfMatPacket_t *)0)->mtexAlpha == 0x20) ? 1 : -1];
+typedef char sdfMatPacket_t_mtexAlgo_at_0x24[
+    ((u32)&((sdfMatPacket_t *)0)->mtexAlgo == 0x24) ? 1 : -1];
+typedef char sdfMatPacket_t_fdBias_at_0x28[
+    ((u32)&((sdfMatPacket_t *)0)->fdBias == 0x28) ? 1 : -1];
+typedef char sdfMatPacket_t_clampData_at_0x48[
+    ((u32)&((sdfMatPacket_t *)0)->clampData == 0x48) ? 1 : -1];
+typedef char sdfMatPacket_t_mtexTex1Data_at_0x50[
+    ((u32)&((sdfMatPacket_t *)0)->mtexTex1Data == 0x50) ? 1 : -1];
 typedef char sdfMatPacket_t_mtexClampData_at_0x60[
     ((u32)&((sdfMatPacket_t *)0)->mtexClampData == 0x60) ? 1 : -1];
 typedef char sdfMatPacket_t_texTm_at_0x68[
@@ -561,6 +571,40 @@ typedef char sdfMatPacket_t_cmd_call_spec_at_0x98[
     ((u32)&((sdfMatPacket_t *)0)->cmd_call_spec == 0x98) ? 1 : -1];
 typedef char sdfMatPacket_t_cmd_call_kind_at_0x9C[
     ((u32)&((sdfMatPacket_t *)0)->cmd_call_kind == 0x9C) ? 1 : -1];
+typedef char sdfMat_t_id_at_0x00[
+    ((u32)&((sdfMat_t *)0)->id == 0x00) ? 1 : -1];
+typedef char sdfMat_t_flags_at_0x04[
+    ((u32)&((sdfMat_t *)0)->flags == 0x04) ? 1 : -1];
+typedef char sdfMat_t_duty_at_0x06[
+    ((u32)&((sdfMat_t *)0)->duty == 0x06) ? 1 : -1];
+typedef char sdfMat_t_packet_at_0x08[
+    ((u32)&((sdfMat_t *)0)->packet == 0x08) ? 1 : -1];
+typedef char sdfMat_t_ambient_at_0x10[
+    ((u32)&((sdfMat_t *)0)->ambient == 0x10) ? 1 : -1];
+typedef char sdfMat_t_diffuse_at_0x14[
+    ((u32)&((sdfMat_t *)0)->diffuse == 0x14) ? 1 : -1];
+typedef char sdfMat_t_multiTexDiffuse_at_0x18[
+    ((u32)&((sdfMat_t *)0)->multiTexDiffuse == 0x18) ? 1 : -1];
+typedef char sdfMat_t_constant_at_0x1C[
+    ((u32)&((sdfMat_t *)0)->constant == 0x1C) ? 1 : -1];
+typedef char sdfMat_t_specular_at_0x20[
+    ((u32)&((sdfMat_t *)0)->specular == 0x20) ? 1 : -1];
+typedef char sdfMat_t_specularParm_at_0x24[
+    ((u32)&((sdfMat_t *)0)->specularParm == 0x24) ? 1 : -1];
+typedef char sdfMat_t_refmap_at_0x28[
+    ((u32)&((sdfMat_t *)0)->refmap == 0x28) ? 1 : -1];
+typedef char sdfMat_t_multiTexHandle_at_0x30[
+    ((u32)&((sdfMat_t *)0)->multiTexHandle == 0x30) ? 1 : -1];
+typedef char sdfMat_t_multiTexMethod_at_0x34[
+    ((u32)&((sdfMat_t *)0)->multiTexMethod == 0x34) ? 1 : -1];
+typedef char sdfMat_t_uvwParm_at_0x38[
+    ((u32)&((sdfMat_t *)0)->uvwParm == 0x38) ? 1 : -1];
+typedef char sdfMat_t_multiTexUvwParm_at_0x3C[
+    ((u32)&((sdfMat_t *)0)->multiTexUvwParm == 0x3C) ? 1 : -1];
+typedef char sdfMat_t_fdBias_at_0x40[
+    ((u32)&((sdfMat_t *)0)->fdBias == 0x40) ? 1 : -1];
+typedef char sdfMat_t_fdSoften_at_0x44[
+    ((u32)&((sdfMat_t *)0)->fdSoften == 0x44) ? 1 : -1];
 
 extern s32 sdfThreadSema;
 extern SdfThreadNode *sdfVblankThreadId;
@@ -576,70 +620,6 @@ typedef struct SdfMemHeap {
 typedef char SdfMemHeap_size_must_be_0x28[(sizeof(SdfMemHeap) == 0x28) ? 1 : -1];
 
 extern SdfMemHeap sdfMemCB;
-
-#define SDF_CHIP_CLASS_COUNT 7
-
-typedef struct SdfChipCell SdfChipCell;
-typedef struct SdfChipPage SdfChipPage;
-typedef struct sdfChipCB_tag sdfChipCB_tag;
-typedef struct SdfPendingNode SdfPendingNode;
-
-/* A free chip cell carries its next-list link at byte 8. */
-struct SdfChipCell {
-    u8 pad00[8];
-    SdfChipCell *nextFree;
-};
-
-/* One power-of-two allocation class in the chip heap (0x0C). */
-struct sdfChipCB_tag {
-    SdfChipPage *currentPage;
-    SdfChipPage *availablePages;
-    s16 cellSize;
-    s16 cellCount;
-};
-
-typedef SdfChipCell *(*SdfChipAllocateFn)(sdfChipCB_tag *, SdfChipPage *);
-
-/* Per-page allocation metadata for one 4 KiB chip-heap page (0x18). */
-struct SdfChipPage {
-    SdfChipPage *next;
-    u8 *base;
-    SdfChipAllocateFn allocate;
-    sdfChipCB_tag *sizeClass;
-    SdfChipCell *freeCells;
-    s16 usedCells;
-    s16 bumpCellsRemaining;
-};
-
-/* Deferred handlers share one address-word argument at the native dispatch
- * boundary, while their C consumers interpret that word as different owners. */
-typedef void (*SdfPendingCallback)();
-
-/* Interrupt-synchronized deferred callback owner (0x08). */
-typedef struct SdfPendingRequest {
-    SdfPendingCallback handler;
-    SdfPendingNode *pending;
-} SdfPendingRequest;
-
-typedef char SdfChipClass_size_must_be_0x0C[(sizeof(sdfChipCB_tag) == 0x0C) ? 1 : -1];
-typedef char SdfChipPage_size_must_be_0x18[(sizeof(SdfChipPage) == 0x18) ? 1 : -1];
-typedef char SdfPendingRequest_size_must_be_0x08[(sizeof(SdfPendingRequest) == 0x08) ? 1 : -1];
-
-/* Seven size classes followed by the retail range's four-byte alignment tail. */
-typedef struct SdfChipClassTable {
-    sdfChipCB_tag classes[SDF_CHIP_CLASS_COUNT];
-    u8 pad54[4];
-} SdfChipClassTable;
-
-typedef char SdfChipClassTable_size_must_be_0x58[(sizeof(SdfChipClassTable) == 0x58) ? 1 : -1];
-
-extern SdfChipPage *sdfChipPageInfo;
-extern SdfChipPage *sdfChipPageFreeLink;
-extern u8 *sdfChipPageTop;
-extern u8 *sdfChipPageEnd;
-extern s32 sdfChipPageCount[2];
-extern SdfPendingRequest dds3CleanupList;
-extern SdfChipClassTable sdfChipCB;
 
 enum SdfColorTrackMode {
     SDF_COLOR_TRACK_MODE_ENDPOINTS = 0,
