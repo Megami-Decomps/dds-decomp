@@ -585,8 +585,8 @@ typedef struct sdfMat_t {
     sdfTexHandle_t *texHandle;
     sdfTexHandle_t *multiTexHandle; /* 0x30 */
     u32 multiTexMethod;       /* 0x34: secondary packet and palette selector */
-    SdfSubParam *uvwParm; /* 0x38 */
-    SdfSubParam *multiTexUvwParm; /* 0x3C */
+    void *uvwParm; /* 0x38 */
+    void *multiTexUvwParm; /* 0x3C */
     f32 fdBias; /* 0x40 */
     f32 fdSoften; /* 0x44 */
 } sdfMat_t;
