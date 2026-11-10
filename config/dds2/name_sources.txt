@@ -9354,6 +9354,7 @@
 0x003400B8	sdfHddPowerOffHandler	inferred	SMT3HD name via SLUS_209.11 0x002BFA20, identical twin in its sdf unit run (sdf-decomp tools/twins.py renames); was sdfPowerOffInterruptCallback
 0x003400D0	sdfHddInit	inferred	SMT3HD name via SLUS_209.11 0x002BFA38, sdfHdd twin; was sdfDevInitializeHddPfsDebugMode
 0x00340218	sdfDev9LoadModule	inferred	SMT3HD name via SLUS_209.11 0x002BFBD8, reloc-identical; was sdfLoadDevModule
+0x00340298	sdfZeroMem	inferred	SMT3HD name via SLUS_209.11 0x002BFC58, sdfDev9 quad zero fill, sibling of sdfZeroMemQuad; was func_00340298
 0x00340328	sdfZeroMemQuad	inferred	SMT3HD name via SLUS_209.11 0x002BFCE8, shared-hash-in-run; was sdfClearQuadwords
 0x003403A0	sdfStrdupChip	inferred	SMT3HD name via SLUS_209.11 0x002BFD60, reloc-identical; was sdfStrDup
 0x00340410	sdfBcdToDecimal	inferred	SMT3HD name via SLUS_209.11 0x002BFDD0, byte-identical; was sdfBcdStrToInt
