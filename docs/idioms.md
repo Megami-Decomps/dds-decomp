@@ -1463,8 +1463,8 @@ allowed on the same terms as COP2:
    copies, `por` for `u128` moves). An instruction that `u128` C reproduces
    may not be written as asm; say in the macro comment or parked note which
    C was tried.
-2. **Shared macros, not ad-hoc blocks.** MMI idioms live in `include/ee_mmi.h`
-   (COP2 ones in `include/pcp_vu0.h`), one idiom per macro, used in more than
+2. **Shared macros, not ad-hoc blocks.** COP2 and MMI idioms live in
+   `include/ps2asm.h`, one idiom per macro, used in more than
    one place or mirroring a known SDK macro; each macro comment names the
    retail pattern it reproduces. Operands come from C (`"r"`), not hard-coded
    registers, unless the SDK macro hard-codes them. A load or store of the
@@ -1530,6 +1530,11 @@ SMT3's `NON_MATCHING` drafts.
 
 Each macro reproduces one retail instruction pattern; the header comment names
 the plain-C forms that were tried. Use these instead of writing the asm again.
+
+The tables below use the old DDS macro names. `include/ee_mmi.h`,
+`pcp_vu0.h`, `sdf_vu0.h` and `mdl_dev_slot_color.h` are gone; each macro is
+now the `include/ps2asm.h` macro with the same expansion, and forms only DDS
+uses are in that header's last block.
 
 `include/ee_mmi.h` (MMI, with the COP2 moves they are fused with):
 
