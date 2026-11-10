@@ -327,7 +327,7 @@ segments:
       - [0x24F1A0, asm, sdk/libipu]  # first signature hit 0x0034E1A0
       - [0x24F788, asm, sdk/libsdr]  # first signature hit 0x0034E788
       - [0x250118, asm, sdk/libmc]  # first signature hit 0x0034F118
-      - [0x2514A8, asm, hand/at3dec]
+      - [0x2514A8, c, hand/at3dec]
       - [0x253B50, asm, sdk/libm]
       - [0x257E08, asm, sdk/libgcc]
       - [0x25A390, asm, sdk/libc]
