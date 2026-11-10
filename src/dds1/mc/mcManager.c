@@ -28,9 +28,6 @@ extern s32 sceMcClose(s32 a);
 extern s32 sceMcRead(s32 a, void *b, s32 c);
 extern s32 sceMcWrite(s32 a, const void *b, s32 c);
 
-#define MC_SLOT_FLAG_WORDS 20
-#define MC_CB_SIZE 0x64
-
 /* One control block per port. */
 typedef struct
 {
@@ -42,10 +39,8 @@ typedef struct
     u8 fileInfoReady;
     u8 cardStat;
     s8 slotIndex;
-    u32 slotFlags[MC_SLOT_FLAG_WORDS];
+    u32 slotFlags[20];
 } sdfMcCb_tag;
-
-typedef char sdfMcCbSizeCheck[(sizeof(sdfMcCb_tag) == MC_CB_SIZE) ? 1 : -1];
 
 extern sdfMcCb_tag sdfMcCb[];
 extern s32 sdfMcInfo;
