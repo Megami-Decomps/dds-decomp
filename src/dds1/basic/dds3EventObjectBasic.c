@@ -1,7 +1,23 @@
 #include "common.h"
 #include "sdf_chip.h"
 #include "eff_event.h"
+#include "dds3_basic_lifecycle.h"
+#include "dds3obj.h"
+#include "dds3_object_flags.h"
 
+/* Attach a 16-byte slot block before constructing and publishing its state handle.
+ * Return the accepted result expected by dds3AllocBasic. */
+Dds3BasicCreateResult EventObjectBasicConstructor(dds3Basic_t *object) {
+    DdsSlotResourceBlock *resource;
+    dds3ObjectBaseControlWorkData_t *handle;
+
+    dds3InitPoseSet(object);
+    resource = (DdsSlotResourceBlock *)sdfChipAllocDirect(sizeof(DdsSlotResourceBlock));
+    object->workdata = resource;
+    handle = dds3CreateSlotResourceState(object);
+    resource->baseControlWorkData = handle;
+    return DDS3_BASIC_CREATE_ACCEPTED;
+}
 
 void dds3FreePoseSet(dds3Basic_t *object);
 void dds3ObjectBaseFreeControlWorkData(dds3ObjectBaseControlWorkData_t *resource);
@@ -29,4 +45,20 @@ s32 EventObjectBasicMainProcuder(dds3Basic_t *eventObject) {
         dds3SetRadiusPoseSet(eventNode);
     }
     return 1;
+}
+
+/* Create an inner-vector object and snapshot its vector state after initialization. */
+dds3Basic_t *dds3AddEventObjectBasic(s32 initialValue, u128 *position, u128 *rotation) {
+    dds3Basic_t *obj = dds3AddSceneBasicData(EFF_WORLD_KIND_RESOURCE_OWNER);
+
+    obj->key = initialValue;
+    dds3SetPosPoseSet(obj, position);
+    dds3SetRotPoseSet(obj, rotation);
+    dds3SetRadiusPoseSet(obj->poseset);
+    return obj;
+}
+
+dds3ObjectBaseControlWorkData_t *dds3EventObjectBasicGetControlWorkData(const dds3Basic_t *object) {
+    const DdsSlotResourceBlock *block = (const DdsSlotResourceBlock *)object->workdata;
+    return block->baseControlWorkData;
 }

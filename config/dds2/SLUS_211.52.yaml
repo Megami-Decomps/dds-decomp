@@ -95,11 +95,8 @@ segments:
       - [0x142F0, c, basic/dds3UnitObjectBasic]  # Nocturne __FILE__
       - [0x14308, c, game/code_00113308]
       - [0x157D8, c, basic/dds3EffectObjectBasic]  # Nocturne __FILE__
-      - [0x16F40, c, game/code_00115F40]
-      - [0x173B0, c, basic/dds3EventObjectBasic]  # Nocturne __FILE__
-      - [0x17440, c, game/code_00116440]
-      - [0x175A0, c, basic/dds3LightObjectBasic]  # Nocturne __FILE__
-      - [0x177F8, c, game/code_001167F8]
+      - [0x17360, c, basic/dds3EventObjectBasic]  # Nocturne __FILE__
+      - [0x174C8, c, basic/dds3LightObjectBasic]  # Nocturne __FILE__
       - [0x17AC8, c, basic/dds3ModelBasic]  # Nocturne __FILE__
       - [0x17AE0, c, game/code_00116AE0]
       - [0x17CB8, c, basic/dds3ModelRangeBasic]  # Nocturne __FILE__
@@ -489,7 +486,7 @@ segments:
       - [0x333EA0, .lit4, basic/dds3ObjectBase]
       - [0x333EC0, .lit4, basic/dds3CameraObjectBasic]
       - [0x333EC8, .lit4, game/code_00113308]
-      - [0x333EE4, .lit4, game/code_00116440]
+      - [0x333EE4, .lit4, basic/dds3LightObjectBasic]
       - [0x333EEC, .lit4, game/code_0011F208]
       - [0x333F1C, .lit4, game/code_00124040]
       - [0x333F7C, .lit4, field/fldFileResolver]

@@ -6,12 +6,48 @@
 #include "ee_mmi.h"
 #include "pcp_vu0.h"
 #include "dds3_draw_light_binding.h"
+#include "common.h"
+#include "dds3_object_flags.h"
+#include "dds3obj.h"
+#include "eff_event.h"
+#include "evt_unit.h"
+#include "effect_value_object.h"
+#include "eff_object.h"
 
 void dds3FreePoseSet(dds3Basic_t *object);
 void dds3ObjectBaseFreeControlWorkData(dds3ObjectBaseControlWorkData_t *object);
 extern dds3LightSourceTable_t dds3LightParam;
 extern f32 dds3AmbientColor[4];
 
+/* Allocate the kind-9 light payload and its auxiliary buffer. */
+u32 lightconstructor(dds3Basic_t *object) {
+    EffLightData *obj;
+
+    dds3InitPoseSet(object);
+    obj = (EffLightData *)sdfChipAllocDirect(sizeof(EffLightData));
+    object->workdata = obj;
+    obj->baseControlWorkData = dds3CreateSlotResourceState(object);
+    dds3ObjectBaseOnFlag(object, 0x62);
+    obj->flags = 0;
+    obj->sourceVectors.named.color[0] = 0.7f;
+    obj->sourceVectors.named.color[1] = 0.7f;
+    obj->sourceVectors.named.color[2] = 0.7f;
+    obj->sourceVectors.named.direction[1] = 1.0f;
+    obj->sourceVectors.named.direction[2] = 0.5f;
+    obj->ambientColor[0] = 0.2f;
+    obj->ambientColor[1] = 0.2f;
+    obj->ambientColor[2] = 0.2f;
+    obj->ambientColor[3] = 1.0f;
+    obj->parameter50 = 100.0f;
+    obj->parameter54 = 800.0f;
+    obj->parameter58 = 7.0f;
+    obj->sourceVectors.named.color[3] = 0.0f;
+    obj->sourceVectors.named.direction[0] = 0.0f;
+    obj->sourceVectors.named.direction[3] = 0.0f;
+    obj->word5C = 0;
+    obj->buffer = sdfChipAllocDirect(0xE0);
+    return 1;
+}
 
 /* Releases the light's buffer and resource before freeing the object itself. */
 void lightdestructor(dds3Basic_t *light) {
@@ -82,5 +118,123 @@ s32 lightmainprocedure(dds3Basic_t *lightObject) {
     }
     sources[0] = (sdf3DLight_t *)data->sourceVectors.vectors;
     sdf3DMakeLightParallelPacket(data->buffer, sources, data->ambientColor);
+    return 1;
+}
+
+struct evtUnitHandle_t;
+
+extern void evtEndUnitValueTransition(struct evtUnitHandle_t *unit, s32 duration);
+
+u32 lightdrawprocedure(void) {
+    return 1;
+}
+
+dds3ObjectBaseControlWorkData_t *dds3LightObjectBasicGetControlWorkData(dds3Basic_t *object) {
+    return ((EffLightData *)object->workdata)->baseControlWorkData;
+}
+
+dds3Basic_t *dds3AddLightObjectBasic(s32 key) {
+    dds3Basic_t *obj = dds3AddSceneBasicData(EFF_WORLD_KIND_LIGHT);
+
+    obj->key = key;
+    dds3ObjectBaseCreateMover(obj);
+    return obj;
+}
+
+void dds3DeleteLightObjectBasic(dds3Basic_t *object) {
+    dds3DeleteSceneBasicData(object);
+}
+
+void dds3LinkSceneLight(dds3Basic_t *lightNode, s32 blendFrames) {
+    EffLightData *lightData = lightNode->workdata;
+    s32 color1[4];
+    s32 color2[4];
+    u32 packed1;
+    u32 packed2;
+
+    lightData->flags |= EFF_LIGHT_FLAG_UPDATE_COLOR_VECTORS;
+    if (blendFrames == 0) {
+        lightData->flags &= ~EFF_LIGHT_FLAG_BLEND_COLOR_VECTORS;
+    } else {
+        lightData->flags |= EFF_LIGHT_FLAG_BLEND_COLOR_VECTORS;
+        lightData->blendFrames = blendFrames;
+        SDF_VU0_LOADVECTOR(dds3LightParam[0]);
+        EE_MMI_RGBA_PACK_F128(packed1);
+        color1[0] = packed1;
+        lightData->packedColorA = color1[0];
+        SDF_VU0_LOADVECTOR(dds3AmbientColor);
+        EE_MMI_RGBA_PACK(packed2);
+        color2[0] = packed2;
+        lightData->packedColorB = color2[0];
+    }
+}
+
+void dds3UnlinkSceneLight(dds3Basic_t *object) {
+    EffLightData *data = object->workdata;
+
+    data->flags &= ~(EFF_LIGHT_FLAG_UPDATE_COLOR_VECTORS | EFF_LIGHT_FLAG_BLEND_COLOR_VECTORS);
+}
+
+/* Kind-5 effect payloads retain transition work separately from light data. */
+void dds3LinkLightObjectToUnitObject(EffectValueObject *value, dds3Basic_t *effectNode, s32 duration) {
+    EffectObjectData *effectData = effectNode->workdata;
+
+    evtSetUnitValueTransition(effectData->transitionWork, (dds3Basic_t *)value, duration);
+}
+
+void dds3UnlinkLightObjectFromUnitObject(dds3Basic_t *effectNode, s32 duration) {
+    EffectObjectData *effectData = effectNode->workdata;
+
+    evtEndUnitValueTransition((struct evtUnitHandle_t *)effectData->transitionWork, duration);
+}
+/* Load flags, mode and the transform block from a setup record. */
+void dds3SetLightObjectResoruce(dds3Basic_t *worldNode, WorldTransformSetup *setup) {
+    WorldTransformData *transformData = worldNode->workdata;
+
+    transformData->flags = 0;
+    if (setup->flags & 1) {
+        transformData->flags = 1;
+    }
+    if (setup->flags & 2) {
+        transformData->flags |= 4;
+    }
+    transformData->rotation[0] = setup->transform.rotation[0];
+    transformData->mode = setup->mode;
+    transformData->rotation[1] = setup->transform.rotation[1];
+    transformData->rotation[2] = setup->transform.rotation[2];
+    transformData->rotation[3] = setup->transform.rotation[3];
+    transformData->position[0] = setup->transform.position[0];
+    transformData->position[1] = setup->transform.position[1];
+    transformData->position[2] = setup->transform.position[2];
+    transformData->positionW = 0.0f;
+    transformData->scale[0] = setup->transform.scale[0];
+    transformData->scale[1] = setup->transform.scale[1];
+    transformData->scale[2] = setup->transform.scale[2];
+    transformData->scaleW = 1.0f;
+}
+
+/* Load rotation, position and scale from a parameter block. */
+void dds3SetLightObjectPathResoruce(dds3Basic_t *worldNode, const WorldTransformParams *params) {
+    WorldTransformData *transformData = worldNode->workdata;
+
+    transformData->rotation[0] = params->rotation[0];
+    transformData->rotation[1] = params->rotation[1];
+    transformData->rotation[2] = params->rotation[2];
+    transformData->rotation[3] = params->rotation[3];
+    transformData->position[0] = params->position[0];
+    transformData->position[1] = params->position[1];
+    transformData->position[2] = params->position[2];
+    transformData->positionW = 0.0f;
+    transformData->scale[0] = params->scale[0];
+    transformData->scale[1] = params->scale[1];
+    transformData->scale[2] = params->scale[2];
+    transformData->scaleW = 1.0f;
+}
+
+u32 dds3AllocEventBasicWorkData(dds3Basic_t *obj) {
+    void *work = sdfChipAllocDirect(0x1C);
+
+    obj->workdata = work;
+    memset(work, 0, 0x1C);
     return 1;
 }
