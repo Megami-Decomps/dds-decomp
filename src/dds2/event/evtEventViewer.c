@@ -4282,7 +4282,6 @@ s32 evtViewCmdSelectMode(s32 unused0, s32 unused1, evtViewerInfo_t *viewer) {
     return handled ? -1 : 0;
 }
 
-#ifdef NON_MATCHING
 #include "common.h"
 #include "sdf_dma_tag.h"
 #include "evt_window_shade_packet.h"
@@ -4339,19 +4338,16 @@ extern u16 evtViewerPopHistory(evtViewerInfo_t *viewer);
 extern s8 evtViewerFrameColumnCategories[];
 extern void evtEndUnitValueTransition(evtUnitHandle_t *unit, s32 duration);
 
-/* Assign the selected world object's name to the pending key field that the
- * current command kind and frame group type select (-1 when nothing is chosen). */
-/* In the event viewer, assigns the name of the world object selected by the
- * cursor (counted over the world slots other than slot 3) to the pending key's
- * target field, which depends on the current command column's value type and
- * the frame group type, or -1 when nothing is selected; then reapplies the
- * timeline frame and pops the history. Upstream: INCLUDE_ASM in both games'
- * event/evtEventViewer; written from the retail routine. It differs from retail
- * only in the code layout of the last case: the body stores the name in each
- * arm of the conditional, retail joins them before one store. */
+/* Assign the selected world object's name to the pending key field selected by
+ * the command column and frame-group type, or -1 for no selected object. */
 s32 evtViewCmdSetObjectTarget(s32 unused0, s32 unused1, evtViewerInfo_t *viewer) {
     EvtRuntimeChild *entry = evtEventViewerGetPendingNode(viewer);
-    dds3Basic_t *object;
+    /* The live world cursor becomes the selected object and survives the
+     * old-target lookup and transition calls. Both retail twins retain it in s3; the ordinary
+     * allocator instead gives it s1 ahead of the ordinal and viewer. This
+     * localized home preserves its real definitions, uses and callee-saved
+     * lifetime. See the qualified object-target allocation investigation. */
+    register dds3Basic_t *object __asm__("s3");
     dds3Basic_t *node;
     s32 count;
     s32 slot;
@@ -4384,9 +4380,10 @@ s32 evtViewCmdSetObjectTarget(s32 unused0, s32 unused1, evtViewerInfo_t *viewer)
         if (viewer->frameGroup->type < 22) {
             if (viewer->frameGroup->type >= 20) {
                 if (object == NULL) {
-                    entry->p0C.sb[viewer->inputB] = -1;
+                    /* Same signed parameter array as evtViewerDrawPendingNodeRow. */
+                    entry->parameterBytes[viewer->inputB + 4] = -1;
                 } else {
-                    entry->p0C.sb[viewer->inputB] = evtEventViewerAddName(object->name, viewer);
+                    entry->parameterBytes[viewer->inputB + 4] = evtEventViewerAddName(object->name, viewer);
                 }
             }
         }
@@ -4424,7 +4421,11 @@ s32 evtViewCmdSetObjectTarget(s32 unused0, s32 unused1, evtViewerInfo_t *viewer)
         break;
     case 19:
         if (entry->p08.sb[0] == 7) {
-            entry->p0C.sh[0] = object != NULL ? evtEventViewerAddName(object->name, viewer) : -1;
+            if (object == NULL) {
+                entry->p0C.sh[0] = -1;
+            } else {
+                entry->p0C.sh[0] = evtEventViewerAddName(object->name, viewer);
+            }
         }
         break;
     }
@@ -4432,9 +4433,6 @@ s32 evtViewCmdSetObjectTarget(s32 unused0, s32 unused1, evtViewerInfo_t *viewer)
     evtViewerPopHistory(viewer);
     return 0;
 }
-#else
-INCLUDE_ASM(const s32, "event/evtEventViewer", evtViewCmdSetObjectTarget);
-#endif
 
 u32 evtViewerClearPendingNodeAndPushHistory(u32 unused0, u32 unused1, evtViewerInfo_t *viewer) {
     if (evtEventViewerGetPendingNode(viewer) != 0) {
