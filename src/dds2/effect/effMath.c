@@ -1,70 +1,77 @@
-#include "sdk_ps2.h"
-#include "eff_resource_browser.h"
-#include "sdf_sif_command.h"
 #include "common.h"
-#include "sdf_vu0.h"
-#include "sdf_vu_matrix.h"
-#include "sdf_chip.h"
-#include "sdf_column_packet_api.h"
-#include "sdf_packet_list.h"
-#include "kwln_sprite.h"
-#include "eff_event_setup.h"
-#include "sdf_heap_api.h"
-#include "sdf.h"
-#include "sdf_packet_alloc.h"
-#include "sdf_bordered_rectangle_packet.h"
-#include "eff.h"
-#include "eff_magatuhi_api.h"
-#include "eff_math.h"
-#include "eff_cubic_bezier_array.h"
-#include "ee_mmi.h"
-#include "pcp_vu0.h"
+#include "sdf_types.h"
+#include "ps2asm.h"
 #include "fpu.h"
-#include "sdf_texture_file.h"
-#include "sdf_projection.h"
-#include "eff_dirent.h"
 
-#define EFF_MATRIX_BYTES 0x40
+/* DDS's names for the same objects. */
+#define D_002FA240 sdfViewMatrix
+#define aViewEye sdfViewTargetVector
+#define func_001AC068 effMathResetBezierSlot
 
-#define EFF_VECTOR_WORD_COUNT 4
+/* The owner is stored after its contiguous cubic segments. */
+typedef struct
+{
+    f32 controlPoints[4][3];
+    f32 t;
+    f32 step;
+} dds3Bezier4PPart_t;
 
-#define EFF_COLOR_UNPACK_SCALE_BITS 0x3C000000
+typedef struct
+{
+    void *pPart;
+    u32 number;
+    void *allocation;
+} effBezier4P_t;
 
-#define EFF_SLOT_BYTES 0x38
+extern void *sdfMemAllocDirect(u32 aSize);
+extern void *sdfMemLock(void *aHandle);
+extern void sdfMemFreeDirect(void *aHandle);
 
-#define EFF_SLOT_HEADER_BYTES 0xC
 
-extern char D_00436448[];
+/* 1/128 as binary32: the colour unpack scales 0..255 integer lanes to 0..2. */
+#define EFF_RGBA_UNIT 0x3C000000
 
-extern char D_00436450[];
+/* The colour inlines read and write a 16-byte slot, one word of it used. */
+typedef struct
+{
+    u32 word;
+    u8 pad04[12];
+} effColorWork_t;
 
-extern u8 sdfViewMatrix[];
+/* Only the projection block from +0x30 on is read here: a 4x4 matrix, then the
+ * viewport half-extent and centre as one quadword each. */
+typedef struct
+{
+    u8 pad00[0x30];
+    f32 matrix[16];
+    sdfVector4_t scale;
+    sdfVector4_t offset;
+    u8 pad90[0x10];
+} dds3ScreenParam_t;
 
-extern u8 sdfProjectionMatrix[];
+extern dds3ScreenParam_t dds3ScreenParam;
+extern f32 D_002FA240[16];
+extern sdfVector4_t aViewEye;
+extern sdfVector4_t aViewDown;
+extern void MultMatrixRev(f32 *aMatrix);
 
-extern u8 D_0037F660[];
+/* vu0 routine: project the world point in vf10 to screen space */
+void effScreenOffset(void)
+{
+    f32 *matrix;
 
-extern u8 sdfViewTargetVector[];
-
-extern u8 aViewDown[];
-
-/* vu0 routine: transform the point in vf10 by view/projection, divide by w, then scale/bias.
-   No clipping or zero-w check is performed; the result remains in vf10. */
-void effScreenOffset(void) {
-    u8 *projectionData;
-    VU0_LOAD_MATRIX(sdfViewMatrix);
-    projectionData = sdfProjectionMatrix;
-    MultMatrixRev((const struct Matrix4 *)projectionData);
+    SDF_VU0_LOADMATRIX(D_002FA240);
+    matrix = dds3ScreenParam.matrix;
+    MultMatrixRev(matrix);
     SDF_VU0_APPLYMATRIX_XYZ1();
     SDF_VU0_PERSVECTOR();
-    projectionData += EFF_MATRIX_BYTES;
-    SDF_VU0_LOADVECTOR_B_BARRIER(projectionData);
+    SDF_VU0_LOADVECTOR_B(matrix + 16);
     SDF_VU0_MULVECTOR();
-    SDF_VU0_LOADVECTOR_B_BARRIER(D_0037F660);
+    SDF_VU0_LOADVECTOR_B(&dds3ScreenParam.offset);
     SDF_VU0_ADDVECTOR();
 }
 
-/* vu0 routine: project a point and its camera-right offset, returning their rounded screen distance. */
+/* vu0 routine: measure the projected camera-right offset. */
 s32 effPCPBlurScreenOffset(f32 scale) {
     f32 scaleVector[4];
     f32 projectedEnd[4];
@@ -72,6 +79,7 @@ s32 effPCPBlurScreenOffset(f32 scale) {
     f32 original[4];
     f32 dx;
     f32 dy;
+    f32 distance;
 
     SDF_VU0_STOREVECTOR_NOMEM(original);
     effScreenOffset();
@@ -80,9 +88,9 @@ s32 effPCPBlurScreenOffset(f32 scale) {
     scaleVector[0] = scaleVector[1] = scaleVector[2] = scale;
     SDF_VU0_LOADVECTOR(original);
     SDF_VU0_COPYVECTOR_A_TO_C();
-    SDF_VU0_LOADVECTOR_B(sdfViewTargetVector);
+    SDF_VU0_LOADVECTOR_B(&aViewEye);
     SDF_VU0_SUBVECTOR();
-    SDF_VU0_LOADVECTOR_B(aViewDown);
+    SDF_VU0_LOADVECTOR_B(&aViewDown);
     SDF_VU0_OUTERPRODUCT();
     SDF_VU0_NORMALIZE();
     SDF_VU0_LOADVECTOR_B_BARRIER(scaleVector);
@@ -95,112 +103,102 @@ s32 effPCPBlurScreenOffset(f32 scale) {
     dx = projectedEnd[0] - projectedStart[0];
     dy = projectedEnd[1] - projectedStart[1];
     SDF_VU0_LOADVECTOR(projectedStart);
-    return (s32)fsqrtf(dx * dx + dy * dy);
+    distance = fsqrtf(dx * dx + dy * dy);
+    return (s32)distance;
 }
 
-/* vu0 routine: blend two RGBA8888 colours by t (lerp in float, packed back to RGBA8888) */
-u32 effColorBlend(u32 colorA, u32 colorB, f32 t) {
-    s32 color1[4];
-    s32 color2[4];
-    s32 blended[4];
-    u32 packed;
+/* vu0 routine: blend two colours, `amount` of `from` */
+u32 effColorBlend(u32 abgr0, u32 abgr1, f32 rate)
+{
+    effColorWork_t work[3];
+    u32 blended;
     u32 unit;
 
-    if (t >= 1.0f) {
-        return colorB;
+    if (rate >= 1.0f) {
+        return abgr1;
     }
-    unit = 0x3C000000;
-    color1[0] = colorB;
-    EE_MMI_RGBA_UNPACK(color1, unit);
+    unit = EFF_RGBA_UNIT;
+    work[0].word = abgr1;
+    MMI_RGBA_UNPACK(&work[0], unit);
     SDF_VU0_COPYVECTOR_A_TO_B();
-    color2[0] = colorA;
-    EE_MMI_RGBA_UNPACK(color2, unit);
-    VU0_SCALAR_OP_CLOBBER(1.0f - t, "vmulx.xyzw vf10, vf10, vf2x");
-    VU0_SCALAR_OP_R3_CLOBBER(t, "vmulx.xyzw vf11, vf11, vf2x");
+    work[1].word = abgr0;
+    MMI_RGBA_UNPACK(&work[1], unit);
+    SDF_VU0_SCALEVECTOR(1.0f - rate);
+    SDF_VU0_SCALEVECTOR_B(rate);
     SDF_VU0_ADDVECTOR();
-    EE_MMI_RGBA_PACK(packed);
-    blended[0] = packed;
-
-    return blended[0];
+    SDF_VU0_dds3ColorFtoI(blended, 128.0f);
+    work[2].word = blended;
+    return blended;
 }
 
-/* vu0 routine: multiply RGBA channels normalized by 128, then pack at the same scale.
-   Native integer conversion/byte packing remains unclamped; quadword storage is unchanged. */
-u32 effMagaCylinderCalcColor(u32 colorA, u32 colorB) {
-    s32 colorAWords[EFF_VECTOR_WORD_COUNT];
-    s32 colorBWords[EFF_VECTOR_WORD_COUNT];
-    s32 packedWords[EFF_VECTOR_WORD_COUNT];
-    u32 packed;
-    u32 unpackScaleBits = EFF_COLOR_UNPACK_SCALE_BITS;
-    colorAWords[0] = colorA;
-    EE_MMI_RGBA_UNPACK(colorAWords, unpackScaleBits);
+/* vu0 routine: unpack two colours, multiply and pack */
+u32 effMagaCylinderCalcColor(u32 color, u32 scale)
+{
+    effColorWork_t work[3];
+    u32 unit = EFF_RGBA_UNIT;
+    u32 out;
+
+    work[0].word = color;
+    MMI_RGBA_UNPACK(&work[0], unit);
     SDF_VU0_COPYVECTOR_A_TO_B();
-    colorBWords[0] = colorB;
-    EE_MMI_RGBA_UNPACK(colorBWords, unpackScaleBits);
+    work[1].word = scale;
+    MMI_RGBA_UNPACK(&work[1], unit);
     SDF_VU0_MULVECTOR();
-    EE_MMI_RGBA_PACK(packed);
-    packedWords[0] = packed;
-    return packedWords[0];
+    SDF_VU0_dds3ColorFtoI(out, 128.0f);
+    return out;
 }
 
-/* vu0 routine: distance from point to the line through origin along a unit direction.
-   Direction is not normalized here; dot/length use xyz despite full quadword loads. */
-f32 effLinePointLength(f32 *direction, f32 *origin, f32 *point) {
-    f32 projectedOffset[EFF_VECTOR_WORD_COUNT];
-    f32 pointOffset[EFF_VECTOR_WORD_COUNT];
-    f32 projectionAmount;
-    f32 distance;
+/* vu0 routine: distance from `to` to the line through `from` along `dir` */
+f32 effLinePointLength(sdfVector4_t *pDir, sdfVector4_t *pLinePos, sdfVector4_t *pPos)
+{
+    sdfVector4_t along;
+    sdfVector4_t delta;
+    f32 projection;
+    f32 length;
 
-    SDF_VU0_LOADVECTOR(point);
-    SDF_VU0_LOADVECTOR_B(origin);
+    SDF_VU0_LOADVECTOR(pPos);
+    SDF_VU0_LOADVECTOR_B(pLinePos);
     SDF_VU0_SUBVECTOR();
-    SDF_VU0_STOREVECTOR(pointOffset);
-    SDF_VU0_LOADVECTOR_B(direction);
-    SDF_VU0_INNERPRODUCT(projectionAmount);
-    /* The fourth projection component remains unwritten: only xyz contributes to distance. */
-    projectedOffset[0] = direction[0] * projectionAmount;
-    projectedOffset[1] = direction[1] * projectionAmount;
-    projectedOffset[2] = direction[2] * projectionAmount;
-    SDF_VU0_LOADVECTOR(pointOffset);
-    SDF_VU0_LOADVECTOR_B(projectedOffset);
+    SDF_VU0_STOREVECTOR(&delta);
+    SDF_VU0_LOADVECTOR_B(pDir);
+    SDF_VU0_INNERPRODUCT(projection);
+    along.x = pDir->x * projection;
+    along.y = pDir->y * projection;
+    along.z = pDir->z * projection;
+    SDF_VU0_LOADVECTOR(&delta);
+    SDF_VU0_LOADVECTOR_B(&along);
     SDF_VU0_SUBVECTOR();
-    SDF_VU0_GETLENGTH(distance);
-    return distance;
+    SDF_VU0_GETLENGTH(length);
+    return length;
 }
 
-/* Allocate/retain slot storage and return its header after the slots, not the slot base.
-   Only the two native slot defaults are initialized; count/allocation validity is unchecked. */
-EffCubicBezierArray *dds3Bezier4PCreate(s32 count) {
-    struct sdfMemHandle_t *allocation = sdfMemAllocDirect(count * EFF_SLOT_BYTES + EFF_SLOT_HEADER_BYTES);
-    EffCubicBezierSlot *slot = (EffCubicBezierSlot *)sdfMemLock(allocation);
+effBezier4P_t *dds3Bezier4PCreate(s32 number) {
+    void *allocation = sdfMemAllocDirect(number * sizeof(dds3Bezier4PPart_t) + sizeof(effBezier4P_t));
+    void *retainedAddress = (void *)sdfMemLock(allocation);
     u32 slotIndex = 0;
-    u8 *headerAddress = (u8 *)(slot + count);
+    dds3Bezier4PPart_t *slot = retainedAddress;
+    u8 *headerAddress = (u8 *)slot + number * sizeof(dds3Bezier4PPart_t);
 
-    ((EffCubicBezierArray *)headerAddress)->allocation = allocation;
-    ((EffCubicBezierArray *)headerAddress)->slots = slot;
-    ((EffCubicBezierArray *)headerAddress)->slotCount = count;
-    if (count != 0) {
+    ((effBezier4P_t *)headerAddress)->allocation = allocation;
+    ((effBezier4P_t *)headerAddress)->pPart = retainedAddress;
+    ((effBezier4P_t *)headerAddress)->number = number;
+    if (number != 0) {
         do {
             slotIndex++;
             slot->t = 0;
             slot->step = 0.05f;
-            slot++;
-        } while (slotIndex < count);
+            slot = (dds3Bezier4PPart_t *)((u8 *)slot + sizeof(dds3Bezier4PPart_t));
+        } while (slotIndex < number);
     }
-    return (EffCubicBezierArray *)headerAddress;
+    return (effBezier4P_t *)headerAddress;
 }
 
-extern f32 D_00433528;
-
-void dds3Bezier4PDelete(EffCubicBezierArray *work) {
-    sdfMemFreeDirect(work->allocation);
+void dds3Bezier4PDelete(effBezier4P_t *pEffBezier4P) {
+    sdfMemFreeDirect(pEffBezier4P->allocation);
 }
 
-/* Evaluate the curve at the current t, advance t, and report whether the
- * stored next position was clamped to the endpoint. */
-EffCubicBezierStepResult dds3Bezier4PPartRun(
-    EffCubicBezierArray *table, EffCubicBezierSlotIndex slotIndex, f32 *out) {
-    EffCubicBezierSlot *slot = &table->slots[slotIndex];
+s32 dds3Bezier4PPartRun(effBezier4P_t *table, s32 slotIndex, f32 *out) {
+    dds3Bezier4PPart_t *slot = &((dds3Bezier4PPart_t *)table->pPart)[slotIndex];
     f32 w[4];
     f32 t = slot->t;
     f32 u = 1.0f - t;
@@ -215,14 +213,13 @@ EffCubicBezierStepResult dds3Bezier4PPartRun(
     t += slot->step;
     if (t > 1.0f) {
         slot->t = 1.0f;
-        return EFF_CUBIC_BEZIER_STEP_CLAMPED_TO_END;
+        return 0;
     }
     slot->t = t;
-    return EFF_CUBIC_BEZIER_STEP_WITHIN_RANGE;
+    return 1;
 }
 
-/* Direct-slot variant of dds3Bezier4PPartRun. */
-EffCubicBezierStepResult nbCameraLerpVec(EffCubicBezierSlot *slot, f32 *out) {
+s32 nbCameraLerpVec(dds3Bezier4PPart_t *slot, f32 *out) {
     f32 w[4];
     f32 t = slot->t;
     f32 u = 1.0f - t;
@@ -238,19 +235,19 @@ EffCubicBezierStepResult nbCameraLerpVec(EffCubicBezierSlot *slot, f32 *out) {
     t += slot->step;
     if (t > 1.0f) {
         slot->t = 1.0f;
-        return EFF_CUBIC_BEZIER_STEP_CLAMPED_TO_END;
+        return 0;
     }
     slot->t = t;
-    return EFF_CUBIC_BEZIER_STEP_WITHIN_RANGE;
+    return 1;
 }
 
-void effMathResetBezierSlot(EffCubicBezierArray *table, EffCubicBezierSlotIndex slotIndex) {
-    EffCubicBezierSlot *slot = &table->slots[slotIndex];
+void func_001AC068(effBezier4P_t *table, s32 slotIndex) {
+    dds3Bezier4PPart_t *slot = &((dds3Bezier4PPart_t *)table->pPart)[slotIndex];
+
     slot->step = 0.05f;
     slot->t = 0;
 }
 
-EffCubicBezierSlot *dds3Bezier4PGetPart(
-    EffCubicBezierArray *table, EffCubicBezierSlotIndex slotIndex) {
-    return &table->slots[slotIndex];
+dds3Bezier4PPart_t *dds3Bezier4PGetPart(effBezier4P_t *pEffBezier4P, s32 index) {
+    return &((dds3Bezier4PPart_t *)pEffBezier4P->pPart)[index];
 }
