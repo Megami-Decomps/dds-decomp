@@ -145,7 +145,7 @@ extern f32 kwlnOverlayAmbientColor[4];
 
 extern f32 kwlnDefaultColorVector[4];
 
-extern f32 kwlnHeldTextureTargetVector[4], kwlnHeldTextureEyeVector[4], kwlnHeldTextureUpVector[4];
+extern f32 dds3RenderTargetVector[4], dds3RenderEyeVector[4], kwlnHeldTextureUpVector[4];
 
 extern f32 D_0037FA20[4], kwlnOverlayEyeVector[4], kwlnOverlayUpVector[4];
 
@@ -204,7 +204,7 @@ s32 dds3DrawFirstProcess(dds3ProcessID_t *task) {
             sdfDrawTag_t *sceneList;
             u64 *sceneFrustum;
             sdf3DMakeScreenParam(&D_0037F7B0.camera);
-            LookAtMatrix(kwlnHeldTextureTargetVector, kwlnHeldTextureEyeVector, kwlnHeldTextureUpVector);
+            LookAtMatrix(dds3RenderTargetVector, dds3RenderEyeVector, kwlnHeldTextureUpVector);
             VU0_STORE_MATRIX_UNCLOBBERED(&dds3RenderViewportMatrix);
             sdf3DMakeViewportPacket((struct ConsMatrixPacket *)(kwlnHeldTextureMatrixPackets + bufferIndex * KWLN_FRAME_BUFFER_BYTES),
                 &D_0037F7B0, &dds3RenderViewportMatrix);

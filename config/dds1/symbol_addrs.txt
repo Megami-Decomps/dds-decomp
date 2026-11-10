@@ -8020,6 +8020,8 @@ aViewEye = 0x00324690;
 aViewDown = 0x003246A0;
 kwlnDefaultColorVector = 0x00324780;
 kwlnDrawVector = 0x00324790;
+dds3RenderTargetVector = 0x00324850;
+dds3RenderEyeVector = 0x00324860;
 dds3RenderLightParallel = 0x00324940;
 dds3RenderAmbientColor = 0x00324950;
 sdfGrOtTable = 0x00324B48;
@@ -11744,8 +11746,6 @@ mnuTerminalPreparationPopupEntry = 0x0036ADF4;
 mnuTerminalPanelPopupEntry = 0x0036AE10;
 mnuTerminalFollowupFadePopupEntry = 0x0036AE2C;
 mnuShopSolarPhaseSalePrices = 0x0036A260;
-kwlnHeldTextureTargetVector = 0x00324850;
-kwlnHeldTextureEyeVector = 0x00324860;
 kwlnHeldTextureUpVector = 0x00324870;
 
 

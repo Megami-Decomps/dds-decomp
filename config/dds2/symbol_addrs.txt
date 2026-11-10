@@ -8317,6 +8317,8 @@ aViewEye = 0x0037F690;
 aViewDown = 0x0037F6A0;
 kwlnDefaultColorVector = 0x0037F780;
 kwlnDrawVector = 0x0037F790;
+dds3RenderTargetVector = 0x0037F850;
+dds3RenderEyeVector = 0x0037F860;
 dds3RenderLightParallel = 0x0037F940;
 dds3RenderAmbientColor = 0x0037F950;
 sdfGrOtTable = 0x0037FB48;
@@ -13159,8 +13161,6 @@ mnuCampCompactRewardKindByteView = 0x003CD8F4;
 mnuExtraLevelItemRewardRows = 0x003D6330;
 mnuExtraLevelWeightedItemPairsView = 0x003D6332;
 mnuMantraPanelEntryRows = 0x003CFEB8;
-kwlnHeldTextureTargetVector = 0x0037F850;
-kwlnHeldTextureEyeVector = 0x0037F860;
 kwlnHeldTextureUpVector = 0x0037F870;
 
 
