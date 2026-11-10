@@ -6,7 +6,6 @@
 #include "libsdf.h"
 #include "sdf_resource.h"
 
-#define D_00529630 D_0040B540
 #include "eeregs.h"
 
 /* Register selectors carried by GIF A+D writes in the two GS contexts. */
@@ -373,7 +372,7 @@ void sdf3DMakeScreenParam(sdf3DScreenParam_t *camera)
 }
 
 
-extern f32 D_00529630[];
+extern f32 sdf3DUpVector[];
 extern void DiagMatrix(void);
 extern sdfMemHandle_t *sdfMemAllocDirect(s32 size);
 extern void *memset(void *dst, s32 value, size_t size);
@@ -438,7 +437,7 @@ void sdf3DMakeLightParallelPacket(sdf3DLightParallelPacket_t *aPacket, sdf3DLigh
         axis[3] = 0.0f;
         SDF_VU0_LOADVECTOR_B_F32(axis);
     } else {
-        SDF_VU0_LOADVECTOR_B(D_00529630);
+        SDF_VU0_LOADVECTOR_B(sdf3DUpVector);
     }
     SDF_VU0_OUTERPRODUCT();
     SDF_VU0_NORMALIZE();

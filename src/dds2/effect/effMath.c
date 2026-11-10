@@ -5,7 +5,6 @@
 #include "fpu.h"
 
 /* DDS's names for the same objects. */
-#define D_002FA240 sdfViewMatrix
 #define aViewEye sdfViewTargetVector
 #define func_001AC068 effMathResetBezierSlot
 
@@ -51,7 +50,7 @@ typedef struct
 } dds3ScreenParam_t;
 
 extern dds3ScreenParam_t dds3ScreenParam;
-extern f32 D_002FA240[16];
+extern f32 sdfViewMatrix[16];
 extern sdfVector4_t aViewEye;
 extern sdfVector4_t aViewDown;
 extern void MultMatrixRev(f32 *aMatrix);
@@ -61,7 +60,7 @@ void effScreenOffset(void)
 {
     f32 *matrix;
 
-    SDF_VU0_LOADMATRIX(D_002FA240);
+    SDF_VU0_LOADMATRIX(sdfViewMatrix);
     matrix = dds3ScreenParam.matrix;
     MultMatrixRev(matrix);
     SDF_VU0_APPLYMATRIX_XYZ1();

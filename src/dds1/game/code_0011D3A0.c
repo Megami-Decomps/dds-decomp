@@ -165,7 +165,7 @@ u64 *dds3PrimLine(s32 x0, s32 y0, s32 z0, s32 color0, s32 x1, s32 y1, s32 z1, s3
     return packet;
 }
 
-extern f32 D_00398390[4];
+extern f32 sdf3DUpVector[4];
 extern u8 sdfViewMatrix[0x40];
 extern const f32 D_0032AF90[13][4];
 extern const f32 D_0032B090[4];
@@ -195,7 +195,7 @@ void *dds3PrimLine3D(s32 x, s32 y, s32 z, s32 highlighted) {
         axis[1] = 0.0f;
         SDF_VU0_LOADVECTOR_B(axis);
     } else {
-        SDF_VU0_LOADVECTOR_B(D_00398390);
+        SDF_VU0_LOADVECTOR_B(sdf3DUpVector);
     }
     SDF_VU0_OUTERPRODUCT();
     SDF_VU0_NORMALIZE();

@@ -1557,7 +1557,7 @@ u32 mdlRunViewerIndexedLabelTask(void) {
 
 extern f32 sdfUnitXVector[4];
 
-extern f32 D_00398390[4];
+extern f32 sdf3DUpVector[4];
 
 extern f32 D_003983A0[4];
 
@@ -1582,10 +1582,10 @@ void mdlUpdateViewerSelectedModelFromPad(void) {
     if (mdlViewerState.yawStepMode != 0) {
         mdlGetRotate(mdlViewerState.resources[0]);
         if (dds3PadBitTable[5] < 0) {
-            SDF_VU0_LOADVECTOR_B(D_00398390);
+            SDF_VU0_LOADVECTOR_B(sdf3DUpVector);
             angle = 5.0f * 3.14159265f / 180.0f;
         } else if (dds3PadBitTable[4] < 0) {
-            SDF_VU0_LOADVECTOR_B(D_00398390);
+            SDF_VU0_LOADVECTOR_B(sdf3DUpVector);
             angle = -5.0f * 3.14159265f / 180.0f;
         } else {
             return;
@@ -1634,11 +1634,11 @@ void mdlUpdateViewerSelectedModelFromPad(void) {
         }
         mdlGetRotate(mdlViewerState.resources[0]);
         if (dds3PadBitTable[5] != 0) {
-            SDF_VU0_LOADVECTOR_B(D_00398390);
+            SDF_VU0_LOADVECTOR_B(sdf3DUpVector);
             FromRotation_B(speed);
             Mult();
         } else if (dds3PadBitTable[4] != 0) {
-            SDF_VU0_LOADVECTOR_B(D_00398390);
+            SDF_VU0_LOADVECTOR_B(sdf3DUpVector);
             FromRotation_B(-speed);
             Mult();
         }

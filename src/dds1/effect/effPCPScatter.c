@@ -6,7 +6,6 @@
 #include "sdfFrame.h"
 
 /* DDS's names for the same objects. */
-#define D_0031F3E0 effScatterTriangleIndices
 #define dds3EffectBase effDefaultRandomState
 #define sdfMatSetTex sdfSetAssetPrimaryTextureAddress
 #define sdfTexFreeDelayed sdfTexReleaseReferenceViaHandler
@@ -689,7 +688,7 @@ extern u32 effPCPScatterTexcoords[];
 
 extern u32 effPCPScatterParams[];
 
-extern u8 D_0031F3E0[];
+extern u8 effScatterTriangleIndices[];
 
 extern void *memset(void *a, s32 b, size_t c);
 
@@ -2983,7 +2982,7 @@ void dds3WhirlwindPolyListDraw(dds3WhirlwindPolyList_tag *object) {
     }
     sdf3DPrimLinkMat(packet, (sdfMat_t *)object->asset, 0);
     count = (s32)object->particleCount;
-    effDebugPoly.parameters = (const u32 *)D_0031F3E0;
+    effDebugPoly.parameters = (const u32 *)effScatterTriangleIndices;
     for (particleIndex = 0; particleIndex < count; particleIndex++) {
         draw = &effDebugPoly;
         remaining = object->vectorsPerParticle;

@@ -634,11 +634,11 @@ void LoadMcModules(const char *prefix, s32 moduleGroup) {
     sceMcInit();
 }
 
-INCLUDE_RODATA(const s32, "sdf/sdfTmx", D_003B50C0);
+INCLUDE_RODATA(const s32, "sdf/sdfTmx", mcModuleNameCdMcserv);
 
-INCLUDE_RODATA(const s32, "sdf/sdfTmx", D_003B50D0);
+INCLUDE_RODATA(const s32, "sdf/sdfTmx", mcModuleNameCdMcman);
 
-INCLUDE_RODATA(const s32, "sdf/sdfTmx", D_003B50E0);
+INCLUDE_RODATA(const s32, "sdf/sdfTmx", mcModuleNameMcserv);
 
-INCLUDE_RODATA(const s32, "sdf/sdfTmx", D_003B50F0);
+INCLUDE_RODATA(const s32, "sdf/sdfTmx", mcModuleNameMcman);
 

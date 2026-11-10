@@ -9836,6 +9836,7 @@
 0x003980B0	sdfGrFrameModes	inferred	SMT3HD data name via SLUS_209.11 0x00529358, 1 agreeing references; was sdfGrFrameModes
 0x003980E0	sdfGrFrameSet	inferred	SMT3HD name via SLUS_209.11 0x00529388, sdf/sdfGsMemIO SMT3 rename; was D_003980E0
 0x003980E8	sdfPacketResourceEntries	inferred	confidence=high; src/dds1/game/code_002D33C8.c:D_003980E8; type=sdfGsMemSlice_t*[]; refs=sdfLinkStoreFrameImagePredraw,sdfPrimFrameMovePredraw; Indexed texture resources supply the VRAM word offset for patching the low resource-address bits of draw packets. [names_qp9.tsv]
+0x00398100	sdfImageSetTexFlushPacket	inferred	SMT3HD name via SLUS_209.11 0x005293A0, sdf/sdfImageSet SMT3 data name; was D_00398100
 0x00398158	sdfGrDrawState	inferred	SMT3HD data name via SLUS_209.11 0x005293F8, 4 agreeing references; was sdfGrDrawState
 0x00398188	sdfModelDefaultName	inferred	SMT3HD name via SLUS_209.11 0x00529428, sdf/sdfModel SMT3 rename; was D_00398188
 0x00398198	sdfMatMultiTexAlphaTable	inferred	SMT3HD name via SLUS_209.11 0x00529438, sdf/sdfMat SMT3 rename; was D_00398198
@@ -9860,6 +9861,7 @@
 0x00398360	sdfMotGenMorphTable	inferred	SMT3HD name via SLUS_209.11 0x00529600, sdfMotion morph generator table; was sdfMotionCommandHandlers
 0x00398368	sdfMotMorphTable	inferred	SMT3HD data name via SLUS_209.11 0x00529608, 1 agreeing references; was sdfMotMorphTable
 0x00398380	sdfUnitXVector	inferred	SMT3HD name via SLUS_209.11 0x00529620, sdf/sdfQuat SMT3 rename; was D_00398380
+0x00398390	sdf3DUpVector	inferred	SMT3HD name via SLUS_209.11 0x00529630, sdf/sdf3D SMT3 data name; was D_00398390
 0x003983D0	sdf3DScreenParam	inferred	The screen parameters sdf3DSetCamera copies whole (an SdfProjectionRecord, 0xA0 bytes). Named the original name, from Nocturne HD's sdf3D.c (sdf3DSetCamera's stores in order)
 0x00398470	sdf3DScreenTm	inferred	SMT3HD data name via SLUS_209.11 0x00529710, 9 agreeing references; was sdf3DScreenTm
 0x003984B0	sdfCameraTm	inferred	The camera matrix sdf3DSetCamera is given, kept as it stores it first. Named the original name, from Nocturne HD's sdf3D.c, whose sdf3DSetCamera stores sdfCameraTm, sdf3DScreenTm, sdf3DEyeOffset and the screen parameters in this order
@@ -9940,6 +9942,10 @@
 0x003B48E0	sdfDmaNestOverflowMsg	inferred	SMT3HD name via SLUS_209.11 0x00549BB0, sdf/sdfSound SMT3 rename; was D_003B48E0
 0x003B4DB8	sdfGsMemInfoTitle	inferred	SMT3HD name via SLUS_209.11 0x0054A088, sdf/sdfSound SMT3 rename; was sdfGsMemoryDumpHeader
 0x003B4E30	sdfGsMemNodeFmt	inferred	SMT3HD name via SLUS_209.11 0x0054A100, sdf/sdfSound SMT3 rename; was sdfGsMemoryDumpRowFormat
+0x003B50C0	mcModuleNameCdMcserv	inferred	SMT3HD name via SLUS_209.11 0x0054A3A0, sdf/sdfTmx SMT3 data name; was D_003B50C0
+0x003B50D0	mcModuleNameCdMcman	inferred	SMT3HD name via SLUS_209.11 0x0054A3B0, sdf/sdfTmx SMT3 data name; was D_003B50D0
+0x003B50E0	mcModuleNameMcserv	inferred	SMT3HD name via SLUS_209.11 0x0054A3C0, sdf/sdfTmx SMT3 data name; was D_003B50E0
+0x003B50F0	mcModuleNameMcman	inferred	SMT3HD name via SLUS_209.11 0x0054A3D0, sdf/sdfTmx SMT3 data name; was D_003B50F0
 0x003B5C80	at3decOutputFirTaps	inferred	libat3dec: 48 taps of the final FIR that at3decFilterOutput applies; read by its routines. DDS2 twin 0x0042F9D0.
 0x003B5CE0	at3decQmfTaps	inferred	libat3dec: 24 half-band QMF synthesis taps, forward order; read by its routines. DDS2 twin 0x0042FA30.
 0x003B5D10	at3decQmfTapsReversed	inferred	libat3dec: the same 24 QMF taps in reverse order; read by its routines. DDS2 twin 0x0042FA60.
@@ -10370,6 +10376,7 @@
 0x003BD628	sdfMovieDrawRight	inferred	The movie sprite's right edge (GS coordinates), set by sdfSetGridScaledDrawBounds. DDS2 twin 0x00438D18.
 0x003BD62C	sdfMovieDrawBottom	inferred	The movie sprite's bottom edge (GS coordinates), set by sdfSetGridScaledDrawBounds. DDS2 twin 0x00438D1C.
 0x003BD630	sdfMovieDrawColor	inferred	The movie sprite's color: alpha in the top byte, RGB below, set by sdfSetGridScaledDrawBounds. DDS2 twin 0x00438D20.
+0x003BD638	sdfMovieIpsExt	inferred	SMT3HD name via SLUS_209.11 0x00551B50, sdf/sdfMovie SMT3 data name; was D_003BD638
 0x003BD688	dds3KernelThread	inferred	SMT3HD name via SLUS_209.11 0x00551B88, sdf/sdfDefaultMain SMT3 rename; was kwlnMainLoopThreadNode
 0x003BD690	dds3PadVibrationState	inferred	SMT3HD data name via SLUS_209.11 0x00551B90, 3 agreeing references; was dds3PadVibrationState
 0x003BD699	kwlnLargeMotorTarget	inferred	confidence=high; src/dds1/game/code_00102ED8.c:kwlnPadStepLargeMotorLevel; Target actuator level approached in steps of at most 0x20. [names_qp9.tsv]

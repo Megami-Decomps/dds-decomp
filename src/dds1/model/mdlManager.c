@@ -5,7 +5,6 @@
 #include "ps2asm.h"
 #include "sdfFrame.h"
 
-#define D_002FA240 sdfViewMatrix
 #define fileHandleFree fileRequestFreeIfComplete
 #define mdl_1DD9C0 mdlProjectPoints
 
@@ -274,7 +273,7 @@ extern u16 mdlPibGetEffectCount(mdlPibRecord_t *record);
 extern u16 mdlPibGetMotionCount(mdlPibRecord_t *record);
 extern s32 mdlPibGetVersion(mdlPibRecord_t *record);
 extern sdfPacDecodeResrc_t *sdfPacFreeResrc(sdfPacDecodeResrc_t *resrc);
-extern sdfMatrix4_t D_002FA240;
+extern sdfMatrix4_t sdfViewMatrix;
 extern sdf3DScreenParam_t dds3ScreenParam;
 extern void MultMatrixRev(sdfMatrix4_t *aMatrix);
 extern void MultMatrixRevNoArg(void);
@@ -1299,7 +1298,7 @@ void mdlSetEffectScale(mdlObj_t *aHandle, f32 aScale)
 /* vu0 routine: project the point through the view and model matrices into vf10. */
 void mdlGetScreenOffset(mdlObj_t *aHandle, void *aOfs)
 {
-    SDF_VU0_LOADMATRIX(&D_002FA240);
+    SDF_VU0_LOADMATRIX(&sdfViewMatrix);
     MultMatrixRev(&dds3ScreenParam.TM);
     SDF_VU0_COPYMATRIX_A_TO_B();
     SDF_VU0_LOADMATRIX(&aHandle->inner->tm);
@@ -1322,7 +1321,7 @@ void mdl_1DD9C0(mdlObj_t *ctx, f32 (*inputPoints)[4], f32 (*outputPoints)[4], s3
     SDF_VU0_LOADMATRIX(&ctx->inner->tm);
     SDF_VU0_LOADVECTOR_BARRIER(&ctx->inner->scale);
     SDF_VU0_SCALE_XYZ();
-    MultMatrixRev(&D_002FA240);
+    MultMatrixRev(&sdfViewMatrix);
     MultMatrixRev(&dds3ScreenParam.TM);
     for (pointIndex = 0; pointIndex < pointCount; pointIndex++) {
         SDF_VU0_LOADVECTOR_BARRIER(inputPoints[pointIndex]);

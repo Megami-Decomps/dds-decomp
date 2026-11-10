@@ -34,9 +34,8 @@ s32 movieParseHeader(sdfIpuDecodeCb_t *aNode, sdfMovieCb_t *stream, s32 aOp, voi
 extern s32 movieStreamSema;
 extern u32 movieSemaCount;
 extern sdfMovieCb_t *movieSemaId;
-#define D_00551B50 D_003BD638
 #define movieDrawMode D_003BD61C
-extern const char D_00551B50[];
+extern const char sdfMovieIpsExt[];
 
 #define movie_2C5080 sdfPrintTextLine
 #define release_movieobj2 sdfMovieDrawFrame
@@ -684,7 +683,7 @@ void movieOpenStream(sdfMovieCb_t *stream, sdfMovieInitParm_t *desc, const char 
     ext = strrchr(path, '.');
     isPac = 0;
     if (ext != NULL) {
-        isPac = strcasecmp(ext, D_00551B50) == 0;
+        isPac = strcasecmp(ext, sdfMovieIpsExt) == 0;
     }
     stream->mode = isPac;
     fmt.loopMode = 0;
@@ -807,5 +806,5 @@ INCLUDE_SDATA(const s32, "sdf/sdfMovie", sdfMovieDrawColor);
 
 INCLUDE_SDATA(const s32, "sdf/sdfMovie", D_003BD634);
 
-INCLUDE_SDATA(const s32, "sdf/sdfMovie", D_003BD638);
+INCLUDE_SDATA(const s32, "sdf/sdfMovie", sdfMovieIpsExt);
 

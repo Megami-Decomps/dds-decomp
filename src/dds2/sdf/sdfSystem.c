@@ -6,7 +6,6 @@
 #include "basic.h"
 #include "motion.h"
 
-#define D_00551828 sdfTickCallback
 #define sdf_2A8258 sdfFreeMemorySlotFromEitherHeap
 #define sdf_2A84D8 sdfDrainPendingHandlers
 #define func_002A8758 sdfDeleteTrackedThread
@@ -40,7 +39,7 @@ extern s32 _gp, sdfThreadSema, sdfVblankFlag, sdfCoreDrawBuffSize;
 
 extern u8 sdfPadManagerMode, sdfSystemThreadStack[], sdfVblankThreadStack[];
 
-extern void (*D_00551828)(void);
+extern void (*sdfTickCallback)(void);
 
 extern sdfThCB_t *sdfVblankThreadId;
 
@@ -456,8 +455,8 @@ void sdfSystemThreadProc(void) {
             sdfPadWork();
         }
         sdfFileCmdThreadCheckPrio();
-        if (D_00551828 != NULL) {
-            D_00551828();
+        if (sdfTickCallback != NULL) {
+            sdfTickCallback();
         }
     }
 }

@@ -4,8 +4,6 @@
 #include "sdfFrame.h"
 
 /* DDS's names for the same objects. */
-#define D_002F5C20 kwlnHeldTextureTargetVector
-#define D_002F5C30 kwlnHeldTextureEyeVector
 #define dds3CrossfadeEndMessage D_00414430
 
 /* DDS keeps the end message as data: its rodata block has 8 more bytes than
@@ -26,8 +24,8 @@ extern void *sdf2DGetPrimPtr(void *aPacketPtr);
 extern u32 dds3GetFrameID(void);
 extern sdfTexHandle_t *dds3GetRenderTexture(void);
 extern u32 dds3RenderDrawEnv;
-extern f32 D_002F5C20[];
-extern f32 D_002F5C30[];
+extern f32 kwlnHeldTextureTargetVector[];
+extern f32 kwlnHeldTextureEyeVector[];
 extern void dds3CrossfadeEnd(void);
 extern s32 dds3AllocRenderTexture(u16 sx, u16 sy, f32 aspect);
 extern s32 dds3RenderTextureON(void);
@@ -316,12 +314,12 @@ void dds3CrossfadeStart(s32 frame)
     if (frame == 0) {
         return;
     }
-    D_002F5C20[0] = 0.0f;
-    D_002F5C20[1] = 0.0f;
-    D_002F5C20[2] = 0.0f;
-    D_002F5C30[0] = 0.0f;
-    D_002F5C30[1] = 0.0f;
-    D_002F5C30[2] = 0.0f;
+    kwlnHeldTextureTargetVector[0] = 0.0f;
+    kwlnHeldTextureTargetVector[1] = 0.0f;
+    kwlnHeldTextureTargetVector[2] = 0.0f;
+    kwlnHeldTextureEyeVector[0] = 0.0f;
+    kwlnHeldTextureEyeVector[1] = 0.0f;
+    kwlnHeldTextureEyeVector[2] = 0.0f;
     dds3RenderDrawEnv = 0x80808080;
     dds3AllocRenderTexture(0x100, 0xE0, 0.0f);
     dds3RenderTextureON();
