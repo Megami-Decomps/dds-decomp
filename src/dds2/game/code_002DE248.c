@@ -1,5 +1,4 @@
 #include "sdk_ps2.h"
-#include "kernel.h"
 #include "eff_block128.h"
 #include "sdf_model_packet_callback.h"
 #include "eff_editor_menu.h"
@@ -50,8 +49,6 @@
 #include "eff_actor_transition_config.h"
 #include "eff_object_node.h"
 #include "btl_effect_position.h"
-/* Holds the declaration context sdfDrawTexturedQuad's full-unit match needs. */
-#include "sdf_texture_release.h"
 #include "eff_random.h"
 #include "sdf_trig.h"
 #include "btl_stage_task_cleanup.h"
@@ -121,12 +118,12 @@ extern void fileReadRecordSecondVector(u8 *obj, void *dst);
 extern void fileReadVectorPtr20(u8 *obj, void *dst);
 extern void fileSetRecordSecondVector(void *record, const void *src);
 extern s32 itfGridLookupValueOrDefault(EffectSlotSet *resource, s32 resourceIndex);
+extern void dds3PadVibrationReset(void);
 extern void mnuRecordSetVector(void *record, const void *src);
 extern s32 sdfModelGetMarkPosMatrix(sdfModelRootNode_t *model, s32 mapRecordId);
 extern u8 *effAllocateStripFromWorkAndRetainTexture(u8 *work);
 extern u8 *effCreateTexturedStripWithSharedTexture(u32 count, u32 repeat);
 
-extern void dds3PadVibrationReset(void);
 extern void btlBeginSceneLightColorTransition(f32 *, f32 *, s32);
 
 
