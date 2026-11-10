@@ -1,4 +1,5 @@
 # addr	name	evidence|inferred	note
+0x001001C8	_exit	inferred	SMT3HD name via SLUS_209.11 0x001001C8, crt0 _exit, tail-calls Exit(0); was func_001001C8
 0x001003E8	dds3SoftReset	inferred	SMT3HD name via SLUS_209.11 0x00100400, shared-hash-in-run; was kwlnRequestMainLoopExit
 0x001003F8	dds3GetKernelCount	inferred	SMT3HD name via SLUS_209.11 0x00100410, shared-hash-in-run; was kwlnGetFrameCounter
 0x00100400	dds3GetFrameID	inferred	SMT3HD name via SLUS_209.11 0x00100418, shared-hash-in-run; was kwlnGetDrawBufferIndex
@@ -9796,6 +9797,7 @@
 0x00361358	_dtoa_r	inferred	SMT3HD name via SLUS_209.11 0x002D8378, reloc-identical; was func_00361358
 0x00362678	__sfvwrite	inferred	SMT3HD name via SLUS_209.11 0x002D9E00, reloc-identical; was func_00362678
 0x00362A58	_setlocale_r	inferred	SMT3HD name via SLUS_209.11 0x002DA278, reloc-identical; was func_00362A58
+0x00362AE8	_localeconv_r	inferred	SMT3HD name via SLUS_209.11 0x002DA308, newlib _localeconv_r, returns &localeconvData; was func_00362AE8
 0x00362AF8	setlocale	inferred	SMT3HD name via SLUS_209.11 0x002DA318, shared-hash-in-run; was func_00362AF8
 0x00362BA0	_mbtowc_r	inferred	SMT3HD name via SLUS_209.11 0x002DA4B8, byte-identical; was func_00362BA0
 0x00362CB8	_Balloc	inferred	SMT3HD name via SLUS_209.11 0x002DA5D0, reloc-identical; was func_00362CB8
@@ -10546,6 +10548,8 @@
 0x0040D9A0	ipuDefaultQuantizerMatrices	inferred	libipu: the intra and non-intra quantizer matrices sceIpuInit loads; read by its routines. DDS1 twin 0x0039A820.
 0x0040D9F0	ipuDefaultVqClut	inferred	libipu: the VQ colour lookup table sceIpuInit loads; read by its routines. DDS1 twin 0x0039A870.
 0x0040E650	at3decImdctTwiddles	inferred	libat3dec: 128 x 4 words, the butterfly twiddles of the 256-point inverse transform; read by its routines. DDS1 twin 0x0039B4D0.
+0x0040EE50	dtorListCursor	inferred	SMT3HD name via SLUS_209.11 0x0052BB28, __do_global_dtors static destructor cursor; was D_0040EE50
+0x0040EE54	dtorFrameDeregistered	inferred	SMT3HD name via SLUS_209.11 0x0052BB2C, __do_global_dtors static flag; was D_0040EE54
 0x0040F150	_impure_ptr	inferred	Newlib's active reentrancy pointer: fopen loads it as _fopen_r's first argument, as do the printf/stdio and signal wrappers. Retail data points to 0x0040EE60; srand stores a zero-extended seed and rand updates the 64-bit state at +0xA8. DDS1 twin 0x0039BFD0; only the four-byte pointer is named.
 0x0040F158	__malloc_av_	inferred	newlib's bin array: two words a bin, 128 bins, the top chunk in bin 0's forward link and the binblocks map in its size word. DDS1 twin 0x0039BFD8.
 0x0040F560	__malloc_trim_threshold	inferred	newlib's trim threshold, an unsigned long (64 bits on the EE): free trims the top chunk at or past it. DDS1 twin 0x0039C3E0.
@@ -10556,6 +10560,8 @@
 0x0040F588	__malloc_current_mallinfo	inferred	newlib's mallinfo totals; its arena is the memory taken from sbrk. DDS1 twin 0x0039C408.
 0x0040F5C8	fileioLibraryVersion	inferred	The EE FILEIO library's version ("2500" here): the library's open compares the IOP FILEIO's reply at 0x00486FA8 with it, or with "....", and refuses a mismatch. DDS1 twin 0x0039C448.
 0x0040F5D0	sbrkBreak	inferred	The heap's current end that sbrk moves (Sony's sbrk: checked against EndOfHeap with interrupts off), initialized to the end of the loaded image; newlib's allocator grows and trims through it. DDS1 twin 0x0039C450.
+0x0040F6A4	frameObjectSema	inferred	SMT3HD name via SLUS_209.11 0x0052C37C, semaphore around frameObjectList; was D_0040F6A4
+0x00410C68	__EH_FRAME_BEGIN__	inferred	SMT3HD name via SLUS_209.11 0x0052D940, start of .eh_frame; was D_00410C68
 0x00410C6C	sdfAsinTable	inferred	SMT3HD name via SLUS_209.11 0x0052D944, sdfMath asin table; was sdfNormalizedAsinSamples
 0x00411408	scrCommandTable	inferred	SMT3HD name via SLUS_209.11 0x0052E350, script/scrScriptProcess SMT3 rename; was D_00411408
 0x00412688	scrSceneLightDirectionZeroWarning	inferred	confidence=high; Existing C-defined WARNING: SCENE_LIGHT_DIR length zero string, emitted when all direction components have abs<=0.01; native allocation40B including padding, C literal38B including NUL. DDS1 twin 0x0039F508; existing const char[], native 0x28-byte allocation and padding unchanged. No import or active ASM reader. [PurD readability data b7; native/matched-C twin; identifier-only]
@@ -10644,6 +10650,7 @@
 0x00430AC0	at3decOverlapOrder	inferred	libat3dec: the overlap stage's output order, a permutation of 0..127; read by its routines. DDS1 twin 0x003B6D70.
 0x00430CC0	at3decOverlapWindows	inferred	libat3dec: the overlap stage's two 128-entry windows; read by its routines. DDS1 twin 0x003B6F70.
 0x00430EC0	at3decFallingWindow	inferred	libat3dec: 128-entry falling window, the overlap stage's and at3decCarrySilentBand's; read by its routines. DDS1 twin 0x003B7170.
+0x004324B8	localeconvData	inferred	SMT3HD name via SLUS_209.11 0x0054B8D8, newlib lconv data _localeconv_r returns; was D_004324B8
 0x00435BAC	dds3VblanksPerFrame	inferred	SMT3HD data name via SLUS_209.11 0x0054E82C, 1 agreeing references; was dds3VblanksPerFrame
 0x00435BD0	startinglistf	inferred	SMT3HD data name via SLUS_209.11 0x0054E850, 11 agreeing references; was startinglistf
 0x00435BD8	startinglistcnt	inferred	SMT3HD data name via SLUS_209.11 0x0054E858, 6 agreeing references; was startinglistcnt
@@ -11315,6 +11322,7 @@
 0x0043921C	movieSemaCount	inferred	SMT3HD data name via SLUS_209.11 0x0055216C, 3 agreeing references; was movieSemaCount
 0x00439220	sdfDecompHistoryIndex	inferred	SMT3HD name via SLUS_209.11 0x00552170, sdf/sdf_Decomp SMT3 rename; was D_00439220
 0x00439224	sdfFileRpcThreadId	inferred	SMT3HD name via SLUS_209.11 0x00552174, sdfTmx twin; was D_00439224
+0x00439228	libcErrno	inferred	SMT3HD name via SLUS_209.11 0x00552178, newlib errno cleared and read by _sbrk_r; was D_00439228
 0x004393C8	dds3ProcessTreeDepth	inferred	SMT3HD data name via SLUS_209.11 0x005522C8, 2 agreeing references; was dds3ProcessTreeDepth
 0x00439410	dds3KernelStack	inferred	SMT3HD name via SLUS_209.11 0x00552310, sdf/sdfDefaultMain SMT3 rename; was D_00439410
 0x0043DC90	key2	inferred	SMT3HD data name via SLUS_209.11 0x00556B90, 2 agreeing references; was key2
@@ -11472,3 +11480,6 @@
 0x0047BD00	sdfFileRpcRecvBuf	inferred	SMT3HD name via SLUS_209.11 0x00594800, sdf/sdfTmx SMT3 rename; was D_0047BD00
 0x0047BE00	sdfFileRpcBuf	inferred	SMT3HD name via SLUS_209.11 0x00594900, sdfTmx twin; was D_0047BE00
 0x0047BE40	sdfFileRpcReadBuf	inferred	SMT3HD name via SLUS_209.11 0x00594940, sdf/sdfTmx SMT3 rename; was D_0047BE40
+0x00483540	ctorFrameObject	inferred	SMT3HD name via SLUS_209.11 0x0059AD40, __do_global_ctors static object; was D_00483540
+0x00483558	mainCtorsDone	inferred	SMT3HD name via SLUS_209.11 0x0059AD58, __main static flag; was D_00483558
+0x00483560	frameObjectList	inferred	SMT3HD name via SLUS_209.11 0x0059AD60, __register_frame_info object list head; was D_00483560

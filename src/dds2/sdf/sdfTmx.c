@@ -399,7 +399,7 @@ extern void *_signal_r(_reent *r, s32 sig, void *handler);
 
 extern s32 _setlocale_r(_reent *r, s32 category, const char *locale);
 
-extern void *func_002DA308(_reent *r);
+extern void *_localeconv_r(_reent *r);
 
 extern void _cleanup_r(_reent *r);
 
@@ -415,11 +415,11 @@ extern long strtol(const char *s, char **end, s32 base);
 
 extern s32 raise(s32 sig);
 
-extern void func_001001C8(s32 code) __attribute__((noreturn));
+extern void _exit(s32 code) __attribute__((noreturn));
 
 extern u8 localeconvData[] __attribute__((section(".data")));
 
-extern s32 D_00552178 __attribute__((section(".data")));
+extern s32 libcErrno __attribute__((section(".data")));
 
 extern s32 mallocLockCount __attribute__((section(".data")));
 
@@ -505,21 +505,21 @@ extern void __do_global_ctors(void);
 
 extern s32 atexit(void (*fn)(void));
 
-extern void (**D_0052BB28)(void) __attribute__((section(".data")));
+extern void (**dtorListCursor)(void) __attribute__((section(".data")));
 
-extern s32 D_0052BB2C __attribute__((section(".data")));
+extern s32 dtorFrameDeregistered __attribute__((section(".data")));
 
-extern s32 D_0052C37C __attribute__((section(".data")));
+extern s32 frameObjectSema __attribute__((section(".data")));
 
-extern u8 D_0052D940[] __attribute__((section(".data")));
+extern u8 __EH_FRAME_BEGIN__[] __attribute__((section(".data")));
 
-extern void (*D_002F5600[])(void) __attribute__((section(".data")));
+extern void (*__CTOR_LIST__[])(void) __attribute__((section(".data")));
 
-extern s32 D_0059AD58 __attribute__((section(".data")));
+extern s32 mainCtorsDone __attribute__((section(".data")));
 
-extern object *D_0059AD60 __attribute__((section(".data")));
+extern object *frameObjectList __attribute__((section(".data")));
 
-extern object D_0059AD40;
+extern object ctorFrameObject;
 
 typedef struct fp_number_type {
     s32 class;
@@ -538,7 +538,7 @@ extern f64 __make_dp(s32 kind, s32 sign, s32 exp, s64 mant);
 
 #define va_end(ap) ((void)0)
 
-extern s32 func_002D6678(_reent *r, FILE *fp, const char *fmt, va_list ap);
+extern s32 _vfprintf_r(_reent *r, FILE *fp, const char *fmt, va_list ap);
 
 typedef union f32_bits {
     f32 f;
@@ -561,9 +561,9 @@ extern fp_number_type_df *libc_2D1590(const fp_number_type_df *a, const fp_numbe
 
 extern long __fpcmp_parts_df(const fp_number_type_df *a, const fp_number_type_df *b);
 
-extern const u8 D_0054B551[];
+extern const u8 _ctype_[];
 
-#define SDF_TOLOWER(c) ((D_0054B551[(c)] & 1) ? (c) + 0x20 : (c))
+#define SDF_TOLOWER(c) (((_ctype_ + 1)[(c)] & 1) ? (c) + 0x20 : (c))
 
 typedef struct {
     u32 mode;
