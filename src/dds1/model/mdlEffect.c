@@ -2733,11 +2733,11 @@ void mdlLoadViewerPresentationConfig(void) {
             }
         } else if (memcmp(lineStart, D_003BBCD8, 4) == 0) {
             if (sscanf(lineStart + 4, "%d,%f,%d,%f,%x", &fogNear, &fogValue, &fogFar, &fogFarB, &color) == 5) {
-                kwlnDrawVector.fogNear = fogNear;
-                kwlnDrawVector.depthNear = fogValue;
-                kwlnDrawVector.fogFar = fogFar;
-                kwlnDrawVector.depthFar = fogFarB;
-                kwlnDrawVector.fogColor = color;
+                kwlnDrawVector.fogMax = fogNear;
+                kwlnDrawVector.fogNear = fogValue;
+                kwlnDrawVector.fogMin = fogFar;
+                kwlnDrawVector.fogFar = fogFarB;
+                kwlnDrawVector.color = color;
             }
         }
         lineOffset = nextLineOffset;
@@ -2755,9 +2755,9 @@ void mdlSaveViewerPresentationConfig(void) {
     size = sprintf(buffer, D_003ABF18, D_003BA8EC,
                         D_003D7B20.x, D_003D7B20.y, D_003D7B20.z,
                         D_003D7B30.x, D_003D7B30.y, D_003D7B30.z,
-                        dds3ScreenParam.camera.fov, (s32)kwlnDrawVector.fogNear,
-                        kwlnDrawVector.depthNear, (s32)kwlnDrawVector.fogFar,
-                        kwlnDrawVector.depthFar, kwlnDrawVector.fogColor);
+                        dds3ScreenParam.camera.fov, (s32)kwlnDrawVector.fogMax,
+                        kwlnDrawVector.fogNear, (s32)kwlnDrawVector.fogMin,
+                        kwlnDrawVector.fogFar, kwlnDrawVector.color);
     request = fileSave(D_00367AF8, buffer, size);
     fileSync(request);
     fileHandleFree((struct FileRequest *)request);
@@ -3200,7 +3200,7 @@ s32 mdlDebugPrintEffectScale2(dds3ProcessID_t *task) {
         } else if (mdlDebugScaleWork.selection < 4) {
             mdlGetDebugEntry(mdlDebugScaleWork.selection);
         } else {
-            dds3DebugColorEditEx(&kwlnDrawVector.fogColor, mdlDebugScaleWork.selection - 4, (s8 *)mdlDebugScaleWork.pad);
+            dds3DebugColorEditEx(&kwlnDrawVector.color, mdlDebugScaleWork.selection - 4, (s8 *)mdlDebugScaleWork.pad);
         }
     }
     sdfDrawTagLink(mdlDebugScaleWork.packetList,
@@ -3227,7 +3227,7 @@ s32 mdlDebugPrintEffectScale2(dds3ProcessID_t *task) {
                                                           (mdlDebugScaleWork.unk04 == 1 && mdlDebugScaleWork.selection == i) ? 6 : 0,
                                                           D_00367D58[i].format, value));
     }
-    mdlDebugTextBox(0x8680, 0x7C60, kwlnDrawVector.fogColor, mdlDebugScaleWork.selection - 4);
+    mdlDebugTextBox(0x8680, 0x7C60, kwlnDrawVector.color, mdlDebugScaleWork.selection - 4);
     D_00325708.regFunc(&D_00325708, mdlDebugScaleWork.packetList);
     return 0;
 }

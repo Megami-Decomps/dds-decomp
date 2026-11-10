@@ -2564,18 +2564,18 @@ void func_00145B18(void) {
     SDF_VU0_COPYVECTOR(&fldAutoMapEye, eye);
     SDF_VU0_COPYVECTOR(&D_00324A20, focus);
     SDF_VU0_COPYVECTOR(&fldAutoMapUp, &up);
-    kwlnOverlayFrustumParameters.fogNear = 255.0f;
-    kwlnOverlayFrustumParameters.depthNear = 1000.0f;
-    kwlnOverlayFrustumParameters.fogFar = 255.0f;
-    kwlnOverlayFrustumParameters.depthFar = 20000.0f;
-    kwlnOverlayFrustumParameters.fogColor = 0x108010;
+    kwlnOverlayFrustumParameters.fogMax = 255.0f;
+    kwlnOverlayFrustumParameters.fogNear = 1000.0f;
+    kwlnOverlayFrustumParameters.fogMin = 255.0f;
+    kwlnOverlayFrustumParameters.fogFar = 20000.0f;
+    kwlnOverlayFrustumParameters.color = 0x108010;
     D_00324980.camera.offsetX = 2048.0f;
     D_00324980.camera.offsetY = 2048.0f;
-    kwlnDrawVector.fogNear = 255.0f;
-    kwlnDrawVector.depthNear = 1000.0f;
-    kwlnDrawVector.fogFar = 255.0f;
-    kwlnDrawVector.depthFar = 20000.0f;
-    kwlnDrawVector.fogColor = 0x108010;
+    kwlnDrawVector.fogMax = 255.0f;
+    kwlnDrawVector.fogNear = 1000.0f;
+    kwlnDrawVector.fogMin = 255.0f;
+    kwlnDrawVector.fogFar = 20000.0f;
+    kwlnDrawVector.color = 0x108010;
 }
 extern void frSetFontDrawOT(u32);
 
@@ -2686,11 +2686,11 @@ void fldEnterSceneCamera(void) {
     SDF_VU0_COPYVECTOR(&fldAutoMapEye, eye);
     SDF_VU0_COPYVECTOR(&D_00324A20, focus);
     SDF_VU0_COPYVECTOR(&fldAutoMapUp, &up);
-    kwlnOverlayFrustumParameters.fogNear = 255.0f;
-    kwlnOverlayFrustumParameters.depthNear = 1000.0f;
-    kwlnOverlayFrustumParameters.fogFar = 255.0f;
-    kwlnOverlayFrustumParameters.depthFar = 20000.0f;
-    kwlnOverlayFrustumParameters.fogColor = 0x108010;
+    kwlnOverlayFrustumParameters.fogMax = 255.0f;
+    kwlnOverlayFrustumParameters.fogNear = 1000.0f;
+    kwlnOverlayFrustumParameters.fogMin = 255.0f;
+    kwlnOverlayFrustumParameters.fogFar = 20000.0f;
+    kwlnOverlayFrustumParameters.color = 0x108010;
     D_00324980.camera.offsetX = 2244.0f;
     D_00324980.camera.offsetY = 2118.0f;
 }
@@ -2744,11 +2744,11 @@ void fldLoadSceneModelsAndCamera(void) {
     SDF_VU0_COPYVECTOR(&fldAutoMapEye, eye);
     SDF_VU0_COPYVECTOR(&D_00324A20, focus);
     SDF_VU0_COPYVECTOR(&fldAutoMapUp, &up);
-    kwlnOverlayFrustumParameters.fogNear = 255.0f;
-    kwlnOverlayFrustumParameters.depthNear = 1000.0f;
-    kwlnOverlayFrustumParameters.fogFar = 255.0f;
-    kwlnOverlayFrustumParameters.depthFar = 20000.0f;
-    kwlnOverlayFrustumParameters.fogColor = 0x108010;
+    kwlnOverlayFrustumParameters.fogMax = 255.0f;
+    kwlnOverlayFrustumParameters.fogNear = 1000.0f;
+    kwlnOverlayFrustumParameters.fogMin = 255.0f;
+    kwlnOverlayFrustumParameters.fogFar = 20000.0f;
+    kwlnOverlayFrustumParameters.color = 0x108010;
     D_00324980.camera.offsetX = 2244.0f;
     D_00324980.camera.offsetY = 2118.0f;
 }
@@ -2916,11 +2916,11 @@ void fldUpdateAutomapInput(void) {
     SDF_VU0_COPYVECTOR(&fldAutoMapEye, eye);
     SDF_VU0_COPYVECTOR(&D_00324A20, focus);
     SDF_VU0_COPYVECTOR(&fldAutoMapUp, up);
-    kwlnOverlayFrustumParameters.fogNear = 255.0f;
-    kwlnOverlayFrustumParameters.depthNear = 1000.0f;
-    kwlnOverlayFrustumParameters.fogFar = 255.0f;
-    kwlnOverlayFrustumParameters.depthFar = 20000.0f;
-    kwlnOverlayFrustumParameters.fogColor = 0x808080;
+    kwlnOverlayFrustumParameters.fogMax = 255.0f;
+    kwlnOverlayFrustumParameters.fogNear = 1000.0f;
+    kwlnOverlayFrustumParameters.fogMin = 255.0f;
+    kwlnOverlayFrustumParameters.fogFar = 20000.0f;
+    kwlnOverlayFrustumParameters.color = 0x808080;
     SDF_VU0_COPYVECTOR(aViewEye, eye);
     SDF_VU0_COPYVECTOR(aViewTarget, focus);
     SDF_VU0_COPYVECTOR(aViewDown, up);
@@ -2955,11 +2955,11 @@ void fldCenterCameraOnEntry(void) {
     SDF_VU0_COPYVECTOR(&fldAutoMapEye, eye);
     SDF_VU0_COPYVECTOR(&D_00324A20, focus);
     SDF_VU0_COPYVECTOR(&fldAutoMapUp, up);
-    kwlnOverlayFrustumParameters.fogNear = 255.0f;
-    kwlnOverlayFrustumParameters.depthNear = 1000.0f;
-    kwlnOverlayFrustumParameters.fogFar = 255.0f;
-    kwlnOverlayFrustumParameters.depthFar = 20000.0f;
-    kwlnOverlayFrustumParameters.fogColor = 0x808080;
+    kwlnOverlayFrustumParameters.fogMax = 255.0f;
+    kwlnOverlayFrustumParameters.fogNear = 1000.0f;
+    kwlnOverlayFrustumParameters.fogMin = 255.0f;
+    kwlnOverlayFrustumParameters.fogFar = 20000.0f;
+    kwlnOverlayFrustumParameters.color = 0x808080;
 }
 
 /* Stores the area, floor/room and third location selection, and selects the

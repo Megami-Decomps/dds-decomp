@@ -194,12 +194,12 @@ EvtRuntimeChild *evtCreateViewerTimelineKey(EvtRuntimeGroup *group, s32 frame, e
         break;
     case 11: {
         EvtViewerDrawPayload *draw = sdfChipAllocDirect(sizeof(*draw));
-        draw->parameters.vec[0] = kwlnDrawVector.fogFar;
-        draw->parameters.color = kwlnDrawVector.fogColor;
+        draw->parameters.vec[0] = kwlnDrawVector.fogMin;
+        draw->parameters.color = kwlnDrawVector.color;
         key->payload = draw;
-        draw->parameters.vec[1] = kwlnDrawVector.fogNear;
-        draw->parameters.vec[2] = kwlnDrawVector.depthNear;
-        draw->parameters.vec[3] = kwlnDrawVector.depthFar;
+        draw->parameters.vec[1] = kwlnDrawVector.fogMax;
+        draw->parameters.vec[2] = kwlnDrawVector.fogNear;
+        draw->parameters.vec[3] = kwlnDrawVector.fogFar;
         key->p08.h[0] = 1;
         break;
     }

@@ -380,15 +380,15 @@ void dds3SetFogColor(s32 blendFrames, f32 *color) {
 void dds3SetFogPara(s32 blendFrames, f32 x, f32 y, f32 z, f32 w) {
     if (blendFrames == 0) {
         dds3DrawFlag &= ~EVT_DRAW_VECTOR_BLEND_FLAG;
-        kwlnDrawVector.fogNear = x;
-        kwlnDrawVector.fogFar = y;
-        kwlnDrawVector.depthNear = z;
-        kwlnDrawVector.depthFar = w;
+        kwlnDrawVector.fogMax = x;
+        kwlnDrawVector.fogMin = y;
+        kwlnDrawVector.fogNear = z;
+        kwlnDrawVector.fogFar = w;
     } else {
-        f32 previousX = kwlnDrawVector.fogNear;
-        f32 previousY = kwlnDrawVector.fogFar;
-        f32 previousZ = kwlnDrawVector.depthNear;
-        f32 previousW = kwlnDrawVector.depthFar;
+        f32 previousX = kwlnDrawVector.fogMax;
+        f32 previousY = kwlnDrawVector.fogMin;
+        f32 previousZ = kwlnDrawVector.fogNear;
+        f32 previousW = kwlnDrawVector.fogFar;
         dds3DrawFlag |= EVT_DRAW_VECTOR_BLEND_FLAG;
         D_003BD6FA = blendFrames;
         D_003C2C20.x = previousX;
@@ -490,10 +490,10 @@ void dds3SceneLightUpdateFirst(void) {
         VU0_SCALE_VF(vf10, 1.0f - ratio);
         VU0_SCALAR_OP(ratio, "vmulx.xyzw vf11, vf11, vf2x");
         SDF_VU0_ADDVECTOR();
-        SDF_VU0_GETVECTOR_X(kwlnDrawVector.fogNear);
-        SDF_VU0_GETVECTOR_Y(kwlnDrawVector.fogFar);
-        SDF_VU0_GETVECTOR_Z(kwlnDrawVector.depthNear);
-        SDF_VU0_GETVECTOR_W(kwlnDrawVector.depthFar);
+        SDF_VU0_GETVECTOR_X(kwlnDrawVector.fogMax);
+        SDF_VU0_GETVECTOR_Y(kwlnDrawVector.fogMin);
+        SDF_VU0_GETVECTOR_Z(kwlnDrawVector.fogNear);
+        SDF_VU0_GETVECTOR_W(kwlnDrawVector.fogFar);
         if (D_003BD6F8 >= D_003BD6FA) {
             dds3DrawFlag &= ~EVT_DRAW_VECTOR_BLEND_FLAG;
         }

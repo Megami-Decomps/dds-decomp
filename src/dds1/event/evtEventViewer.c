@@ -1293,7 +1293,7 @@ void evtViewerUpdateTimelineGroupState(EvtRuntimeGroup *group, EvtRuntimeChild *
         if (from != NULL || to != NULL) {
             evtHokanSceneFog(enable, ratio, from, to, &D_003D7DD0);
             dds3SetFogPara(0, D_003D7DD0.vec[1], D_003D7DD0.vec[0], D_003D7DD0.vec[2], D_003D7DD0.vec[3]);
-            kwlnDrawVector.fogColor = D_003D7DD0.color;
+            kwlnDrawVector.color = D_003D7DD0.color;
         }
         break;
     }
@@ -3424,7 +3424,7 @@ s32 evtEventViewerHandleKeyEditCommand(s32 command, s32 unused, evtViewerInfo_t 
                     case 11: {
                         EvtViewerDrawPayload *parameters = key->payload;
                         dds3SetFogPara(0, parameters->parameters.vec[1], parameters->parameters.vec[0], parameters->parameters.vec[2], parameters->parameters.vec[3]);
-                        kwlnDrawVector.fogColor = parameters->parameters.color;
+                        kwlnDrawVector.color = parameters->parameters.color;
                         viewer->controlState = dds3StartProcess(D_003BBF60, 0x2AF9, 1, 1, mdlDebugPrintEffectScale2, NULL, 1);
                         evtViewerPushCommandHistory(11, 0, 0, viewer);
                         break;
@@ -4172,11 +4172,11 @@ s32 evtEventViewerCopyEffectSetupPayload(s32 unused0, s32 unused1, evtViewerInfo
         break;
     case 11:
         draw = entry->payload;
-        draw->parameters.vec[0] = kwlnDrawVector.fogFar;
-        draw->parameters.color = kwlnDrawVector.fogColor;
-        draw->parameters.vec[1] = kwlnDrawVector.fogNear;
-        draw->parameters.vec[2] = kwlnDrawVector.depthNear;
-        draw->parameters.vec[3] = kwlnDrawVector.depthFar;
+        draw->parameters.vec[0] = kwlnDrawVector.fogMin;
+        draw->parameters.color = kwlnDrawVector.color;
+        draw->parameters.vec[1] = kwlnDrawVector.fogMax;
+        draw->parameters.vec[2] = kwlnDrawVector.fogNear;
+        draw->parameters.vec[3] = kwlnDrawVector.fogFar;
         break;
     case 13:
         memcpy(entry->payload, effGetLoadDescA(), 0x28);

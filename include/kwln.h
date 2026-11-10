@@ -3,15 +3,15 @@
 
 #include "common.h"
 
-/* Shared fog/depth state consumed by sdf3DMakeFogPacket (0x14).
- * The viewer config serializes fogNear, depthNear, fogFar, depthFar, fogColor;
- * timeline payloads store fogFar before fogNear instead. */
+/* What sdf3DMakeFogPacket is handed: the two fog densities and the two
+ * distances they span, plus the colour. sdf3DFogParam_t in draw3d.h, which
+ * these units cannot include until they take libsdf.h. */
 typedef struct KwlnDrawVectorParams {
-    f32 fogNear;    /* 0x00: minimum fog range. */
-    f32 fogFar;     /* 0x04: maximum fog range. */
-    f32 depthNear;  /* 0x08: near depth used in the projection coefficients. */
-    f32 depthFar;   /* 0x0C: far depth used in the projection coefficients. */
-    u32 fogColor;   /* 0x10: packed GS FOGCOL value. */
+    f32 fogMax;
+    f32 fogMin;
+    f32 fogNear;
+    f32 fogFar;
+    u32 color;
 } KwlnDrawVectorParams;
 
 typedef char KwlnDrawVectorParams_size[(sizeof(KwlnDrawVectorParams) == 0x14) ? 1 : -1];
