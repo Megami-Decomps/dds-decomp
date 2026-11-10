@@ -1776,4 +1776,115 @@ __asm__ volatile ( \
 #define EE_GET_VPU_STAT(aOut) __asm__ volatile ( \
     ".set noreorder\n\tcfc2.ni %0, $vi29\n\t.set reorder" : "=r" (aOut))
 
+
+/* Forms only DDS uses so far. */
+
+/* The quadword copy without the memory clobber: values loaded before it stay
+ * live across it. */
+#define SDF_VU0_COPYVECTOR_NOMEM(dst, src) __asm__ volatile ( \
+    ".set noreorder\n\tlq $2, 0(%1)\n\tsq $2, 0(%0)\n\t.set reorder" \
+    : : "r" (dst), "r" (src) : "$2")
+/* _F32 with the address operand first and a memory operand that is not
+ * volatile. */
+#define SDF_VU0_LOADVECTOR_F32_NV(src) __asm__ volatile ( \
+    ".set noreorder\n\tlqc2 vf10, 0(%0)\n\t.set reorder" \
+    : : "r" (src), "m" (*(const ps2asm_float_vector4_t *)(src)))
+#define SDF_VU0_LOADVECTOR_B_F32_NV(src) __asm__ volatile ( \
+    ".set noreorder\n\tlqc2 vf11, 0(%0)\n\t.set reorder" \
+    : : "r" (src), "m" (*(const ps2asm_float_vector4_t *)(src)))
+#define SDF_VU0_STOREVECTOR_F32_NV(dst) __asm__ volatile ( \
+    ".set noreorder\n\tsqc2 vf10, 0(%1)\n\t.set reorder" \
+    : "=m" (*(ps2asm_float_vector4_t *)(dst)) : "r" (dst))
+#define SDF_VU0_LOADVECTOR_C_BARRIER(src) __asm__ volatile ( \
+    ".set noreorder\n\tlqc2 vf12, 0(%0)\n\t.set reorder" \
+    : : "r" (src) : "memory")
+#define SDF_VU0_LOADMATRIX_BARRIER(src) __asm__ volatile ( \
+    ".set noreorder\n\tlqc2 vf28, 0(%0)\n\tlqc2 vf29, 16(%0)\n\t" \
+    "lqc2 vf30, 32(%0)\n\tlqc2 vf31, 48(%0)\n\t.set reorder" \
+    : : "r" (src) : "memory")
+#define SDF_VU0_STOREVECTOR_MEMOPS_BARRIER(lvalue) __asm__ volatile ( \
+    ".set noreorder\n\tsqc2 vf10, %0\n\t.set reorder" : "=m" (lvalue) : : "memory")
+#define SDF_VU0_STOREVECTOR_C_NOMEM(dst) __asm__ volatile ( \
+    ".set noreorder\n\tsqc2 vf12, 0(%0)\n\t.set reorder" : : "r" (dst))
+#define SDF_VU0_STORE_ROW3_NOMEM(dst) __asm__ volatile ( \
+    ".set noreorder\n\tsqc2 vf31, 0(%0)\n\t.set reorder" : : "r" (dst))
+#define SDF_VU0_STOREIDENTITYVECTOR_NOMEM(dst) __asm__ volatile ( \
+    ".set noreorder\n\tsqc2 vf0, 0(%0)\n\t.set reorder" : : "r" (dst))
+/* addr = base + off, then the store through addr. */
+#define SDF_VU0_STOREVECTOR_OFFSET(addr, base, off) __asm__ volatile ( \
+    ".set noreorder\n\taddiu %0, %1, %2\n\tsqc2 vf10, 0(%0)\n\t.set reorder" \
+    : "=r" (addr) : "r" (base), "i" (off) : "memory")
+#define SDF_VU0_LOADIDENTITYVECTOR_B() __asm__ volatile ( \
+    ".set noreorder\n\tvmove.xyzw vf11, vf0\n\t.set reorder")
+#define SDF_VU0_NEGVECTOR_B_XYZ() __asm__ volatile ( \
+    ".set noreorder\n\tvsub.xyz vf11, vf0, vf11\n\t.set reorder")
+#define SDF_VU0_APPLYMATRIX_XYZ_B() __asm__ volatile ( \
+    ".set noreorder\n\tvmulax.xyzw ACC, vf28, vf11x\n\tvmadday.xyzw ACC, vf29, vf11y\n\t" \
+    "vmaddz.xyzw vf11, vf30, vf11z\n\t.set reorder")
+/* vf10 = vf10 * vf11 + vf12. */
+#define VU0_MUL_ADD_VF10_VF11_VF12() __asm__ volatile ( \
+    ".set noreorder\n\tvmul.xyzw vf10, vf10, vf11\n\tvadd.xyzw vf10, vf10, vf12\n\t.set reorder")
+/* vf10 *= vf2.x, vf2 already loaded. */
+#define VU0_MULX_XYZW_VF10_VF10_VF2X() __asm__ volatile ( \
+    ".set noreorder\n\tvmulx.xyzw vf10, vf10, vf2x\n\t.set reorder")
+
+/* Scales and component sets with the float bits through a fixed register:
+ * _V0 is $2, _V1 is $3, _CLOBBER declares it, _BARRIER adds "memory". */
+#define SDF_VU0_SCALEVECTOR_BARRIER(f) do { u32 ps2Bits; __asm__ volatile ( \
+    ".set noreorder\n\tmfc1 %0, %1\n\tqmtc2.ni %0, vf2\n\t" \
+    "vmulx.xyzw vf10, vf10, vf2x\n\t.set reorder" \
+    : "=&r" (ps2Bits) : "f" (f) : "memory"); } while (0)
+#define SDF_VU0_SCALEVECTOR_V0_CLOBBER(f) __asm__ volatile ( \
+    ".set noreorder\n\tmfc1 $2, %0\n\tqmtc2.ni $2, vf2\n\t" \
+    "vmulx.xyzw vf10, vf10, vf2x\n\t.set reorder" : : "f" (f) : "$2")
+#define SDF_VU0_SCALEVECTOR_B_V0_CLOBBER(f) __asm__ volatile ( \
+    ".set noreorder\n\tmfc1 $2, %0\n\tqmtc2.ni $2, vf2\n\t" \
+    "vmulx.xyzw vf11, vf11, vf2x\n\t.set reorder" : : "f" (f) : "$2")
+#define SDF_VU0_SCALEVECTOR_V1(f) __asm__ volatile ( \
+    ".set noreorder\n\tmfc1 $3, %0\n\tqmtc2.ni $3, vf2\n\t" \
+    "vmulx.xyzw vf10, vf10, vf2x\n\t.set reorder" : : "f" (f))
+#define SDF_VU0_SCALEVECTOR_B_V1(f) __asm__ volatile ( \
+    ".set noreorder\n\tmfc1 $3, %0\n\tqmtc2.ni $3, vf2\n\t" \
+    "vmulx.xyzw vf11, vf11, vf2x\n\t.set reorder" : : "f" (f))
+#define SDF_VU0_SCALEVECTOR_B_V1_CLOBBER(f) __asm__ volatile ( \
+    ".set noreorder\n\tmfc1 $3, %0\n\tqmtc2.ni $3, vf2\n\t" \
+    "vmulx.xyzw vf11, vf11, vf2x\n\t.set reorder" : : "f" (f) : "$3")
+#define SDF_VU0_SETVECTOR_X_V0(f) __asm__ volatile ( \
+    ".set noreorder\n\tmfc1 $2, %0\n\tqmtc2.ni $2, vf2\n\t" \
+    "vaddx.x vf10, vf0, vf2x\n\t.set reorder" : : "f" (f))
+#define SDF_VU0_SETVECTOR_Z_V0(f) __asm__ volatile ( \
+    ".set noreorder\n\tmfc1 $2, %0\n\tqmtc2.ni $2, vf2\n\t" \
+    "vaddx.z vf10, vf0, vf2x\n\t.set reorder" : : "f" (f))
+#define VU0_SET_VF10_Z_CLEAR_W(f) __asm__ volatile ( \
+    ".set noreorder\n\tmfc1 $2, %0\n\tqmtc2.ni $2, vf2\n\tvaddx.z vf10, vf0, vf2x\n\t" \
+    "vmulx.w vf10, vf10, vf0x\n\t.set reorder" \
+    : : "f" (f))
+
+/* VU0_MATRIX4_MUL_BANK_C_RIGHT and _LEFT with a memory clobber. */
+#define VU0_MATRIX4_MUL_BANK_C_RIGHT_BARRIER() __asm__ volatile ( \
+    ".set noreorder\n\t" \
+    "vmulax.xyzw ACC, vf28, vf20x\n\tvmadday.xyzw ACC, vf29, vf20y\n\t" \
+    "vmaddaz.xyzw ACC, vf30, vf20z\n\tvmaddw.xyzw vf2, vf31, vf20w\n\t" \
+    "vmulax.xyzw ACC, vf28, vf21x\n\tvmadday.xyzw ACC, vf29, vf21y\n\t" \
+    "vmaddaz.xyzw ACC, vf30, vf21z\n\tvmaddw.xyzw vf3, vf31, vf21w\n\t" \
+    "vmulax.xyzw ACC, vf28, vf22x\n\tvmadday.xyzw ACC, vf29, vf22y\n\t" \
+    "vmaddaz.xyzw ACC, vf30, vf22z\n\tvmaddw.xyzw vf4, vf31, vf22w\n\t" \
+    "vmulax.xyzw ACC, vf28, vf23x\n\tvmadday.xyzw ACC, vf29, vf23y\n\t" \
+    "vmaddaz.xyzw ACC, vf30, vf23z\n\tvmaddw.xyzw vf31, vf31, vf23w\n\t" \
+    "vmove.xyzw vf28, vf2\n\tvmove.xyzw vf29, vf3\n\tvmove.xyzw vf30, vf4\n\t" \
+    ".set reorder" \
+    : : : "memory")
+#define VU0_MATRIX4_MUL_BANK_C_LEFT_BARRIER() __asm__ volatile ( \
+    ".set noreorder\n\t" \
+    "vmulax.xyzw ACC, vf20, vf28x\n\tvmadday.xyzw ACC, vf21, vf28y\n\t" \
+    "vmaddaz.xyzw ACC, vf22, vf28z\n\tvmaddw.xyzw vf28, vf23, vf28w\n\t" \
+    "vmulax.xyzw ACC, vf20, vf29x\n\tvmadday.xyzw ACC, vf21, vf29y\n\t" \
+    "vmaddaz.xyzw ACC, vf22, vf29z\n\tvmaddw.xyzw vf29, vf23, vf29w\n\t" \
+    "vmulax.xyzw ACC, vf20, vf30x\n\tvmadday.xyzw ACC, vf21, vf30y\n\t" \
+    "vmaddaz.xyzw ACC, vf22, vf30z\n\tvmaddw.xyzw vf30, vf23, vf30w\n\t" \
+    "vmulax.xyzw ACC, vf20, vf31x\n\tvmadday.xyzw ACC, vf21, vf31y\n\t" \
+    "vmaddaz.xyzw ACC, vf22, vf31z\n\tvmaddw.xyzw vf31, vf23, vf31w\n\t" \
+    ".set reorder" \
+    : : : "memory")
+
 #endif /* PS2ASM_H */
