@@ -11154,7 +11154,7 @@
 0x00439118	sdfChipPageCount	inferred	confidence=high; the exact initializer stores the usable 4 KiB page count and statistics traverses that many descriptors; paired with DDS1.
 0x00439120	dds3CleanupList	inferred	SMT3HD data name via SLUS_209.11 0x00552070, 2 agreeing references; was dds3CleanupList
 0x00439128	sdfMemDelayedResrcCB	inferred	SMT3HD data name via SLUS_209.11 0x00552078, 2 agreeing references; was sdfMemDelayedResrcCB
-0x00439130	sdfGraphicsBufferThread	inferred	confidence=high; sdfGrInit passes this SdfThreadNode to sdfStartThreadAndWait with sdfDispThread; native node extent is eight bytes. Same role in DDS1 at 0x003BD9D0. Preserve all types, declarations, bounds, data and control flow. [PurC5 readability data b6; native/matched-C twin evidence; identifier-only]
+0x00439130	sdfDispThreadCB	inferred	SMT3HD name via SLUS_209.11 0x00552080, sdf/sdfGraph SMT3 rename; was sdfGraphicsBufferThread
 0x00439138	sdfDrawThreadId	inferred	SMT3HD data name via SLUS_209.11 0x00552088, 2 agreeing references; was sdfDrawThreadId
 0x0043913C	reqMakeFrameBuff	inferred	SMT3HD data name via SLUS_209.11 0x0055208C, 3 agreeing references; was reqMakeFrameBuff
 0x0043913D	reqGsReset	inferred	SMT3HD data name via SLUS_209.11 0x0055208D, 3 agreeing references; was reqGsReset
@@ -11334,10 +11334,10 @@
 0x0045F0A0	sdfChipCB	inferred	SMT3HD data name via SLUS_209.11 0x00577EC0, 3 agreeing references; was sdfChipCB
 0x0045F0F8	sdfMemCB	inferred	SMT3HD data name via SLUS_209.11 0x00577F18, 5 agreeing references; was sdfMemCB
 0x0045F120	sdfIopRpcClient	inferred	SMT3HD data name via SLUS_209.11 0x00577F40, 1 agreeing references; was sdfIopRpcClient
-0x0045F160	sdfGsCaptureStoreImage	inferred	confidence=high; sdfGrCapture initializes and executes this sceGsStoreImage for both color-buffer captures; existing uncached alias expression and SDK type remain unchanged. Same role in DDS1 at 0x003E27B0. Preserve all types, declarations, bounds, data and control flow. [PurC5 readability data b6; native/matched-C twin evidence; identifier-only]
-0x0045F1D0	sdfGraphicsBufferThreadStack	inferred	confidence=high; The same tracked graphics-buffer worker receives this existing byte array as its stack with stackSize=0x1000. Generated BSS has interior synthetic labels; full native call span must be checked. Same role in DDS1 at 0x003E2820. Preserve all types, declarations, bounds, data and control flow. [PurC5 readability data b6; native/matched-C twin evidence; identifier-only]
-0x004601D0	sdfGraphicsTransferThreadStack	inferred	confidence=high; CreateThreadSimple receives this existing byte array with sdfDrawThread, stackSize=0x8000 and priority=0x44. Full call-proven span must be checked for interior references. Same role in DDS1 at 0x003E3820. Preserve all types, declarations, bounds, data and control flow. [PurC5 readability data b6; native/matched-C twin evidence; identifier-only]
-0x004681D0	sdfDisplayEnvironment	inferred	Initialized through the uncached sceGsSetDefDispEnv alias; receives the selected display buffer page and is submitted through sceGsPutDispEnv. Paired DDS1 0x003EB820.
+0x0045F160	sdfGrStoreImage	inferred	SMT3HD name via SLUS_209.11 0x00577F80, sdf/sdfGraph SMT3 rename; was sdfGsCaptureStoreImage
+0x0045F1D0	sdfDispThreadStack	inferred	SMT3HD name via SLUS_209.11 0x00577FF0, sdf/sdfGraph SMT3 rename; was sdfGraphicsBufferThreadStack
+0x004601D0	sdfDrawThreadStack	inferred	SMT3HD name via SLUS_209.11 0x00578FF0, sdf/sdfGraph SMT3 rename; was sdfGraphicsTransferThreadStack
+0x004681D0	sdfGrDispEnv	inferred	SMT3HD name via SLUS_209.11 0x00580FF0, sdf/sdfGraph SMT3 rename; was sdfDisplayEnvironment
 0x004681F8	sdfImageSetCb	inferred	SMT3HD data name via SLUS_209.11 0x00581018, 5 agreeing references; was sdfImageSetCb
 0x00468210	corePktFaceList	inferred	The node packet's face list: three vertex pointers a triangle, filled by corePktBuildFaceList and corePktBuildBackFaceList, which leave the count in the packet work's nodeCount; 4096 triangles (0xC000 bytes), the rejected triangles' index list after it.
 0x00476210	sdfModelColorTransform	inferred	the SdfVuColorTransform sdfCorePacketGen builds through corePktSetFaceDivParm; the lighting kernels load its three quadwords as vf19..vf21. DDS1 twin 0x003F9860.

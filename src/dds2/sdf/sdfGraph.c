@@ -6,11 +6,11 @@
 #include "ps2asm.h"
 
 #define D_00529388 sdfGrFrameSet
-#define D_00552080 sdfGraphicsBufferThread
-#define D_00577F80 sdfGsCaptureStoreImage
-#define D_00577FF0 sdfGraphicsBufferThreadStack
-#define D_00578FF0 sdfGraphicsTransferThreadStack
-#define D_00580FF0 sdfDisplayEnvironment
+#define D_00552080 sdfDispThreadCB
+#define D_00577F80 sdfGrStoreImage
+#define D_00577FF0 sdfDispThreadStack
+#define D_00578FF0 sdfDrawThreadStack
+#define D_00580FF0 sdfGrDispEnv
 typedef struct
 {
     u64 pmode;

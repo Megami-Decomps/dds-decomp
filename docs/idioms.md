@@ -14442,14 +14442,14 @@ from the already named chip-release request. `sdfIopRpcClient`
 is bound to the named-resource service and reused for the packed name/data
 requests; its existing SDK client-prefix declaration is unchanged.
 
-The graphics buffer-service worker uses `sdfGraphicsBufferThread` and its
-0x1000-byte `sdfGraphicsBufferThreadStack`. The transfer worker uses the
-separate 0x8000-byte `sdfGraphicsTransferThreadStack`; its stored
+The graphics buffer-service worker uses `sdfDispThreadCB` and its
+0x1000-byte `sdfDispThreadStack`. The transfer worker uses the
+separate 0x8000-byte `sdfDrawThreadStack`; its stored
 `sdfDrawThreadId` is also woken by the graph interrupt callback.
 Keep the existing byte arrays, stack sizes, priorities and per-game pointer
 versus integer argument carriers. `reqGsReset` is set during
 worker initialization and cleared immediately before the current-mode GS
-reset. `sdfGsCaptureStoreImage` is the existing SDK descriptor reused for
+reset. `sdfGrStoreImage` is the existing SDK descriptor reused for
 both color-buffer captures; its existing uncached-address expression stays
 unchanged, not a new alias view.
 
