@@ -519,7 +519,7 @@ extern DmaPacketHeader D_003DFAF0[2];
 
 extern sdfDrawTag_t D_003DFB30[2];
 
-extern SdfLightingPacketStorage D_003DFB70[2];
+extern sdf3DLightParallelPacket_t D_003DFB70[2];
 
 extern ConsMatrixPacket D_003DFD30[2];
 

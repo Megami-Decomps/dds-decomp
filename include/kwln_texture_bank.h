@@ -11,7 +11,7 @@ typedef struct KwlnTextureBank {
     sdfDrawTag_t list;
     SdfSceneDrawPacket scene;
     ConsMatrixPacket matrix;
-    SdfLightingPacketStorage lighting;
+    sdf3DLightParallelPacket_t lighting;
 } KwlnTextureBank;
 
 typedef char KwlnTextureBank_size_must_be_0x340[

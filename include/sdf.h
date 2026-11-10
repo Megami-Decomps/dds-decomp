@@ -541,26 +541,32 @@ typedef struct sdfMatPacket_t
 
 typedef char sdfMatPacket_t_ambient_at_0x04[
     ((u32)&((sdfMatPacket_t *)0)->ambient == 0x04) ? 1 : -1];
+typedef char sdfMatPacket_t_diffuse_at_0x08[
+    ((u32)&((sdfMatPacket_t *)0)->diffuse == 0x08) ? 1 : -1];
 typedef char sdfMatPacket_t_mtexDiffuse_at_0x0C[
     ((u32)&((sdfMatPacket_t *)0)->mtexDiffuse == 0x0C) ? 1 : -1];
+typedef char sdfMatPacket_t_refmapColor_at_0x14[
+    ((u32)&((sdfMatPacket_t *)0)->refmapColor == 0x14) ? 1 : -1];
 typedef char sdfMatPacket_t_constant_at_0x1C[
     ((u32)&((sdfMatPacket_t *)0)->constant == 0x1C) ? 1 : -1];
+typedef char sdfMatPacket_t_mtexAlpha_at_0x20[
+    ((u32)&((sdfMatPacket_t *)0)->mtexAlpha == 0x20) ? 1 : -1];
 typedef char sdfMatPacket_t_mtexAlgo_at_0x24[
     ((u32)&((sdfMatPacket_t *)0)->mtexAlgo == 0x24) ? 1 : -1];
-typedef char sdfMatPacket_t_tex1Data_at_0x38[
-    ((u32)&((sdfMatPacket_t *)0)->tex1Data == 0x38) ? 1 : -1];
+typedef char sdfMatPacket_t_fdBias_at_0x28[
+    ((u32)&((sdfMatPacket_t *)0)->fdBias == 0x28) ? 1 : -1];
 typedef char sdfMatPacket_t_clampData_at_0x48[
     ((u32)&((sdfMatPacket_t *)0)->clampData == 0x48) ? 1 : -1];
-typedef char sdfMatPacket_t_mtexTex1Data_at_0x50[
-    ((u32)&((sdfMatPacket_t *)0)->mtexTex1Data == 0x50) ? 1 : -1];
-typedef char sdfMatPacket_t_mtexClampData_at_0x60[
-    ((u32)&((sdfMatPacket_t *)0)->mtexClampData == 0x60) ? 1 : -1];
 typedef char sdfMatPacket_t_texTm_at_0x68[
     ((u32)&((sdfMatPacket_t *)0)->texTm == 0x68) ? 1 : -1];
+typedef char sdfMatPacket_t_mtexTexTm_at_0x80[
+    ((u32)&((sdfMatPacket_t *)0)->mtexTexTm == 0x80) ? 1 : -1];
 typedef char sdfMatPacket_t_cmd_call_spec_at_0x98[
     ((u32)&((sdfMatPacket_t *)0)->cmd_call_spec == 0x98) ? 1 : -1];
 typedef char sdfMatPacket_t_cmd_call_kind_at_0x9C[
     ((u32)&((sdfMatPacket_t *)0)->cmd_call_kind == 0x9C) ? 1 : -1];
+typedef char sdfMat_t_id_at_0x00[
+    ((u32)&((sdfMat_t *)0)->id == 0x00) ? 1 : -1];
 typedef char sdfMat_t_flags_at_0x04[
     ((u32)&((sdfMat_t *)0)->flags == 0x04) ? 1 : -1];
 typedef char sdfMat_t_duty_at_0x06[
@@ -575,10 +581,14 @@ typedef char sdfMat_t_multiTexDiffuse_at_0x18[
     ((u32)&((sdfMat_t *)0)->multiTexDiffuse == 0x18) ? 1 : -1];
 typedef char sdfMat_t_constant_at_0x1C[
     ((u32)&((sdfMat_t *)0)->constant == 0x1C) ? 1 : -1];
+typedef char sdfMat_t_specular_at_0x20[
+    ((u32)&((sdfMat_t *)0)->specular == 0x20) ? 1 : -1];
 typedef char sdfMat_t_specularParm_at_0x24[
     ((u32)&((sdfMat_t *)0)->specularParm == 0x24) ? 1 : -1];
 typedef char sdfMat_t_refmap_at_0x28[
     ((u32)&((sdfMat_t *)0)->refmap == 0x28) ? 1 : -1];
+typedef char sdfMat_t_texHandle_at_0x2C[
+    ((u32)&((sdfMat_t *)0)->texHandle == 0x2C) ? 1 : -1];
 typedef char sdfMat_t_multiTexHandle_at_0x30[
     ((u32)&((sdfMat_t *)0)->multiTexHandle == 0x30) ? 1 : -1];
 typedef char sdfMat_t_multiTexMethod_at_0x34[

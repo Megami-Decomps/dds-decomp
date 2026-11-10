@@ -423,7 +423,7 @@ extern void sdfModelEvalTm(sdfModelRootNode_t *);
 void effObjApplyTransformParameters(struct sdfGrOt_t **surfaces, dds3Basic_t *object) {
     dds3ObjectBaseControlWorkData_t *base;
     Dds3ObjectResourceState resourceState;
-    struct SdfDmaTagHeader *lighting;
+    struct sdf3DLightParallelPacket_t *lighting;
     sdfModelRootNode_t *model;
     s32 roomObjectIndex;
 
@@ -444,7 +444,7 @@ void effObjApplyTransformParameters(struct sdfGrOt_t **surfaces, dds3Basic_t *ob
             dds3DrawObjectWithGradientOverlay(object);
             return;
         }
-        lighting = (struct SdfDmaTagHeader *)((EffectObjectData *)object->workdata)->transitionWork->value;
+        lighting = (struct sdf3DLightParallelPacket_t *)((EffectObjectData *)object->workdata)->transitionWork->value;
         if (lighting != NULL) {
             dds3ObjectBaseBorrowModelContext(base)->inner->lighting = lighting;
         } else {

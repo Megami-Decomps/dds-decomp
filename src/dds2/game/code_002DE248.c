@@ -12712,7 +12712,7 @@ void effTransitionSelectedActorRgbColors(EffActiveResource *work) {
     }
 }
 
-s32 effComputeLightDirectionVU(dds3ModelHandle_t *model, SdfLightingPacketStorage *target) {
+s32 effComputeLightDirectionVU(dds3ModelHandle_t *model, sdf3DLightParallelPacket_t *target) {
     if (btlIsRuntimeAllocated() == 0) {
         return 0;
     }
@@ -15063,7 +15063,7 @@ typedef struct EffectBlob {
 typedef struct EffSharedEffectResource {
     dds3ModelHandle_t *model;
     u32 deviceSlot;
-    SdfLightingPacketStorage *data;
+    sdf3DLightParallelPacket_t *data;
     u32 lastProcessedKernelCount;
     u16 references;
     u8 pad12[2];
@@ -15157,7 +15157,7 @@ void effReleaseSharedResourceReference(EffSharedEffectWork *work) {
 
     resource->references--;
     if (resource->references == 0) {
-        SdfLightingPacketStorage *data = resource->data;
+        sdf3DLightParallelPacket_t *data = resource->data;
         if (data != NULL) {
             sdfChipFreeDirect(data);
         }

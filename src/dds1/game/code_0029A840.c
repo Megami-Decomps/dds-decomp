@@ -117,7 +117,7 @@ EffModelOwner *effCreateModelOwner(FileJobPayload *source) {
 }
 
 void effDestroyModelOwner(EffModelOwner *owner) {
-    SdfLightingPacketStorage *buffer = owner->ownedBuffer;
+    sdf3DLightParallelPacket_t *buffer = owner->ownedBuffer;
     if (buffer != NULL) {
         sdfChipFreeDirect(buffer);
     }
@@ -157,7 +157,7 @@ void effModelAnimationStop(EffModelOwner *owner) {
 }
 
 
-extern s32 effComputeLightDirectionVU(dds3ModelHandle_t *, SdfLightingPacketStorage *);
+extern s32 effComputeLightDirectionVU(dds3ModelHandle_t *, sdf3DLightParallelPacket_t *);
 
 #include "sdf_packet_alloc.h"
 extern sdfGrOt_t *kwlnSceneSurfaceSets[13][4];
@@ -168,7 +168,7 @@ void effRefreshModelLighting(EffModelOwner *work) {
     dds3ModelHandle_t *model;
     if (effComputeLightDirectionVU(work->model, work->ownedBuffer) != 0) {
         model = work->model;
-        model->inner->lighting = &work->ownedBuffer->dmaTag;
+        model->inner->lighting = work->ownedBuffer;
     } else {
         model = work->model;
     }
@@ -305,7 +305,7 @@ void effRenderModelOwnerWithGsTests(EffModelOwner *owner) {
     }
 
     if (effComputeLightDirectionVU(owner->model, owner->ownedBuffer)) {
-        owner->model->inner->lighting = &owner->ownedBuffer->dmaTag;
+        owner->model->inner->lighting = owner->ownedBuffer;
     }
 
     mdlLink(owner->model, kwlnSceneSurfaceSets[1]);

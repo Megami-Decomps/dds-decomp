@@ -3344,7 +3344,7 @@ void btlDrawUnitTransparencyPasses(BtlUnit *unit, dds3ModelHandle_t *model, sdfM
     }
     sdfModelCopyStat(overlay, model->inner);
     if (unit->status.flags & 2) {
-        overlay->lighting = (struct SdfDmaTagHeader *)unit->ext->endpointWork;
+        overlay->lighting = unit->ext->endpointWork;
     } else {
         overlay->lighting = NULL;
     }
@@ -3403,7 +3403,7 @@ void btlUpdateUnitTransparency(BtlUnit *unit) {
                                      SDF_MODEL_MATERIAL_RESOURCES_RELEASE_DEFERRED);
                     unit->transparencyModel = 0;
                     if (unit->status.flags & 2) {
-                        info->inner->lighting = (struct SdfDmaTagHeader *)unit->ext->endpointWork;
+                        info->inner->lighting = unit->ext->endpointWork;
                     } else {
                         info->inner->lighting = 0;
                     }

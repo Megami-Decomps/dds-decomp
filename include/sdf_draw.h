@@ -4,6 +4,7 @@
 #include "common.h"
 #include "sdf_dma_tag.h"
 #include "sdf_motion.h"
+#include "sdf_lighting.h"
 
 struct SdfChunkHeader;
 
@@ -13,49 +14,8 @@ typedef f32 (*SdfLightSources[3])[4];
 
 typedef char SdfLightSources_size_must_be_0xC[(sizeof(SdfLightSources) == 0xC) ? 1 : -1];
 
-/* DMA/VIF lighting payload: its first 0x10 bytes also serve as an attached
- * SdfDmaTagHeader; DDS1 002E195C..002E1964 writes the count and two VIF words.
- * The lighting vectors occupy 0x10..0xDF in both games. */
-typedef struct SdfLightingPacketStorage {
-    union {
-        SdfDmaTagHeader dmaTag; /* 0x00: borrowed by SdfModelInner.lighting */
-        struct {
-            u16 quadwordCount; /* 0x00 */
-            u8 pad02[6];
-            u32 flushCode; /* 0x08 */
-            u32 unpackCode; /* 0x0C */
-        };
-    };
-    f32 normal[4][4]; /* 0x10 */
-    f32 color[3][4]; /* 0x50 */
-    f32 ambient[4]; /* 0x80 */
-    f32 combinedColor[4]; /* 0x90 */
-    f32 basis[4][4]; /* 0xA0 */
-} SdfLightingPacketStorage;
-
-typedef char SdfLightingPacketStorage_size_must_be_0xE0[
-    (sizeof(SdfLightingPacketStorage) == 0xE0) ? 1 : -1];
-typedef char SdfLightingPacketStorage_dmaTag_offset_check[
-    ((u32)&((SdfLightingPacketStorage *)0)->dmaTag == 0x00) ? 1 : -1];
-typedef char SdfLightingPacketStorage_quadwordCount_offset_check[
-    ((u32)&((SdfLightingPacketStorage *)0)->quadwordCount == 0x00) ? 1 : -1];
-typedef char SdfLightingPacketStorage_flushCode_offset_check[
-    ((u32)&((SdfLightingPacketStorage *)0)->flushCode == 0x08) ? 1 : -1];
-typedef char SdfLightingPacketStorage_unpackCode_offset_check[
-    ((u32)&((SdfLightingPacketStorage *)0)->unpackCode == 0x0C) ? 1 : -1];
-typedef char SdfLightingPacketStorage_normal_offset_check[
-    ((u32)&((SdfLightingPacketStorage *)0)->normal == 0x10) ? 1 : -1];
-typedef char SdfLightingPacketStorage_color_offset_check[
-    ((u32)&((SdfLightingPacketStorage *)0)->color == 0x50) ? 1 : -1];
-typedef char SdfLightingPacketStorage_ambient_offset_check[
-    ((u32)&((SdfLightingPacketStorage *)0)->ambient == 0x80) ? 1 : -1];
-typedef char SdfLightingPacketStorage_combinedColor_offset_check[
-    ((u32)&((SdfLightingPacketStorage *)0)->combinedColor == 0x90) ? 1 : -1];
-typedef char SdfLightingPacketStorage_basis_offset_check[
-    ((u32)&((SdfLightingPacketStorage *)0)->basis == 0xA0) ? 1 : -1];
-
 /* Light vectors and ambient are read-only inputs; packet is the writable output. */
-void sdf3DMakeLightParallelPacket(SdfLightingPacketStorage *packet,
+void sdf3DMakeLightParallelPacket(sdf3DLightParallelPacket_t *packet,
                                   SdfLightSources sources,
                                   const f32 *ambient);
 
@@ -182,7 +142,7 @@ typedef struct sdfModelRootNode_t {
     f32 matrix[4][4];
     f32 rotationQuaternion[4];
     f32 scaleVector[4];
-    struct SdfDmaTagHeader *lighting; /* Borrowed first DMA reference prefix. */
+    struct sdf3DLightParallelPacket_t *lighting;
     struct SdfDmaTagHeader *secondaryLighting; /* Borrowed second DMA reference prefix. */
     f32 scalarOverrideFirst;
     f32 scalarOverrideSecond;

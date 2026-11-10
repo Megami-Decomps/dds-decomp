@@ -631,7 +631,7 @@ void cmpExpandColor(u64 *channels, u32 color) {
 extern sdfDrawTag_t D_0045C380[2];
 extern DmaPacketHeader D_0045C3C0[2];
 extern sdfDrawTag_t D_0045C400[2];
-extern SdfLightingPacketStorage D_0045C440[2];
+extern sdf3DLightParallelPacket_t D_0045C440[2];
 extern ConsMatrixPacket D_0045C600[2];
 extern SdfLightSources D_0037F770;
 extern f32 kwlnDefaultColorVector[4];

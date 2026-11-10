@@ -3,7 +3,7 @@
 
 #include "dds3obj.h"
 
-struct SdfLightingPacketStorage;
+struct sdf3DLightParallelPacket_t;
 
 /* One directional source is two adjacent vec4s in the lighting SDK API. */
 typedef union EffLightSourceVectors {
@@ -40,7 +40,7 @@ typedef struct EffLightData {
     u16 blendFrames;
     u16 unk72;
     dds3ObjectBaseControlWorkData_t *baseControlWorkData; /* Owned block released by lightdestructor. */
-    struct SdfLightingPacketStorage *buffer;
+    struct sdf3DLightParallelPacket_t *buffer;
 } EffLightData;
 
 typedef char EffLightData_size_must_be_0x7C[(sizeof(EffLightData) == 0x7C) ? 1 : -1];

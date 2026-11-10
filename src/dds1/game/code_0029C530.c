@@ -536,7 +536,7 @@ extern u16 D_003BC944;
 
 extern void effInitModelVUState(dds3ModelHandle_t *);
 
-extern s32 effComputeLightDirectionVU(dds3ModelHandle_t *, SdfLightingPacketStorage *);
+extern s32 effComputeLightDirectionVU(dds3ModelHandle_t *, sdf3DLightParallelPacket_t *);
 
 
 extern char D_003B2AA0[];
@@ -12110,7 +12110,7 @@ extern u128 D_003DCBA0[];
 extern SdfLightSources D_0037EE80;
 
 
-s32 effComputeLightDirectionVU(dds3ModelHandle_t *vector, SdfLightingPacketStorage *target) {
+s32 effComputeLightDirectionVU(dds3ModelHandle_t *vector, sdf3DLightParallelPacket_t *target) {
     s32 result = btlIsRuntimeAllocated();
 
     if (result != 0) {

@@ -196,7 +196,7 @@ s32 dds3DrawFirstProcess(dds3ProcessID_t *task) {
     evtCheckSelectionState();
     dds3SceneLightUpdateFirst();
     if (dds3RenderTex != 0) {
-        sdf3DMakeLightParallelPacket((SdfLightingPacketStorage *)(kwlnHeldTextureLightingPackets + bufferIndex * KWLN_FRAME_BUFFER_BYTES),
+        sdf3DMakeLightParallelPacket((sdf3DLightParallelPacket_t *)(kwlnHeldTextureLightingPackets + bufferIndex * KWLN_FRAME_BUFFER_BYTES),
             kwlnHeldTextureLightSources, kwlnHeldTextureAmbientColor);
         *(u32 *)(kwlnHeldTextureLightingPackets - 0x140 + bufferIndex * KWLN_FRAME_BUFFER_BYTES) = dds3RenderDrawEnv;
         if (dds3RenderTex != 0) {
@@ -222,7 +222,7 @@ s32 dds3DrawFirstProcess(dds3ProcessID_t *task) {
         sdfGrOt_t *overlayNode;
         sdfDrawTag_t *overlayList;
         u64 *overlayFrustum;
-        sdf3DMakeLightParallelPacket((SdfLightingPacketStorage *)(kwlnOverlayLightingPackets + bufferIndex * KWLN_FRAME_BUFFER_BYTES),
+        sdf3DMakeLightParallelPacket((sdf3DLightParallelPacket_t *)(kwlnOverlayLightingPackets + bufferIndex * KWLN_FRAME_BUFFER_BYTES),
             kwlnOverlayLightSources, kwlnOverlayAmbientColor);
         sdf3DMakeScreenParam(&D_0037F980.camera);
         LookAtMatrix(D_0037FA20, kwlnOverlayEyeVector, kwlnOverlayUpVector);
@@ -236,7 +236,7 @@ s32 dds3DrawFirstProcess(dds3ProcessID_t *task) {
         sdfDrawTagLink(overlayList, (u32)overlayFrustum);
         overlayNode->regFunc(overlayNode, overlayList);
 
-        sdf3DMakeLightParallelPacket((SdfLightingPacketStorage *)(kwlnOverlayMatrixPackets - 0x440 + bufferIndex * KWLN_FRAME_BUFFER_BYTES), D_0037F770, kwlnDefaultColorVector);
+        sdf3DMakeLightParallelPacket((sdf3DLightParallelPacket_t *)(kwlnOverlayMatrixPackets - 0x440 + bufferIndex * KWLN_FRAME_BUFFER_BYTES), D_0037F770, kwlnDefaultColorVector);
         *(u32 *)(kwlnOverlayMatrixPackets - 0x620 + bufferIndex * KWLN_FRAME_BUFFER_BYTES) = D_00435CBC;
     }
     sdf3DMakeScreenParam(&dds3ScreenParam.camera);

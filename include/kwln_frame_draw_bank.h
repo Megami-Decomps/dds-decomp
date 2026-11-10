@@ -23,7 +23,7 @@ typedef struct KwlnFrameDrawBank {
     KwlnTextureBank heldTexture;          /* 0x1A30: the held texture's packets */
     sdfDrawTag_t thirdList;               /* 0x1D70 */
     ConsMatrixPacket thirdMatrix;        /* 0x1D90 */
-    SdfLightingPacketStorage overlayLightPacket; /* 0x1E60 */
+    sdf3DLightParallelPacket_t overlayLightPacket; /* 0x1E60 */
 } KwlnFrameDrawBank;
 
 typedef char KwlnFrameDrawBank_size_must_be_0x1F40[

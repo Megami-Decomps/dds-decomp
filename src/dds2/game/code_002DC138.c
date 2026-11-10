@@ -54,7 +54,7 @@ extern u32 D_00437E38;
 extern sdfGrOt_t *D_00437E3C;
 
 extern struct EffExpandedList *effCreateTextureAnimationSet(u32);
-extern s32 effComputeLightDirectionVU(dds3ModelHandle_t *, SdfLightingPacketStorage *);
+extern s32 effComputeLightDirectionVU(dds3ModelHandle_t *, sdf3DLightParallelPacket_t *);
 
 extern void effFloorModelListRemove(EffectObjectNode *);
 
@@ -136,7 +136,7 @@ EffModelOwner *effCreateModelOwner(FileJobPayload *source) {
 }
 
 void effDestroyModelOwner(EffModelOwner *owner) {
-    SdfLightingPacketStorage *buffer = owner->ownedBuffer;
+    sdf3DLightParallelPacket_t *buffer = owner->ownedBuffer;
     if (buffer != NULL) {
         sdfChipFreeDirect(buffer);
     }
@@ -180,7 +180,7 @@ void effRefreshModelLighting(EffModelOwner *work) {
     dds3ModelHandle_t *model;
     if (effComputeLightDirectionVU(work->model, work->ownedBuffer)) {
         model = work->model;
-        model->inner->lighting = &work->ownedBuffer->dmaTag;
+        model->inner->lighting = work->ownedBuffer;
     } else {
         model = work->model;
     }
@@ -323,7 +323,7 @@ void effRenderModelOwnerWithGsTests(EffModelOwner *owner) {
     }
 
     if (effComputeLightDirectionVU(owner->model, owner->ownedBuffer)) {
-        owner->model->inner->lighting = &owner->ownedBuffer->dmaTag;
+        owner->model->inner->lighting = owner->ownedBuffer;
     }
 
     mdlLink(owner->model, kwlnSceneSurfaceSets[1]);

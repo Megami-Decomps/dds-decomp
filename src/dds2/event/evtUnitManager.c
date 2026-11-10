@@ -794,7 +794,7 @@ extern f32 D_004215D0[];
 
 evtUnitHandle_t *evtCreateUnitTransitionWork(dds3Basic_t *effObj, dds3ModelHandle_t *owner) {
     evtUnitHandle_t *work;
-    struct SdfLightingPacketStorage *endpoint;
+    struct sdf3DLightParallelPacket_t *endpoint;
     f32 defaultVector[4];
     s32 i;
 
@@ -838,7 +838,7 @@ evtUnitHandle_t *evtCreateUnitTransitionWork(dds3Basic_t *effObj, dds3ModelHandl
 }
 
 s32 evtDeleteUnitHandle(evtUnitHandle_t *transitionWork) {
-    struct SdfLightingPacketStorage *endpointWork;
+    struct sdf3DLightParallelPacket_t *endpointWork;
 
     if (transitionWork == NULL) {
         return 1;
