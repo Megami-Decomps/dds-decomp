@@ -1,16 +1,12 @@
 #include "common.h"
+#include "sdf_types.h"
 #include "effPCPData.h"
 #include "ps2asm.h"
 #include "sdf_resource.h"
+#include "sdfFrame.h"
 
 /* DDS's names for the same objects. */
-#define D_0031F2C0 effPCPScatterParams
-#define D_0031F310 effPCPScatterTexcoords
-#define D_0031F3D0 effPCPScatterSurfaceByPool
 #define D_0031F3E0 effScatterTriangleIndices
-#define D_0031F440 effPCPScatterSurfaceByQueue
-#define D_0056AD28 effPCPScatterDrawParams
-#define D_0056AD58 effDebugPoly
 #define dds3EffectBase effDefaultRandomState
 #define sdfMatSetTex sdfSetAssetPrimaryTextureAddress
 #define sdfTexFreeDelayed sdfTexReleaseReferenceViaHandler
@@ -668,34 +664,34 @@ f32 dds3GetRandFloatA(effRandState_t *name);
 
 /* Constructors copy one serialized parameter variant into its runtime owner. */
 effPCPWhirlwindPoly_tag *effPCPWhirlwindPolyCreate(
-    effPCPWhirlwindPolyParam_t *pParam, u32 pTex);
+    effPCPWhirlwindPolyParam_t *pParam, addr_t pTex);
 
 effPCPWwSpherePoly_tag *effPCPWwSpherePolyCreate(
-    effPCPWwSpherePolyParam_t *pParam, u32 pTex);
+    effPCPWwSpherePolyParam_t *pParam, addr_t pTex);
 
 extern dds3ScatterPolyListTexResource_tag *dds3ScatterPolyListTexResourceCopy(dds3ScatterPolyListTexResource_tag *hSplTexResSrc);
 
 effPCPWhirlwind2Poly_tag *effPCPWhirlwind2PolyCreate(
-    effPCPWhirlwind2PolyParam_t *pParam, u32 pTex);
+    effPCPWhirlwind2PolyParam_t *pParam, addr_t pTex);
 
 effPCPWhirlwind3Poly_tag *effPCPWhirlwind3PolyCreate(
-    effPCPWhirlwind3PolyParam_t *pParam, u32 pTex);
+    effPCPWhirlwind3PolyParam_t *pParam, addr_t pTex);
 
-extern effDebugPolyParams_t D_0056AD58;
+extern effDebugPolyParams_t effDebugPoly;
 
-extern sdfGrOt_t *D_0031F440[];
+extern sdfGrOt_t *effPCPScatterSurfaceByQueue[];
 
-extern effDebugPolyParams_t D_0056AD28[];
+extern effDebugPolyParams_t effPCPScatterDrawParams[];
 
-extern sdfGrOt_t *D_0031F3D0[];
+extern sdfGrOt_t *effPCPScatterSurfaceByPool[];
 
-extern u32 D_0031F310[];
+extern u32 effPCPScatterTexcoords[];
 
-extern u32 D_0031F2C0[];
+extern u32 effPCPScatterParams[];
 
 extern u8 D_0031F3E0[];
 
-extern void *memset(void *a, s32 b, u32 c);
+extern void *memset(void *a, s32 b, size_t c);
 
 struct sdfMemHandle_t *sdfMemAllocDirect(s32 aSize);
 
@@ -705,7 +701,7 @@ s32 sdfGrAllocPacketBuff(s32 aSize);
 
 void *sdfChipAllocDirect(s32 aSize);
 
-void sdfDrawTagLink(struct sdfDrawTag_t *aTag, u32 aPacket);
+void sdfDrawTagLink(struct sdfDrawTag_t *aTag, addr_t aPacket);
 
 /* Apply the primary VU0 matrix bank vf28-vf31 to basis vectors vf24-vf27,
  * then replace vf28-vf31 with the four transformed vectors. */
@@ -767,10 +763,10 @@ extern u32 effColorBlend(u32 abgr0, u32 abgr1, f32 rate);
 extern s32 effMagaCylinderCalcColor(s32 color, s32 tint);
 extern f32 sdfAtan(f32 aX);
 extern void SetRotateMatrixAxis(f32 aAngle, const void *aAxis);
-extern void *memcpy(void *a, const void *b, u32 c);
-effPCPHamaCardSpiral_tag *effPCPHamaCardSpiralCreate(const effPCPHamaCardSpiralParam_t *pParam, u32 pTex, void *pData);
-effPCPHamaCardSphere_tag *effPCPHamaCardSphereCreate(const effPCPHamaCardSphereParam_t *pParam, u32 pTex, void *pData);
-effPCPHamaCardScatter_tag *effPCPHamaCardScatterCreate(const effPCPHamaCardScatterParam_t *pParam, u32 pTex, void *pData);
+extern void *memcpy(void *a, const void *b, size_t c);
+effPCPHamaCardSpiral_tag *effPCPHamaCardSpiralCreate(const effPCPHamaCardSpiralParam_t *pParam, addr_t pTex, void *pData);
+effPCPHamaCardSphere_tag *effPCPHamaCardSphereCreate(const effPCPHamaCardSphereParam_t *pParam, addr_t pTex, void *pData);
+effPCPHamaCardScatter_tag *effPCPHamaCardScatterCreate(const effPCPHamaCardScatterParam_t *pParam, addr_t pTex, void *pData);
 dds3WhirlwindPolyList_tag *dds3WhirlwindPolyListCreate(u32 number, u32 face);
 void dds3WhirlwindPolyListSetRotateMatrix(dds3WhirlwindPolyList_tag *hPoly, const void *pMatrix);
 dds3ScatterPolyList_tag *dds3ScatterPolyListCreate(s32 face);
@@ -800,7 +796,7 @@ f32 *dds3WhirlwindPolyListGetUV(dds3WhirlwindPolyList_tag *hPoly, s32 index);
 
 effPCPHamaCardSpiral_tag *effPCPHamaCardSpiralCreate(params, resource, particleParams)
     const effPCPHamaCardSpiralParam_t *params;
-    u32 resource;
+    addr_t resource;
     void *particleParams;
 {
     effPCPHamaCardSpiral_tag *work;
@@ -814,7 +810,7 @@ effPCPHamaCardSpiral_tag *effPCPHamaCardSpiralCreate(params, resource, particleP
     u32 segments;
 
     handle = sdfMemAllocDirect(sizeof(effPCPHamaCardSpiral_tag) + params->number * sizeof(effPCPHamaCardSpiralPart_tag));
-    work = (effPCPHamaCardSpiral_tag *)sdfMemLock(handle);
+    work = EE_ADDR_AS(effPCPHamaCardSpiral_tag *, sdfMemLock(handle));
     work->pPart = (effPCPHamaCardSpiralPart_tag *)(work + 1);
     work->param = *params;
     work->abgr = EFF_SCATTER_NEUTRAL_COLOR;
@@ -837,7 +833,7 @@ effPCPHamaCardSpiral_tag *effPCPHamaCardSpiralCreate(params, resource, particleP
         }
         count = work->AttachNum;
         handle = sdfMemAllocDirect(count * sizeof(u32));
-        handles = (effPartHandle_t **)sdfMemLock(handle);
+        handles = EE_ADDR_AS(effPartHandle_t **, sdfMemLock(handle));
         work->hAttachMem = handle;
         work->pAttach = handles;
         work->pAttach[0] = dds3EffectPartCreate(EFF_PARAM_WORK_KIND_EXTENDED_WORK_WITH_MATRIX_CALLBACK, particleParams);
@@ -854,7 +850,7 @@ effPCPHamaCardSpiral_tag *effPCPHamaCardSpiralCreate(params, resource, particleP
     }
     segments = work->param.simu_num;
     for (i = 0; i < count; i++, particle++) {
-        particle->frame = ageOffset - dds3GetRandA((effRandState_t *)dds3EffectBase) % delaySpread;
+        particle->frame = SDF_FRAMES(ageOffset - dds3GetRandA((effRandState_t *)dds3EffectBase) % delaySpread);
         if ((i + 1) % segments == 0) {
             ageOffset -= delaySpread;
         }
@@ -866,7 +862,7 @@ effPCPHamaCardSpiral_tag *effPCPHamaCardSpiralCreatePCF(void *parameterTable)
 {
     return effPCPHamaCardSpiralCreate(
         dds3EffectPCPDataGetData(parameterTable, EFF_SCATTER_PARAM_BLOCK),
-        (u32)dds3EffectPCPDataGetData(parameterTable, EFF_SCATTER_RESOURCE_BLOCK),
+        EE_ADDR(dds3EffectPCPDataGetData(parameterTable, EFF_SCATTER_RESOURCE_BLOCK)),
         dds3EffectPCPDataGetData(parameterTable, EFF_SCATTER_CHILD_BLOCK));
 }
 
@@ -888,7 +884,7 @@ effPCPHamaCardSpiral_tag *effPCPHamaCardSpiralCopy(source)
         }
         count = work->AttachNum;
         allocation = sdfMemAllocDirect(count * EFF_SCATTER_WORD_BYTES);
-        handles = (effPartHandle_t **)sdfMemLock(allocation);
+        handles = EE_ADDR_AS(effPartHandle_t **, sdfMemLock(allocation));
         work->hAttachMem = allocation;
         work->pAttach = handles;
         for (i = 0; i < count; i++) {
@@ -941,14 +937,14 @@ void effPCPHamaCardSpiralPartInit(effPCPHamaCardSpiral_tag *pHCardSpiral, u32 nu
 }
 
 void effPCPHamaCardSpiralDraw(effPCPHamaCardSpiral_tag *hData) {
-    f32 next[4];
-    f32 position[4];
-    f32 duplicatePosition[4];
-    f32 direction[4];
-    f32 radial[4];
-    f32 halfWidth[4];
-    f32 halfHeight[4];
-    f32 side[4];
+    sdfVector4_t next;
+    sdfVector4_t position;
+    sdfVector4_t duplicatePosition;
+    sdfVector4_t direction;
+    sdfVector4_t radial;
+    sdfVector4_t halfWidth;
+    sdfVector4_t halfHeight;
+    sdfVector4_t side;
     s32 respawn;
     s32 pulse;
     s32 duplicates;
@@ -968,21 +964,21 @@ void effPCPHamaCardSpiralDraw(effPCPHamaCardSpiral_tag *hData) {
     f32 angleDamping;
 
     i = 0;
-    duration = hData->param.life;
-    endAge = hData->param.wait + duration;
+    duration = SDF_FRAMES(hData->param.life);
+    endAge = SDF_FRAMES(hData->param.wait) + duration;
     duplicates = hData->pAttach != NULL;
     count = hData->param.number;
-    VEC3_SPLAT(halfWidth, hData->param.tex_w * 0.5f);
-    VEC3_SPLAT(halfHeight, hData->param.tex_h * 0.5f);
+    VEC3_SPLAT(&halfWidth.x, hData->param.tex_w * 0.5f);
+    VEC3_SPLAT(&halfHeight.x, hData->param.tex_h * 0.5f);
     particle = hData->pPart;
     respawn = hData->param.loop;
     pulse = hData->param.vibrate;
     pulseAngle = hData->param.vib_power;
-    fadeIn = hData->param.fade_in;
-    fadeOut = hData->param.fade_out;
-    heightDamping = hData->param.up_a;
-    angleDamping = hData->param.roll_a;
-    duplicateStart = hData->param.attach_f;
+    fadeIn = SDF_FRAMES(hData->param.fade_in);
+    fadeOut = SDF_FRAMES(hData->param.fade_out);
+    heightDamping = SDF_FRAME_DECAY(hData->param.up_a);
+    angleDamping = SDF_FRAME_DECAY(hData->param.roll_a);
+    duplicateStart = SDF_FRAMES(hData->param.attach_f);
     perGroup = hData->param.attach_i;
     baseColor = hData->abgr;
 
@@ -1019,61 +1015,61 @@ void effPCPHamaCardSpiralDraw(effPCPHamaCardSpiral_tag *hData) {
             angleStep = particle->roll_s;
             heightStep = particle->up_s;
             if (!moving && pulse) {
-                if (age == duration) {
+                if (SDF_FRAME_TICK(age) == SDF_FRAME_TICK(duration)) {
                     angle += pulseAngle;
                     height += heightStep * pulseAngle / angleStep;
-                } else if (age == duration + 1) {
+                } else if (SDF_FRAME_TICK(age) == SDF_FRAME_TICK(duration) + 1) {
                     angle -= pulseAngle;
                     height -= heightStep * pulseAngle / angleStep;
                 }
             }
-            position[0] = sdfCos(angle) * radius;
-            position[1] = height;
-            position[2] = sdfSin(angle) * radius;
-            SDF_VU0_LOADVECTOR_C(position);
+            position.x = sdfCos(angle) * radius;
+            position.y = height;
+            position.z = sdfSin(angle) * radius;
+            SDF_VU0_LOADVECTOR_C(&position);
             for (j = 0; j < 3; j++, vertices++, colors++) {
                 height += heightStep;
                 colors[0] = color;
                 colors[3] = color;
-                angle += sdfAtan(halfWidth[0] / radius);
-                next[0] = sdfCos(angle) * radius;
-                next[1] = height;
-                next[2] = sdfSin(angle) * radius;
-                SDF_VU0_LOADVECTOR(next);
-                SDF_VU0_LOADVECTOR_B(position);
+                angle += sdfAtan(halfWidth.x / radius);
+                next.x = sdfCos(angle) * radius;
+                next.y = height;
+                next.z = sdfSin(angle) * radius;
+                SDF_VU0_LOADVECTOR(&next);
+                SDF_VU0_LOADVECTOR_B(&position);
                 SDF_VU0_SUBVECTOR();
                 SDF_VU0_NORMALIZE();
-                SDF_VU0_STOREVECTOR_NOMEM(direction);
-                SDF_VU0_LOADVECTOR_B(halfWidth);
+                SDF_VU0_STOREVECTOR_NOMEM(&direction);
+                SDF_VU0_LOADVECTOR_B(&halfWidth);
                 SDF_VU0_MULVECTOR();
                 SDF_VU0_ADDVECTOR_A_C();
                 SDF_VU0_COPYVECTOR_A_TO_C();
-                SDF_VU0_STOREVECTOR_NOMEM(position);
-                SDF_VU0_STOREVECTOR_NOMEM(radial);
-                radial[1] = 0.0f;
-                SDF_VU0_LOADVECTOR(direction);
-                SDF_VU0_LOADVECTOR_B(radial);
+                SDF_VU0_STOREVECTOR_NOMEM(&position);
+                SDF_VU0_STOREVECTOR_NOMEM(&radial);
+                radial.y = 0.0f;
+                SDF_VU0_LOADVECTOR(&direction);
+                SDF_VU0_LOADVECTOR_B(&radial);
                 SDF_VU0_OUTERPRODUCT();
                 SDF_VU0_NORMALIZE();
-                SDF_VU0_LOADVECTOR_B(halfHeight);
+                SDF_VU0_LOADVECTOR_B(&halfHeight);
                 SDF_VU0_MULVECTOR();
-                SDF_VU0_STOREVECTOR_NOMEM(side);
-                SDF_VU0_LOADVECTOR(position);
-                SDF_VU0_LOADVECTOR_B(side);
+                SDF_VU0_STOREVECTOR_NOMEM(&side);
+                SDF_VU0_LOADVECTOR(&position);
+                SDF_VU0_LOADVECTOR_B(&side);
                 SDF_VU0_ADDVECTOR();
                 SDF_VU0_STOREVECTOR_NOMEM(vertices);
                 SDF_VU0_SUBVECTOR();
                 SDF_VU0_SUBVECTOR();
                 SDF_VU0_STOREVECTOR_NOMEM(vertices + 3);
                 if (j == 1) {
-                    SDF_VU0_COPYVECTOR(duplicatePosition, position);
+                    SDF_VU0_COPYVECTOR(&duplicatePosition, &position);
                 }
-                SDF_VU0_COPYVECTOR(position, next);
+                SDF_VU0_COPYVECTOR(&position, &next);
             }
             if (moving) {
-                particle->radius += particle->radius_s;
-                particle->radian += angleStep;
-                particle->height += heightStep;
+                particle->radius += SDF_FRAME_STEP(particle->radius_s);
+                particle->radian += SDF_FRAME_STEP(angleStep);
+                particle->height += SDF_FRAME_STEP(heightStep);
                 particle->roll_s = angleStep * angleDamping;
                 particle->up_s = heightStep * heightDamping;
             }
@@ -1092,10 +1088,10 @@ void effPCPHamaCardSpiralDraw(effPCPHamaCardSpiral_tag *hData) {
             u32 group = i / perGroup;
             dds3EffectPartSetColor(hData->pAttach[group], baseColor);
             SDF_VU0_LOADVECTOR(hData->param.pos);
-            SDF_VU0_LOADVECTOR_B(duplicatePosition);
+            SDF_VU0_LOADVECTOR_B(&duplicatePosition);
             SDF_VU0_ADDVECTOR();
-            SDF_VU0_STOREVECTOR_NOMEM(duplicatePosition);
-            dds3EffectPartSetPosition(hData->pAttach[group], duplicatePosition);
+            SDF_VU0_STOREVECTOR_NOMEM(&duplicatePosition);
+            dds3EffectPartSetPosition(hData->pAttach[group], &duplicatePosition.x);
             dds3EffectPartDraw(hData->pAttach[group]);
         }
         particle->frame++;
@@ -1115,16 +1111,16 @@ void effPCPHamaCardSpiralSetColor(effPCPHamaCardSpiral_tag *hData, u32 abgr)
     hData->abgr = abgr;
 }
 
-void effPCPHamaCardSpiralSetScale(f32 hData, effPCPHamaCardSpiral_tag *scale)
+void effPCPHamaCardSpiralSetScale(effPCPHamaCardSpiral_tag *hData, f32 scale)
 {
-    scale->param.up_s *= hData;
-    scale->param.radius_s *= hData;
-    scale->param.radius_e *= hData;
+    hData->param.up_s *= scale;
+    hData->param.radius_s *= scale;
+    hData->param.radius_e *= scale;
 }
 
 effPCPHamaCardSphere_tag *effPCPHamaCardSphereCreate(params, resource, particleParams)
     const effPCPHamaCardSphereParam_t *params;
-    u32 resource;
+    addr_t resource;
     void *particleParams;
 {
     effPCPHamaCardSphere_tag *work;
@@ -1136,7 +1132,7 @@ effPCPHamaCardSphere_tag *effPCPHamaCardSphereCreate(params, resource, particleP
     s32 delaySpread;
 
     allocation = sdfMemAllocDirect(sizeof(effPCPHamaCardSphere_tag) + params->number * sizeof(effPCPHamaCardSpherePart_tag));
-    work = (effPCPHamaCardSphere_tag *)sdfMemLock(allocation);
+    work = EE_ADDR_AS(effPCPHamaCardSphere_tag *, sdfMemLock(allocation));
     work->pPart = (effPCPHamaCardSpherePart_tag *)(work + 1);
     work->param = *params;
     work->abgr = EFF_SCATTER_NEUTRAL_COLOR;
@@ -1159,7 +1155,7 @@ effPCPHamaCardSphere_tag *effPCPHamaCardSphereCreate(params, resource, particleP
         }
         count = work->AttachNum;
         allocation = sdfMemAllocDirect(count * sizeof(u32));
-        handles = (effPartHandle_t **)sdfMemLock(allocation);
+        handles = EE_ADDR_AS(effPartHandle_t **, sdfMemLock(allocation));
         work->hAttachMem = allocation;
         work->pAttach = handles;
         /* Native setup seeds group zero even when the computed group count is zero. */
@@ -1175,14 +1171,14 @@ effPCPHamaCardSphere_tag *effPCPHamaCardSphereCreate(params, resource, particleP
         delaySpread = 1;
     }
     for (i = 0; i < count; i++, particle++) {
-        particle->frame = -(dds3GetRandA((effRandState_t *)dds3EffectBase) % delaySpread);
+        particle->frame = -SDF_FRAMES(dds3GetRandA((effRandState_t *)dds3EffectBase) % delaySpread);
     }
     return work;
 }
 
 effPCPHamaCardSphere_tag *effPCPHamaCardSphereCreatePCF(void *parameterTable)
 {
-    return effPCPHamaCardSphereCreate(dds3EffectPCPDataGetData(parameterTable, EFF_SCATTER_PARAM_BLOCK), (u32)dds3EffectPCPDataGetData(parameterTable, EFF_SCATTER_RESOURCE_BLOCK), dds3EffectPCPDataGetData(parameterTable, EFF_SCATTER_CHILD_BLOCK));
+    return effPCPHamaCardSphereCreate(dds3EffectPCPDataGetData(parameterTable, EFF_SCATTER_PARAM_BLOCK), EE_ADDR(dds3EffectPCPDataGetData(parameterTable, EFF_SCATTER_RESOURCE_BLOCK)), dds3EffectPCPDataGetData(parameterTable, EFF_SCATTER_CHILD_BLOCK));
 }
 
 effPCPHamaCardSphere_tag *effPCPHamaCardSphereCopy(source)
@@ -1203,7 +1199,7 @@ effPCPHamaCardSphere_tag *effPCPHamaCardSphereCopy(source)
         }
         count = work->AttachNum;
         allocation = sdfMemAllocDirect(count * EFF_SCATTER_WORD_BYTES);
-        handles = (effPartHandle_t **)sdfMemLock(allocation);
+        handles = EE_ADDR_AS(effPartHandle_t **, sdfMemLock(allocation));
         work->hAttachMem = allocation;
         work->pAttach = handles;
         for (i = 0; i < count; i++) {
@@ -1236,7 +1232,7 @@ void effPCPHamaCardSphereDelete(effPCPHamaCardSphere_tag *hData)
 void effPCPHamaCardSpherePartInit(effPCPHamaCardSphere_tag *pHCardSphere, s32 number)
 {
     effPCPHamaCardSpherePart_tag *sprite = &pHCardSphere->pPart[number];
-    f32 direction[4];
+    sdfVector4_t direction;
     f32 jitter;
 
     sprite->radian = dds3GetRandFloatA(dds3EffectBase) * (EFF_SCATTER_HALF_TURN * 2.0f);
@@ -1245,28 +1241,28 @@ void effPCPHamaCardSpherePartInit(effPCPHamaCardSphere_tag *pHCardSphere, s32 nu
     jitter = pHCardSphere->param.radius_e_r;
     sprite->radius_s = (pHCardSphere->param.radius_e * (dds3GetRandFloatA(dds3EffectBase) * jitter + (1.0f - jitter)) - sprite->radius) / (f32)pHCardSphere->param.life;
     sprite->roll_s = pHCardSphere->param.roll_s;
-    direction[0] = (dds3GetRandFloatA(dds3EffectBase) - EFF_SCATTER_RANDOM_MIDPOINT) * EFF_SCATTER_RANDOM_SPAN;
-    direction[1] = (dds3GetRandFloatA(dds3EffectBase) - EFF_SCATTER_RANDOM_MIDPOINT) * EFF_SCATTER_RANDOM_SPAN;
-    direction[2] = (dds3GetRandFloatA(dds3EffectBase) - EFF_SCATTER_RANDOM_MIDPOINT) * EFF_SCATTER_RANDOM_SPAN;
-    SDF_VU0_LOADVECTOR(direction);
+    direction.x = (dds3GetRandFloatA(dds3EffectBase) - EFF_SCATTER_RANDOM_MIDPOINT) * EFF_SCATTER_RANDOM_SPAN;
+    direction.y = (dds3GetRandFloatA(dds3EffectBase) - EFF_SCATTER_RANDOM_MIDPOINT) * EFF_SCATTER_RANDOM_SPAN;
+    direction.z = (dds3GetRandFloatA(dds3EffectBase) - EFF_SCATTER_RANDOM_MIDPOINT) * EFF_SCATTER_RANDOM_SPAN;
+    SDF_VU0_LOADVECTOR(&direction);
     SDF_VU0_NORMALIZE();
-    SDF_VU0_STOREVECTOR(direction);
+    SDF_VU0_STOREVECTOR(&direction);
     sprite->frame = 0;
-    sprite->axis[0] = direction[0];
-    sprite->axis[1] = direction[1];
-    sprite->axis[2] = direction[2];
+    sprite->axis[0] = direction.x;
+    sprite->axis[1] = direction.y;
+    sprite->axis[2] = direction.z;
 }
 
 void effPCPHamaCardSphereDraw(effPCPHamaCardSphere_tag *hData) {
-    f32 axis[4];
-    f32 next[4];
-    f32 position[4];
-    f32 duplicatePosition[4];
-    f32 direction[4];
-    f32 radial[4];
-    f32 halfWidth[4];
-    f32 halfHeight[4];
-    f32 side[4];
+    sdfVector4_t axis;
+    sdfVector4_t next;
+    sdfVector4_t position;
+    sdfVector4_t duplicatePosition;
+    sdfVector4_t direction;
+    sdfVector4_t radial;
+    sdfVector4_t halfWidth;
+    sdfVector4_t halfHeight;
+    sdfVector4_t side;
     s32 respawn;
     s32 pulse;
     s32 duplicates;
@@ -1285,20 +1281,20 @@ void effPCPHamaCardSphereDraw(effPCPHamaCardSphere_tag *hData) {
     f32 angleDamping;
 
     i = 0;
-    duration = hData->param.life;
-    endAge = hData->param.wait + duration;
+    duration = SDF_FRAMES(hData->param.life);
+    endAge = SDF_FRAMES(hData->param.wait) + duration;
     duplicates = hData->pAttach != NULL;
     count = hData->param.number;
-    VEC3_SPLAT(halfWidth, hData->param.tex_w * 0.5f);
-    VEC3_SPLAT(halfHeight, hData->param.tex_h * 0.5f);
+    VEC3_SPLAT(&halfWidth.x, hData->param.tex_w * 0.5f);
+    VEC3_SPLAT(&halfHeight.x, hData->param.tex_h * 0.5f);
     particle = hData->pPart;
     respawn = hData->param.loop;
     pulse = hData->param.vibrate;
     pulseAngle = hData->param.vib_power;
-    fadeIn = hData->param.fade_in;
-    fadeOut = hData->param.fade_out;
-    angleDamping = hData->param.roll_a;
-    duplicateStart = hData->param.attach_f;
+    fadeIn = SDF_FRAMES(hData->param.fade_in);
+    fadeOut = SDF_FRAMES(hData->param.fade_out);
+    angleDamping = SDF_FRAME_DECAY(hData->param.roll_a);
+    duplicateStart = SDF_FRAMES(hData->param.attach_f);
     perGroup = hData->param.attach_i;
     baseColor = hData->abgr;
 
@@ -1331,68 +1327,68 @@ void effPCPHamaCardSphereDraw(effPCPHamaCardSphere_tag *hData) {
             radius = particle->radius;
             angleStep = particle->roll_s;
             if (!moving && pulse) {
-                if (age == duration) {
+                if (SDF_FRAME_TICK(age) == SDF_FRAME_TICK(duration)) {
                     angle += pulseAngle;
-                } else if (age == duration + 1) {
+                } else if (SDF_FRAME_TICK(age) == SDF_FRAME_TICK(duration) + 1) {
                     angle -= pulseAngle;
                 }
             }
-            axis[0] = particle->axis[0];
-            axis[1] = particle->axis[1];
-            axis[2] = particle->axis[2];
-            SetRotateMatrixAxis(angle, (const void *)axis);
-            position[0] = radius;
-            position[1] = 0.0f;
-            position[2] = 0.0f;
-            SDF_VU0_LOADVECTOR(position);
+            axis.x = particle->axis[0];
+            axis.y = particle->axis[1];
+            axis.z = particle->axis[2];
+            SetRotateMatrixAxis(angle, (const void *)&axis);
+            position.x = radius;
+            position.y = 0.0f;
+            position.z = 0.0f;
+            SDF_VU0_LOADVECTOR(&position);
             SDF_VU0_APPLYMATRIX();
-            SDF_VU0_STOREVECTOR_NOMEM(position);
+            SDF_VU0_STOREVECTOR_NOMEM(&position);
             SDF_VU0_COPYVECTOR_A_TO_C();
             for (j = 0; j < 3; j++, vertices++, colors++) {
                 colors[0] = color;
                 colors[3] = color;
-                angle += sdfAtan(halfWidth[0] / radius);
-                SetRotateMatrixAxis(angle, (const void *)axis);
-                next[0] = radius;
-                next[1] = 0.0f;
-                next[2] = 0.0f;
-                SDF_VU0_LOADVECTOR(next);
+                angle += sdfAtan(halfWidth.x / radius);
+                SetRotateMatrixAxis(angle, (const void *)&axis);
+                next.x = radius;
+                next.y = 0.0f;
+                next.z = 0.0f;
+                SDF_VU0_LOADVECTOR(&next);
                 SDF_VU0_APPLYMATRIX();
-                SDF_VU0_STOREVECTOR_NOMEM(next);
-                SDF_VU0_LOADVECTOR(next);
-                SDF_VU0_LOADVECTOR_B(position);
+                SDF_VU0_STOREVECTOR_NOMEM(&next);
+                SDF_VU0_LOADVECTOR(&next);
+                SDF_VU0_LOADVECTOR_B(&position);
                 SDF_VU0_SUBVECTOR();
                 SDF_VU0_NORMALIZE();
-                SDF_VU0_STOREVECTOR_NOMEM(direction);
-                SDF_VU0_LOADVECTOR_B(halfWidth);
+                SDF_VU0_STOREVECTOR_NOMEM(&direction);
+                SDF_VU0_LOADVECTOR_B(&halfWidth);
                 SDF_VU0_MULVECTOR();
                 SDF_VU0_ADDVECTOR_A_C();
                 SDF_VU0_COPYVECTOR_A_TO_C();
-                SDF_VU0_STOREVECTOR_NOMEM(position);
-                SDF_VU0_STOREVECTOR_NOMEM(radial);
-                radial[1] = 0.0f;
-                SDF_VU0_LOADVECTOR(direction);
-                SDF_VU0_LOADVECTOR_B(radial);
+                SDF_VU0_STOREVECTOR_NOMEM(&position);
+                SDF_VU0_STOREVECTOR_NOMEM(&radial);
+                radial.y = 0.0f;
+                SDF_VU0_LOADVECTOR(&direction);
+                SDF_VU0_LOADVECTOR_B(&radial);
                 SDF_VU0_OUTERPRODUCT();
                 SDF_VU0_NORMALIZE();
-                SDF_VU0_LOADVECTOR_B(halfHeight);
+                SDF_VU0_LOADVECTOR_B(&halfHeight);
                 SDF_VU0_MULVECTOR();
-                SDF_VU0_STOREVECTOR_NOMEM(side);
-                SDF_VU0_LOADVECTOR(position);
-                SDF_VU0_LOADVECTOR_B(side);
+                SDF_VU0_STOREVECTOR_NOMEM(&side);
+                SDF_VU0_LOADVECTOR(&position);
+                SDF_VU0_LOADVECTOR_B(&side);
                 SDF_VU0_ADDVECTOR();
                 SDF_VU0_STOREVECTOR_NOMEM(vertices);
                 SDF_VU0_SUBVECTOR();
                 SDF_VU0_SUBVECTOR();
                 SDF_VU0_STOREVECTOR_NOMEM(vertices + 3);
                 if (j == 1) {
-                    SDF_VU0_COPYVECTOR(duplicatePosition, position);
+                    SDF_VU0_COPYVECTOR(&duplicatePosition, &position);
                 }
-                SDF_VU0_COPYVECTOR(position, next);
+                SDF_VU0_COPYVECTOR(&position, &next);
             }
             if (moving) {
-                particle->radius += particle->radius_s;
-                particle->radian += angleStep;
+                particle->radius += SDF_FRAME_STEP(particle->radius_s);
+                particle->radian += SDF_FRAME_STEP(angleStep);
                 particle->roll_s = angleStep * angleDamping;
             }
         } else {
@@ -1410,10 +1406,10 @@ void effPCPHamaCardSphereDraw(effPCPHamaCardSphere_tag *hData) {
             u32 group = i / perGroup;
             dds3EffectPartSetColor(hData->pAttach[group], baseColor);
             SDF_VU0_LOADVECTOR(hData->param.pos);
-            SDF_VU0_LOADVECTOR_B(duplicatePosition);
+            SDF_VU0_LOADVECTOR_B(&duplicatePosition);
             SDF_VU0_ADDVECTOR();
-            SDF_VU0_STOREVECTOR_NOMEM(duplicatePosition);
-            dds3EffectPartSetPosition(hData->pAttach[group], duplicatePosition);
+            SDF_VU0_STOREVECTOR_NOMEM(&duplicatePosition);
+            dds3EffectPartSetPosition(hData->pAttach[group], &duplicatePosition.x);
             dds3EffectPartDraw(hData->pAttach[group]);
         }
         particle->frame++;
@@ -1433,15 +1429,15 @@ void effPCPHamaCardSphereSetColor(effPCPHamaCardSphere_tag *hData, u32 abgr)
     hData->abgr = abgr;
 }
 
-void effPCPHamaCardSphereSetScale(f32 hData, effPCPHamaCardSphere_tag *scale)
+void effPCPHamaCardSphereSetScale(effPCPHamaCardSphere_tag *hData, f32 scale)
 {
-    scale->param.radius_s *= hData;
-    scale->param.radius_e *= hData;
+    hData->param.radius_s *= scale;
+    hData->param.radius_e *= scale;
 }
 
 effPCPHamaCardScatter_tag *effPCPHamaCardScatterCreate(params, resource, particleParams)
     const effPCPHamaCardScatterParam_t *params;
-    u32 resource;
+    addr_t resource;
     void *particleParams;
 {
     effPCPHamaCardScatter_tag *work;
@@ -1453,7 +1449,7 @@ effPCPHamaCardScatter_tag *effPCPHamaCardScatterCreate(params, resource, particl
     s32 delaySpread;
 
     allocation = sdfMemAllocDirect(sizeof(effPCPHamaCardScatter_tag) + params->particleCount * sizeof(effPCPHamaCardScatterPart_tag));
-    work = (effPCPHamaCardScatter_tag *)sdfMemLock(allocation);
+    work = EE_ADDR_AS(effPCPHamaCardScatter_tag *, sdfMemLock(allocation));
     work->pPart = (effPCPHamaCardScatterPart_tag *)(work + 1);
     work->param = *params;
     work->abgr = EFF_SCATTER_NEUTRAL_COLOR;
@@ -1476,7 +1472,7 @@ effPCPHamaCardScatter_tag *effPCPHamaCardScatterCreate(params, resource, particl
         }
         count = work->AttachNum;
         allocation = sdfMemAllocDirect(count * sizeof(u32));
-        handles = (effPartHandle_t **)sdfMemLock(allocation);
+        handles = EE_ADDR_AS(effPartHandle_t **, sdfMemLock(allocation));
         work->hAttachMem = allocation;
         work->pAttach = handles;
         /* Native setup seeds group zero even when the computed group count is zero. */
@@ -1492,14 +1488,14 @@ effPCPHamaCardScatter_tag *effPCPHamaCardScatterCreate(params, resource, particl
         delaySpread = 1;
     }
     for (i = 0; i < count; i++, particle++) {
-        particle->frame = -(dds3GetRandA((effRandState_t *)dds3EffectBase) % delaySpread);
+        particle->frame = -SDF_FRAMES(dds3GetRandA((effRandState_t *)dds3EffectBase) % delaySpread);
     }
     return work;
 }
 
 void effPCPHamaCardScatterCreatePCF(void *parameterTable)
 {
-    effPCPHamaCardScatterCreate(dds3EffectPCPDataGetData(parameterTable, EFF_SCATTER_PARAM_BLOCK), (u32)dds3EffectPCPDataGetData(parameterTable, EFF_SCATTER_RESOURCE_BLOCK), dds3EffectPCPDataGetData(parameterTable, EFF_SCATTER_CHILD_BLOCK));
+    effPCPHamaCardScatterCreate(dds3EffectPCPDataGetData(parameterTable, EFF_SCATTER_PARAM_BLOCK), EE_ADDR(dds3EffectPCPDataGetData(parameterTable, EFF_SCATTER_RESOURCE_BLOCK)), dds3EffectPCPDataGetData(parameterTable, EFF_SCATTER_CHILD_BLOCK));
 }
 
 effPCPHamaCardScatter_tag *effPCPHamaCardScatterCopy(source)
@@ -1523,7 +1519,7 @@ effPCPHamaCardScatter_tag *effPCPHamaCardScatterCopy(source)
         }
         count = work->AttachNum;
         allocation = sdfMemAllocDirect(count * EFF_SCATTER_WORD_BYTES);
-        handles = (effPartHandle_t **)sdfMemLock(allocation);
+        handles = EE_ADDR_AS(effPartHandle_t **, sdfMemLock(allocation));
         work->hAttachMem = allocation;
         work->pAttach = handles;
         for (i = 0; i < count; i++) {
@@ -1559,7 +1555,7 @@ void effPCPHamaCardScatterPartInit(effPCPHamaCardScatter_tag *pHCardScatter, s32
     f32 diagonalAngle = EFF_SCATTER_DIAGONAL_ANGLE_DEGREES * EFF_SCATTER_DEGREES_TO_RADIANS;
     f32 tiltStep = EFF_SCATTER_TILT_STEP_DEGREES * EFF_SCATTER_DEGREES_TO_RADIANS;
     effPCPHamaCardScatterPart_tag *particle = &pHCardScatter->pPart[number];
-    f32 direction[4];
+    sdfVector4_t direction;
 
     particle->height = 0.0f;
     particle->height_s = pHCardScatter->param.heightStep;
@@ -1569,27 +1565,27 @@ void effPCPHamaCardScatterPartInit(effPCPHamaCardScatter_tag *pHCardScatter, s32
     particle->roll = dds3GetRandFloatA(dds3EffectBase) * EFF_SCATTER_FULL_TURN;
     particle->radius = EFF_SCATTER_INITIAL_RIBBON_RADIUS;
 
-    direction[0] = (dds3GetRandFloatA(dds3EffectBase) - EFF_SCATTER_RANDOM_MIDPOINT) * EFF_SCATTER_RANDOM_SPAN;
-    direction[1] = 0.0f;
-    direction[2] = (dds3GetRandFloatA(dds3EffectBase) - EFF_SCATTER_RANDOM_MIDPOINT) * EFF_SCATTER_RANDOM_SPAN;
+    direction.x = (dds3GetRandFloatA(dds3EffectBase) - EFF_SCATTER_RANDOM_MIDPOINT) * EFF_SCATTER_RANDOM_SPAN;
+    direction.y = 0.0f;
+    direction.z = (dds3GetRandFloatA(dds3EffectBase) - EFF_SCATTER_RANDOM_MIDPOINT) * EFF_SCATTER_RANDOM_SPAN;
     VU0_NORMALIZE_PACKED_VECTOR(direction);
 
-    particle->unk20 = direction[0];
+    particle->unk20 = direction.x;
     particle->frame = 0;
-    particle->unk24 = direction[2];
+    particle->unk24 = direction.z;
 }
 
 /* vu0 routine: each particle sweeps three ribbon quads around its tilt angle,
  * and the tilt reverses once it passes half its stored span. */
 void effPCPHamaCardScatterDraw(effPCPHamaCardScatter_tag *hData) {
-    f32 next[4];
-    f32 position[4];
-    f32 duplicatePosition[4];
-    f32 direction[4];
-    f32 axis[4];
-    f32 halfWidth[4];
-    f32 halfHeight[4];
-    f32 side[4];
+    sdfVector4_t next;
+    sdfVector4_t position;
+    sdfVector4_t duplicatePosition;
+    sdfVector4_t direction;
+    sdfVector4_t axis;
+    sdfVector4_t halfWidth;
+    sdfVector4_t halfHeight;
+    sdfVector4_t side;
     s32 respawn;
     s32 duplicates;
     u32 i;
@@ -1605,17 +1601,17 @@ void effPCPHamaCardScatterDraw(effPCPHamaCardScatter_tag *hData) {
     effPCPHamaCardScatterPart_tag *particle;
 
     i = 0;
-    duration = hData->param.duration;
-    endAge = hData->param.fadeDuration + duration;
+    duration = SDF_FRAMES(hData->param.duration);
+    endAge = SDF_FRAMES(hData->param.fadeDuration) + duration;
     duplicates = hData->pAttach != NULL;
     count = hData->param.particleCount;
-    VEC3_SPLAT(halfWidth, hData->param.width * 0.5f);
-    VEC3_SPLAT(halfHeight, hData->param.height * 0.5f);
+    VEC3_SPLAT(&halfWidth.x, hData->param.width * 0.5f);
+    VEC3_SPLAT(&halfHeight.x, hData->param.height * 0.5f);
     particle = hData->pPart;
     respawn = hData->param.respawn;
-    fadeIn = hData->param.fadeIn;
-    fadeOut = hData->param.fadeOut;
-    duplicateStart = hData->param.duplicateStartAge;
+    fadeIn = SDF_FRAMES(hData->param.fadeIn);
+    fadeOut = SDF_FRAMES(hData->param.fadeOut);
+    duplicateStart = SDF_FRAMES(hData->param.duplicateStartAge);
     perGroup = hData->param.particlesPerGroup;
     baseColor = hData->abgr;
 
@@ -1647,60 +1643,60 @@ void effPCPHamaCardScatterDraw(effPCPHamaCardScatter_tag *hData) {
             radius = particle->radius;
             height = particle->height;
             heightStep = particle->height_s;
-            angle = particle->radian - sdfAtan(halfWidth[0] / radius);
+            angle = particle->radian - sdfAtan(halfWidth.x / radius);
             tiltStep = particle->radian_s;
-            axis[0] = 0.0f;
-            axis[1] = 0.0f;
-            axis[2] = 1.0f;
-            position[0] = sdfSin(angle) * radius;
-            position[1] = sdfCos(angle) * radius + height;
-            position[2] = 0.0f;
-            SDF_VU0_LOADVECTOR(position);
+            axis.x = 0.0f;
+            axis.y = 0.0f;
+            axis.z = 1.0f;
+            position.x = sdfSin(angle) * radius;
+            position.y = sdfCos(angle) * radius + height;
+            position.z = 0.0f;
+            SDF_VU0_LOADVECTOR(&position);
             SDF_VU0_COPYVECTOR_A_TO_C();
             for (j = 0; j < 3; j++, vertices++, colors++) {
                 colors[0] = color;
                 colors[3] = color;
                 height += heightStep;
-                angle += sdfAtan(halfWidth[0] / radius);
-                next[0] = sdfSin(angle) * radius;
-                next[1] = sdfCos(angle) * radius + height;
-                next[2] = 0.0f;
-                SDF_VU0_LOADVECTOR(next);
-                SDF_VU0_LOADVECTOR_B(position);
+                angle += sdfAtan(halfWidth.x / radius);
+                next.x = sdfSin(angle) * radius;
+                next.y = sdfCos(angle) * radius + height;
+                next.z = 0.0f;
+                SDF_VU0_LOADVECTOR(&next);
+                SDF_VU0_LOADVECTOR_B(&position);
                 SDF_VU0_SUBVECTOR();
                 SDF_VU0_NORMALIZE();
-                SDF_VU0_STOREVECTOR_NOMEM(direction);
-                SDF_VU0_LOADVECTOR_B(halfWidth);
+                SDF_VU0_STOREVECTOR_NOMEM(&direction);
+                SDF_VU0_LOADVECTOR_B(&halfWidth);
                 SDF_VU0_MULVECTOR();
                 SDF_VU0_ADDVECTOR_A_C();
                 SDF_VU0_COPYVECTOR_A_TO_C();
-                SDF_VU0_STOREVECTOR_NOMEM(position);
-                SDF_VU0_LOADVECTOR(axis);
-                SDF_VU0_LOADVECTOR_B(halfHeight);
+                SDF_VU0_STOREVECTOR_NOMEM(&position);
+                SDF_VU0_LOADVECTOR(&axis);
+                SDF_VU0_LOADVECTOR_B(&halfHeight);
                 SDF_VU0_MULVECTOR();
-                SDF_VU0_STOREVECTOR_NOMEM(side);
-                SDF_VU0_LOADVECTOR(position);
-                SDF_VU0_LOADVECTOR_B(side);
+                SDF_VU0_STOREVECTOR_NOMEM(&side);
+                SDF_VU0_LOADVECTOR(&position);
+                SDF_VU0_LOADVECTOR_B(&side);
                 SDF_VU0_ADDVECTOR();
                 SDF_VU0_STOREVECTOR_NOMEM(vertices);
                 SDF_VU0_SUBVECTOR();
                 SDF_VU0_SUBVECTOR();
                 SDF_VU0_STOREVECTOR_NOMEM(vertices + 3);
                 if (j == 1) {
-                    SDF_VU0_COPYVECTOR(duplicatePosition, position);
+                    SDF_VU0_COPYVECTOR(&duplicatePosition, &position);
                 }
-                SDF_VU0_COPYVECTOR(position, next);
+                SDF_VU0_COPYVECTOR(&position, &next);
             }
             if (age < duration) {
                 f32 limit = particle->radian_w * 0.5f;
-                f32 tilt = particle->radian + tiltStep;
+                f32 tilt = particle->radian + SDF_FRAME_STEP(tiltStep);
                 f32 magnitude;
 
                 particle->radian = tilt;
-                particle->height = particle->height + heightStep;
+                particle->height = particle->height + SDF_FRAME_STEP(heightStep);
                 magnitude = sdfFabs(tilt);
                 if (limit < magnitude) {
-                    particle->radian = tilt - tiltStep;
+                    particle->radian = tilt - SDF_FRAME_STEP(tiltStep);
                     particle->radian_s = -particle->radian_s;
                 }
             }
@@ -1719,10 +1715,10 @@ void effPCPHamaCardScatterDraw(effPCPHamaCardScatter_tag *hData) {
             u32 group = i / perGroup;
             dds3EffectPartSetColor(hData->pAttach[group], baseColor);
             SDF_VU0_LOADVECTOR(hData->param.origin);
-            SDF_VU0_LOADVECTOR_B(duplicatePosition);
+            SDF_VU0_LOADVECTOR_B(&duplicatePosition);
             SDF_VU0_ADDVECTOR();
-            SDF_VU0_STOREVECTOR_NOMEM(duplicatePosition);
-            dds3EffectPartSetPosition(hData->pAttach[group], duplicatePosition);
+            SDF_VU0_STOREVECTOR_NOMEM(&duplicatePosition);
+            dds3EffectPartSetPosition(hData->pAttach[group], &duplicatePosition.x);
             dds3EffectPartDraw(hData->pAttach[group]);
         }
         particle->frame++;
@@ -1759,7 +1755,7 @@ dds3ScatterPolyList_tag *dds3ScatterPolyListCreate(s32 face) {
     auxWords = slotCount * EFF_SCATTER_POOL_AUX_WORDS_PER_SLOT;
     allocationBytes = (recordWords + auxWords) * EFF_SCATTER_WORD_BYTES + EFF_SCATTER_POOL_CONTROL_BYTES;
     allocation = sdfMemAllocDirect(allocationBytes);
-    recordBlock = (u32 *)sdfMemLock(allocation);
+    recordBlock = EE_ADDR_AS(u32 *, sdfMemLock(allocation));
     memset(recordBlock, 0, allocationBytes);
     pool = (dds3ScatterPolyList_tag *)(recordBlock + (recordWords + auxWords));
     pool->recordBase = (u8 *)recordBlock;
@@ -1772,8 +1768,8 @@ dds3ScatterPolyList_tag *dds3ScatterPolyListCreate(s32 face) {
     pool->sharedResource = 0;
     pool->drawAsset = sdfMatNew();
     sdfMatSetConstant(pool->drawAsset, 1.0f);
-    memset(D_0056AD28, 0, EFF_SCATTER_DRAW_TEMPLATE_BYTES);
-    D_0056AD28->primitive = 0x4000;
+    memset(effPCPScatterDrawParams, 0, EFF_SCATTER_DRAW_TEMPLATE_BYTES);
+    effPCPScatterDrawParams->primitive = 0x4000;
     return pool;
 }
 
@@ -1788,7 +1784,7 @@ void dds3ScatterPolyListDelete(dds3ScatterPolyList_tag *hPoly)
 
 void dds3ScatterPolyListDraw(dds3ScatterPolyList_tag *hPoly) {
     f32 matrix[16];
-    sdfDrawTag_t *packet = (sdfDrawTag_t *)sdfGrAllocPacketBuff(0x20);
+    sdfDrawTag_t *packet = EE_ADDR_AS(sdfDrawTag_t *, sdfGrAllocPacketBuff(0x20));
     s32 remainingVertices;
     sdfGrOt_t *surface;
 
@@ -1801,30 +1797,30 @@ void dds3ScatterPolyListDraw(dds3ScatterPolyList_tag *hPoly) {
     sdf3DPrimLinkTm(packet, 0);
     if (hPoly->sharedResource != NULL) {
         sdfMatSetTex(hPoly->drawAsset, hPoly->sharedResource->textureHandle);
-        D_0056AD28->texcoords = (f32 *)D_0031F310;
+        effPCPScatterDrawParams->texcoords = (f32 *)effPCPScatterTexcoords;
     } else {
-        D_0056AD28->texcoords = NULL;
+        effPCPScatterDrawParams->texcoords = NULL;
     }
     sdf3DPrimLinkMat(packet, hPoly->drawAsset, 0);
     remainingVertices = hPoly->secondWordCount;
-    D_0056AD28->colors = (u32 *)hPoly->auxRecordBase;
-    D_0056AD28->positions = (u128 *)hPoly->recordBase;
-    D_0056AD28->color = hPoly->color;
-    D_0056AD28->parameterCount = 0x10;
-    D_0056AD28->vertexCount = 24;
-    D_0056AD28->parameters = D_0031F2C0;
+    effPCPScatterDrawParams->colors = (u32 *)hPoly->auxRecordBase;
+    effPCPScatterDrawParams->positions = (u128 *)hPoly->recordBase;
+    effPCPScatterDrawParams->color = hPoly->color;
+    effPCPScatterDrawParams->parameterCount = 0x10;
+    effPCPScatterDrawParams->vertexCount = 24;
+    effPCPScatterDrawParams->parameters = effPCPScatterParams;
     while (remainingVertices >= 24) {
         remainingVertices -= 24;
-        sdfDrawTagLink(packet, (u32)effPkt3DPrimMakePoly(D_0056AD28));
-        D_0056AD28->positions += 24;
-        D_0056AD28->colors += 24;
+        sdfDrawTagLink(packet, EE_ADDR(effPkt3DPrimMakePoly(effPCPScatterDrawParams)));
+        effPCPScatterDrawParams->positions += 24;
+        effPCPScatterDrawParams->colors += 24;
     }
     if (remainingVertices >= 6) {
-        D_0056AD28->parameterCount = remainingVertices / 6 * 4;
-        D_0056AD28->vertexCount = remainingVertices;
-        sdfDrawTagLink(packet, (u32)effPkt3DPrimMakePoly(D_0056AD28));
+        effPCPScatterDrawParams->parameterCount = remainingVertices / 6 * 4;
+        effPCPScatterDrawParams->vertexCount = remainingVertices;
+        sdfDrawTagLink(packet, EE_ADDR(effPkt3DPrimMakePoly(effPCPScatterDrawParams)));
     }
-    surface = D_0031F3D0[hPoly->poolMode];
+    surface = effPCPScatterSurfaceByPool[hPoly->poolMode];
     surface->regFunc(surface, packet);
 }
 
@@ -1859,7 +1855,7 @@ dds3ScatterPolyListTexResource_tag *dds3ScatterPolyListTexResourceCreate(u32 pTe
     dds3ScatterPolyListTexResource_tag *res;
 
     res = sdfChipAllocDirect(sizeof(dds3ScatterPolyListTexResource_tag));
-    res->textureHandle = sdfTexSet((TMX_HEADER_t *)(pTex));
+    res->textureHandle = sdfTexSet(EE_ADDR_AS(TMX_HEADER_t *, (pTex)));
     res->refCount = 1;
     return res;
 }
@@ -1880,10 +1876,10 @@ dds3ScatterPolyListTexResource_tag *dds3ScatterPolyListTexResourceCopy(dds3Scatt
 
 effPCPWhirlwindPoly_tag *effPCPWhirlwindPolyCreate(src, resource)
     effPCPWhirlwindPolyParam_t *src;
-    u32 resource;
+    addr_t resource;
 {
     sdfMemHandle_t *allocation = sdfMemAllocDirect(src->particleCount * sizeof(effPCPWhirlwindPolyPart_tag) + sizeof(effPCPWhirlwindPoly_tag));
-    effPCPWhirlwindPoly_tag *inst = (effPCPWhirlwindPoly_tag *)sdfMemLock(allocation);
+    effPCPWhirlwindPoly_tag *inst = EE_ADDR_AS(effPCPWhirlwindPoly_tag *, sdfMemLock(allocation));
     effPCPWhirlwindPolyPart_tag *particle;
     u32 delayModulus;
     u32 count;
@@ -1912,7 +1908,7 @@ effPCPWhirlwindPoly_tag *effPCPWhirlwindPolyCreate(src, resource)
         delayModulus = 1;
     }
     for (i = 0; i < count; i++) {
-        particle->frame = -(dds3GetRandA((effRandState_t *)dds3EffectBase) % delayModulus);
+        particle->frame = -SDF_FRAMES(dds3GetRandA((effRandState_t *)dds3EffectBase) % delayModulus);
         particle++;
     }
     return inst;
@@ -1920,7 +1916,7 @@ effPCPWhirlwindPoly_tag *effPCPWhirlwindPolyCreate(src, resource)
 
 effPCPWhirlwindPoly_tag *effPCPWhirlwindPolyCreatePCF(void *parameterTable)
 {
-    return effPCPWhirlwindPolyCreate(dds3EffectPCPDataGetData(parameterTable, EFF_SCATTER_PARAM_BLOCK), (u32)dds3EffectPCPDataGetData(parameterTable, EFF_SCATTER_RESOURCE_BLOCK));
+    return effPCPWhirlwindPolyCreate(dds3EffectPCPDataGetData(parameterTable, EFF_SCATTER_PARAM_BLOCK), EE_ADDR(dds3EffectPCPDataGetData(parameterTable, EFF_SCATTER_RESOURCE_BLOCK)));
 }
 
 effPCPWhirlwindPoly_tag *effPCPWhirlwindPolyCopy(effPCPWhirlwindPoly_tag *work) {
@@ -2021,7 +2017,7 @@ void effPCPWhirlwindPolyPartMove(effPCPWhirlwindPoly_tag *pWhirlwindPoly, s32 in
 
     dds3WhirlwindPolyListGetUV(pWhirlwindPoly->hPoly, index);
     ring = &pWhirlwindPoly->pPart[index];
-    radius = ring->radius + ring->radius_s;
+    radius = ring->radius + SDF_FRAME_STEP(ring->radius_s);
     count = pWhirlwindPoly->hPoly->vectorsPerParticle >> 1;
     rise = ring->up_s;
     angle = ring->radian;
@@ -2029,18 +2025,18 @@ void effPCPWhirlwindPolyPartMove(effPCPWhirlwindPoly_tag *pWhirlwindPoly, s32 in
     SetRotateMatrixX(ring->rot_x);
     SetRotateMatrixY_B(ring->rot_y);
     MultMatrixRevNoArg();
-    ring->rot_y += ring->radian_s;
-    ring->radian_s *= pWhirlwindPoly->param.tiltDamping;
+    ring->rot_y += SDF_FRAME_STEP(ring->radian_s);
+    ring->radian_s *= SDF_FRAME_DECAY(pWhirlwindPoly->param.tiltDamping);
     ring->radius = radius;
-    ring->up_s = rise * pWhirlwindPoly->param.riseDecay;
+    ring->up_s = rise * SDF_FRAME_DECAY(pWhirlwindPoly->param.riseDecay);
     for (i = 0; i < count; i++) {
         f32 s;
 
         vertex[0] = sdfCos(angle) * radius;
-        vertex[1] += rise;
+        vertex[1] += SDF_FRAME_STEP(rise);
         s = sdfSin(angle);
         vertex[4] = vertex[0];
-        vertex[5] += rise;
+        vertex[5] += SDF_FRAME_STEP(rise);
         vertex[6] = vertex[2] = s * radius;
         SDF_VU0_LOADVECTOR(vertex);
         SDF_VU0_APPLYMATRIX();
@@ -2059,13 +2055,13 @@ void effPCPWhirlwindPolyDraw(effPCPWhirlwindPoly_tag *hData) {
     u32 count = hData->param.particleCount;
     dds3WhirlwindPolyList_tag *draw = hData->hPoly;
     effPCPWhirlwindPolyPart_tag *particle = hData->pPart;
-    s32 duration = hData->param.duration;
+    s32 duration = SDF_FRAMES(hData->param.duration);
     s32 fadeIn;
     s32 fadeRange;
     s32 color;
     loop = hData->param.loop;
-    fadeIn = hData->param.fadeIn;
-    fadeRange = hData->param.fadeRange;
+    fadeIn = SDF_FRAMES(hData->param.fadeIn);
+    fadeRange = SDF_FRAMES(hData->param.fadeRange);
     color = effMagaCylinderCalcColor(hData->abgr, hData->param.baseColor);
 
     for (i = 0; i < count; i++) {
@@ -2127,10 +2123,10 @@ void effPCPWhirlwindPolySetRotateMatrix(effPCPWhirlwindPoly_tag *hData, void *pM
 
 effPCPWhirlwind2Poly_tag *effPCPWhirlwind2PolyCreate(src, resource)
     effPCPWhirlwind2PolyParam_t *src;
-    u32 resource;
+    addr_t resource;
 {
     sdfMemHandle_t *allocation = sdfMemAllocDirect(src->number * sizeof(effPCPWhirlwindPolyPart_tag) + sizeof(effPCPWhirlwind2Poly_tag));
-    effPCPWhirlwind2Poly_tag *inst = (effPCPWhirlwind2Poly_tag *)sdfMemLock(allocation);
+    effPCPWhirlwind2Poly_tag *inst = EE_ADDR_AS(effPCPWhirlwind2Poly_tag *, sdfMemLock(allocation));
     effPCPWhirlwindPolyPart_tag *particle;
     u32 delayModulus;
     u32 count;
@@ -2163,7 +2159,7 @@ effPCPWhirlwind2Poly_tag *effPCPWhirlwind2PolyCreate(src, resource)
     delayModulus = delayLimit;
     count = inst->param.number;
     for (i = 0; i < count; i++) {
-        particle->frame = -(dds3GetRandA((effRandState_t *)dds3EffectBase) % delayModulus);
+        particle->frame = -SDF_FRAMES(dds3GetRandA((effRandState_t *)dds3EffectBase) % delayModulus);
         particle++;
     }
     return inst;
@@ -2171,7 +2167,7 @@ effPCPWhirlwind2Poly_tag *effPCPWhirlwind2PolyCreate(src, resource)
 
 effPCPWhirlwind2Poly_tag *effPCPWhirlwind2PolyCreatePCF(void *parameterTable)
 {
-    return effPCPWhirlwind2PolyCreate(dds3EffectPCPDataGetData(parameterTable, EFF_SCATTER_PARAM_BLOCK), (u32)dds3EffectPCPDataGetData(parameterTable, EFF_SCATTER_RESOURCE_BLOCK));
+    return effPCPWhirlwind2PolyCreate(dds3EffectPCPDataGetData(parameterTable, EFF_SCATTER_PARAM_BLOCK), EE_ADDR(dds3EffectPCPDataGetData(parameterTable, EFF_SCATTER_RESOURCE_BLOCK)));
 }
 
 effPCPWhirlwind2Poly_tag *effPCPWhirlwind2PolyCopy(effPCPWhirlwind2Poly_tag *work)
@@ -2273,7 +2269,7 @@ void effPCPWhirlwind2PolyPartMove(effPCPWhirlwind2Poly_tag *pWhirlwind2Poly, s32
 
     dds3WhirlwindPolyListGetUV(pWhirlwind2Poly->hPoly, index);
     ring = &pWhirlwind2Poly->pPart[index];
-    radius = ring->radius + ring->radius_s;
+    radius = ring->radius + SDF_FRAME_STEP(ring->radius_s);
     count = pWhirlwind2Poly->hPoly->vectorsPerParticle >> 1;
     rise = ring->up_s;
     angle = ring->radian;
@@ -2281,19 +2277,19 @@ void effPCPWhirlwind2PolyPartMove(effPCPWhirlwind2Poly_tag *pWhirlwind2Poly, s32
     SetRotateMatrixX(ring->rot_x);
     SetRotateMatrixY_B(ring->rot_y);
     MultMatrixRevNoArg();
-    ring->rot_y += ring->radian_s;
-    ring->radian_s *= pWhirlwind2Poly->param.roll_a;
+    ring->rot_y += SDF_FRAME_STEP(ring->radian_s);
+    ring->radian_s *= SDF_FRAME_DECAY(pWhirlwind2Poly->param.roll_a);
     ring->radius = radius;
-    ring->radius_s *= pWhirlwind2Poly->param.radius_a;
-    ring->up_s = rise * pWhirlwind2Poly->param.up_a;
+    ring->radius_s *= SDF_FRAME_DECAY(pWhirlwind2Poly->param.radius_a);
+    ring->up_s = rise * SDF_FRAME_DECAY(pWhirlwind2Poly->param.up_a);
     for (i = 0; i < count; i++) {
         f32 s;
 
         vertex[0] = sdfCos(angle) * radius;
-        vertex[1] += rise;
+        vertex[1] += SDF_FRAME_STEP(rise);
         s = sdfSin(angle);
         vertex[4] = vertex[0];
-        vertex[5] += rise;
+        vertex[5] += SDF_FRAME_STEP(rise);
         vertex[6] = vertex[2] = s * radius;
         SDF_VU0_LOADVECTOR(vertex);
         SDF_VU0_APPLYMATRIX();
@@ -2308,7 +2304,7 @@ void effPCPWhirlwind2PolyPartMove(effPCPWhirlwind2Poly_tag *pWhirlwind2Poly, s32
 
 void effPCPWhirlwind2PolyDraw(effPCPWhirlwind2Poly_tag *hData) {
     s32 loop;
-    s32 duration = hData->param.life;
+    s32 duration = SDF_FRAMES(hData->param.life);
     dds3WhirlwindPolyList_tag *draw = hData->hPoly;
     effPCPWhirlwindPolyPart_tag *particle = hData->pPart;
     u32 count = hData->param.number;
@@ -2323,8 +2319,8 @@ void effPCPWhirlwind2PolyDraw(effPCPWhirlwind2Poly_tag *hData) {
     u32 i;
 
     loop = hData->param.loop;
-    fadeIn = hData->param.fade_in;
-    fadeRange = hData->param.fade_out;
+    fadeIn = SDF_FRAMES(hData->param.fade_in);
+    fadeRange = SDF_FRAMES(hData->param.fade_out);
     delayModulus = hData->param.timing;
     color = effMagaCylinderCalcColor(hData->abgr, hData->param.abgr);
     instanceAge = hData->frame_all;
@@ -2355,7 +2351,7 @@ void effPCPWhirlwind2PolyDraw(effPCPWhirlwind2Poly_tag *hData) {
                 effPCPWhirlwind2PolyPartMove(hData, i);
             }
             if (loop != 0 && !(instanceAge < duration)) {
-                particle->frame = -(dds3GetRandA((effRandState_t *)dds3EffectBase) % delayModulus);
+                particle->frame = -SDF_FRAMES(dds3GetRandA((effRandState_t *)dds3EffectBase) % delayModulus);
             } else {
                 particle->frame++;
             }
@@ -2398,10 +2394,10 @@ void effPCPWhirlwind2PolySetRotateMatrix(effPCPWhirlwind2Poly_tag *hData, void *
 
 effPCPWhirlwind3Poly_tag *effPCPWhirlwind3PolyCreate(src, resource)
     effPCPWhirlwind3PolyParam_t *src;
-    u32 resource;
+    addr_t resource;
 {
     sdfMemHandle_t *allocation = sdfMemAllocDirect(src->number * sizeof(effPCPWhirlwindPolyPart_tag) + sizeof(effPCPWhirlwind3Poly_tag));
-    effPCPWhirlwind3Poly_tag *inst = (effPCPWhirlwind3Poly_tag *)sdfMemLock(allocation);
+    effPCPWhirlwind3Poly_tag *inst = EE_ADDR_AS(effPCPWhirlwind3Poly_tag *, sdfMemLock(allocation));
     effPCPWhirlwindPolyPart_tag *particle;
     u32 delayModulus;
     u32 count;
@@ -2434,7 +2430,7 @@ effPCPWhirlwind3Poly_tag *effPCPWhirlwind3PolyCreate(src, resource)
     delayModulus = delayLimit;
     count = inst->param.number;
     for (i = 0; i < count; i++) {
-        particle->frame = -(dds3GetRandA((effRandState_t *)dds3EffectBase) % delayModulus);
+        particle->frame = -SDF_FRAMES(dds3GetRandA((effRandState_t *)dds3EffectBase) % delayModulus);
         particle++;
     }
     return inst;
@@ -2442,7 +2438,7 @@ effPCPWhirlwind3Poly_tag *effPCPWhirlwind3PolyCreate(src, resource)
 
 effPCPWhirlwind3Poly_tag *effPCPWhirlwind3PolyCreatePCF(void *parameterTable)
 {
-    return effPCPWhirlwind3PolyCreate(dds3EffectPCPDataGetData(parameterTable, EFF_SCATTER_PARAM_BLOCK), (u32)dds3EffectPCPDataGetData(parameterTable, EFF_SCATTER_RESOURCE_BLOCK));
+    return effPCPWhirlwind3PolyCreate(dds3EffectPCPDataGetData(parameterTable, EFF_SCATTER_PARAM_BLOCK), EE_ADDR(dds3EffectPCPDataGetData(parameterTable, EFF_SCATTER_RESOURCE_BLOCK)));
 }
 
 effPCPWhirlwind3Poly_tag *effPCPWhirlwind3PolyCopy(effPCPWhirlwind3Poly_tag *work)
@@ -2542,7 +2538,7 @@ void effPCPWhirlwind3PolyPartMove(effPCPWhirlwind3Poly_tag *pWhirlwind3Poly, s32
 
     dds3WhirlwindPolyListGetUV(pWhirlwind3Poly->hPoly, index);
     ring = &pWhirlwind3Poly->pPart[index];
-    radius = ring->radius + ring->radius_s;
+    radius = ring->radius + SDF_FRAME_STEP(ring->radius_s);
     count = pWhirlwind3Poly->hPoly->vectorsPerParticle >> 1;
     rise = ring->up_s;
     angle = ring->radian;
@@ -2550,19 +2546,19 @@ void effPCPWhirlwind3PolyPartMove(effPCPWhirlwind3Poly_tag *pWhirlwind3Poly, s32
     SetRotateMatrixX(ring->rot_x);
     SetRotateMatrixY_B(ring->rot_y);
     MultMatrixRevNoArg();
-    ring->rot_y += ring->radian_s;
-    ring->radian_s *= pWhirlwind3Poly->param.roll_a;
+    ring->rot_y += SDF_FRAME_STEP(ring->radian_s);
+    ring->radian_s *= SDF_FRAME_DECAY(pWhirlwind3Poly->param.roll_a);
     ring->radius = radius;
-    ring->radius_s *= pWhirlwind3Poly->param.radius_a;
-    ring->up_s = rise * pWhirlwind3Poly->param.up_a;
+    ring->radius_s *= SDF_FRAME_DECAY(pWhirlwind3Poly->param.radius_a);
+    ring->up_s = rise * SDF_FRAME_DECAY(pWhirlwind3Poly->param.up_a);
     for (i = 0; i < count; i++) {
         f32 s;
 
         vertex[0] = sdfCos(angle) * radius;
-        vertex[1] += rise;
+        vertex[1] += SDF_FRAME_STEP(rise);
         s = sdfSin(angle);
         vertex[4] = vertex[0];
-        vertex[5] += rise;
+        vertex[5] += SDF_FRAME_STEP(rise);
         vertex[6] = vertex[2] = s * radius;
         SDF_VU0_LOADVECTOR(vertex);
         SDF_VU0_APPLYMATRIX();
@@ -2577,7 +2573,7 @@ void effPCPWhirlwind3PolyPartMove(effPCPWhirlwind3Poly_tag *pWhirlwind3Poly, s32
 
 void effPCPWhirlwind3PolyDraw(effPCPWhirlwind3Poly_tag *hData) {
     s32 loop;
-    s32 duration = hData->param.life;
+    s32 duration = SDF_FRAMES(hData->param.life);
     dds3WhirlwindPolyList_tag *draw = hData->hPoly;
     effPCPWhirlwindPolyPart_tag *particle = hData->pPart;
     u32 count = hData->param.number;
@@ -2597,8 +2593,8 @@ void effPCPWhirlwind3PolyDraw(effPCPWhirlwind3Poly_tag *hData) {
 
     instanceAge = hData->frame_all;
     loop = hData->param.loop;
-    fadeIn = hData->param.fade_in;
-    fadeRange = hData->param.fade_out;
+    fadeIn = SDF_FRAMES(hData->param.fade_in);
+    fadeRange = SDF_FRAMES(hData->param.fade_out);
     delayModulus = hData->param.timing;
     startColor = hData->param.abgr_s;
     endColor = hData->param.abgr_e;
@@ -2633,7 +2629,7 @@ void effPCPWhirlwind3PolyDraw(effPCPWhirlwind3Poly_tag *hData) {
                 effPCPWhirlwind3PolyPartMove(hData, i);
             }
             if (loop != 0 && !(instanceAge < duration)) {
-                particle->frame = -(dds3GetRandA((effRandState_t *)dds3EffectBase) % delayModulus);
+                particle->frame = -SDF_FRAMES(dds3GetRandA((effRandState_t *)dds3EffectBase) % delayModulus);
             } else {
                 particle->frame++;
             }
@@ -2676,10 +2672,10 @@ void effPCPWhirlwind3PolySetRotateMatrix(effPCPWhirlwind3Poly_tag *hData, void *
 
 effPCPWwSpherePoly_tag *effPCPWwSpherePolyCreate(src, resource)
     effPCPWwSpherePolyParam_t *src;
-    u32 resource;
+    addr_t resource;
 {
     sdfMemHandle_t *allocation = sdfMemAllocDirect(src->number * sizeof(effPCPWwSpherePolyPart_tag) + sizeof(effPCPWwSpherePoly_tag));
-    effPCPWwSpherePoly_tag *inst = (effPCPWwSpherePoly_tag *)sdfMemLock(allocation);
+    effPCPWwSpherePoly_tag *inst = EE_ADDR_AS(effPCPWwSpherePoly_tag *, sdfMemLock(allocation));
     effPCPWwSpherePolyPart_tag *particle;
     u32 delayModulus;
     u32 count;
@@ -2708,7 +2704,7 @@ effPCPWwSpherePoly_tag *effPCPWwSpherePolyCreate(src, resource)
         delayModulus = 1;
     }
     for (i = 0; i < count; i++) {
-        particle->frame = -(dds3GetRandA((effRandState_t *)dds3EffectBase) % delayModulus);
+        particle->frame = -SDF_FRAMES(dds3GetRandA((effRandState_t *)dds3EffectBase) % delayModulus);
         particle++;
     }
     return inst;
@@ -2716,7 +2712,7 @@ effPCPWwSpherePoly_tag *effPCPWwSpherePolyCreate(src, resource)
 
 effPCPWwSpherePoly_tag *effPCPWwSpherePolyCreatePCF(void *parameterTable)
 {
-    return effPCPWwSpherePolyCreate(dds3EffectPCPDataGetData(parameterTable, EFF_SCATTER_PARAM_BLOCK), (u32)dds3EffectPCPDataGetData(parameterTable, EFF_SCATTER_RESOURCE_BLOCK));
+    return effPCPWwSpherePolyCreate(dds3EffectPCPDataGetData(parameterTable, EFF_SCATTER_PARAM_BLOCK), EE_ADDR(dds3EffectPCPDataGetData(parameterTable, EFF_SCATTER_RESOURCE_BLOCK)));
 }
 
 effPCPWwSpherePoly_tag *effPCPWwSpherePolyCopy(effPCPWwSpherePoly_tag *work)
@@ -2795,17 +2791,17 @@ void effPCPWwSpherePolyPartMove(effPCPWwSpherePoly_tag *pWwSpherePoly, s32 index
     dds3WhirlwindPolyListGetUV(pWwSpherePoly->hPoly, index);
     ring = &pWwSpherePoly->pPart[index];
     count = pWwSpherePoly->hPoly->vectorsPerParticle >> 1;
-    angle = ring->radian + ring->radian_s;
+    angle = ring->radian + SDF_FRAME_STEP(ring->radian_s);
     radius = ring->radius;
     step = ring->radian_add;
-    radius += ring->radius_s;
-    if (ring->frame >= pWwSpherePoly->param.radius_aw) {
-        ring->radius_s *= pWwSpherePoly->param.radius_a;
+    radius += SDF_FRAME_STEP(ring->radius_s);
+    if (ring->frame >= SDF_FRAMES(pWwSpherePoly->param.radius_aw)) {
+        ring->radius_s *= SDF_FRAME_DECAY(pWwSpherePoly->param.radius_a);
     }
     SetRotateMatrixXYZ(ring->rot);
     ring->radius = radius;
     ring->radian = angle;
-    ring->radian_s *= pWwSpherePoly->param.roll_a;
+    ring->radian_s *= SDF_FRAME_DECAY(pWwSpherePoly->param.roll_a);
     height = ring->width;
     for (i = 0; i < count; i++) {
         vertex[0] = sdfCos(angle) * radius;
@@ -2831,13 +2827,13 @@ void effPCPWwSpherePolyDraw(effPCPWwSpherePoly_tag *hData) {
     u32 count = hData->param.number;
     dds3WhirlwindPolyList_tag *draw = hData->hPoly;
     effPCPWwSpherePolyPart_tag *particle = hData->pPart;
-    s32 duration = hData->param.life;
+    s32 duration = SDF_FRAMES(hData->param.life);
     s32 fadeIn;
     s32 fadeRange;
     s32 color;
     loop = hData->param.loop;
-    fadeIn = hData->param.fade_in;
-    fadeRange = hData->param.fade_out;
+    fadeIn = SDF_FRAMES(hData->param.fade_in);
+    fadeRange = SDF_FRAMES(hData->param.fade_out);
     color = effMagaCylinderCalcColor(hData->abgr, hData->param.abgr);
 
     for (i = 0; i < count; i++) {
@@ -2908,7 +2904,7 @@ dds3WhirlwindPolyList_tag *dds3WhirlwindPolyListCreate(u32 number, u32 face) {
 
     object = sdfChipAllocDirect(sizeof(dds3WhirlwindPolyList_tag));
     allocation = sdfMemAllocDirect(bytes);
-    cursor = (u8 *)sdfMemLock(allocation);
+    cursor = EE_ADDR_AS(u8 *, sdfMemLock(allocation));
     memset(cursor, 0, bytes);
     object->points = (f32 *)cursor;
     cursor += totalVectors * 16;
@@ -2944,8 +2940,8 @@ dds3WhirlwindPolyList_tag *dds3WhirlwindPolyListCreate(u32 number, u32 face) {
             right -= 2;
         }
     }
-    memset(&D_0056AD58, 0, sizeof(effDebugPolyParams_t));
-    D_0056AD58.primitive = 0x4000;
+    memset(&effDebugPoly, 0, sizeof(effDebugPolyParams_t));
+    effDebugPoly.primitive = 0x4000;
     return object;
 }
 
@@ -2970,7 +2966,7 @@ void dds3WhirlwindPolyListDraw(dds3WhirlwindPolyList_tag *object) {
     s32 particleIndex;
     sdfGrOt_t *surface;
 
-    packet = (sdfDrawTag_t *)sdfGrAllocPacketBuff(0x20);
+    packet = EE_ADDR_AS(sdfDrawTag_t *, sdfGrAllocPacketBuff(0x20));
     sdfDrawTagInit(packet);
     SDF_VU0_STOREIDENTITY(matrix);
     matrix[10] = matrix[5] = matrix[0] = object->scale;
@@ -2987,9 +2983,9 @@ void dds3WhirlwindPolyListDraw(dds3WhirlwindPolyList_tag *object) {
     }
     sdf3DPrimLinkMat(packet, (sdfMat_t *)object->asset, 0);
     count = (s32)object->particleCount;
-    D_0056AD58.parameters = (const u32 *)D_0031F3E0;
+    effDebugPoly.parameters = (const u32 *)D_0031F3E0;
     for (particleIndex = 0; particleIndex < count; particleIndex++) {
-        draw = &D_0056AD58;
+        draw = &effDebugPoly;
         remaining = object->vectorsPerParticle;
         draw->positions = (u128 *)dds3WhirlwindPolyListGetVertex(object, particleIndex);
         draw->texcoords = dds3WhirlwindPolyListGetUV(object, particleIndex);
@@ -3000,19 +2996,19 @@ void dds3WhirlwindPolyListDraw(dds3WhirlwindPolyList_tag *object) {
         if ((draw->color & 0xFF000000) != 0) {
             while (remaining >= 18) {
                 remaining -= 16;
-                sdfDrawTagLink(packet, (u32)effPkt3DPrimMakePoly(&D_0056AD58));
-                D_0056AD58.positions += 16;
-                D_0056AD58.colors += 16;
-                D_0056AD58.texcoords += 32;
+                sdfDrawTagLink(packet, EE_ADDR(effPkt3DPrimMakePoly(&effDebugPoly)));
+                effDebugPoly.positions += 16;
+                effDebugPoly.colors += 16;
+                effDebugPoly.texcoords += 32;
             }
             if (remaining >= 4) {
                 draw->parameterCount = remaining - 2;
                 draw->vertexCount = remaining;
-                sdfDrawTagLink(packet, (u32)effPkt3DPrimMakePoly(draw));
+                sdfDrawTagLink(packet, EE_ADDR(effPkt3DPrimMakePoly(draw)));
             }
         }
     }
-    surface = D_0031F440[object->packetQueueIndex];
+    surface = effPCPScatterSurfaceByQueue[object->packetQueueIndex];
     surface->regFunc(surface, packet);
 }
 
