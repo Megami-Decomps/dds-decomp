@@ -731,7 +731,7 @@ extern u32 D_00435CBC;
 dds3ProcessID_t *mnuCreateTitleMenuTask(s32 mode) {
     struct sdfMemHandle_t *allocation;
 
-    kwlnFadeBackgroundStartOut(0);
+    dds3FadeBackgroundStartOut(0);
     mnuStopTitleMovieDraw();
     allocation = sdfMemAllocDirect(sizeof(MovieMenuState));
     titleWork = (void *)sdfMemLock((struct sdfMemHandle_t *)(allocation));

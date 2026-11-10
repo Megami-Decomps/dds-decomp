@@ -331,7 +331,7 @@ void mnuStartRewardDialogAndMotion(BrsSkillPackageWork *work) {
 extern s32 btlAddBaseStats(s32 *, datUnitWork_t *);
 extern void mnuRefreshSelectedUnitPanels(datUnitWork_t *, BrsSkillPackageWork *);
 
-void kwlnItemUpdateDisplay(BrsSkillPackageWork *scene) {
+void mnuItemUpdateDisplay(BrsSkillPackageWork *scene) {
     datUnitWork_t *item = scene->selectedRewardRow->unit;
     switch (scene->rewardMode) {
     case 4:
@@ -381,7 +381,7 @@ s32 brsAdvanceRewardPanelAfterMessage(dds3ProcessID_t *request) {
         if (fclChkMessage() == EVT_MESSAGE_WINDOW_CONTROL_RESULT_NO_ACTIVE_CONTROL) {
             if (panel->rewardMode != 0) {
                 mnuStartRewardDialogAndMotion(panel);
-                kwlnItemUpdateDisplay(panel);
+                mnuItemUpdateDisplay(panel);
                 panel->rewardMode = 0;
             } else {
                 mnuSetPopupEntryFlagged(&panel->transition.state, brsPrimaryRewardPopupEntry);

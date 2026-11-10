@@ -3006,7 +3006,7 @@ void drawSprite3D(sdfTexHandle_t *texture, FldMarkerPacket *modelData) {
     descriptor->regFunc(descriptor, command);
 }
 
-extern KwlnFrameDrawBuffer kwlnFrameDrawPacketRecords[];
+extern KwlnFrameDrawBuffer dds3FrameDrawPacketRecords[];
 
 extern void sdfGrSetFrameMaskRGB(const u8 *, SdfDmaReferenceChainPacket *, s32);
 
@@ -3018,7 +3018,7 @@ void fldSubmitPrimaryFramePacket(void) {
     sdfGrOt_t *descriptor;
     sdfDrawTagInit(command);
     texture = (SdfDmaReferenceChainPacket *)sdfGrAllocPacketBuff(0x40);
-    sdfGrSetFrameMaskRGB(kwlnFrameDrawPacketRecords[dds3GetFrameID()].baseBytes, texture, 0);
+    sdfGrSetFrameMaskRGB(dds3FrameDrawPacketRecords[dds3GetFrameID()].baseBytes, texture, 0);
     sdfDrawTagLinkRefGif(command, (u32)texture);
     descriptor = &sdfGrOtTable[rsetFrameMaskOtOffset];
     descriptor->regFunc(descriptor, command);
@@ -3030,7 +3030,7 @@ void fldSubmitAlternateFramePacket(void) {
     sdfGrOt_t *descriptor;
     sdfDrawTagInit(command);
     texture = (SdfDmaReferenceChainPacket *)sdfGrAllocPacketBuff(0x40);
-    sdfGrSetFrameMaskReset(kwlnFrameDrawPacketRecords[dds3GetFrameID()].baseBytes, texture, 0);
+    sdfGrSetFrameMaskReset(dds3FrameDrawPacketRecords[dds3GetFrameID()].baseBytes, texture, 0);
     sdfDrawTagLinkRefGif(command, (u32)texture);
     descriptor = &sdfGrOtTable[rsetFrameMaskOtOffset];
     descriptor->regFunc(descriptor, command);
@@ -3108,7 +3108,7 @@ void fldSubmitTexturedOverlaySprite(void) {
     sdfGrOt_t *surface;
 
     sdfGrLinkDispFrameTex(list,
-        (u32)(kwlnFrameDrawPacketRecords[dds3GetFrameID()].baseBytes), reference);
+        (u32)(dds3FrameDrawPacketRecords[dds3GetFrameID()].baseBytes), reference);
     texturePacket = (SdfGsTextureAlphaFlushPacket *)sdfGrAllocPacketBuff(0x40);
     texturePacket->header.dmaTag = 3;
     texturePacket->header.vifCommands = 0x5000000310000000ULL;
@@ -3163,7 +3163,7 @@ void fldSubmitOverlaySpriteWithRenderState(s32 mode) {
     sdfGrOt_t *surface;
 
     sdfGrLinkDispFrameTex(list,
-        (u32)(kwlnFrameDrawPacketRecords[dds3GetFrameID()].baseBytes), reference);
+        (u32)(dds3FrameDrawPacketRecords[dds3GetFrameID()].baseBytes), reference);
     texturePacket = (SdfGsTextureAlphaFlushPacket *)sdfGrAllocPacketBuff(0x40);
     texturePacket->header.dmaTag = 3;
     texturePacket->header.vifCommands = 0x5000000310000000ULL;
@@ -3225,7 +3225,7 @@ void fldSubmitOverlayStateAndSprite(s32 alpha) {
     sdfGrOt_t *surface;
 
     sdfGrLinkDispFrameTex(list,
-        (u32)(kwlnFrameDrawPacketRecords[dds3GetFrameID()].baseBytes), reference);
+        (u32)(dds3FrameDrawPacketRecords[dds3GetFrameID()].baseBytes), reference);
     texturePacket = (SdfGsTextureAlphaFlushPacket *)sdfGrAllocPacketBuff(0x40);
     texturePacket->header.dmaTag = 3;
     texturePacket->header.vifCommands = 0x5000000310000000ULL;
@@ -3647,7 +3647,7 @@ void fldSubmitAreaOverlayQuads(s32 alpha, s32 offset) {
     sdfGrOt_t *descriptor;
 
     sdfGrLinkDispFrameTex(list,
-        (u32)(kwlnFrameDrawPacketRecords[dds3GetFrameID()].baseBytes), reference);
+        (u32)(dds3FrameDrawPacketRecords[dds3GetFrameID()].baseBytes), reference);
     texturePacket = (u64 *)sdfGrAllocPacketBuff(0x40);
     texturePacket[0] = 3;
     texturePacket[1] = 0x5000000310000000ULL;
@@ -3733,7 +3733,7 @@ void fldRequestEncounterWithFade(FldEncounterRuntimeMode encounterMode,
                                  FldBattleSceneRecordIndex recordIndex) {
     if ((recordIndex < 0x400) && ((datBattleSceneRecords[recordIndex].flags & 0x8000) != 0))
     {
-        kwlnFadeBackgroundStartOut(0);
+        dds3FadeBackgroundStartOut(0);
         fldSetEncounterMode(FLD_ENCOUNTER_MODE_BYPASS_BATTLE_RUNTIME);
         return;
     }

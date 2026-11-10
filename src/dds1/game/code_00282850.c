@@ -66,7 +66,7 @@ extern void evtFreeStage(void);
 
 extern void itfSetGridEntryQuantizedAndRefresh(EffectSlotSet *resource, s32 resourceIndex, s32 x, s32 y, s32 width, s32 height);
 
-extern void kwlnDebugGraphSetEnabled(s8 enabled);
+extern void dds3DebugGraphSetEnabled(s8 enabled);
 
 extern void mnuDrawIconPanelDefaultFlag(s32 x, s32 y, s32 depth, s32 fade, MenuPanelHandles *list, s32 drawArg);
 
@@ -3235,12 +3235,12 @@ void evtDestroyBattleStageTestWorldNode(dds3ProcessID_t *task) {
 /* Destroy the named battle-stage-test task hierarchy and disable the debug graph. */
 void evtBattleStageTestStopTask(void) {
     dds3KillProcessName(D_003B2608, 1);
-    kwlnDebugGraphSetEnabled(0);
+    dds3DebugGraphSetEnabled(0);
 }
 
 /* Enable the debug graph and create the battle-stage selector task with its cleanup callback. */
 void btlCreateStageTestTask(void) {
-    kwlnDebugGraphSetEnabled(1);
+    dds3DebugGraphSetEnabled(1);
     dds3StartProcess(D_003B2608, 0x2b0c, 1, 1, evtBattleStageTestScreen, evtDestroyBattleStageTestWorldNode, 0);
 }
 

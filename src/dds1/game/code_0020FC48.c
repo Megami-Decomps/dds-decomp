@@ -1276,7 +1276,7 @@ void btlDrawScaledHeldTextureQuad(sdfDrawTag_t *list, s32 primitive, s32 color, 
                          depth, 0);
 }
 
-extern KwlnFrameDrawBuffer kwlnFrameDrawPacketRecords[];
+extern KwlnFrameDrawBuffer dds3FrameDrawPacketRecords[];
 
 #include "sdf_packet_alloc.h"
 
@@ -1297,7 +1297,7 @@ void btlDrawScaledFrameBufferQuad(sdfDrawTag_t *list, s32 primitive, s32 color, 
 
     packet = (void *)sdfGrAllocPacketBuff(0x20);
     index = dds3GetFrameID();
-    sdfGrLinkDispFrameTex(list, (u32)(kwlnFrameDrawPacketRecords[index].baseBytes), (sdfGrRefPacketHeader_t *)packet);
+    sdfGrLinkDispFrameTex(list, (u32)(dds3FrameDrawPacketRecords[index].baseBytes), (sdfGrRefPacketHeader_t *)packet);
     halfWidth = 0x1000;
     halfHeight = 0x700;
     xOffset = (s32)((f32)halfWidth * scale);
@@ -1484,7 +1484,7 @@ void btlDrawWindOverlay(sdfDrawTag_t *list, u32 color, s32 depth) {
         btlCopyPaletteLowByteToAlpha((s32 *)btlRuntimeState.resource->palette);
     }
     tag = (SdfDmaReferenceChainPacket *)sdfGrAllocPacketBuff(0x40);
-    sdfGrSetFrameMaskRGB(kwlnFrameDrawPacketRecords[dds3GetFrameID()].baseBytes, tag, 1);
+    sdfGrSetFrameMaskRGB(dds3FrameDrawPacketRecords[dds3GetFrameID()].baseBytes, tag, 1);
     sdfDrawTagLinkRefGif(list, (u32)tag);
     registers = (SdfPacket *)sdfGrAllocPacketBuff(0x40);
     registers[0].unk0 = 3;
@@ -1519,7 +1519,7 @@ void btlDrawWindOverlay(sdfDrawTag_t *list, u32 color, s32 depth) {
         btlRuntimeState.phaseSpeed = -0.02f;
     }
     tag = (SdfDmaReferenceChainPacket *)sdfGrAllocPacketBuff(0x40);
-    sdfGrSetFrameMaskReset(kwlnFrameDrawPacketRecords[dds3GetFrameID()].baseBytes, tag, 1);
+    sdfGrSetFrameMaskReset(dds3FrameDrawPacketRecords[dds3GetFrameID()].baseBytes, tag, 1);
     sdfDrawTagLinkRefGif(list, (u32)tag);
 }
 
@@ -1948,7 +1948,7 @@ s32 btlUpdateRuntimeFadeState(void) {
         } else {
             mode = btlRuntimeState.fadeMode;
             if (mode == 2) {
-                kwlnFadeBackgroundStartOut(0);
+                dds3FadeBackgroundStartOut(0);
                 dds3DrawFlag |= 0x10000000;
                 if (btlRuntimeState.counter < 3) {
                     fldSkyDrawFilter();
@@ -2027,7 +2027,7 @@ void btlActivateRuntime(u8 fadeMode) {
     battle->active = 1;
     battle->pending = 0;
     battle->options = 0;
-    if (kwlnFadeIsBackgroundOverlayActive() != KWLN_BACKGROUND_OVERLAY_INACTIVE) {
+    if (dds3FadeIsBackgroundOverlayActive() != KWLN_BACKGROUND_OVERLAY_INACTIVE) {
         battle->options |= 4;
     }
 }

@@ -413,7 +413,7 @@ s32 fldSceneStateRestoreDisplay(u8 *scene) {
             state->commandRestrictFlags &= ~0x80;
         }
         if (!(state->battleFlags & 0x4000)) {
-            kwlnFadeBackgroundStartOut(0);
+            dds3FadeBackgroundStartOut(0);
             dds3SetBlur(0, 0, 1);
             dds3Blur2Off(0);
             dds3Filter2Off(0);

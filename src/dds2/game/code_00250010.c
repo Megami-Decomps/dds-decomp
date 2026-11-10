@@ -4868,7 +4868,7 @@ extern EvtPackedSoundTrackId evtLoadEventBgm(s32 eventId);
 extern EvtEventBgmReadiness evtCheckEventBgmLoaded(s32 eventId);
 extern u8 fldTitleIsActive(void);
 extern void fldStartTitle(s32 field, s32 mode, s32 option);
-extern void kwlnFadeBackgroundStartIn(s32);
+extern void dds3FadeBackgroundStartIn(s32);
 
 s32 evtPopulateViewerTimelineFromMovie(PolyMovieWork *work, evtViewerInfo_t *runtime) {
     char motionName[0x40];
@@ -5546,9 +5546,9 @@ s32 evtPopulateViewerTimelineFromMovie(PolyMovieWork *work, evtViewerInfo_t *run
         }
     }
     if (mnuCampGetPrimaryOption(runtime) == 0) {
-        kwlnFadeBackgroundStartIn(0);
+        dds3FadeBackgroundStartIn(0);
     } else {
-        kwlnFadeBackgroundStartOut(0);
+        dds3FadeBackgroundStartOut(0);
     }
     evtViewerDispatchFlagMode(runtime);
     evtApplyViewerTimelineFrame(runtime->nowframe, runtime);

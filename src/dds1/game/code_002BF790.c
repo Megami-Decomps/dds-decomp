@@ -848,7 +848,7 @@ void cmpDraw3DPoly(const f32 *first, const f32 *second, const f32 *third,
     surface->regFunc(surface, list);
 }
 
-extern KwlnFrameDrawBuffer kwlnFrameDrawPacketRecords[];
+extern KwlnFrameDrawBuffer dds3FrameDrawPacketRecords[];
 
 extern void sdfGrSetFrameMaskRGB(const u8 *, SdfDmaReferenceChainPacket *, s32);
 
@@ -859,7 +859,7 @@ void uiDrawActiveSurfaceRegion(s32 surfaceIndex) {
     SdfDmaReferenceChainPacket *texture;
     sdfDrawTagInit(list);
     texture = (SdfDmaReferenceChainPacket *)sdfGrAllocPacketBuff(0x40);
-    sdfGrSetFrameMaskRGB(kwlnFrameDrawPacketRecords[dds3GetFrameID()].baseBytes, texture, 0);
+    sdfGrSetFrameMaskRGB(dds3FrameDrawPacketRecords[dds3GetFrameID()].baseBytes, texture, 0);
     sdfDrawTagLinkRefGif(list, (u32)texture);
     {
         sdfGrOt_t *surface = &sdfGrOtTable[surfaceIndex];
@@ -872,7 +872,7 @@ void sdfDispatchSurfaceWithPreparedTexturePacket(s32 surfaceIndex) {
     SdfDmaReferenceChainPacket *texture;
     sdfDrawTagInit(list);
     texture = (SdfDmaReferenceChainPacket *)sdfGrAllocPacketBuff(0x40);
-    sdfGrSetFrameMaskReset(kwlnFrameDrawPacketRecords[dds3GetFrameID()].baseBytes, texture, 0);
+    sdfGrSetFrameMaskReset(dds3FrameDrawPacketRecords[dds3GetFrameID()].baseBytes, texture, 0);
     sdfDrawTagLinkRefGif(list, (u32)texture);
     {
         sdfGrOt_t *surface = &sdfGrOtTable[surfaceIndex];

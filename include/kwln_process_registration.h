@@ -15,6 +15,6 @@ struct dds3ProcessID_t;
 KwlnProcessRegistrationResult dds3ExistProcess(const struct dds3ProcessID_t *task);
 
 /* Test name membership in the scheduler's registered task queues. */
-KwlnProcessRegistrationResult kwlnTaskExists(const char *name);
+KwlnProcessRegistrationResult sdfTaskExists(const char *name);
 
 #endif /* KWLN_PROCESS_REGISTRATION_H */

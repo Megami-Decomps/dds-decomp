@@ -234,7 +234,7 @@ void mdlCleanupViewerTasksAndResources(void);
 
 extern u32 D_003BA8EC;
 
-extern void kwlnDebugGraphSetEnabled(s8 mode);
+extern void dds3DebugGraphSetEnabled(s8 mode);
 
 extern s32 dds3DebugColorEditEx(u32 *color, s32 channel, s8 *pad);
 
@@ -2030,7 +2030,7 @@ void mdlUpdateViewerSettingsInput(void) {
             mdlViewerState.unk0E ^= 1;
             break;
         case 1:
-            kwlnDebugGraphSetEnabled(mdlIsDebugTimeGraph() == 0);
+            dds3DebugGraphSetEnabled(mdlIsDebugTimeGraph() == 0);
             break;
         case 2:
             mdlViewerState.assetDisplayMode ^= 1;

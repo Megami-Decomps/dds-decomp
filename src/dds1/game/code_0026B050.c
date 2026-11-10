@@ -23,7 +23,7 @@ extern MovieMenuState *mnuMovieMenuState;
 dds3ProcessID_t *mnuCreateTitleMenuTask(s32 mode) {
     struct sdfMemHandle_t *allocation;
 
-    kwlnFadeBackgroundStartOut(0);
+    dds3FadeBackgroundStartOut(0);
     movieStop();
     allocation = sdfMemAllocDirect(0x40);
     mnuMovieMenuState = (void *)sdfMemLock(allocation);

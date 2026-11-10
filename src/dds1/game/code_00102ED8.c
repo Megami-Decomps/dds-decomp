@@ -60,17 +60,17 @@ extern sdfGsMemSlice_t *D_003BA8F4;
 
 extern sdfTexHandle_t *dds3RenderTexture;
 
-extern u32 kwlnTextureViewerPageIndex;
+extern u32 dds3TextureViewerPageIndex;
 extern u8 D_003BA890;
 
 extern s8 D_003BA7FC;
 
-extern s8 kwlnBackgroundFadeMode;
+extern s8 dds3BackgroundFadeMode;
 
-extern s16 kwlnBackgroundFadeFirstRamp;
+extern s16 dds3BackgroundFadeFirstRamp;
 
-extern s16 kwlnBackgroundFadeSecondRamp;
-extern u8 kwlnBackgroundFadeColor[4];
+extern s16 dds3BackgroundFadeSecondRamp;
+extern u8 dds3BackgroundFadeColor[4];
 
 extern s8 D_0032453B[];
 
@@ -88,18 +88,18 @@ extern u8 kwlnLargeMotorTarget;
 extern u16 fadenow;
 
 extern u16 fademax;
-extern u16 kwlnBackgroundFadeCounter;
-extern u16 kwlnBackgroundFadeDuration;
+extern u16 dds3BackgroundFadeCounter;
+extern u16 dds3BackgroundFadeDuration;
 
-extern sdfTexHandle_t *kwlnCurrentIncompleteResource;
+extern sdfTexHandle_t *dds3CurrentIncompleteResource;
 extern EffRandState effSharedRandomState[];
 extern void sdfRandomize(void *data, u32 tag);
-extern s32 kwlnTextureViewerHandlePad(void);
-extern void kwlnDrawTextureViewerFrame(sdfGrOt_t *surface, sdfTexHandle_t *image);
+extern s32 dds3TextureViewerHandlePad(void);
+extern void dds3DrawTextureViewerFrame(sdfGrOt_t *surface, sdfTexHandle_t *image);
 
-extern void kwlnTextureAttachTask(sdfGrOt_t *surface);
+extern void dds3TextureAttachTask(sdfGrOt_t *surface);
 
-extern void kwlnInitializeFrameDrawPackets(s32 bufferIndex);
+extern void dds3InitializeFrameDrawPackets(s32 bufferIndex);
 
 extern void dds3InitZClearDrawTag(void);
 
@@ -107,18 +107,18 @@ extern void eglInit(void);
 
 extern void sdfGrSetScreen(s32 displayModeIndex);
 #include "sdf_packet_alloc.h"
-extern void kwlnDrawTextureListDiagnostic(sdfDrawTag_t *packetList, s32 x, s32 y);
+extern void dds3DrawTextureListDiagnostic(sdfDrawTag_t *packetList, s32 x, s32 y);
 extern u64 *dds3PrimFrameRect(s32, s32, s32, s32, s32, u32, u32);
 extern void dds3PadVibrationSet(u32, u8, s32);
-extern s32 kwlnDebugGraphUpdate(dds3ProcessID_t *task);
-extern dds3ProcessID_t *kwlnDebugGraphTask;
-extern s32 kwlnTextureCountIncompleteResources(void);
+extern s32 dds3DebugGraphUpdate(dds3ProcessID_t *task);
+extern dds3ProcessID_t *dds3DebugGraphTask;
+extern s32 dds3TextureCountIncompleteResources(void);
 extern void *sdfDevPrintf(s32, s32, s32, s32, const char *, ...);
 extern s32 D_003BA724;
 extern s32 distblurovercnt;
 extern s32 ripblurovercnt;
 extern s8 dds3PadBitTable[32];
-extern s32 kwlnSelectIncompleteResourceAtPageIndex(s32);
+extern s32 dds3SelectIncompleteResourceAtPageIndex(s32);
 extern sdfGrOt_t D_00325708;
 
 
@@ -207,7 +207,7 @@ s32 fclEncycFindFreeSlot(const char *name) {
 }
 
 /* One shared initializer for the three configure modes and unregister. */
-static inline void kwlnSetNamedSlotState(s32 index, s32 kind, KwlnTaskUpdateCallback update, KwlnTaskDestroyCallback destroy,
+static inline void dds3SetNamedSlotState(s32 index, s32 kind, KwlnTaskUpdateCallback update, KwlnTaskDestroyCallback destroy,
                                          void (*setState)(s32), void *userValue) {
     D_003C1C90[index].kind = kind;
     D_003C1C90[index].task = NULL;
@@ -277,7 +277,7 @@ s32 fclEncycFreeEntries(const char *name) {
         }
     }
     D_003C1C90[slotIndex].name[0] = 0;
-    kwlnSetNamedSlotState(slotIndex, 0, NULL, NULL, NULL, 0);
+    dds3SetNamedSlotState(slotIndex, 0, NULL, NULL, NULL, 0);
     if (D_003C1C90[slotIndex].previous < 0) {
         D_003BA850 = D_003C1C90[slotIndex].next;
     } else {
@@ -302,7 +302,7 @@ s32 kwlnConfigureNamedSlotMode3(const char *name, void (*setState)(s32)) {
     if (index < 0) {
         return 0;
     }
-    kwlnSetNamedSlotState(index, 3, NULL, NULL, setState, 0);
+    dds3SetNamedSlotState(index, 3, NULL, NULL, setState, 0);
     return 1;
 }
 
@@ -311,7 +311,7 @@ s32 fclEncycAllocEntry(const char *name, KwlnTaskUpdateCallback update, KwlnTask
     if (index < 0) {
         return 0;
     }
-    kwlnSetNamedSlotState(index, 1, update, destroy, NULL, userValue);
+    dds3SetNamedSlotState(index, 1, update, destroy, NULL, userValue);
     return 1;
 }
 
@@ -320,7 +320,7 @@ s32 kwlnConfigureNamedSlotMode2(const char *name, KwlnTaskUpdateCallback update,
     if (index < 0) {
         return 0;
     }
-    kwlnSetNamedSlotState(index, 2, update, destroy, NULL, userValue);
+    dds3SetNamedSlotState(index, 2, update, destroy, NULL, userValue);
     return 1;
 }
 
@@ -449,8 +449,8 @@ s32 dds3PadVibrationTest(dds3ProcessID_t *task) {
     return 0;
 }
 
-extern u32 kwlnPadButtonHoldCounters[4][16];
-extern u32 kwlnPadStickHoldCounters[2][2];
+extern u32 dds3PadButtonHoldCounters[4][16];
+extern u32 dds3PadStickHoldCounters[2][2];
 extern s8 dds3PadButtonPrev[2][2][16];
 extern u8 D_003BA860[2][2][2];
 extern s8 D_003BA868[2][2];
@@ -462,7 +462,7 @@ void dds3PadInitialize(void) {
     s32 port;
     s32 bank;
     s32 i;
-    u32 (*inputTimers)[16] = kwlnPadButtonHoldCounters;
+    u32 (*inputTimers)[16] = dds3PadButtonHoldCounters;
 
     for (port = 0; port < 2; port++) {
         for (bank = 0; bank < 2; bank++) {
@@ -473,7 +473,7 @@ void dds3PadInitialize(void) {
             }
         }
         for (i = 0; i < 2; i++) {
-            kwlnPadStickHoldCounters[port][i] = 0;
+            dds3PadStickHoldCounters[port][i] = 0;
             D_003BA860[port][i][0] = 0;
             D_003BA860[port][i][1] = 0;
             D_003BA868[port][i] = 0;
@@ -597,14 +597,14 @@ void kwlnUpdatePadInputState(void) {
             for (i = 0; i < 16; i++) {
                 if (buttons[j][i] != 0) {
                     dds3PadButtonPrev[j][pad][i] = 1;
-                    if (++kwlnPadButtonHoldCounters[j * 2 + pad][i] == 1) {
+                    if (++dds3PadButtonHoldCounters[j * 2 + pad][i] == 1) {
                         dds3PadButtonPrev[j][pad][i] = -0x7D;
                     }
                 } else {
                     dds3PadButtonPrev[j][pad][i] = 0;
-                    kwlnPadButtonHoldCounters[j * 2 + pad][i] = 0;
+                    dds3PadButtonHoldCounters[j * 2 + pad][i] = 0;
                 }
-                if (kwlnPadButtonHoldCounters[j * 2 + pad][i] >= 8 && !(kwlnPadButtonHoldCounters[j * 2 + pad][i] & 1)) {
+                if (dds3PadButtonHoldCounters[j * 2 + pad][i] >= 8 && !(dds3PadButtonHoldCounters[j * 2 + pad][i] & 1)) {
                     dds3PadButtonPrev[j][pad][i] |= 2;
                 }
             }
@@ -620,14 +620,14 @@ void kwlnUpdatePadInputState(void) {
             SDF_VU0_GETLENGTH(stickLength);
             if (stickLength >= 64.0f) {
                 D_003BA868[pad][i] = 1;
-                if (++kwlnPadStickHoldCounters[pad][i] == 1) {
+                if (++dds3PadStickHoldCounters[pad][i] == 1) {
                     D_003BA868[pad][i] = -0x7D;
                 }
             } else {
                 D_003BA868[pad][i] = 0;
-                kwlnPadStickHoldCounters[pad][i] = 0;
+                dds3PadStickHoldCounters[pad][i] = 0;
             }
-            if (kwlnPadStickHoldCounters[pad][i] >= 8 && !(kwlnPadStickHoldCounters[pad][i] & 1)) {
+            if (dds3PadStickHoldCounters[pad][i] >= 8 && !(dds3PadStickHoldCounters[pad][i] & 1)) {
                 D_003BA868[pad][i] |= 2;
             }
         }
@@ -722,7 +722,7 @@ void dds3UpdateVibrationSlots(void) {
     }
 }
 
-s32 kwlnTaskNoopCallback(dds3ProcessID_t *task) {
+s32 dds3TaskNoopCallback(dds3ProcessID_t *task) {
     return 0;
 }
 
@@ -739,12 +739,12 @@ extern u16 D_003BA884;
 extern u16 D_003BA886;
 extern char D_003BA888[];
 
-s32 kwlnDebugGraphUpdate(dds3ProcessID_t *task) {
+s32 dds3DebugGraphUpdate(dds3ProcessID_t *task) {
     sdfDrawTag_t *packetList = (sdfDrawTag_t *)sdfGrAllocPacketBuff(0x20);
     sdfPrimTransPacket_t *blendPacket;
     s32 originX = 0x7100;
     /* Keep the four real conversion epochs in one local; see docs/idioms.md,
-     * "Trace-justified pixel conversion reuse: kwlnDebugGraphUpdate". */
+     * "Trace-justified pixel conversion reuse: dds3DebugGraphUpdate". */
     s32 pixels;
 
     sdfDrawTagInit(packetList);
@@ -797,21 +797,21 @@ s32 kwlnDebugGraphUpdate(dds3ProcessID_t *task) {
     return 0;
 }
 
-void kwlnDebugGraphTaskDestroy(dds3ProcessID_t *task) {
+void dds3DebugGraphTaskDestroy(dds3ProcessID_t *task) {
 }
 
 /* Only mode 1 creates and mode 0 destroys the timing graph; other modes do nothing. */
-void kwlnDebugGraphSetEnabled(s8 enabled) {
+void dds3DebugGraphSetEnabled(s8 enabled) {
     if (enabled == 1) {
-        kwlnDebugGraphTask = dds3StartProcess("DebugTimeGrph", 0x2710, 1, 1, kwlnDebugGraphUpdate, kwlnDebugGraphTaskDestroy, NULL);
+        dds3DebugGraphTask = dds3StartProcess("DebugTimeGrph", 0x2710, 1, 1, dds3DebugGraphUpdate, dds3DebugGraphTaskDestroy, NULL);
     } else if (enabled == 0) {
-        dds3KillProcess(kwlnDebugGraphTask, 0);
+        dds3KillProcess(dds3DebugGraphTask, 0);
     }
 }
 
 /* Scale the longer preview side to at most 256 texels, preserving division
  * before coordinate scaling; UV endpoints at 1024 texels are reduced by one. */
-void kwlnDrawImageOutline(sdfDrawTag_t *packetList, sdfTexHandle_t *image) {
+void dds3DrawImageOutline(sdfDrawTag_t *packetList, sdfTexHandle_t *image) {
     s32 width = image->width;
     s32 height = image->height;
     s32 drawWidth;
@@ -839,13 +839,13 @@ void kwlnDrawImageOutline(sdfDrawTag_t *packetList, sdfTexHandle_t *image) {
                                 width * 0x10, height * 0x10, KWLN_DIAG_DEPTH, 0);
 }
 
-extern u32 kwlnTextureGetPageIndex(void);
+extern u32 dds3TextureGetPageIndex(void);
 
 /* Append the zero-based viewer page and final page index; an empty list prints -1. */
-void kwlnTextureDrawPageCounter(sdfDrawTag_t *packetList) {
+void dds3TextureDrawPageCounter(sdfDrawTag_t *packetList) {
     char pageText[0x70];
-    s32 pageIndex = kwlnTextureGetPageIndex();
-    s32 resourceCount = kwlnTextureCountIncompleteResources();
+    s32 pageIndex = dds3TextureGetPageIndex();
+    s32 resourceCount = dds3TextureCountIncompleteResources();
     sprintf(pageText, "TEX VIEWER [%d/%d]", pageIndex, resourceCount - 1);
     sdfDrawTagLink(packetList, (u32)sdfDevPrintf(0x7180, 0x79C0, KWLN_DIAG_DEPTH, 0, pageText));
 }
@@ -856,7 +856,7 @@ extern char D_0039E188[];
 
 INCLUDE_RODATA(const s32, "game/code_00102ED8", D_0039E078);
 
-void kwlnDrawTextureResourceDetails(sdfDrawTag_t *packetList, sdfTexHandle_t *texture) {
+void dds3DrawTextureResourceDetails(sdfDrawTag_t *packetList, sdfTexHandle_t *texture) {
     char text[0x70];
     s32 formatIndex = 0;
     s32 formatMode = 0;
@@ -902,7 +902,7 @@ void kwlnDrawTextureResourceDetails(sdfDrawTag_t *packetList, sdfTexHandle_t *te
 #define KWLN_HELD_TEXTURE_CLAMP_MODE 5
 
 /* Count texture entries without a reference clone source. */
-s32 kwlnTextureCountIncompleteResources(void) {
+s32 dds3TextureCountIncompleteResources(void) {
     sdfTexHandle_t *texture = sdfTexHandleLink;
     sdfTexHandle_t *previousTexture;
     s32 incompleteCount = 0;
@@ -920,13 +920,13 @@ s32 kwlnTextureCountIncompleteResources(void) {
     return incompleteCount;
 }
 
-u32 kwlnTextureGetPageIndex(void) {
-    return kwlnTextureViewerPageIndex;
+u32 dds3TextureGetPageIndex(void) {
+    return dds3TextureViewerPageIndex;
 }
 
 /* Clamp a negative request and return the reached index. DDS1 index zero
  * selects the head without scanning clone-source links; tail exits retain prior writes. */
-s32 kwlnSelectIncompleteResourceAtPageIndex(s32 requestedIndex) {
+s32 dds3SelectIncompleteResourceAtPageIndex(s32 requestedIndex) {
     sdfTexHandle_t *texture = sdfTexHandleLink;
     sdfTexHandle_t *previousTexture;
     s32 visitedIndex = 0;
@@ -935,7 +935,7 @@ s32 kwlnSelectIncompleteResourceAtPageIndex(s32 requestedIndex) {
         requestedIndex = 0;
     }
     while (texture != NULL && visitedIndex != requestedIndex) {
-        kwlnCurrentIncompleteResource = texture;
+        dds3CurrentIncompleteResource = texture;
         while (texture->ref != NULL && texture->ref->origin != NULL) {
             previousTexture = texture->next;
             if (previousTexture == NULL) {
@@ -950,26 +950,26 @@ s32 kwlnSelectIncompleteResourceAtPageIndex(s32 requestedIndex) {
         visitedIndex++;
         texture = previousTexture;
     }
-    kwlnCurrentIncompleteResource = texture;
+    dds3CurrentIncompleteResource = texture;
     return visitedIndex;
 }
 
 /* Exit input returns 0 immediately; otherwise apply one prioritized page step,
  * select its reached index, then optionally toggle the viewer mode and return 1. */
-s32 kwlnTextureViewerHandlePad(void) {
+s32 dds3TextureViewerHandlePad(void) {
     if (dds3PadBitTable[0x13] < 0) {
         return 0;
     }
     if (dds3PadBitTable[0x14] & KWLN_PAD_REPEAT_BIT) {
-        kwlnTextureViewerPageIndex -= 1;
+        dds3TextureViewerPageIndex -= 1;
     } else if (dds3PadBitTable[0x15] & KWLN_PAD_REPEAT_BIT) {
-        kwlnTextureViewerPageIndex += 1;
+        dds3TextureViewerPageIndex += 1;
     } else if ((dds3PadBitTable[0x18] & KWLN_PAD_REPEAT_BIT) || (dds3PadBitTable[0x19] & KWLN_PAD_REPEAT_BIT)) {
-        kwlnTextureViewerPageIndex -= KWLN_VIEWER_FAST_PAGE_STEP;
+        dds3TextureViewerPageIndex -= KWLN_VIEWER_FAST_PAGE_STEP;
     } else if ((dds3PadBitTable[0x1A] & KWLN_PAD_REPEAT_BIT) || (dds3PadBitTable[0x1B] & KWLN_PAD_REPEAT_BIT)) {
-        kwlnTextureViewerPageIndex += KWLN_VIEWER_FAST_PAGE_STEP;
+        dds3TextureViewerPageIndex += KWLN_VIEWER_FAST_PAGE_STEP;
     }
-    kwlnTextureViewerPageIndex = kwlnSelectIncompleteResourceAtPageIndex(kwlnTextureViewerPageIndex);
+    dds3TextureViewerPageIndex = dds3SelectIncompleteResourceAtPageIndex(dds3TextureViewerPageIndex);
     if (dds3PadBitTable[0x12] < 0) {
         D_003BA890 ^= 1;
     }
@@ -978,9 +978,9 @@ s32 kwlnTextureViewerHandlePad(void) {
 
 extern s32 D_003BA8E0;
 
-void kwlnDrawTextureAllocationMapBlock(void *packetList, s32 x, s32 y, sdfGsMemSlice_t *block, u8 mode);
+void dds3DrawTextureAllocationMapBlock(void *packetList, s32 x, s32 y, sdfGsMemSlice_t *block, u8 mode);
 
-void kwlnDrawTextureViewerFrame(sdfGrOt_t *surface, sdfTexHandle_t *image) {
+void dds3DrawTextureViewerFrame(sdfGrOt_t *surface, sdfTexHandle_t *image) {
     sdfDrawTag_t *packetList;
     s32 counter;
     s32 mode;
@@ -991,24 +991,24 @@ void kwlnDrawTextureViewerFrame(sdfGrOt_t *surface, sdfTexHandle_t *image) {
     packetList = (sdfDrawTag_t *)sdfGrAllocPacketBuff(0x20);
     sdfDrawTagInit(packetList);
     sdfDrawTagLink(packetList, (u32)dds3PrimFrameRect(0x7160, 0x79B0, 0x0FFFFF7F, 0x1040, 0x80, 0x80000000, 0x80806020));
-    kwlnTextureDrawPageCounter(packetList);
+    dds3TextureDrawPageCounter(packetList);
     sdfDrawTagLink(packetList, (u32)dds3PrimFrameRect(0x7160, 0x7A50, 0x0FFFFF7F, 0x1040, 0x820, 0x80000000, 0x80806020));
-    kwlnDrawImageOutline(packetList, image);
+    dds3DrawImageOutline(packetList, image);
     sdfDrawTagLink(packetList, (u32)dds3PrimFrameRect(0x7160, 0x8290, 0x0FFFFF7F, 0x1040, 0xE0, 0x80000000, 0x80806020));
-    kwlnDrawTextureResourceDetails(packetList, image);
+    dds3DrawTextureResourceDetails(packetList, image);
 
     if (D_003BA890 != 0) {
-        kwlnDrawTextureListDiagnostic(packetList, 0x8240, 0x7A60);
+        dds3DrawTextureListDiagnostic(packetList, 0x8240, 0x7A60);
         counter = D_003BA8E0;
         mode = (counter >> 4) & 1;
         if (image->pixelGsHandle != NULL) {
-            kwlnDrawTextureAllocationMapBlock(packetList, 0x8240, 0x7A60, image->pixelGsHandle, mode);
+            dds3DrawTextureAllocationMapBlock(packetList, 0x8240, 0x7A60, image->pixelGsHandle, mode);
         }
         counter = D_003BA8E0;
         /* Boolean highlight selection; see docs/idioms.md, "Trace-justified boolean extraction: texture viewer highlight". */
         mode = (counter & 0x10) ? 2 : 0;
         if (image->clutGsHandle != NULL) {
-            kwlnDrawTextureAllocationMapBlock(packetList, 0x8240, 0x7A60, image->clutGsHandle, mode);
+            dds3DrawTextureAllocationMapBlock(packetList, 0x8240, 0x7A60, image->clutGsHandle, mode);
         }
         D_003BA8E0++;
     }
@@ -1017,53 +1017,53 @@ void kwlnDrawTextureViewerFrame(sdfGrOt_t *surface, sdfTexHandle_t *image) {
 
 /* With a nonempty list, invoke its renderer even when input reports exit.
  * The surface owns the packet submission callback; return input status. */
-s32 kwlnSwapActiveResource(sdfGrOt_t *surface) {
+s32 dds3SwapActiveResource(sdfGrOt_t *surface) {
     s32 inputStatus;
 
     if (sdfTexHandleLink == 0) {
         return 0;
     }
-    inputStatus = kwlnTextureViewerHandlePad();
-    kwlnDrawTextureViewerFrame(surface, kwlnCurrentIncompleteResource);
+    inputStatus = dds3TextureViewerHandlePad();
+    dds3DrawTextureViewerFrame(surface, dds3CurrentIncompleteResource);
     return inputStatus;
 }
 
 /* Use the default surface: empty list returns 0, exit input -1, drawing 0. */
-s32 kwlnLoadDefaultResource(void) {
+s32 dds3LoadDefaultResource(void) {
     if (sdfTexHandleLink == 0) {
         return 0;
     }
-    if (kwlnTextureViewerHandlePad() == 0) {
+    if (dds3TextureViewerHandlePad() == 0) {
         return -1;
     }
-    kwlnDrawTextureViewerFrame(&sdfDebugGrOt, kwlnCurrentIncompleteResource);
+    dds3DrawTextureViewerFrame(&sdfDebugGrOt, dds3CurrentIncompleteResource);
     return 0;
 }
 
 /* Initialize viewer state and return its default renderer for the first eligible
  * node. Exhausting a nonempty list returns NULL after the initial state writes. */
-s32 (*kwlnTextureFindIncompleteResource(void))(void) {
+s32 (*dds3TextureFindIncompleteResource(void))(void) {
     sdfTexHandle_t *texture = sdfTexHandleLink;
     if (texture == NULL) {
         return NULL;
     }
-    kwlnCurrentIncompleteResource = texture;
+    dds3CurrentIncompleteResource = texture;
     D_003BA890 = 1;
-    kwlnTextureViewerPageIndex = 0;
+    dds3TextureViewerPageIndex = 0;
     while (texture->ref != NULL && texture->ref->origin != NULL) {
-        texture = kwlnCurrentIncompleteResource->next;
+        texture = dds3CurrentIncompleteResource->next;
         if (texture == NULL) {
             return NULL;
         }
-        kwlnCurrentIncompleteResource = texture;
+        dds3CurrentIncompleteResource = texture;
     }
-    return kwlnLoadDefaultResource;
+    return dds3LoadDefaultResource;
 }
 
 /* Draw one allocation-map block in address units, choosing color by mode.
  * Only the initial partial row forces a nonzero remainder to occupy one cell;
  * the final partial row retains its truncated cell count. */
-void kwlnDrawTextureAllocationMapBlock(void *packetList, s32 x, s32 y, sdfGsMemSlice_t *block, u8 mode) {
+void dds3DrawTextureAllocationMapBlock(void *packetList, s32 x, s32 y, sdfGsMemSlice_t *block, u8 mode) {
     s32 color;
     u32 remainingUnits;
     s32 columnIndex;
@@ -1128,7 +1128,7 @@ void kwlnDrawTextureAllocationMapBlock(void *packetList, s32 x, s32 y, sdfGsMemS
 
 
 /* Draw the allocation-map border, then walk blocks through their prev links. */
-void kwlnDrawTextureListDiagnostic(sdfDrawTag_t *packetList, s32 x, s32 y) {
+void dds3DrawTextureListDiagnostic(sdfDrawTag_t *packetList, s32 x, s32 y) {
     sdfGsMemSlice_t *block = sdfGsMemGetLinkHead();
 
     if (block != NULL) {
@@ -1136,26 +1136,26 @@ void kwlnDrawTextureListDiagnostic(sdfDrawTag_t *packetList, s32 x, s32 y) {
                                           0x0FFFFF7F, KWLN_MAP_BORDER_WIDTH, 0x820,
                                           0x80000000, 0x80806020));
         do {
-            kwlnDrawTextureAllocationMapBlock(packetList, x, y, block, 0);
+            dds3DrawTextureAllocationMapBlock(packetList, x, y, block, 0);
             block = block->next;
         } while (block != NULL);
     }
 }
 
 /* Build an allocation-map packet list and submit it through the surface callback. */
-void kwlnTextureAttachTask(sdfGrOt_t *surface) {
+void dds3TextureAttachTask(sdfGrOt_t *surface) {
     sdfDrawTag_t *packetList = (sdfDrawTag_t *)sdfGrAllocPacketBuff(KWLN_DIAG_PACKET_LIST_BYTES);
     sdfDrawTagInit(packetList);
-    kwlnDrawTextureListDiagnostic(packetList, 0x7180, 0x79C0);
+    dds3DrawTextureListDiagnostic(packetList, 0x7180, 0x79C0);
     surface->regFunc(surface, packetList);
 }
 
 /* Submit the default surface's map only when the control array's first byte is zero. */
-s32 kwlnEnsureDefaultResource(void) {
+s32 dds3EnsureDefaultResource(void) {
     if (D_0032453B[0] != 0) {
         return 0;
     }
-    kwlnTextureAttachTask(&sdfDebugGrOt);
+    dds3TextureAttachTask(&sdfDebugGrOt);
     return 0;
 }
 
@@ -1174,7 +1174,7 @@ extern f32 kwlnOverlayAmbientColor[4];
 extern void sdf3DLinkInitPacket(sdfDrawTag_t *, DmaPacketHeader *);
 
 /* Initialize the selected frame bank's scene and overlay packet chains. */
-void kwlnInitializeFrameDrawPackets(s32 bufferIndex) {
+void dds3InitializeFrameDrawPackets(s32 bufferIndex) {
     sdfDrawTagInit(&dds3DrawEnv[bufferIndex].initialList);
     sdf3DLinkInitPacket(&dds3DrawEnv[bufferIndex].initialList,
                                         &dds3DrawEnv[bufferIndex].programReference);
@@ -1217,8 +1217,8 @@ void dds3InitDrawEnv(void) {
     sdfGrSetScreen(1);
     sdf3DMakeScreenParam(&dds3ScreenParam.camera);
     sdf3DMakeScreenParam(&D_00324980.camera);
-    kwlnInitializeFrameDrawPackets(0);
-    kwlnInitializeFrameDrawPackets(1);
+    dds3InitializeFrameDrawPackets(0);
+    dds3InitializeFrameDrawPackets(1);
     dds3InitZClearDrawTag();
     D_003BA7FC = 0;
     eglInit();
@@ -1491,7 +1491,7 @@ void dds3FadeSet(s32 red, s32 green, s32 blue, s32 alpha) {
 }
 
 /* Return the live color address through outColor, rather than copying channels. */
-void kwlnFadeGetColor(KwlnFadeColor **outColor) {
+void dds3FadeColorGet(KwlnFadeColor **outColor) {
     *outColor = &fadergba;
 }
 
@@ -1620,11 +1620,11 @@ void dds3DrawDistRipOverError(void) {
 #include "kwln_fade_color.h"
 #include "kwln_draw_buffer.h"
 
-extern s16 kwlnBackgroundFadeFirstRamp; /* the background fade's band ramps */
-extern s16 kwlnBackgroundFadeSecondRamp;
+extern s16 dds3BackgroundFadeFirstRamp; /* the background fade's band ramps */
+extern s16 dds3BackgroundFadeSecondRamp;
 extern u8 kwlnBackgroundFadeOverlayPackets[]; /* the overlay packet, one per draw buffer */
 extern sdfGrOt_t sdfGrOtTable[];
-extern s32 kwlnFadeIsBackgroundOverlayActive(void);
+extern s32 dds3FadeIsBackgroundOverlayActive(void);
 
 #define KWLN_FADE_OVERLAY_SURFACE 92
 #define KWLN_FADE_MAX_ALPHA 0x80
@@ -1653,12 +1653,12 @@ typedef struct KwlnFadeOverlayPacket {
 
 typedef char KwlnFadeOverlayPacket_size_must_be_0xB0[(sizeof(KwlnFadeOverlayPacket) == 0xB0) ? 1 : -1];
 
-static void kwlnWriteRegister(SdfGsRegisterWrite *write, u64 value, u64 registerId) {
+static void dds3WriteRegister(SdfGsRegisterWrite *write, u64 value, u64 registerId) {
     write->value = value;
     write->registerId = registerId;
 }
 
-static u64 kwlnOverlayVertex(u32 x, u32 y) {
+static u64 dds3OverlayVertex(u32 x, u32 y) {
     return (KWLN_OVERLAY_DEPTH << 32) | (u32)(y << 16) | x;
 }
 
@@ -1684,26 +1684,26 @@ void kwlnQueueBackgroundFadeOverlayPacket(void) {
     packet->header.vifCommands = 0x5000000AULL << 32; /* NOP; DIRECT ten quadwords */
     packet->header.gifTag = 0x1000000000000004ULL;    /* NLOOP 4, NREG 1 */
     packet->header.gifRegisters = SDF_GIF_REGISTER_AD;
-    kwlnWriteRegister(&packet->alpha, KWLN_OVERLAY_ALPHA, SDF_GS_ALPHA_1);
-    kwlnWriteRegister(&packet->pabe, 0, KWLN_GS_PABE);
-    kwlnWriteRegister(&packet->fba, 0, KWLN_GS_FBA_1);
-    kwlnWriteRegister(&packet->test, KWLN_OVERLAY_TEST, SDF_GS_TEST_1);
+    dds3WriteRegister(&packet->alpha, KWLN_OVERLAY_ALPHA, SDF_GS_ALPHA_1);
+    dds3WriteRegister(&packet->pabe, 0, KWLN_GS_PABE);
+    dds3WriteRegister(&packet->fba, 0, KWLN_GS_FBA_1);
+    dds3WriteRegister(&packet->test, KWLN_OVERLAY_TEST, SDF_GS_TEST_1);
     packet->spriteTag = 0x1023400000008004ULL; /* NLOOP 4, EOP, PRE, PRIM blended sprite, NREG 1 */
     packet->spriteRegisters = SDF_GIF_REGISTER_AD;
 
-    if (kwlnFadeIsBackgroundOverlayActive()) {
-        top = 0x7A88 - kwlnBackgroundFadeFirstRamp * 8;
-        bottom = 0x8488 + kwlnBackgroundFadeSecondRamp * 8;
+    if (dds3FadeIsBackgroundOverlayActive()) {
+        top = 0x7A88 - dds3BackgroundFadeFirstRamp * 8;
+        bottom = 0x8488 + dds3BackgroundFadeSecondRamp * 8;
     }
     /* Retail shifts the alpha in 32 bits, sign-extending a negative one (a
      * fade alpha above 0x80) over Q; the sprite is untextured, so Q goes
      * unread, but the packet keeps retail's bits. */
     color = 0x3F80000000000000ULL /* Q = 1.0 */ | (u64)(s64)(s32)((u32)overlayAlpha << 24) |
             ((u64)fadergba.b << 16) | ((u64)fadergba.g << 8) | fadergba.r;
-    kwlnWriteRegister(&packet->vertices[0], color, SDF_GS_RGBAQ);
-    kwlnWriteRegister(&packet->vertices[1], kwlnOverlayVertex(KWLN_OVERLAY_LEFT, top), SDF_GS_XYZ2);
-    kwlnWriteRegister(&packet->vertices[2], color, SDF_GS_RGBAQ);
-    kwlnWriteRegister(&packet->vertices[3], kwlnOverlayVertex(KWLN_OVERLAY_RIGHT, bottom), SDF_GS_XYZ2);
+    dds3WriteRegister(&packet->vertices[0], color, SDF_GS_RGBAQ);
+    dds3WriteRegister(&packet->vertices[1], dds3OverlayVertex(KWLN_OVERLAY_LEFT, top), SDF_GS_XYZ2);
+    dds3WriteRegister(&packet->vertices[2], color, SDF_GS_RGBAQ);
+    dds3WriteRegister(&packet->vertices[3], dds3OverlayVertex(KWLN_OVERLAY_RIGHT, bottom), SDF_GS_XYZ2);
 
     packets = dds3FontReqAllocDrawTag();
     sdfDrawTagLink(packets, (u32)packet);
@@ -1716,53 +1716,53 @@ INCLUDE_ASM(const s32, "game/code_00102ED8", kwlnQueueBackgroundFadeOverlayPacke
 
 /* Cancel background direction, zero RGBA and restore the inactive ramp maxima.
  * This reset does not rewrite the background counter or duration. */
-void kwlnFadeResetBackground(void) {
+void dds3FadeResetBackground(void) {
     dds3DrawFlag &= KWLN_BGFADE_KEEP_OTHER_BITS;
-    kwlnBackgroundFadeColor[0] = 0;
-    kwlnBackgroundFadeColor[1] = 0;
-    kwlnBackgroundFadeColor[2] = 0;
-    kwlnBackgroundFadeColor[KWLN_COLOR_ALPHA_CHANNEL] = 0;
-    kwlnBackgroundFadeFirstRamp = KWLN_BGFADE_FIRST_RAMP_MAX;
-    kwlnBackgroundFadeSecondRamp = KWLN_BGFADE_SECOND_RAMP_MAX;
+    dds3BackgroundFadeColor[0] = 0;
+    dds3BackgroundFadeColor[1] = 0;
+    dds3BackgroundFadeColor[2] = 0;
+    dds3BackgroundFadeColor[KWLN_COLOR_ALPHA_CHANNEL] = 0;
+    dds3BackgroundFadeFirstRamp = KWLN_BGFADE_FIRST_RAMP_MAX;
+    dds3BackgroundFadeSecondRamp = KWLN_BGFADE_SECOND_RAMP_MAX;
 }
 
 /* Start the background countdown; zero duration performs the full background reset. */
-void kwlnFadeBackgroundStartOut(s32 duration) {
-    kwlnBackgroundFadeColor[0] = 0;
-    kwlnBackgroundFadeColor[1] = 0;
-    kwlnBackgroundFadeColor[2] = 0;
-    kwlnBackgroundFadeColor[KWLN_COLOR_ALPHA_CHANNEL] = KWLN_FADE_MAX_ALPHA;
+void dds3FadeBackgroundStartOut(s32 duration) {
+    dds3BackgroundFadeColor[0] = 0;
+    dds3BackgroundFadeColor[1] = 0;
+    dds3BackgroundFadeColor[2] = 0;
+    dds3BackgroundFadeColor[KWLN_COLOR_ALPHA_CHANNEL] = KWLN_FADE_MAX_ALPHA;
     if (duration == 0) {
-        kwlnBackgroundFadeColor[KWLN_COLOR_ALPHA_CHANNEL] = 0;
-        kwlnBackgroundFadeCounter = 0;
-        kwlnBackgroundFadeDuration = 0;
-        kwlnBackgroundFadeFirstRamp = KWLN_BGFADE_FIRST_RAMP_MAX;
-        kwlnBackgroundFadeSecondRamp = KWLN_BGFADE_SECOND_RAMP_MAX;
-        kwlnFadeResetBackground();
+        dds3BackgroundFadeColor[KWLN_COLOR_ALPHA_CHANNEL] = 0;
+        dds3BackgroundFadeCounter = 0;
+        dds3BackgroundFadeDuration = 0;
+        dds3BackgroundFadeFirstRamp = KWLN_BGFADE_FIRST_RAMP_MAX;
+        dds3BackgroundFadeSecondRamp = KWLN_BGFADE_SECOND_RAMP_MAX;
+        dds3FadeResetBackground();
     } else {
-        kwlnBackgroundFadeDuration = duration;
-        kwlnBackgroundFadeCounter = duration;
+        dds3BackgroundFadeDuration = duration;
+        dds3BackgroundFadeCounter = duration;
         dds3DrawFlag = (dds3DrawFlag | KWLN_BGFADE_COUNT_DOWN_BIT) & KWLN_BGFADE_CLEAR_UP_MASK;
     }
     D_003245EC[2] = 2048.0f;
 }
 
 /* Start the background count-up; zero duration leaves max alpha and zero ramps. */
-void kwlnFadeBackgroundStartIn(s32 duration) {
-    kwlnBackgroundFadeColor[0] = 0;
-    kwlnBackgroundFadeColor[1] = 0;
-    kwlnBackgroundFadeColor[2] = 0;
-    kwlnBackgroundFadeColor[KWLN_COLOR_ALPHA_CHANNEL] = 0;
+void dds3FadeBackgroundStartIn(s32 duration) {
+    dds3BackgroundFadeColor[0] = 0;
+    dds3BackgroundFadeColor[1] = 0;
+    dds3BackgroundFadeColor[2] = 0;
+    dds3BackgroundFadeColor[KWLN_COLOR_ALPHA_CHANNEL] = 0;
     if (duration == 0) {
-        kwlnBackgroundFadeCounter = 0;
-        kwlnBackgroundFadeDuration = 0;
-        kwlnBackgroundFadeColor[KWLN_COLOR_ALPHA_CHANNEL] = KWLN_FADE_MAX_ALPHA;
+        dds3BackgroundFadeCounter = 0;
+        dds3BackgroundFadeDuration = 0;
+        dds3BackgroundFadeColor[KWLN_COLOR_ALPHA_CHANNEL] = KWLN_FADE_MAX_ALPHA;
         dds3DrawFlag &= KWLN_BGFADE_KEEP_OTHER_BITS;
-        kwlnBackgroundFadeFirstRamp = 0;
-        kwlnBackgroundFadeSecondRamp = 0;
+        dds3BackgroundFadeFirstRamp = 0;
+        dds3BackgroundFadeSecondRamp = 0;
     } else {
-        kwlnBackgroundFadeDuration = duration;
-        kwlnBackgroundFadeCounter = 0;
+        dds3BackgroundFadeDuration = duration;
+        dds3BackgroundFadeCounter = 0;
         dds3DrawFlag = (dds3DrawFlag & KWLN_BGFADE_CLEAR_DOWN_MASK) | KWLN_BGFADE_COUNT_UP_BIT;
     }
     D_003245EC[2] = 2041.0f;
@@ -1770,15 +1770,15 @@ void kwlnFadeBackgroundStartIn(s32 duration) {
 
 /* Direction flags take precedence; idle visibility uses alpha in mode zero,
  * otherwise it tests whether the first ramp differs from its inactive maximum. */
-KwlnBackgroundOverlayActivity kwlnFadeIsBackgroundOverlayActive(void) {
+KwlnBackgroundOverlayActivity dds3FadeIsBackgroundOverlayActive(void) {
     if (dds3DrawFlag & KWLN_BGFADE_DIRECTION_BITS) {
         return KWLN_BACKGROUND_OVERLAY_ACTIVE;
     }
-    if (kwlnBackgroundFadeMode == 0) {
-        if (KWLN_FADE_MAX_ALPHA - kwlnBackgroundFadeColor[KWLN_COLOR_ALPHA_CHANNEL] >= KWLN_FADE_MAX_ALPHA) {
+    if (dds3BackgroundFadeMode == 0) {
+        if (KWLN_FADE_MAX_ALPHA - dds3BackgroundFadeColor[KWLN_COLOR_ALPHA_CHANNEL] >= KWLN_FADE_MAX_ALPHA) {
             return KWLN_BACKGROUND_OVERLAY_INACTIVE;
         }
-    } else if (kwlnBackgroundFadeFirstRamp == KWLN_BGFADE_FIRST_RAMP_MAX) {
+    } else if (dds3BackgroundFadeFirstRamp == KWLN_BGFADE_FIRST_RAMP_MAX) {
         return KWLN_BACKGROUND_OVERLAY_INACTIVE;
     }
     return KWLN_BACKGROUND_OVERLAY_ACTIVE;
@@ -1786,52 +1786,52 @@ KwlnBackgroundOverlayActivity kwlnFadeIsBackgroundOverlayActive(void) {
 
 /* Store the visibility mode; its stored zero value clears ramps, otherwise
  * maximum alpha is selected. Counter direction and timing are unchanged. */
-void kwlnFadeSetMode(s32 visibilityMode) {
-    kwlnBackgroundFadeMode = visibilityMode;
-    if (kwlnBackgroundFadeMode == 0) {
-        kwlnBackgroundFadeFirstRamp = 0;
-        kwlnBackgroundFadeSecondRamp = 0;
+void dds3FadeSetMode(s32 visibilityMode) {
+    dds3BackgroundFadeMode = visibilityMode;
+    if (dds3BackgroundFadeMode == 0) {
+        dds3BackgroundFadeFirstRamp = 0;
+        dds3BackgroundFadeSecondRamp = 0;
     } else {
-        kwlnBackgroundFadeColor[KWLN_COLOR_ALPHA_CHANNEL] = KWLN_FADE_MAX_ALPHA;
+        dds3BackgroundFadeColor[KWLN_COLOR_ALPHA_CHANNEL] = KWLN_FADE_MAX_ALPHA;
     }
 }
 
 /* Step the u16 counter, then derive integer alpha and f32 ramp samples.
  * Completion clears timing/flags after sampling, retaining endpoint values. */
-void kwlnStepBackgroundFade(void) {
+void dds3StepBackgroundFade(void) {
     f32 fadeRatio;
 
     if (dds3DrawFlag & KWLN_BGFADE_DIRECTION_BITS) {
         if (dds3DrawFlag & KWLN_BGFADE_COUNT_DOWN_BIT) {
-            kwlnBackgroundFadeCounter--;
+            dds3BackgroundFadeCounter--;
         } else {
-            kwlnBackgroundFadeCounter++;
+            dds3BackgroundFadeCounter++;
         }
-        fadeRatio = (f32)kwlnBackgroundFadeCounter / (f32)kwlnBackgroundFadeDuration;
-        kwlnBackgroundFadeColor[KWLN_COLOR_ALPHA_CHANNEL] = (kwlnBackgroundFadeCounter << KWLN_FADE_ALPHA_SHIFT) / kwlnBackgroundFadeDuration;
-        kwlnBackgroundFadeFirstRamp = KWLN_BGFADE_FIRST_RAMP_SCALE - fadeRatio * KWLN_BGFADE_FIRST_RAMP_SCALE;
-        kwlnBackgroundFadeSecondRamp = KWLN_BGFADE_SECOND_RAMP_SCALE - fadeRatio * KWLN_BGFADE_SECOND_RAMP_SCALE;
-        if (((dds3DrawFlag & KWLN_BGFADE_COUNT_DOWN_BIT) && kwlnBackgroundFadeCounter == 0) ||
-            ((dds3DrawFlag & KWLN_BGFADE_COUNT_UP_BIT) && kwlnBackgroundFadeCounter == kwlnBackgroundFadeDuration)) {
-            kwlnBackgroundFadeCounter = 0;
-            kwlnBackgroundFadeDuration = 0;
+        fadeRatio = (f32)dds3BackgroundFadeCounter / (f32)dds3BackgroundFadeDuration;
+        dds3BackgroundFadeColor[KWLN_COLOR_ALPHA_CHANNEL] = (dds3BackgroundFadeCounter << KWLN_FADE_ALPHA_SHIFT) / dds3BackgroundFadeDuration;
+        dds3BackgroundFadeFirstRamp = KWLN_BGFADE_FIRST_RAMP_SCALE - fadeRatio * KWLN_BGFADE_FIRST_RAMP_SCALE;
+        dds3BackgroundFadeSecondRamp = KWLN_BGFADE_SECOND_RAMP_SCALE - fadeRatio * KWLN_BGFADE_SECOND_RAMP_SCALE;
+        if (((dds3DrawFlag & KWLN_BGFADE_COUNT_DOWN_BIT) && dds3BackgroundFadeCounter == 0) ||
+            ((dds3DrawFlag & KWLN_BGFADE_COUNT_UP_BIT) && dds3BackgroundFadeCounter == dds3BackgroundFadeDuration)) {
+            dds3BackgroundFadeCounter = 0;
+            dds3BackgroundFadeDuration = 0;
             dds3DrawFlag &= KWLN_BGFADE_KEEP_OTHER_BITS;
         }
     }
 }
 
-void kwlnDrawBackgroundFadeBands(void) {
+void dds3DrawBackgroundFadeBands(void) {
     s16 firstRamp = 0;
     s16 secondRamp = 0;
     s32 fade;
     s32 alpha;
 
-    if (kwlnBackgroundFadeMode == 0) {
-        fade = KWLN_FADE_MAX_ALPHA - kwlnBackgroundFadeColor[KWLN_COLOR_ALPHA_CHANNEL];
+    if (dds3BackgroundFadeMode == 0) {
+        fade = KWLN_FADE_MAX_ALPHA - dds3BackgroundFadeColor[KWLN_COLOR_ALPHA_CHANNEL];
     } else {
-        firstRamp = kwlnBackgroundFadeFirstRamp;
+        firstRamp = dds3BackgroundFadeFirstRamp;
         fade = 0;
-        secondRamp = kwlnBackgroundFadeSecondRamp;
+        secondRamp = dds3BackgroundFadeSecondRamp;
         if (firstRamp == KWLN_BGFADE_FIRST_RAMP_MAX) {
             return;
         }
@@ -1898,9 +1898,9 @@ INCLUDE_SDATA(const s32, "game/code_00102ED8", D_003BA8C8);
 
 INCLUDE_SDATA(const s32, "game/code_00102ED8", D_003BA8D0);
 
-INCLUDE_SDATA(const s32, "game/code_00102ED8", kwlnCurrentIncompleteResource);
+INCLUDE_SDATA(const s32, "game/code_00102ED8", dds3CurrentIncompleteResource);
 
-INCLUDE_SDATA(const s32, "game/code_00102ED8", kwlnTextureViewerPageIndex);
+INCLUDE_SDATA(const s32, "game/code_00102ED8", dds3TextureViewerPageIndex);
 
 INCLUDE_SDATA(const s32, "game/code_00102ED8", D_003BA8E0);
 
@@ -1944,15 +1944,15 @@ INCLUDE_SDATA(const s32, "game/code_00102ED8", fadergba);
 
 SDATA_PAD(4);
 
-INCLUDE_SDATA(const s32, "game/code_00102ED8", kwlnBackgroundFadeColor);
+INCLUDE_SDATA(const s32, "game/code_00102ED8", dds3BackgroundFadeColor);
 
 INCLUDE_SDATA(const s32, "game/code_00102ED8", D_003BA92B);
 
-INCLUDE_SDATA(const s32, "game/code_00102ED8", kwlnBackgroundFadeMode);
+INCLUDE_SDATA(const s32, "game/code_00102ED8", dds3BackgroundFadeMode);
 
-INCLUDE_SDATA(const s32, "game/code_00102ED8", kwlnBackgroundFadeFirstRamp);
+INCLUDE_SDATA(const s32, "game/code_00102ED8", dds3BackgroundFadeFirstRamp);
 
-INCLUDE_SDATA(const s32, "game/code_00102ED8", kwlnBackgroundFadeSecondRamp);
+INCLUDE_SDATA(const s32, "game/code_00102ED8", dds3BackgroundFadeSecondRamp);
 
 SDATA_PAD(2);
 

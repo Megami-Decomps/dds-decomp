@@ -36,7 +36,7 @@ extern void dspRequestMessageWindowModeOne(void);
 
 
 /* Apply a capped selected profile and record whether the selection was applied. */
-void kwlnItemApplySelection(BrsSkillPackageWork *scene) {
+void mnuItemApplySelection(BrsSkillPackageWork *scene) {
     datUnitWork_t *item = scene->selectedRewardRow->unit;
     const DatProfileRecord *profile = ptyGetCurrentProfileRecord(item);
     s8 selection = item->profileId;
@@ -59,7 +59,7 @@ u32 mnuProcessItemSelection(BrsSkillPackageWork *scene) {
     skillCount = ptyBuildProfileCapSkillList(
         scene->selectedRewardRow->unit, &scene->skillList);
     scene->pendingSkillCount = skillCount;
-    kwlnItemApplySelection(scene);
+    mnuItemApplySelection(scene);
     return 1;
 }
 
@@ -96,7 +96,7 @@ void prfCapPresentMessages(BrsSkillPackageWork *scene) {
     }
 }
 
-s32 kwlnItemDismissOverlay(BrsSkillPackageWork *scene) {
+s32 mnuItemDismissOverlay(BrsSkillPackageWork *scene) {
     if (scene->overlayFlags & 1) {
         dspSetActive(1);
         fclStartMessage(1);
@@ -147,7 +147,7 @@ s32 prfCapTaskStep(dds3ProcessID_t *request) {
             if (mnuMarkItemSelectionSceneVisited(scene) != 0) {
                 return 0;
             }
-            if (kwlnItemDismissOverlay(scene) != 0) {
+            if (mnuItemDismissOverlay(scene) != 0) {
                 return 0;
             }
             if (scene->primaryRewards.count == 0) {

@@ -61,7 +61,7 @@ void dds3EffectRippleBlurDelete(EffBlurScaleWork *work) {
 
 extern sdfGrOt_t D_003803E8;
 extern sdfGrOt_t D_003803C8;
-extern KwlnFrameDrawBuffer kwlnFrameDrawPacketRecords[];
+extern KwlnFrameDrawBuffer dds3FrameDrawPacketRecords[];
 #include "sdf_packet_alloc.h"
 extern u32 dds3NullDrawProc(void);
 extern u64 *effPkt2DAllocF4(u32 flags);
@@ -182,7 +182,7 @@ void effBlurDrawFramebufferQuad(const dds3Effect_Blur_t *source)
         list = (sdfDrawTag_t *)sdfGrAllocPacketBuff(0x20);
         sdfDrawTagInit(list);
         tag = (void *)sdfGrAllocPacketBuff(0x20);
-        sdfGrLinkDispFrameTex(list, (u32)kwlnFrameDrawPacketRecords[dds3GetFrameID()].baseBytes, tag);
+        sdfGrLinkDispFrameTex(list, (u32)dds3FrameDrawPacketRecords[dds3GetFrameID()].baseBytes, tag);
         samplingPacket = (u64 *)sdfGrAllocPacketBuff(0x30);
         samplingPacket[0] = 2;
         samplingPacket[1] = 0x5000000210000000ULL;
@@ -216,7 +216,7 @@ void effBlurDrawFramebufferQuad(const dds3Effect_Blur_t *source)
         clampPacket[1] = 0x5000000210000000ULL;
         clampPacket[2] = 0x1000000000008001ULL;
         clampPacket[3] = 0xE;
-        if (kwlnFadeIsBackgroundOverlayActive() != KWLN_BACKGROUND_OVERLAY_INACTIVE) {
+        if (dds3FadeIsBackgroundOverlayActive() != KWLN_BACKGROUND_OVERLAY_INACTIVE) {
             clampPacket[4] = 0x2DC19000009ULL;
         } else {
             clampPacket[4] = 0x37C00000009ULL;

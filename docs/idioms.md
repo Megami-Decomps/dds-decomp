@@ -11239,7 +11239,7 @@ The existing ITF fan/strip constants independently distinguish `0x4D` from
 `0x4C`. Color selection, coordinate scale/bias, packet values, argument types,
 legacy caller declarations and statement order are unchanged.
 
-## Trace-justified pixel conversion reuse: kwlnDebugGraphUpdate
+## Trace-justified pixel conversion reuse: dds3DebugGraphUpdate
 
 The two timing graphs (`0x00104290` in DDS1 and `0x00104180` in DDS2,
 872 bytes each) display current measurements and held peaks. All four draws

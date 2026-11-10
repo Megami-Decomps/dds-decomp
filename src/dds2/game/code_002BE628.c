@@ -83,7 +83,7 @@ extern s32 itfGridLookupValueOrDefault(EffectSlotSet *resource, s32 resourceInde
 
 extern void itfSetGridEntryQuantizedAndRefresh(EffectSlotSet *resource, s32 resourceIndex, s32 x, s32 y, s32 width, s32 height);
 
-extern void kwlnDebugGraphSetEnabled(s8 enabled);
+extern void dds3DebugGraphSetEnabled(s8 enabled);
 
 extern s32 sdfApplyCommandResults(s32 channel, datUnitWork_t *sourceRecord, datUnitWork_t *item);
 
@@ -4647,12 +4647,12 @@ void evtDestroyBattleStageTestWorldNode(dds3ProcessID_t *task) {
 /* Destroy the named battle-stage-test task hierarchy and disable the debug graph. */
 void evtBattleStageTestStopTask(void) {
     dds3KillProcessName(D_0042B610, 1);
-    kwlnDebugGraphSetEnabled(0);
+    dds3DebugGraphSetEnabled(0);
 }
 
 /* Enable the debug graph and create the battle-stage selector task with its cleanup callback. */
 void btlCreateStageTestTask(void) {
-    kwlnDebugGraphSetEnabled(1);
+    dds3DebugGraphSetEnabled(1);
     dds3StartProcess(D_0042B610, 0x2B0C, 1, 1, evtBattleStageTestScreen, evtDestroyBattleStageTestWorldNode, 0);
 }
 

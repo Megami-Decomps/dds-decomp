@@ -1958,7 +1958,7 @@ s32 btlUpdateRuntimeFadeState(void) {
         } else {
             mode = btlRuntimeState.fadeMode;
             if (mode == 2) {
-                kwlnFadeBackgroundStartOut(0);
+                dds3FadeBackgroundStartOut(0);
                 dds3DrawFlag |= 0x10000000;
                 if (btlRuntimeState.counter < 3) {
                     fldSkyDrawFilter();
@@ -2036,7 +2036,7 @@ void btlActivateRuntime(u8 condition) {
     battle->active = 1;
     battle->pending = 0;
     battle->options = 0;
-    if (kwlnFadeIsBackgroundOverlayActive() != KWLN_BACKGROUND_OVERLAY_INACTIVE) {
+    if (dds3FadeIsBackgroundOverlayActive() != KWLN_BACKGROUND_OVERLAY_INACTIVE) {
         battle->options |= 4;
     }
 }

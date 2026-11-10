@@ -748,7 +748,7 @@ extern void dds3PlayMovieByIndex(s32 value);
 extern u8 fldTitleIsActive(void);
 extern void fldSetTitleDrawMode(u32 enabled);
 extern void nbPanelAnalyzeStart(void);
-extern void kwlnFadeBackgroundStartIn(s32 duration);
+extern void dds3FadeBackgroundStartIn(s32 duration);
 extern void itfMesBuildOptionList(ItfMesWindowIndex window, ItfMesEntryIndex entryIndex);
 extern void mnuStopTitleVoicePlayback(void);
 extern void datDebugPrintf(const char *format, ...);
@@ -945,11 +945,11 @@ void evtEventViewerApplyTimelineKey(EvtRuntimeGroup *track, EvtRuntimeChild *key
     case 32:
         if (currentFrame == key->frame) {
             if (key->p08.sh[0] == 0) {
-                kwlnFadeSetMode(1);
-                kwlnFadeBackgroundStartOut(key->duration);
+                dds3FadeSetMode(1);
+                dds3FadeBackgroundStartOut(key->duration);
             } else {
-                kwlnFadeSetMode(1);
-                kwlnFadeBackgroundStartIn(key->duration);
+                dds3FadeSetMode(1);
+                dds3FadeBackgroundStartIn(key->duration);
             }
         }
         break;
@@ -4170,7 +4170,7 @@ s32 evtEventViewerCommitGroupSelection(s32 unused0, s32 unused1, evtViewerInfo_t
     return 0;
 }
 
-u32 kwlnBattleCopyMatrix(u32 unused0, u32 unused1, evtViewerInfo_t *viewer) {
+u32 evtBattleCopyMatrix(u32 unused0, u32 unused1, evtViewerInfo_t *viewer) {
     EvtRuntimeChild *key = evtEventViewerGetPendingNode(viewer);
     if (key != NULL) {
         f32 *dst = key->payload;
@@ -4738,7 +4738,7 @@ void evtViewerRelease(viewer)
     fldReleaseCameraColorEffect();
     while (sdfDelayedResrcCheck() != 0) {
     }
-    kwlnFadeSetMode(0);
+    dds3FadeSetMode(0);
     dds3DrawFlag |= 0x2000000;
 }
 

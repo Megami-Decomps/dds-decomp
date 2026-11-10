@@ -184,7 +184,7 @@ void billFlushPendingChildPackets(void) {
     dds3BillboardTag = NULL;
 }
 
-extern KwlnFrameDrawBuffer kwlnFrameDrawPacketRecords[];
+extern KwlnFrameDrawBuffer dds3FrameDrawPacketRecords[];
 extern void sdfGrSetFrameMaskRGB(const u8 *source, SdfDmaReferenceChainPacket *packet, s32 gsContext);
 extern f32 billPairFacingReferenceAxis[4];
 extern f32 billPairFacingScale[4];
@@ -213,7 +213,7 @@ void billAppendPairedQuadEntry(billHandle_t *obj, BillRenderPair *node) {
         node->packetList = (sdfDrawTag_t *)sdfGrAllocPacketBuff(0x20);
         sdfDrawTagInit(node->packetList);
         framePacket = (SdfDmaReferenceChainPacket *)sdfGrAllocPacketBuff(0x40);
-        sdfGrSetFrameMaskRGB(kwlnFrameDrawPacketRecords[dds3GetFrameID()].baseBytes, framePacket, 0);
+        sdfGrSetFrameMaskRGB(dds3FrameDrawPacketRecords[dds3GetFrameID()].baseBytes, framePacket, 0);
         sdfDrawTagLinkRefGif(node->packetList, (u32)framePacket);
         state = (BillStatePacket *)sdfGrAllocPacketBuff(0x40);
         state->dmaTag = 3;
@@ -408,7 +408,7 @@ void billFlushPendingRenderPairs(void) {
     list = (sdfDrawTag_t *)sdfGrAllocPacketBuff(0x20);
     sdfDrawTagInit(list);
     texture = (SdfDmaReferenceChainPacket *)sdfGrAllocPacketBuff(0x40);
-    sdfGrSetFrameMaskReset(kwlnFrameDrawPacketRecords[dds3GetFrameID()].baseBytes, texture, 0);
+    sdfGrSetFrameMaskReset(dds3FrameDrawPacketRecords[dds3GetFrameID()].baseBytes, texture, 0);
     sdfDrawTagLinkRefGif(list, (u32)texture);
     packet = (BillStatePacket *)sdfGrAllocPacketBuff(0x40);
     packet->dmaTag = 3;

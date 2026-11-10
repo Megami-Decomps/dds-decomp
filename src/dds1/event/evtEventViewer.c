@@ -840,7 +840,7 @@ extern void itfMesBuildOptionList(ItfMesWindowIndex window, ItfMesEntryIndex ent
 extern void dds3PadVibrationSet(u32, u8, s32);
 extern void movieStop(void);
 extern void dds3PlayMovieByIndex(s32);
-extern void kwlnFadeBackgroundStartIn(s32);
+extern void dds3FadeBackgroundStartIn(s32);
 extern u16 D_003BBE78;
 extern char D_003ACFE8[];
 extern void mnuUnpackNibbleFields(EvtRuntimeChild *key, s32 *lowBitsOut, s32 *highBitsOut);
@@ -1005,11 +1005,11 @@ void evtEventViewerApplyTimelineKey(EvtRuntimeGroup *track, EvtRuntimeChild *key
             break;
         }
         if (key->p08.sh[0] == 0) {
-            kwlnFadeSetMode(1);
-            kwlnFadeBackgroundStartOut(key->duration);
+            dds3FadeSetMode(1);
+            dds3FadeBackgroundStartOut(key->duration);
         } else {
-            kwlnFadeSetMode(1);
-            kwlnFadeBackgroundStartIn(key->duration);
+            dds3FadeSetMode(1);
+            dds3FadeBackgroundStartIn(key->duration);
         }
         break;
     }
@@ -3866,7 +3866,7 @@ s32 evtEventViewerCommitGroupSelection(s32 unused0, s32 unused1, evtViewerInfo_t
     return 0;
 }
 
-u32 kwlnBattleCopyMatrix(u32 unused0, u32 unused1, evtViewerInfo_t *viewer) {
+u32 evtBattleCopyMatrix(u32 unused0, u32 unused1, evtViewerInfo_t *viewer) {
     EvtRuntimeChild *record = evtEventViewerGetPendingNode(viewer);
     if (record != NULL) {
         f32 *dst = record->payload;
@@ -4411,7 +4411,7 @@ void evtViewerReleaseResources(evtViewerInfo_t *viewer) {
     fldReleaseCameraColorEffect();
     while (sdfDelayedResrcCheck() != 0) {
     }
-    kwlnFadeSetMode(0);
+    dds3FadeSetMode(0);
     dds3DrawFlag |= 0x2000000;
 }
 

@@ -11,7 +11,7 @@ enum {
 };
 
 /* Start the background fade-out countdown; zero clears the transition. */
-void kwlnFadeBackgroundStartOut(s32 duration);
-KwlnBackgroundOverlayActivity kwlnFadeIsBackgroundOverlayActive(void);
+void dds3FadeBackgroundStartOut(s32 duration);
+KwlnBackgroundOverlayActivity dds3FadeIsBackgroundOverlayActive(void);
 
 #endif /* KWLN_BACKGROUND_FADE_API_H */

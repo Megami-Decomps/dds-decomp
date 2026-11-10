@@ -225,7 +225,7 @@ extern s32 sdf2DGetPrimPacketSize(s32 registerCount, s32 loopCount);
 
 extern u8 *sdf2DGetPrimPtr(SdfDrawPacket *packet);
 
-extern KwlnFrameDrawBuffer kwlnFrameDrawPacketRecords[];
+extern KwlnFrameDrawBuffer dds3FrameDrawPacketRecords[];
 
 extern void sdfGrSetFrameMaskRGB(const u8 *, SdfDmaReferenceChainPacket *, s32);
 
@@ -248,7 +248,7 @@ extern void evtUpdateSelectionStateInterpolation(void);
 extern u8 sdfViewShakeVector[];
 
 
-extern s32 kwlnTaskNoopCallback(dds3ProcessID_t *task);
+extern s32 dds3TaskNoopCallback(dds3ProcessID_t *task);
 
 extern dds3ProcessID_t *evtInitSky(void);
 
@@ -669,7 +669,7 @@ void evtSubmitPrimaryFramePacket(void) {
     SdfDmaReferenceChainPacket *framePacket;
     sdfDrawTagInit(list);
     framePacket = (SdfDmaReferenceChainPacket *)sdfGrAllocPacketBuff(EVT_FRAME_REFERENCE_PACKET_BYTES);
-    sdfGrSetFrameMaskRGB(kwlnFrameDrawPacketRecords[dds3GetFrameID()].baseBytes, framePacket, 0);
+    sdfGrSetFrameMaskRGB(dds3FrameDrawPacketRecords[dds3GetFrameID()].baseBytes, framePacket, 0);
     sdfDrawTagLinkRefGif(list, (u32)framePacket);
     {
         sdfGrOt_t *surface = &sdfGrOtTable[egl_OT_Offset];
@@ -682,7 +682,7 @@ void evtSubmitAlternateFramePacket(void) {
     SdfDmaReferenceChainPacket *framePacket;
     sdfDrawTagInit(list);
     framePacket = (SdfDmaReferenceChainPacket *)sdfGrAllocPacketBuff(EVT_FRAME_REFERENCE_PACKET_BYTES);
-    sdfGrSetFrameMaskReset(kwlnFrameDrawPacketRecords[dds3GetFrameID()].baseBytes, framePacket, 0);
+    sdfGrSetFrameMaskReset(dds3FrameDrawPacketRecords[dds3GetFrameID()].baseBytes, framePacket, 0);
     sdfDrawTagLinkRefGif(list, (u32)framePacket);
     {
         sdfGrOt_t *surface = &sdfGrOtTable[egl_OT_Offset];
@@ -1222,7 +1222,7 @@ void evtSelStateDestroy(void) {
 }
 
 dds3ProcessID_t *CallDebug(void) {
-    return dds3StartProcess(D_00411370, 0x2AF9, 0, 0, kwlnTaskNoopCallback, 0, 0);
+    return dds3StartProcess(D_00411370, 0x2AF9, 0, 0, dds3TaskNoopCallback, 0, 0);
 }
 
 u32 ExitDebug(void) {
@@ -1338,7 +1338,7 @@ u8 CheckEndSave(void) {
 }
 
 void CallField(u32 selection, const struct fldSceneParam_t *record) {
-    kwlnFadeBackgroundStartOut(0);
+    dds3FadeBackgroundStartOut(0);
     fldProcTrigSequence(record, selection);
 }
 
@@ -1361,7 +1361,7 @@ u32 CheckField(void) {
 }
 
 void evtStartSelectionFadeOut(void) {
-    kwlnFadeBackgroundStartOut(0);
+    dds3FadeBackgroundStartOut(0);
 }
 
 /* Admin mode 11 destroy callback: no work, zero transition result. */
@@ -1539,7 +1539,7 @@ dds3ProcessID_t *evtCreateTestAndSkyTasks(void) {
 
 u32 evtInitializeSelectionScene(void) {
     D_00435BB0 = 1;
-    kwlnFadeBackgroundStartOut(0);
+    dds3FadeBackgroundStartOut(0);
     evtChkEndProcess();
     evtExitSky();
     return 1;
@@ -1559,7 +1559,7 @@ void evtClearSecondaryWorldAndViewer(void) {
 u32 evtInitializeSelectionScreen(void) {
     evtEventViewerDestroyTask();
     D_00435BB0 = 1;
-    kwlnFadeBackgroundStartOut(0);
+    dds3FadeBackgroundStartOut(0);
     return 0;
 }
 

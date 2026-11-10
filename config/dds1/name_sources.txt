@@ -85,25 +85,27 @@
 0x00104068	dds3PadVibrationSet	inferred	SMT3HD name via SLUS_209.11 0x001040A8, unique-masked-hash; was kwlnPadStartMotor
 0x00104130	kwlnPadResetMotorLevelsAndOutput	inferred	Zeroes both pad motor levels and queued outputs and clears the motor command pair. [names_reviewed11.tsv]
 0x00104168	dds3UpdateVibrationSlots	inferred	SMT3HD name via SLUS_209.11 0x001041A8, reloc-identical; was kwlnUpdatePadMotorDurations
-0x00104260	kwlnTaskNoopCallback	inferred	confidence=high; Task update callback returns zero without using its task argument; registered by CallDebug for the StartSel task. DDS2 00104150 counterpart. [PurD readability b1]
+0x00104260	dds3TaskNoopCallback	inferred	confidence=high; Task update callback returns zero without using its task argument; registered by CallDebug for the StartSel task. DDS2 00104150 counterpart. [PurD readability b1]; was dds3TaskNoopCallback
 0x00104268	dds3InitRandCB	inferred	SMT3HD name via SLUS_209.11 0x00104670, reloc-identical; was kwlnInitMagicState
-0x00104290	kwlnDebugGraphUpdate	inferred	DebugTimeGrph update callback; native body returns signed zero scheduler control and ignores the incoming task argument.
-0x001045F8	kwlnDebugGraphTaskDestroy	inferred	No-op destroy callback registered for the DebugTimeGrph task.
-0x00104600	kwlnDebugGraphSetEnabled	inferred	creates or destroys the DebugTimeGrph task by mode
-0x00104678	kwlnDrawImageOutline	inferred	M141; sources=names_pending_main.tsv; twin=0x00104568, input-family pairing. [names_qp10.tsv]
-0x00104798	kwlnTextureDrawPageCounter	inferred	formats TEX VIEWER page counter and submits rendered text
-0x00104810	kwlnDrawTextureResourceDetails	inferred	Appends formatted texture dimensions, pixel-format label, resource key and battle-texture slot to the viewer packet list; DDS2 twin 0x00104700.
-0x00104A18	kwlnSelectIncompleteResourceAtPageIndex	inferred	Selects the reached incomplete-texture page, stores its resource pointer and returns the reached index; DDS2 twin 0x00104908. DDS1 treats requested index zero as the head directly; DDS2 skips clone-source entries at the head first.
-0x00104A98	kwlnTextureViewerHandlePad	inferred	pad bits 0x14/0x15/0x18/0x19/0x1A/0x1B move the TEX VIEWER page by -1/+1/-10/+10, then kwlnSelectIncompleteResourceAtPageIndex clamps it; D_003BA890 toggles on unk12<0 [names_reviewed2.tsv]
-0x00104B88	kwlnDrawTextureViewerFrame	inferred	Builds the texture-viewer packet list with page counter, image outline/info and optional allocation-map diagnostics, then submits it to the supplied surface; DDS2 twin 0x00104AA8.
-0x00104D20	kwlnSwapActiveResource	inferred	checks active state then draws and submits the supplied texture through kwlnDrawTextureViewerFrame
-0x00104D70	kwlnLoadDefaultResource	inferred	checks active state then loads D_00325748 with active handle
-0x00104DB8	kwlnTextureFindIncompleteResource	inferred	scans resource nodes and returns follow-up callback for incomplete entry
-0x00104E20	kwlnDrawTextureAllocationMapBlock	inferred	Draws a texture-resource allocation block as colored map rows from its start word, size and allocation mode; callers render primary/secondary resources with selection/highlight mode. DDS2 twin 0x00104D40.
-0x00105010	kwlnDrawTextureListDiagnostic	inferred	confidence=high; matched-C; src/dds1/game/code_00102ED8.c:406:func_00105010; Draws background then walks texture-list prev links and appends each texture diagnostic row.; twin=0x00104F30, anchored ordered retail pairing.; sources=names_M143.tsv,names_R_Names35.tsv [names_qp10.tsv]
-0x001050B8	kwlnTextureAttachTask	inferred	allocates and initializes task then invokes scene attach callback
-0x00105118	kwlnEnsureDefaultResource	inferred	initializes D_00325748 when readiness byte is clear
-0x00105150	kwlnInitializeFrameDrawPackets	inferred	Inferred from the current C implementation in game/code_00102ED8.c; agent-proposed name checked against its owner, fields and callees (R1 finite names pass).
+0x00104290	dds3DebugGraphUpdate	inferred	DebugTimeGrph update callback; native body returns signed zero scheduler control and ignores the incoming task argument.; was dds3DebugGraphUpdate
+0x001045F8	dds3DebugGraphTaskDestroy	inferred	No-op destroy callback registered for the DebugTimeGrph task.; was dds3DebugGraphTaskDestroy
+0x00104600	dds3DebugGraphSetEnabled	inferred	creates or destroys the DebugTimeGrph task by mode; was dds3DebugGraphSetEnabled
+0x00104678	dds3DrawImageOutline	inferred	M141; sources=names_pending_main.tsv; twin=0x00104568, input-family pairing. [names_qp10.tsv]; was dds3DrawImageOutline
+0x00104798	dds3TextureDrawPageCounter	inferred	formats TEX VIEWER page counter and submits rendered text; was dds3TextureDrawPageCounter
+0x00104810	dds3DrawTextureResourceDetails	inferred	Appends formatted texture dimensions, pixel-format label, resource key and battle-texture slot to the viewer packet list; DDS2 twin 0x00104700.; was dds3DrawTextureResourceDetails
+0x001049A8	dds3TextureCountIncompleteResources	inferred	was dds3TextureCountIncompleteResources
+0x00104A10	dds3TextureGetPageIndex	inferred	was dds3TextureGetPageIndex
+0x00104A18	dds3SelectIncompleteResourceAtPageIndex	inferred	Selects the reached incomplete-texture page, stores its resource pointer and returns the reached index; DDS2 twin 0x00104908. DDS1 treats requested index zero as the head directly; DDS2 skips clone-source entries at the head first.; was dds3SelectIncompleteResourceAtPageIndex
+0x00104A98	dds3TextureViewerHandlePad	inferred	pad bits 0x14/0x15/0x18/0x19/0x1A/0x1B move the TEX VIEWER page by -1/+1/-10/+10, then dds3SelectIncompleteResourceAtPageIndex clamps it; D_003BA890 toggles on unk12<0 [names_reviewed2.tsv]; was dds3TextureViewerHandlePad
+0x00104B88	dds3DrawTextureViewerFrame	inferred	Builds the texture-viewer packet list with page counter, image outline/info and optional allocation-map diagnostics, then submits it to the supplied surface; DDS2 twin 0x00104AA8.; was dds3DrawTextureViewerFrame
+0x00104D20	dds3SwapActiveResource	inferred	checks active state then draws and submits the supplied texture through dds3DrawTextureViewerFrame; was dds3SwapActiveResource
+0x00104D70	dds3LoadDefaultResource	inferred	checks active state then loads D_00325748 with active handle; was dds3LoadDefaultResource
+0x00104DB8	dds3TextureFindIncompleteResource	inferred	scans resource nodes and returns follow-up callback for incomplete entry; was dds3TextureFindIncompleteResource
+0x00104E20	dds3DrawTextureAllocationMapBlock	inferred	Draws a texture-resource allocation block as colored map rows from its start word, size and allocation mode; callers render primary/secondary resources with selection/highlight mode. DDS2 twin 0x00104D40.; was dds3DrawTextureAllocationMapBlock
+0x00105010	dds3DrawTextureListDiagnostic	inferred	confidence=high; matched-C; src/dds1/game/code_00102ED8.c:406:func_00105010; Draws background then walks texture-list prev links and appends each texture diagnostic row.; twin=0x00104F30, anchored ordered retail pairing.; sources=names_M143.tsv,names_R_Names35.tsv [names_qp10.tsv]; was dds3DrawTextureListDiagnostic
+0x001050B8	dds3TextureAttachTask	inferred	allocates and initializes task then invokes scene attach callback; was dds3TextureAttachTask
+0x00105118	dds3EnsureDefaultResource	inferred	initializes D_00325748 when readiness byte is clear; was dds3EnsureDefaultResource
+0x00105150	dds3InitializeFrameDrawPackets	inferred	Inferred from the current C implementation in game/code_00102ED8.c; agent-proposed name checked against its owner, fields and callees (R1 finite names pass).; was dds3InitializeFrameDrawPackets
 0x00105320	dds3InitDrawEnv	inferred	SMT3HD name via SLUS_209.11 0x00104820, reloc-identical; was evtResetDisplayProjectionAndVectorState
 0x00105370	dds3InitRenderDrawEnv	inferred	SMT3HD name via SLUS_209.11 0x00104870, unique-masked-hash; was kwlnInitHeldTextureScenePackets
 0x001054D0	dds3AllocRenderTexture	inferred	SMT3HD name via SLUS_209.11 0x001049D0, reloc-identical; was kwlnCreateHeldTextureBuffer
@@ -119,6 +121,7 @@
 0x001059F0	dds3LinkZClearDrawTag	inferred	SMT3HD name via SLUS_209.11 0x00104F00, reloc-identical; was evtBuildFrameStatePacketList
 0x00105A68	dds3FadeClear	inferred	SMT3HD name via SLUS_209.11 0x00104F78, reloc-identical; was kwlnFadeClear
 0x00105A90	dds3FadeSet	inferred	SMT3HD name via SLUS_209.11 0x00104FA0, reloc-identical; was kwlnFadeSetColor
+0x00105AB8	dds3FadeColorGet	inferred	was dds3FadeColorGet
 0x00105AC8	dds3FadeColorSet	inferred	HD original name; native callback/dispatcher role and paired Nocturne implementation establish identity; was kwlnFadeSetRGB.
 0x00105AE0	dds3FadeIn	inferred	SMT3HD name via SLUS_209.11 0x00104FE0, reloc-identical; was kwlnFadeOutStart
 0x00105B48	dds3FadeIn2	inferred	SMT3HD name via SLUS_209.11 0x00105048, reloc-identical; was kwlnFadeStartIn
@@ -128,12 +131,13 @@
 0x00105C58	dds3FadeUpdate	inferred	SMT3HD name via SLUS_209.11 0x00105158, reloc-identical; was kwlnFadeUpdate
 0x00105D00	dds3DrawDistRipOverError	inferred	SMT3HD name via SLUS_209.11 0x00105200, reloc-identical; was kwlnDrawBlurErrorCounters
 0x00105DD8	kwlnQueueBackgroundFadeOverlayPacket	inferred	Reads the active frame-buffer index and background-fade alpha; when visible, initializes and appends the current surface overlay packet. Paired DDS2 provider at 0x00105CF8.
-0x00106088	kwlnFadeResetBackground	inferred	clears background fade color and restores default dimensions
-0x001060C8	kwlnFadeBackgroundStartOut	inferred	sets the background fade bytes, arms D_003BD6C4/6C6 with the duration and D_003245EC[2] = 2048.0 [names_reviewed2.tsv]
-0x00106160	kwlnFadeBackgroundStartIn	inferred	mirror of func_001060C8 (alpha 0x80, D_003245EC[2] = 2041.0) [names_reviewed2.tsv]
-0x001061E8	kwlnFadeIsBackgroundOverlayActive	inferred	Tests background fade flags or overlay presence; shortened without claiming transition stage. [names_reviewed11.tsv]
-0x00106268	kwlnStepBackgroundFade	inferred	M141; sources=names_pending_main.tsv; twin=0x00106188, input-family pairing. [names_qp10.tsv]
-0x00106368	kwlnDrawBackgroundFadeBands	inferred	Applies current fade alpha and ramp offsets as two horizontal gradient bands; called once per render frame after stepping fade state. DDS2 twin 0x00106288.
+0x00106088	dds3FadeResetBackground	inferred	clears background fade color and restores default dimensions; was dds3FadeResetBackground
+0x001060C8	dds3FadeBackgroundStartOut	inferred	sets the background fade bytes, arms D_003BD6C4/6C6 with the duration and D_003245EC[2] = 2048.0 [names_reviewed2.tsv]; was dds3FadeBackgroundStartOut
+0x00106160	dds3FadeBackgroundStartIn	inferred	mirror of func_001060C8 (alpha 0x80, D_003245EC[2] = 2041.0) [names_reviewed2.tsv]; was dds3FadeBackgroundStartIn
+0x001061E8	dds3FadeIsBackgroundOverlayActive	inferred	Tests background fade flags or overlay presence; shortened without claiming transition stage. [names_reviewed11.tsv]; was dds3FadeIsBackgroundOverlayActive
+0x00106240	dds3FadeSetMode	inferred	was dds3FadeSetMode
+0x00106268	dds3StepBackgroundFade	inferred	M141; sources=names_pending_main.tsv; twin=0x00106188, input-family pairing. [names_qp10.tsv]; was dds3StepBackgroundFade
+0x00106368	dds3DrawBackgroundFadeBands	inferred	Applies current fade alpha and ramp offsets as two horizontal gradient bands; called once per render frame after stepping fade state. DDS2 twin 0x00106288.; was dds3DrawBackgroundFadeBands
 0x00106488	dds3SetScreenFovy	inferred	SMT3HD name via SLUS_209.11 0x00105580, shared-hash-in-run; was sdfSetViewFieldOfView
 0x00106498	dds3SetAmbient	inferred	SMT3HD name via SLUS_209.11 0x00105590, shared-hash-in-run; was kwlnDrawCopyRow128
 0x001064B0	dds3SetFog	inferred	SMT3HD name via SLUS_209.11 0x001055A8, reloc-identical; was kwlnDrawCopyWords20
@@ -5331,7 +5335,7 @@
 0x00231CC0	evtViewCmdNoOp	inferred	confidence=high; Native viewer-command callback table slot0x00368514 contains this zero-return no-action handler, among evtViewCmdSetValue, field/word store, group-selection and position handlers. DDS2 twin0x0024C9D0 occupies corresponding slot0x003C92EC. No popup enter/leave identity asserted; signature and constant return retained. [Namer1 readability b81; native behavior and registered debug hooks]
 0x00231CC8	evtViewerStoreCommandInEntryWord	inferred	Writes command value to selected entry word, refreshes viewer and pops history. [names_reviewed7.tsv]
 0x00231D18	evtEventViewerCommitGroupSelection	inferred	confidence=high; matched-C; src/dds1/event/evtEventViewer.c:3060:evtEventViewerCommitGroupSelection; Writes the chosen group selection into the frame group metadata (name index for the named-group case), refreshes the timeline frame and pops history.; twin=0x0024CA28 (DDS2).
-0x00231E10	kwlnBattleCopyMatrix	inferred	copies three columns of four floats to battle record transform
+0x00231E10	evtBattleCopyMatrix	inferred	copies three columns of four floats to battle record transform; was evtBattleCopyMatrix
 0x00231EF8	evtViewCmdCancelSelection	inferred	Event-viewer command callback pops current command history without modifying pending script entry. [names_reviewed18.tsv]
 0x00232108	evtViewCmdSetObjectTarget	inferred	Stores selected world-object targets and resolved name indices in the pending event-viewer command entry; paired title implementation.
 0x002323E8	evtViewerClearPendingNodeAndPushHistory	inferred	Clears pending event viewer values and records a history command. [names_reviewed8.tsv]
@@ -6085,10 +6089,10 @@
 0x00263100	mnuRunResultPanelMode2	inferred	confidence=high; src/dds1/game/code_00262EB8.c:84; Dispatches the result-task request through menuRunPanel mode 2. Kept distinct from mnuAdvanceResultPanel at 0x002635C0; address-paired DDS2 entry 0x00299FA0 is named mnuAdvanceResultPanel. [LiteH menu naming batch 18]
 0x00263138	mnuResultSelectionEnterNoOp	inferred	confidence=high; Native MenuPopupEntry.enter slot0x0036D3F0. Follow-up result selection descriptor dispatches prfCapTaskStep/mnuDispatchProfileSelectionScene to process reward/skill selections; enter returns1. DDS2 twin0x00299FD8 at slot0x003D6440 has the same behavior. Canonical mnu_transition.h and native callback table establish the role; exact signature, constant return and definition order preserved. [Namer1 readability b78; paired terminal/result popup registry]
 0x00263140	mnuResultSelectionLeaveNoOp	inferred	confidence=high; Native MenuPopupEntry.leave slot0x0036D3F4. Same result selection descriptor; leave returns1. DDS2 twin0x00299FE0 at slot0x003D6444 has the same behavior. Canonical mnu_transition.h and native callback table establish the role; exact signature, constant return and definition order preserved. [Namer1 readability b78; paired terminal/result popup registry]
-0x00263148	kwlnItemApplySelection	inferred	validates selected item and marks scene flag when resource 0x910 is absent
+0x00263148	mnuItemApplySelection	inferred	validates selected item and marks scene flag when resource 0x910 is absent; was mnuItemApplySelection
 0x00263220	mnuProcessItemSelection	inferred	Calculates the selected item's action output at scene offset 0x244 and applies the current item selection.
 0x00263260	prfCapPresentMessages	inferred	legacy ProfileCapReward_PresentStatusMessages: presents the profile-cap reward status messages
-0x00263378	kwlnItemDismissOverlay	inferred	calls paired overlay shutdown routines and clears scene bit zero
+0x00263378	mnuItemDismissOverlay	inferred	calls paired overlay shutdown routines and clears scene bit zero; was mnuItemDismissOverlay
 0x002633D8	mnuMarkItemSelectionSceneVisited	inferred	Marks the item-selection scene as visited if its model flag was not already set. [names_reviewed16.tsv]
 0x00263408	prfCapTaskStep	inferred	legacy ProfileCapReward_TaskStep: profile-cap reward task step
 0x00263570	mnuRefreshAndRunResultPanel	inferred	Refreshes the current result panel layer, then runs its input request in mode 1; DDS2 has mnuRefreshAndDispatchCurrentPanel at 0x00299F50. [LiteH menu naming batch 9]
@@ -6124,7 +6128,7 @@
 0x00264740	brsPrepareRewardMessage	inferred	Prepares the reward message and clears pending stat gains; DDS2 twin 0x0029BB28. LiteH reward/stat batch.
 0x002647B0	brsAcknowledgeRewardMessage	inferred	Finishes the reward message window and notifies its task; DDS2 twin 0x0029BBC0. LiteH reward/stat batch.
 0x002647D0	mnuStartRewardDialogAndMotion	inferred	Displays reward-mode unit/stat text and queues the corresponding motion/effect; DDS2 twin 0x0029BC58. LiteH reward/stat batch.
-0x002648A8	kwlnItemUpdateDisplay	inferred	switches item screen coordinates and activation by scene mode
+0x002648A8	mnuItemUpdateDisplay	inferred	switches item screen coordinates and activation by scene mode; was mnuItemUpdateDisplay
 0x002649B0	brsAdvanceRewardPanelAfterMessage	inferred	Waits for the idle reward-panel message, applies pending reward state, and selects the next popup; DDS2 twin 0x0029BFB8. LiteH reward/stat batch.
 0x00264A60	itfRunPanelMode1	inferred	itf panel wrapper mode 1
 0x00264AB8	itfRunPanelMode2	inferred	itf panel wrapper mode 2
@@ -7985,7 +7989,7 @@
 0x002CB1C8	sdfCreateTaskWorker	inferred	DDS2 func_00312620: builds work via func_002CB4B8, attaches item, registers primary/secondary kwln tasks [names_M49_GridSdf.tsv]
 0x002CB278	sdfDestroyTaskWorkerTasks	inferred	Destroys both tasks named by the task-work object's primary and secondary task names.
 0x002CB2B8	sdfIsPrimaryTaskRegistered	inferred	Returns whether a task with the task-work object's primary task name exists.
-0x002CB2E0	kwlnTaskExists	inferred	returns nonzero when dds3SearchProcessName finds the named task
+0x002CB2E0	sdfTaskExists	inferred	returns nonzero when dds3SearchProcessName finds the named task; was sdfTaskExists
 0x002CB300	sdfAttachTaskItem	inferred	sdf system, device, DMA, or task infrastructure in game/code_002C97E8.c
 0x002CB358	sdfRemoveTaskItem	inferred	sdf system, device, DMA, or task infrastructure in game/code_002C97E8.c
 0x002CB390	sdfFindTaskItemValueByKey	inferred	Returns the matching task-list item's stored value or zero if the key is absent.
@@ -9367,8 +9371,8 @@
 0x00324214	vu1Tex0Slot1	inferred	SMT3HD name via SLUS_209.11 0x002F54C4, sdf3D data twin; was D_00324214
 0x00324290	vu1Tex0Slot2	inferred	SMT3HD name via SLUS_209.11 0x002F5540, sdf3D data twin; was D_00324290
 0x00324350	vu1MicroPacketEnd	inferred	SMT3HD name via SLUS_209.11 0x002F5600, sdf/sdf3D SMT3 rename; was D_00324350
-0x003243C0	kwlnPadButtonHoldCounters	inferred	confidence=high; Per-button hold durations, incremented while pressed and reset on release; first frame selects the fresh flag, and durations >=8 on even frames select repeat. DDS2 twin 0x0037F3C0; existing u32[4][16], native 0x100-byte allocation and padding unchanged. No import or active ASM reader. [PurD readability data b5; native/matched-C twin; identifier-only]
-0x003244C0	kwlnPadStickHoldCounters	inferred	confidence=high; Per-port/per-stick hold durations, incremented while magnitude >=64 and reset inside the dead zone; first-frame and even-frame repeat flags use the counter. DDS2 twin 0x0037F4C0; existing u32[2][2], native 0x10-byte allocation and padding unchanged. No import or active ASM reader. [PurD readability data b5; native/matched-C twin; identifier-only]
+0x003243C0	dds3PadButtonHoldCounters	inferred	confidence=high; Per-button hold durations, incremented while pressed and reset on release; first frame selects the fresh flag, and durations >=8 on even frames select repeat. DDS2 twin 0x0037F3C0; existing u32[4][16], native 0x100-byte allocation and padding unchanged. No import or active ASM reader. [PurD readability data b5; native/matched-C twin; identifier-only]; was dds3PadButtonHoldCounters
+0x003244C0	dds3PadStickHoldCounters	inferred	confidence=high; Per-port/per-stick hold durations, incremented while magnitude >=64 and reset inside the dead zone; first-frame and even-frame repeat flags use the counter. DDS2 twin 0x0037F4C0; existing u32[2][2], native 0x10-byte allocation and padding unchanged. No import or active ASM reader. [PurD readability data b5; native/matched-C twin; identifier-only]; was dds3PadStickHoldCounters
 0x003244D0	dds3PadButtonPrev	inferred	SMT3HD data name via SLUS_209.11 0x002F57D0, 2 agreeing references; was dds3PadButtonPrev
 0x00324510	dds3PadButtonState	inferred	SMT3HD data name via SLUS_209.11 0x002F5810, 60 agreeing references; was dds3PadButtonState
 0x00324550	effSharedRandomState	inferred	confidence=high; src/dds1/game/code_00102ED8.c:D_00324550; type=PRNG state storage (u8[]); refs=dds3InitRandCB,btlSelectActorAction; Seeded with a fixed value and passed to random generators for effect frame, position and scale variation. [names_qp9.tsv]
@@ -9395,12 +9399,12 @@
 0x00325748	sdfDebugGrOt	inferred	SMT3HD name via SLUS_209.11 0x002F6978, kwln rename; was kwlnPositionedTextSurface; was kwlnPositionedTextSurface
 0x00325788	kwlnSceneSurfaceSets	inferred	Thirteen sets of four draw surfaces (SdfPoolNode *[13][4]) that kwlnBuildFrameScenePackets stores each frame; a model draws through the set of its pass. DDS2 twin 0x00380788.
 0x00325870	dds3DrawEnv	inferred	SMT3HD name via SLUS_209.11 0x002F6A80, effect/effPacket SMT3 rename; was D_00325870
-0x00326ED0	kwlnFrameDrawPacketRecords	inferred	confidence=high; src/dds1/game/code_00185E18.c:D_00326ED0; type=frame DMA record[]; refs=effDrawBlurListWithFramePacket,uiDrawActiveSurfaceRegion; Selected by the active frame-buffer index to append primary DMA and texture-state packets. [names_qp9.tsv]
-0x003272A0	kwlnHeldTexturePacketBanks	inferred	confidence=high; Existing KwlnTextureBank[2] work views initialized by dds3InitRenderDrawEnv; 0x1F40 stride and padding unchanged, list/scene/matrix/lighting payload 0x340 per slot. No new view or ownership extent inferred. DDS2 twin 0x003822A0; all selected root/interior/addend instruction readers already C, no import/active ASM reader. Parent frame banks/canonical kwlnFrameDrawPacketRecords unchanged. [PurD readability data b11; identifier-only]
-0x00327430	kwlnHeldTextureMatrixPackets	inferred	confidence=high; Existing unsized u8 alias at held-texture bank+0x190, selected with native 0x1F40 frame stride; ConsMatrixPacket payload 0xD0. Existing -0x190 list expression and declarations unchanged. DDS2 twin 0x00382430; all selected root/interior/addend instruction readers already C, no import/active ASM reader. Parent frame banks/canonical kwlnFrameDrawPacketRecords unchanged. [PurD readability data b11; identifier-only]
-0x00327500	kwlnHeldTextureLightingPackets	inferred	confidence=high; Existing unsized u8 alias at held-texture bank+0x260, selected with native 0x1F40 frame stride; SDK lighting payload 0xE0. Existing relative centered-bounds color access unchanged. DDS2 twin 0x00382500; all selected root/interior/addend instruction readers already C, no import/active ASM reader. Parent frame banks/canonical kwlnFrameDrawPacketRecords unchanged. [PurD readability data b11; identifier-only]
-0x00327600	kwlnOverlayMatrixPackets	inferred	confidence=high; Existing scene85 overlay0xD0 matrix-packet alias, selected by the existing0x1F40 frame-bank stride. Preserve unsizedu8[] and every pre-existing relative/negative-offset expression; no new typed view or second-buffer label. DDS2 twin 0x00382600; explicit root/interior/addend native readers current matched frame builder only, no import/activeASM reader. [PurD readability data b14 folded into b13; identifier-only]
-0x003276D0	kwlnOverlayLightingPackets	inferred	confidence=high; Existing scene85 overlay0xE0 lighting-packet alias, selected by the existing0x1F40 frame-bank stride. Preserve unsizedu8[], casts and source expressions; parentbanks/canonical frame records unchanged. DDS2 twin 0x003826D0; explicit root/interior/addend native readers current matched frame builder only, no import/activeASM reader. [PurD readability data b14 folded into b13; identifier-only]
+0x00326ED0	dds3FrameDrawPacketRecords	inferred	confidence=high; src/dds1/game/code_00185E18.c:D_00326ED0; type=frame DMA record[]; refs=effDrawBlurListWithFramePacket,uiDrawActiveSurfaceRegion; Selected by the active frame-buffer index to append primary DMA and texture-state packets. [names_qp9.tsv]; was dds3FrameDrawPacketRecords
+0x003272A0	dds3HeldTexturePacketBanks	inferred	confidence=high; Existing KwlnTextureBank[2] work views initialized by dds3InitRenderDrawEnv; 0x1F40 stride and padding unchanged, list/scene/matrix/lighting payload 0x340 per slot. No new view or ownership extent inferred. DDS2 twin 0x003822A0; all selected root/interior/addend instruction readers already C, no import/active ASM reader. Parent frame banks/canonical dds3FrameDrawPacketRecords unchanged. [PurD readability data b11; identifier-only]; was dds3HeldTexturePacketBanks
+0x00327430	dds3HeldTextureMatrixPackets	inferred	confidence=high; Existing unsized u8 alias at held-texture bank+0x190, selected with native 0x1F40 frame stride; ConsMatrixPacket payload 0xD0. Existing -0x190 list expression and declarations unchanged. DDS2 twin 0x00382430; all selected root/interior/addend instruction readers already C, no import/active ASM reader. Parent frame banks/canonical dds3FrameDrawPacketRecords unchanged. [PurD readability data b11; identifier-only]; was dds3HeldTextureMatrixPackets
+0x00327500	dds3HeldTextureLightingPackets	inferred	confidence=high; Existing unsized u8 alias at held-texture bank+0x260, selected with native 0x1F40 frame stride; SDK lighting payload 0xE0. Existing relative centered-bounds color access unchanged. DDS2 twin 0x00382500; all selected root/interior/addend instruction readers already C, no import/active ASM reader. Parent frame banks/canonical dds3FrameDrawPacketRecords unchanged. [PurD readability data b11; identifier-only]; was dds3HeldTextureLightingPackets
+0x00327600	dds3OverlayMatrixPackets	inferred	confidence=high; Existing scene85 overlay0xD0 matrix-packet alias, selected by the existing0x1F40 frame-bank stride. Preserve unsizedu8[] and every pre-existing relative/negative-offset expression; no new typed view or second-buffer label. DDS2 twin 0x00382600; explicit root/interior/addend native readers current matched frame builder only, no import/activeASM reader. [PurD readability data b14 folded into b13; identifier-only]; was dds3OverlayMatrixPackets
+0x003276D0	dds3OverlayLightingPackets	inferred	confidence=high; Existing scene85 overlay0xE0 lighting-packet alias, selected by the existing0x1F40 frame-bank stride. Preserve unsizedu8[], casts and source expressions; parentbanks/canonical frame records unchanged. DDS2 twin 0x003826D0; explicit root/interior/addend native readers current matched frame builder only, no import/activeASM reader. [PurD readability data b14 folded into b13; identifier-only]; was dds3OverlayLightingPackets
 0x003296F0	sdfViewMatrix	inferred	confidence=high; src/dds1/game/code_0018CAC8.c:D_003296F0; type=f32[4][4]; refs=effScreenOffset,mdlGetScreenOffset; Receives the look-at matrix and is loaded before screen projection and combined matrix construction. [names_qp9.tsv]
 0x00329730	dds3RenderTexId	inferred	SMT3HD data name via SLUS_209.11 0x002FA280, 2 agreeing references; was dds3RenderTexId
 0x00329750	dds3RenderViewportMatrix	inferred	SMT3HD name via SLUS_209.11 0x002FA2A0, kwln rename; was kwlnHeldTextureViewMatrix; was kwlnHeldTextureViewMatrix
@@ -9986,8 +9990,8 @@
 0x003BA824	runprocess	inferred	SMT3HD data name via SLUS_209.11 0x0054E874, 3 agreeing references; was runprocess
 0x003BA83C	sdfDefaultCdMode	inferred	SMT3HD name via SLUS_209.11 0x0054E8BC, sdf/sdfDefaultMain SMT3 rename; was D_003BA83C
 0x003BA848	dds3AdminTaskName	inferred	confidence=high; data D_003BA848; matched-C-users=2; src/dds1/game/code_00102ED8.c:143:dds3InitAdmini; src/dds1/game/code_00101B08.c:185:GetAdminiProcessData; Task lookup/create and admin work accessor use this task-name string; data-twin=D_00435C18, supported by 2 independently paired matched functions.; retail-data-start=asm/dds1/data/game/code_00101B08.sdata.s:22.; seed-placeholder=D_003BA848; current asm label and source default identifier verified; source=names_reviewed36.tsv. [names_qp10_seed.tsv]
-0x003BA8D8	kwlnCurrentIncompleteResource	inferred	confidence=high; matched_users=src/dds1/game/code_00102ED8.c:kwlnLoadDefaultResource, src/dds1/game/code_00102ED8.c:kwlnTextureFindIncompleteResource; Resource scan stores the first unfinished list entry here and the load callback consumes that entry. [names_qp9.tsv]
-0x003BA8DC	kwlnTextureViewerPageIndex	inferred	confidence=high; data D_003BA8DC; matched-C-users=2; src/dds1/game/code_00102ED8.c:294:kwlnTextureGetPageIndex; src/dds1/game/code_00102ED8.c:300:kwlnTextureViewerHandlePad; Texture viewer input changes this index; page accessor returns it; data-twin=D_00435CAC, supported by 2 independently paired matched functions.; retail-data-start=asm/dds1/data/game/code_00102ED8.sdata.s:223.; seed-placeholder=D_003BA8DC; current asm label and source default identifier verified; source=names_reviewed36.tsv. [names_qp10_seed.tsv]
+0x003BA8D8	dds3CurrentIncompleteResource	inferred	confidence=high; matched_users=src/dds1/game/code_00102ED8.c:dds3LoadDefaultResource, src/dds1/game/code_00102ED8.c:dds3TextureFindIncompleteResource; Resource scan stores the first unfinished list entry here and the load callback consumes that entry. [names_qp9.tsv]; was dds3CurrentIncompleteResource
+0x003BA8DC	dds3TextureViewerPageIndex	inferred	confidence=high; data D_003BA8DC; matched-C-users=2; src/dds1/game/code_00102ED8.c:294:dds3TextureGetPageIndex; src/dds1/game/code_00102ED8.c:300:dds3TextureViewerHandlePad; Texture viewer input changes this index; page accessor returns it; data-twin=D_00435CAC, supported by 2 independently paired matched functions.; retail-data-start=asm/dds1/data/game/code_00102ED8.sdata.s:223.; seed-placeholder=D_003BA8DC; current asm label and source default identifier verified; source=names_reviewed36.tsv. [names_qp10_seed.tsv]; was dds3TextureViewerPageIndex
 0x003BA8E8	egl_OT_Offset	inferred	SMT3HD data name via SLUS_209.11 0x0054E940, 8 agreeing references; was egl_OT_Offset
 0x003BA8F0	dds3RenderTex	inferred	SMT3HD data name via SLUS_209.11 0x0054E948, 5 agreeing references; was dds3RenderTex
 0x003BA8F8	dds3RenderTexture	inferred	SMT3HD data name via SLUS_209.11 0x0054E950, 6 agreeing references; was dds3RenderTexture
@@ -9997,10 +10001,10 @@
 0x003BA90A	dds3ScreenBlurAlpha	inferred	SMT3HD data name via SLUS_209.11 0x0054E962, 10 agreeing references; was dds3ScreenBlurAlpha
 0x003BA90C	dds3ScreenBlurScale	inferred	SMT3HD data name via SLUS_209.11 0x0054E964, 10 agreeing references; was dds3ScreenBlurScale
 0x003BA920	fadergba	inferred	SMT3HD data name via SLUS_209.11 0x0054E978, 4 agreeing references; was fadergba; sized 0x4: the fade colour's red, green, blue and alpha (KwlnFadeColor), HD's u8 fadergba[4] in dds3KernelDraw.c
-0x003BA928	kwlnBackgroundFadeColor	inferred	high confidence; src/dds1/game/code_00102ED8.c kwlnFadeBackgroundStartIn(): D_003BA928[0] = 0; Four-component background overlay color, with its alpha initialized by the background-fade entry points. [names_reviewed26.tsv]
-0x003BA92C	kwlnBackgroundFadeMode	inferred	confidence=high; matched_users=src/dds1/game/code_00102ED8.c:kwlnFadeIsBackgroundOverlayActive, src/dds1/game/code_00102ED8.c:kwlnFadeSetMode; Fade-mode setter stores the mode; background-overlay visibility logic branches on it. [names_qp9.tsv]
-0x003BA92E	kwlnBackgroundFadeFirstRamp	inferred	The background fade's first band ramp, up to KWLN_BGFADE_FIRST_RAMP_MAX: the band's top moves up 8 units a step. DDS2 twin 0x00435CFE.
-0x003BA930	kwlnBackgroundFadeSecondRamp	inferred	The background fade's second band ramp, up to KWLN_BGFADE_SECOND_RAMP_MAX: the band's bottom moves down 8 units a step. DDS2 twin 0x00435D00.
+0x003BA928	dds3BackgroundFadeColor	inferred	high confidence; src/dds1/game/code_00102ED8.c dds3FadeBackgroundStartIn(): D_003BA928[0] = 0; Four-component background overlay color, with its alpha initialized by the background-fade entry points. [names_reviewed26.tsv]; was dds3BackgroundFadeColor
+0x003BA92C	dds3BackgroundFadeMode	inferred	confidence=high; matched_users=src/dds1/game/code_00102ED8.c:dds3FadeIsBackgroundOverlayActive, src/dds1/game/code_00102ED8.c:dds3FadeSetMode; Fade-mode setter stores the mode; background-overlay visibility logic branches on it. [names_qp9.tsv]; was dds3BackgroundFadeMode
+0x003BA92E	dds3BackgroundFadeFirstRamp	inferred	The background fade's first band ramp, up to KWLN_BGFADE_FIRST_RAMP_MAX: the band's top moves up 8 units a step. DDS2 twin 0x00435CFE.; was dds3BackgroundFadeFirstRamp
+0x003BA930	dds3BackgroundFadeSecondRamp	inferred	The background fade's second band ramp, up to KWLN_BGFADE_SECOND_RAMP_MAX: the band's bottom moves down 8 units a step. DDS2 twin 0x00435D00.; was dds3BackgroundFadeSecondRamp
 0x003BA934	distblurovercnt	inferred	SMT3HD data name via SLUS_209.11 0x0054E97C, 4 agreeing references; was distblurovercnt
 0x003BA938	ripblurovercnt	inferred	SMT3HD data name via SLUS_209.11 0x0054E980, 4 agreeing references; was ripblurovercnt
 0x003BA948	evtSelectionStateActive	inferred	confidence=high; matched_users=src/dds1/game/code_00107FD8.c:evtCheckSelectionState, src/dds1/game/code_00107FD8.c:evtSelStateCreate; Creation sets this flag; state polling checks it before accessing the allocated selection state. [names_qp9.tsv]
@@ -10431,7 +10435,7 @@
 0x003BD688	dds3KernelThread	inferred	SMT3HD name via SLUS_209.11 0x00551B88, sdf/sdfDefaultMain SMT3 rename; was kwlnMainLoopThreadNode
 0x003BD690	dds3PadVibrationState	inferred	SMT3HD data name via SLUS_209.11 0x00551B90, 3 agreeing references; was dds3PadVibrationState
 0x003BD699	kwlnLargeMotorTarget	inferred	confidence=high; src/dds1/game/code_00102ED8.c:kwlnPadStepLargeMotorLevel; Target actuator level approached in steps of at most 0x20. [names_qp9.tsv]
-0x003BD6A8	kwlnDebugGraphTask	inferred	The task handle created for DebugTimeGrph and passed to hierarchy destruction.
+0x003BD6A8	dds3DebugGraphTask	inferred	The task handle created for DebugTimeGrph and passed to hierarchy destruction.; was dds3DebugGraphTask
 0x003BD6B4	blurnow	inferred	SMT3HD data name via SLUS_209.11 0x00551BAC, 4 agreeing references; was blurnow
 0x003BD6B6	blurmax	inferred	SMT3HD data name via SLUS_209.11 0x00551BAE, 3 agreeing references; was blurmax
 0x003BD6B8	bluralphabase	inferred	SMT3HD data name via SLUS_209.11 0x00551BB0, 3 agreeing references; was bluralphabase
@@ -10440,8 +10444,8 @@
 0x003BD6BE	blurscaletarget	inferred	SMT3HD data name via SLUS_209.11 0x00551BB6, 2 agreeing references; was blurscaletarget
 0x003BD6C0	fadenow	inferred	SMT3HD data name via SLUS_209.11 0x00551BB8, 14 agreeing references; was fadenow
 0x003BD6C2	fademax	inferred	SMT3HD data name via SLUS_209.11 0x00551BBA, 10 agreeing references; was fademax
-0x003BD6C4	kwlnBackgroundFadeCounter	inferred	high confidence; src/dds1/game/code_00102ED8.c kwlnFadeBackgroundStartIn(): D_003BD6C4 = 0; Background fade counter starts at zero for the increasing fade and at duration for the opposite fade. [names_reviewed26.tsv]
-0x003BD6C6	kwlnBackgroundFadeDuration	inferred	high confidence; src/dds1/game/code_00102ED8.c kwlnFadeBackgroundStartIn(): D_003BD6C6 = 0; Stores the caller-supplied background fade duration. [names_reviewed26.tsv]
+0x003BD6C4	dds3BackgroundFadeCounter	inferred	high confidence; src/dds1/game/code_00102ED8.c dds3FadeBackgroundStartIn(): D_003BD6C4 = 0; Background fade counter starts at zero for the increasing fade and at duration for the opposite fade. [names_reviewed26.tsv]; was dds3BackgroundFadeCounter
+0x003BD6C6	dds3BackgroundFadeDuration	inferred	high confidence; src/dds1/game/code_00102ED8.c dds3FadeBackgroundStartIn(): D_003BD6C6 = 0; Stores the caller-supplied background fade duration. [names_reviewed26.tsv]; was dds3BackgroundFadeDuration
 0x003BD718	mulblurnow	inferred	SMT3HD data name via SLUS_209.11 0x00551C10, 7 agreeing references; was mulblurnow
 0x003BD71A	mulblurmax	inferred	SMT3HD data name via SLUS_209.11 0x00551C12, 5 agreeing references; was mulblurmax
 0x003BD71C	mulblurabase	inferred	SMT3HD data name via SLUS_209.11 0x00551C14, 4 agreeing references; was mulblurabase
@@ -10628,7 +10632,7 @@
 0x003C2510	key2	inferred	SMT3HD data name via SLUS_209.11 0x00556B90, 2 agreeing references; was key2
 0x003C2540	dds3DistBlurCurrent	inferred	SMT3HD name via SLUS_209.11 0x00556BC0, kwln rename; was kwlnFilterBlurFrameParameters; was kwlnFilterBlurFrameParameters
 0x003C2570	dds3BlurState	inferred	SMT3HD data name via SLUS_209.11 0x00556BF0, 2 agreeing references; was dds3BlurState
-0x003C25A0	kwlnRectangleBlurFrameParameters	inferred	confidence=high; Per-update workspace filled by transition blending or target-copy plus alpha fade, then passed to real effect-copy and enable/disable providers. DDS2 twin0x0043DD20. Native allocation0x30 including padding retained; existingKwlnBlurRectParams unchanged. No import or active ASM consumer. [PurD readability data b3; native/matched-C twin; identifier-only]
+0x003C25A0	dds3RectangleBlurFrameParameters	inferred	confidence=high; Per-update workspace filled by transition blending or target-copy plus alpha fade, then passed to real effect-copy and enable/disable providers. DDS2 twin0x0043DD20. Native allocation0x30 including padding retained; existingKwlnBlurRectParams unchanged. No import or active ASM consumer. [PurD readability data b3; native/matched-C twin; identifier-only]; was dds3RectangleBlurFrameParameters
 0x003C25D0	dds3BlurParam	inferred	SMT3HD data name via SLUS_209.11 0x00556C50, 2 agreeing references; was dds3BlurParam
 0x003C25F0	dds3MFilterCurrent	inferred	SMT3HD name via SLUS_209.11 0x00556C70, kwln rename; was kwlnTexturedSquareFrameParameters; was kwlnTexturedSquareFrameParameters
 0x003C2620	dds3ZClearDrawTag	inferred	SMT3HD data name via SLUS_209.11 0x00556CA0, 2 agreeing references; was dds3ZClearDrawTag
@@ -10639,11 +10643,11 @@
 0x003C2CD0	distblurtarget	inferred	SMT3HD data name via SLUS_209.11 0x00557350, 6 agreeing references; was distblurtarget
 0x003C2D00	dds3RipBlurBuf	inferred	SMT3HD data name via SLUS_209.11 0x00557380, 2 agreeing references; was dds3RipBlurBuf
 0x003C2D30	ripblurtarget	inferred	SMT3HD data name via SLUS_209.11 0x005573B0, 6 agreeing references; was ripblurtarget
-0x003C2D60	kwlnRectangleBlurTransitionStartParameters	inferred	confidence=high; Snapshot of the live effect parameters captured by the matching setup and used as blend from, distinct from staged target parameters. DDS2 twin0x0043E4E0. Native allocation0x28 including padding retained; existingKwlnBlurRectParams unchanged. No import or active ASM consumer. [PurD readability data b3; native/matched-C twin; identifier-only]
+0x003C2D60	dds3RectangleBlurTransitionStartParameters	inferred	confidence=high; Snapshot of the live effect parameters captured by the matching setup and used as blend from, distinct from staged target parameters. DDS2 twin0x0043E4E0. Native allocation0x28 including padding retained; existingKwlnBlurRectParams unchanged. No import or active ASM consumer. [PurD readability data b3; native/matched-C twin; identifier-only]; was dds3RectangleBlurTransitionStartParameters
 0x003C2D88	blur2target	inferred	SMT3HD data name via SLUS_209.11 0x00557408, 6 agreeing references; was blur2target
 0x003C2DB0	dds3Filter2Buf	inferred	SMT3HD data name via SLUS_209.11 0x00557430, 2 agreeing references; was dds3Filter2Buf
 0x003C2DC8	filter2target	inferred	SMT3HD data name via SLUS_209.11 0x00557448, 4 agreeing references; was filter2target
-0x003C2DD0	kwlnColorRectangleParameterBounds	inferred	confidence=high; Existing typed bounds subobject of filter2target at +8, initialized by setdraw_xy; existing Eve_FilterSetParam argument subtracts 8 to recover the parameter owner. Alias only, not distinct storage. DDS2 twin0x0043E550. Existing 0x10-byte bounds subobject in unchanged0x18-byte owner; alias only, not new storage. No import or active ASM consumer. [PurD readability data b4; native/matched-C twin; identifier-only]
+0x003C2DD0	dds3ColorRectangleParameterBounds	inferred	confidence=high; Existing typed bounds subobject of filter2target at +8, initialized by setdraw_xy; existing Eve_FilterSetParam argument subtracts 8 to recover the parameter owner. Alias only, not distinct storage. DDS2 twin0x0043E550. Existing 0x10-byte bounds subobject in unchanged0x18-byte owner; alias only, not new storage. No import or active ASM consumer. [PurD readability data b4; native/matched-C twin; identifier-only]; was dds3ColorRectangleParameterBounds
 0x003C2DE0	dds3MFilterBuf	inferred	SMT3HD data name via SLUS_209.11 0x00557460, 2 agreeing references; was dds3MFilterBuf
 0x003C2E08	mfiltertarget	inferred	SMT3HD data name via SLUS_209.11 0x00557488, 5 agreeing references; was mfiltertarget
 0x003C2E70	evtWorkScriptContext	inferred	confidence=high; Existing EvtScriptContext owner is24 bytes in both games; dds3WorkInit clears24, evtRunContext installs arguments/command/options, clears written flag and returns result. Existing DDS1 s32-array/cast form and DDS2 typed extern unchanged; split native labels and alignment gaps retained. DDS2 twin 0x0043E5C0; actual matched-C readers only, no import or active ASM reader. [PurD readability data b9; identifier-only]

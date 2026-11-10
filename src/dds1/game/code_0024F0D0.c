@@ -315,7 +315,7 @@ void mnuCreateResourceTask(void) {
 
 /* Return whether the named resource task exists; invalidate the cached handle when it does not. */
 s32 mnuCheckResourceTask(void) {
-    if (kwlnTaskExists(mnuResourceTaskName) != KWLN_PROCESS_NOT_REGISTERED) {
+    if (sdfTaskExists(mnuResourceTaskName) != KWLN_PROCESS_NOT_REGISTERED) {
         return 1;
     }
     mnuSceneResourceContext = 0;

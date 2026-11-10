@@ -2440,7 +2440,7 @@ extern EffBlurScatterWork *D_003BABE4;
 
 extern char D_0039FD30[], D_0039FD40[];
 
-extern void kwlnFadeResetBackground(void);
+extern void dds3FadeResetBackground(void);
 
 extern void fldFreeInputPanel(void), evtDisableMoonDraw(void), fldFreeAddressProcess(void);
 
@@ -2451,7 +2451,7 @@ extern void fldReleaseMenuSlotsAfterWait(void);
 void fldReleaseCampSceneTasks(void) {
     if (D_003BABF4 == 0) return;
     D_003BABF4 = 0;
-    kwlnFadeResetBackground();
+    dds3FadeResetBackground();
     fldEncountClearFlag(0x10);
     fldEncountClearFlag(0x20);
     fldAutoMapSeqSetFlag(1);

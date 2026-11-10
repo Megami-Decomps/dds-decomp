@@ -10849,7 +10849,7 @@ u32 effAllocateStripFromWorkAndRetainTexture(u8 *work) {
 
 extern sdfGrOt_t *D_0037EE20[];
 extern vu8 sdfFrameId;
-extern KwlnFrameDrawBuffer kwlnFrameDrawPacketRecords[];
+extern KwlnFrameDrawBuffer dds3FrameDrawPacketRecords[];
 extern void sdfGrSetFrameMaskRGB(const u8 *, SdfDmaReferenceChainPacket *, s32);
 extern void sdfGrSetFrameMaskReset(const u8 *, SdfDmaReferenceChainPacket *, s32);
 
@@ -10931,7 +10931,7 @@ void effDrawScalyTexturedStrip(EffStripWork *work, void *matrix) {
     referencePacket[1] = 0;
     sdfDrawTagLinkRef(list, (u32)referencePacket);
     dmaPacket = sdfGrAllocPacketBuff(0x40);
-    sdfGrSetFrameMaskRGB(kwlnFrameDrawPacketRecords[dds3GetFrameID()].baseBytes, dmaPacket, 0);
+    sdfGrSetFrameMaskRGB(dds3FrameDrawPacketRecords[dds3GetFrameID()].baseBytes, dmaPacket, 0);
     sdfDrawTagLinkRefGif(list, (u32)dmaPacket);
     packet = sdfGrAllocPacketBuff(0x40);
     packet->dmaTag = 3;
@@ -10998,7 +10998,7 @@ void effDrawScalyTexturedStrip(EffStripWork *work, void *matrix) {
         colors++;
     }
     dmaPacket = sdfGrAllocPacketBuff(0x40);
-    sdfGrSetFrameMaskReset(kwlnFrameDrawPacketRecords[dds3GetFrameID()].baseBytes, dmaPacket, 0);
+    sdfGrSetFrameMaskReset(dds3FrameDrawPacketRecords[dds3GetFrameID()].baseBytes, dmaPacket, 0);
     sdfDrawTagLinkRefGif(list, (u32)dmaPacket);
     packet = sdfGrAllocPacketBuff(0x40);
     packet->dmaTag = 3;

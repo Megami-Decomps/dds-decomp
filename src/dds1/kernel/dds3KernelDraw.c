@@ -289,13 +289,13 @@ void dds3SetBlur2Area(s32 centerX, s32 centerY) {
     blur2target.position[1] = centerY;
 }
 
-extern dds3Effect_Blur_t kwlnRectangleBlurTransitionStartParameters;
+extern dds3Effect_Blur_t dds3RectangleBlurTransitionStartParameters;
 extern u16 blur2swapnow;
 extern u16 blur2swapmax;
 
 /* Save live rectangle-blur params, then apply now or request interpolation. */
 void dds3Blur2Swap(s32 duration) {
-    kwlnRectangleBlurTransitionStartParameters = Eve_BlurGetParam()->source;
+    dds3RectangleBlurTransitionStartParameters = Eve_BlurGetParam()->source;
     blur2swapnow = 0;
     blur2swapmax = duration;
     if (duration == 0) {
@@ -598,7 +598,7 @@ void dds3RipBlurOff(s32 duration) {
 extern dds3Effect_PartialMultiBlurParam_t key2;
 extern dds3Effect_DistortionBlurParam_t dds3DistBlurCurrent;
 extern dds3Effect_RippleBlurParam_t dds3BlurState __attribute__((aligned(8)));
-extern dds3Effect_Blur_t kwlnRectangleBlurFrameParameters;
+extern dds3Effect_Blur_t dds3RectangleBlurFrameParameters;
 extern dds3Effect_Filter_t dds3BlurParam;
 extern dds3Effect_PartialMultiFilterParam_t dds3MFilterCurrent;
 
@@ -637,11 +637,11 @@ void dds3BlurUpdate(void) {
         if (blur2swapnow < blur2swapmax) {
             blur2swapnow++;
         }
-        evtHokanBlur2(1, (f32)blur2swapnow / (f32)blur2swapmax, &kwlnRectangleBlurTransitionStartParameters,
-                        &blur2target, &kwlnRectangleBlurFrameParameters);
-        setdraw_xy(kwlnRectangleBlurFrameParameters.corners);
-        Eve_BlurSetParam(&kwlnRectangleBlurFrameParameters);
-        if ((kwlnRectangleBlurFrameParameters.color >> 24) != 0) {
+        evtHokanBlur2(1, (f32)blur2swapnow / (f32)blur2swapmax, &dds3RectangleBlurTransitionStartParameters,
+                        &blur2target, &dds3RectangleBlurFrameParameters);
+        setdraw_xy(dds3RectangleBlurFrameParameters.corners);
+        Eve_BlurSetParam(&dds3RectangleBlurFrameParameters);
+        if ((dds3RectangleBlurFrameParameters.color >> 24) != 0) {
             Eve_BlurON();
         }
         else {
@@ -655,13 +655,13 @@ void dds3BlurUpdate(void) {
         if (blur2now < blur2max) {
             blur2now++;
         }
-        kwlnRectangleBlurFrameParameters = blur2target;
+        dds3RectangleBlurFrameParameters = blur2target;
         alpha = blur2abase + blur2now *
                 (blur2atarget - blur2abase) /
                 blur2max;
-        kwlnRectangleBlurFrameParameters.color = (kwlnRectangleBlurFrameParameters.color & 0xFFFFFF) | (alpha << 24);
-        setdraw_xy(kwlnRectangleBlurFrameParameters.corners);
-        Eve_BlurSetParam(&kwlnRectangleBlurFrameParameters);
+        dds3RectangleBlurFrameParameters.color = (dds3RectangleBlurFrameParameters.color & 0xFFFFFF) | (alpha << 24);
+        setdraw_xy(dds3RectangleBlurFrameParameters.corners);
+        Eve_BlurSetParam(&dds3RectangleBlurFrameParameters);
         if (alpha == 0) {
             Eve_BlurOFF();
         }

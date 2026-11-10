@@ -685,7 +685,7 @@ void effSubmitGeneratedTexturePacket(sdfGrOt_t *surface, EffGeneratedTextureDesc
     surface->regFunc(surface, packetList);
 }
 
-extern KwlnFrameDrawBuffer kwlnFrameDrawPacketRecords[];
+extern KwlnFrameDrawBuffer dds3FrameDrawPacketRecords[];
 
 extern void sdfGrSetFrameMaskRGB(const u8 *, SdfDmaReferenceChainPacket *, s32);
 
@@ -707,7 +707,7 @@ void effDrawCompositeTextureQuad(sdfDrawTag_t *list, EffCompositeGsDescriptor *s
     f32 cornerX, cornerY;
 
     framePacket = (SdfDmaReferenceChainPacket *)sdfGrAllocPacketBuff(0x40);
-    sdfGrSetFrameMaskRGB(kwlnFrameDrawPacketRecords[dds3GetFrameID()].baseBytes, framePacket, 0);
+    sdfGrSetFrameMaskRGB(dds3FrameDrawPacketRecords[dds3GetFrameID()].baseBytes, framePacket, 0);
     sdfDrawTagLinkRefGif(list, (u32)framePacket);
 
     state = (sdfPrimTransPacket_t *)sdfGrAllocPacketBuff(0x40);
@@ -818,7 +818,7 @@ void effDrawCompositeTextureQuad(sdfDrawTag_t *list, EffCompositeGsDescriptor *s
     sdfDrawTagLink(list, (u32)geometry);
 
     framePacket = (SdfDmaReferenceChainPacket *)sdfGrAllocPacketBuff(0x40);
-    sdfGrSetFrameMaskReset(kwlnFrameDrawPacketRecords[dds3GetFrameID()].baseBytes, framePacket, 0);
+    sdfGrSetFrameMaskReset(dds3FrameDrawPacketRecords[dds3GetFrameID()].baseBytes, framePacket, 0);
     sdfDrawTagLinkRefGif(list, (u32)framePacket);
 
     state = (sdfPrimTransPacket_t *)sdfGrAllocPacketBuff(0x40);

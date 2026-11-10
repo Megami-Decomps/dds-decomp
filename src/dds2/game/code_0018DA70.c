@@ -94,7 +94,7 @@ struct sdfDrawTag_t;
 struct sdfGrRefPacketHeader_t;
 
 extern sdfGrOt_t D_003803E8;
-extern KwlnFrameDrawBuffer kwlnFrameDrawPacketRecords[];
+extern KwlnFrameDrawBuffer dds3FrameDrawPacketRecords[];
 #include "sdf_packet_alloc.h"
 extern void sdfGrSetFrameMaskReset(const u8 *source, SdfDmaReferenceChainPacket *packet, s32 gsContext);
 
@@ -251,7 +251,7 @@ void effDrawBlurRectangle(const dds3Effect_Blur_t *source)
         list = (sdfDrawTag_t *)sdfGrAllocPacketBuff(0x20);
         sdfDrawTagInit(list);
         tag = (void *)sdfGrAllocPacketBuff(0x20);
-        sdfGrLinkDispFrameTex(list, (u32)kwlnFrameDrawPacketRecords[dds3GetFrameID()].baseBytes, tag);
+        sdfGrLinkDispFrameTex(list, (u32)dds3FrameDrawPacketRecords[dds3GetFrameID()].baseBytes, tag);
         samplingPacket = (void *)sdfGrAllocPacketBuff(0x30);
         samplingPacket[0] = 2;
         samplingPacket[1] = 0x5000000210000000ULL;
@@ -285,7 +285,7 @@ void effDrawBlurRectangle(const dds3Effect_Blur_t *source)
         clampPacket[1] = 0x5000000210000000ULL;
         clampPacket[2] = 0x1000000000008001ULL;
         clampPacket[3] = 0xE;
-        if (kwlnFadeIsBackgroundOverlayActive() != KWLN_BACKGROUND_OVERLAY_INACTIVE) {
+        if (dds3FadeIsBackgroundOverlayActive() != KWLN_BACKGROUND_OVERLAY_INACTIVE) {
             clampPacket[4] = 0x2DC19000009ULL;
         } else {
             clampPacket[4] = 0x37C00000009ULL;
@@ -309,7 +309,7 @@ void effAppendBlurRenderState(struct sdfDrawTag_t *list, s32 blendControl, sdfTe
     void *tag;
 
     framePacket = (SdfDmaReferenceChainPacket *)sdfGrAllocPacketBuff(0x40);
-    sdfGrSetFrameMaskRGB(kwlnFrameDrawPacketRecords[dds3GetFrameID()].baseBytes, framePacket, 1);
+    sdfGrSetFrameMaskRGB(dds3FrameDrawPacketRecords[dds3GetFrameID()].baseBytes, framePacket, 1);
     sdfDrawTagLinkRefGif(list, (u32)framePacket);
 
     blendPacket = (u64 *)sdfGrAllocPacketBuff(0x40);
@@ -336,7 +336,7 @@ void effAppendBlurRenderState(struct sdfDrawTag_t *list, s32 blendControl, sdfTe
     sdfDrawTagLink(list, (u32)blendPacket);
 
     tag = (void *)sdfGrAllocPacketBuff(0x20);
-    sdfGrLinkDispFrameTex(list, (u32)kwlnFrameDrawPacketRecords[dds3GetFrameID()].baseBytes, tag);
+    sdfGrLinkDispFrameTex(list, (u32)dds3FrameDrawPacketRecords[dds3GetFrameID()].baseBytes, tag);
 
     samplingPacket = (u64 *)sdfGrAllocPacketBuff(0x30);
     samplingPacket[0] = 2;
@@ -363,7 +363,7 @@ void effAppendBlurRenderState(struct sdfDrawTag_t *list, s32 blendControl, sdfTe
     clampPacket[1] = 0x5000000210000000ULL;
     clampPacket[2] = 0x1000000000008001ULL;
     clampPacket[3] = 0xE;
-    if (kwlnFadeIsBackgroundOverlayActive() != KWLN_BACKGROUND_OVERLAY_INACTIVE) {
+    if (dds3FadeIsBackgroundOverlayActive() != KWLN_BACKGROUND_OVERLAY_INACTIVE) {
         clampPacket[4] = 0x2DC19000009ULL;
     } else {
         clampPacket[4] = 0x37C00000009ULL;
@@ -392,7 +392,7 @@ void effAppendBlurRectanglePackets(struct sdfDrawTag_t *list, const BlurSource *
 void effDrawBlurListWithFramePacket(struct sdfDrawTag_t *list) {
     SdfDmaReferenceChainPacket *packet = (SdfDmaReferenceChainPacket *)sdfGrAllocPacketBuff(0x40);
 
-    sdfGrSetFrameMaskReset(kwlnFrameDrawPacketRecords[dds3GetFrameID()].baseBytes, packet, 1);
+    sdfGrSetFrameMaskReset(dds3FrameDrawPacketRecords[dds3GetFrameID()].baseBytes, packet, 1);
     sdfDrawTagLinkRefGif(list, (u32)packet);
     D_003803E8.regFunc(&D_003803E8, list);
 }

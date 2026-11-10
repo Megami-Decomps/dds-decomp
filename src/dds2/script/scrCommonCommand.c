@@ -124,8 +124,8 @@ extern dds3GlobalWork_t *DDS3_GBWK;
 
 #define SCR_PROCESS_CONTROL_FLAG 210
 
-extern void kwlnFadeBackgroundStartOut(s32 duration);
-extern void kwlnFadeBackgroundStartIn(s32 duration);
+extern void dds3FadeBackgroundStartOut(s32 duration);
+extern void dds3FadeBackgroundStartIn(s32 duration);
 extern void effDisableFramebufferQuad(void);
 extern void fldSetFilterAnime(u32 mode);
 extern void fldSkySetAlpha(u32 alpha);
@@ -252,7 +252,7 @@ s32 scrCommandFadeBackgroundOut(void)
 {
     if (scrGetCommandTimer() == 0)
     {
-        kwlnFadeBackgroundStartOut(scrGetIntPara(0));
+        dds3FadeBackgroundStartOut(scrGetIntPara(0));
         return 0;
     }
     return 1;
@@ -262,7 +262,7 @@ s32 scrCommandFadeBackgroundIn(void)
 {
     if (scrGetCommandTimer() == 0)
     {
-        kwlnFadeBackgroundStartIn(scrGetIntPara(0));
+        dds3FadeBackgroundStartIn(scrGetIntPara(0));
         return 0;
     }
     return 1;

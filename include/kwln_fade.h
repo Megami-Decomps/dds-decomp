@@ -13,6 +13,6 @@ void dds3FadeIn2(s32 duration);
 void dds3FadeOut2(s32 duration);
 
 /* Select the background fade visibility mode used by scene transitions. */
-void kwlnFadeSetMode(s32 visibilityMode);
+void dds3FadeSetMode(s32 visibilityMode);
 
 #endif /* KWLN_FADE_H */
