@@ -372,14 +372,14 @@ typedef struct sdfTexHandle_t {
     u8 numOfMipmap;
     u16 mipmapParam; /* Packed GS TEX1 L/K parameters. */
     u8 flags;
-    SdfTextureClampMode texWrapMode; /* 0x1F: 0xFF leaves GS CLAMP state zero; otherwise low nibble is copied. */
-    s32 texId;
-    s32 clutId;
-    sdfTexPacket_t *packet;
-    sdfTexPacket_t *packetCtx2;
-    u8 *clutData; /* 0x30: retained copy of the texture's palette colors. */
-    s32 clutDataSize; /* 0x34: palette byte count from sdfTexGetClutDataSize. */
-    s32 clutColor;
+    u8 texWrapMode; /* 0x1F: 0xFF leaves GS CLAMP state zero; otherwise low nibble is copied. */
+    u32 texId;
+    u32 clutId;
+    struct sdfTexPacket_t *packet;
+    struct sdfTexPacket_t *packetCtx2;
+    void *clutData; /* 0x30: retained copy of the texture's palette colors. */
+    u32 clutDataSize; /* 0x34: palette byte count from sdfTexGetClutDataSize. */
+    u32 clutColor;
     u8 *monoClutData; /* 0x3C: lazily generated weighted-RGB intensity bytes. */
 } sdfTexHandle_t;
 
