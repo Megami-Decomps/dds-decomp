@@ -662,7 +662,136 @@ s32 sdfSndInitWorkAreas(void)
 #else
 INCLUDE_ASM("SDFSDMAN", sdfSndInitWorkAreas);
 #endif
+#ifdef NON_MATCHING
+/* As long as the retail code, but gcc schedules and allocates registers
+ * differently. */
+/* FUNC sdfSndSeqThread */
+/* Woken 240 times a second by the hard timer: runs the synthesiser and the
+ * MIDI front end, applies the volume ramps and finishes the BGM switch the
+ * MIDI callback asked for. */
+void sdfSndSeqThread(void *arg)
+{
+    sceMidiSlot_t *ms;
+    s32 state;
+    s32 i;
+    s32 j;
+    s32 bank;
+    s32 slot;
+    s32 vol;
+    u32 serial;
+
+    while (1) {
+        thbase_SleepThread();
+        intrman_CpuSuspendIntr(&state);
+        modmidi_e5(&sdfSndMidiWork);
+        intrman_CpuResumeIntr(state);
+        intrman_CpuSuspendIntr(&state);
+        modhsyn_e5(&sdfSndHsynWork);
+        intrman_CpuResumeIntr(state);
+
+        for (i = 0; i < 16; i++) {
+            if ((sdfSndMidiWork.tbl->seq[i].slot->flags & 2) == 0) {
+                sdfSndSlots[i].location = -1;
+                sdfSndSlots[i].id = -1;
+                sdfSndSlots[i].fadeIn = 0;
+                sdfSndSlots[i].volStep = 0;
+                sdfSndSlots[i].unk34[0] = 0;
+                continue;
+            }
+            if (sdfSndListenerDirty && i >= 3) {
+                sdfSndUpdate3dVoice(i);
+            }
+            if (sdfSndBgmSwitchSlot == i && sdfSndBgmSwitchMidi >= 0) {
+                bank = sdfSndFindSlotById(sdfSndSlots[i].id);
+                slot = sdfSndAllocBgmSlot();
+                if (slot >= 0) {
+                    sdfSndMidiWork.tbl->seq[slot].data = sdfSndWorkArea->progData[bank].ptr;
+                    sdfSndHsynLoad(bank, slot);
+                    intrman_CpuSuspendIntr(&state);
+                    if (modmidi_sceMidi_Load(&sdfSndMidiWork, slot) != 0) {
+                        intrman_CpuResumeIntr(state);
+                        stdio_printf(aSdfsnddrvScemi);
+                        sdfSndPostError(17);
+                    } else {
+                        ms = &sdfSndMidiSlotWork[slot];
+                        ms->cbB = sdfSndMidiCbIgnore1;
+                        ms->msgCb = sdfSndMidiCbMessage;
+                        ms->cbBArg = slot;
+                        ms->msgCbArg = slot;
+                        ms->cbC = sdfSndMidiCbIgnore2;
+                        ms->cbCArg = slot;
+                        ms->slotMask = 1 << slot;
+                        for (j = 15; j >= 0; j--) {
+                            ms->chanMask[j] = 1 << slot;
+                        }
+                        modmidi_sceMidi_SelectMidi(&sdfSndMidiWork, slot, sdfSndBgmSwitchMidi);
+                        modmidi_sceMidi_MidiSetLocation(&sdfSndMidiWork, slot, 0);
+                        modmidi_sceMidi_MidiPlaySwitch(&sdfSndMidiWork, slot, 1);
+                        serial = sdfSndSlotSerialNext;
+                        sdfSndSlots[slot].volStep = sdfSndSlots[i].volStep;
+                        sdfSndSlots[slot].fadeIn = sdfSndSlots[i].fadeIn;
+                        sdfSndSlots[slot].vol = sdfSndSlots[i].vol;
+                        sdfSndSlots[slot].unk34[0] = sdfSndSlots[i].unk34[0];
+                        sdfSndSlots[slot].group = sdfSndSlots[i].group;
+                        sdfSndSlots[slot].serial = serial;
+                        sdfSndSlotSerialNext = serial + 1;
+                        sdfSndSlots[slot].location = -1;
+                        sdfSndSlots[slot].id =
+                            (sdfSndSlots[i].id & 0xFFFF0000) | sdfSndBgmSwitchMidi;
+                        sdfSndApplyVolume(sdfSndSlots[slot].id, slot,
+                                          sdfSndSlots[i].vol >> 8);
+                        sdfSndPutMsg(slot);
+                        sdfSndBgmSwitchReq = 0;
+                        sdfSndBgmSwitchMidi = -1;
+                        sdfSndBgmSwitchSlot = -1;
+                        modmidi_sceMidi_MidiPlaySwitch(&sdfSndMidiWork, i, 0);
+                        sdfSndSlots[i].fadeIn = 0;
+                        sdfSndSlots[i].volStep = 0;
+                        sdfSndSlots[i].location = -1;
+                        sdfSndSlots[i].id = -1;
+                        sdfSndSlots[i].unk34[0] = 0;
+                    }
+                    intrman_CpuResumeIntr(state);
+                }
+            }
+            if (sdfSndSlots[i].volStep == 0) {
+                continue;
+            }
+            vol = sdfSndSlots[i].vol + sdfSndSlots[i].volStep;
+            sdfSndSlots[i].vol = vol;
+            if (vol >= 32513) {
+                sdfSndSlots[i].vol = 32512;
+                sdfSndSlots[i].volStep = 0;
+                sdfSndApplyVolume(sdfSndSlots[i].id, i, sdfSndSlots[i].vol >> 8);
+            } else if (vol >= 0) {
+                if (sdfSndSlots[i].fadeIn && vol < 0x4000) {
+                    sdfSndSlots[i].vol = 0x3FFF;
+                    sdfSndSlots[i].volStep = 0;
+                    sdfSndSlots[i].fadeIn = 0;
+                }
+                sdfSndApplyVolume(sdfSndSlots[i].id, i, sdfSndSlots[i].vol >> 8);
+            } else {
+                /* The fade reached silence: stop the sequence. The matching
+                 * suspend is the one in the switch block above. */
+                sdfSndSaveResumePoint(i);
+                sdfSndSlots[i].vol = 0;
+                sdfSndSlots[i].volStep = 0;
+                sdfSndSlots[i].fadeIn = 0;
+                sdfSndSlots[i].id = -1;
+                sdfSndSlots[i].location = -1;
+                sdfSndSlots[i].unk34[0] = 0;
+                modmidi_sceMidi_MidiPlaySwitch(&sdfSndMidiWork, i, 0);
+                intrman_CpuResumeIntr(state);
+            }
+        }
+        sdfSndListenerDirty = 0;
+        sdfAdpcmFadeTick();
+    }
+}
+/* ENDF sdfSndSeqThread */
+#else
 INCLUDE_ASM("SDFSDMAN", sdfSndSeqThread);
+#endif
 
 
 #ifdef NON_MATCHING
@@ -1476,7 +1605,230 @@ s32 sdfSndIsBankLoaded(s32 kind)
 #endif
 }
 /* ENDF sdfSndIsBankLoaded */
+#ifdef NON_MATCHING
+/* The switch on the file's kind compiles to a jump table in
+ * asm/irx/SDFSDMAN/rodata.s; a C switch would put its own table at the front
+ * of .rodata and move everything after it. */
+/* FUNC sdfSndLoadSmg */
+/* Load one .SMG bank: header, volume table, sequence data, wave data (in
+ * work area sized pieces straight into the SPU2) and program data. Kinds 1,
+ * 4 and 5 alternate between two banks; kinds 6 to 8 cycle through three
+ * pairs. */
+s32 sdfSndLoadSmg(const char *path, s32 mode)
+{
+    sdfSmgHeader_t hdr;
+    u8 volTable[128];
+    s32 count;
+    s32 fd;
+    s32 ret;
+    s32 i;
+    u32 len;
+    u32 waveSize;
+    u32 progSize;
+    u16 id;
+    s32 bank;
+    s32 pair;
+    s32 kind;
+    s32 inUse;
+    u8 *tbl;
+    u32 read;
+    s32 left;
+    u32 spuAddr;
+    s32 chunk;
+
+    pair = 0;
+    ret = -1;
+    fd = sdfSndFileOpen(path, mode);
+    if (fd < 0) {
+        return -1;
+    }
+    if (mode == 0 && sdfSndFileGetSize(fd) < 0) {
+        goto done;
+    }
+    read = sdfSndFileRead(fd, &hdr, 176, mode);
+    if (read < 0xB0) {
+        stdio_printf(aSdfsnddrvFileR, read);
+        sdfSndPostError(2);
+        goto done;
+    }
+    len = hdr.seqSize;
+    waveSize = hdr.waveSize;
+    progSize = hdr.progSize;
+    id = hdr.idPacked >> 16;
+    if (sdfSndFindSlotById(hdr.idPacked) >= 0) {
+        stdio_printf(aSdfsnddrvMidi0, id);
+        goto done;
+    }
+    for (i = 0; i < 128; i++) {
+        volTable[i] = hdr.volTable[i];
+    }
+    if (len == 0 || waveSize == 0) {
+        if (mode) {
+            stdio_printf(aSdfsnddrvDataS);
+        } else {
+            stdio_printf(aSdfsnddrvSData, path);
+        }
+        sdfSndPostError(5);
+        goto done;
+    }
+    if (hdr.idPacked == 0x10000) {
+        hdr.kind = 4;
+    }
+
+    switch (hdr.kind) {
+    case 0:
+        bank = 0;
+        break;
+    case 1:
+        bank = 1;
+        if (waveSize > 0xBB800 ||
+            ((len + 15) & 0xFFFFFFF0) + ((progSize + 15) & 0xFFFFFFF0) > 0xB000) {
+            sdfSndUnloadBank(2);
+            sdfSndBank1Loaded = 1;
+            break;
+        }
+        if (!sdfSndIsBankLoaded(1)) {
+            break;
+        }
+        if (!sdfSndIsBankLoaded(2)) {
+            bank = 2;
+            pair = 2;
+            break;
+        }
+        inUse = 0;
+        for (i = 0; i < 16; i++) {
+            if (sdfSndSlots[i].id >= 0 && sdfSndSlots[i].group < 0) {
+                if ((sdfSndSlots[i].group & 2) != 0) {
+                    inUse |= 2;
+                } else {
+                    inUse |= 1;
+                }
+            }
+        }
+        bank = 1;
+        if (inUse == 1 || (inUse != 2 && sdfSndBankAltSlot == 1)) {
+            bank = 2;
+        }
+        sdfSndBankAltSlot = bank;
+        break;
+    case 4:
+        if (sdfSndBankAltSlot == 1) {
+            bank = 4;
+            pair = 2;
+        } else {
+            bank = 3;
+            pair = 1;
+        }
+        break;
+    case 5:
+        if (sdfSndBankAltSlot == 1) {
+            bank = 6;
+            pair = 2;
+        } else {
+            bank = 5;
+            pair = 1;
+        }
+        break;
+    case 6:
+    case 7:
+    case 8:
+        if (sdfSndBankAltSlot == 1) {
+            if (sdfSndBankCycle == 0) {
+                bank = 8;
+            } else if (sdfSndBankCycle == 1) {
+                bank = 10;
+            } else {
+                bank = 12;
+            }
+            pair = 2;
+        } else {
+            if (sdfSndBankCycle == 0) {
+                bank = 7;
+            } else if (sdfSndBankCycle == 1) {
+                bank = 9;
+            } else {
+                bank = 11;
+            }
+            pair = 1;
+        }
+        sdfSndBankCycle++;
+        if (sdfSndBankCycle >= 3) {
+            sdfSndBankCycle = 0;
+        }
+        break;
+    default:
+        goto done;
+    }
+
+    kind = hdr.kind;
+    if (kind == 1) {
+        for (i = 3; i < SDF_SND_KINDS; i++) {
+            sdfSndUnloadBank(i);
+        }
+    } else if (kind != 0 && kind < 9 && kind >= 4 && pair != 0) {
+        sdfSndUnloadBank(pair);
+    }
+    sdfSndUnloadBank(bank);
+    if (bank == 2 && sdfSndBank1Loaded) {
+        sdfSndUnloadBank(1);
+    }
+    tbl = sdfSndGetVolTable(bank, &count);
+    if (tbl != NULL) {
+        for (i = 0; i < count; i++) {
+            tbl[i] = volTable[i];
+        }
+    }
+    sdfSndWorkArea->banks[bank].size =
+        ((len + 15) & 0xFFFFFFF0) + ((progSize + 15) & 0xFFFFFFF0);
+    if (bank < 0) {
+        goto done;
+    }
+    sdfSndWorkArea->progData[bank].ptr =
+        (u8 *)sdfSndWorkArea->banks[bank].data + ((len + 15) & 0xFFFFFFF0);
+    if (sdfSndFileRead(fd, sdfSndWorkArea->banks[bank].data, len, mode) != len) {
+        goto readError;
+    }
+    sdfSndSetBankAddr(bank, waveSize);
+    left = waveSize;
+    spuAddr = sdfSndWorkArea->banks[bank].spuAddr;
+    do {
+        chunk = sdfSndWorkArea->xferBufSize;
+        if (left < chunk) {
+            chunk = left;
+        }
+        if (sdfSndFileRead(fd, sdfSndWorkArea->xferBuf, chunk, mode) != chunk) {
+            goto readError;
+        }
+        ret = modhsyn_sceHSyn_VoiceTrans(1, sdfSndWorkArea->xferBuf, spuAddr, chunk);
+        left -= chunk;
+        if (ret != 0) {
+            stdio_printf(aSdfsnddrvScehs_1);
+            goto done;
+        }
+        spuAddr += chunk;
+    } while (left != 0);
+
+    sdfSndWorkArea->progData[bank].size = progSize;
+    if (sdfSndFileRead(fd, sdfSndWorkArea->progData[bank].ptr, progSize, mode) != progSize) {
+readError:
+        stdio_printf(aSdfsnddrvSRead, path);
+        goto done;
+    }
+    sdfSndWorkArea->stat[bank].kind = hdr.statKind;
+    sdfSndWorkArea->stat[bank].id = id;
+    p2sdIrxSpuIopMap();
+done:
+    if (mode) {
+        sdfSndCallEeRpc(0, NULL, 0, 5, NULL);
+    } else {
+        sdfSndFileClose(fd);
+    }
+    return ret;
+}
+/* ENDF sdfSndLoadSmg */
+#else
 INCLUDE_ASM("SDFSDMAN", sdfSndLoadSmg);
+#endif
 
 /* FUNC sdfSndSmgLoadThread */
 /* Waits on its semaphore and loads whatever path the EE last set. */

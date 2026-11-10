@@ -187,6 +187,7 @@ sdfSndBankOffTbl = 0x00006418; // size:0x38
 sdfSndBankFlagTbl = 0x00006450; // size:0x38
 sdfSndBank1Loaded = 0x00006488; // size:0x4
 sdfSndBankAltSlot = 0x0000648C; // size:0x1
+sdfSndBankCycle = 0x0000648D; // size:0x1
 sdfSndSlotSerialNext = 0x00006490; // size:0x4
 sdfSndResumeIdx = 0x00006494; // size:0x4
 sdfSndSeqVolume = 0x00006498; // size:0x4

@@ -207,8 +207,8 @@ typedef struct {
     u32 xferBufSize;
     sdfSndBank_t banks[SDF_SND_KINDS + 1]; /* 8 in SMT3 */
     u8 unkF0[32];
-    sdfSndBankData_t progData[7];
-    u8 unk148[72];
+    sdfSndBankData_t progData[SDF_SND_KINDS]; /* 7 in SMT3 */
+    u8 unk178[24];
     sdfSndBankStat_t stat[SDF_SND_KINDS];
     void *eeAddr;
     u32 size;
@@ -229,7 +229,9 @@ typedef struct {
     u32 unk20;
     u32 progSize;
     u32 idPacked;
-    u32 kindPacked;
+    u16 statKind;
+    u8 unk2E;
+    u8 kind; /* picks the bank */
     u8 volTable[128];
 } sdfSmgHeader_t;
 
@@ -290,6 +292,7 @@ extern u32 sdfSndBankFlagTbl[SDF_SND_KINDS + 1];
 extern s32 sdfSndBank1Loaded;
 extern s32 sdfSndBank3Loaded;
 extern u8 sdfSndBankAltSlot;
+extern u8 sdfSndBankCycle; /* DDS only: which pair kinds 6 to 8 load next */
 extern u32 sdfSndSlotSerialNext;
 extern s32 sdfSndResumeIdx;
 extern s32 sdfSndSeqVolume;

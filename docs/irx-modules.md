@@ -47,8 +47,8 @@ mapped onto DDS's file by aligning the two `.text` sections.
 `src/irx/SDFSDMAN.c` starts from SMT3's text: a function whose code is the same
 in both keeps SMT3's C, and a function DDS changed has SMT3's C adapted to
 DDS's layout, or new C where DDS rewrote it. Of the 72 functions, 37 are
-matching C, 32 are drafts under `NON_MATCHING`, and 3 are still `INCLUDE_ASM`
-of DDS's own code: `sdfSndSeqThread`, `sdfSndLoadSmg`, `sdfAdpcmStreamInit`.
+matching C, 34 are drafts under `NON_MATCHING`, and 1 is still `INCLUDE_ASM` of
+DDS's own code: `sdfAdpcmStreamInit`.
 
 What changed, as far as the differences show:
 
@@ -62,6 +62,9 @@ What changed, as far as the differences show:
 - one bank-loaded flag instead of two: DDS uses the one SMT3 calls
   `sdfSndBank1Loaded`.
 - the BGM paths take `CpuSuspendIntr` locks SMT3 does not.
+- `sdfSndLoadSmg` places banks differently: kinds 4 and 5 alternate between
+  two banks, kinds 6 to 8 cycle through three pairs (`sdfSndBankCycle`),
+  kinds 2 and 3 are refused, and the BGM bank takes larger files.
 - the ADPCM stream player lost most of its logging (the fade, stop, mono,
   stereo and frequency messages, and `sdfAdpcmFreqNames`).
 
