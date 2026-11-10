@@ -1520,11 +1520,11 @@ and packet construction remain ordinary C.
 | Segment | DDS1 | DDS2 | Contents |
 |---|---|---|---|
 | `hand/crt0` | `func_00100000` .. `func_001001D0` (4) | `func_00100000` .. `func_001001D0` (4) | program entry `_start` (register/FPU clear, `.bss` clear, `SetupThread`/`SetupHeap` syscalls, `Exit`), the `Exit(0)` stub and the syscall 0x23 stub |
-| `hand/vu/corePktVu0Run` | `corePktVu0Run` | `corePktVu0Run` | DMA/VIF-polled unpack of scratchpad vertex records through VU0 `vlqi` loads |
-| `hand/vu/corePktEmitRefMapPass` | `corePktEmitRefMapPass` | `corePktEmitRefMapPass` | node vertex lighting loop, then `corePktLerpUVColorChain` and a `j corePktEmitTexTrisCtx2` tail |
-| `hand/vu/corePktApplyFaceDivColor` | `corePktApplyFaceDivColor` | `corePktApplyFaceDivColor` | per-vertex alpha clamp loop plus a linked-list copy |
-| `hand/vu/sdfVuVertexKernels` | `corePktSkinPointsFirst` .. `corePktXfmUV` (15) | `corePktSkinPointsFirst` .. `corePktXfmUV` (15) | VU0 macro-mode loops over 0x60-byte vertex records (transform, offset, scale, normalise, clip flags) |
 | `hand/mem/sdfMemClearBlocks` | `func_002E73F0` | `func_00340298` | 128-byte `sq` block clear entered by a computed `jr` (Duff's device), `memset` fallback |
+
+The VU0 vertex kernels (`corePktSkinPointsFirst` .. `corePktXfmUV`, `corePktApplyFaceDivColor`,
+`corePktEmitRefMapPass`, `corePktVu0Run`) are `INCLUDE_ASM` in `sdf/sdfVu1`, as in SMT3, with
+SMT3's `NON_MATCHING` drafts.
 
 ### Macro list
 
