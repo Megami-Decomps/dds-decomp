@@ -1,4 +1,5 @@
 #include "common.h"
+#include "sdfFrame.h"
 #include "sdf_types.h"
 #include "ps2asm.h"
 #include "fpu.h"
@@ -73,36 +74,36 @@ void effScreenOffset(void)
 
 /* vu0 routine: measure the projected camera-right offset. */
 s32 effPCPBlurScreenOffset(f32 scale) {
-    f32 scaleVector[4];
-    f32 projectedEnd[4];
-    f32 projectedStart[4];
-    f32 original[4];
+    sdfVector4_t scaleVector;
+    sdfVector4_t projectedEnd;
+    sdfVector4_t projectedStart;
+    sdfVector4_t original;
     f32 dx;
     f32 dy;
     f32 distance;
 
-    SDF_VU0_STOREVECTOR_NOMEM(original);
+    SDF_VU0_STOREVECTOR_NOMEM(&original);
     effScreenOffset();
-    SDF_VU0_STOREVECTOR(projectedStart);
+    SDF_VU0_STOREVECTOR(&projectedStart);
 
-    scaleVector[0] = scaleVector[1] = scaleVector[2] = scale;
-    SDF_VU0_LOADVECTOR(original);
+    scaleVector.x = scaleVector.y = scaleVector.z = scale;
+    SDF_VU0_LOADVECTOR(&original);
     SDF_VU0_COPYVECTOR_A_TO_C();
     SDF_VU0_LOADVECTOR_B(&aViewEye);
     SDF_VU0_SUBVECTOR();
     SDF_VU0_LOADVECTOR_B(&aViewDown);
     SDF_VU0_OUTERPRODUCT();
     SDF_VU0_NORMALIZE();
-    SDF_VU0_LOADVECTOR_B_BARRIER(scaleVector);
+    SDF_VU0_LOADVECTOR_B_BARRIER(&scaleVector);
     SDF_VU0_MULVECTOR();
     SDF_VU0_COPYVECTOR_C_TO_B();
     SDF_VU0_ADDVECTOR();
 
     effScreenOffset();
-    SDF_VU0_STOREVECTOR(projectedEnd);
-    dx = projectedEnd[0] - projectedStart[0];
-    dy = projectedEnd[1] - projectedStart[1];
-    SDF_VU0_LOADVECTOR(projectedStart);
+    SDF_VU0_STOREVECTOR(&projectedEnd);
+    dx = projectedEnd.x - projectedStart.x;
+    dy = projectedEnd.y - projectedStart.y;
+    SDF_VU0_LOADVECTOR(&projectedStart);
     distance = fsqrtf(dx * dx + dy * dy);
     return (s32)distance;
 }
@@ -199,18 +200,18 @@ void dds3Bezier4PDelete(effBezier4P_t *pEffBezier4P) {
 
 s32 dds3Bezier4PPartRun(effBezier4P_t *table, s32 slotIndex, f32 *out) {
     dds3Bezier4PPart_t *slot = &((dds3Bezier4PPart_t *)table->pPart)[slotIndex];
-    f32 w[4];
+    sdfVector4_t w;
     f32 t = slot->t;
     f32 u = 1.0f - t;
 
-    w[0] = u * u * u;
-    w[1] = t * (u * u) * 3.0f;
-    w[2] = t * t * u * 3.0f;
-    w[3] = t * t * t;
-    out[0] = slot->controlPoints[0][0] * w[0] + slot->controlPoints[1][0] * w[1] + slot->controlPoints[2][0] * w[2] + slot->controlPoints[3][0] * w[3];
-    out[1] = slot->controlPoints[0][1] * w[0] + slot->controlPoints[1][1] * w[1] + slot->controlPoints[2][1] * w[2] + slot->controlPoints[3][1] * w[3];
-    out[2] = slot->controlPoints[0][2] * w[0] + slot->controlPoints[1][2] * w[1] + slot->controlPoints[2][2] * w[2] + slot->controlPoints[3][2] * w[3];
-    t += slot->step;
+    w.x = u * u * u;
+    w.y = t * (u * u) * 3.0f;
+    w.z = t * t * u * 3.0f;
+    w.w = t * t * t;
+    out[0] = slot->controlPoints[0][0] * w.x + slot->controlPoints[1][0] * w.y + slot->controlPoints[2][0] * w.z + slot->controlPoints[3][0] * w.w;
+    out[1] = slot->controlPoints[0][1] * w.x + slot->controlPoints[1][1] * w.y + slot->controlPoints[2][1] * w.z + slot->controlPoints[3][1] * w.w;
+    out[2] = slot->controlPoints[0][2] * w.x + slot->controlPoints[1][2] * w.y + slot->controlPoints[2][2] * w.z + slot->controlPoints[3][2] * w.w;
+    t += SDF_FRAME_STEP(slot->step);
     if (t > 1.0f) {
         slot->t = 1.0f;
         return 0;
@@ -220,17 +221,17 @@ s32 dds3Bezier4PPartRun(effBezier4P_t *table, s32 slotIndex, f32 *out) {
 }
 
 s32 nbCameraLerpVec(dds3Bezier4PPart_t *slot, f32 *out) {
-    f32 w[4];
+    sdfVector4_t w;
     f32 t = slot->t;
     f32 u = 1.0f - t;
 
-    w[0] = u * u * u;
-    w[1] = t * (u * u) * 3.0f;
-    w[2] = t * t * u * 3.0f;
-    w[3] = t * t * t;
-    out[0] = slot->controlPoints[0][0] * w[0] + slot->controlPoints[1][0] * w[1] + slot->controlPoints[2][0] * w[2] + slot->controlPoints[3][0] * w[3];
-    out[1] = slot->controlPoints[0][1] * w[0] + slot->controlPoints[1][1] * w[1] + slot->controlPoints[2][1] * w[2] + slot->controlPoints[3][1] * w[3];
-    out[2] = slot->controlPoints[0][2] * w[0] + slot->controlPoints[1][2] * w[1] + slot->controlPoints[2][2] * w[2] + slot->controlPoints[3][2] * w[3];
+    w.x = u * u * u;
+    w.y = t * (u * u) * 3.0f;
+    w.z = t * t * u * 3.0f;
+    w.w = t * t * t;
+    out[0] = slot->controlPoints[0][0] * w.x + slot->controlPoints[1][0] * w.y + slot->controlPoints[2][0] * w.z + slot->controlPoints[3][0] * w.w;
+    out[1] = slot->controlPoints[0][1] * w.x + slot->controlPoints[1][1] * w.y + slot->controlPoints[2][1] * w.z + slot->controlPoints[3][1] * w.w;
+    out[2] = slot->controlPoints[0][2] * w.x + slot->controlPoints[1][2] * w.y + slot->controlPoints[2][2] * w.z + slot->controlPoints[3][2] * w.w;
     out[3] = 1.0f;
     t += slot->step;
     if (t > 1.0f) {
