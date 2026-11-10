@@ -3888,7 +3888,7 @@ extern s32 D_00435F30;
 
 extern s32 D_004360C0;
 
-extern void dds3CameraObjectBasicSetWorldEye(dds3Basic_t *camera, const u128 *worldEye);
+extern void dds3CameraObjectBasicGetCameraTM(dds3Basic_t *camera, const u128 *worldEye);
 
 void func_0012FA58(void) {
     FldLookAtVector nearPoint;
@@ -3930,7 +3930,7 @@ void func_0012FA58(void) {
         nearPoint.f[1] = fldLookAtNearPoint[1] + (nearPoint.f[1] - fldLookAtNearPoint[1]) * 0.125f;
         nearPoint.f[2] = fldLookAtNearPoint[2] + (nearPoint.f[2] - fldLookAtNearPoint[2]) * 0.5f;
     }
-    dds3CameraObjectBasicSetWorldEye(*sceneSlot, &nearPoint.q);
+    dds3CameraObjectBasicGetCameraTM(*sceneSlot, &nearPoint.q);
     referencePoint[0] = fldGlobalBase.x;
     referencePoint[1] = fldGlobalBase.y + fldCameraFollowRows[fldGlobalBase.cameraFollowRowIndex].y;
     referencePoint[2] = fldGlobalBase.z;
@@ -4029,7 +4029,7 @@ void func_0012FA58(void) {
     fldUpdateLookAtSegmentDistance();
 }
 
-extern void dds3CameraObjectBasicSetWorldEye(dds3Basic_t *camera, const u128 *worldEye);
+extern void dds3CameraObjectBasicGetCameraTM(dds3Basic_t *camera, const u128 *worldEye);
 extern f32 GetSphericalPosMove(f32 fromX, f32 fromZ, f32 toX, f32 toZ);
 extern f32 EulerAngleAxisY(void);
 extern void dds3GetTMPoseSet(dds3Basic_t *object);
@@ -4048,7 +4048,7 @@ void fldUpdateCameraViewFromPlayer(void) {
     nearPoint[2] = fldLookAtNearPoint[2] + (fldGlobalBase.z - fldLookAtNearPoint[2]);
     fldGlobalBase.angle = angle;
     fldGlobalBase.targetAngle = angle;
-    dds3CameraObjectBasicSetWorldEye(*world, (u128 *)nearPoint);
+    dds3CameraObjectBasicGetCameraTM(*world, (u128 *)nearPoint);
     dds3GetTMPoseSet(fldPlayerObject);
     farPoint[3] = 1.0f;
     farPoint[0] = fldGlobalBase.focusPos[0];
@@ -4242,7 +4242,7 @@ void func_001302A0(void) {
     nearPoint.f[0] = fldLookAtNearPoint[0] + (nearPoint.f[0] - fldLookAtNearPoint[0]) * 0.5f;
     nearPoint.f[1] = fldLookAtNearPoint[1] + (nearPoint.f[1] - fldLookAtNearPoint[1]) * 0.125f;
     nearPoint.f[2] = fldLookAtNearPoint[2] + (nearPoint.f[2] - fldLookAtNearPoint[2]) * 0.5f;
-    dds3CameraObjectBasicSetWorldEye((dds3Basic_t *)*world, &nearPoint.q);
+    dds3CameraObjectBasicGetCameraTM((dds3Basic_t *)*world, &nearPoint.q);
     dds3GetTMPoseSet((dds3Basic_t *)fldPlayerObject);
     farPoint.f[0] = area->focusPos[0];
     farPoint.f[1] = area->focusPos[1];

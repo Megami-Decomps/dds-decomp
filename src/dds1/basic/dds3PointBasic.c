@@ -40,7 +40,7 @@ dds3Basic_t *dds3AddPointBasic(u32 key, EvtWorldSourceTransformPrefix *source, c
     return obj;
 }
 
-f32 *dds3GetTransformSourceData(dds3Basic_t *node) {
+f32 *dds3PointBasicGetResource(dds3Basic_t *node) {
     return node->workdata;
 }
 

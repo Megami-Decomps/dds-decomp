@@ -23,7 +23,7 @@ typedef char SdfFloatCounter_time_at_0x0C[
 
 /* Advance one counter step unless frozen. FINISHED means a non-looping
  * counter was already at its endpoint; a frozen counter still CONTINUES. */
-s32 dds3PathBasicControlStep(SdfFloatCounter *counter);
+s32 dds3PathBasicControlIsFinished(SdfFloatCounter *counter);
 void dds3PathBasicControlAlterMode(SdfFloatCounter *counter, u32 direction);
 u32 dds3PathBasicControlGetMode(const SdfFloatCounter *counter);
 f32 dds3PathBasicControlGetRatio(const SdfFloatCounter *counter);

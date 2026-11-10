@@ -853,7 +853,7 @@ FldSceneStatus fldGetRestoreMode(void) {
 extern FieldAreaEncounterTable *D_003BAA38;
 extern void fldInitializeActorLinkedSequence(s32 mode, s32 index, fldSceneParam_t *sequence);
 
-extern f32 *dds3GetTransformSourceData(dds3Basic_t *node);
+extern f32 *dds3PointBasicGetResource(dds3Basic_t *node);
 extern void fldStartMiniTitleForUnlock(s32 area);
 extern void FromRotation(f32 angle);
 extern void fldPreparePlayerAndCameraScene(u128 *transform);
@@ -906,7 +906,7 @@ void fldRebuildFieldScene(void) {
             node = dds3SceneBasicSearchNameAndType(dds3GetControlScene(),
                 0x11, (const u8 *)sceneWork->entryName);
             if (node != NULL) {
-                transform = dds3GetTransformSourceData(node);
+                transform = dds3PointBasicGetResource(node);
             } else {
                 transform = fallback;
             }
@@ -1405,7 +1405,7 @@ extern FieldVec4 D_0039FC90;
 
 extern char D_003BABC0[];
 
-extern void dds3CameraObjectBasicSetWorldEye(struct dds3Basic_t *camera, const u128 *worldEye);
+extern void dds3CameraObjectBasicGetCameraTM(struct dds3Basic_t *camera, const u128 *worldEye);
 
 
 
@@ -1422,7 +1422,7 @@ void fldCreateSecondaryWorldCamera(void) {
     cameraObject = dds3AddCameraObjectBasicTypeLookAt(dds3AllocObjectId(), (u128 *)&targetPosition, (u128 *)&worldEye, (u128 *)&localUp);
     *cameraObjectSlot = cameraObject;
     dds3SetUnitObjectId(cameraObject, D_003BABC0);
-    dds3CameraObjectBasicSetWorldEye(*cameraObjectSlot, (u128 *)&worldEye);
+    dds3CameraObjectBasicGetCameraTM(*cameraObjectSlot, (u128 *)&worldEye);
     dds3GetRadiusPoseSet(*cameraObjectSlot, 2.0f);
     dds3ReplaceActiveCameraSceneBasic(dds3GetControlScene(), *cameraObjectSlot);
 }

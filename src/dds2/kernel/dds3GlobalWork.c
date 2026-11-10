@@ -36,7 +36,7 @@ extern void dds3WorkInit(const scrHeader_t *header);
 extern s32 sdfDispatchPrimaryUnitScript(u32 unitIndex, datUnitWork_t *sourceRecord,
     datUnitWork_t *targetRecord, u8 mode);
 extern char sdfRuntimeTaskName[]; /* "GBWK" */
-extern void sdfRuntimeTaskTeardownHook(void);
+extern void dds3GlobalWorkUserInit(void);
 
 extern void dds3GlobalWorkClearFlags(void);
 extern void evtInitGlobalWork(void);
@@ -87,7 +87,7 @@ void dds3GlobalWorkDestroy(void) {
     struct sdfMemHandle_t *allocation;
 
     dds3KillProcessName(sdfRuntimeTaskName, 0);
-    sdfRuntimeTaskTeardownHook();
+    dds3GlobalWorkUserInit();
     allocation = DDS3_GBWK->header.backingAllocation;
     sdfMemUnlock(allocation);
     sdfMemFreeDirect(allocation);
@@ -123,7 +123,7 @@ void evtResetWorldAndProfileRuntime(void) {
 }
 
 /* Empty GBWK teardown hook, invoked before its backing allocation is released. */
-void sdfRuntimeTaskTeardownHook(void) {
+void dds3GlobalWorkUserInit(void) {
 }
 
 extern u8 D_0043E5B0[16];
@@ -833,3 +833,4 @@ INCLUDE_SDATA(const s32, "kernel/dds3GlobalWork", D_00435DC5);
 INCLUDE_SDATA(const s32, "kernel/dds3GlobalWork", DDS3_GBWK);
 
 INCLUDE_SDATA(const s32, "kernel/dds3GlobalWork", D_00435DD4);
+

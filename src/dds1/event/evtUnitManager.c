@@ -1076,7 +1076,7 @@ EvtUnitVerticalMoveStepCount evtUnitPrepareVerticalMoveSteps(evtUnitHandle_t *un
 EvtUnitMotionStepResult evtUnitMoveTypePathTrace(evtUnitHandle_t *unit) {
     f32 v[4];
 
-    dds3PathBasicControlStep(&unit->pathControl->counter);
+    dds3PathBasicControlIsFinished(&unit->pathControl->counter);
     dds3PathBasicControlGetPos(unit->pathControl);
     SDF_VU0_STOREVECTOR(v);
     dds3SetPosPoseSet(unit->effObj, (u128 *)v);

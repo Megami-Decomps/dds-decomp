@@ -13067,7 +13067,7 @@ s32 func_002F6D00(EffActiveResource *owner) {
     dds3CameraObjectBasicSetFovy(camera, D_00437E90);
     data->fovUpdatePending |= DDS3_CAMERA_UPDATE_FOV_BIT;
     dds3SetRotPoseSet(camera, &D_003E9F80);
-    return dds3PathBasicControlStep(&path->counter);
+    return dds3PathBasicControlIsFinished(&path->counter);
 }
 
 

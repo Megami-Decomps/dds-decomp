@@ -13,7 +13,7 @@
 #include "dds3_object_control_slot.h"
 
 /* Allocate the inner state and associate it with its world-object handle. */
-Dds3BasicCreateResult dds3CreateCameraData(dds3Basic_t *object) {
+Dds3BasicCreateResult dds3CameraObjectBasicConstructor(dds3Basic_t *object) {
     CameraData *inner;
     dds3ObjectBaseControlWorkData_t *objectBase;
 
@@ -46,7 +46,7 @@ extern f32 aViewEye[4];
 extern f32 aViewDown[4];
 
 /* Release the camera's inner node, base handle, and owned data block. */
-void dds3DestroyCameraData(dds3Basic_t *camera) {
+void dds3CameraObjectBasicDestructor(dds3Basic_t *camera) {
     CameraData *cameraData;
 
     dds3FreePoseSet(camera);
@@ -57,7 +57,7 @@ void dds3DestroyCameraData(dds3Basic_t *camera) {
 
 /* Rebuild dirty vectors and publish only the active world's camera; return 1.
  * A pending field-of-view update is consumed only while this camera is active. */
-s32 dds3UpdateCameraObject(dds3Basic_t *camera) {
+s32 dds3CameraObjectBasicMainProcedure(dds3Basic_t *camera) {
     dds3PoseSet_t *inner;
     CameraData *data;
 
@@ -81,7 +81,7 @@ s32 dds3UpdateCameraObject(dds3Basic_t *camera) {
 }
 
 /* The camera draw callback has no geometry to submit. */
-s32 dds3DrawCameraObject(dds3Basic_t *camera) {
+s32 dds3CameraObjectBasicDrawProcedure(dds3Basic_t *camera) {
     return 1;
 }
 
@@ -189,12 +189,12 @@ void dds3LoadObjectMatrixPointerIntoVu(dds3Basic_t *camera) {
 }
 
 /* Copy the supplied vector to the camera's world-space eye position. */
-void dds3CameraObjectBasicSetWorldEye(dds3Basic_t *camera, const u128 *worldEye) {
+void dds3CameraObjectBasicGetCameraTM(dds3Basic_t *camera, const u128 *worldEye) {
     SDF_VU0_COPYVECTOR(&((CameraData *)camera->workdata)->worldEye, worldEye);
 }
 
 /* Load the camera's world-space eye vector into vf10. */
-void dds3CameraObjectBasicLoadWorldEyeIntoVu(dds3Basic_t *camera) {
+void dds3CameraObjectBasicGetTargetPos(dds3Basic_t *camera) {
     u128 *eye = &((CameraData *)camera->workdata)->worldEye;
 
     SDF_VU0_LOADVECTOR_BARRIER(eye);

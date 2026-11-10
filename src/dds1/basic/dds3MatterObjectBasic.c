@@ -159,7 +159,7 @@ void dds3MatterObjectBasicDestructor(dds3Basic_t *object) {
 
 extern void dds3GetTMPoseSet(dds3Basic_t *object);
 
-s32 effUpdateTransformOpacityMode(dds3Basic_t *object) {
+s32 dds3MatterObjectBasicMainProcedure(dds3Basic_t *object) {
     EffectTransformData *data = object->workdata;
     sdfModelRootNode_t *model;
     u32 mode = data->opacityMode;
@@ -290,7 +290,7 @@ extern dds3Basic_t *fldPlayerObject;
 
 /* Submit the normal pass and the opacity-mode pass, temporarily neutralizing
  * the tint while the player is hidden. */
-s32 effObjSubmitTransformOpacityPasses(dds3Basic_t *object) {
+s32 dds3MatterObjectBasicDrawProcedure(dds3Basic_t *object) {
     EffectTransformData *data;
     u32 opacityMode;
 

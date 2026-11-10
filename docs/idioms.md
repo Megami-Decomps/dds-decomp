@@ -12256,7 +12256,7 @@ consumers select original/variant actor muzzle positions and status flags
 instead of fixed positions or existing resource matrices. This is not a
 battle-active check, nor does it validate either stored selector.
 
-The empty `sdfRuntimeTaskTeardownHook` runs after the GBWK hierarchy is
+The empty `dds3GlobalWorkUserInit` runs after the GBWK hierarchy is
 destroyed and before the backing allocation is released. It remains empty.
 `btlCompleteEffectTaskImmediately` reports completion without per-frame work:
 the scheduler enters its end-delay phase on a nonzero callback result.

@@ -197,7 +197,7 @@ void evtResetObjectPendingValue(dds3Basic_t *object) {
     data->pendingTargetKey = 0;
 }
 
-s32 effObjInitializeFollowModelData(dds3Basic_t *object) {
+s32 dds3UnitObjectBasicConstructor(dds3Basic_t *object) {
     EffectObjectData *data;
     void *work;
 
@@ -262,7 +262,7 @@ extern void effObjStepFollowAngleTowardPosition(dds3Basic_t *obj, const f32 *tar
 extern void *dds3GetWorldNodeData(dds3Basic_t *node);
 
 /* Per-frame refresh of a model effect object: rebuild the child transform from the follow record (a tilt that wobbles with its angle), then run the timed callbacks. */
-s32 effUpdateFollowModelTransform(dds3Basic_t *obj) {
+s32 dds3UnitObjectBasicMainProcedure(dds3Basic_t *obj) {
     EffVec4 axis = D_004128B0;
     dds3PoseSet_t node;
     EffectObjectData *data;

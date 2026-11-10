@@ -588,10 +588,10 @@
 0x00112A90	dds3ObjectBaseGetPathControl	inferred	SMT3HD name via SLUS_209.11 0x00112280, shared-hash-in-run; was dds3GetSlot1Data
 0x00112AB0	dds3GetBaseControlWorkData	inferred	SMT3HD name via SLUS_209.11 0x001122A0, reloc-identical; was dds3GetObjectOwnedHandle
 0x00112B58	dds3ObjectBaseSetControlBasicSvs	inferred	SMT3HD name via SLUS_209.11 0x00112348, reloc-identical; was dds3SetOwnedWorldInnerValue
-0x00112B80	dds3CreateCameraData	inferred	Camera kind-4 creation callback: creates the node transform, allocates CameraData, attaches its dds3ObjectBaseControlWorkData_t handle and clears the pending-FOV flag.
-0x00112BE0	dds3DestroyCameraData	inferred	Releases the nested camera handle and data; mirrors DDS1 dds3DestroyCameraData.
-0x00112C20	dds3UpdateCameraObject	inferred	Updates a changed camera transform, publishes the selected camera vectors, and applies a pending field-of-view change.
-0x00112D08	dds3DrawCameraObject	inferred	Kind-4 EffWorldOps draw callback; native ops table at 0x00385110 stores this function in its fourth slot.
+0x00112B80	dds3CameraObjectBasicConstructor	inferred	SMT3HD name via SLUS_209.11 0x00112370, SMT3 world-kind table slot name (was dds3CreateCameraData); was dds3CreateCameraData
+0x00112BE0	dds3CameraObjectBasicDestructor	inferred	SMT3HD name via SLUS_209.11 0x001123D0, SMT3 world-kind table slot name (was dds3DestroyCameraData); was dds3DestroyCameraData
+0x00112C20	dds3CameraObjectBasicMainProcedure	inferred	SMT3HD name via SLUS_209.11 0x00112410, SMT3 world-kind table slot name (was dds3UpdateCameraObject); was dds3UpdateCameraObject
+0x00112D08	dds3CameraObjectBasicDrawProcedure	inferred	SMT3HD name via SLUS_209.11 0x001124F8, SMT3 world-kind table slot name (was dds3DrawCameraObject); was dds3DrawCameraObject
 0x00112D10	MakeCamera	inferred	SMT3HD name via SLUS_209.11 0x00112500, reloc-identical; was dds3RebuildCameraBasis
 0x00112DD8	dds3GetCameraObjectBaseControlWorkData	inferred	SMT3HD name via SLUS_209.11 0x001125C8, shared-hash-in-run; was dds3GetCameraHandle
 0x00112DE8	dds3AllocCameraObjectBasic	inferred	SMT3HD name via SLUS_209.11 0x001125D8, reloc-identical; was dds3CreateCameraObjectWithSlotData
@@ -599,8 +599,8 @@
 0x00112F28	dds3AddCameraObjectBasicTypeLookAt	inferred	SMT3HD name via SLUS_209.11 0x00112718, reloc-identical; was dds3CreateConfiguredCameraObject
 0x00112FC0	dds3AddCameraObjectBasic	inferred	SMT3HD name via SLUS_209.11 0x001127B0, reloc-identical; was dds3CreateCameraObjectWithVectors
 0x00113080	dds3DeleteCameraObjectBasic	inferred	SMT3HD name via SLUS_209.11 0x00112870, shared-hash-in-run; was dds3ReleaseCameraWorldNode
-0x001130B8	dds3CameraObjectBasicSetWorldEye	inferred	Copies the supplied vector into CameraData.worldEye; direct callers use it to seed or update the camera eye. Replaces the imported GetCameraTM name, which contradicted the copy direction.
-0x001130D0	dds3CameraObjectBasicLoadWorldEyeIntoVu	inferred	Loads CameraData.worldEye into VU0 vf10; paired direct callers consume it as the camera eye vector before subtracting the target position.
+0x001130B8	dds3CameraObjectBasicGetCameraTM	inferred	SMT3HD name via SLUS_209.11 0x001128A8, SMT3 name for the identical function (was dds3CameraObjectBasicSetWorldEye); was dds3CameraObjectBasicSetWorldEye
+0x001130D0	dds3CameraObjectBasicGetTargetPos	inferred	SMT3HD name via SLUS_209.11 0x001128C0, SMT3 name for the identical function (was dds3CameraObjectBasicLoadWorldEyeIntoVu); was dds3CameraObjectBasicLoadWorldEyeIntoVu
 0x001130E8	dds3CameraObjectBasicSetFovy	inferred	SMT3HD name via SLUS_209.11 0x001128D8, byte-identical; was dds3SetCameraFieldOfView
 0x00113100	dds3CameraObjectBasicGetFovy	inferred	SMT3HD name via SLUS_209.11 0x00112900, shared-hash-in-run; was dds3GetCameraFieldOfView
 0x00113110	dds3CameraObjectBasicGetTgtCam	inferred	SMT3HD name via SLUS_209.11 0x00112910, reloc-identical; was dds3TransformCameraVectorsByInnerRotation
@@ -616,9 +616,9 @@
 0x00113560	effObjStepFollowAngleTowardZero	inferred	After the angle-return delay, advances the follow angle toward zero by up to 1 degree and clears flag 0x2000 near zero.
 0x00113660	evtArmEffectObjectPendingValue	inferred	Stores an effect-object pending value, resets its timer and marks its flags. [names_reviewed10.tsv]
 0x001136A0	evtResetObjectPendingValue	inferred	Resets an object pending value and arms its timer. [names_reviewed8.tsv]
-0x001136B8	effObjInitializeFollowModelData	inferred	confidence=high; matched-C; src/dds2/basic/dds3UnitObjectBasic.c:200:func_001136B8; Creates inner transform and follow-model data, clears it, creates base slot-resource state, initializes IDs/timer and paired -45/+45 motion limits, then installs object flags 0x42.; source=fresh-R_Names31-today [names_qp11.tsv]
+0x001136B8	dds3UnitObjectBasicConstructor	inferred	SMT3HD name via SLUS_209.11 0x00112B38, SMT3 world-kind table slot name (was effObjInitializeFollowModelData); was effObjInitializeFollowModelData
 0x00113760	dds3UnitObjectBasicDestructor	inferred	SMT3HD name via SLUS_209.11 0x00112BB0, reloc-identical; was evtDestroyEffectObjectData
-0x001137D8	effUpdateFollowModelTransform	inferred	Updates transform from the followed model; DDS1 twin. [names_qp9.tsv]
+0x001137D8	dds3UnitObjectBasicMainProcedure	inferred	SMT3HD name via SLUS_209.11 0x00112C28, SMT3 world-kind table slot name (was effUpdateFollowModelTransform); was effUpdateFollowModelTransform
 0x00113AB0	dds3UnitObjectBasicDrawProcedure	inferred	HD original name, shared by audited native identity; was dds3UpdateEffectObjectFollowParameters.
 0x00113CD0	dds3UnitObjectBasicEL_LinkFree	inferred	SMT3HD name via SLUS_209.11 0x001130D0, reloc-identical; was evtEndObjectValueTransition
 0x00113D18	dds3UnitObjectBasicEL_Link	inferred	SMT3HD name via SLUS_209.11 0x00113118, reloc-identical; was effUpdateValueTransitionProximity
@@ -630,11 +630,11 @@
 0x00114008	dds3MatterObjectBasicGetHojiID	inferred	SMT3HD name via SLUS_209.11 0x00113408, reloc-identical; was effObjGetRoomNumberById
 0x00114048	dds3MatterObjectBasicSetAlpMode	inferred	SMT3HD name via SLUS_209.11 0x00113448, shared-hash-in-run; was dds3SetObjectPayloadWord8
 0x00114058	dds3MatterObjectBasicGetAlpMode	inferred	SMT3HD name via SLUS_209.11 0x00113458, shared-hash-in-run; was dds3GetObjectPayloadWord8
-0x00114068	effObjSetOpacityPassEnabled	inferred	Callers gate effObjSubmitTransformOpacityPasses; setter stores the pass-enabled word.
+0x00114068	effObjSetOpacityPassEnabled	inferred	Callers gate dds3MatterObjectBasicDrawProcedure; setter stores the pass-enabled word.
 0x00114070	dds3MatterObjectBasicConstructor	inferred	SMT3HD name via SLUS_209.11 0x00113468, reloc-identical; was effObjInitializeTransformData
 0x00114110	dds3MatterObjectBasicDestructor	inferred	SMT3HD name via SLUS_209.11 0x00113508, shared-hash-in-run; was evtReleaseEffectObjectHandleAndData
-0x00114150	effUpdateFadingModelTransform	inferred	Inferred from the current C implementation in basic/dds3MatterObjectBasic.c; agent-proposed name checked against its owner, fields and callees (R1 finite names pass).
-0x00114428	effObjSubmitTransformOpacityPasses	inferred	U1
+0x00114150	dds3MatterObjectBasicMainProcedure	inferred	SMT3HD name via SLUS_209.11 0x00113548, SMT3 world-kind table slot name (was effUpdateTransformOpacityMode, dds2 effUpdateFadingModelTransform); was effUpdateFadingModelTransform
+0x00114428	dds3MatterObjectBasicDrawProcedure	inferred	SMT3HD name via SLUS_209.11 0x001137C8, SMT3 world-kind table slot name (was effObjSubmitTransformOpacityPasses); was effObjSubmitTransformOpacityPasses
 0x00114618	dds3RefreshStoredVec3	inferred	Copies three floats from the source vector at indices 16-18 into the object's stored vector.
 0x00114640	FreeEffectData	inferred	SMT3HD name via SLUS_209.11 0x001139A8, reloc-identical; was effObjReleaseStateDependencies
 0x00114770	dds3EffectObjectBasicConstructor	inferred	SMT3HD name via SLUS_209.11 0x00113AD8, reloc-identical; was evtInitializeEffectObjectData
@@ -714,9 +714,9 @@
 0x00117170	dds3DeletePathControl	inferred	SMT3HD name via SLUS_209.11 0x001163E0, shared-hash-in-run; was dds3FreePathObject
 0x001171A0	dds3PathBasicControlGetPos	inferred	SMT3HD name via SLUS_209.11 0x00116410, reloc-identical; was dds3InterpolatePathVectorVU
 0x001172B8	dds3PathBasicControlGetRot	inferred	SMT3HD name via SLUS_209.11 0x00116528, reloc-identical; was dds3InterpolatePathQuaternionVU
-0x00117340	dds3PathBasicControlGetTransform	inferred	Samples the current rotation, position, and scale without advancing path time; replaces SMT3HD-inferred dds3PathBasicControlNextStep (SLUS_209.11 0x001165B0, reloc-identical; formerly dds3InterpolatePathOutput)
+0x00117340	dds3PathBasicControlNextStep	inferred	SMT3HD name via SLUS_209.11 0x001165B0, SMT3 name for the identical function (was dds3PathBasicControlGetTransform); was dds3PathBasicControlGetTransform
 0x001176A0	dds3PathBasicControlGetFovy	inferred	SMT3HD name via SLUS_209.11 0x00116910, reloc-identical; was sdfSampleActiveLinearCurve
-0x00117728	dds3PathBasicControlStep	inferred	Paired counter-step providers advance time; zero means non-looping endpoint; prior SMT3HD name suggested a predicate
+0x00117728	dds3PathBasicControlIsFinished	inferred	SMT3HD name via SLUS_209.11 0x00116998, SMT3 name for the identical function (was dds3PathBasicControlStep); was dds3PathBasicControlStep
 0x001177D0	dds3PathBasicControlAlterMode	inferred	SMT3HD name via SLUS_209.11 0x00116A40, shared-hash-in-run; was sdfSetFloatCounterDirection
 0x001177D8	dds3PathBasicControlGetMode	inferred	SMT3HD name via SLUS_209.11 0x00116A48, shared-hash-in-run; was sdfGetFloatCounterDirection
 0x001177E0	dds3PathBasicControlSetRatio	inferred	SMT3HD name via SLUS_209.11 0x00116A50, byte-identical; was evtScaleValueByMultiplier
@@ -726,14 +726,14 @@
 0x00117838	dds3PathBasicLoopOn	inferred	SMT3HD name via SLUS_209.11 0x00116AA8, byte-identical; was sdfEnableFloatCounterWrap
 0x00117848	dds3PathBasicLoopOff	inferred	SMT3HD name via SLUS_209.11 0x00116AB8, byte-identical; was sdfDisableFloatCounterWrap
 0x00117860	dds3AddPointBasic	inferred	SMT3HD name via SLUS_209.11 0x00116AD0, reloc-identical; was evtSpawnActionObj11
-0x001178B0	dds3GetTransformSourceData	inferred	confidence=high; Returns the borrowed data pointer of the kind0x11 transform-source node; its factory installs EvtWorldSourceTransformPrefix, and fldRebuildFieldScene consumes this getter's result as the transform. Generic dds3GetWorldNodeData remains distinct. DDS1 00117648 counterpart. [PurD readability b2]
+0x001178B0	dds3PointBasicGetResource	inferred	SMT3HD name via SLUS_209.11 0x00116B20, SMT3 name for the identical function (was dds3GetTransformSourceData); was dds3GetTransformSourceData
 0x001178B8	dds3GetWorldNodeData	inferred	Returns the canonical dds3Basic_t.data pointer at offset +0x18; the payload interpretation depends on node kind.
 0x001178C0	evtLoadValueVectorIntoVu	inferred	Loads the event value pointer vector directly into VU0 VF10; no scaling occurs. [names_reviewed16.tsv]
 0x00117908	dds3GlobalWorkInit	inferred	HD original name; native callback/dispatcher role and paired Nocturne implementation establish identity; was sdfCreateRuntimeTask.
 0x00117998	dds3GlobalWorkDestroy	inferred	HD original name; native callback/dispatcher role and paired Nocturne implementation establish identity; was sdfDestroyRuntimeTask.
 0x001179E8	dds3GlobalWorkMainProc	inferred	HD original name; native callback/dispatcher role and paired Nocturne implementation establish identity; was sdfBumpTickCounters.
 0x00117A10	evtResetWorldAndProfileRuntime	inferred	Clears script state and reinitializes world and profile runtime records. [names_reviewed9.tsv]
-0x00117A80	sdfRuntimeTaskTeardownHook	inferred	confidence=medium; Empty GBWK teardown hook called immediately after hierarchy destruction and before backing-allocation release. DDS1 00117808 has the same role and body. [Namer1 b63]
+0x00117A80	dds3GlobalWorkUserInit	inferred	SMT3HD name via SLUS_209.11 0x00116C98, SMT3 name for the identical function (was sdfRuntimeTaskTeardownHook); was sdfRuntimeTaskTeardownHook
 0x00117A88	sdfSaveResetSnapshot	inferred	TaskPurist
 0x00118008	sdfRestoreResetSnapshot	inferred	Restores saved runtime data after sdfResetGameRuntime clears the game state; restores flags, ticks, mantra/profile/template data, inventory/event bits, and world slot flags. Paired with DDS1 0x00117C48.
 0x00118598	sdfResetGameRuntime	inferred	confidence=high; matched-C; src/dds2/kernel/dds3GlobalWork.c:256:func_00118598; Resets game runtime ticks, process globals, viewer/solar state and party profiles; a full reset preserves the backing allocation, clears game-state storage and restores saved runtime data. Peer-released and whole-unit matched.; source=names_M143.tsv:24 [names_qp13.tsv]
@@ -5079,7 +5079,7 @@
 0x0023D740	evtSetUnitMove2	inferred	SMT3HD name via SLUS_209.11 0x001E4208, unique-masked-hash; was evtBeginUnitTransitionTowardWorldObject
 0x0023D800	evtSetUnitMove3	inferred	SMT3HD name via SLUS_209.11 0x001E42C8, unique-masked-hash; was evtSetUnitPathFollow
 0x0023DA48	evtStartUnitModeWithValue	inferred	Stores a nonzero unit value, clears its counter and enters mode four. [names_reviewed8.tsv]
-0x0023DA70	evtUpdateUnitMotion	inferred	Advances the event unit motion state and per-slot animations, applies movement/wobble updates, refreshes endpoint work, and returns whether the unit moved; called each frame by effUpdateFollowModelTransform. Paired with DDS1 0x00222ED8.
+0x0023DA70	evtUpdateUnitMotion	inferred	Advances the event unit motion state and per-slot animations, applies movement/wobble updates, refreshes endpoint work, and returns whether the unit moved; called each frame by dds3UnitObjectBasicMainProcedure. Paired with DDS1 0x00222ED8.
 0x0023E178	evtResetUnitVectorSlots	inferred	Initializes each vector slot and clears its state and object id. [names_reviewed7.tsv]
 0x0023E220	evtSetSlotVectors	inferred	DDS1 twin 0x002235E8 [names_M52_EvtEff.tsv]
 0x0023E320	evtSetSlotVector	inferred	DDS1 twin 0x002236E8; stores the supplied coordinates in evtUnitVectorSlots[slotIndex].auxX/auxY after the ten-slot bounds check. Callers in code_00250010 pass the UI editor slot and current/saved coordinate pair.
@@ -10713,7 +10713,7 @@
 0x00435D88	dds3ObjectIdCounter	inferred	SMT3HD data name via SLUS_209.11 0x0054E9C0, 2 agreeing references; was dds3ObjectIdCounter
 0x00435D8C	dds3TheWorld	inferred	SMT3HD data name via SLUS_209.11 0x0054E9C4, 20 agreeing references; was dds3TheWorld
 0x00435D90	dds3MoverCount	inferred	SMT3HD data name via SLUS_209.11 0x0054E9C8, 3 agreeing references; was dds3MoverCount
-0x00435DA0	effObjOpacityPassEnabled	inferred	Read by effObjSubmitTransformOpacityPasses as the opacity-pass early-return gate.
+0x00435DA0	effObjOpacityPassEnabled	inferred	Read by dds3MatterObjectBasicDrawProcedure as the opacity-pass early-return gate.
 0x00435DB0	sdfRuntimeTaskName	inferred	confidence=high; data D_00435DB0; matched-C-users=2; src/dds2/game/code_001176A0.c:222:sdfCreateRuntimeTask; src/dds2/game/code_001176A0.c:234:sdfDestroyRuntimeTask; Runtime state allocation creates this named task; teardown destroys same name; data-twin=D_003BA9E0, supported by 2 independently paired matched functions.; retail-data-start=asm/dds2/data/game/code_001176A0.sdata.s:10.; seed-placeholder=D_00435DB0; current asm label and source default identifier verified; source=names_reviewed36.tsv. [names_qp10_seed.tsv]
 0x00435DD0	DDS3_GBWK	inferred	SMT3HD data name via SLUS_209.11 0x0054EA20, 41 agreeing references; was DDS3_GBWK
 0x00435DD8	datAffinityTablePrimary	inferred	Selected by datGetEffectiveAffinity when unit flags include 0x1000; indexed by unit ID and element. The affinity debug reader uses the same table. Paired DDS1 0x003BAA08.

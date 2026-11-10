@@ -115,12 +115,12 @@ s32 MoverBasicMainprocuder(dds3Basic_t *moverNode)
         }
         if (slotResource->path->counter.flags & DDS3_PATH_WORLD_TRANSFORM_CHANNEL) {
             if ((targetObject->kindTag >> 24) == EFF_WORLD_KIND_LIGHT) {
-                dds3PathBasicControlGetTransform(slotResource->path, &transformParams);
+                dds3PathBasicControlNextStep(slotResource->path, &transformParams);
                 dds3SetLightObjectPathResoruce(targetObject, &transformParams);
             }
         }
         /* Advance even when no applicable channel was enabled for this target. */
-        dds3PathBasicControlStep(&slotResource->path->counter);
+        dds3PathBasicControlIsFinished(&slotResource->path->counter);
     } else {
         updateCallback = slotResource->update;
         /* This unidentified word is cleared even when no callback exists. */

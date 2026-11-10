@@ -170,7 +170,7 @@ void dds3PathBasicControlGetRot(dds3PathBasicControl_t *path) {
 }
 
 /* Interpolate rotation, position, and scale at the current path time, or clear the output. */
-void dds3PathBasicControlGetTransform(const dds3PathBasicControl_t *path, WorldTransformParams *transformParams) {
+void dds3PathBasicControlNextStep(const dds3PathBasicControl_t *path, WorldTransformParams *transformParams) {
     u32 segmentIndex;
     f32 interpolationWeight;
     const Dds3PathKeyframes *keyframes;
@@ -247,7 +247,7 @@ f32 dds3PathBasicControlGetFovy(dds3PathBasicControl_t *user) {
 #define SDF_FLOAT_COUNTER_WRAP_FLAG 0x00000020
 
 /* Step the counter by one; return zero when a non-looping endpoint is reached. */
-s32 dds3PathBasicControlStep(SdfFloatCounter *counter) {
+s32 dds3PathBasicControlIsFinished(SdfFloatCounter *counter) {
     s32 result = SDF_FLOAT_COUNTER_STEP_CONTINUES;
 
     if (counter->flags & SDF_FLOAT_COUNTER_FROZEN_FLAG) {
