@@ -80,12 +80,12 @@
 0x00103908	dds3ConsPanelTagLinkZ	inferred	SMT3HD name via SLUS_209.11 0x00103928, reloc-identical; was kwlnDrawSpriteCellZ
 0x00103970	dds3PadVibrationTest	inferred	SMT3HD name via SLUS_209.11 0x00103990, reloc-identical; was kwlnDebugPulsePadMotors
 0x001039E0	dds3PadInitialize	inferred	SMT3HD name via SLUS_209.11 0x00103A00, reloc-identical; was kwlnPadResetInputAndMotorState
-0x00103B10	dds3RunProcessList	inferred	matched-C; src/dds1/game/code_00102ED8.c; copies the two controllers' raw buttons and sticks, synthesizes right-stick direction buttons, updates held/new-press/repeat flags for button banks and sticks, and advances motor durations. Exact1268-byte DDS2 0x00103A00 twin; native-majority flat32-byte signed primary button array and separate per-stick magnitude scope preserve natural signed angle quantization (PurC deep refinement).; was dds3RunProcessList
+0x00103B10	dds3RunProcessList	inferred	matched-C; src/dds1/kernel/dds3PadManager.c; copies the two controllers' raw buttons and sticks, synthesizes right-stick direction buttons, updates held/new-press/repeat flags for button banks and sticks, and advances motor durations. Exact1268-byte DDS2 0x00103A00 twin; native-majority flat32-byte signed primary button array and separate per-stick magnitude scope preserve natural signed angle quantization (PurC deep refinement).; was dds3RunProcessList
 0x00104008	dds3GetVibrationLevel	inferred	steps the byte at D_003BD691 toward D_003BD699 by at most 0x20 per call with wrap-around [names_reviewed2.tsv]; was dds3GetVibrationLevel
 0x00104068	dds3PadVibrationSet	inferred	SMT3HD name via SLUS_209.11 0x001040A8, unique-masked-hash; was kwlnPadStartMotor
 0x00104130	dds3PadVibrationReset	inferred	Zeroes both pad motor levels and queued outputs and clears the motor command pair. [names_reviewed11.tsv]; was dds3PadVibrationReset
 0x00104168	dds3UpdateVibrationSlots	inferred	SMT3HD name via SLUS_209.11 0x001041A8, reloc-identical; was kwlnUpdatePadMotorDurations
-0x00104260	dds3TaskNoopCallback	inferred	confidence=high; Task update callback returns zero without using its task argument; registered by CallDebug for the StartSel task. DDS2 00104150 counterpart. [PurD readability b1]; was dds3TaskNoopCallback
+0x00104260	dds3StartMenuProcess	inferred	confidence=high; Task update callback returns zero without using its task argument; registered by CallDebug for the StartSel task. SMT3 name (kernel/dds3StartMenu). DDS2 00104150 counterpart. [PurD readability b1]; was dds3TaskNoopCallback
 0x00104268	dds3InitRandCB	inferred	SMT3HD name via SLUS_209.11 0x00104670, reloc-identical; was kwlnInitMagicState
 0x00104290	dds3DebugGraphUpdate	inferred	DebugTimeGrph update callback; native body returns signed zero scheduler control and ignores the incoming task argument.; was dds3DebugGraphUpdate
 0x001045F8	dds3DebugGraphTaskDestroy	inferred	No-op destroy callback registered for the DebugTimeGrph task.; was dds3DebugGraphTaskDestroy
@@ -102,10 +102,10 @@
 0x00104D70	dds3LoadDefaultResource	inferred	checks active state then loads D_00325748 with active handle; was dds3LoadDefaultResource
 0x00104DB8	dds3TextureFindIncompleteResource	inferred	scans resource nodes and returns follow-up callback for incomplete entry; was dds3TextureFindIncompleteResource
 0x00104E20	dds3DrawTextureAllocationMapBlock	inferred	Draws a texture-resource allocation block as colored map rows from its start word, size and allocation mode; callers render primary/secondary resources with selection/highlight mode. DDS2 twin 0x00104D40.; was dds3DrawTextureAllocationMapBlock
-0x00105010	dds3DrawTextureListDiagnostic	inferred	confidence=high; matched-C; src/dds1/game/code_00102ED8.c:406:func_00105010; Draws background then walks texture-list prev links and appends each texture diagnostic row.; twin=0x00104F30, anchored ordered retail pairing.; sources=names_M143.tsv,names_R_Names35.tsv [names_qp10.tsv]; was dds3DrawTextureListDiagnostic
+0x00105010	dds3DrawTextureListDiagnostic	inferred	confidence=high; matched-C; src/dds1/game/code_00104290.c:428:func_00105010; Draws background then walks texture-list prev links and appends each texture diagnostic row.; twin=0x00104F30, anchored ordered retail pairing.; sources=names_M143.tsv,names_R_Names35.tsv [names_qp10.tsv]; was dds3DrawTextureListDiagnostic
 0x001050B8	dds3TextureAttachTask	inferred	allocates and initializes task then invokes scene attach callback; was dds3TextureAttachTask
 0x00105118	dds3EnsureDefaultResource	inferred	initializes D_00325748 when readiness byte is clear; was dds3EnsureDefaultResource
-0x00105150	dds3InitializeFrameDrawPackets	inferred	Inferred from the current C implementation in game/code_00102ED8.c; agent-proposed name checked against its owner, fields and callees (R1 finite names pass).; was dds3InitializeFrameDrawPackets
+0x00105150	dds3InitializeFrameDrawPackets	inferred	Inferred from the current C implementation in kernel/dds3KernelDraw.c; agent-proposed name checked against its owner, fields and callees (R1 finite names pass).; was dds3InitializeFrameDrawPackets
 0x00105320	dds3InitDrawEnv	inferred	SMT3HD name via SLUS_209.11 0x00104820, reloc-identical; was evtResetDisplayProjectionAndVectorState
 0x00105370	dds3InitRenderDrawEnv	inferred	SMT3HD name via SLUS_209.11 0x00104870, unique-masked-hash; was kwlnInitHeldTextureScenePackets
 0x001054D0	dds3AllocRenderTexture	inferred	SMT3HD name via SLUS_209.11 0x001049D0, reloc-identical; was kwlnCreateHeldTextureBuffer
@@ -10000,7 +10000,7 @@
 0x003BA824	runprocess	inferred	SMT3HD data name via SLUS_209.11 0x0054E874, 3 agreeing references; was runprocess
 0x003BA83C	sdfDefaultCdMode	inferred	SMT3HD name via SLUS_209.11 0x0054E8BC, sdf/sdfDefaultMain SMT3 rename; was D_003BA83C
 0x003BA848	dds3AdminTaskName	inferred	confidence=high; data D_003BA848; matched-C-users=2; src/dds1/game/code_00102ED8.c:143:dds3InitAdmini; src/dds1/game/code_00101B08.c:185:GetAdminiProcessData; Task lookup/create and admin work accessor use this task-name string; data-twin=D_00435C18, supported by 2 independently paired matched functions.; retail-data-start=asm/dds1/data/game/code_00101B08.sdata.s:22.; seed-placeholder=D_003BA848; current asm label and source default identifier verified; source=names_reviewed36.tsv. [names_qp10_seed.tsv]
-0x003BA8D8	dds3CurrentIncompleteResource	inferred	confidence=high; matched_users=src/dds1/game/code_00102ED8.c:dds3LoadDefaultResource, src/dds1/game/code_00102ED8.c:dds3TextureFindIncompleteResource; Resource scan stores the first unfinished list entry here and the load callback consumes that entry. [names_qp9.tsv]; was dds3CurrentIncompleteResource
+0x003BA8D8	dds3CurrentIncompleteResource	inferred	confidence=high; matched_users=src/dds1/game/code_00104290.c:dds3LoadDefaultResource, src/dds1/game/code_00102ED8.c:dds3TextureFindIncompleteResource; Resource scan stores the first unfinished list entry here and the load callback consumes that entry. [names_qp9.tsv]; was dds3CurrentIncompleteResource
 0x003BA8DC	dds3TextureViewerPageIndex	inferred	confidence=high; data D_003BA8DC; matched-C-users=2; src/dds1/game/code_00102ED8.c:294:dds3TextureGetPageIndex; src/dds1/game/code_00102ED8.c:300:dds3TextureViewerHandlePad; Texture viewer input changes this index; page accessor returns it; data-twin=D_00435CAC, supported by 2 independently paired matched functions.; retail-data-start=asm/dds1/data/game/code_00102ED8.sdata.s:223.; seed-placeholder=D_003BA8DC; current asm label and source default identifier verified; source=names_reviewed36.tsv. [names_qp10_seed.tsv]; was dds3TextureViewerPageIndex
 0x003BA8E8	egl_OT_Offset	inferred	SMT3HD data name via SLUS_209.11 0x0054E940, 8 agreeing references; was egl_OT_Offset
 0x003BA8F0	dds3RenderTex	inferred	SMT3HD data name via SLUS_209.11 0x0054E948, 5 agreeing references; was dds3RenderTex
@@ -10012,7 +10012,7 @@
 0x003BA90C	dds3ScreenBlurScale	inferred	SMT3HD data name via SLUS_209.11 0x0054E964, 10 agreeing references; was dds3ScreenBlurScale
 0x003BA920	fadergba	inferred	SMT3HD data name via SLUS_209.11 0x0054E978, 4 agreeing references; was fadergba; sized 0x4: the fade colour's red, green, blue and alpha (dds3FadeColor_t), HD's u8 fadergba[4] in dds3KernelDraw.c
 0x003BA928	dds3BackgroundFadeColor	inferred	high confidence; src/dds1/game/code_00102ED8.c dds3FadeBackgroundStartIn(): D_003BA928[0] = 0; Four-component background overlay color, with its alpha initialized by the background-fade entry points. [names_reviewed26.tsv]; was dds3BackgroundFadeColor
-0x003BA92C	dds3BackgroundFadeMode	inferred	confidence=high; matched_users=src/dds1/game/code_00102ED8.c:dds3FadeIsBackgroundOverlayActive, src/dds1/game/code_00102ED8.c:dds3FadeSetMode; Fade-mode setter stores the mode; background-overlay visibility logic branches on it. [names_qp9.tsv]; was dds3BackgroundFadeMode
+0x003BA92C	dds3BackgroundFadeMode	inferred	confidence=high; matched_users=src/dds1/kernel/dds3KernelDraw.c:dds3FadeIsBackgroundOverlayActive, src/dds1/kernel/dds3KernelDraw.c:dds3FadeSetMode; Fade-mode setter stores the mode; background-overlay visibility logic branches on it. [names_qp9.tsv]; was dds3BackgroundFadeMode
 0x003BA92E	dds3BackgroundFadeFirstRamp	inferred	The background fade's first band ramp, up to DDS3_BGFADE_FIRST_RAMP_MAX: the band's top moves up 8 units a step. DDS2 twin 0x00435CFE.; was dds3BackgroundFadeFirstRamp
 0x003BA930	dds3BackgroundFadeSecondRamp	inferred	The background fade's second band ramp, up to DDS3_BGFADE_SECOND_RAMP_MAX: the band's bottom moves down 8 units a step. DDS2 twin 0x00435D00.; was dds3BackgroundFadeSecondRamp
 0x003BA934	distblurovercnt	inferred	SMT3HD data name via SLUS_209.11 0x0054E97C, 4 agreeing references; was distblurovercnt
@@ -10444,7 +10444,7 @@
 0x003BD638	sdfMovieIpsExt	inferred	SMT3HD name via SLUS_209.11 0x00551B50, sdf/sdfMovie SMT3 data name; was D_003BD638
 0x003BD688	dds3KernelThread	inferred	SMT3HD name via SLUS_209.11 0x00551B88, sdf/sdfDefaultMain SMT3 rename; was kwlnMainLoopThreadNode
 0x003BD690	dds3PadVibrationState	inferred	SMT3HD data name via SLUS_209.11 0x00551B90, 3 agreeing references; was dds3PadVibrationState
-0x003BD699	dds3PadVibrationMode	inferred	confidence=high; src/dds1/game/code_00102ED8.c:dds3GetVibrationLevel; Target actuator level approached in steps of at most 0x20. [names_qp9.tsv]; was dds3PadVibrationMode
+0x003BD699	dds3PadVibrationMode	inferred	confidence=high; src/dds1/kernel/dds3PadManager.c:dds3GetVibrationLevel; Target actuator level approached in steps of at most 0x20. [names_qp9.tsv]; was dds3PadVibrationMode
 0x003BD6A8	dds3DebugGraphTask	inferred	The task handle created for DebugTimeGrph and passed to hierarchy destruction.; was dds3DebugGraphTask
 0x003BD6B4	blurnow	inferred	SMT3HD data name via SLUS_209.11 0x00551BAC, 4 agreeing references; was blurnow
 0x003BD6B6	blurmax	inferred	SMT3HD data name via SLUS_209.11 0x00551BAE, 3 agreeing references; was blurmax

@@ -68,8 +68,13 @@ segments:
       - [0x2AC0, c, sdf/sdfDefaultMain]  # SMT3 unit (sdf-decomp tools/twins.py runs)
       - [0x2C50, c, kernel/dds3KernelProcess]  # SMT3 unit
       - [0x3790, c, kernel/dds3AdminiProcess]  # Nocturne __FILE__; starts at dds3GetAdminTaskWork (same-TU provider evidence)
-      - [0x3DC8, c, game/code_00102DC8]
-      - [0x73B8, c, kernel/dds3KernelDraw]  # Nocturne __FILE__
+      - [0x44E0, c, kernel/dds3DebugMenu]  # SMT3 unit
+      - [0x44E8, c, kernel/dds3KernelMisc]  # SMT3 unit
+      - [0x4860, c, kernel/dds3PadManager]  # SMT3 unit
+      - [0x5150, c, kernel/dds3StartMenu]  # SMT3 unit; DDS keeps only dds3StartMenuProcess
+      - [0x5158, c, kernel/dds3Randomize]  # SMT3 unit
+      - [0x5180, c, game/code_00104180]  # DDS-only debug graph and texture viewer
+      - [0x6070, c, kernel/dds3KernelDraw]  # Nocturne __FILE__; SMT3 unit starts at dds3InitializeFrameDrawPackets
       - [0x8EF8, c, game/code_00107EF8]
       - [0xCD50, c, script/scrScriptProcess]  # Nocturne __FILE__
       - [0xD348, c, script/scrTraceCode]  # Nocturne __FILE__
@@ -343,7 +348,9 @@ segments:
       - [0x311FA0, .rodata, game/code_00100000]
       - [0x312008, .rodata, kernel/dds3KernelCore]
       - [0x3120A8, .rodata, sdf/sdfDefaultMain]
-      - [0x3121B0, .rodata, game/code_00102DC8]
+      - [0x3121B0, .rodata, kernel/dds3PadManager]
+      - [0x3121D0, .rodata, game/code_00104180]
+      - [0x3122F0, .rodata, kernel/dds3KernelDraw]
       - [0x312320, .rodata, game/code_00107EF8]
       - [0x3123F8, .rodata, script/scrScriptProcess]
       - [0x313510, .rodata, script/scrTraceCode]
@@ -473,8 +480,8 @@ segments:
       - [0x32FD40, .rodata, sdf/sdf_Decomp]
       - [0x32FD70, .rodata, sdf/sdfTmx]
       - [0x32FE10, rodata, rodata_0042EE10]
-      - [0x333E80, .lit4, game/code_00102DC8]
-      - [0x333E90, .lit4, kernel/dds3KernelDraw]
+      - [0x333E80, .lit4, kernel/dds3PadManager]
+      - [0x333E88, .lit4, kernel/dds3KernelDraw]
       - [0x333E98, .lit4, script/scrCommonCommand]
       - [0x333EA0, .lit4, basic/dds3ObjectBase]
       - [0x333EC0, .lit4, basic/dds3CameraObjectBasic]
@@ -579,7 +586,9 @@ segments:
       - [0x336C0C, .sdata, sdf/sdfDefaultMain]
       - [0x336C14, .sdata, kernel/dds3KernelProcess]
       - [0x336C18, .sdata, kernel/dds3AdminiProcess]
-      - [0x336C20, .sdata, game/code_00102DC8]
+      - [0x336C30, .sdata, kernel/dds3PadManager]
+      - [0x336C50, .sdata, game/code_00104180]
+      - [0x336CB8, .sdata, kernel/dds3KernelDraw]  # starts at egl_OT_Offset, as in SMT3
       - [0x336D18, .sdata, game/code_00107EF8]
       - [0x336D70, .sdata, basic/dds3DbgBasic]
       - [0x336D88, .sdata, basic/dds3Basic]

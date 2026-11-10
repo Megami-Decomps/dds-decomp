@@ -1,15 +1,23 @@
 #include "sdk_ps2.h"
 #include "common.h"
-#include "dds3_draw_light_binding.h"
 #include "ps2asm.h"
-#include "kernel.h"
+#include "dds3_background_fade_api.h"
+#include "dds3_draw_buffer.h"
+#include "eff_random_mod.h"
+#include "sdf_packet_list.h"
+#include "sdf_tex_packet.h"
+#include "sdf_projection.h"
+#include "btl.h"
+#include "dds3_fade_color.h"
+#include "evt_frame_state_packet.h"
+#include "dds3_draw_light_binding.h"
 #include "draw3d.h"
 #include "gs_packet.h"
-#include "eff_blur.h"
 #include "eff_rectangle_blur_api.h"
 #include "eff_event_draw.h"
 #include "eff_event_work_api.h"
-#include "eff.h"
+#include "dds3_frame_draw_bank.h"
+#include "sdf_packet_alloc.h"
 
 extern u32 dds3DrawFlag;
 extern u8 dds3ScreenBlurFlag;
@@ -26,7 +34,6 @@ extern dds3LightSourceTable_t dds3LightParam;
 
 /* Pending, saved, and frame blocks share the effect owner's parameter type.
  * dds3DrawFlag tracks each family's running fades and transitions. */
-
 
 extern dds3Effect_Filter_t filter2target;
 extern dds3Effect_PartialMultiFilterParam_t mfiltertarget;
@@ -81,11 +88,723 @@ extern void Normalize(void);
 #define DDS3_DRAW_OVERLAY_TRANSITION_BIT 0x800
 #define DDS3_DRAW_CLEAR_OVERLAY_TRANSITION 0xfffff7ff
 
+extern char D_0039E170[];
+extern char D_0039E188[];
+#define DDS3_DIAG_PACKET_LIST_BYTES 0x20
+#define DDS3_HELD_TEXTURE_CLAMP_MODE 5
+
+extern void eglSetOt(u32 surfaceIndex);
+extern void evtSubmitDefaultDepthGradientRect(s32 x, s32 y, s32 width, s32 height, s32 topLeftColor, s32 topRightColor, s32 bottomRightColor, s32 bottomLeftColor);
+extern void evtSubmitPrimaryAlphaBlendMode(s32 blendMode);
+extern void evtSubmitPrimaryGsTest(s32 ate, s32 atst, s32 aref, s32 afail, s32 date, s32 datm, s32 unusedZte, s32 ztst);
+extern u16 D_003BA918;
+extern s16 D_003BA91A;
+extern u16 D_003BA91C;
+extern u16 D_003BA91E;
+extern u32 dds3RenderTex;
+extern sdfGsMemSlice_t *D_003BA8F4;
+extern sdfTexHandle_t *dds3RenderTexture;
+extern s8 D_003BA7FC;
+extern s8 dds3BackgroundFadeMode;
+extern u8 dds3BackgroundFadeColor[4];
+extern f32 D_003245EC[];
+extern u16 fadenow;
+extern u16 fademax;
+extern u16 dds3BackgroundFadeCounter;
+extern u16 dds3BackgroundFadeDuration;
+extern s16 dds3BackgroundFadeFirstRamp;
+extern s16 dds3BackgroundFadeSecondRamp;
+extern void dds3InitializeFrameDrawPackets(s32 bufferIndex);
+extern void dds3InitZClearDrawTag(void);
+extern void eglInit(void);
+extern void sdfGrSetScreen(s32 displayModeIndex);
+extern void *sdfDevPrintf(s32, s32, s32, s32, const char *, ...);
+extern s32 D_003BA724;
+extern sdfGrOt_t D_00325708;
+
+extern dds3FrameDrawBank_t dds3DrawEnv[2];
+extern u32 D_003BA8EC;
+extern sdfGrFrameSet_t sdfGrFrameSet;
+extern Matrix4 sdfViewMatrix;
+extern Matrix4 D_00329790;
+extern sdf3DLight_t *dds3LightParam2[3];
+extern sdfVector4_t dds3AmbientColor2;
+extern void sdf3DLinkInitPacket(sdfDrawTag_t *, DmaPacketHeader *);
+
+/* Initialize the selected frame bank's scene and overlay packet chains. */
+void dds3InitializeFrameDrawPackets(s32 bufferIndex) {
+    sdfDrawTagInit(&dds3DrawEnv[bufferIndex].initialList);
+    sdf3DLinkInitPacket(&dds3DrawEnv[bufferIndex].initialList,
+                                        &dds3DrawEnv[bufferIndex].programReference);
+    sdfDrawTagInit(&dds3DrawEnv[bufferIndex].sceneList);
+    sdfPreDrawTagInit(&dds3DrawEnv[bufferIndex].linkedList);
+    sdfGrSetStdDrawEnv(&dds3DrawEnv[bufferIndex].scene, &sdfGrFrameSet);
+    /* Update the RGBAQ color word while retaining its floating-point Q word. */
+    *(u32 *)&dds3DrawEnv[bufferIndex].scene.centeredBounds.rgbaq.value = D_003BA8EC;
+    if (dds3DrawFlag & 0x10000000) {
+        sdfGrSetClearPacket(&dds3DrawEnv[bufferIndex].scene.centeredBounds, 0, 0,
+                                         sdfGrFrameSet.bufferFormat,
+                                         sdfGrFrameSet.auxiliaryFormat);
+        dds3DrawFlag &= 0xEFFFFFFF;
+    }
+    sdfGrLinkStdDrawEnv(&dds3DrawEnv[bufferIndex].sceneList,
+                                 &dds3DrawEnv[bufferIndex].linkedList,
+                                 &dds3DrawEnv[bufferIndex].scene.link);
+    sdf3DMakeViewportPacket(&dds3DrawEnv[bufferIndex].sceneMatrix,
+                             &dds3ScreenParam, &sdfViewMatrix);
+    sdfDrawTagLink(&dds3DrawEnv[bufferIndex].sceneList,
+                    (u32)&dds3DrawEnv[bufferIndex].sceneMatrix);
+    sdf3DMakeLightParallelPacket(&dds3DrawEnv[bufferIndex].scenePacketStorage,
+                  (sdf3DLight_t **)dds3LightParam, (sdfVector4_t *)&dds3AmbientColor);
+    sdfDrawTagLink(&dds3DrawEnv[bufferIndex].sceneList,
+                    (u32)&dds3DrawEnv[bufferIndex].scenePacketStorage);
+
+    sdfDrawTagInit(&dds3DrawEnv[bufferIndex].thirdList);
+    sdf3DMakeViewportPacket(&dds3DrawEnv[bufferIndex].thirdMatrix,
+                             &D_00324980, &D_00329790);
+    sdfDrawTagLink(&dds3DrawEnv[bufferIndex].thirdList,
+                    (u32)&dds3DrawEnv[bufferIndex].thirdMatrix);
+    sdf3DMakeLightParallelPacket(&dds3DrawEnv[bufferIndex].overlayLightPacket,
+                  dds3LightParam2, &dds3AmbientColor2);
+    sdfDrawTagLink(&dds3DrawEnv[bufferIndex].thirdList,
+                    (u32)&dds3DrawEnv[bufferIndex].overlayLightPacket);
+}
+
+/* Select display mode 1, rebuild both projection blocks and reset draw-vector state. */
+void dds3InitDrawEnv(void) {
+    sdfGrSetScreen(1);
+    sdf3DMakeScreenParam(&dds3ScreenParam.camera);
+    sdf3DMakeScreenParam(&D_00324980.camera);
+    dds3InitializeFrameDrawPackets(0);
+    dds3InitializeFrameDrawPackets(1);
+    dds3InitZClearDrawTag();
+    D_003BA7FC = 0;
+    eglInit();
+}
+
+/* One 0x1F40-byte draw bank of the held-texture render target. */
+
+extern sdfGrFrameSet_t dds3RenderTexId;
+extern u16 D_003BA8FC;
+extern u16 D_003BA8FE;
+extern u32 dds3RenderDrawEnv;
+extern sdf3DLight_t *dds3RenderLightParallel[3];
+extern sdfVector4_t dds3RenderAmbientColor;
+extern Matrix4 dds3RenderViewportMatrix;
+
+/* Rebuild the held-texture render target's view and both frame banks. */
+void dds3InitRenderDrawEnv(void) {
+    s32 i;
+
+    dds3RenderTexId.width = D_003BA8FC;
+    dds3RenderTexId.unk2 = D_003BA8FE;
+    dds3RenderTexId.height = D_003BA8FE;
+    dds3RenderTexId.bufferFormat = 0;
+    dds3RenderTexId.auxiliaryFormat = 0x30;
+    dds3RenderTexId.buffers[0] = D_003BA8F4;
+    dds3RenderTexId.buffers[1] = 0;
+    dds3RenderTexId.buffers[2] = sdfGrFrameSet.buffers[2];
+    sdf3DMakeScreenParam(&D_003247B0.camera);
+    for (i = 0; i != 2; i++) {
+        sdfDrawTagInit(&dds3DrawEnv[i].heldTexture.list);
+        sdfGrSetDrawEnv(&dds3DrawEnv[i].heldTexture.scene, &dds3RenderTexId, 0);
+        *(u32 *)&dds3DrawEnv[i].heldTexture.scene.centeredBounds.rgbaq.value = dds3RenderDrawEnv;
+        sdfDrawTagLink(&dds3DrawEnv[i].heldTexture.list, (u32)&dds3DrawEnv[i].heldTexture.scene);
+        sdf3DMakeViewportPacket(&dds3DrawEnv[i].heldTexture.matrix, &D_003247B0, &dds3RenderViewportMatrix);
+        sdfDrawTagLink(&dds3DrawEnv[i].heldTexture.list, (u32)&dds3DrawEnv[i].heldTexture.matrix);
+        sdf3DMakeLightParallelPacket(&dds3DrawEnv[i].heldTexture.lighting, dds3RenderLightParallel, &dds3RenderAmbientColor);
+        sdfDrawTagLink(&dds3DrawEnv[i].heldTexture.list, (u32)&dds3DrawEnv[i].heldTexture.lighting);
+    }
+}
+
+extern u16 D_003BA8FC;
+extern u16 D_003BA8FE;
+extern void dds3FreeRenderTexture(void);
+extern void dds3InitRenderDrawEnv(void);
+extern sdfGsMemSlice_t *sdfGsAllocFrameBuff(s32 width, s32 height, s32 format);
+extern sdfTexHandle_t *sdfTexNew(s32 x, s32 y, s32 pixelFormat, s32 maxMipLevel, sdfGsMemSlice_t *primary, s32 paletteFormat, s32 paletteCount, sdfGsMemSlice_t *secondary);
+/* Replace the held texture with a width x height image buffer; return 1 on success.
+ * A texture-creation failure does not roll back the already allocated image buffer. */
+s32 dds3AllocRenderTexture(u16 width, u16 height, f32 aspect) {
+    sdfTexHandle_t *texture;
+
+    if (dds3RenderTexture != 0) {
+        dds3FreeRenderTexture();
+    }
+    dds3RenderTex = 0;
+    D_003BA8FC = width;
+    D_003BA8FE = height;
+    D_003BA8F4 = sdfGsAllocFrameBuff(width, height, 0);
+    if (D_003BA8F4 == 0) {
+        return 0;
+    }
+    texture = sdfTexNew(width, height, 0, 0, D_003BA8F4, 0, 0, 0);
+    if (texture == 0) {
+        return 0;
+    }
+    dds3RenderTexture = texture;
+    sdfTexSetWrapMode(texture, DDS3_HELD_TEXTURE_CLAMP_MODE);
+    sdfTexMakeGIFPacket(texture);
+    D_003247B0.camera.aspect = aspect;
+    D_003247B0.camera.width = width;
+    D_003247B0.camera.height = height;
+    dds3InitRenderDrawEnv();
+    return 1;
+}
+
+/* Release the held texture if present and clear tracking; no separate buffer free. */
+void dds3FreeRenderTexture(void) {
+    if (dds3RenderTexture != 0) {
+        sdfTexReleaseReference(dds3RenderTexture);
+    }
+    dds3RenderTexture = 0;
+    D_003BA8F4 = 0;
+    dds3RenderTex = 0;
+}
+
+/* Set the flag and return 1 when a held handle exists; otherwise leave it and return 0. */
+
+s32 dds3RenderTextureON(void) {
+    s32 result = 0;
+
+    if (dds3RenderTexture == 0) {
+        return result;
+    }
+    dds3RenderTex = 1;
+    return 1;
+}
+
+void dds3RenderTextureOFF(void) {
+    dds3RenderTex = 0;
+}
+
+u32 dds3CheckRenderTexture(void) {
+    return dds3RenderTex;
+}
+
+sdfTexHandle_t *dds3GetRenderTexture(void) {
+    return dds3RenderTexture;
+}
+
+extern f32 sdfViewShakeVector[];
+extern f32 D_003BA940[];
+extern f32 fabsf(f32 value);
+
+/* Advance the two bounded shake offsets and taper finite-duration amplitudes. */
+void dds3RunQuake(void) {
+    f32 limits[2];
+    f32 weights[2];
+    s32 axis;
+
+    memcpy(weights, D_003BA940, sizeof(weights));
+    if (D_003BA918 == 0) {
+        SDF_VU0_LOADIDENTITYVECTOR();
+        SDF_VU0_VECTOR_W_SET_ZERO();
+        return;
+    }
+    if (D_003BA91A == 0) {
+        D_003BA918 = 0;
+        return;
+    }
+    limits[0] = D_003BA91C * 0.01f;
+    limits[1] = D_003BA91E * 0.01f;
+    for (axis = 0; axis < 2; axis++) {
+        if (limits[axis] != 0.0f) {
+            f32 step = dds3GetRandFloatA(0) * limits[axis] * 0.5f + limits[axis] * 0.5f;
+
+            if (limits[axis] * weights[axis] <= fabsf(sdfViewShakeVector[axis])) {
+                if (sdfViewShakeVector[axis] <= 0.0f) {
+                    sdfViewShakeVector[axis] += step;
+                } else {
+                    sdfViewShakeVector[axis] -= step;
+                }
+            } else {
+                sdfViewShakeVector[axis] += 2.0f * (step * (dds3GetRandFloatA(0) - 0.5f));
+            }
+            if (sdfViewShakeVector[axis] < -limits[axis]) {
+                sdfViewShakeVector[axis] = -limits[axis];
+            }
+            if (limits[axis] < sdfViewShakeVector[axis]) {
+                sdfViewShakeVector[axis] = limits[axis];
+            }
+        }
+    }
+    if (D_003BA91A > 0) {
+        s32 divisor = D_003BA91A + 5;
+
+        D_003BA91C -= D_003BA91C / divisor;
+        D_003BA91E -= D_003BA91E / divisor;
+        D_003BA91A--;
+    }
+}
+
+#define DDS3_FADE_TICKS_PER_FRAME 10
+#define DDS3_FADE_MARK_NUMERATOR 4
+#define DDS3_FADE_COUNT_DOWN_BIT 1
+#define DDS3_FADE_COUNT_UP_BIT 2
+#define DDS3_FADE_DIRECTION_BITS 3
+#define DDS3_FADE_MAX_ALPHA 0x80
+#define DDS3_FADE_ALPHA_SHIFT 7
+#define DDS3_COLOR_ALPHA_CHANNEL 3
+#define DDS3_BGFADE_COUNT_DOWN_BIT 0x04000000
+#define DDS3_BGFADE_COUNT_UP_BIT 0x08000000
+#define DDS3_BGFADE_DIRECTION_BITS 0x0C000000
+#define DDS3_BGFADE_KEEP_OTHER_BITS 0xF3FFFFFF
+#define DDS3_BGFADE_CLEAR_UP_MASK 0xF7FFFFFF
+#define DDS3_BGFADE_CLEAR_DOWN_MASK 0xFBFFFFFF
+#define DDS3_BGFADE_FIRST_RAMP_MAX 0x31
+#define DDS3_BGFADE_SECOND_RAMP_MAX 0x4F
+#define DDS3_BGFADE_FIRST_RAMP_SCALE 49.0f
+#define DDS3_BGFADE_SECOND_RAMP_SCALE 79.0f
+
+/* Store tenths in the 16-bit duration before deriving its forty-percent mark.
+ * Zero frames only disables the configuration; mode zero stores the -1 sentinel. */
+void dds3SetQuake(s32 fadeMode, s32 frames) {
+    if (frames == 0) {
+        D_003BA918 = 0;
+        return;
+    }
+    D_003BA918 = 1;
+    if (fadeMode == 0) {
+        D_003BA91A = -1;
+    } else {
+        D_003BA91A = fadeMode;
+    }
+    D_003BA91E = frames * DDS3_FADE_TICKS_PER_FRAME;
+    D_003BA91C = D_003BA91E * DDS3_FADE_MARK_NUMERATOR / DDS3_FADE_TICKS_PER_FRAME;
+}
+
+/* Disable the configured fade without clearing its stored timing parameters. */
+void dds3StopQuake(void) {
+    D_003BA918 = 0;
+}
+
+/* Fill each frame state's z-clear packet for both draw buffers. */
+void dds3InitZClearDrawTag(void) {
+    s32 state;
+    s32 buffer;
+    u64 topLeft;
+    u64 bottomRight;
+
+    for (state = 0; state < 3; state++) {
+        for (buffer = 0; buffer < 2; buffer++) {
+            dds3ZClearDrawTag[state][buffer].dma.quadwordCount = 10;
+            dds3ZClearDrawTag[state][buffer].dma.reservedByte = 0;
+            dds3ZClearDrawTag[state][buffer].dma.control = 0x70;
+            dds3ZClearDrawTag[state][buffer].dma.address = 0;
+            dds3ZClearDrawTag[state][buffer].dma.firstVifCode = 0;
+            dds3ZClearDrawTag[state][buffer].dma.secondVifCode = 0x5000000A;
+            dds3ZClearDrawTag[state][buffer].testGifTag = 0x1000000000000001;
+            dds3ZClearDrawTag[state][buffer].testGifRegisters = 0xE;
+            dds3ZClearDrawTag[state][buffer].clearTest.registerId = 0x47;
+            dds3ZClearDrawTag[state][buffer].clearTest.value = 0x32001;
+            dds3ZClearDrawTag[state][buffer].clearGifTag = 0x1003400000000004;
+            dds3ZClearDrawTag[state][buffer].clearGifRegisters = 0xE;
+            topLeft = 0x79007000;
+            dds3ZClearDrawTag[state][buffer].topLeftColor.registerId = 1;
+            dds3ZClearDrawTag[state][buffer].topLeftColor.value = 0x3F80000000000000;
+            dds3ZClearDrawTag[state][buffer].topLeftPosition.registerId = 5;
+            dds3ZClearDrawTag[state][buffer].topLeftPosition.value = topLeft;
+            bottomRight = 0x87009000;
+            dds3ZClearDrawTag[state][buffer].bottomRightColor.registerId = 1;
+            dds3ZClearDrawTag[state][buffer].bottomRightColor.value = 0x3F80000000000000;
+            dds3ZClearDrawTag[state][buffer].bottomRightPosition.registerId = 5;
+            dds3ZClearDrawTag[state][buffer].bottomRightPosition.value = bottomRight;
+            dds3ZClearDrawTag[state][buffer].blendGifTag = 0x1000000000008002;
+            dds3ZClearDrawTag[state][buffer].blendGifRegisters = 0xE;
+            dds3ZClearDrawTag[state][buffer].blend.test.registerId = 0x47;
+            dds3ZClearDrawTag[state][buffer].blend.test.value = 0x5101B;
+            dds3ZClearDrawTag[state][buffer].blend.alpha.registerId = 0x42;
+            dds3ZClearDrawTag[state][buffer].blend.alpha.value = 0x44;
+        }
+    }
+}
+
+/* Append the selected state's packet for the current draw buffer to a new list. */
+sdfDrawTag_t *dds3LinkZClearDrawTag(s32 stateIndex) {
+    sdfDrawTag_t *packetList = dds3FontReqAllocDrawTag();
+
+    sdfDrawTagLink(packetList, (u32)&dds3ZClearDrawTag[stateIndex][dds3GetFrameID()]);
+    return packetList;
+}
+
+/* Cancel the foreground direction and zero RGBA; timing words are unchanged. */
+void dds3FadeClear(void) {
+    dds3DrawFlag &= ~DDS3_FADE_DIRECTION_BITS;
+    fadergba.r = 0;
+    fadergba.g = 0;
+    fadergba.b = 0;
+    fadergba.a = 0;
+}
+
+/* Store RGBA and cancel foreground direction flags without changing timing. */
+void dds3FadeSet(s32 red, s32 green, s32 blue, s32 alpha) {
+    dds3DrawFlag &= ~DDS3_FADE_DIRECTION_BITS;
+    fadergba.r = red;
+    fadergba.g = green;
+    fadergba.b = blue;
+    fadergba.a = alpha;
+}
+
+/* Return the live color address through outColor, rather than copying channels. */
+void dds3FadeColorGet(dds3FadeColor_t **outColor) {
+    *outColor = &fadergba;
+}
+
+/* Replace RGB only; alpha, direction flags and timing are preserved. */
+void dds3FadeColorSet(s8 red, s8 green, s8 blue) {
+    fadergba.r = red;
+    fadergba.g = green;
+    fadergba.b = blue;
+}
+
+/* Start the countdown with caller RGB. A zero duration also clears RGB via FadeClear.
+ * The signed alpha byte -0x80 carries the raw maximum-alpha value 0x80. */
+void dds3FadeIn(s32 red, s32 green, s32 blue, s32 duration) {
+    fadergba.r = red;
+    fadergba.g = green;
+    fadergba.b = blue;
+    fadergba.a = -DDS3_FADE_MAX_ALPHA;
+    if (duration == 0) {
+        fadergba.a = 0;
+        fadenow = 0;
+        fademax = 0;
+        dds3FadeClear();
+        return;
+    }
+    fademax = duration;
+    fadenow = duration;
+    dds3DrawFlag = (dds3DrawFlag | DDS3_FADE_COUNT_DOWN_BIT) & ~DDS3_FADE_COUNT_UP_BIT;
+}
+
+/* Start the same countdown using existing RGB; zero duration preserves RGB. */
+void dds3FadeIn2(s32 duration) {
+    fadergba.a = -DDS3_FADE_MAX_ALPHA;
+    if (duration == 0) {
+        fadergba.a = 0;
+        dds3DrawFlag &= ~DDS3_FADE_DIRECTION_BITS;
+        fadenow = 0;
+        fademax = 0;
+    } else {
+        fademax = duration;
+        fadenow = duration;
+        dds3DrawFlag = (dds3DrawFlag | DDS3_FADE_COUNT_DOWN_BIT) & ~DDS3_FADE_COUNT_UP_BIT;
+    }
+}
+
+/* Start the count-up with caller RGB; zero duration leaves maximum alpha. */
+void dds3FadeOut(s32 red, s32 green, s32 blue, s32 duration) {
+    fadergba.r = red;
+    fadergba.g = green;
+    fadergba.b = blue;
+    fadergba.a = 0;
+    if (duration == 0) {
+        fadenow = 0;
+        fademax = 0;
+        fadergba.a = -DDS3_FADE_MAX_ALPHA;
+        dds3DrawFlag &= ~DDS3_FADE_DIRECTION_BITS;
+        return;
+    }
+    fademax = duration;
+    fadenow = 0;
+    dds3DrawFlag = (dds3DrawFlag & ~DDS3_FADE_COUNT_DOWN_BIT) | DDS3_FADE_COUNT_UP_BIT;
+}
+
+/* Start the same count-up using existing RGB; zero duration preserves RGB. */
+void dds3FadeOut2(s32 duration) {
+    fadergba.a = 0;
+    if (duration == 0) {
+        fadenow = 0;
+        fadergba.a = -DDS3_FADE_MAX_ALPHA;
+        dds3DrawFlag &= ~DDS3_FADE_DIRECTION_BITS;
+        fademax = 0;
+    } else {
+        fademax = duration;
+        fadenow = 0;
+        dds3DrawFlag = (dds3DrawFlag & ~DDS3_FADE_COUNT_DOWN_BIT) | DDS3_FADE_COUNT_UP_BIT;
+    }
+}
+
+/* Return whether either foreground counter direction is enabled. */
+s32 dds3FadeCheck(void) {
+    return (dds3DrawFlag & DDS3_FADE_DIRECTION_BITS) != 0;
+}
+
+/* Step the u16 counter and sample alpha before testing exact completion.
+ * Completion clears timing/flags but leaves the sampled endpoint alpha intact. */
+void dds3FadeUpdate(void) {
+    if (dds3FadeCheck() != 0) {
+        if (dds3DrawFlag & DDS3_FADE_COUNT_DOWN_BIT) {
+            fadenow -= 1;
+        } else {
+            fadenow += 1;
+        }
+        fadergba.a = (fadenow << DDS3_FADE_ALPHA_SHIFT) / fademax;
+        if (((dds3DrawFlag & DDS3_FADE_COUNT_DOWN_BIT) && fadenow == 0) || ((dds3DrawFlag & DDS3_FADE_COUNT_UP_BIT) && fadenow == fademax)) {
+            fadenow = 0;
+            fademax = 0;
+            dds3DrawFlag &= ~DDS3_FADE_DIRECTION_BITS;
+        }
+    }
+}
+
+/* Submit diagnostics when enabled and either counter is nonzero; only positive
+ * counters produce text, so negative-only errors still submit an empty list. */
+void dds3DrawDistRipOverError(void) {
+    sdfDrawTag_t *packetList;
+
+    if (D_003BA724 != 0) {
+        if (distblurovercnt != 0 || ripblurovercnt != 0) {
+            packetList = (sdfDrawTag_t *)sdfGrAllocPacketBuff(DDS3_DIAG_PACKET_LIST_BYTES);
+            sdfDrawTagInit(packetList);
+            if ((s32)distblurovercnt > 0) {
+                sdfDrawTagLink(packetList, (u32)sdfDevPrintf(0x73C0, 0x7AE0, 0xFEFFFF, 0xE, D_0039E170, distblurovercnt));
+            }
+            if ((s32)ripblurovercnt > 0) {
+                sdfDrawTagLink(packetList, (u32)sdfDevPrintf(0x73C0, 0x7B40, 0xFEFFFF, 4, D_0039E188, ripblurovercnt));
+            }
+            D_00325708.regFunc(&D_00325708, packetList);
+        }
+    }
+}
+
+#ifdef NON_MATCHING
+#include "common.h"
+
+extern u8 dds3FadePacket[]; /* the overlay packet, one per draw buffer */
+extern sdfGrOt_t sdfGrOtTable[];
+extern s32 dds3FadeIsBackgroundOverlayActive(void);
+
+#define DDS3_FADE_OVERLAY_SURFACE 92
+#define DDS3_FADE_MAX_ALPHA 0x80
+#define DDS3_GS_PABE 0x49
+#define DDS3_GS_FBA_1 0x4A
+#define DDS3_OVERLAY_TEST 0x31003       /* alpha and depth tests always pass */
+#define DDS3_OVERLAY_ALPHA 0x01         /* (Cd - Cs) * As / 128 + Cs */
+#define DDS3_OVERLAY_DEPTH 0xFEFFFFULL
+#define DDS3_OVERLAY_LEFT 0x7000
+#define DDS3_OVERLAY_RIGHT 0x9000
+#define DDS3_OVERLAY_TOP 0x7900
+#define DDS3_OVERLAY_BOTTOM 0x8700
+
+/* An end tag carrying VIF DIRECT of ten quadwords: four A+D register writes,
+ * then a blended sprite of two vertices. */
+typedef struct dds3FadePacket_t {
+    SdfGsPacketHeader header;
+    SdfGsRegisterWrite alpha;
+    SdfGsRegisterWrite pabe;
+    SdfGsRegisterWrite fba;
+    SdfGsRegisterWrite test;
+    u64 spriteTag;
+    u64 spriteRegisters;
+    SdfGsRegisterWrite vertices[4];
+} dds3FadePacket_t;
+
+typedef char dds3FadePacket_size_must_be_0xB0[(sizeof(dds3FadePacket_t) == 0xB0) ? 1 : -1];
+
+static void dds3WriteRegister(SdfGsRegisterWrite *write, u64 value, u64 registerId) {
+    write->value = value;
+    write->registerId = registerId;
+}
+
+static u64 dds3OverlayVertex(u32 x, u32 y) {
+    return (DDS3_OVERLAY_DEPTH << 32) | (u32)(y << 16) | x;
+}
+
+/* While the fade colour has any alpha, cover the screen with it: the sprite
+ * keeps (128 - alpha) / 128 of what is drawn. An active background overlay
+ * narrows it to the rows between its two bands. Upstream: INCLUDE_ASM in
+ * both games; same packet as the retail routine. */
+void dds3DrawFade(void) {
+    u32 buffer = dds3GetFrameID();
+    s32 overlayAlpha = DDS3_FADE_MAX_ALPHA - fadergba.a;
+    dds3FadePacket_t *packet;
+    u32 top = DDS3_OVERLAY_TOP;
+    u32 bottom = DDS3_OVERLAY_BOTTOM;
+    u64 color;
+    sdfDrawTag_t *packets;
+    sdfGrOt_t *surface;
+
+    if (overlayAlpha >= DDS3_FADE_MAX_ALPHA) {
+        return;
+    }
+    packet = (dds3FadePacket_t *)(dds3FadePacket + buffer * sizeof(dds3FadePacket_t));
+    packet->header.dmaTag = 0x7000000A;              /* end, ten quadwords */
+    packet->header.vifCommands = 0x5000000AULL << 32; /* NOP; DIRECT ten quadwords */
+    packet->header.gifTag = 0x1000000000000004ULL;    /* NLOOP 4, NREG 1 */
+    packet->header.gifRegisters = SDF_GIF_REGISTER_AD;
+    dds3WriteRegister(&packet->alpha, DDS3_OVERLAY_ALPHA, SDF_GS_ALPHA_1);
+    dds3WriteRegister(&packet->pabe, 0, DDS3_GS_PABE);
+    dds3WriteRegister(&packet->fba, 0, DDS3_GS_FBA_1);
+    dds3WriteRegister(&packet->test, DDS3_OVERLAY_TEST, SDF_GS_TEST_1);
+    packet->spriteTag = 0x1023400000008004ULL; /* NLOOP 4, EOP, PRE, PRIM blended sprite, NREG 1 */
+    packet->spriteRegisters = SDF_GIF_REGISTER_AD;
+
+    if (dds3FadeIsBackgroundOverlayActive()) {
+        top = 0x7A88 - dds3BackgroundFadeFirstRamp * 8;
+        bottom = 0x8488 + dds3BackgroundFadeSecondRamp * 8;
+    }
+    /* Retail shifts the alpha in 32 bits, sign-extending a negative one (a
+     * fade alpha above 0x80) over Q; the sprite is untextured, so Q goes
+     * unread, but the packet keeps retail's bits. */
+    color = 0x3F80000000000000ULL /* Q = 1.0 */ | (u64)(s64)(s32)((u32)overlayAlpha << 24) |
+            ((u64)fadergba.b << 16) | ((u64)fadergba.g << 8) | fadergba.r;
+    dds3WriteRegister(&packet->vertices[0], color, SDF_GS_RGBAQ);
+    dds3WriteRegister(&packet->vertices[1], dds3OverlayVertex(DDS3_OVERLAY_LEFT, top), SDF_GS_XYZ2);
+    dds3WriteRegister(&packet->vertices[2], color, SDF_GS_RGBAQ);
+    dds3WriteRegister(&packet->vertices[3], dds3OverlayVertex(DDS3_OVERLAY_RIGHT, bottom), SDF_GS_XYZ2);
+
+    packets = dds3FontReqAllocDrawTag();
+    sdfDrawTagLink(packets, (u32)packet);
+    surface = &sdfGrOtTable[DDS3_FADE_OVERLAY_SURFACE];
+    surface->regFunc(surface, packets);
+}
+#else
+INCLUDE_ASM(const s32, "kernel/dds3KernelDraw", dds3DrawFade);
+#endif
+
+/* Cancel background direction, zero RGBA and restore the inactive ramp maxima.
+ * This reset does not rewrite the background counter or duration. */
+void dds3FadeResetBackground(void) {
+    dds3DrawFlag &= DDS3_BGFADE_KEEP_OTHER_BITS;
+    dds3BackgroundFadeColor[0] = 0;
+    dds3BackgroundFadeColor[1] = 0;
+    dds3BackgroundFadeColor[2] = 0;
+    dds3BackgroundFadeColor[DDS3_COLOR_ALPHA_CHANNEL] = 0;
+    dds3BackgroundFadeFirstRamp = DDS3_BGFADE_FIRST_RAMP_MAX;
+    dds3BackgroundFadeSecondRamp = DDS3_BGFADE_SECOND_RAMP_MAX;
+}
+
+/* Start the background countdown; zero duration performs the full background reset. */
+void dds3FadeBackgroundStartOut(s32 duration) {
+    dds3BackgroundFadeColor[0] = 0;
+    dds3BackgroundFadeColor[1] = 0;
+    dds3BackgroundFadeColor[2] = 0;
+    dds3BackgroundFadeColor[DDS3_COLOR_ALPHA_CHANNEL] = DDS3_FADE_MAX_ALPHA;
+    if (duration == 0) {
+        dds3BackgroundFadeColor[DDS3_COLOR_ALPHA_CHANNEL] = 0;
+        dds3BackgroundFadeCounter = 0;
+        dds3BackgroundFadeDuration = 0;
+        dds3BackgroundFadeFirstRamp = DDS3_BGFADE_FIRST_RAMP_MAX;
+        dds3BackgroundFadeSecondRamp = DDS3_BGFADE_SECOND_RAMP_MAX;
+        dds3FadeResetBackground();
+    } else {
+        dds3BackgroundFadeDuration = duration;
+        dds3BackgroundFadeCounter = duration;
+        dds3DrawFlag = (dds3DrawFlag | DDS3_BGFADE_COUNT_DOWN_BIT) & DDS3_BGFADE_CLEAR_UP_MASK;
+    }
+    D_003245EC[2] = 2048.0f;
+}
+
+/* Start the background count-up; zero duration leaves max alpha and zero ramps. */
+void dds3FadeBackgroundStartIn(s32 duration) {
+    dds3BackgroundFadeColor[0] = 0;
+    dds3BackgroundFadeColor[1] = 0;
+    dds3BackgroundFadeColor[2] = 0;
+    dds3BackgroundFadeColor[DDS3_COLOR_ALPHA_CHANNEL] = 0;
+    if (duration == 0) {
+        dds3BackgroundFadeCounter = 0;
+        dds3BackgroundFadeDuration = 0;
+        dds3BackgroundFadeColor[DDS3_COLOR_ALPHA_CHANNEL] = DDS3_FADE_MAX_ALPHA;
+        dds3DrawFlag &= DDS3_BGFADE_KEEP_OTHER_BITS;
+        dds3BackgroundFadeFirstRamp = 0;
+        dds3BackgroundFadeSecondRamp = 0;
+    } else {
+        dds3BackgroundFadeDuration = duration;
+        dds3BackgroundFadeCounter = 0;
+        dds3DrawFlag = (dds3DrawFlag & DDS3_BGFADE_CLEAR_DOWN_MASK) | DDS3_BGFADE_COUNT_UP_BIT;
+    }
+    D_003245EC[2] = 2041.0f;
+}
+
+/* Direction flags take precedence; idle visibility uses alpha in mode zero,
+ * otherwise it tests whether the first ramp differs from its inactive maximum. */
+dds3BackgroundOverlayActivity_t dds3FadeIsBackgroundOverlayActive(void) {
+    if (dds3DrawFlag & DDS3_BGFADE_DIRECTION_BITS) {
+        return DDS3_BACKGROUND_OVERLAY_ACTIVE;
+    }
+    if (dds3BackgroundFadeMode == 0) {
+        if (DDS3_FADE_MAX_ALPHA - dds3BackgroundFadeColor[DDS3_COLOR_ALPHA_CHANNEL] >= DDS3_FADE_MAX_ALPHA) {
+            return DDS3_BACKGROUND_OVERLAY_INACTIVE;
+        }
+    } else if (dds3BackgroundFadeFirstRamp == DDS3_BGFADE_FIRST_RAMP_MAX) {
+        return DDS3_BACKGROUND_OVERLAY_INACTIVE;
+    }
+    return DDS3_BACKGROUND_OVERLAY_ACTIVE;
+}
+
+/* Store the visibility mode; its stored zero value clears ramps, otherwise
+ * maximum alpha is selected. Counter direction and timing are unchanged. */
+void dds3FadeSetMode(s32 visibilityMode) {
+    dds3BackgroundFadeMode = visibilityMode;
+    if (dds3BackgroundFadeMode == 0) {
+        dds3BackgroundFadeFirstRamp = 0;
+        dds3BackgroundFadeSecondRamp = 0;
+    } else {
+        dds3BackgroundFadeColor[DDS3_COLOR_ALPHA_CHANNEL] = DDS3_FADE_MAX_ALPHA;
+    }
+}
+
+/* Step the u16 counter, then derive integer alpha and f32 ramp samples.
+ * Completion clears timing/flags after sampling, retaining endpoint values. */
+void dds3StepBackgroundFade(void) {
+    f32 fadeRatio;
+
+    if (dds3DrawFlag & DDS3_BGFADE_DIRECTION_BITS) {
+        if (dds3DrawFlag & DDS3_BGFADE_COUNT_DOWN_BIT) {
+            dds3BackgroundFadeCounter--;
+        } else {
+            dds3BackgroundFadeCounter++;
+        }
+        fadeRatio = (f32)dds3BackgroundFadeCounter / (f32)dds3BackgroundFadeDuration;
+        dds3BackgroundFadeColor[DDS3_COLOR_ALPHA_CHANNEL] = (dds3BackgroundFadeCounter << DDS3_FADE_ALPHA_SHIFT) / dds3BackgroundFadeDuration;
+        dds3BackgroundFadeFirstRamp = DDS3_BGFADE_FIRST_RAMP_SCALE - fadeRatio * DDS3_BGFADE_FIRST_RAMP_SCALE;
+        dds3BackgroundFadeSecondRamp = DDS3_BGFADE_SECOND_RAMP_SCALE - fadeRatio * DDS3_BGFADE_SECOND_RAMP_SCALE;
+        if (((dds3DrawFlag & DDS3_BGFADE_COUNT_DOWN_BIT) && dds3BackgroundFadeCounter == 0) ||
+            ((dds3DrawFlag & DDS3_BGFADE_COUNT_UP_BIT) && dds3BackgroundFadeCounter == dds3BackgroundFadeDuration)) {
+            dds3BackgroundFadeCounter = 0;
+            dds3BackgroundFadeDuration = 0;
+            dds3DrawFlag &= DDS3_BGFADE_KEEP_OTHER_BITS;
+        }
+    }
+}
+
+void dds3DrawBackgroundFadeBands(void) {
+    s16 firstRamp = 0;
+    s16 secondRamp = 0;
+    s32 fade;
+    s32 alpha;
+
+    if (dds3BackgroundFadeMode == 0) {
+        fade = DDS3_FADE_MAX_ALPHA - dds3BackgroundFadeColor[DDS3_COLOR_ALPHA_CHANNEL];
+    } else {
+        firstRamp = dds3BackgroundFadeFirstRamp;
+        fade = 0;
+        secondRamp = dds3BackgroundFadeSecondRamp;
+        if (firstRamp == DDS3_BGFADE_FIRST_RAMP_MAX) {
+            return;
+        }
+    }
+    if (fade >= DDS3_FADE_MAX_ALPHA) {
+        return;
+    }
+
+    eglSetOt(0x4F);
+    evtSubmitPrimaryAlphaBlendMode(0);
+    evtSubmitPrimaryGsTest(1, 0, 0x80, 3, 0, 0, 1, 1);
+    alpha = (DDS3_FADE_MAX_ALPHA - fade) << 24;
+    evtSubmitDefaultDepthGradientRect(0, -2 - firstRamp, 0x200, 0x33, alpha, alpha, alpha, alpha);
+    evtSubmitDefaultDepthGradientRect(0, secondRamp + 0x171, 0x200, 0x51, alpha, alpha, alpha, alpha);
+}
+
+void dds3SetScreenFovy(f32 fieldOfView) {
+    D_003245EC[0] = fieldOfView;
+}
+
 /* Copy one complete vector into the default draw color state; retain no source pointer. */
 void dds3SetAmbient(const u128 *source) {
     SDF_VU0_COPYVECTOR(&dds3AmbientColor, source);
 }
-
 
 /* Copy the five-word draw vector parameter body without interpreting or retaining it. */
 void dds3SetFog(const sdf3DFogParam_t *source) {
@@ -919,3 +1638,66 @@ void dds3RotationArc(void) {
     SDF_VU0_SETVECTOR_W(dot);
     Normalize();
 }
+
+INCLUDE_RODATA(const s32, "kernel/dds3KernelDraw", D_0039E170);
+
+INCLUDE_RODATA(const s32, "kernel/dds3KernelDraw", D_0039E188);
+
+INCLUDE_SDATA(const s32, "kernel/dds3KernelDraw", egl_OT_Offset);
+
+INCLUDE_SDATA(const s32, "kernel/dds3KernelDraw", D_003BA8EC);
+
+INCLUDE_SDATA(const s32, "kernel/dds3KernelDraw", dds3RenderTex);
+
+INCLUDE_SDATA(const s32, "kernel/dds3KernelDraw", D_003BA8F4);
+
+INCLUDE_SDATA(const s32, "kernel/dds3KernelDraw", dds3RenderTexture);
+
+INCLUDE_SDATA(const s32, "kernel/dds3KernelDraw", D_003BA8FC);
+
+INCLUDE_SDATA(const s32, "kernel/dds3KernelDraw", D_003BA8FE);
+
+INCLUDE_SDATA(const s32, "kernel/dds3KernelDraw", dds3RenderDrawEnv);
+
+INCLUDE_SDATA(const s32, "kernel/dds3KernelDraw", dds3DrawFlag);
+
+INCLUDE_SDATA(const s32, "kernel/dds3KernelDraw", dds3ScreenBlurFlag);
+
+INCLUDE_SDATA(const s32, "kernel/dds3KernelDraw", dds3ScreenBlurAlpha);
+
+INCLUDE_SDATA(const s32, "kernel/dds3KernelDraw", dds3ScreenBlurScale);
+
+INCLUDE_SDATA(const s32, "kernel/dds3KernelDraw", D_003BA910);
+
+INCLUDE_SDATA(const s32, "kernel/dds3KernelDraw", D_003BA914);
+
+INCLUDE_SDATA(const s32, "kernel/dds3KernelDraw", D_003BA918);
+
+INCLUDE_SDATA(const s32, "kernel/dds3KernelDraw", D_003BA91A);
+
+INCLUDE_SDATA(const s32, "kernel/dds3KernelDraw", D_003BA91C);
+
+INCLUDE_SDATA(const s32, "kernel/dds3KernelDraw", D_003BA91E);
+
+INCLUDE_SDATA(const s32, "kernel/dds3KernelDraw", fadergba);
+
+SDATA_PAD(4);
+
+INCLUDE_SDATA(const s32, "kernel/dds3KernelDraw", dds3BackgroundFadeColor);
+
+INCLUDE_SDATA(const s32, "kernel/dds3KernelDraw", D_003BA92B);
+
+INCLUDE_SDATA(const s32, "kernel/dds3KernelDraw", dds3BackgroundFadeMode);
+
+INCLUDE_SDATA(const s32, "kernel/dds3KernelDraw", dds3BackgroundFadeFirstRamp);
+
+INCLUDE_SDATA(const s32, "kernel/dds3KernelDraw", dds3BackgroundFadeSecondRamp);
+
+SDATA_PAD(2);
+
+INCLUDE_SDATA(const s32, "kernel/dds3KernelDraw", distblurovercnt);
+
+INCLUDE_SDATA(const s32, "kernel/dds3KernelDraw", ripblurovercnt);
+
+INCLUDE_SDATA(const s32, "kernel/dds3KernelDraw", D_003BA940);
+

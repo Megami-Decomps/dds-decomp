@@ -137,7 +137,7 @@ extern u32 dds3DrawFlag;
 
 
 
-extern s32 dds3TaskNoopCallback(dds3ProcessID_t *task);
+extern s32 dds3StartMenuProcess(dds3ProcessID_t *task);
 
 extern void fldMainLoadStart(void);
 extern void btlStart(s32 mode, s32 pack, s32 encounter);
@@ -1183,7 +1183,7 @@ void evtSelStateDestroy(void) {
 }
 
 dds3ProcessID_t *CallDebug(void) {
-    return dds3StartProcess(D_0039E1F0, 0x2AF9, 0, 0, dds3TaskNoopCallback, 0, 0);
+    return dds3StartProcess(D_0039E1F0, 0x2AF9, 0, 0, dds3StartMenuProcess, 0, 0);
 }
 
 u32 ExitDebug(void) {

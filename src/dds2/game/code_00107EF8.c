@@ -254,7 +254,7 @@ extern void evtUpdateSelectionStateInterpolation(void);
 extern u8 sdfViewShakeVector[];
 
 
-extern s32 dds3TaskNoopCallback(dds3ProcessID_t *task);
+extern s32 dds3StartMenuProcess(dds3ProcessID_t *task);
 
 extern dds3ProcessID_t *evtInitSky(void);
 
@@ -1226,7 +1226,7 @@ void evtSelStateDestroy(void) {
 }
 
 dds3ProcessID_t *CallDebug(void) {
-    return dds3StartProcess(D_00411370, 0x2AF9, 0, 0, dds3TaskNoopCallback, 0, 0);
+    return dds3StartProcess(D_00411370, 0x2AF9, 0, 0, dds3StartMenuProcess, 0, 0);
 }
 
 u32 ExitDebug(void) {

@@ -8,7 +8,7 @@ D_003B2560 = 0x003B2560; // type:asciz
 // Two s8 globals open game/code_002C5FD8's .sdata at 0x3BD280 (code_002C3868 reads the first);
 // splitting the unit at 0x3BD281 linked D_003BD281 one byte low
 D_003BD280 = 0x003BD280; // type:s8 size:0x1
-// func_00100B40 reads two sdata bytes split out of game/code_00102ED8's D_003BA861/D_003BA872 blobs
+// func_00100B40 reads two sdata bytes split out of kernel/dds3PadManager's D_003BA861/D_003BA872 blobs
 D_003BA868 = 0x003BA868; // type:u8
 D_003BA878 = 0x003BA878; // type:u8
 // dds3DebugGraphUpdate's four graph-channel halfwords split out of .sdata
@@ -103,7 +103,7 @@ dds3GetVibrationLevel = 0x00104008; // type:func
 dds3PadVibrationSet = 0x00104068; // type:func
 dds3PadVibrationReset = 0x00104130; // type:func
 dds3UpdateVibrationSlots = 0x00104168; // type:func
-dds3TaskNoopCallback = 0x00104260; // type:func
+dds3StartMenuProcess = 0x00104260; // type:func
 dds3InitRandCB = 0x00104268; // type:func
 dds3DebugGraphUpdate = 0x00104290; // type:func
 dds3DebugGraphTaskDestroy = 0x001045F8; // type:func

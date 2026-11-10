@@ -2,11 +2,13 @@
 #include "common.h"
 #include "dds3_admin_control_api.h"
 #include "sdf_chip.h"
-#include "dds3Admin.h"
-#include "kernel.h"
-#include "kernel.h"
 #include "dds3_task_runner.h"
 #include "dds3_admin_dispatch.h"
+#include "dds3_process_registration.h"
+#include "dds3_named_slot.h"
+#include "dds3_task_create.h"
+#include "dds3_task_lifecycle.h"
+#include "btl.h"
 
 extern char dds3AdminTaskName[];
 
@@ -245,5 +247,199 @@ void dds3AdminiNeoShutdown(dds3ProcessID_t *task) {
     sdfChipFreeDirect((void *)dds3GetProcessData(task));
 }
 
+
+extern char dds3AdminTaskName[];
+extern dds3TaskUpdateResult_t dds3AdminiNeoProcess(dds3ProcessID_t *task);
+extern void dds3AdminiNeoShutdown(dds3ProcessID_t *task);
+
+void dds3InitAdmini(void) {
+    dds3AdminiData_t *work;
+    s32 i;
+
+    if (dds3SearchProcessName(dds3AdminTaskName) == NULL) {
+        work = sdfChipAllocDirect(sizeof(dds3AdminiData_t));
+        work->Stat = 0;
+        work->RunTimer = 0;
+        work->NowSequence = -1;
+        work->NextSequence = -1;
+        work->HistoryPointer = 0;
+        for (i = 0; i < 8; i++) {
+            work->SequenceHistory[i] = -1;
+            work->FlagHistory[i] = 0;
+        }
+        work->CallData = 0;
+        work->CallDataSize = 0;
+        dds3StartProcess(dds3AdminTaskName, 2, 0, 1, dds3AdminiNeoProcess, dds3AdminiNeoShutdown, (u32)work);
+    }
+}
+
+extern fclNamedSlot_t D_003C1C90[];
+extern char D_0039E018[];
+extern s32 D_003BA850;
+extern s32 D_003BA854;
+extern s32 D_003BA858;
+extern s32 D_003BA85C;
+
+s32 fclEncycFreeEntry(const char *name);
+
+s32 fclEncycFindFreeSlot(const char *name) {
+    s32 slotIndex;
+    s32 characterIndex;
+    s32 previous;
+
+    if (dds3SearchProcessName(D_0039E018) == NULL) {
+        return -1;
+    }
+    if (fclEncycFreeEntry(name) >= 0) {
+        return -1;
+    }
+    for (slotIndex = 0; slotIndex < 32; slotIndex++) {
+        if (D_003C1C90[slotIndex].kind == 0) {
+            break;
+        }
+    }
+    if (slotIndex == 32) {
+        return -1;
+    }
+    D_003C1C90[slotIndex].kind = 0;
+    characterIndex = 0;
+    while ((D_003C1C90[slotIndex].name[characterIndex] = name[characterIndex]) != '\0') {
+        if (characterIndex == 31) {
+            D_003C1C90[slotIndex].name[characterIndex] = '\0';
+            break;
+        }
+        characterIndex++;
+    }
+    D_003C1C90[slotIndex].task = NULL;
+    D_003C1C90[slotIndex].update = NULL;
+    D_003C1C90[slotIndex].destroy = NULL;
+    D_003C1C90[slotIndex].setState = NULL;
+    D_003C1C90[slotIndex].enabled = 0;
+    D_003C1C90[slotIndex].userValue = NULL;
+    D_003C1C90[slotIndex].previous = -1;
+    D_003C1C90[slotIndex].next = -1;
+    previous = D_003BA854;
+    if (previous < 0) {
+        D_003BA850 = slotIndex;
+        D_003BA854 = slotIndex;
+        D_003BA85C = slotIndex;
+    } else {
+        D_003BA854 = slotIndex;
+        D_003C1C90[previous].next = slotIndex;
+        D_003C1C90[slotIndex].previous = previous;
+    }
+    D_003BA858++;
+    return slotIndex;
+}
+
+/* One shared initializer for the three configure modes and unregister. */
+static inline void dds3SetNamedSlotState(s32 index, s32 kind, dds3ProcessFunc_t update, dds3ProcessShutdownFunc_t destroy,
+                                         void (*setState)(s32), void *userValue) {
+    D_003C1C90[index].kind = kind;
+    D_003C1C90[index].task = NULL;
+    D_003C1C90[index].update = update;
+    D_003C1C90[index].destroy = destroy;
+    D_003C1C90[index].setState = setState;
+    D_003C1C90[index].enabled = 0;
+    D_003C1C90[index].userValue = userValue;
+}
+
+/* Find an exact NUL-terminated name along the linked slot indices, or return -1. */
+s32 fclEncycFreeEntry(const char *name) {
+    s32 slotIndex = D_003BA850;
+    s32 characterIndex;
+
+    while (slotIndex >= 0) {
+        characterIndex = 0;
+        while (D_003C1C90[slotIndex].name[characterIndex] != '\0') {
+            if (name[characterIndex] != D_003C1C90[slotIndex].name[characterIndex]) {
+                break;
+            }
+            characterIndex++;
+        }
+        if (D_003C1C90[slotIndex].name[characterIndex] == '\0' && name[characterIndex] == '\0') {
+            return slotIndex;
+        }
+        slotIndex = D_003C1C90[slotIndex].next;
+    }
+    return -1;
+}
+
+/* Unregister a named slot: stop its task, clear it and unlink it from the slot chain. */
+s32 fclEncycFreeEntries(const char *name) {
+    s32 slotIndex;
+
+    if (dds3SearchProcessName(D_0039E018) == NULL) {
+        return 0;
+    }
+    slotIndex = fclEncycFreeEntry(name);
+    if (slotIndex < 0) {
+        return 0;
+    }
+    if (D_003C1C90[slotIndex].kind > 0) {
+        if (D_003C1C90[slotIndex].kind < 3) {
+            if (dds3ExistProcess(D_003C1C90[slotIndex].task) == DDS3_PROCESS_REGISTERED) {
+                dds3KillProcess(D_003C1C90[D_003BA85C].task, 1);
+            }
+        }
+    }
+    D_003C1C90[slotIndex].name[0] = 0;
+    dds3SetNamedSlotState(slotIndex, 0, NULL, NULL, NULL, 0);
+    if (D_003C1C90[slotIndex].previous < 0) {
+        D_003BA850 = D_003C1C90[slotIndex].next;
+    } else {
+        D_003C1C90[D_003C1C90[slotIndex].previous].next = D_003C1C90[slotIndex].next;
+    }
+    if (D_003C1C90[slotIndex].next < 0) {
+        D_003BA854 = D_003C1C90[slotIndex].previous;
+    } else {
+        D_003C1C90[D_003C1C90[slotIndex].next].previous = D_003C1C90[slotIndex].previous;
+    }
+    D_003C1C90[slotIndex].previous = -1;
+    D_003C1C90[slotIndex].next = -1;
+    if (D_003BA85C == slotIndex) {
+        D_003BA85C = D_003BA850;
+    }
+    D_003BA858--;
+    return 1;
+}
+
+s32 fclEncycConfigureMode3(const char *name, void (*setState)(s32)) {
+    s32 index = fclEncycFindFreeSlot(name);
+    if (index < 0) {
+        return 0;
+    }
+    dds3SetNamedSlotState(index, 3, NULL, NULL, setState, 0);
+    return 1;
+}
+
+s32 fclEncycAllocEntry(const char *name, dds3ProcessFunc_t update, dds3ProcessShutdownFunc_t destroy, void *userValue) {
+    s32 index = fclEncycFindFreeSlot(name);
+    if (index < 0) {
+        return 0;
+    }
+    dds3SetNamedSlotState(index, 1, update, destroy, NULL, userValue);
+    return 1;
+}
+
+s32 fclEncycConfigureMode2(const char *name, dds3ProcessFunc_t update, dds3ProcessShutdownFunc_t destroy, void *userValue) {
+    s32 index = fclEncycFindFreeSlot(name);
+    if (index < 0) {
+        return 0;
+    }
+    dds3SetNamedSlotState(index, 2, update, destroy, NULL, userValue);
+    return 1;
+}
+
 INCLUDE_SDATA(const s32, "kernel/dds3AdminiProcess", dds3AdminTaskName);
+
+INCLUDE_SDATA(const s32, "kernel/dds3AdminiProcess", D_003BA850);
+
+INCLUDE_SDATA(const s32, "kernel/dds3AdminiProcess", D_003BA854);
+
+INCLUDE_SDATA(const s32, "kernel/dds3AdminiProcess", D_003BA858);
+
+INCLUDE_SDATA(const s32, "kernel/dds3AdminiProcess", D_003BA85C);
+
+INCLUDE_SDATA(const s32, "kernel/dds3AdminiProcess", D_003BA85F);
 
