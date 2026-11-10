@@ -14470,7 +14470,7 @@ only the 0–15 bytes needed for alignment; do not merge the banks.
 `effWaveEmitterNegativeYAxis` is the existing `(0,-1,0,0)` vector loaded into
 VF10 by the wave-emitter update, with its original VU0 operations retained.
 
-`fileManagerTaskName` is the C-owned eight-byte `fileManagerProc` task-name object,
+`fileManagerProcName` is the C-owned eight-byte `fileManagerProc` task-name object,
 not an imported small-data blob. Keep its existing `.sdata` placement and
 array bound. `sdfMcInfo` selects the request entry
 used by the manager's card synchronization/type/format polling and retry;

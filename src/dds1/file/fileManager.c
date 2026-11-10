@@ -4,7 +4,7 @@
 #include "kwln.h"
 
 #define fileHandleFree fileRequestFreeIfComplete
-#define D_00551650 fileManagerTaskName
+#define D_00551650 fileManagerProcName
 #include "fileManager.h"
 
 /* All three views share the 0x30-byte request header. Their differently

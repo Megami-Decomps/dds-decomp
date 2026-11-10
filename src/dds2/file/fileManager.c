@@ -4,7 +4,7 @@
 #include "kwln.h"
 
 #define fileHandleFree fileRequestFreeIfComplete
-#define D_00551650 fileManagerTaskName
+#define D_00551650 fileManagerProcName
 #define pacLoadEx fileCreatePacLoadWork
 #include "fileManager.h"
 
