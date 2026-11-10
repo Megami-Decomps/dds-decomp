@@ -24,7 +24,6 @@ D_003BC268 = 0x003BC268; // type:u8
 dds3GetProcessRunTime = 0x00101A60; // type:func size:0x8
 scrCommand_SCR_EXISTS = 0x0010EEA8; // type:func size:0x48
 // The main loop thread's tracked-thread node, after the frame parity word
-kwlnMainLoopThreadNode = 0x003BD688; // size:0x8
 // Saved DebugTimeGrph task handle.
 kwlnDebugGraphTask = 0x003BD6A8;
 // Names from tools/names.py (provenance: name_sources.txt)
@@ -8232,6 +8231,7 @@ endinglistcnt = 0x003BA814;
 runninglistf = 0x003BA818;
 runninglistcnt = 0x003BA820;
 runprocess = 0x003BA824;
+sdfDefaultCdMode = 0x003BA83C;
 dds3AdminTaskName = 0x003BA848;
 kwlnCurrentIncompleteResource = 0x003BA8D8;
 kwlnTextureViewerPageIndex = 0x003BA8DC;
@@ -8568,6 +8568,7 @@ p2sdSmgBuf = 0x003BD4A8;
 sdfDumpLineBuf = 0x003BD518;
 sdfGsMemoryTypeFormat = 0x003BD610;
 movieStreamSema = 0x003BD618; // type:s32 size:0x4
+dds3KernelThread = 0x003BD688; // size:0x8
 dds3PadVibrationState = 0x003BD690;
 kwlnLargeMotorTarget = 0x003BD699;
 blurnow = 0x003BD6B4;
@@ -8735,6 +8736,7 @@ movieSemaCount = 0x003BDABC; // type:s32 size:0x4
 sdfDecompHistoryIndex = 0x003BDAC0;
 sdfFileRpcThreadId = 0x003BDAC4;
 dds3ProcessTreeDepth = 0x003BDC48;
+dds3KernelStack = 0x003BDC90;
 key2 = 0x003C2510;
 dds3BlurState = 0x003C2570;
 dds3BlurParam = 0x003C25D0;

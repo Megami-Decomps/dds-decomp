@@ -9923,6 +9923,7 @@
 0x003BA818	runninglistf	inferred	SMT3HD data name via SLUS_209.11 0x0054E868, 13 agreeing references; was runninglistf
 0x003BA820	runninglistcnt	inferred	SMT3HD data name via SLUS_209.11 0x0054E870, 6 agreeing references; was runninglistcnt
 0x003BA824	runprocess	inferred	SMT3HD data name via SLUS_209.11 0x0054E874, 3 agreeing references; was runprocess
+0x003BA83C	sdfDefaultCdMode	inferred	SMT3HD name via SLUS_209.11 0x0054E8BC, sdf/sdfDefaultMain SMT3 rename; was D_003BA83C
 0x003BA848	dds3AdminTaskName	inferred	confidence=high; data D_003BA848; matched-C-users=2; src/dds1/game/code_00102ED8.c:143:dds3InitAdmini; src/dds1/game/code_00101B08.c:185:GetAdminiProcessData; Task lookup/create and admin work accessor use this task-name string; data-twin=D_00435C18, supported by 2 independently paired matched functions.; retail-data-start=asm/dds1/data/game/code_00101B08.sdata.s:22.; seed-placeholder=D_003BA848; current asm label and source default identifier verified; source=names_reviewed36.tsv. [names_qp10_seed.tsv]
 0x003BA8D8	kwlnCurrentIncompleteResource	inferred	confidence=high; matched_users=src/dds1/game/code_00102ED8.c:kwlnLoadDefaultResource, src/dds1/game/code_00102ED8.c:kwlnTextureFindIncompleteResource; Resource scan stores the first unfinished list entry here and the load callback consumes that entry. [names_qp9.tsv]
 0x003BA8DC	kwlnTextureViewerPageIndex	inferred	confidence=high; data D_003BA8DC; matched-C-users=2; src/dds1/game/code_00102ED8.c:294:kwlnTextureGetPageIndex; src/dds1/game/code_00102ED8.c:300:kwlnTextureViewerHandlePad; Texture viewer input changes this index; page accessor returns it; data-twin=D_00435CAC, supported by 2 independently paired matched functions.; retail-data-start=asm/dds1/data/game/code_00102ED8.sdata.s:223.; seed-placeholder=D_003BA8DC; current asm label and source default identifier verified; source=names_reviewed36.tsv. [names_qp10_seed.tsv]
@@ -10280,6 +10281,7 @@
 0x003BD628	sdfMovieDrawRight	inferred	The movie sprite's right edge (GS coordinates), set by sdfSetGridScaledDrawBounds. DDS2 twin 0x00438D18.
 0x003BD62C	sdfMovieDrawBottom	inferred	The movie sprite's bottom edge (GS coordinates), set by sdfSetGridScaledDrawBounds. DDS2 twin 0x00438D1C.
 0x003BD630	sdfMovieDrawColor	inferred	The movie sprite's color: alpha in the top byte, RGB below, set by sdfSetGridScaledDrawBounds. DDS2 twin 0x00438D20.
+0x003BD688	dds3KernelThread	inferred	SMT3HD name via SLUS_209.11 0x00551B88, sdf/sdfDefaultMain SMT3 rename; was kwlnMainLoopThreadNode
 0x003BD690	dds3PadVibrationState	inferred	SMT3HD data name via SLUS_209.11 0x00551B90, 3 agreeing references; was dds3PadVibrationState
 0x003BD699	kwlnLargeMotorTarget	inferred	confidence=high; src/dds1/game/code_00102ED8.c:kwlnPadStepLargeMotorLevel; Target actuator level approached in steps of at most 0x20. [names_qp9.tsv]
 0x003BD6A8	kwlnDebugGraphTask	inferred	The task handle created for DebugTimeGrph and passed to hierarchy destruction.
@@ -10466,6 +10468,7 @@
 0x003BDAC0	sdfDecompHistoryIndex	inferred	SMT3HD name via SLUS_209.11 0x00552170, sdf/sdf_Decomp SMT3 rename; was D_003BDAC0
 0x003BDAC4	sdfFileRpcThreadId	inferred	SMT3HD name via SLUS_209.11 0x00552174, sdfTmx twin; was D_003BDAC4
 0x003BDC48	dds3ProcessTreeDepth	inferred	SMT3HD data name via SLUS_209.11 0x005522C8, 2 agreeing references; was dds3ProcessTreeDepth
+0x003BDC90	dds3KernelStack	inferred	SMT3HD name via SLUS_209.11 0x00552310, sdf/sdfDefaultMain SMT3 rename; was D_003BDC90
 0x003C2510	key2	inferred	SMT3HD data name via SLUS_209.11 0x00556B90, 2 agreeing references; was key2
 0x003C2540	kwlnFilterBlurFrameParameters	inferred	confidence=high; Per-update workspace filled by transition blending or target-copy plus alpha fade, then passed to real effect-copy and enable/disable providers. DDS2 twin0x0043DCC0. Native allocation0x30 including padding retained; existingEffBlurScatterParams unchanged. No import or active ASM consumer. [PurD readability data b3; native/matched-C twin; identifier-only]
 0x003C2570	dds3BlurState	inferred	SMT3HD data name via SLUS_209.11 0x00556BF0, 2 agreeing references; was dds3BlurState

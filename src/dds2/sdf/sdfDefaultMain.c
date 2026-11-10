@@ -3,9 +3,9 @@
 #include "kernel.h"
 #include "libsdf.h"
 
-#define D_0054E8BC D_00435C0C
-#define D_00552310 D_00439410
-#define D_00551B88 kwlnMainLoopThreadNode
+#define D_0054E8BC sdfDefaultCdMode
+#define D_00552310 dds3KernelStack
+#define D_00551B88 dds3KernelThread
 
 extern u32 D_0054E8BC;
 
@@ -108,5 +108,5 @@ s32 sdfDefaultMain(void)
 
 INCLUDE_RODATA(const s32, "sdf/sdfDefaultMain", D_00411198);
 
-INCLUDE_SDATA(const s32, "sdf/sdfDefaultMain", D_00435C0C);
+INCLUDE_SDATA(const s32, "sdf/sdfDefaultMain", sdfDefaultCdMode);
 

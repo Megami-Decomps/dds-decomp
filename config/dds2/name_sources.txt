@@ -3999,7 +3999,7 @@
 0x002004E8	btlCameraVectorHasNaN	inferred	tests camera eye and target components for NaN by self-comparison [names_R_FuncNames2.tsv]
 0x00200568	btlInitTintTransitionResource	inferred	stores resource/color and soundId in transition work, allocates handle [names_R_FuncNames2.tsv]
 0x002005B0	btlInitTintTransitionDefault	inferred	initializes same work with default resource 0x80 [names_R_FuncNames2.tsv]
-0x002005F0	btlStepTintTransition	inferred	counts down D_003BDC90 transition, lerps handle->resource; callers btlStepBlendColor / btlQueueTintTransition neighbours [names_M74_BattleLarge.tsv]
+0x002005F0	btlStepTintTransition	inferred	counts down dds3KernelStack transition, lerps handle->resource; callers btlStepBlendColor / btlQueueTintTransition neighbours [names_M74_BattleLarge.tsv]
 0x002006B0	btlQueueTintTransition	inferred	stores previous/queued resource-color values and countdown [names_R_FuncNames2.tsv]
 0x002006F0	btlQueueTintTransitionToZero	inferred	sets queued resource-color to zero and countdown [names_R_FuncNames2.tsv]
 0x00200730	btlStepBlendColor	inferred	counts down soundId and blends via btlBlendColor
@@ -10591,6 +10591,7 @@
 0x00435BE8	runninglistf	inferred	SMT3HD data name via SLUS_209.11 0x0054E868, 13 agreeing references; was runninglistf
 0x00435BF0	runninglistcnt	inferred	SMT3HD data name via SLUS_209.11 0x0054E870, 6 agreeing references; was runninglistcnt
 0x00435BF4	runprocess	inferred	SMT3HD data name via SLUS_209.11 0x0054E874, 3 agreeing references; was runprocess
+0x00435C0C	sdfDefaultCdMode	inferred	SMT3HD name via SLUS_209.11 0x0054E8BC, sdf/sdfDefaultMain SMT3 rename; was D_00435C0C
 0x00435C18	dds3AdminTaskName	inferred	confidence=high; data D_00435C18; matched-C-users=2; src/dds2/game/code_00102DC8.c:162:dds3InitAdmini; src/dds2/game/code_001019F0.c:184:GetAdminiProcessData; Task lookup/create and admin work accessor use this task-name string; data-twin=D_003BA848, supported by 2 independently paired matched functions.; retail-data-start=asm/dds2/data/game/code_001019F0.sdata.s:22.; seed-placeholder=D_00435C18; current asm label and source default identifier verified; source=names_reviewed36.tsv. [names_qp10_seed.tsv]
 0x00435CA8	kwlnCurrentIncompleteResource	inferred	confidence=high; matched_users=src/dds2/game/code_00102DC8.c:kwlnLoadDefaultResource, src/dds2/game/code_00102DC8.c:kwlnTextureFindIncompleteResource; Resource scan stores the first unfinished list entry here and the load callback consumes that entry. Retail address correspondence is independently corroborated by at least two paired functions. [names_qp9.tsv]
 0x00435CAC	kwlnTextureViewerPageIndex	inferred	confidence=high; data D_00435CAC; matched-C-users=2; src/dds2/game/code_00102DC8.c:313:kwlnTextureGetPageIndex; src/dds2/game/code_00102DC8.c:319:kwlnTextureViewerHandlePad; Texture viewer input changes this index; page accessor returns it; data-twin=D_003BA8DC, supported by 2 independently paired matched functions.; retail-data-start=asm/dds2/data/game/code_00102DC8.sdata.s:223.; seed-placeholder=D_00435CAC; current asm label and source default identifier verified; source=names_reviewed36.tsv. [names_qp10_seed.tsv]
@@ -10960,6 +10961,7 @@
 0x00438D18	sdfMovieDrawRight	inferred	The movie sprite's right edge (GS coordinates), set by sdfSetGridScaledDrawBounds. DDS1 twin 0x003BD628.
 0x00438D1C	sdfMovieDrawBottom	inferred	The movie sprite's bottom edge (GS coordinates), set by sdfSetGridScaledDrawBounds. DDS1 twin 0x003BD62C.
 0x00438D20	sdfMovieDrawColor	inferred	The movie sprite's color: alpha in the top byte, RGB below, set by sdfSetGridScaledDrawBounds. DDS1 twin 0x003BD630.
+0x00438D88	dds3KernelThread	inferred	SMT3HD name via SLUS_209.11 0x00551B88, sdf/sdfDefaultMain SMT3 rename; was kwlnMainLoopThreadNode
 0x00438D90	dds3PadVibrationState	inferred	SMT3HD data name via SLUS_209.11 0x00551B90, 3 agreeing references; was dds3PadVibrationState
 0x00438DA8	kwlnDebugGraphTask	inferred	The task handle created for DebugTimeGrph and passed to hierarchy destruction.
 0x00438DB4	blurnow	inferred	SMT3HD data name via SLUS_209.11 0x00551BAC, 4 agreeing references; was blurnow
@@ -11156,6 +11158,7 @@
 0x00439220	sdfDecompHistoryIndex	inferred	SMT3HD name via SLUS_209.11 0x00552170, sdf/sdf_Decomp SMT3 rename; was D_00439220
 0x00439224	sdfFileRpcThreadId	inferred	SMT3HD name via SLUS_209.11 0x00552174, sdfTmx twin; was D_00439224
 0x004393C8	dds3ProcessTreeDepth	inferred	SMT3HD data name via SLUS_209.11 0x005522C8, 2 agreeing references; was dds3ProcessTreeDepth
+0x00439410	dds3KernelStack	inferred	SMT3HD name via SLUS_209.11 0x00552310, sdf/sdfDefaultMain SMT3 rename; was D_00439410
 0x0043DC90	key2	inferred	SMT3HD data name via SLUS_209.11 0x00556B90, 2 agreeing references; was key2
 0x0043DCC0	kwlnFilterBlurFrameParameters	inferred	confidence=high; Per-update workspace filled by transition blending or target-copy plus alpha fade, then passed to real effect-copy and enable/disable providers. DDS1 twin0x003C2540. Native allocation0x30 including padding retained; existingEffBlurScatterParams unchanged. No import or active ASM consumer. [PurD readability data b3; native/matched-C twin; identifier-only]
 0x0043DCF0	dds3BlurState	inferred	SMT3HD data name via SLUS_209.11 0x00556BF0, 2 agreeing references; was dds3BlurState

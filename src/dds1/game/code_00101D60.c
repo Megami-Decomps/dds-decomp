@@ -27,7 +27,7 @@ struct dds3Basic_t;
 
 extern struct dds3Basic_t *dds3TheWorld;
 
-extern const s32 D_003BA83C;
+extern const s32 sdfDefaultCdMode;
 
 #define KWLN_FRAME_POOL_NODE_COUNT 0x62
 
