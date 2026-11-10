@@ -304,16 +304,50 @@ ScrCurrentWorkTaskResult scrIsCurrentWorkTask(const struct scrProcessWork_s *exp
 
 const char D_0039F930[] = "sys:[%s]\n";
 
+#ifdef NON_MATCHING
+/* clang has no GNU nested functions. The matching build keeps sdfLoadChannelFileSegment nested in
+ * sdfReloadChannelSegments, whose static chain lays out the outer frame. */
+static s32 size;
+static u8 *address;
+static u32 segmentBytes;
+static u32 alignedBytes; /* 001181F4 stores the returned stride at static-chain +0xC. */
+
+/* Copy one segment into *slot and report its length rounded up to 16 bytes. */
+static s32 sdfLoadChannelFileSegment(void **slot, u32 unused) {
+    u32 blocks;
+    u32 advance;
+
+    size = *(s32 *)address;
+    if (*slot != 0) {
+        sdfFreeAuto(*slot);
+    }
+    *slot = sdfAllocAuto(size);
+    memcpy(*slot, address + 4, size);
+    segmentBytes = size + 4;
+    blocks = segmentBytes >> 4;
+    if ((segmentBytes & 0xF) != 0) {
+        advance = (blocks + 1) << 4;
+    } else {
+        advance = blocks << 4;
+    }
+    alignedBytes = advance;
+    return alignedBytes;
+}
+#endif
+
 /* Load a table's file and copy each size-prefixed segment into its own block. */
 void sdfReloadChannelSegments(SdfChannel *table) {
     sdfFileCmdHandle_t *command;
     struct sdfMemHandle_t *block;
+#ifndef NON_MATCHING
     s32 size;
     u8 *address;
     u32 segmentBytes;
     u32 alignedBytes; /* 001181F4 stores the returned stride at static-chain +0xC. */
+#endif
     s32 i;
 
+#ifndef NON_MATCHING
     /* Copy one segment into *slot and report its length rounded up to 16 bytes. */
     s32 sdfLoadChannelFileSegment(void **slot, u32 unused) {
         u32 blocks;
@@ -335,6 +369,7 @@ void sdfReloadChannelSegments(SdfChannel *table) {
         alignedBytes = advance;
         return alignedBytes;
     }
+#endif
 
     command = sdfFileOpen(table->path);
     size = sdfFileLength(command);

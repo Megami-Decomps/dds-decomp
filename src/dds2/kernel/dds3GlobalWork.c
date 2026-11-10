@@ -299,16 +299,50 @@ ScrCurrentWorkTaskResult scrIsCurrentWorkTask(const struct scrProcessWork_s *exp
     return current == expected;
 }
 
+#ifdef NON_MATCHING
+/* clang has no GNU nested functions. The matching build keeps sdfLoadChannelFileSegment nested in
+ * sdfReloadChannelSegments, whose static chain lays out the outer frame. */
+static s32 size;
+static u8 *address;
+static u32 segmentBytes;
+static u32 alignedBytes; /* 0011877C stores the returned stride at static-chain +0xC. */
+
+/* Nested helper retains the outer file cursor and reports one 16-byte-aligned segment span. */
+static s32 sdfLoadChannelFileSegment(void **slot, u32 unused) {
+    u32 blocks;
+    u32 advance;
+
+    size = *(s32 *)address;
+    if (*slot != 0) {
+        sdfFreeAuto(*slot);
+    }
+    *slot = sdfAllocAuto(size);
+    memcpy(*slot, address + 4, size);
+    segmentBytes = size + 4;
+    blocks = segmentBytes >> 4;
+    if ((segmentBytes & 0xF) != 0) {
+        advance = (blocks + 1) << 4;
+    } else {
+        advance = blocks << 4;
+    }
+    alignedBytes = advance;
+    return alignedBytes;
+}
+#endif
+
 /* Load the channel file and copy its size-prefixed segments into table slots. */
 void sdfReloadChannelSegments(SdfChannel *table) {
     sdfFileCmdHandle_t *command;
     struct sdfMemHandle_t *block;
+#ifndef NON_MATCHING
     s32 size;
     u8 *address;
     u32 segmentBytes;
     u32 alignedBytes; /* 0011877C stores the returned stride at static-chain +0xC. */
+#endif
     s32 i;
 
+#ifndef NON_MATCHING
     /* Nested helper retains the outer file cursor and reports one 16-byte-aligned segment span. */
     s32 sdfLoadChannelFileSegment(void **slot, u32 unused) {
         u32 blocks;
@@ -330,6 +364,7 @@ void sdfReloadChannelSegments(SdfChannel *table) {
         alignedBytes = advance;
         return alignedBytes;
     }
+#endif
 
     command = sdfFileOpen(table->path);
     size = sdfFileLength(command);

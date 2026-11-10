@@ -2434,25 +2434,76 @@ extern BtlUnit *btlFindNearestUnit(u32, BtlUnit *);
 extern void btlFlagAllUnitsDefeatCandidate(void);
 
 
+#ifdef NON_MATCHING
+/* clang has no GNU nested functions. The matching build keeps func_001E37B0 nested in
+ * btlBuildShoulderActionCamera, whose static chain lays out the outer frame. */
+static f32 focus[4];
+static f32 eye[4];
+static f32 mirror[4];
+static f32 view[4];
+static f32 refReach;
+static BtlUnit *ref;
+static f32 offset;
+static f32 halfFov;
+
+/* Distance at which `ref` fits the view along the mirror direction. */
+static f32 func_001E37B0(f32 heightScale) {
+    f32 tanHalf;
+    f32 distance;
+
+    refReach = ref->reach * ref->scale;
+    effBTLModelGetSphereCenter(ref);
+    SDF_VU0_SETVECTOR_Y(focus[1] * heightScale);
+    SDF_VU0_STOREVECTOR(mirror);
+    SDF_VU0_LOADVECTOR_B(focus);
+    SDF_VU0_SUBVECTOR();
+    SDF_VU0_LOADVECTOR_B(view);
+    SDF_VU0_OUTERPRODUCT();
+    SDF_VU0_OUTERPRODUCT();
+    SDF_VU0_NORMALIZE();
+    SDF_VU0_COPYVECTOR_A_TO_C();
+    SDF_VU0_LOADVECTOR(focus);
+    SDF_VU0_LOADVECTOR_B(mirror);
+    SDF_VU0_SUBVECTOR();
+    SDF_VU0_COPYVECTOR_C_TO_B();
+    SDF_VU0_INNERPRODUCT(offset);
+    distance = ffabsf(offset);
+    tanHalf = tanf(halfFov);
+    distance = (distance + refReach / cosf(halfFov)) / tanHalf;
+    SDF_VU0_LOADVECTOR(eye);
+    SDF_VU0_SETVECTOR_Y(focus[1] * heightScale);
+    SDF_VU0_LOADVECTOR_B(mirror);
+    SDF_VU0_SUBVECTOR();
+    SDF_VU0_LOADVECTOR_B(view);
+    SDF_VU0_INNERPRODUCT(offset);
+    return distance + ffabsf(offset);
+}
+#endif
+
 /* Frame the camera for a two-actor command: place the eye so the actor, the farthest
    and the nearest actors fit the view, then store the resulting distance. */
 void btlBuildShoulderActionCamera(BtlLinkedCommand *action, BtlCamState *pose, BtlUnit *unit, s32 mode) {
+#ifndef NON_MATCHING
     f32 focus[4];
     f32 eye[4];
     f32 mirror[4];
+#endif
     f32 farMuzzle[4];
     f32 fits[3];
+#ifndef NON_MATCHING
     f32 view[4];
     f32 refReach;
     BtlUnit *ref;
     f32 offset;
     f32 halfFov;
+#endif
     f32 nearFit;
     f32 unitExtent;
     f32 fit;
     f32 ramp;
     f32 shift;
 
+#ifndef NON_MATCHING
     /* Distance at which `ref` fits the view along the mirror direction. */
     f32 func_001E37B0(f32 heightScale) {
         f32 tanHalf;
@@ -2485,6 +2536,7 @@ void btlBuildShoulderActionCamera(BtlLinkedCommand *action, BtlCamState *pose, B
         SDF_VU0_INNERPRODUCT(offset);
         return distance + ffabsf(offset);
     }
+#endif
 
     btlGetRuntime();
     btlFlagAllUnitsDefeatCandidate();
