@@ -5,7 +5,7 @@
 #define sdfTexFreeDelayed sdfTexReleaseReferenceViaHandler
 #define sdfMatSetRefMap sdfSetPrimaryStateWordFourth
 #define sdfMatSetTex sdfSetAssetPrimaryTextureAddress
-#define D_00529438 sdfMatMultiTexAlphaTable
+#include "eeregs.h"
 
 extern void *sdfChipAllocDirect(s32 aSize);
 extern void *sdfChipAllocZeroDirect(s32 aSize);
@@ -24,7 +24,7 @@ extern sdfDelayedResrcCB_t sdfMatDelayedResrcCB2;
 extern s32 sdfMatAllocCount;
 
 /* The GS ALPHA_2 value per multi-texture method, indexed by sdfMat_t.multiTexMethod. */
-extern u16 D_00529438[];
+extern u16 sdfMatMultiTexAlphaTable[];
 
 extern void sdfTexFreeDelayed(sdfTexHandle_t *aHandle);
 extern sdfTexHandle_t *sdfTexDup(sdfTexHandle_t *aHandle);
@@ -96,7 +96,7 @@ void sdfTexListFree(sdfItemArray_t *aList, s32 aReleaseItems)
     if (aReleaseItems != 0) {
         count = aList->count;
         for (i = 0; i < count; i++) {
-            sdfTexFreeDelayed((sdfTexHandle_t *)((u32 *)aList->items)[i]);
+            sdfTexFreeDelayed(EE_ADDR_AS(sdfTexHandle_t *, ((u32 *)aList->items)[i]));
         }
     }
     sdfItemArrayFree(aList);
@@ -107,7 +107,7 @@ void sdfTexListAdd(sdfItemArray_t *aList, sdfTexHandle_t *aTexHandle)
     if (aList->count >= (s16)aList->capacity) {
         sdfItemArrayGrow(aList);
     }
-    ((u32 *)aList->items)[aList->count] = (u32)aTexHandle;
+    ((u32 *)aList->items)[aList->count] = EE_ADDR(aTexHandle);
     aList->count++;
 }
 
@@ -141,7 +141,7 @@ sdfItemArray_t *sdfTexListDup(sdfItemArray_t *aList)
     count = aList->count;
     dup = sdfTexListNew(count);
     for (i = 0; i < count; i++) {
-        ((u32 *)dup->items)[i] = (u32)sdfTexDup((sdfTexHandle_t *)((u32 *)aList->items)[i]);
+        ((u32 *)dup->items)[i] = EE_ADDR(sdfTexDup(EE_ADDR_AS(sdfTexHandle_t *, ((u32 *)aList->items)[i])));
     }
     dup->count = count;
     return dup;
@@ -403,7 +403,7 @@ u8 *sdfMatSet(sdfMat_t *aMatPtr, sdfItemArray_t *aTexList, u8 *aDef)
         cursor += 4;
     }
     if (flags & 0x4) {
-        sdfMatSetTex(aMatPtr, (sdfTexHandle_t *)((u32 *)aTexList->items)[*(u16 *)cursor]);
+        sdfMatSetTex(aMatPtr, EE_ADDR_AS(sdfTexHandle_t *, ((u32 *)aTexList->items)[*(u16 *)cursor]));
         cursor += 4;
     }
     if (flags & 0x8) {
@@ -418,7 +418,7 @@ u8 *sdfMatSet(sdfMat_t *aMatPtr, sdfItemArray_t *aTexList, u8 *aDef)
     if (flags & 0x20) {
         packed = *(u32 *)cursor;
         cursor += 4;
-        sdfMatSetMultiTex(aMatPtr, (sdfTexHandle_t *)((u32 *)aTexList->items)[packed & 0xFFFF]);
+        sdfMatSetMultiTex(aMatPtr, EE_ADDR_AS(sdfTexHandle_t *, ((u32 *)aTexList->items)[packed & 0xFFFF]));
         sdfMatSetMultiMethod(aMatPtr, packed >> 16);
     }
     if (flags & 0x40) {
@@ -468,7 +468,7 @@ void sdfMatFreeDelayed(sdfMat_t *aMat)
 sdfDmaTag_t *sdfMatMakePacket(sdfMat_t *aMat, sdfDmaTag_t *aBuffer, s32 aId)
 {
     aBuffer->id = 0x30;
-    aBuffer->addr = (void *)((u32)aMat->packet[aId] & 0x0FFFFFFF);
+    aBuffer->addr = (void *)EE_PHYSICAL(EE_ADDR(aMat->packet[aId]));
     aBuffer->qwc = 0xA;
     aBuffer->dat0 = 0;
     aBuffer->dat1 = 0;
@@ -550,7 +550,7 @@ void sdfMatUpdatePacketMultiTex(sdfMat_t *aMat, sdfMatPacket_t *aPacket)
     aPacket->mtexDiffuse = aMat->multiTexDiffuse;
     method = aMat->multiTexMethod;
     aPacket->mtexAlgo = method;
-    aPacket->mtexAlpha = D_00529438[method];
+    aPacket->mtexAlpha = sdfMatMultiTexAlphaTable[method];
     if (handle != NULL) {
         aPacket->mtexTex1Data = sdfTexGetTex1Reg(handle);
         aPacket->mtexTex0Data = sdfTexGetTex0Reg(handle);
@@ -678,10 +678,11 @@ void sdfMatListCopyStat(sdfItemArray_t *aDst, sdfItemArray_t *aSrc)
     u32 *dst = aDst->items;
 
     for (i = 0; i < count; i++) {
-        sdfMatCopyStat((sdfMat_t *)dst[i], (sdfMat_t *)src[i]);
+        sdfMatCopyStat(EE_ADDR_AS(sdfMat_t *, dst[i]), EE_ADDR_AS(sdfMat_t *, src[i]));
     }
 }
 
 INCLUDE_SDATA(const s32, "sdf/sdfMat", sdfMatAllocCount);
 
 INCLUDE_SDATA(const s32, "sdf/sdfMat", sdfForcedAssetTextureMode);
+
