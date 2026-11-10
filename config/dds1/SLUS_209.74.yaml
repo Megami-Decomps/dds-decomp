@@ -153,8 +153,8 @@ segments:
       - [0x99460, c, interface/itfMisc]  # SMT3 unit start
       - [0x9A828, c, interface/itfPanel]  # SMT3 unit start
       - [0x9BD50, c, interface/itfMesManager]  # SMT3 unit start
-      - [0x9EB88, c, game/code_0019DB88]
-      - [0xA14C0, c, game/code_001A04C0]
+      - [0xA0AD8, c, interface/itfTestMesManager]  # SMT3 unit start
+      - [0xA1CA0, c, game/code_001A0CA0]
       - [0xA2960, c, game/code_001A1960]
       - [0xA6C40, c, game/code_001A5C40]
       - [0xA8180, c, game/code_001A7180]
@@ -375,8 +375,8 @@ segments:
       - [0x2A23B8, .rodata, interface/frTestFont]
       - [0x2A23F0, .rodata, interface/itfMisc]
       - [0x2A2410, .rodata, interface/itfMesManager]
-      - [0x2A24F0, .rodata, game/code_0019DB88]
-      - [0x2A2598, .rodata, game/code_001A04C0]
+      - [0x2A24F0, .rodata, interface/itfTestMesManager]
+      - [0x2A2598, .rodata, game/code_001A0CA0]
       - [0x2A2700, .rodata, game/code_001A1960]
       - [0x2A2988, .rodata, game/code_001A5C40]
       - [0x2A2AA8, .rodata, game/code_001A7180]
@@ -498,8 +498,7 @@ segments:
       - [0x2BA370, .lit4, effect/effDebug]
       - [0x2BA394, .lit4, effect/effEvent]
       - [0x2BA3A0, .lit4, effect/effSpline]
-      - [0x2BA3A8, .lit4, game/code_0019DB88]
-      - [0x2BA3B4, .lit4, game/code_001A04C0]
+      - [0x2BA3A8, .lit4, interface/itfTestMesManager]
       - [0x2BA3C0, .lit4, game/code_001A5C40]
       - [0x2BA3C8, .lit4, game/code_001A9780]
       - [0x2BA3FC, .lit4, game/code_001C48A8]
@@ -594,8 +593,8 @@ segments:
       - [0x2BC198, .sdata, interface/itfMisc]
       - [0x2BC1A8, .sdata, interface/itfPanel]
       - [0x2BC1E8, .sdata, interface/itfMesManager]
-      - [0x2BC230, .sdata, game/code_0019DB88]
-      - [0x2BC2B4, .sdata, game/code_001A04C0]
+      - [0x2BC240, .sdata, interface/itfTestMesManager]
+      - [0x2BC2E0, .sdata, game/code_001A0CA0]
       - [0x2BC3A0, .sdata, game/code_001A9780]
       - [0x2BC5E0, .sdata, game/code_001C8890]
       - [0x2BC5F0, .sdata, game/code_001D0BA0]

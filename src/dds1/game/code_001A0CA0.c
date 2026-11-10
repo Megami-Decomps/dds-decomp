@@ -6,259 +6,26 @@
 #include "fld_next_scene_request_api.h"
 #include "btl_boss_data_api.h"
 #include "btl_event_asset_api.h"
-#include "btl_skill_max_api.h"
-#include "btl_raise_party_record_status_value.h"
 #include "dds3_task_add_child.h"
-#include "sdf_trig.h"
-#include "snd_pad.h"
-#include "sdf_packet_list.h"
-#include "kernel.h"
 #include "dds3_task_priority_query.h"
 #include "dds3_task_create.h"
 #include "sdf_heap_api.h"
-#include "ps2asm.h"
-#include "dat_state.h"
 #include "btl_state.h"
 #include "btl_runtime_activity_status_api.h"
 #include "mnu_result.h"
-#include "sdf.h"
 #include "dds3_task_lifecycle.h"
 #include "itf_mes_resource.h"
-#include "sdf_sif_command.h"
 #include "mdl_flag_api.h"
 #include "btl_enc_bg_entry.h"
-#include "itf_color_panel_row.h"
-
-/* Named and indexed views of the same four signed 32-bit color channels. */
-typedef union UiQuadColor {
-    struct {
-        s32 red;
-        s32 green;
-        s32 blue;
-        s32 alpha;
-    };
-    s32 channels[4];
-} UiQuadColor;
-typedef char UiQuadColorSizeCheck[sizeof(UiQuadColor) == 0x10 ? 1 : -1];
-
-
-extern sdfGrOt_t sdfGrOtTable[];
-extern s32 pbDebugPanel3State;
-extern UiQuadColor itfTestOverlayColor;
-extern u64 *pbAllocPrimPacket(u32, u32, u32, u32, u32, u32, u32);
 
 extern void btlBossDebugPrintf(const char *format, ...);
-
 extern u32 datComputeSkillBoostedMaxHp(datUnitWork_t *);
-
 extern u32 datComputeSkillBoostedMaxMp(datUnitWork_t *);
-
 extern u64 btlAdvanceRuntimeSequenceCounter(void);
-
 extern void btlUpdateScene(void);
 extern void btlUpdateBattleCameraFrame(void);
 extern BtlState *btlRuntime;
-
-
 extern u64 D_003BB2E8;
-#include "sdf_packet_alloc.h"
-
-/* Option IDs index the same signed-byte bank used by the named controls. */
-typedef struct ItfColorPanelWork {
-    s16 editing;
-    s16 selection;
-    u32 blink;
-    u8 pad08[8];
-} ItfColorPanelWork;
-
-typedef char ItfColorPanelWorkSizeCheck[sizeof(ItfColorPanelWork) == 0x10 ? 1 : -1];
-
-extern ItfColorPanelWork pbDebugPanel3X;
-extern ItfColorPanelRow itfOverlayColorEditorRows[6];
-extern SndPad dds3PadButtonState;
-extern sdfGrOt_t sdfDebugGrOt;
-extern s32 itfTestOverlayPhaseStep;
-extern u8 D_003BB2B4;
-extern char D_003BB2B8[]; /* "FILTER:" */
-extern char D_003BB2C0[]; /* ">" */
-extern char D_003BB2C8[]; /* " %s" */
-extern char D_003BB2D0[]; /* "%3d" */
-extern char D_003BB2D8[]; /* "%4d" */
-extern u64 *dds3PrimFrameRect(s32, s32, s32, s32, s32, u32, u32);
-void pbDrawRotatedPrim(s32 surfaceIndex);
-
-/* Draw the four color channels and handle selection and value editing. */
-/* Retail 0x001A0680 keeps the row < 4 select inside the four-row loop. */
-s32 pbDebugPrintPanel3(void) {
-    SifCommand packet;
-    sdfDrawTag_t *list;
-    s32 row;
-    s32 y = 0x7A20;
-    s16 previousSelection;
-    s32 previousRate;
-    s32 highlight;
-
-    list = dds3FontReqAllocDrawTag();
-    sdfDrawTagLink(list,
-        (u32)dds3PrimFrameRect(0x8950, 0x79A8, 0xFEFFFF, 0x5A0, 0x210, 0x60000000, 0x40806020));
-    sdfDevSetPrintCB(&packet, 0x8980, 0x79C0, 0xFF0000, 0);
-    sdfDrawTagLink(list, (u32)sdfDevPrintfEx(&packet, D_003BB2B8));
-    if (pbDebugPanel3X.editing == 0) {
-        sdfDevSetPrintCB(&packet, 0x8980, pbDebugPanel3X.selection * 0x60 + 0x7A20, 0xFF0000, 0);
-        pbDebugPanel3X.blink++;
-        if (pbDebugPanel3X.blink < 32 || (pbDebugPanel3X.blink & 31) < 18) {
-            sdfDrawTagLink(list, (u32)sdfDevPrintfEx(&packet, D_003BB2C0));
-        }
-    }
-    for (row = 0; row != 4; row++) {
-        sdfDevSetPrintCB(&packet, 0x8980, y, 0xFF0000, itfOverlayColorEditorRows[row].highlight);
-        sdfDrawTagLink(list,
-            (u32)sdfDevPrintfEx(&packet, D_003BB2C8, itfOverlayColorEditorRows[row].title));
-        highlight = 0;
-        if (pbDebugPanel3X.editing != 0 && row == pbDebugPanel3X.selection) {
-            highlight = 6;
-        }
-        sdfDevSetPrintCB(&packet, 0x8C80, y, 0xFF0000, highlight);
-        if (row < 4) {
-            sdfDrawTagLink(list,
-                (u32)sdfDevPrintfEx(&packet, D_003BB2D0, itfTestOverlayColor.channels[row]));
-        } else {
-            sdfDrawTagLink(list,
-                (u32)sdfDevPrintfEx(&packet, D_003BB2D8, itfTestOverlayPhaseStep));
-        }
-        y += 0x60;
-    }
-    sdfDebugGrOt.regFunc(&sdfDebugGrOt, list);
-    pbDebugPanel3State += itfTestOverlayPhaseStep;
-    pbDrawRotatedPrim(0x52);
-    if ((s8)dds3PadButtonState.secondaryTriangle < 0) {
-        D_003BB2B4 ^= 1;
-    }
-    if (pbDebugPanel3X.editing == 0) {
-        previousSelection = pbDebugPanel3X.selection;
-        if ((u8)dds3PadButtonState.secondaryUp & 2) {
-            pbDebugPanel3X.selection--;
-            if (pbDebugPanel3X.selection < 0) {
-                pbDebugPanel3X.selection = 3;
-            }
-        }
-        if ((u8)dds3PadButtonState.secondaryDown & 2) {
-            pbDebugPanel3X.selection++;
-            if (pbDebugPanel3X.selection >= 4) {
-                pbDebugPanel3X.selection = 0;
-            }
-        }
-        if (previousSelection != pbDebugPanel3X.selection) {
-            pbDebugPanel3X.blink = 0;
-        }
-        if (dds3PadButtonState.secondaryCross < 0) {
-            pbDebugPanel3X.editing ^= 1;
-            pbDebugPanel3X.blink = 0;
-        }
-        if ((u8)dds3PadButtonState.secondaryCancel & 2) {
-            return -1;
-        }
-    } else {
-        if (pbDebugPanel3X.selection < 4) {
-            if ((u8)dds3PadButtonState.coarseDown & 2) {
-                itfTestOverlayColor.channels[pbDebugPanel3X.selection] -= 10;
-                if (itfTestOverlayColor.channels[pbDebugPanel3X.selection] < 0) {
-                    itfTestOverlayColor.channels[pbDebugPanel3X.selection] = 0;
-                }
-            }
-            if ((u8)dds3PadButtonState.coarseUp & 2) {
-                itfTestOverlayColor.channels[pbDebugPanel3X.selection] += 10;
-                if (itfTestOverlayColor.channels[pbDebugPanel3X.selection] > 255) {
-                    itfTestOverlayColor.channels[pbDebugPanel3X.selection] = 255;
-                }
-            }
-        } else {
-            previousRate = itfTestOverlayPhaseStep;
-            if ((u8)dds3PadButtonState.coarseDown & 2) {
-                itfTestOverlayPhaseStep -= 0x100;
-                if (itfTestOverlayPhaseStep < 0) {
-                    itfTestOverlayPhaseStep = 0;
-                }
-            }
-            if ((u8)dds3PadButtonState.coarseUp & 2) {
-                itfTestOverlayPhaseStep += 0x100;
-                if (itfTestOverlayPhaseStep > 0x800) {
-                    itfTestOverlayPhaseStep = 0x800;
-                }
-            }
-            if (previousRate != itfTestOverlayPhaseStep) {
-                pbDebugPanel3State = 0;
-            }
-        }
-        if (dds3PadButtonState.secondaryCancel < 0) {
-            pbDebugPanel3X.editing ^= 1;
-            pbDebugPanel3X.blink = 0;
-        }
-    }
-    return 0;
-}
-
-
-u64 *pbAllocPrimPacket(u32 x, u32 y, u32 depth, u32 width, u32 height, u32 color0, u32 color1) {
-    u64 *packet = (u64 *)sdfGrAllocPacketBuff(0x80);
-
-    packet[0] = 7;
-    packet[1] = 0x5000000700000000ULL;
-    packet[2] = 0xB400000000008001ULL;
-    packet[3] = 0xFF515151510ULL;
-    packet[4] = 0x14D;
-    packet[5] = color0 | ((u64)0xFE00 << 46);
-    packet[7] = color0 | ((u64)0xFE00 << 46);
-    packet[9] = color1 | ((u64)0xFE00 << 46);
-    packet[11] = color1 | ((u64)0xFE00 << 46);
-    packet[6] = (u64)((x & 0xFFFF) | (y << 16)) | ((u64)depth << 32);
-    packet[8] = (u64)(((x + width) & 0xFFFF) | (y << 16)) | ((u64)depth << 32);
-    packet[10] = (u64)(((x + width) & 0xFFFF) | ((y + height) << 16)) | ((u64)depth << 32);
-    packet[12] = (u64)((x & 0xFFFF) | ((y + height) << 16)) | ((u64)depth << 32);
-    packet[13] = packet[14] = packet[15] = 0;
-    return packet;
-}
-
-extern void *sdf2DMakeStdPacket(void *packet, s32 packetBytes);
-
-u64 *pbMakeSpritePacket(u64 owner, s32 alternative) {
-    u64 *entry = (u64 *)sdf2DMakeStdPacket((void *)sdfGrAllocPacketBuff(0x30), 0x30);
-    entry[4] = owner;
-    entry[5] = alternative ? 0x48 : 0x47;
-    return entry;
-}
-
-u64 *pbMakePrimPacket(u64 owner, s32 alternative) {
-    u64 *entry = (u64 *)sdf2DMakeStdPacket((void *)sdfGrAllocPacketBuff(0x30), 0x30);
-    entry[4] = owner;
-    entry[5] = alternative ? 0x43 : 0x42;
-    return entry;
-}
-
-void pbDrawRotatedPrim(s32 surfaceIndex) {
-    u32 color = 0;
-    s32 alpha;
-    s32 i;
-    u8 *component;
-    sdfDrawTag_t *list;
-    sdfGrOt_t *surface;
-    f32 phase;
-
-    phase = (f32)(pbDebugPanel3State % 4096) * (1.0f / 4096.0f);
-    phase = phase * 6.2831852f + 1.5707963f + 0.78539815f;
-    alpha = (s32)((sdfSin(phase) + 1.0f) * 0.5f * itfTestOverlayColor.alpha);
-    component = (u8 *)&itfTestOverlayColor;
-    for (i = 0; i != 3; i++, component += 4) {
-        color |= *component << (i * 8);
-    }
-    color |= (u32)alpha << 24;
-    list = dds3FontReqAllocDrawTag();
-    sdfDrawTagLink(list, (u32)pbMakeSpritePacket(0x33001, 0));
-    sdfDrawTagLink(list, (u32)pbMakePrimPacket(6, 0));
-    sdfDrawTagLink(list, (u32)pbAllocPrimPacket(0x7000, 0x7900, 0xFEFFFF, 0x2000, 0xE00, color, color));
-    surface = &sdfGrOtTable[surfaceIndex];
-    surface->regFunc(surface, list);
-}
 
 void btlResetRuntimeSequenceCounter(void) {
     D_003BB2E8 = 1;
@@ -360,7 +127,6 @@ extern char D_003BB2F0[];
 
 extern char D_003A1598[]; /* "battle_draw" */
 
-
 void btlCreateDrawTasks(void) {
     BtlState *battle = btlRuntime;
     dds3ProcessID_t *mainTask;
@@ -417,8 +183,6 @@ extern ItfMesSub D_0032A210;
 
 extern EffRandState effSharedRandomState[];
 
-
-
 extern void sdfRandomize(s8 *, s32);
 
 extern u32 dds3GetKernelCount(void);
@@ -446,7 +210,6 @@ extern void btlRetainButtonTexture(void);
 extern void btlAllocatePanelTaskWork(void);
 
 extern void btlInitializeRuntimeNoOp(void);
-
 
 /* Allocate/reset battle work, initialize windows and queue shared resources. */
 void btlInitializeBattleRuntime(void) {
@@ -524,11 +287,11 @@ extern void dds3StopQuake(void);
 extern void sndClearList(void);
 extern void sndFreeBattleSoundEntries(void);
 
-INCLUDE_RODATA(const s32, "game/code_001A04C0", D_003A1598);
+INCLUDE_RODATA(const s32, "game/code_001A0CA0", D_003A1598);
 
-INCLUDE_RODATA(const s32, "game/code_001A04C0", D_003A15A8);
+INCLUDE_RODATA(const s32, "game/code_001A0CA0", D_003A15A8);
 
-INCLUDE_RODATA(const s32, "game/code_001A04C0", D_003A15C8);
+INCLUDE_RODATA(const s32, "game/code_001A0CA0", D_003A15C8);
 
 s32 btlExitWhenAudioAndTasksIdle(void) {
     if (btlRuntime == NULL) {
@@ -730,7 +493,6 @@ u32 btlSnapshotResultRewards(BrsRewardSummary *rewards) {
     return 1;
 }
 
-
 extern EncBgRow *D_003BAA44;
 
 s32 btlResolveQueuedSceneRequestParameters(s32 *outCode, s32 *outParameter) {
@@ -765,7 +527,6 @@ s32 btlResolveQueuedSceneRequestParameters(s32 *outCode, s32 *outParameter) {
 void *btlGetRuntime(void) {
     return btlRuntime;
 }
-
 
 #define BTL_ENTRY_STATUS_MASK 0x7FFF
 
@@ -846,75 +607,63 @@ void btlRaisePartyRecordStatusValue(datUnitWork_t *item, u32 minimumValue) {
     sdfRaisePackedChannelValue(item, minimumValue);
 }
 
-INCLUDE_RODATA(const s32, "game/code_001A04C0", D_003A1698);
+INCLUDE_RODATA(const s32, "game/code_001A0CA0", D_003A1698);
 
-INCLUDE_RODATA(const s32, "game/code_001A04C0", D_003A16B8);
+INCLUDE_RODATA(const s32, "game/code_001A0CA0", D_003A16B8);
 
-INCLUDE_RODATA(const s32, "game/code_001A04C0", D_003A16C8);
+INCLUDE_RODATA(const s32, "game/code_001A0CA0", D_003A16C8);
 
-INCLUDE_RODATA(const s32, "game/code_001A04C0", D_003A16D8);
+INCLUDE_RODATA(const s32, "game/code_001A0CA0", D_003A16D8);
 
-INCLUDE_RODATA(const s32, "game/code_001A04C0", D_003A16E8);
+INCLUDE_RODATA(const s32, "game/code_001A0CA0", D_003A16E8);
 
-INCLUDE_SDATA(const s32, "game/code_001A04C0", D_003BB2B4);
+INCLUDE_SDATA(const s32, "game/code_001A0CA0", D_003BB2E0);
 
-INCLUDE_SDATA(const s32, "game/code_001A04C0", D_003BB2B8);
+INCLUDE_SDATA(const s32, "game/code_001A0CA0", btlRuntime);
 
-INCLUDE_SDATA(const s32, "game/code_001A04C0", D_003BB2C0);
+INCLUDE_SDATA(const s32, "game/code_001A0CA0", D_003BB2E8);
 
-INCLUDE_SDATA(const s32, "game/code_001A04C0", D_003BB2C8);
+INCLUDE_SDATA(const s32, "game/code_001A0CA0", D_003BB2F0);
 
-INCLUDE_SDATA(const s32, "game/code_001A04C0", D_003BB2D0);
+INCLUDE_SDATA(const s32, "game/code_001A0CA0", D_003BB2F8);
 
-INCLUDE_SDATA(const s32, "game/code_001A04C0", D_003BB2D8);
+INCLUDE_SDATA(const s32, "game/code_001A0CA0", D_003BB300);
 
-INCLUDE_SDATA(const s32, "game/code_001A04C0", D_003BB2E0);
+INCLUDE_SDATA(const s32, "game/code_001A0CA0", D_003BB308);
 
-INCLUDE_SDATA(const s32, "game/code_001A04C0", btlRuntime);
+INCLUDE_SDATA(const s32, "game/code_001A0CA0", D_003BB310);
 
-INCLUDE_SDATA(const s32, "game/code_001A04C0", D_003BB2E8);
+INCLUDE_SDATA(const s32, "game/code_001A0CA0", D_003BB318);
 
-INCLUDE_SDATA(const s32, "game/code_001A04C0", D_003BB2F0);
+INCLUDE_SDATA(const s32, "game/code_001A0CA0", D_003BB320);
 
-INCLUDE_SDATA(const s32, "game/code_001A04C0", D_003BB2F8);
+INCLUDE_SDATA(const s32, "game/code_001A0CA0", D_003BB328);
 
-INCLUDE_SDATA(const s32, "game/code_001A04C0", D_003BB300);
+INCLUDE_SDATA(const s32, "game/code_001A0CA0", D_003BB330);
 
-INCLUDE_SDATA(const s32, "game/code_001A04C0", D_003BB308);
+INCLUDE_SDATA(const s32, "game/code_001A0CA0", D_003BB338);
 
-INCLUDE_SDATA(const s32, "game/code_001A04C0", D_003BB310);
+INCLUDE_SDATA(const s32, "game/code_001A0CA0", D_003BB340);
 
-INCLUDE_SDATA(const s32, "game/code_001A04C0", D_003BB318);
+INCLUDE_SDATA(const s32, "game/code_001A0CA0", D_003BB348);
 
-INCLUDE_SDATA(const s32, "game/code_001A04C0", D_003BB320);
+INCLUDE_SDATA(const s32, "game/code_001A0CA0", D_003BB350);
 
-INCLUDE_SDATA(const s32, "game/code_001A04C0", D_003BB328);
+INCLUDE_SDATA(const s32, "game/code_001A0CA0", D_003BB358);
 
-INCLUDE_SDATA(const s32, "game/code_001A04C0", D_003BB330);
+INCLUDE_SDATA(const s32, "game/code_001A0CA0", D_003BB360);
 
-INCLUDE_SDATA(const s32, "game/code_001A04C0", D_003BB338);
+INCLUDE_SDATA(const s32, "game/code_001A0CA0", D_003BB368);
 
-INCLUDE_SDATA(const s32, "game/code_001A04C0", D_003BB340);
+INCLUDE_SDATA(const s32, "game/code_001A0CA0", D_003BB370);
 
-INCLUDE_SDATA(const s32, "game/code_001A04C0", D_003BB348);
+INCLUDE_SDATA(const s32, "game/code_001A0CA0", D_003BB378);
 
-INCLUDE_SDATA(const s32, "game/code_001A04C0", D_003BB350);
+INCLUDE_SDATA(const s32, "game/code_001A0CA0", D_003BB380);
 
-INCLUDE_SDATA(const s32, "game/code_001A04C0", D_003BB358);
+INCLUDE_SDATA(const s32, "game/code_001A0CA0", D_003BB388);
 
-INCLUDE_SDATA(const s32, "game/code_001A04C0", D_003BB360);
+INCLUDE_SDATA(const s32, "game/code_001A0CA0", D_003BB390);
 
-INCLUDE_SDATA(const s32, "game/code_001A04C0", D_003BB368);
-
-INCLUDE_SDATA(const s32, "game/code_001A04C0", D_003BB370);
-
-INCLUDE_SDATA(const s32, "game/code_001A04C0", D_003BB378);
-
-INCLUDE_SDATA(const s32, "game/code_001A04C0", D_003BB380);
-
-INCLUDE_SDATA(const s32, "game/code_001A04C0", D_003BB388);
-
-INCLUDE_SDATA(const s32, "game/code_001A04C0", D_003BB390);
-
-INCLUDE_SDATA(const s32, "game/code_001A04C0", D_003BB398);
+INCLUDE_SDATA(const s32, "game/code_001A0CA0", D_003BB398);
 

@@ -69,6 +69,6 @@ transfer above. Native formatter users at `0x001A45C0` and `0x001A81F0` share
 poller at `0x001A85E0` initializes/completes the same tightly shared state
 protocol as the latter function. This supports the conservative extension
 through the poller, without claiming the next function is a proven original
-file boundary. The remaining code is `game/code_001A8748`; its `.rodata` begins
-at `0x00414E90`, and its `.lit4` remains at `0x00434568`. See the controlled
+file boundary. The remaining code is `interface/itfTestMesManager` (`.rodata` at
+`0x00414E90`, `.lit4` at `0x00434568`) and `game/code_001A9910`. See the controlled
 compiler-context and provenance discussion in `idioms.md`.

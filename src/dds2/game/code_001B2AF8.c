@@ -100,7 +100,6 @@ extern void btlResetBattleHistoryCounters(void);
  * An early void declaration recolors btlDrawItemCommandRows' loop carriers:
  * retail row $21, y $22, total $30 become $20, $21, $23 respectively. */
 
-
 extern void btlDrawActorPanelHighlights(BtlUnit *, BattleActorPanelWork *, s32, s8);
 
 extern f32 D_00415F80[4];
@@ -108,10 +107,6 @@ extern f32 D_00415F80[4];
 extern BtlCommandHintWork *D_004367F8;
 
 extern const char *D_004367CC;
-
-extern u32 sndTestMessageResourceIndex;
-
-extern sdfTexHandle_t *sndTestMessageTexture;
 
 extern u64 D_004366E8;
 
@@ -133,8 +128,6 @@ extern SceneKindTable *btlCommandSelectionHighlightWork;
 
 extern u32 btlCommandOptionAnimationWork;
 
-
-
 extern BattleTrackedTaskWork *btlTrackedTaskHandles;
 
 extern u32 btlPendingLinkageSkillFlags[];
@@ -144,8 +137,6 @@ extern DatEnemyRecord *datEnemyRecords;
 extern void btlBossDebugPrintf(const char *, ...);
 
 extern EffRandState effSharedRandomState[];
-
-
 
 extern s32 btlDoesEnabledStatusMatchCurrentId(datUnitWork_t *, u32);
 
@@ -165,24 +156,6 @@ extern BattleSelectionWork *btlLinkedSelectionTaskBuffer;
 
 /* Option IDs index the same signed-byte bank used by the named controls. */
 extern SndPad dds3PadButtonState;
-
-extern u8 D_00436630[5];
-
-extern u8 D_00436638[5];
-
-
-extern char D_00436660[];
-
-extern char D_00436668[];
-
-extern char D_00436670[];
-
-extern char D_00436678[];
-
-extern char D_00436680[];
-
-extern char D_00436688[];
-
 
 extern char D_004366F0[];
 
@@ -212,8 +185,6 @@ void btlClearAllActorEntrySlots(BtlUnit *unit);
 
 s32 btlGetEntryFlagsUnlessDisabled(datUnitWork_t *record);
 
-
-
 /* Read current HP from a unit-entry address. */ s32 btlReadCurrentUnitHp(datUnitWork_t *entry);
 
 /* Cache the skill-adjusted maximum and return current HP clamped to it. * The comparison uses the full-width result, not the u16 cache. */ u16 btlRefreshUnitMaximumHpAndClampCurrentHp(datUnitWork_t *entryAddress);
@@ -228,7 +199,6 @@ typedef struct BattleEscapeParameters {
 } BattleEscapeParameters;
 
 const char D_004156B0[] = "btl:escape=%d%%[ratio=%.2f,sn=%d]\n";
-
 
 s32 btlTryEscapeWithPhaseAdjustment(BtlUnit *actor) {
     BtlState *battle = (BtlState *)btlGetRuntime();
@@ -538,7 +508,6 @@ BtlEnemySpawnCapacityResult btlCanSpawnAnotherEnemy(BtlUnit *requester) {
     }
     return BTL_ENEMY_SPAWN_CAPACITY_AVAILABLE;
 }
-
 
 /* Count eligible option-skill IDs; a non-NULL output receives those IDs. */
 s32 btlCollectAvailableOptionSkills(BtlUnit *actor, BtlCommandId *choices) {
@@ -1589,7 +1558,6 @@ s8 btlChooseStartVoice(void) {
     btlBossDebugPrintf(D_00415970, voice, category, chosen->partyRecord.unitId);
     return voice;
 }
-
 
 u32 func_001B5268(void) {
     btlGetRuntime();
@@ -2831,7 +2799,6 @@ extern u32 btlHasRegisteredSkillNamePanelTask(void);
 
 extern u32 btlHasRegisteredAphNamePanelTask(void);
 
-
 extern s32 btlUpdateValueMessageWindows(dds3ProcessID_t *);
 
 extern void itfMesCloseAllWindows(dds3ProcessID_t *);
@@ -2897,7 +2864,6 @@ void btlRequestMahenPanelClose(void) {
     }
 }
 
-
 extern u32 btlHasRegisteredAnalysisPanelTask(void);
 
 extern u32 btlHasRegisteredGuidePanelTask(void);
@@ -2905,7 +2871,6 @@ extern u32 btlHasRegisteredGuidePanelTask(void);
 extern u32 btlHasRegisteredSkillNamePanelTask(void);
 
 extern u32 btlHasRegisteredAphNamePanelTask(void);
-
 
 extern s32 btlUpdateAndDrawAnalysisPanel(dds3ProcessID_t *task);
 
@@ -2990,7 +2955,6 @@ extern u32 btlHasRegisteredGuidePanelTask(void);
 extern u32 btlHasRegisteredSkillNamePanelTask(void);
 
 extern u32 btlHasRegisteredAphNamePanelTask(void);
-
 
 s32 btlCreateGuidePanelTask(s32 windowIndex, s32 entryIndex) {
     BtlState *context = (BtlState *)btlGetRuntime();
@@ -3152,7 +3116,6 @@ s32 btlCreatePhaseChangePanelTask(s32 variant) {
     return 1;
 }
 
-
 u32 btlHasRegisteredSkillNamePanelTask(void) {
     dds3ProcessID_t *task;
 
@@ -3244,7 +3207,6 @@ extern void itfMesMngSetMesPosition(s32, s32, s32);
 extern s32 btlDrawTimedDialogTask(dds3ProcessID_t *task);
 
 extern void btlReleaseDialogTaskData(dds3ProcessID_t *task);
-
 
 s32 btlReplaceDialogTasksAndQueueMessage(s32 windowIndex, s32 entryIndex) {
     BtlState *context = (BtlState *)btlGetRuntime();
@@ -3428,7 +3390,6 @@ s32 btlUpdateValueMessageWindows(dds3ProcessID_t *task) {
     }
     return 0;
 }
-
 
 extern void itfMesMngRequestMessageRelease(s32, s32);
 
@@ -3734,7 +3695,6 @@ s32 btlUpdateAndDrawAnalysisPanel(dds3ProcessID_t *task) {
     }
     return 0;
 }
-
 
 extern s32 btlInitCursorAndApplyAction(BtlLinkedCommand *, BtlCamState *);
 
@@ -4191,8 +4151,6 @@ void btlDrawThreePanelSpriteStrips(s32 unused, s32 x, s32 y, s32 delta) {
     }
 }
 
-
-
 /* Draw the fixed panel composition at x/y using the requested corner opacity. */
 void btlDrawCompositePanelSprites(void *unused, s32 x, s32 y, u32 alpha) {
     s32 strips[37][3] = {
@@ -4567,7 +4525,6 @@ void btlReleaseRegisteredChildTaskWork(dds3ProcessID_t *task) {
     sdfChipFreeDirect((void *)dds3GetProcessData(task));
     btlSetTrackedProcess(BTL_TRACKED_PROCESS_REGISTERED_ACTOR_PANEL_CHILD, 0);
 }
-
 
 typedef struct BattlePhaseSlotIds { s32 values[3]; } BattlePhaseSlotIds;
 
@@ -5031,8 +4988,6 @@ void btlDrawPhaseChangePanelEchoes(BattlePhasePanelWork *work) {
 INCLUDE_RODATA(const s32, "game/code_001B2AF8", D_00416498);
 
 const s32 D_004164A8[4] = {0x21, 0x22, 0x2C, 0x2D};
-
-
 
 extern void btlUpdatePhasePanelAnimation();
 
@@ -5578,7 +5533,6 @@ INCLUDE_RODATA(const s32, "game/code_001B2AF8", D_00416560);
 INCLUDE_ASM(const s32, "game/code_001B2AF8", func_001BDF20);
 #endif
 
-
 extern const char *D_004367D4;
 extern s32 func_001BEBD0(dds3ProcessID_t *);
 extern void btlReleaseCmsleffPanelWork(dds3ProcessID_t *);
@@ -5776,7 +5730,6 @@ s32 btlUpdateSkillNamePanelTask(dds3ProcessID_t *task) {
     }
     return 0;
 }
-
 
 extern void eglSetOt(u32);
 extern void evtSubmitPrimaryGsTest(s32, s32, s32, s32, s32, s32, s32, s32);
@@ -6212,7 +6165,6 @@ s32 btlIsLinkageTutorialEligible(void) {
     return 1;
 }
 
-
 extern s32 btlBuildActorLinkageSkillList(BtlUnit *actor, BattleRosterTable *table);
 
 /* Clear working notice flags, then test for an unmarked eligible LINKAGE skill. */
@@ -6247,8 +6199,6 @@ btlCommandPanelOwnerHasUnmarkedLinkageSkill(void) {
     availability = btlHasUnmarkedLinkageSkill(scene->owner->unit);
     return availability;
 }
-
-
 
 extern s32 btlAccessRecordedLinkageSkillFlag(s32, s32);
 
@@ -6398,7 +6348,6 @@ s32 btlUpdateLinkageNoticeTask(dds3ProcessID_t *task) {
 dialog_active:
     return 0;
 }
-
 
 void btlFinishTrackedBattleTaskAndCloseWindow(dds3ProcessID_t *handle) {
     u8 *work = (u8 *)btlGetRuntime();
@@ -6659,7 +6608,6 @@ s32 btlUpdateMajinTutorialTask(dds3ProcessID_t *task) {
     return 0;
 }
 
-
 extern const char *D_004367F0;
 
 s32 btlDestroyTaskD(void) {
@@ -6708,8 +6656,6 @@ void btlInitializeSelectionWork(void) {
     }
     btlSetTrackedResourceFlag(BTL_TRACKED_RESOURCE_SELECTION_BUFFER, 1);
 }
-
-#define SELECTION_VIEW ((SelView *)btlLinkedSelectionTaskBuffer)
 
 INCLUDE_RODATA(const s32, "game/code_001B2AF8", btlSoundSlotDefaults);
 
@@ -7477,7 +7423,6 @@ s32 btlUpdateReservePanelSelection(dds3ProcessID_t *task, BtlState *battle) {
     return 1;
 }
 
-
 void btlSlotBankPromoteStates(BattleActorPanelWork *bank) {
     s32 i;
     for (i = 0; i < bank->reserveCount; i++) {
@@ -7744,11 +7689,8 @@ typedef struct UiInputState {
     u32 flags; /* 0x3C */
 } UiInputState;
 
-
-
 extern const char *D_004367CC;
 extern u8 btlHasRequiredActorStatusBits(BtlUnit *node);
-
 
 extern const char *btlCommandPanelTaskNameRef;
 extern void btlClearClosingActorRowPulses(BattleActorPanelWork *, s8);
@@ -8308,7 +8250,6 @@ void btlDrawActorPanelHighlights(BtlUnit *unit, BattleActorPanelWork *work, s32 
     evtSubmitPrimaryAlphaBlendMode(0);
 }
 
-
 void func_001C4C58(BtlUnit *unusedUnit, BattleActorPanelWork *work, s32 slot) {
     s32 i;
 
@@ -8552,7 +8493,6 @@ void btlDrawActorPanelTransitionTriangles(void *task, BattleActorPanelWork *work
     evtSubmitPrimaryAlphaBlendMode(0);
 }
 
-
 void btlAdvanceActorSlotEchoAnimation(BtlUnit *unusedUnit, BattleActorPanelWork *work, s32 slot) {
     s32 i;
 
@@ -8655,7 +8595,6 @@ void btlAdvanceActorSlotEchoAnimation(BtlUnit *unusedUnit, BattleActorPanelWork 
         break;
     }
 }
-
 
 extern const BattlePanelColors D_004168C8;
 
@@ -8779,8 +8718,6 @@ void btlUpdateActorVitalPulseTrail(BtlUnit *unit, BattleActorPanelWork *work, s1
     }
 }
 
-
-
 extern const BattlePanelColors D_004168D8;
 
 /* Advance one HP/MP bar pulse and draw it when the unit status permits. */
@@ -8838,7 +8775,6 @@ void btlUpdateAndDrawVitalBarPulse(BtlUnit *unit, BattleStatPulse *pulse, s32 x,
                      0, btlResourceBlock->resA, sprite, 0x53);
     }
 }
-
 
 void btlUpdateActorVitalEffectState(BtlUnit *unit, BattleActorPanelWork *work, s32 slot) {
     switch (work->activeEntries[slot].presentation.hpState) {
@@ -8943,7 +8879,6 @@ void btlUpdateActorVitalChangeEffects(BtlUnit *unit, BattleActorPanelWork *work,
         }
     }
 }
-
 
 /* Compare cached HP/MP with current values and prepare change targets and pulse states. */
 void btlTrackActorVitalChanges(BtlUnit *unit, BattleActorPanelWork *work, s32 slot, s8 kind) {
@@ -9252,7 +9187,6 @@ void btlDrawActorVitalGauge(BtlUnit *unit, s32 current, s32 displayed, s32 maxim
         btlResourceBlock->resA->workEntries[sprite].parameters[0] = 0;
 }
 
-
 extern sdfGrOt_t D_003805A8;
 #include "sdf_packet_alloc.h"
 /* Draw a textured command-panel quad with independently colored corners. */
@@ -9409,29 +9343,13 @@ extern ActorSlotOrder *D_00438F58[2];
 extern _FRQ *itfCreateFont2TextGlyph(s32, s32, s32, u32, char *, _FRQ *);
 extern s32 frFontDrawGlyphWithSharedFlags(struct _FRQ *, s8);
 
-
-
-
-
-
-
-
 extern u32 btlHasRegisteredAphNamePanelTask(void);
 
 extern SceneAiWork *btlCreateTargetSelectionWork(ActionStateLink *source);
 
 extern SceneAiWork *btlGetTargetSelectionWork(void);
 
-
-
-
-
-
-
 extern BattleSceneObject *btlGetCommandPanelTaskWork(void);
-
-
-
 
 extern BattleCmdPanel *btlCommandPanelWork;
 
@@ -9441,9 +9359,7 @@ extern u32 btlGetActorCommandClass(BattleSceneObject *, s8);
 
 extern s32 btlCountFlaggedSceneActors(void);
 
-
 extern s32 D_004367C0;
-
 
 extern u8 D_003B5B10[];
 
@@ -9452,12 +9368,6 @@ extern s32 btlGetEntryFlagsUnlessDisabled(datUnitWork_t *);
 extern u8 *datSkillNames;
 
 extern u8 *D_00435E5C;
-
-
-
-
-
-
 
 void btlUpdateSceneFlow(void) {
     BtlState *scene = (BtlState *)btlGetRuntime();
@@ -9547,13 +9457,11 @@ u32 btlGetActorCommandClass(BattleSceneObject *object, s8 panelSlotIndex) {
     return selectionBanksByPanelSlot->values[panelSlotIndex];
 }
 
-
 extern SceneKindTable *btlCommandSelectionHighlightWork;
 
 extern u16 *btlGatherActorCommandsByKind(s32, s16 *, u16, u16, u16);
 
 extern void fldCollectAvailableRosterEntries(s32, s16 *);
-
 
 /* Advance the per-kind scene counter table: refresh the slot for the current
  * scene kind, then return its value (clamped to 4 unless noClamp is set). */
@@ -9753,7 +9661,6 @@ u16 *btlGatherEnemyCommands(BtlUnit *actor, s16 *outCount) {
     *outCount = count;
     return out;
 }
-
 
 /* Pack available roster IDs and their values into consecutive byte pairs. */
 void fldCollectAvailableRosterEntries(s32 unused, s16 *count) {
@@ -10299,54 +10206,6 @@ void btlDrawItemCommandRows(BattleSceneObject *object) {
     }
 }
 
-INCLUDE_SDATA(const s32, "game/code_001B2AF8", D_00436630);
-
-INCLUDE_SDATA(const s32, "game/code_001B2AF8", D_00436638);
-
-INCLUDE_SDATA(const s32, "game/code_001B2AF8", sndTestMessageResourceIndex);
-
-INCLUDE_SDATA(const s32, "game/code_001B2AF8", sndTestMessageTexture);
-
-INCLUDE_SDATA(const s32, "game/code_001B2AF8", D_00436648);
-
-INCLUDE_SDATA(const s32, "game/code_001B2AF8", D_00436650);
-
-INCLUDE_SDATA(const s32, "game/code_001B2AF8", D_00436658);
-
-INCLUDE_SDATA(const s32, "game/code_001B2AF8", D_00436660);
-
-INCLUDE_SDATA(const s32, "game/code_001B2AF8", D_00436668);
-
-INCLUDE_SDATA(const s32, "game/code_001B2AF8", D_00436670);
-
-INCLUDE_SDATA(const s32, "game/code_001B2AF8", D_00436678);
-
-INCLUDE_SDATA(const s32, "game/code_001B2AF8", D_00436680);
-
-INCLUDE_SDATA(const s32, "game/code_001B2AF8", D_00436688);
-
-INCLUDE_SDATA(const s32, "game/code_001B2AF8", D_00436690);
-
-INCLUDE_SDATA(const s32, "game/code_001B2AF8", D_00436698);
-
-INCLUDE_SDATA(const s32, "game/code_001B2AF8", D_004366A0);
-
-INCLUDE_SDATA(const s32, "game/code_001B2AF8", D_004366A8);
-
-INCLUDE_SDATA(const s32, "game/code_001B2AF8", D_004366B0);
-
-INCLUDE_SDATA(const s32, "game/code_001B2AF8", D_004366B4);
-
-INCLUDE_SDATA(const s32, "game/code_001B2AF8", D_004366B8);
-
-INCLUDE_SDATA(const s32, "game/code_001B2AF8", D_004366C0);
-
-INCLUDE_SDATA(const s32, "game/code_001B2AF8", D_004366C8);
-
-INCLUDE_SDATA(const s32, "game/code_001B2AF8", D_004366D0);
-
-INCLUDE_SDATA(const s32, "game/code_001B2AF8", D_004366D8);
-
 INCLUDE_SDATA(const s32, "game/code_001B2AF8", D_004366E0);
 
 INCLUDE_SDATA(const s32, "game/code_001B2AF8", btlRuntime);
@@ -10502,7 +10361,6 @@ static inline void btlSetCornerColors(BattlePanelColors *colors, u32 color) {
     colors->values[3] = color;
 }
 
-
 void btlDrawLinkageSkillOptions(BattleSceneObject *object) {
     char text[16];
     BattlePanelColors colors = D_00416A10;
@@ -10618,8 +10476,6 @@ BtlCommandUseError btlCheckScenePairResult(BtlUnit *self, BattleRosterPair *args
     }
     return resultB;
 }
-
-
 
 /* Retail returns 0 or 1 from both; this caller discards the result. */
 extern s32 func_001C0EF0(void);
@@ -10799,8 +10655,6 @@ s32 btlHaveActiveSceneActorEntriesCleared(void) {
     }
     return 1;
 }
-
-
 
 BtlCommandPanelIntroMode fldSelectSceneMode(ActionStateLink *task) {
     s32 flag = ((BtlState *)btlGetRuntime())->encounterKind == 3;
@@ -11464,7 +11318,6 @@ void btlUpdateAndDrawTargetActorPanels(SceneAiWork *work) {
     }
 }
 
-
 void btlDrawCenteredPanelSegments(s32 width) {
     u32 color[4] = {0x80808080, 0x80808080, 0x80808080, 0x80808080};
     s32 half = width / 2;
@@ -11476,8 +11329,6 @@ void btlDrawCenteredPanelSegments(s32 width) {
         btlResourceBlock->resC->workEntries[0x16].sourceWidth << 4;
     effDrawSpriteWithCornerColors((0x92 - half) * 0x10, 0x200, 0, color, 0, btlResourceBlock->resC, 0x15, 0x53);
 }
-
-
 
 extern void btlUpdateAndDrawTargetActorPanels();
 
@@ -11510,15 +11361,6 @@ s32 btlUpdateTargetSelectionTask(dds3ProcessID_t *handle) {
     }
     return 0;
 }
-
-
-
-
-
-
-
-
-
 
 /* Creates the AI work object for `source`: allocates two index lists and
  * fills them according to the current scene object state. */
@@ -11933,7 +11775,6 @@ void btlDrawActorSlotOrder(void) {
     }
 }
 
-
 extern const u32 D_00416ED0[4];
 
 /* Draw one bank-selected secondary actor slot, rereading offsets after scaling. */
@@ -12032,8 +11873,6 @@ void btlUpdateActorSlotOrderColors(s32 bank, s32 index) {
     }
 }
 
-
-
 void btlScaleEffectSlotSourceBounds(EffectSlotSet *work, s32 index) {
     work->workEntries[index].geometry.bounds[2] = work->workEntries[index].sourceWidth << 4;
     work->workEntries[index].geometry.bounds[3] = work->workEntries[index].sourceHeight << 3;
@@ -12116,7 +11955,6 @@ void btlUpdateBankedSlotFadeSequence(void) {
         }
     }
 }
-
 
 extern u32 btlSetSlotLowByteClamped(EffectSlotSet *, s32, s32, s32);
 
@@ -12299,10 +12137,8 @@ void btlDrawSceneSlotFades(void) {
     }
 }
 
-
 extern u32 btlSetSlotLowByteClamped(EffectSlotSet *, s32, s32, s32);
 extern const s32 D_00416FA0[10][3];
-
 
 void btlDrawSceneSlotFadeTiles(void) {
     u32 overlays[4] = {0x0000FF00, 0xFF000000, 0x8080FF00, 0xFF808000};
@@ -12353,7 +12189,6 @@ void btlDrawSceneSlotFadeTiles(void) {
                       0, colors, 0, btlResourceBlock->resC, finalRows[last][2], 0x53);
     }
 }
-
 
 void fldInitSceneFadeRecords(void) {
     BtlState *scene = (BtlState *)btlGetRuntime();
@@ -12584,7 +12419,6 @@ extern void btlLoadResourceBlock(void);
 extern void btlStartRegisteredChildTask(void);
 
 extern void btlInitializeStaffActorPanels(void);
-
 
 void fldCreateSceneCleanupTask(void) {
     BtlState *scene;

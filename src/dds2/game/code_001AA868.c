@@ -1,130 +1,48 @@
 #include "sdk_ps2.h"
 #include "evt_run_context_api.h"
-#include "fld_area_work.h"
-#include "fld_next_scene_request_api.h"
-#include "sdf_packet_list.h"
 #include "common.h"
-#include "snd_battle_sound_file_request_status.h"
-#include "btl_selected_entry_api.h"
-#include "btl_actor_command_selector_value_api.h"
 #include "pty_active_roster_index_api.h"
 #include "dat_assigned_item_id.h"
 #include "btl_command_use_error.h"
-#include "btl_runtime_activity_status_api.h"
 #include "btl_command_cost_api.h"
 #include "btl_action_press_result.h"
 #include "btl_command_target_policy.h"
 #include "btl_target_list_builder.h"
 #include "btl_command_status_target_index.h"
-#include "btl_indexed_ui_resource_api.h"
-#include "btl_actor_resource_bank_api.h"
 #include "btl_actor_entry_code_api.h"
-#include "btl_flag_to_element_index_api.h"
 #include "btl_actor_entry_code_defaults.h"
-#include "itf_debug_panel_work.h"
-#include "itf_color_panel_row.h"
-#include "btl_boss_data_api.h"
-#include "btl_event_asset_api.h"
 #include "btl_skill_max_api.h"
-#include "btl_raise_party_record_status_value.h"
-#include "dds3_task_add_child.h"
 #include "btl_special_ability.h"
 #include "btl_command_vital_cost.h"
 #include "dat_unit_has_skill_api.h"
 #include "btl_command_affinity_api.h"
 #include "btl_active_units_ready_api.h"
-#include "btl_enc_bg_entry.h"
-#include "btl_animation_mode_entry.h"
-#include "btl_effect_position.h"
 #include "evt_solar.h"
 #include "evt_item_value_threshold_api.h"
 #include "eff_random_mod.h"
-#include "eff_random.h"
-#include "sdf_trig.h"
-#include "snd_pad.h"
 #include "btl_enemy_selection_result.h"
 #include "btl_enemy_selection_context.h"
 #include "btl_item_drop.h"
-#include "itf_mes_window.h"
-#include "fr_font_measure.h"
-#include "eff_resource_slots.h"
-#include "sdf_chip.h"
-#include "kernel.h"
-#include "dds3_task_priority_query.h"
-#include "dds3_task_create.h"
-#include "sdf_heap_api.h"
-#include "ps2asm.h"
-#include "btl_scene_fade.h"
-#include "btl_resource.h"
 #include "eff.h"
-#include "itf.h"
-#include "itf_panel_draw.h"
-#include "itf_panel_api.h"
 #include "btl_state.h"
-#include "btl_ui.h"
-#include "sdf.h"
-#include "sdf_projection.h"
 #include "btl_action.h"
 #include "snd_slot.h"
-#include "scr.h"
-#include "scr.h"
-#include "dat_state.h"
 #include "dat_calculated_stat_value_api.h"
 #include "dat_calculate_command_base_value_api.h"
-#include "dat_affinity_selector.h"
-#include "dat_effective_affinity_api.h"
 #include "btl_resolve_unit_value_api.h"
 #include "btl_select_transform_parameters_api.h"
 #include "mnu_result.h"
 #include "dat_command.h"
-#include "sdf_sif_command.h"
-#include "mdl_resource_table.h"
-#include "dds3_task_lifecycle.h"
 #include "mdl_flag_api.h"
-#include "btl_target_result.h"
-
-/* Named and indexed views of the same four signed 32-bit color channels. */
-typedef union UiQuadColor {
-    struct {
-        s32 red;
-        s32 green;
-        s32 blue;
-        s32 alpha;
-    };
-    s32 channels[4];
-} UiQuadColor;
 
 extern datUnitWork_t *btlGetIndexedPartyEntryRecord(s32);
-
-
-extern const char *D_003B4CF8[];
-
-extern u32 sndTestMessageResourceIndex;
-
-extern sdfTexHandle_t *sndTestMessageTexture;
-
-
-extern u64 D_004366E8;
-
-extern BtlState *btlRuntime;
-
 extern u8 *D_00435DE0;
-
 extern u8 *D_00435DF0;
-
 extern u8 *D_00435DE4;
-
 extern u8 *D_00435DF8;
-extern s8 D_0037F530[];
-
 extern u8 btlSharedActorTransformParameters[];
-
 extern u8 *D_00435E00;
-
 extern const u8 *btlPartyUnitGunTypeNames[];
-
-extern EncBgRow *D_00435E14;
-
 typedef struct BattleController {
     u8 pad_000[0x214];
     s32 frame;
@@ -154,1262 +72,18 @@ typedef struct BattleController {
     u8 pad2FE[0x3DE];
     s32 (*commandRangeOverride)(BtlUnit *, s32);
 } BattleController;
-typedef char BattleControllerTotalApOffsetCheck[
-    ((u32)&((BattleController *)0)->totalAp == 0x2F8) ? 1 : -1];
-typedef char BattleControllerDrawTaskOffsetCheck[
-    ((u32)&((BattleController *)0)->drawTask == 0x2C4) ? 1 : -1];
-
 extern DatEnemyRecord *datEnemyRecords;
-
 extern char D_00415158[];
-
 extern char D_004150B0[]; /* "btl:hunt ep=%d[id=%X]\n" */
-
 extern void btlBossDebugPrintf(const char *, ...);
-
 extern EffRandState effSharedRandomState[];
-
 extern void *btlCommandAttributeNames[];
-
 extern f32 btlActiveGroupCountMultipliers[];
-
-
-
 extern DatAssignedItemId mnuGetPartyEntryCurrentId(datUnitWork_t *);
-
 extern s32 btlDoesEnabledStatusMatchCurrentId(datUnitWork_t *, u32);
-
-
-
-extern s32 TestMsgMngD_Process(dds3ProcessID_t *task);
-
-extern sdfGrOt_t D_003805A8;
-
-extern u8 D_003B4D08[];
-
-extern u8 D_003B4D18[];
-
-extern u8 D_003B4D28[];
-
-#include "sdf_packet_alloc.h"
-
-extern void itfMiscDrawAlphaPrim(sdfDrawTag_t *list, s32 context, s32 mode);
-
-
-/* Option IDs index the same signed-byte bank used by the named controls. */
-extern SndPad dds3PadButtonState;
-
-extern sdfGrOt_t sdfGrOtTable[];
-
-#define BTL_ENTRY_STATUS_MASK 0x7FFF
-
 extern u32 datComputeSkillBoostedMaxHp(datUnitWork_t *);
-
 extern u32 datComputeSkillBoostedMaxMp(datUnitWork_t *);
-
-extern sdfGrOt_t D_00380708;
-
-
-extern s32 D_00435CBC;
-
-
-extern void itfDebugPrintMark();
-
-extern s32 TestMsgMngC_Process(dds3ProcessID_t *task);
-
-extern u8 D_003B4A28[];
-
-
-void TestMsgReloadTexture(void);
-
-void itfDebugMesMngInitialize(void) {
-    D_00435CBC = 0x80FFFFFF;
-    TestMsgReloadTexture();
-    itfMesMngSetKutiCallback(((scrProcessWork_s *)dds3GetProcessData(scrStartScript2(0x3E8, (const scrHeader_t *)D_003B4A28, 0)))->MesHandle, itfDebugPrintMark);
-    dds3StartProcess("TestMsgMngC", 0x3EF, 0, 0, TestMsgMngC_Process, 0, 0);
-    dds3StartProcess("TestMsgMngD", 0x2AFE, 0, 0, TestMsgMngD_Process, 0, 0);
-}
-
-void TestMsgReloadTexture(void) {
-    if (sndTestMessageTexture != 0) {
-        sdfTexFreeDelayed(sndTestMessageTexture);
-        sndTestMessageTexture = 0;
-    }
-    sndTestMessageResourceIndex = (sndTestMessageResourceIndex + 1) & 3;
-    if (sndTestMessageResourceIndex != 3) {
-        sndTestMessageTexture = itfMiscLoadTexture(D_003B4CF8[sndTestMessageResourceIndex]);
-    }
-}
-
-s32 TestMsgMngC_Process(dds3ProcessID_t *task) {
-    if (D_0037F530[0] < 0) {
-        TestMsgReloadTexture();
-    }
-    return 0;
-}
-
-s32 TestMsgMngD_Process(dds3ProcessID_t *task) {
-    sdfDrawTag_t *mem;
-    if ((sndTestMessageTexture != 0) && (sndTestMessageResourceIndex != 3)) {
-        mem = (sdfDrawTag_t *)sdfGrAllocPacketBuff(0x20);
-        sdfDrawTagInit(mem);
-        itfMiscDrawAlphaPrim(mem, 0, 0);
-        itfMiscDrawSpritePrim((DrawVertex *)D_003B4D08, (DrawColorRec *)D_003B4D18, (DrawColorRec *)D_003B4D28, 0xFFF, sndTestMessageTexture, 0, mem);
-        D_003805A8.regFunc(&D_003805A8, mem);
-        return 0;
-    }
-    return 0;
-}
-
 #include "sdf_debug_api.h"
-
-INCLUDE_RODATA(const s32, "game/code_001A8748", D_00414EB0);
-
-INCLUDE_RODATA(const s32, "game/code_001A8748", D_00414EC8);
-
-INCLUDE_RODATA(const s32, "game/code_001A8748", D_00414EE0);
-
-void itfDebugPrintMark(void) {
-    printf("********* AAAA ********\n");
-}
-
-typedef struct ItfFovPanelWork {
-    u8 pad00[8];
-    f32 degrees;
-    u8 pad0C[4];
-} ItfFovPanelWork;
-
-typedef char ItfFovPanelWorkSizeCheck[sizeof(ItfFovPanelWork) == 0x10 ? 1 : -1];
-
-extern ItfFovPanelWork D_00452E70;
-
-extern s8 D_0037F543[];
-
-extern u64 *dds3PrimFrameRect(s32, s32, s32, s32, s32, u32, u32);
-
-extern s32 pbCalcFovDegrees(f32 *, f32, f32, f32, f32);
-
-s32 pbDebugPrintPanel(void) {
-    SifCommand packet;
-    sdfDrawTag_t *list;
-    f32 radiansToDegrees = 57.2957795f;
-
-    list = dds3FontReqAllocDrawTag();
-    sdfDrawTagLink(list,
-                    (u32)dds3PrimFrameRect(0x8500, 0x79C0, 0xFEFFFF,
-                                       0xA80, 0x120, 0x60000000, 0x40806020));
-    sdfDevSetPrintCB(&packet, 0x85C0, 0x7A20, 0xFF0000, 0);
-    sdfDrawTagLink(list,
-                    (u32)sdfDevPrintfEx(&packet, "FOVY: %6.2f",
-                        dds3ScreenParam.camera.fov * radiansToDegrees));
-    D_00380708.regFunc(&D_00380708, list);
-    if (D_0037F543[0] < 0) {
-        return -1;
-    }
-    D_00452E70.degrees = dds3ScreenParam.camera.fov * radiansToDegrees;
-    if (pbCalcFovDegrees(&D_00452E70.degrees, 1.0f, 89.0f, 0.1f, 1.0f) != 0) {
-        dds3ScreenParam.camera.fov = D_00452E70.degrees * 0.0174532925f;
-    }
-    return 0;
-}
-
-s32 pbCalcFovDegrees(f32 *angleDegrees, f32 minimum, f32 maximum, f32 coarseStep, f32 fineStep) {
-    f32 current = *angleDegrees;
-    s32 changed = 0;
-
-    if (dds3PadButtonState.coarseUp < 0) {
-        if (current < maximum) {
-            current += coarseStep;
-        } else {
-            current = minimum;
-        }
-        changed = 1;
-    } else if (dds3PadButtonState.coarseUp & 2) {
-        if (current < maximum) {
-            current += coarseStep;
-            changed = 1;
-        }
-    } else if (dds3PadButtonState.coarseDown < 0) {
-        if (minimum < current) {
-            current -= coarseStep;
-        } else {
-            current = maximum;
-        }
-        changed = 1;
-    } else if (dds3PadButtonState.coarseDown & 2) {
-        if (minimum < current) {
-            current -= coarseStep;
-            changed = 1;
-        }
-    } else if (fineStep != 0.0f) {
-        if (dds3PadButtonState.fineUp < 0) {
-            if (current < maximum) {
-                current += fineStep;
-                if (maximum < current) {
-                    current = maximum;
-                }
-            } else {
-                current = minimum;
-            }
-            changed = 1;
-        } else if (dds3PadButtonState.fineUp & 2) {
-            if (current < maximum) {
-                current += fineStep;
-                if (maximum < current) {
-                    current = maximum;
-                }
-                changed = 1;
-            }
-        } else if (dds3PadButtonState.fineDown < 0) {
-            if (minimum < current) {
-                current -= fineStep;
-                if (current < minimum) {
-                    current = minimum;
-                }
-            } else {
-                current = maximum;
-            }
-            changed = 1;
-        } else if (dds3PadButtonState.fineDown & 2) {
-            if (minimum < current) {
-                current -= fineStep;
-                if (current < minimum) {
-                    current = minimum;
-                }
-                changed = 1;
-            }
-        }
-    }
-    if (changed != 0) {
-        *angleDegrees = current;
-        return 1;
-    }
-    return 0;
-}
-
-extern ItfDebugPanelWork D_00452E80;
-
-extern const char *D_003B4D38[6];
-
-extern u8 dds3ScreenBlurFlag;
-
-extern s16 dds3ScreenBlurAlpha;
-
-extern s16 dds3ScreenBlurScale;
-
-extern s32 D_00435CE0[2];
-
-extern char D_00436660[];
-
-extern char D_00436668[];
-
-extern char D_00436670[];
-
-extern char D_00436678[];
-
-extern char D_00436680[];
-
-extern char D_00436688[];
-
-extern sdfGrOt_t sdfDebugGrOt;
-
-/* Draw the blur settings and handle selection, editing and cancellation. */
-s32 pbDebugPrintPanel2(void) {
-    SifCommand packet;
-    sdfDrawTag_t *list;
-    s32 row;
-    s32 y;
-    s16 previous;
-    s32 highlight;
-
-    list = dds3FontReqAllocDrawTag();
-    sdfDrawTagLink(list,
-        (u32)dds3PrimFrameRect(0x8290, 0x79A8, 0xFEFFFF, 0xC60, 0x1B0, 0x60000000, 0x40806020));
-    sdfDevSetPrintCB(&packet, 0x82C0, 0x79C0, 0xFF0000, 0);
-    sdfDrawTagLink(list, (u32)sdfDevPrintfEx(&packet,
-        "BLUR:        %s", dds3ScreenBlurFlag ? D_00436660 : D_00436668));
-
-    y = 0x7A20;
-    if (D_00452E80.editing == 0) {
-        sdfDevSetPrintCB(&packet, 0x82C0, D_00452E80.selection * 0x60 + 0x7A20, 0xFF0000, 0);
-        D_00452E80.blink++;
-        if (D_00452E80.blink < 32 || (D_00452E80.blink & 31) < 18) {
-            sdfDrawTagLink(list, (u32)sdfDevPrintfEx(&packet, D_00436670));
-        }
-    }
-
-    for (row = 0; row != 3; row++) {
-        sdfDevSetPrintCB(&packet, 0x82C0, y, 0xFF0000, 0);
-        sdfDrawTagLink(list,
-            (u32)sdfDevPrintfEx(&packet, D_00436678, D_003B4D38[row]));
-        highlight = 0;
-        if (D_00452E80.editing != 0 && row == D_00452E80.selection) {
-            highlight = 6;
-        }
-        sdfDevSetPrintCB(&packet, 0x8800, y, 0xFF0000, highlight);
-        switch (row) {
-        case 0:
-            sdfDrawTagLink(list,
-                (u32)sdfDevPrintfEx(&packet, D_00436680, dds3ScreenBlurAlpha));
-            break;
-        case 1:
-            sdfDrawTagLink(list,
-                (u32)sdfDevPrintfEx(&packet, D_00436680, dds3ScreenBlurScale));
-            break;
-        case 2:
-            sdfDrawTagLink(list,
-                (u32)sdfDevPrintfEx(&packet, D_00436688, D_00435CE0[0], D_00435CE0[1]));
-            break;
-        }
-        y += 0x60;
-    }
-    sdfDrawTagLink(list,
-        (u32)dds3PrimFrameRect((D_00435CE0[0] * 16) + 0x7FC0, (D_00435CE0[1] * 8) + 0x7FE0,
-            0xFF0000, 0x80, 0x40, 0x80008080, 0x80000000));
-    sdfDebugGrOt.regFunc(&sdfDebugGrOt, list);
-
-    if ((s8)dds3PadButtonState.secondaryTriangle < 0) {
-        dds3ScreenBlurFlag ^= 1;
-    }
-    if (D_00452E80.editing == 0) {
-        previous = D_00452E80.selection;
-        if ((u8)dds3PadButtonState.secondaryUp & 2) {
-            D_00452E80.selection--;
-            if (D_00452E80.selection < 0) {
-                D_00452E80.selection = 2;
-            }
-        }
-        if ((u8)dds3PadButtonState.secondaryDown & 2) {
-            D_00452E80.selection++;
-            if (D_00452E80.selection >= 3) {
-                D_00452E80.selection = 0;
-            }
-        }
-        if (previous != D_00452E80.selection) {
-            D_00452E80.blink = 0;
-        }
-        if (dds3PadButtonState.secondaryCross < 0) {
-            D_00452E80.editing ^= 1;
-            D_00452E80.blink = 0;
-        }
-        if ((u8)dds3PadButtonState.secondaryCancel & 2) {
-            return -1;
-        }
-    } else {
-        if (D_00452E80.selection == 2) {
-            if (dds3PadButtonState.secondaryUp != 0) {
-                D_00435CE0[1] -= 16;
-                if (D_00435CE0[1] < -224) {
-                    D_00435CE0[1] = -224;
-                }
-            }
-            if (dds3PadButtonState.secondaryDown != 0) {
-                D_00435CE0[1] += 16;
-                if (D_00435CE0[1] > 224) {
-                    D_00435CE0[1] = 224;
-                }
-            }
-            if (dds3PadButtonState.coarseDown != 0) {
-                D_00435CE0[0] -= 16;
-                if (D_00435CE0[0] < -256) {
-                    D_00435CE0[0] = -256;
-                }
-            }
-            if (dds3PadButtonState.coarseUp != 0) {
-                D_00435CE0[0] += 16;
-                if (D_00435CE0[0] > 256) {
-                    D_00435CE0[0] = 256;
-                }
-            }
-        } else if (D_00452E80.selection == 0) {
-            if ((u8)dds3PadButtonState.coarseDown & 2) {
-                dds3ScreenBlurAlpha -= 10;
-                if (dds3ScreenBlurAlpha < 0) {
-                    dds3ScreenBlurAlpha = 0;
-                }
-            }
-            if ((u8)dds3PadButtonState.coarseUp & 2) {
-                dds3ScreenBlurAlpha += 10;
-                if (dds3ScreenBlurAlpha > 255) {
-                    dds3ScreenBlurAlpha = 255;
-                }
-            }
-        } else {
-            if ((u8)dds3PadButtonState.coarseDown & 2) {
-                dds3ScreenBlurScale -= 10;
-                if (dds3ScreenBlurScale < -255) {
-                    dds3ScreenBlurScale = -255;
-                }
-            }
-            if ((u8)dds3PadButtonState.coarseUp & 2) {
-                dds3ScreenBlurScale += 10;
-                if (dds3ScreenBlurScale > 255) {
-                    dds3ScreenBlurScale = 255;
-                }
-            }
-        }
-        if (dds3PadButtonState.secondaryCancel < 0) {
-            D_00452E80.editing ^= 1;
-            D_00452E80.blink = 0;
-        }
-    }
-    return 0;
-}
-
-extern ItfDebugPanelWork pbDebugPanel3X;
-
-extern ItfColorPanelRow itfOverlayColorEditorRows[6];
-
-extern s32 pbDebugPanel3State;
-
-extern UiQuadColor itfTestOverlayColor;
-
-extern s32 itfTestOverlayPhaseStep;
-
-extern u8 D_004366B4;
-
-extern char D_004366B8[]; /* "FILTER:" */
-
-extern char D_004366C0[]; /* ">" */
-
-extern char D_004366C8[]; /* " %s" */
-
-extern char D_004366D0[]; /* "%3d" */
-
-extern char D_004366D8[]; /* "%4d" */
-
-void pbDrawRotatedPrim(s32 surfaceIndex);
-
-/* Draw the four color channels and handle selection and value editing. */
-/* Retail 0x001A92F0 keeps the row < 4 select inside the four-row loop. */
-s32 pbDebugPrintPanel3(void) {
-    SifCommand packet;
-    sdfDrawTag_t *list;
-    s32 row;
-    s32 y = 0x7A20;
-    s16 previousSelection;
-    s32 previousRate;
-    s32 highlight;
-
-    list = dds3FontReqAllocDrawTag();
-    sdfDrawTagLink(list,
-        (u32)dds3PrimFrameRect(0x8950, 0x79A8, 0xFEFFFF, 0x5A0, 0x210, 0x60000000, 0x40806020));
-    sdfDevSetPrintCB(&packet, 0x8980, 0x79C0, 0xFF0000, 0);
-    sdfDrawTagLink(list, (u32)sdfDevPrintfEx(&packet, D_004366B8));
-    if (pbDebugPanel3X.editing == 0) {
-        sdfDevSetPrintCB(&packet, 0x8980, pbDebugPanel3X.selection * 0x60 + 0x7A20, 0xFF0000, 0);
-        pbDebugPanel3X.blink++;
-        if (pbDebugPanel3X.blink < 32 || (pbDebugPanel3X.blink & 31) < 18) {
-            sdfDrawTagLink(list, (u32)sdfDevPrintfEx(&packet, D_004366C0));
-        }
-    }
-    for (row = 0; row != 4; row++) {
-        sdfDevSetPrintCB(&packet, 0x8980, y, 0xFF0000, itfOverlayColorEditorRows[row].highlight);
-        sdfDrawTagLink(list,
-            (u32)sdfDevPrintfEx(&packet, D_004366C8, itfOverlayColorEditorRows[row].title));
-        highlight = 0;
-        if (pbDebugPanel3X.editing != 0 && row == pbDebugPanel3X.selection) {
-            highlight = 6;
-        }
-        sdfDevSetPrintCB(&packet, 0x8C80, y, 0xFF0000, highlight);
-        if (row < 4) {
-            sdfDrawTagLink(list,
-                (u32)sdfDevPrintfEx(&packet, D_004366D0, itfTestOverlayColor.channels[row]));
-        } else {
-            sdfDrawTagLink(list,
-                (u32)sdfDevPrintfEx(&packet, D_004366D8, itfTestOverlayPhaseStep));
-        }
-        y += 0x60;
-    }
-    sdfDebugGrOt.regFunc(&sdfDebugGrOt, list);
-    pbDebugPanel3State += itfTestOverlayPhaseStep;
-    pbDrawRotatedPrim(0x52);
-    if ((s8)dds3PadButtonState.secondaryTriangle < 0) {
-        D_004366B4 ^= 1;
-    }
-    if (pbDebugPanel3X.editing == 0) {
-        previousSelection = pbDebugPanel3X.selection;
-        if ((u8)dds3PadButtonState.secondaryUp & 2) {
-            pbDebugPanel3X.selection--;
-            if (pbDebugPanel3X.selection < 0) {
-                pbDebugPanel3X.selection = 3;
-            }
-        }
-        if ((u8)dds3PadButtonState.secondaryDown & 2) {
-            pbDebugPanel3X.selection++;
-            if (pbDebugPanel3X.selection >= 4) {
-                pbDebugPanel3X.selection = 0;
-            }
-        }
-        if (previousSelection != pbDebugPanel3X.selection) {
-            pbDebugPanel3X.blink = 0;
-        }
-        if (dds3PadButtonState.secondaryCross < 0) {
-            pbDebugPanel3X.editing ^= 1;
-            pbDebugPanel3X.blink = 0;
-        }
-        if ((u8)dds3PadButtonState.secondaryCancel & 2) {
-            return -1;
-        }
-    } else {
-        if (pbDebugPanel3X.selection < 4) {
-            if ((u8)dds3PadButtonState.coarseDown & 2) {
-                itfTestOverlayColor.channels[pbDebugPanel3X.selection] -= 10;
-                if (itfTestOverlayColor.channels[pbDebugPanel3X.selection] < 0) {
-                    itfTestOverlayColor.channels[pbDebugPanel3X.selection] = 0;
-                }
-            }
-            if ((u8)dds3PadButtonState.coarseUp & 2) {
-                itfTestOverlayColor.channels[pbDebugPanel3X.selection] += 10;
-                if (itfTestOverlayColor.channels[pbDebugPanel3X.selection] > 255) {
-                    itfTestOverlayColor.channels[pbDebugPanel3X.selection] = 255;
-                }
-            }
-        } else {
-            previousRate = itfTestOverlayPhaseStep;
-            if ((u8)dds3PadButtonState.coarseDown & 2) {
-                itfTestOverlayPhaseStep -= 0x100;
-                if (itfTestOverlayPhaseStep < 0) {
-                    itfTestOverlayPhaseStep = 0;
-                }
-            }
-            if ((u8)dds3PadButtonState.coarseUp & 2) {
-                itfTestOverlayPhaseStep += 0x100;
-                if (itfTestOverlayPhaseStep > 0x800) {
-                    itfTestOverlayPhaseStep = 0x800;
-                }
-            }
-            if (previousRate != itfTestOverlayPhaseStep) {
-                pbDebugPanel3State = 0;
-            }
-        }
-        if (dds3PadButtonState.secondaryCancel < 0) {
-            pbDebugPanel3X.editing ^= 1;
-            pbDebugPanel3X.blink = 0;
-        }
-    }
-    return 0;
-}
-
-u64 *pbAllocPrimPacket(u32 x, u32 y, u32 depth, u32 width, u32 height, u32 color0, u32 color1) {
-    u64 *packet = (u64 *)sdfGrAllocPacketBuff(0x80);
-
-    packet[0] = 7;
-    packet[1] = 0x5000000700000000ULL;
-    packet[2] = 0xB400000000008001ULL;
-    packet[3] = 0xFF515151510ULL;
-    packet[4] = 0x14D;
-    packet[5] = color0 | ((u64)0xFE00 << 46);
-    packet[7] = color0 | ((u64)0xFE00 << 46);
-    packet[9] = color1 | ((u64)0xFE00 << 46);
-    packet[11] = color1 | ((u64)0xFE00 << 46);
-    packet[6] = (u64)((x & 0xFFFF) | (y << 16)) | ((u64)depth << 32);
-    packet[8] = (u64)(((x + width) & 0xFFFF) | (y << 16)) | ((u64)depth << 32);
-    packet[10] = (u64)(((x + width) & 0xFFFF) | ((y + height) << 16)) | ((u64)depth << 32);
-    packet[12] = (u64)((x & 0xFFFF) | ((y + height) << 16)) | ((u64)depth << 32);
-    packet[13] = packet[14] = packet[15] = 0;
-    return packet;
-}
-
-extern void *sdf2DMakeStdPacket(void *packet, s32 packetBytes);
-
-u64 *pbMakeSpritePacket(u64 owner, s32 alternative) {
-    u64 *entry = (u64 *)sdf2DMakeStdPacket((void *)sdfGrAllocPacketBuff(0x30), 0x30);
-    entry[4] = owner;
-    entry[5] = alternative ? 0x48 : 0x47;
-    return entry;
-}
-
-u64 *pbMakePrimPacket(u64 owner, s32 alternative) {
-    u64 *entry = (u64 *)sdf2DMakeStdPacket((void *)sdfGrAllocPacketBuff(0x30), 0x30);
-    entry[4] = owner;
-    entry[5] = alternative ? 0x43 : 0x42;
-    return entry;
-}
-
-
-extern u64 *pbAllocPrimPacket(u32, u32, u32, u32, u32, u32, u32);
-
-void pbDrawRotatedPrim(s32 surfaceIndex) {
-    u32 color = 0;
-    s32 alpha;
-    s32 i;
-    u8 *component;
-    sdfDrawTag_t *list;
-    sdfGrOt_t *surface;
-    f32 phase;
-
-    phase = (f32)(pbDebugPanel3State % 4096) * (1.0f / 4096.0f);
-    phase = phase * 6.2831852f + 1.5707963f + 0.78539815f;
-    alpha = (s32)((sdfSin(phase) + 1.0f) * 0.5f * itfTestOverlayColor.alpha);
-    component = (u8 *)&itfTestOverlayColor;
-    for (i = 0; i != 3; i++, component += 4) {
-        color |= *component << (i * 8);
-    }
-    color |= alpha << 24;
-    list = dds3FontReqAllocDrawTag();
-    sdfDrawTagLink(list, (u32)pbMakeSpritePacket(0x33001, 0));
-    sdfDrawTagLink(list, (u32)pbMakePrimPacket(6, 0));
-    sdfDrawTagLink(list, (u32)pbAllocPrimPacket(0x7000, 0x7900, 0xFEFFFF, 0x2000, 0xE00, color, color));
-    surface = &sdfGrOtTable[surfaceIndex];
-    surface->regFunc(surface, list);
-}
-
-void btlResetRuntimeSequenceCounter(void) {
-    D_004366E8 = 1;
-}
-
-u64 btlAdvanceRuntimeSequenceCounter(void) {
-    s64 value = D_004366E8 + 1;
-
-    if (value < 0) {
-        value = 1;
-        D_004366E8 = value;
-    } else {
-        D_004366E8 = value;
-    }
-    return value;
-}
-
-/* Clear the battle model flags; the exclusive upper limit differs by title. */
-void btlClearModelFlagRange(void) {
-    s32 flagIndex;
-
-    for (flagIndex = 0xBE0; flagIndex < 0xC00; flagIndex++) {
-        evtBitOff(flagIndex);
-    }
-}
-
-extern s32 btlUpdateFadeColor(void);
-
-extern s32 btlUpdateAutoMusic(void);
-
-extern s32 btlUpdateTintAndWorldLight(void);
-
-extern void btlUpdateMotionSoundLoading(void);
-
-extern s32 btlUpdateScene(void);
-
-extern s32 fldAdvanceSceneGroupScheduler(void);
-
-extern s32 btlUpdateActionSeqs(void);
-
-extern s32 btlUpdateActiveActorModelState(void);
-
-extern void btlUpdateActiveFrameNoOp(void);
-
-extern s32 btlSweepFinishedTasks(void);
-
-extern void btlUpdateBattleCameraFrame(void);
-
-extern s32 btlExitWhenAudioAndTasksIdle(void);
-
-s32 btlUpdateActiveBattleFrame(dds3ProcessID_t *task) {
-    if (btlRuntime == NULL) {
-        return 0;
-    }
-    if (((BattleController *)btlRuntime)->flags & 1) {
-        btlUpdateFadeColor();
-        btlUpdateAutoMusic();
-        btlUpdateTintAndWorldLight();
-        btlUpdateMotionSoundLoading();
-        btlUpdateScene();
-        fldAdvanceSceneGroupScheduler();
-        btlUpdateActionSeqs();
-        btlUpdateActiveActorModelState();
-        btlUpdateActiveFrameNoOp();
-        btlSweepFinishedTasks();
-        btlUpdateBattleCameraFrame();
-        ((BattleController *)btlRuntime)->frame = ((BattleController *)btlRuntime)->frame + 1;
-    } else {
-        btlExitWhenAudioAndTasksIdle();
-    }
-    return 0;
-}
-
-extern s32 btlTickFieldSwayAndTint(void);
-
-extern s32 btlReleaseRainSoundTransition(void);
-
-extern s32 btlSweepFloorModelLists(void);
-
-extern s32 btlUpdateActorModelColorAndLinks(void);
-
-extern void btlUpdateEventPlayback(void);
-
-extern void btlUpdateFieldPresentationNoOp(void);
-
-extern s32 btlUpdateSceneFlow(void);
-
-extern void btlRunDeferredTasks(void);
-
-s32 btlUpdateBattleFieldPresentation(dds3ProcessID_t *task) {
-    BattleController *battle = (BattleController *)btlRuntime;
-    if (battle == 0) {
-        return 0;
-    }
-    if (battle->flags & 1) {
-        btlTickFieldSwayAndTint();
-        btlReleaseRainSoundTransition();
-        btlSweepFloorModelLists();
-        btlUpdateActorModelColorAndLinks();
-        btlUpdateEventPlayback();
-        btlUpdateFieldPresentationNoOp();
-        btlUpdateSceneFlow();
-        btlRunDeferredTasks();
-    }
-    return 0;
-}
-
-/* Empty destructor callback for the active battle-frame task. */
-void btlReleaseActiveBattleFrameTask(dds3ProcessID_t *task) {
-}
-
-extern char D_004366F0[];
-
-extern void btlReleaseActiveBattleFrameTask(dds3ProcessID_t *task);
-
-extern s32 btlUpdateBattleFieldPresentation(dds3ProcessID_t *task);
-
-extern s32 btlUpdateActiveBattleFrame(dds3ProcessID_t *task);
-
-void btlCreateDrawTasks(void) {
-    BattleController *battle = (BattleController *)btlRuntime;
-    dds3ProcessID_t *draw;
-    draw = dds3StartProcess(D_004366F0, 0x3F9, 0, 0, btlUpdateActiveBattleFrame, btlReleaseActiveBattleFrameTask, 0);
-    battle->drawTask = draw;
-    dds3LinkProcess(draw, dds3StartProcess("battle_draw", 0x2B0E, 0, 0, btlUpdateBattleFieldPresentation, 0, 0));
-}
-
-void btlDestroyDrawTaskAtPriorityWhenPresent(void) {
-    dds3ProcessID_t *task;
-
-    task = dds3SearchProcessPriority(0x3f9);
-    if (task != 0) {
-        BattleController *battle = (BattleController *)btlRuntime;
-        dds3KillProcess(battle->drawTask, 1);
-        return;
-    }
-}
-
-typedef struct BattleInitState {
-    u8 pad000[0x214];
-    u32 tick;
-    u8 pad218[4];
-    u32 commandRestrictFlags;
-    u8 pad220[4];
-    u32 unk224;
-    u8 pad228[0x20];
-    u32 listHeads[6];
-    u8 pad260[0x1C];
-    u8 endCode;
-    u8 pad27D[0x2F];
-    u16 backgroundA;
-    u16 backgroundB;
-    u32 unk2B0;
-    u8 unk2B4;
-    u8 pad2B5[0x20F];
-    u8 timingRate;
-    u8 pad4C5[3];
-    f32 modelFrameScale;
-    s32 messageWindows[3];
-    u8 pad4D8[0xE0];
-    u8 unk5B8;
-    u8 pad5B9[3];
-    u32 unk5BC;
-} BattleInitState;
-
-extern sdfMemHandle_t *D_004366E0;
-
-extern ItfMesSub *datStatusHelpMessages;
-
-extern ItfMesSub D_003858D8;
-
-extern ItfMesSub D_00385228;
-
-extern u16 dds3VblanksPerFrame;
-
-extern u32 dds3GetKernelCount(void);
-
-extern u32 btlIsCurrentDarkZone(void);
-
-extern void sdfRandomize(void *, u32);
-
-extern ItfMesWindowIndex itfMesMngInitialize(ItfMesSub *);
-
-extern void btlResetActorEntryState(void);
-
-extern char D_004366F8[];
-
-extern char D_003B4D90[];
-
-extern char D_003B4DA8[];
-
-extern void btlAllocatePanelTaskWork(void);
-extern void btlInitializeRuntimeNoOp(void);
-extern void btlRefreshSoundEntries(void);
-extern void btlResetDeferredTaskQueue(void);
-extern void btlResetFieldColorAndSweepFlags(void);
-extern void btlResetMotionSoundFrameCounters(void);
-extern void btlResetToInitialScene(void);
-extern void btlRetainButtonTexture(void);
-extern void fldClearSceneSlotsAndGroups(void);
-extern void sndResetTransition(void);
-
-/* Allocate/reset battle work, initialize windows and queue shared resources. */
-void btlInitializeBattleRuntime(void) {
-    sdfMemHandle_t *allocation;
-    u32 seed;
-    u8 *runtime;
-
-    btlResetRuntimeSequenceCounter();
-    allocation = sdfMemAllocDirect(0xFD4);
-    D_004366E0 = allocation;
-    runtime = (u8 *)sdfMemLock(allocation);
-    btlRuntime = (BtlState *)runtime;
-    memset(runtime, 0, 0xFD4);
-
-    ((BattleInitState *)btlRuntime)->tick = 0;
-    ((BattleInitState *)btlRuntime)->unk224 = 0;
-    ((BattleInitState *)btlRuntime)->listHeads[0] = 0;
-    ((BattleInitState *)btlRuntime)->listHeads[1] = 0;
-    ((BattleInitState *)btlRuntime)->listHeads[2] = 0;
-    ((BattleInitState *)btlRuntime)->listHeads[3] = 0;
-    ((BattleInitState *)btlRuntime)->listHeads[4] = 0;
-    ((BattleInitState *)btlRuntime)->listHeads[5] = 0;
-    dds3VblanksPerFrame = 2;
-    ((BattleInitState *)btlRuntime)->timingRate = 0x1E;
-    {
-        BattleInitState *state = (BattleInitState *)btlRuntime;
-        state->endCode = 0;
-        state->modelFrameScale = 1.0f;
-    }
-    ((BattleInitState *)btlRuntime)->unk5B8 = 0;
-    ((BattleInitState *)btlRuntime)->unk5BC = 0x80808080;
-    ((BattleInitState *)btlRuntime)->backgroundA = 0xC9;
-    ((BattleInitState *)btlRuntime)->backgroundB = 1;
-    ((BattleInitState *)btlRuntime)->unk2B0 = 0;
-    ((BattleInitState *)btlRuntime)->unk2B4 = btlIsCurrentDarkZone();
-    seed = dds3GetKernelCount();
-    sdfRandomize(effSharedRandomState, seed);
-    btlResetActorEntryState();
-
-    ((BattleInitState *)btlRuntime)->messageWindows[0] =
-        itfMesMngInitialize(datStatusHelpMessages);
-    ((BattleInitState *)btlRuntime)->messageWindows[1] =
-        itfMesMngInitialize(&D_003858D8);
-    ((BattleInitState *)btlRuntime)->messageWindows[2] =
-        itfMesMngInitialize(&D_00385228);
-    sndResetTransition();
-    btlResetMotionSoundFrameCounters();
-    btlResetDeferredTaskQueue();
-    btlResetToInitialScene();
-    fldClearSceneSlotsAndGroups();
-    btlResetFieldColorAndSweepFlags();
-    btlRefreshSoundEntries();
-    btlRetainButtonTexture();
-    btlAllocatePanelTaskWork();
-    btlInitializeRuntimeNoOp();
-    btlClearModelFlagRange();
-    evtBitOff(0x82B);
-
-    if (evtBitCheck(0x290) == 0) {
-        mdlSetViewerSlotResourceHandles(0, 1, 0, D_003B4D90, 0);
-        btlBossDebugPrintf(D_004366F8, D_003B4D90);
-    } else {
-        mdlSetViewerSlotResourceHandles(0, 1, 0, D_003B4DA8, 0);
-        btlBossDebugPrintf(D_004366F8, D_003B4DA8);
-    }
-}
-
-extern void itfMesMngRelease(ItfMesWindowIndex window);
-
-extern char D_00414F48[];
-
-extern char D_00414F68[];
-
-extern char D_00414F80[];
-
-extern char D_00414F98[];
-
-extern char D_00414FB0[];
-
-
-extern s32 btlCountRegisteredTasks(void);
-
-extern u32 brsTaskTryDestroy(void);
-extern void btlAdvanceTitleStateWithAudioCleanup(void);
-extern void btlClearPendingSoundList(void);
-extern void btlClearSoundAndModelResources(void);
-extern void btlClearTaskLists(void);
-extern void btlClearTintAndEnableCamera(void);
-extern void btlDestroyAllActionSeqs(void);
-extern void btlDestroyAllUnits(void);
-extern void btlFlagTasksForUpdate(void);
-extern void btlFreeFieldBlocks(void);
-extern void btlGetCurrentSceneRecordValue(void);
-extern void btlReleaseButtonTexture(void);
-extern void btlStopRainSoundTransition(void);
-extern void effResetSlots(void);
-extern void evtDestroySelectionState(void);
-extern void evtDisableMoonDraw(void);
-extern void fldDestroySceneTasksAndBuffers(void);
-extern void itfMesClearFlags(u32 mask);
-extern void dds3StopQuake(void);
-extern void sndClearList(void);
-extern void sndFreeBattleSoundEntries(void);
-
-s32 btlExitWhenAudioAndTasksIdle(void) {
-    BattleInitState *state;
-
-    if (btlRuntime == NULL) {
-        btlBossDebugPrintf(D_00414F48);
-        return 0;
-    }
-    if (sndHasOccupiedNodeSlots() != SND_BATTLE_SOUND_FILE_REQUESTS_CLEAR) {
-        btlBossDebugPrintf(D_00414F68);
-        return -1;
-    }
-    if (btlCountRegisteredTasks() != 0) {
-        btlBossDebugPrintf(D_00414F80);
-        btlFlagTasksForUpdate();
-        return -1;
-    }
-    btlReleaseBossData();
-    btlClearTaskLists();
-    btlDestroyAllActionSeqs();
-    btlDestroyAllUnits();
-    btlClearPendingSoundList();
-    btlReleaseEventAssets();
-    btlGetCurrentSceneRecordValue();
-    btlFreeFieldBlocks();
-    btlStopRainSoundTransition();
-    btlClearTintAndEnableCamera();
-    fldDestroySceneTasksAndBuffers();
-    btlReleaseButtonTexture();
-    sndFreeBattleSoundEntries();
-    sndClearList();
-    brsTaskTryDestroy();
-    btlClearSoundAndModelResources();
-    btlDestroyDrawTaskAtPriorityWhenPresent();
-    itfMesMngRelease(((BattleInitState *)btlRuntime)->messageWindows[2]);
-    itfMesMngRelease(((BattleInitState *)btlRuntime)->messageWindows[1]);
-    itfMesMngRelease(((BattleInitState *)btlRuntime)->messageWindows[0]);
-    btlAdvanceTitleStateWithAudioCleanup();
-    dds3StopQuake();
-    evtDestroySelectionState();
-    effResetSlots();
-    evtDisableMoonDraw();
-    itfMesClearFlags(1);
-
-    state = (BattleInitState *)btlRuntime;
-    if (state->commandRestrictFlags & 0x8000) {
-        state->commandRestrictFlags &= ~0x8000;
-        dds3ScreenParam.camera.farZ = 65536.0f;
-        btlBossDebugPrintf(D_00414F98);
-    }
-
-    sdfMemFreeDirect(D_004366E0);
-    D_004366E0 = 0;
-    btlRuntime = NULL;
-    btlBossDebugPrintf(D_00414FB0);
-    return 0;
-}
-
-extern void datDebugPrintf(const char *, ...);
-
-extern void btlSetScene(s32);
-
-extern void itfMesSetFlags(u32);
-
-extern s32 btlResolveQueuedSceneRequestParameters(s32 *, s32 *);
-
-/* Start the requested battle mode with its encounter and background parameters. */
-INCLUDE_RODATA(const s32, "game/code_001A8748", D_00414F48);
-
-INCLUDE_RODATA(const s32, "game/code_001A8748", D_00414F68);
-
-INCLUDE_RODATA(const s32, "game/code_001A8748", D_00414F80);
-
-INCLUDE_RODATA(const s32, "game/code_001A8748", D_00414F98);
-
-INCLUDE_RODATA(const s32, "game/code_001A8748", D_00414FB0);
-
-void btlStart(s32 mode, s32 pack, s32 encounter) {
-    struct { s32 code; s32 parameter; } req;
-    u16 paramA;
-    u16 paramB;
-
-    btlInitializeBattleRuntime();
-    btlCreateDrawTasks();
-    switch (mode) {
-    case 0:
-        ((BtlState *)btlRuntime)->encounterPack = pack;
-        ((BtlState *)btlRuntime)->adjustmentGroupIndex = (u8)(encounter >> 24);
-        ((BtlState *)btlRuntime)->adjustmentEntryIndex = (u8)(encounter >> 16);
-        ((BtlState *)btlRuntime)->battleMode = (u16)encounter;
-        btlBossDebugPrintf("enc[pack:%X,no:%X,index:%X,encNo:%X]\n", pack, (u8)(encounter >> 24), (u8)(encounter >> 16), (u16)encounter);
-        if (pack > 0) {
-            ((BtlState *)btlRuntime)->background.ids.major = D_00435E0C[pack].encounterParamA;
-            ((BtlState *)btlRuntime)->background.ids.minor = D_00435E0C[pack].encounterParamB;
-            if (((BtlState *)btlRuntime)->battleMode == 0x3A0 && evtBitCheck(0x80D) != 0) {
-                ((BtlState *)btlRuntime)->background.ids.major = 0xDF;
-                ((BtlState *)btlRuntime)->background.ids.minor = 5;
-            } else if (((BtlState *)btlRuntime)->battleMode == 0x3A1 && evtBitCheck(0x80D) != 0) {
-                ((BtlState *)btlRuntime)->background.ids.major = 0xE0;
-                ((BtlState *)btlRuntime)->background.ids.minor = 6;
-            } else if (((BtlState *)btlRuntime)->battleMode == 0x33B && evtBitCheck(0x818) != 0) {
-                ((BtlState *)btlRuntime)->background.ids.major = 0xE2;
-                ((BtlState *)btlRuntime)->background.ids.minor = 1;
-            } else if (((BtlState *)btlRuntime)->battleMode == 0x340 && evtBitCheck(0x818) != 0) {
-                ((BtlState *)btlRuntime)->background.ids.major = 0xE4;
-                ((BtlState *)btlRuntime)->background.ids.minor = 2;
-            }
-            datDebugPrintf("Pack:0x%X Maj:%d Min:%d\n", pack, ((BtlState *)btlRuntime)->background.ids.major, ((BtlState *)btlRuntime)->background.ids.minor);
-            if (((BtlState *)btlRuntime)->background.ids.major == 0 && ((BtlState *)btlRuntime)->background.ids.minor == 0) {
-                if (btlResolveQueuedSceneRequestParameters(&req.code, &req.parameter) != 0) {
-                    datDebugPrintf("GetFldBG Maj:%d Min:%d\n", req.code, req.parameter);
-                    paramA = req.code;
-                    paramB = req.parameter;
-                    ((BtlState *)btlRuntime)->background.ids.major = paramA;
-                    ((BtlState *)btlRuntime)->background.ids.minor = paramB;
-                }
-            }
-        } else {
-            ((BtlState *)btlRuntime)->background.ids.major = datBattleSceneRecords[((BtlState *)btlRuntime)->battleMode].backgroundMajorId;
-            ((BtlState *)btlRuntime)->background.ids.minor = datBattleSceneRecords[((BtlState *)btlRuntime)->battleMode].backgroundMinorId;
-            if (((BtlState *)btlRuntime)->battleMode == 0x3A0 && evtBitCheck(0x80D) != 0) {
-                ((BtlState *)btlRuntime)->background.ids.major = 0xDF;
-                ((BtlState *)btlRuntime)->background.ids.minor = 5;
-            } else if (((BtlState *)btlRuntime)->battleMode == 0x3A1 && evtBitCheck(0x80D) != 0) {
-                ((BtlState *)btlRuntime)->background.ids.major = 0xE0;
-                ((BtlState *)btlRuntime)->background.ids.minor = 6;
-            } else if (((BtlState *)btlRuntime)->battleMode == 0x33B && evtBitCheck(0x818) != 0) {
-                ((BtlState *)btlRuntime)->background.ids.major = 0xE2;
-                ((BtlState *)btlRuntime)->background.ids.minor = 1;
-            } else if (((BtlState *)btlRuntime)->battleMode == 0x340 && evtBitCheck(0x818) != 0) {
-                ((BtlState *)btlRuntime)->background.ids.major = 0xE4;
-                ((BtlState *)btlRuntime)->background.ids.minor = 2;
-            }
-            if (((BtlState *)btlRuntime)->background.ids.major == 0 && ((BtlState *)btlRuntime)->background.ids.minor == 0) {
-                if (btlResolveQueuedSceneRequestParameters(&req.code, &req.parameter) != 0) {
-                    ((BtlState *)btlRuntime)->background.ids.major = req.code;
-                    ((BtlState *)btlRuntime)->background.ids.minor = req.parameter;
-                } else {
-                    ((BtlState *)btlRuntime)->background.ids.major = 0xC9;
-                    ((BtlState *)btlRuntime)->background.ids.minor = 1;
-                }
-            }
-        }
-        btlSetScene(2);
-        break;
-    case 1:
-        btlSetScene(0xC);
-        break;
-    }
-    if (((BtlState *)btlRuntime)->background.ids.major == 0 && ((BtlState *)btlRuntime)->background.ids.minor == 0) {
-        ((BtlState *)btlRuntime)->background.ids.major = 0xC9;
-        ((BtlState *)btlRuntime)->background.ids.minor = 1;
-    }
-    itfMesSetFlags(1);
-    evtBitOn(0xC0F);
-    ((BtlState *)btlRuntime)->battleFlags |= 0x701C1;
-    ((BtlState *)btlRuntime)->commandRestrictFlags |= 2;
-    btlBossDebugPrintf("** btlStart **************\n");
-}
-
-extern void btlLoadStartupPanelResources(void);
-extern void btlOpenButtonIconResource(void);
-extern void sndLoadSysEffLb(void);
-
-void btlLoadInputIconsAndSystemSounds(void) {
-    btlOpenButtonIconResource();
-    btlLoadStartupPanelResources();
-    sndLoadSysEffLb();
-}
-
-u8 btlIsRuntimeAllocated(void) {
-    return btlRuntime != NULL;
-}
-
-u8 btlIsCurrentActorFullyMarked(void) {
-    if (btlIsRuntimeAllocated() == 0) {
-        return 0;
-    }
-    return (((BattleController *)btlRuntime)->flags & 0x06000000) == 0x06000000;
-}
-
-BtlRuntimeActivityStatus btlHasPendingRuntimeActivity(void) {
-    BtlState *state;
-    if (btlIsRuntimeAllocated() == 0) {
-        return BTL_RUNTIME_ACTIVITY_NONE;
-    }
-    state = (BtlState *)btlRuntime;
-    if (state->tasks != 0) {
-        return BTL_RUNTIME_ACTIVITY_PENDING;
-    }
-    if ((state->eventFlags & 2) != 0) {
-        return BTL_RUNTIME_ACTIVITY_PENDING;
-    }
-    return state->effect != 0 ? BTL_RUNTIME_ACTIVITY_PENDING
-                              : BTL_RUNTIME_ACTIVITY_NONE;
-}
-
-void btlResetActorEntryState(void) {
-    s32 context = (s32)btlRuntime;
-    datUnitWork_t *party = DDS3_GBWK->party;
-    u32 i;
-    ((BattleController *)context)->moneyEarned = 0;
-    ((BattleController *)context)->rewardMacca = 0;
-    ((BattleController *)context)->experienceEarned = 0;
-    ((BattleController *)context)->epEarned = 0;
-    ((BattleController *)context)->totalAp = 0;
-    ((BattleController *)context)->specialEnemyDefeats = 0;
-    for (i = 0; i < 5; i++) {
-        party[i].huntExp = 0;
-    }
-    memset(((BattleController *)btlRuntime)->itemDrops, 0,
-           sizeof(((BattleController *)btlRuntime)->itemDrops));
-}
-
-s32 btlCaptureRewardSummary(BrsRewardSummary *rewards) {
-    u32 i;
-
-    if (btlIsRuntimeAllocated() == 0) {
-        return 0;
-    }
-    rewards->macca = evtBitCheck(0x290) ? ((BattleController *)btlRuntime)->rewardMacca : 0;
-    rewards->mitama = ((BattleController *)btlRuntime)->specialEnemyDefeats;
-    rewards->totalExp = ((BattleController *)btlRuntime)->experienceEarned;
-    rewards->totalAp = ((BattleController *)btlRuntime)->totalAp;
-    btlBossDebugPrintf("btl:----------------------\n");
-    btlBossDebugPrintf("btl:money =%d\n", rewards->macca);
-    btlBossDebugPrintf("btl:exp   =%d\n", rewards->totalExp);
-    btlBossDebugPrintf("btl:ep    =%d\n", rewards->totalAp);
-    btlBossDebugPrintf("btl:mitama=%d\n", rewards->mitama);
-    for (i = 0; i < 5; i++) {
-        rewards->unitApBonus[i] = DDS3_GBWK->party[i].huntExp;
-        btlBossDebugPrintf(D_004150B0, rewards->unitApBonus[i], DDS3_GBWK->party[i].unitId);
-    }
-    btlBossDebugPrintf("btl:----------------------\n");
-    for (i = 0; i < 3; i++) {
-        rewards->icons[i].id = ((BattleController *)btlRuntime)->itemDrops[i].id;
-        rewards->icons[i].param = ((BattleController *)btlRuntime)->itemDrops[i].count;
-    }
-    return 1;
-}
-
-s32 btlResolveQueuedSceneRequestParameters(s32 *outCode, s32 *outParameter) {
-    FldNextSceneRequestMapCode mapCode;
-    FldNextSceneRequestEntryIndex entryIndex;
-    s16 i;
-
-    if (fldConsumeNextSceneRequest(&mapCode, &entryIndex) == FLD_NEXT_SCENE_REQUEST_NO_REQUEST) {
-        return 0;
-    }
-    for (i = 0; i < 0x10; i++) {
-        if (D_00435E14[i].mapIdBase + 0xC8 != mapCode) {
-            continue;
-        }
-        *outCode = D_00435E14[i].mapIdBase + 0xC8;
-        if (D_00435E14[i].entries[entryIndex].flagB != -1 &&
-            evtBitCheck(D_00435E14[i].entries[entryIndex].flagB) != 0) {
-            *outParameter = D_00435E14[i].entries[entryIndex].parameterB;
-            return 1;
-        }
-        if (D_00435E14[i].entries[entryIndex].flagA != -1 &&
-            evtBitCheck(D_00435E14[i].entries[entryIndex].flagA) != 0) {
-            *outParameter = D_00435E14[i].entries[entryIndex].parameterA;
-            return 1;
-        }
-        *outParameter = D_00435E14[i].entries[entryIndex].fallbackParameter;
-        return 1;
-    }
-    return 0;
-}
-
-void *btlGetRuntime(void) {
-    return btlRuntime;
-}
-
-/* Read current HP from a unit-entry address. */
-s32 btlReadCurrentUnitHp(datUnitWork_t *entry) {
-    return entry->hp;
-}
-
-/* Word-return getter; native callers choose whether to truncate MP to 16 bits. */
-s32 btlReadCurrentUnitMp(datUnitWork_t *entry) {
-    return entry->mp;
-}
-
-extern s32 ptyComputeMaxHp(datUnitWork_t *);
-
-extern s32 ptyComputeMaxMp(datUnitWork_t *);
-
-void btlComputeProfileMaxHp(datUnitWork_t *unit) {
-    ptyComputeMaxHp(unit);
-}
-
-void btlComputeProfileMaxMp(datUnitWork_t *unit) {
-    ptyComputeMaxMp(unit);
-}
-
-u32 btlComputeSkillAdjustedMaxHp(datUnitWork_t *stats) {
-    return datComputeSkillBoostedMaxHp(stats);
-}
-
-u32 btlComputeSkillAdjustedMaxMp(datUnitWork_t *stats) {
-    return datComputeSkillBoostedMaxMp(stats);
-}
-
-extern s32 datAddHp(datUnitWork_t *, s32);
-
-extern s32 datAddMp(datUnitWork_t *, s32);
-
-s32 btlAdjustUnitHp(datUnitWork_t *object, s32 delta) {
-    return datAddHp(object, delta);
-}
-
-s32 btlAdjustUnitMp(datUnitWork_t *object, s32 delta) {
-    return datAddMp(object, delta);
-}
-
-/* Cache the skill-adjusted maximum and return current HP clamped to it.
- * The comparison uses the full-width result, not the u16 cache. */
-u16 btlRefreshUnitMaximumHpAndClampCurrentHp(datUnitWork_t *entryAddress) {
-    datUnitWork_t *entry = entryAddress;
-    u32 currentHp = btlReadCurrentUnitHp(entry);
-    u32 maxHp = btlComputeSkillAdjustedMaxHp(entryAddress);
-    entry->maxhp = maxHp;
-    if (maxHp < currentHp) {
-        entry->hp = maxHp;
-    }
-    return entry->hp;
-}
-
-/* Cache the skill-adjusted maximum and return current MP clamped to it.
- * The comparison uses the full-width result, not the u16 cache. */
-u16 btlRefreshUnitMaximumMpAndClampCurrentMp(datUnitWork_t *entryAddress) {
-    u32 currentMp = btlReadCurrentUnitMp(entryAddress);
-    u32 maxMp = btlComputeSkillAdjustedMaxMp(entryAddress);
-    entryAddress->maxMp = maxMp;
-    if (maxMp < currentMp) {
-        entryAddress->mp = maxMp;
-    }
-    return entryAddress->mp;
-}
-
-/* Return the low 15 status bits; do not expose the stored high bit. */
-u16 btlReadUnitStatusMask(datUnitWork_t *entry) {
-    return entry->status & BTL_ENTRY_STATUS_MASK;
-}
-
-extern void sdfRaisePackedChannelValue(datUnitWork_t *item, u32 minimumValue);
-
-/* Forward the record and value to the packed low-15-bit status update. */
-void btlRaisePartyRecordStatusValue(datUnitWork_t *item, u32 minimumValue) {
-    sdfRaisePackedChannelValue(item, minimumValue);
-}
 
 extern void datResetBadStat(datUnitWork_t *unit, s32 mask);
 
@@ -1478,8 +152,6 @@ datUnitWork_t *btlGetCurrentPartyEntryRecord(DatUnitId unitId) {
 datUnitWork_t *btlGetIndexedPartyEntryRecord(s32 index) {
     return &DDS3_GBWK->party[index];
 }
-
-INCLUDE_RODATA(const s32, "game/code_001A8748", D_004150B0);
 
 void btlSyncPlayerWork(BtlUnit *actor) {
     datUnitWork_t *src = &actor->partyRecord;
@@ -1983,11 +655,12 @@ BtlTargetListBuildResult btlBuildUnitIndexList(
 }
 
 extern EventRosterStat *datRosterDetails;
-INCLUDE_RODATA(const s32, "game/code_001A8748", D_00415130);
 
-INCLUDE_RODATA(const s32, "game/code_001A8748", D_00415158);
+INCLUDE_RODATA(const s32, "game/code_001AA868", D_00415130);
 
-INCLUDE_RODATA(const s32, "game/code_001A8748", D_00415178);
+INCLUDE_RODATA(const s32, "game/code_001AA868", D_00415158);
+
+INCLUDE_RODATA(const s32, "game/code_001AA868", D_00415178);
 
 BtlCommandTargetPolicy btlSelectCommandTargetPolicy(ActionStateLink *task, BtlIndexList *destination, s32 unused) {
     s32 category = 3;
@@ -2335,7 +1008,6 @@ s32 btlBuildActorLinkageSkillList(BtlUnit *actor, BattleRosterTable *table) {
     return count;
 }
 
-
 extern ActionStateLink *fldGetSceneGroupEntry(s32 entryIndex);
 extern s32 btlFindCommandPartnersByAffinity(
     BtlUnit *unit, BtlCommandId commandId, BtlUnit **first, BtlUnit **second);
@@ -2434,7 +1106,6 @@ BtlCommandAffinityPartnerResolution btlResolveCommandAffinityPartners(
     }
     return result;
 }
-
 
 u32 btlEncodeActorIndexAsSelectionMask(u32 id) {
     u32 mask;
@@ -2557,7 +1228,6 @@ s32 btlIsEventThresholdSatisfiedForEntry(s32 entryValue) {
 }
 
 extern s32 btlRollAiBucket(void);
-
 
 /* Select a record byte; its context determines whether it is an item or action.
  * Keep DDS2's party ability bonus and event exclusions. */
@@ -2782,7 +1452,6 @@ u32 btlGetEscapeAttemptCount(void) {
     return controller->escapeAttemptCount;
 }
 
-
 /* Return a random eligible actor task, or 0 if no candidate is available. */
 ActionStateLink *btlChooseAvailableUnit(void) {
     ActionStateLink *candidates[16];
@@ -2946,15 +1615,15 @@ BtlActorEntryCodeValue btlGetActorEntryCode(
     return unit->entrySlots[slotIndex].code;
 }
 
-INCLUDE_RODATA(const s32, "game/code_001A8748", D_004151E8);
+INCLUDE_RODATA(const s32, "game/code_001AA868", D_004151E8);
 
-INCLUDE_RODATA(const s32, "game/code_001A8748", D_00415208);
+INCLUDE_RODATA(const s32, "game/code_001AA868", D_00415208);
 
-INCLUDE_RODATA(const s32, "game/code_001A8748", D_00415220);
+INCLUDE_RODATA(const s32, "game/code_001AA868", D_00415220);
 
-INCLUDE_RODATA(const s32, "game/code_001A8748", D_00415238);
+INCLUDE_RODATA(const s32, "game/code_001AA868", D_00415238);
 
-INCLUDE_RODATA(const s32, "game/code_001A8748", D_00415250);
+INCLUDE_RODATA(const s32, "game/code_001AA868", D_00415250);
 
 f32 btlGetActorEntryMultiplier(BtlUnit *unit, u32 index, s8 includeCharge) {
     f32 factor;
@@ -3430,11 +2099,11 @@ typedef char BattleSavedActorStateSize[(sizeof(BattleSavedActorState) == 0x38) ?
 
 extern BattleSavedActorState btlSavedPartyUnitStates[3];
 
-INCLUDE_RODATA(const s32, "game/code_001A8748", D_004152F8);
+INCLUDE_RODATA(const s32, "game/code_001AA868", D_004152F8);
 
-INCLUDE_RODATA(const s32, "game/code_001A8748", D_00415308);
+INCLUDE_RODATA(const s32, "game/code_001AA868", D_00415308);
 
-INCLUDE_RODATA(const s32, "game/code_001A8748", D_00415318);
+INCLUDE_RODATA(const s32, "game/code_001AA868", D_00415318);
 
 void btlPushSavedPartyUnitStates(void) {
     s32 count = 0;
@@ -3509,7 +2178,7 @@ void btlSyncModelFlagFromEventThresholds(void) {
 
 extern u32 btlGetAdjustedSlotAffinity(BtlUnit *, s32, DatAffinitySelector);
 
-INCLUDE_RODATA(const s32, "game/code_001A8748", D_00415340);
+INCLUDE_RODATA(const s32, "game/code_001AA868", D_00415340);
 
 BtlActionPressResult btlDetermineActionPressResult(BtlUnit *attacker, BtlUnit *defender, u32 command) {
     BtlState *battle = (BtlState *)btlGetRuntime();
@@ -3622,3 +2291,4 @@ BtlActionPressResult btlDetermineActionPressResult(BtlUnit *attacker, BtlUnit *d
     }
     return BTL_ACTION_PRESS_RESULT_NORMAL;
 }
+

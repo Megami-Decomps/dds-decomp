@@ -3176,3 +3176,7 @@ INCLUDE_SDATA(const s32, "interface/itfMesManager", D_00436620);
 
 INCLUDE_SDATA(const s32, "interface/itfMesManager", D_00436628);
 
+INCLUDE_SDATA(const s32, "interface/itfMesManager", D_00436630);
+
+INCLUDE_SDATA(const s32, "interface/itfMesManager", D_00436638);
+

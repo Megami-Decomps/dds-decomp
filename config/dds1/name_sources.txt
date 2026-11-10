@@ -3269,14 +3269,14 @@
 0x0019E0F8	itfUpdateBattleDisplayAndFadeIndicator	inferred	Runs the display update stages and advances the battle fade indicator. [names_reviewed16.tsv]
 0x0019E130	itfMesUpdatePanelFades	inferred	U2
 0x0019E320	itfMesAdvanceEntryText	inferred	Advances a message entry's timed text state, rebuilds the current glyph and panel frame, and signals when the entry is exhausted.
-0x0019E4F8	itfUpdateSoundSelectionTransition	inferred	Inferred from the current C implementation in game/code_0019DB88.c; agent-proposed name checked against its owner, fields and callees (R1 finite names pass).
+0x0019E4F8	itfUpdateSoundSelectionTransition	inferred	Inferred from the current C implementation in interface/itfMesManager.c; agent-proposed name checked against its owner, fields and callees (R1 finite names pass).
 0x0019E7B0	itfMesShiftPanelVertically	inferred	Shifts a panel and its origin, sprites and child nodes vertically. [names_reviewed11.tsv]
 0x0019E888	SelectItem	inferred	SMT3HD name via SLUS_209.11 0x001D05F0, unique-masked-hash; was sndSeqSelectPoll
 0x0019E9D8	SelectItemMove	inferred	SMT3HD name via SLUS_209.11 0x001D0740, reloc-identical; was sndStepSequenceIndex
 0x0019EA88	SelectItemDefKey	inferred	SMT3HD name via SLUS_209.11 0x001D07F0, unique-masked-hash; was itfMesFindPressedOptionRank
 0x0019EB18	CalcCurCtr	inferred	SMT3HD name via SLUS_209.11 0x001D0880, shared-hash-in-run; was btlUpdateFadeIndicator
 0x0019ED78	itfMesRenderActivePanelSprites	inferred	Queues active panel sprite layers and refreshes the selected panel. [names_reviewed11.tsv]
-0x0019EE58	itfDrawSelectedSoundRow	inferred	Inferred from the current C implementation in game/code_0019DB88.c; agent-proposed name checked against its owner, fields and callees (R1 finite names pass).
+0x0019EE58	itfDrawSelectedSoundRow	inferred	Inferred from the current C implementation in interface/itfMesManager.c; agent-proposed name checked against its owner, fields and callees (R1 finite names pass).
 0x0019F0F8	itfDrawSoundSelectorOptionPanel	inferred	Mode-3 path in itfUpdateSoundSelectorPanel; emits option-row geometry and panel quads for the selector.
 0x0019F4C8	itfDrawSoundSelectorFadeLayers	inferred	U3
 0x0019F660	CalcMsgMng_Process	inferred	SMT3HD name via SLUS_209.11 0x001D0FF8, reloc-identical; was itfUpdateActiveMessageWindows
@@ -3299,7 +3299,7 @@
 0x001A0A78	pbMakeSpritePacket	inferred	SMT3HD name via SLUS_209.11 0x001D2410, reloc-identical; was btlCreateGsTestRegisterPacket
 0x001A0AD0	pbMakePrimPacket	inferred	SMT3HD name via SLUS_209.11 0x001D2468, reloc-identical; was btlCreateGsAlphaRegisterPacket
 0x001A0B28	pbDrawRotatedPrim	inferred	SMT3HD name via SLUS_209.11 0x001D24C0, reloc-identical; was itfDrawPulsingTestOverlay
-0x001A0CA0	btlResetRuntimeSequenceCounter	inferred	confidence=high; matched-C; src/dds1/game/code_001A04C0.c:48:func_001A0CA0; Resets the runtime sequence counter to one, matching the nonnegative restart value used by its increment routine.; source=fresh-R_Names31-QP13 [names_qp13.tsv]
+0x001A0CA0	btlResetRuntimeSequenceCounter	inferred	confidence=high; matched-C; src/dds1/game/code_001A0CA0.c:30:func_001A0CA0; Resets the runtime sequence counter to one, matching the nonnegative restart value used by its increment routine.; source=fresh-R_Names31-QP13 [names_qp13.tsv]
 0x001A0CB0	btlAdvanceRuntimeSequenceCounter	inferred	Increments and returns the battle sequence counter, resetting it after signed overflow. [names_reviewed12.tsv]
 0x001A0CD8	btlClearModelFlagRange	inferred	Clears a contiguous range of model flags; established DDS2 twin name. [names_reviewed16.tsv]
 0x001A0D18	btlUpdateActiveBattleFrame	inferred	Advances battle fade, music, lighting, scene, action tasks and frame count. [names_reviewed9.tsv]
@@ -3313,20 +3313,20 @@
 0x001A1438	btlIsRuntimeAllocated	inferred	Tests whether the battle runtime state exists. [names_reviewed9.tsv]
 0x001A1480	btlHasPendingRuntimeActivity	inferred	Reports activity when runtime work pointers or its active flag are set. [names_reviewed11.tsv]
 0x001A14C8	btlResetActorEntryState	inferred	Resets battle controller counters and per-party-entry saved values. [names_reviewed14.tsv]
-0x001A1530	btlSnapshotResultRewards	inferred	Inferred from the current C implementation in game/code_001A04C0.c; agent-proposed name checked against its owner, fields and callees (R1 finite names pass).
+0x001A1530	btlSnapshotResultRewards	inferred	Inferred from the current C implementation in game/code_001A0CA0.c; agent-proposed name checked against its owner, fields and callees (R1 finite names pass).
 0x001A1668	btlResolveQueuedSceneRequestParameters	inferred	Consumes a field scene request and selects its output parameter using model flags. [names_reviewed12.tsv]
 0x001A17F0	btlGetRuntime	inferred	confidence=high; src/dds1/game/code_001A04C0.c:func_001A17F0; Returns the battle runtime address. [names_qp9.tsv]
-0x001A17F8	btlReadCurrentUnitHp	inferred	confidence=high; matched-C; src/dds1/game/code_001A04C0.c:351:func_001A17F8; Reads current HP halfword; neighboring refresh clamps the same halfword against computed maximum.; twin=0x001AA700, anchored ordered retail pairing.; sources=names_R_Names35.tsv [names_qp10.tsv]
-0x001A1800	btlReadCurrentUnitMp	inferred	confidence=high; matched-C; src/dds1/game/code_001A04C0.c:355:func_001A1800; Reads current MP halfword; neighboring refresh clamps it against computed maximum.; twin=0x001AA708, anchored ordered retail pairing.; sources=names_R_Names35.tsv [names_qp10.tsv]
-0x001A1808	btlComputeProfileMaxHp	inferred	confidence=high; matched-C; src/dds1/game/code_001A04C0.c:359:func_001A1808; Battle callback invokes profile/enemy-table maximum HP calculation before passive-skill boosts.; twin=0x001AA710, anchored ordered retail pairing.; sources=names_R_Names35.tsv [names_qp10.tsv]
-0x001A1820	btlComputeProfileMaxMp	inferred	confidence=high; matched-C; src/dds1/game/code_001A04C0.c:363:func_001A1820; Battle callback invokes profile/enemy-table maximum MP calculation before passive-skill boosts.; twin=0x001AA728, anchored ordered retail pairing.; sources=names_R_Names35.tsv [names_qp10.tsv]
-0x001A1838	btlComputeSkillAdjustedMaxHp	inferred	confidence=high; matched-C; src/dds1/game/code_001A04C0.c:367:func_001A1838; Called by HP refresh; retail callee adds 10/20/30-percent HP passive-skill bonuses and caps party result at 999.; twin=0x001AA740, anchored ordered retail pairing.; sources=names_R_Names35.tsv [names_qp10.tsv]
-0x001A1850	btlComputeSkillAdjustedMaxMp	inferred	confidence=high; matched-C; src/dds1/game/code_001A04C0.c:371:func_001A1850; Called by MP refresh; retail callee adds 10/20/30-percent MP passive-skill bonuses and caps party result at 999.; twin=0x001AA758, anchored ordered retail pairing.; sources=names_R_Names35.tsv [names_qp10.tsv]
-0x001A1868	btlAdjustUnitHp	inferred	confidence=high; matched-C; src/dds1/game/code_001A04C0.c:375:func_001A1868; Adds signed amount to current HP and clamps between zero and maximum through shared data routine.; twin=0x001AA770, anchored ordered retail pairing.; sources=names_R_Names35.tsv [names_qp10.tsv]
-0x001A1880	btlAdjustUnitMp	inferred	confidence=high; matched-C; src/dds1/game/code_001A04C0.c:379:func_001A1880; Adds signed amount to current MP and clamps between zero and maximum through shared data routine.; twin=0x001AA788, anchored ordered retail pairing.; sources=names_R_Names35.tsv [names_qp10.tsv]
+0x001A17F8	btlReadCurrentUnitHp	inferred	confidence=high; matched-C; src/dds1/game/code_001A0CA0.c:534:func_001A17F8; Reads current HP halfword; neighboring refresh clamps the same halfword against computed maximum.; twin=0x001AA700, anchored ordered retail pairing.; sources=names_R_Names35.tsv [names_qp10.tsv]
+0x001A1800	btlReadCurrentUnitMp	inferred	confidence=high; matched-C; src/dds1/game/code_001A0CA0.c:539:func_001A1800; Reads current MP halfword; neighboring refresh clamps it against computed maximum.; twin=0x001AA708, anchored ordered retail pairing.; sources=names_R_Names35.tsv [names_qp10.tsv]
+0x001A1808	btlComputeProfileMaxHp	inferred	confidence=high; matched-C; src/dds1/game/code_001A0CA0.c:546:func_001A1808; Battle callback invokes profile/enemy-table maximum HP calculation before passive-skill boosts.; twin=0x001AA710, anchored ordered retail pairing.; sources=names_R_Names35.tsv [names_qp10.tsv]
+0x001A1820	btlComputeProfileMaxMp	inferred	confidence=high; matched-C; src/dds1/game/code_001A0CA0.c:550:func_001A1820; Battle callback invokes profile/enemy-table maximum MP calculation before passive-skill boosts.; twin=0x001AA728, anchored ordered retail pairing.; sources=names_R_Names35.tsv [names_qp10.tsv]
+0x001A1838	btlComputeSkillAdjustedMaxHp	inferred	confidence=high; matched-C; src/dds1/game/code_001A0CA0.c:554:func_001A1838; Called by HP refresh; retail callee adds 10/20/30-percent HP passive-skill bonuses and caps party result at 999.; twin=0x001AA740, anchored ordered retail pairing.; sources=names_R_Names35.tsv [names_qp10.tsv]
+0x001A1850	btlComputeSkillAdjustedMaxMp	inferred	confidence=high; matched-C; src/dds1/game/code_001A0CA0.c:558:func_001A1850; Called by MP refresh; retail callee adds 10/20/30-percent MP passive-skill bonuses and caps party result at 999.; twin=0x001AA758, anchored ordered retail pairing.; sources=names_R_Names35.tsv [names_qp10.tsv]
+0x001A1868	btlAdjustUnitHp	inferred	confidence=high; matched-C; src/dds1/game/code_001A0CA0.c:565:func_001A1868; Adds signed amount to current HP and clamps between zero and maximum through shared data routine.; twin=0x001AA770, anchored ordered retail pairing.; sources=names_R_Names35.tsv [names_qp10.tsv]
+0x001A1880	btlAdjustUnitMp	inferred	confidence=high; matched-C; src/dds1/game/code_001A0CA0.c:569:func_001A1880; Adds signed amount to current MP and clamps between zero and maximum through shared data routine.; twin=0x001AA788, anchored ordered retail pairing.; sources=names_R_Names35.tsv [names_qp10.tsv]
 0x001A1898	btlRefreshUnitMaximumHpAndClampCurrentHp	inferred	Recalculates maximum HP and clamps the unit current HP if necessary. [names_reviewed11.tsv]
 0x001A18E8	btlRefreshUnitMaximumMpAndClampCurrentMp	inferred	Recalculates maximum MP and clamps the unit current MP if necessary. [names_reviewed11.tsv]
-0x001A1938	btlReadUnitStatusMask	inferred	confidence=high; matched-C; src/dds1/game/code_001A04C0.c:403:func_001A1938; Reads unit status halfword excluding its high control bit; data status-clear/eligibility routines identify same field.; twin=0x001AA840, anchored ordered retail pairing.; sources=names_R_Names35.tsv [names_qp10.tsv]
+0x001A1938	btlReadUnitStatusMask	inferred	confidence=high; matched-C; src/dds1/game/code_001A0CA0.c:599:func_001A1938; Reads unit status halfword excluding its high control bit; data status-clear/eligibility routines identify same field.; twin=0x001AA840, anchored ordered retail pairing.; sources=names_R_Names35.tsv [names_qp10.tsv]
 0x001A1948	btlRaisePartyRecordStatusValue	inferred	confidence=high; matched-C; Battle record/value callsites forward to full packed-channel callee that raises low15 numeric value while retaining stored high bit and native status-dependent randomization. Legacy unprototyped forwarding unchanged. DDS2 twin0x001AA850. Namer1 batch21.
 0x001A1960	btlClearPartyRecordStatusBits	inferred	confidence=high; matched-C; Forwards party record and mask to datResetBadStat; native callee clears masked status bits. DDS2 twin0x001AA868. Namer1 batch21.
 0x001A1978	btlSetActorSelectedEntryIndex	inferred	Stores the selected entry index in the actor record. [names_reviewed19.tsv]
@@ -3341,7 +3341,7 @@
 0x001A1D48	btlInsertPartyActorByPriority	inferred	confidence=high; matched-C; Inserts complete party record before active actors with greater lookupId/priority, shifts records/indices and copies unit stats; native party-in debug message corroborates. DDS2 twin0x001AAC50. Namer1 batch21.
 0x001A2258	btlRemovePartyActorAndShiftEntries	inferred	Inferred from the current C implementation in game/code_001A1960.c; agent-proposed name checked against its owner, fields and callees (R1 finite names pass).
 0x001A2608	btlSynchronizePartyActorRecords	inferred	confidence=high; matched-C; Swaps full party records at actor/target slots and refreshes stats/active flags without changing actor index; aligns existing DDS2 name at 0x001AB510. Namer1 batch 19.
-0x001A2978	btlGetEntryFlagsUnlessDisabled	inferred	btl battle control and actor operations in game/code_0019DB88.c
+0x001A2978	btlGetEntryFlagsUnlessDisabled	inferred	btl battle control and actor operations in game/code_001A1960.c
 0x001A29B8	btlQueryClampedProfileAdjustedStat	inferred	confidence=high; Native tail jump forwards datGetClampedProfileAdjustedStat and its v0 result, signed base/profile sum clamped1..99; existing void C surface retained. DDS2 0x001AB8C0 twin. [Namer1 batch47]
 0x001A29D0	btlGetStatWithStatusOverride	inferred	confidence=high; matched-C; Returns datGetStatWithStatusOverride for party record/stat index; scene priority sorter reads stat3 through it. DDS2 twin 001AB8D8. Namer1 batch 18.
 0x001A29E8	btlApplyCommandAbilityMultiplier	inferred	Scales a command value when the actor has its associated ability. [names_reviewed12.tsv]
@@ -3364,16 +3364,16 @@
 0x001A3CE0	btlResolveCommandAffinityPartners	inferred	Validates an affinity command and its required partner count, then fills the probe output from affinity lookup or eligible scene-group partners. Called by btlScriptSelectActionEntry before it stores the selected command probe; DDS2 has an analogous resolver in its command-selection path.
 0x001A3F38	btlEncodeActorIndexAsSelectionMask	inferred	Converts an indexed battle actor value to its single selection bit. [names_reviewed12.tsv]
 0x001A4060	btlFlagToElementIndex	inferred	confidence=high; matched-C; Returns shared datFlagToElementIndex, used by automatic-guard affinity queries to decode element flags. DDS2 twin 001AD090. Namer1 batch 18.
-0x001A4078	btlCheckSpecialAbility	inferred	btl battle control and actor operations in game/code_0019DB88.c
+0x001A4078	btlCheckSpecialAbility	inferred	btl battle control and actor operations in game/code_001A5C40.c
 0x001A4130	btlSelectEnemyDropItem	inferred	confidence=high; defeat-reward caller passes its result to btlAddItemDrop; mode 1 bypasses conditional override, otherwise rolls enemy drop entries; DDS2 twin 0x001AD310 has party-bonus/event-selection differences. Namer1 batch 27.
 0x001A4240	btlAddItemDrop	inferred	confidence=high; matched-C; Merges one item into matching drop slot or first free controller slot among three; ignores zero/new IDs when full. Enemy reward collector and scene initialization call it. DDS2 twin 001AD5B0. Namer1 batch 18.
 0x001A4328	btlAccumulateEnemyDefeatRewards	inferred	U1
-0x001A4520	btlAllActiveUnitsReady	inferred	btl battle control and actor operations in game/code_0019DB88.c
+0x001A4520	btlAllActiveUnitsReady	inferred	btl battle control and actor operations in game/code_001A1960.c
 0x001A4598	btlGetEncounterAdjustmentScale	inferred	confidence=high; matched-C; Selected encounter pack/group/entry adjustment clamped to -3..3 indexes datBattleParameters.adjustmentScale; evtPushAvailableFloatValue calls it under runtime guard. DDS2 twin 001AD978. Namer1 batch 17.
 0x001A4630	btlGetEscapeAttemptCount	inferred	Returns runtime counter 0x254 incremented only by btlRecordEscapeAttemptOutcome before its escape chance test; evtPushAvailableIntegerValue exposes it to scripts. DDS2 twin 0x001ADA10 reads 0x278. [Namer1 batch 41]
-0x001A4650	btlChooseAvailableUnit	inferred	btl battle control and actor operations in game/code_0019DB88.c
-0x001A46F0	btlCountAvailableUnits	inferred	btl battle control and actor operations in game/code_0019DB88.c
-0x001A4750	btlCountAvailableParticipants	inferred	btl battle control and actor operations in game/code_0019DB88.c
+0x001A4650	btlChooseAvailableUnit	inferred	btl battle control and actor operations in game/code_001A1960.c
+0x001A46F0	btlCountAvailableUnits	inferred	btl battle control and actor operations in game/code_001A1960.c
+0x001A4750	btlCountAvailableParticipants	inferred	btl battle control and actor operations in game/code_001A1960.c
 0x001A47F0	btlGetActorEffectScale	inferred	Inferred from the current C implementation in game/code_001A1960.c; agent-proposed name checked against its owner, fields and callees (R1 finite names pass).
 0x001A4860	btlClearAllActorEntrySlots	inferred	Clears every actor entry slot in the battle record. [names_reviewed10.tsv]
 0x001A48B0	btlActorEntryIsExpired	inferred	slot code non-zero and countdown < 1
@@ -3399,7 +3399,7 @@
 0x001A6968	btlSelectCommandHitCount	inferred	Honors the command hit-count override or selects from the command's inclusive hit range, using roster bounds for affected kind-5 commands.
 0x001A6A50	btlGetActorDisplayByteWithDefault	inferred	Reads the indexed record display byte for a flagged actor or returns the default value. [names_reviewed16.tsv]
 0x001A6AA0	btlGetActionAnimationDelay	inferred	confidence=high; matched-C; Reads animation delayIndex row, prints btl:delay and returns delay; released ATTACK/LINKAGE scheduler callers use it as actionFrames. Native special cases preserved. DDS2 twin 001B0C68. Namer1 batch 18.
-0x001A6B40	btlResolveSkillCategory	inferred	btl battle control and actor operations in game/code_0019DB88.c
+0x001A6B40	btlResolveSkillCategory	inferred	btl battle control and actor operations in game/code_001A5C40.c
 0x001A6BE0	btlSortActorMuzzleDirections	inferred	confidence=high; matched-C; Native animation mode selects no-op, side-sensitive target muzzle-x sort or thirteen random swaps; aligns existing DDS2 001B0DB0. Namer1 batch 18.
 0x001A6EC0	btlShouldDistributeRandomTargetHits	inferred	Returns whether the action path should distribute repeated hits across randomized targets; a true result directly gates btlDistributeRandomTargetHits. DDS2 twin 0x001B1090. [high-volume naming lane, 2026-10-14]
 0x001A6F98	btlDistributeRandomTargetHits	inferred	L13
@@ -3434,7 +3434,7 @@
 0x001A8DD8	btlCollectAvailableOptionSkills	inferred	confidence=high; filters 24 actor skill IDs through explicit A0-A5/B5-B8 ranges and command failure reason, optionally writes accepted IDs and returns count; existing has-option/random-option consumers corroborate; DDS2 twin 0x001B32F8. Does not infer summon meaning. Namer1 batch 29.
 0x001A8EA8	btlHasAvailableOption	inferred	Tests whether collecting selectable battle options yields any choices. [names_reviewed10.tsv]
 0x001A8EC8	btlChooseRandomAvailableOption	inferred	Selects a random member of the object-generated options, or negative one. [names_reviewed8.tsv]
-0x001A8F10	btlChooseEligibleSkill	inferred	btl battle control and actor operations in game/code_0019DB88.c
+0x001A8F10	btlChooseEligibleSkill	inferred	btl battle control and actor operations in game/code_001A7180.c
 0x001A8FF0	btlGetActionCategoryMultiplier	inferred	Returns an action category multiplier, including an ability-specific override. [names_reviewed8.tsv]
 0x001A9068	btlGetActionCategoryGateAsFloat	inferred	Returns 1.0 only when the indexed action category falls in the observed gated range. [names_reviewed17.tsv]
 0x001A90B0	btlGetActionRecordPercentAsFraction	inferred	Returns an indexed unsigned action percentage converted to a fraction. [names_reviewed17.tsv]
@@ -3452,7 +3452,7 @@
 0x001A95C8	btlSelectPreemptiveOutcome	inferred	confidence=high; scene flags/request overrides or event chance with party ability multiplier and 60..80 clamp select outcomes1/2; native preemptive debug string. DDS2 canonical twin0x001B3BE0 has extra encounter-kind rules. Namer1 batch25.
 0x001A9780	btlSelectSerialEncounter	inferred	Choose the follow-up encounter through a scripted override, forced scene or random adjustment rows; btl:serial diagnostics and request mode/argument stores.
 0x001A99B0	btlRollSurpriseAttack	inferred	confidence=high; matched-C; Debug string btl:surprise; rolls chance scaled by active-party/enemy level difference and passive ability 0x22D, with scene overrides. Existing DDS2 twin 0x001B4210. Namer1 batch 11.
-0x001A9CD0	btlClearUnitStatusMask	inferred	btl battle control and actor operations in game/code_0019DB88.c
+0x001A9CD0	btlClearUnitStatusMask	inferred	btl battle control and actor operations in game/code_001A9780.c
 0x001A9D38	btlRollStoneDeathChance	inferred	Inferred from the current C implementation in game/code_001A9780.c; agent-proposed name checked against its owner, fields and callees (R1 finite names pass).
 0x001A9E50	btlRollActorEligibilityWithAbilityOverride	inferred	Rejects blocked actor states, accepts a special ability or rolls the battle RNG. [names_reviewed8.tsv]
 0x001A9EF8	btlHasEnemyRecordDefeatExemptionFlag	inferred	Checks an enemy record flag that suppresses value-based unit defeat evaluation. [names_reviewed12.tsv]
@@ -3650,9 +3650,9 @@
 0x001C3040	btlUpdateBankedSlotFadeSequence	inferred	Steps the current bank's per-slot fade phases under the named-task status gate; slots share the delay timer and the final slot marks completion. DDS2 twin 0x001CE5C8. [Namer1 batch 40]
 0x001C32B0	btlDrawSceneSlotFades	inferred	Inferred from the current C implementation in game/code_001A9780.c; agent-proposed name checked against its owner, fields and callees (R1 finite names pass).
 0x001C3B28	btlDrawSceneSlotGlyphGrid	inferred	Inferred from the current C implementation in game/code_001A9780.c; agent-proposed name checked against its owner, fields and callees (R1 finite names pass).
-0x001C4048	btlFindSceneSlotById	inferred	btl battle control and actor operations in game/code_0019DB88.c
+0x001C4048	btlFindSceneSlotById	inferred	btl battle control and actor operations in game/code_001A9780.c
 0x001C40A8	btlFindSceneSlotRecord	inferred	Existing matched borrowed-record getter follows btlFindSceneSlotById, returning runtime slots[index] or zero; preserves D1typed pointer and D2integer-argument/u8-pointer signatures; identifier only.
-0x001C4100	btlFadeStaleSceneSlots	inferred	btl battle control and actor operations in game/code_0019DB88.c
+0x001C4100	btlFadeStaleSceneSlots	inferred	btl battle control and actor operations in game/code_001A9780.c
 0x001C4418	btlUpdateScenePanelTask	inferred	Existing matched scene-panel task gates updates on battle0x200 and presentation/blocking state, then calls native actor-slot presentation/render manager001C4278 or001CF800; not a cleanup routine; identifier only.
 0x001C4470	btlClearScenePanelTaskHandle	inferred	Existing matched destructor callback only clears the scene-panel task handle (D1cleanupTask/D2sceneStatus); no resource-release or owner-layout change; identifier only.
 0x001C4490	btlBeginScenePanelFadeIn	inferred	Existing matched wrapper requests mode1 eight-frame panel entrance and enables battle0x200 panel updates; mode1 restores command/actor/registered panel presentation; identifier only.
@@ -3674,8 +3674,8 @@
 0x001C5F80	btlFinalizeBattleRewards	inferred	confidence=high; aligns existing DDS2 name at 0x001D18D8 from outcome tasks, money level/turn scaling, participant EP division, auto-EP and total-counter settlement; reward debug strings corroborate, all unsigned casts/loops retained. Namer1 batch 29.
 0x001C6888	btlUpdateBattleEnd	inferred	The battle's end: the end jingle by its outcome, then, once sound and the units are idle, the next mode (the field, or the event a loss starts). DDS2 twin 0x001D22D8.
 0x001C7028	btlFinishScenePartyRecovery	inferred	Inferred from the current C implementation in game/code_001C48A8.c; agent-proposed name checked against its owner, fields and callees (R1 finite names pass).
-0x001C7230	btlSetScene	inferred	btl battle control and actor operations in game/code_0019DB88.c
-0x001C72A8	btlUpdateScene	inferred	btl battle control and actor operations in game/code_0019DB88.c
+0x001C7230	btlSetScene	inferred	btl battle control and actor operations in game/code_001C48A8.c
+0x001C72A8	btlUpdateScene	inferred	btl battle control and actor operations in game/code_001C48A8.c
 0x001C74F0	btlSortSceneGroupByPriorityDesc	inferred	twin 0x001D2F40: bubble sort of scene tasks by btlGetStatWithStatusOverride(actor+0x120, 3) descending
 0x001C75C8	fldSortGroupByPriority	inferred	bubble sort of scene tasks by actor priority (+0x11C)
 0x001C7690	fldBuildSceneSlotsFromActorTasks	inferred	Called by fldInitializeSceneGroups after group sorting. Selects eligible active tasks from the variant-specific actor group, writes each task group ID into its action-count scene slots, clears unused slots and initializes scene fade records.
@@ -3781,17 +3781,17 @@
 0x001D3EB8	btlCreateRefreshEligibleActorsTask	inferred	Twin of dds2 0x001E0B08; Allocates task 0x55 with btlRefreshEligibleActors callback. [names_R_FuncNames3.tsv]
 0x001D3F00	btlUpdateAutoMusic	inferred	Checks battle context and sound-state bytes, toggles sequence volume and logs btl:auto on/off transitions.
 0x001D3FE8	btlPrepareSavedCommandTargets	inferred	Inferred from the current C implementation in game/code_001C8890.c; agent-proposed name checked against its owner, fields and callees (R1 finite names pass).
-0x001D44A8	btlFindTaskByKind	inferred	btl battle control and actor operations in game/code_0019DB88.c
+0x001D44A8	btlFindTaskByKind	inferred	btl battle control and actor operations in game/code_001D0BA0.c
 0x001D4508	btlCountRegisteredTasks	inferred	counts linked battle tasks at +0x230; DDS2 twin [names_R_FuncNames8.tsv]
-0x001D4558	btlCountTasksForOwner	inferred	btl battle control and actor operations in game/code_0019DB88.c
-0x001D45A8	btlCountTasksByKind	inferred	btl battle control and actor operations in game/code_0019DB88.c
+0x001D4558	btlCountTasksForOwner	inferred	btl battle control and actor operations in game/code_001D0BA0.c
+0x001D45A8	btlCountTasksByKind	inferred	btl battle control and actor operations in game/code_001D0BA0.c
 0x001D4A98	btlRunDeferredTasks	inferred	Runs deferred task callbacks, saving each next link before btlRunTask may free the node, then resets both queue heads; DDS2 twin 0x001E17B8.
 0x001D4B28	btlCompleteTaskImmediately	inferred	confidence=high; process callback returns 1 unconditionally and is installed by btlCreateImmediateCompletionTask's zero-argument task; DDS2 twin 0x001E1848. Namer1 batch 28.
-0x001D4B78	btlDumpTaskQueue	inferred	btl battle control and actor operations in game/code_0019DB88.c
+0x001D4B78	btlDumpTaskQueue	inferred	btl battle control and actor operations in game/code_001D0BA0.c
 0x001D4BF8	btlInitUnitFxDefaults	inferred	btl sets unit fx vector and scalar defaults (DDS2 twin func_001E1918)
 0x001D4C38	btlInitFxLights	inferred	Byte-identical dds2 twin 0x001E1958; initialises two light blocks (vectors, intensity 1.0, colour 0x80808080) [names_conflicts.tsv]
 0x001D4CA8	btlInitializeEffectVectorsFromSourceRecords	inferred	Initializes battle effect vectors using source records and their blend weights. [names_reviewed12.tsv]
-0x001D4DB8	btlHasMatchingModel	inferred	btl battle control and actor operations in game/code_0019DB88.c
+0x001D4DB8	btlHasMatchingModel	inferred	btl battle control and actor operations in game/code_001D0BA0.c
 0x001D4E60	btlInheritActorModelState	inferred	Copies sound-slot ownership, the transparency model, effect object and event work from the source unit, then sets the destination inheritance marker and status bit 2. The actor-model reuse caller and model-change mirror caller both pass an established source unit; paired DDS2 helper 0x001E1B80.
 0x001D4E98	btlBindActorModel	inferred	Inferred from the current C implementation in game/code_001C8890.c; agent-proposed name checked against its owner, fields and callees (R1 finite names pass).
 0x001D5238	btlReleaseActorModelResources	inferred	Releases an actor's queued sound, load handle and model data where applicable, then clears model activity flags.
@@ -3839,7 +3839,7 @@
 0x001D7658	btlApplyScaledUnitModelTask	inferred	Twin of dds2 0x001E4588; Task callback invokes btlApplyUnitModelScaledValue on its unit. [names_R_FuncNames3.tsv]
 0x001D7678	btlCreateScaledUnitModelTask	inferred	Allocates a battle task using the scaled unit-model callback. [names_reviewed11.tsv]
 0x001D76E8	btlPollThresholdTask	inferred	Polls elapsed battle time against task threshold, cleans up the owner's effect at the threshold.
-0x001D7748	btlScheduleThresholdTask	inferred	btl battle control and actor operations in game/code_0019DB88.c
+0x001D7748	btlScheduleThresholdTask	inferred	btl battle control and actor operations in game/code_001D0BA0.c
 0x001D79D8	btlAllocateApproachTargetTask	inferred	Allocates an approach-target task and fills its owner, index and scale. [names_reviewed8.tsv]
 0x001D7A78	btlUpdateUnitPositionInterpolationTask	inferred	Interpolates a battle unit position toward its task target over time. [names_reviewed12.tsv]
 0x001D7B60	btlCreateUnitPositionLerpTowardTargetTask	inferred	Creates a task with unit current position, destination and interpolation scale. [names_reviewed12.tsv]
@@ -3849,8 +3849,8 @@
 0x001D7EA0	btlPollModelLoadCompletion	inferred	Polls pending model load, initializes the ready model, performs mode-dependent cleanup and updates owner flags.
 0x001D7F90	btlCreateModelLoadPollTask	inferred	Twin of dds2 0x001E4EE0; Allocates task 0x18 with btlPollModelLoadCompletion callback. [names_R_FuncNames3.tsv]
 0x001D8050	btlReleaseUnitModelTask	inferred	Twin of dds2 0x001E4FA0; Task callback clears unit state then releases actor model resources. [names_R_FuncNames3.tsv]
-0x001D8088	btlScheduleRefreshTask	inferred	btl battle control and actor operations in game/code_0019DB88.c
-0x001D80F8	btlBeginModelChange	inferred	btl battle control and actor operations in game/code_0019DB88.c
+0x001D8088	btlScheduleRefreshTask	inferred	btl battle control and actor operations in game/code_001D0BA0.c
+0x001D80F8	btlBeginModelChange	inferred	btl battle control and actor operations in game/code_001D0BA0.c
 0x001D8190	btlUpdateModelChangeTask	inferred	confidence=high; matched-C; btlCreateModelChangeTask callback phases bind replacement model resources, crossfade the mirror, release it and report btl:model change end before completion. DDS2 twin 0x001E50E0. Namer1 batch 9.
 0x001D87D0	btlCreateModelChangeTask	inferred	task type 0x1A with btlBeginModelChange
 0x001D88B0	btlApplyLinkedUnitStatusWhenActorActive	inferred	Applies status to a linked unit when its owner has the active flag. [names_reviewed17.tsv]
@@ -3880,7 +3880,7 @@
 0x001D9C28	btlAdvanceActorPositionEffectTask	inferred	confidence=high; matched-C; Adopt established DDS2 0x001E6BF8 name: requests permitted motion parameter 13 or advances the same accelerating/reversing fallback lateral effect-position curve, completing on actor disappearance or return. Namer1 batch 9.
 0x001D9E48	btlCreateActorPositionEffectTask	inferred	confidence=high; matched-C; Owner-bound task kind 0x1E registers the position-effect callback and initializes unit and tick zero; ATTACK/LINKAGE schedulers create it for current targets. DDS2 twin 0x001E6E18. Namer1 batch 9.
 0x001D9EC0	btlApplyQueuedActorRotation	inferred	confidence=high; matched-C; Queued callback clears stateFlags bit 0x10, applies the actor's stored orientation through btlSetUnitRotation and returns one; constructor stores the actor and installs it. DDS2 twin 0x001E6E90. Namer1 batch 9.
-0x001D9EF8	btlScheduleActorUpdate	inferred	btl battle control and actor operations in game/code_0019DB88.c
+0x001D9EF8	btlScheduleActorUpdate	inferred	btl battle control and actor operations in game/code_001D0BA0.c
 0x001D9F68	btlRefreshUnitFxVectorTask	inferred	Twin of dds2 0x001E6F38; Task callback calls btlRefreshUnitFxVectors. [names_R_FuncNames3.tsv]
 0x001D9FF8	btlStartGunFinishLoad	inferred	twin 0x001E6FC8: Disposes stale actor load handle, builds gun/finisher resource filename, starts its load, records handle and updates model load flags.
 0x001DA128	btlCreateGunLoadPollTask	inferred	Twin of dds2 0x001E70F8; Allocates task 0x23 with btlPollGunLoad callback. [names_R_FuncNames3.tsv]
@@ -3892,16 +3892,16 @@
 0x001DA3A8	btlCreateActorModelBlendTask	inferred	Creates a model blend task with owner, model target, index, blend value and floating scale parameters.
 0x001DA468	btlUpdateActiveActorModelState	inferred	confidence=high; Canonical DDS2 0x001E7648 twin: active actor motion completion/random seeks, alpha transitions and selected-unit color pulse; game-specific state fields retained. [Namer1 batch47]
 0x001DA780	btlUpdateActorModelColorAndLinks	inferred	U3
-0x001DABE0	btlRemoveActorsWithFlags	inferred	btl battle control and actor operations in game/code_0019DB88.c
-0x001DAC40	btlFindActorForOwner	inferred	btl battle control and actor operations in game/code_0019DB88.c
+0x001DABE0	btlRemoveActorsWithFlags	inferred	btl battle control and actor operations in game/code_001D0BA0.c
+0x001DAC40	btlFindActorForOwner	inferred	btl battle control and actor operations in game/code_001D0BA0.c
 0x001DACA0	btlIsUnitInActorList	inferred	provider walks BtlState.units and compares unit pointers
-0x001DADC8	btlAllocateIndexList	inferred	btl battle control and actor operations in game/code_0019DB88.c
+0x001DADC8	btlAllocateIndexList	inferred	btl battle control and actor operations in game/code_001D0BA0.c
 0x001DAE08	btlFreeIndexList	inferred	DDS2 001E8018 twin; frees index-list allocation [names_R_FuncNames2.tsv]
 0x001DAE20	btlAppendIndexListEntry	inferred	DDS2 001E8030 twin; appends entry at count and increments count [names_R_FuncNames2.tsv]
 0x001DAE40	btlClearIndexList	inferred	DDS2 001E8050 twin; resets index-list count to zero [names_R_FuncNames2.tsv]
 0x001DAE48	btlGetIndexListCount	inferred	DDS2 001E8058 twin; returns count from BtlIndexList [names_R_FuncNames2.tsv]
 0x001DAE50	btlGetIndexListEntry	inferred	DDS2 001E8060 twin; returns indexed entry from BtlIndexList [names_R_FuncNames2.tsv]
-0x001DAE68	btlCopyIndexList	inferred	btl battle control and actor operations in game/code_0019DB88.c
+0x001DAE68	btlCopyIndexList	inferred	btl battle control and actor operations in game/code_001D0BA0.c
 0x001DAEE8	btlSwapIndexListEntries	inferred	DDS2 001E80F8 twin; swaps two entries, no change if indices equal [names_R_FuncNames2.tsv]
 0x001DB048	btlSetCameraCommandMode	inferred	matched-C; src/dds1/game/code_001D0BA0.c; changes the battle camera command mode, linked units and target indices, checks repeat/permission policy and invokes the mode initializer; exact460-byte DDS2 0x001E8258 twin. Direct permission observation followed by preservation snapshot recovers native CFG; primary BtlState +0x664 initializer predicate and native20-byte mode packet (PurC deep structural refinement).
 0x001DB218	btlNormalizeActionCameraKeyScales	inferred	Adjusts pose vectors and resets blend weights according to action flags. [names_reviewed14.tsv]
@@ -3918,7 +3918,7 @@
 0x001DBAF0	btlCreateFloatTask28	inferred	task type 0x28 with 8 float args
 0x001DBBF8	btlApplyEffectCameraKeyframes	inferred	Sets effect camera keys from the supplied float parameters. [names_reviewed8.tsv]
 0x001DBCB0	btlCreateFloatTask29	inferred	task type 0x29 with 16 float args
-0x001DBE20	btlScheduleContextReset	inferred	btl battle control and actor operations in game/code_0019DB88.c
+0x001DBE20	btlScheduleContextReset	inferred	btl battle control and actor operations in game/code_001D0BA0.c
 0x001DBE68	btlUpdateBattleCameraFrame	inferred	Per active battle frame, dispatches the current camera mode's update callback, advances/completes camera-pose blending, then writes the camera pose and FOV to the world camera. Called from btlUpdateActiveBattleFrame. Paired DDS2 body at 0x001E9130.
 0x001DC0E8	btlInitializeWorldCamera	inferred	Inferred from the current C implementation in game/code_001C8890.c; agent-proposed name checked against its owner, fields and callees (R1 finite names pass).
 0x001DC270	btlCopyMotionTransform	inferred	copies both vectors and two scalar values of a motion transform [names_R_FuncNames8.tsv]
@@ -4078,23 +4078,23 @@
 0x001F0998	btlForceSceneLightingRestore	inferred	confidence=high; matched-C; Sets lighting hold count to one before the existing decrement/baseline restore callback; native suppression flag and return type unchanged. DDS2 twin0x00201520. Namer1 batch22.
 0x001F09B8	btlCreateSoundUpdateTask	inferred	Allocates a sound task and assigns its update callback. [names_reviewed10.tsv]
 0x001F09F0	btlQueueTintTransitionWhenEnabled	inferred	Queues a tint transition unless the battle state disables it. [names_reviewed8.tsv]
-0x001F0A48	sndCreateAcquireTask	inferred	snd sound tasks and playback in game/code_0019DB88.c
+0x001F0A48	sndCreateAcquireTask	inferred	snd sound tasks and playback in game/code_001DEFE0.c
 0x001F0AC8	sndTickFadeCounter	inferred	releaseSound callback: counts D_003BB698 down and restarts func_001EFB18 at zero
-0x001F0B28	sndCreateReleaseTask	inferred	snd sound tasks and playback in game/code_0019DB88.c
+0x001F0B28	sndCreateReleaseTask	inferred	snd sound tasks and playback in game/code_001DEFE0.c
 0x001F0B90	btlForceReleaseTintTransition	inferred	confidence=high; matched-C; Sets tint hold count to one before existing tint-release callback; native suppression flag and return type unchanged. DDS2 twin0x00201718. Namer1 batch22.
 0x001F0BB0	btlCreateSoundReleaseTask	inferred	Twin of dds2 0x00201738; Creates sndCreateReleaseTask and assigns battle task ID 8. [names_R_FuncNames3.tsv]
 0x001F0BE8	btlExtendTaskFrameLimit	inferred	Increases a task frame limit only when the new limit is greater. [names_reviewed12.tsv]
-0x001F0C00	sndGetResourceStatus	inferred	snd sound tasks and playback in game/code_0019DB88.c
-0x001F0C38	sndLookupResourceType	inferred	snd sound tasks and playback in game/code_0019DB88.c
+0x001F0C00	sndGetResourceStatus	inferred	snd sound tasks and playback in game/code_001DEFE0.c
+0x001F0C38	sndLookupResourceType	inferred	snd sound tasks and playback in game/code_001DEFE0.c
 0x001F0CA0	btlSetCommandEffectLinkFlags	inferred	Clears actor, companion, and target effect-link flags, then sets their command, reflection, inactivity, and entry-derived bits before command dispatch; paired DDS2 implementation at 0x00201828.
-0x001F0FE0	sndCreateSystemEffect	inferred	snd sound tasks and playback in game/code_0019DB88.c
-0x001F1050	sndDeleteSystemEffect	inferred	snd sound tasks and playback in game/code_0019DB88.c
-0x001F10B0	sndAddEffectReferences	inferred	snd sound tasks and playback in game/code_0019DB88.c
+0x001F0FE0	sndCreateSystemEffect	inferred	snd sound tasks and playback in game/code_001DEFE0.c
+0x001F1050	sndDeleteSystemEffect	inferred	snd sound tasks and playback in game/code_001DEFE0.c
+0x001F10B0	sndAddEffectReferences	inferred	snd sound tasks and playback in game/code_001DEFE0.c
 0x001F1110	btlUpdateReferencedBattleEffect	inferred	confidence=high; deferred task callback creates/advances effBTLCutHandle_t, applies field-color selectors/owner flags and finishes at its duration or battle flag clear. Native effect constructor duplicates effParamWork and logs effBTL handle creation. DDS2 twin0x00201C98. Namer1 batch25.
-0x001F1280	sndReleaseEffectReferences	inferred	snd sound tasks and playback in game/code_0019DB88.c
+0x001F1280	sndReleaseEffectReferences	inferred	snd sound tasks and playback in game/code_001DEFE0.c
 0x001F12E8	btlCreateReferencedBattleEffectTask	inferred	confidence=high; allocates deferred BtlRuntimeTask with start/update/finish reference lifecycle and source/target selector arguments; actual attack schedulers and paired-command effect caller. DDS2 twin0x00201F08 adds selector/target overrides. Namer1 batch25.
-0x001F13C0	sndCreateEffectWithTargets	inferred	snd sound tasks and playback in game/code_0019DB88.c
-0x001F1420	sndStartEffectTask	inferred	snd sound tasks and playback in game/code_0019DB88.c
+0x001F13C0	sndCreateEffectWithTargets	inferred	snd sound tasks and playback in game/code_001DEFE0.c
+0x001F1420	sndStartEffectTask	inferred	snd sound tasks and playback in game/code_001DEFE0.c
 0x001F1470	sndUpdateActorEffectTask	inferred	Inferred from the current C implementation in game/code_001DEFE0.c; agent-proposed name checked against its owner, fields and callees (R1 finite names pass).
 0x001F1650	sndCreateActorEffectTask	inferred	Allocates actor-owned task with system effect create/start and matching finish cleanup. [names_reviewed5.tsv]
 0x001F1710	sndIncrementEffectActiveCount	inferred	Increments activeCount on queued sound-effect node. [names_reviewed5.tsv]
@@ -4106,41 +4106,41 @@
 0x001F1BB0	btlCreateApplyToActiveActorsTask	inferred	Twin of dds2 0x00202840; Allocates task 0x34 with sndApplyToActiveActors callback. [names_R_FuncNames3.tsv]
 0x001F1C18	btlCancelTimedFadeTask	inferred	confidence=high; matched-C; src/dds1/game/code_001A1960.c:10386:func_001F1C18; Battle task callback clears timed fade enable through frame fade reset routine, then reports completion.; twin=0x002028A8, anchored ordered retail pairing.; sources=names_R_Names35.tsv [names_qp10.tsv]
 0x001F1C38	btlCreateFadeStateResetTask	inferred	Creates a task whose callback clears the fade-active flag set by dds3SetQuake. [names_reviewed16.tsv]
-0x001F1C78	sndAddSourceReferences	inferred	snd sound tasks and playback in game/code_0019DB88.c
+0x001F1C78	sndAddSourceReferences	inferred	snd sound tasks and playback in game/code_001DEFE0.c
 0x001F1CC8	sndUpdateEffectSourceFade	inferred	Inferred from the current C implementation in game/code_001DEFE0.c; agent-proposed name checked against its owner, fields and callees (R1 finite names pass).
 0x001F1F20	sndCreateEffectSourceTask	inferred	Creates owner-bound source task that retains effect and unit and releases both on finish. [names_reviewed5.tsv]
 0x001F1FE0	btlTaskStartFadeIn	inferred	DDS2 00202C70 twin; task callback calls dds3FadeIn2 with passed fade id [names_R_FuncNames2.tsv]
 0x001F2000	btlCreateFadeInTask	inferred	DDS2 00202C90 twin; allocates task id 0x38 to invoke dds3FadeIn2 [names_R_FuncNames2.tsv]
 0x001F2068	btlTaskStartCustomFadeIn	inferred	DDS2 00202CF8 twin; task callback calls dds3FadeOut with args [names_R_FuncNames2.tsv]
-0x001F2098	sndCreateCustomTask	inferred	snd sound tasks and playback in game/code_0019DB88.c
+0x001F2098	sndCreateCustomTask	inferred	snd sound tasks and playback in game/code_001DEFE0.c
 0x001F2118	btlTaskSetBattleFlag40000	inferred	DDS2 00202DA8 twin; sets battleFlags 0x40000 and clears listed object flag [names_R_FuncNames2.tsv]
-0x001F2150	sndCreateSetBattleFlagTask	inferred	snd sound tasks and playback in game/code_0019DB88.c
+0x001F2150	sndCreateSetBattleFlagTask	inferred	snd sound tasks and playback in game/code_001DEFE0.c
 0x001F2198	btlTaskClearBattleFlag40000	inferred	DDS2 00202E28 twin; clears battleFlags 0x40000 and sets listed object flag [names_R_FuncNames2.tsv]
-0x001F21D0	sndCreateClearBattleFlagTask	inferred	snd sound tasks and playback in game/code_0019DB88.c
+0x001F21D0	sndCreateClearBattleFlagTask	inferred	snd sound tasks and playback in game/code_001DEFE0.c
 0x001F2218	btlFormatActionEventFilename	inferred	Inferred from the current C implementation in game/code_001DEFE0.c; agent-proposed name checked against its owner, fields and callees (R1 finite names pass).
 0x001F22B0	sndSetEffectNodeParameter	inferred	DDS2 00202F40 twin; forwards node handle plus u16 to effect parameter helper [names_R_FuncNames2.tsv]
 0x001F22D0	sndGetEffectNodeParameter	inferred	DDS2 00202F60 twin; returns handle parameter helper result [names_R_FuncNames2.tsv]
 0x001F22F0	sndIsResourceNodeReferencedOrActive	inferred	DDS2 00202F80 twin; checks resource referenceCount or activeCount [names_R_FuncNames2.tsv]
-0x001F2310	sndHasActiveActor	inferred	snd sound tasks and playback in game/code_0019DB88.c
-0x001F2378	sndAllocResourceNode	inferred	snd sound tasks and playback in game/code_0019DB88.c
-0x001F23E0	sndCreateResourceNode	inferred	snd sound tasks and playback in game/code_0019DB88.c
-0x001F2430	sndFreeResourceNode	inferred	snd sound tasks and playback in game/code_0019DB88.c
+0x001F2310	sndHasActiveActor	inferred	snd sound tasks and playback in game/code_001DEFE0.c
+0x001F2378	sndAllocResourceNode	inferred	snd sound tasks and playback in game/code_001DEFE0.c
+0x001F23E0	sndCreateResourceNode	inferred	snd sound tasks and playback in game/code_001DEFE0.c
+0x001F2430	sndFreeResourceNode	inferred	snd sound tasks and playback in game/code_001DEFE0.c
 0x001F24A8	btlUpdateFadeColor	inferred	ages node counters (ctx+0x234 list) then steps ctx+0x588 colour by 0x10000000 toward 0x80808080 / 0x808080 depending on mode byte ctx+0x584
 0x001F25C8	btlSweepFloorModelLists	inferred	Twin of dds2 0x00203258; Calls effSweepFloorModelList. [names_R_FuncNames3.tsv]
 0x001F25E0	btlResetFieldColorAndSweepFlags	inferred	Twin of dds2 0x00203270; Resets field-color flags and clears global bit 0x20000000. [names_R_FuncNames3.tsv]
 0x001F2618	btlClearSoundAndModelResources	inferred	Twin of dds2 0x002032A8; Clears sound resource nodes and processes model nodes during effect reset. [names_R_FuncNames3.tsv]
-0x001F2648	sndClearResourceNodes	inferred	snd sound tasks and playback in game/code_0019DB88.c
+0x001F2648	sndClearResourceNodes	inferred	snd sound tasks and playback in game/code_001DEFE0.c
 0x001F2688	btlButtonMaskToIndex	inferred	switch mapping single bits of a 15-bit mask (0x1..0x4000) to indices 0..0x10
-0x001F2788	sndAllocResourceLink	inferred	snd sound tasks and playback in game/code_0019DB88.c
-0x001F27C8	sndFreeResourceLink	inferred	snd sound tasks and playback in game/code_0019DB88.c
+0x001F2788	sndAllocResourceLink	inferred	snd sound tasks and playback in game/code_001DEFE0.c
+0x001F27C8	sndFreeResourceLink	inferred	snd sound tasks and playback in game/code_001DEFE0.c
 0x001F2B60	btlMarkTaskReady	inferred	Twin of dds2 0x002037F0; Sets task byte at offset 0x10 to one; precise task semantics unknown. [names_R_FuncNames3.tsv]
-0x001F2B70	sndAllocLink	inferred	snd sound tasks and playback in game/code_0019DB88.c
-0x001F2BB0	sndFreeLink	inferred	snd sound tasks and playback in game/code_0019DB88.c
+0x001F2B70	sndAllocLink	inferred	snd sound tasks and playback in game/code_001DEFE0.c
+0x001F2BB0	sndFreeLink	inferred	snd sound tasks and playback in game/code_001DEFE0.c
 0x001F2C00	btlUpdateUnitCommandEffect	inferred	U2
 0x001F2E20	btlDisableBattleFade	inferred	Twin of dds2 0x00203AB0; Sets battle-work fadeEnabled byte to zero. [names_R_FuncNames3.tsv]
-0x001F2E48	sndCreateClearStateTask	inferred	snd sound tasks and playback in game/code_0019DB88.c
+0x001F2E48	sndCreateClearStateTask	inferred	snd sound tasks and playback in game/code_001DEFE0.c
 0x001F2E90	btlEnableBattleFade	inferred	Twin of dds2 0x00203B20; Sets battle-work fadeEnabled byte to one. [names_R_FuncNames3.tsv]
-0x001F2EB8	sndCreateSetStateTask	inferred	snd sound tasks and playback in game/code_0019DB88.c
+0x001F2EB8	sndCreateSetStateTask	inferred	snd sound tasks and playback in game/code_001DEFE0.c
 0x001F3048	sndFreeBattleSoundEntries	inferred	loops D_0035F748 entries and frees the matching ctx+0x4B8 resource nodes
 0x001F30B8	btlCreateIndexedSoundResourceNode	inferred	Allocates a sound node and stores it at the indexed battle resource slot. [names_reviewed8.tsv]
 0x001F3188	btlUpdateJobPositionFromModel	inferred	Derives a model position and updates a positioned file job. [names_reviewed8.tsv]
@@ -4154,39 +4154,39 @@
 0x001F3430	btlAdvanceTitleStateTask	inferred	Twin of dds2 0x00204078; Task callback calls btlAdvanceTitleState. [names_R_FuncNames3.tsv]
 0x001F3448	btlAdvanceTitleStateWithAudioCleanupTask	inferred	Twin of dds2 0x00204090; Task callback calls btlAdvanceTitleStateWithAudioCleanup. [names_R_FuncNames3.tsv]
 0x001F3460	sndLoadAndPlayStationedSe	inferred	DDS2 002040A8 twin; loads id then plays stationed sound on success [names_R_FuncNames2.tsv]
-0x001F3498	sndPlayStationedSe	inferred	snd sound tasks and playback in game/code_0019DB88.c
-0x001F34E0	sndCreateStationedSeTask	inferred	snd sound tasks and playback in game/code_0019DB88.c
+0x001F3498	sndPlayStationedSe	inferred	snd sound tasks and playback in game/code_001DEFE0.c
+0x001F34E0	sndCreateStationedSeTask	inferred	snd sound tasks and playback in game/code_001DEFE0.c
 0x001F3548	sndHasFlaggedActiveNode	inferred	Traverses the battle sound-node list and tests its flag; uses existing snd sound subsystem prefix. [names_reviewed12.tsv]
-0x001F3690	sndCreateSkillSeTask	inferred	snd sound tasks and playback in game/code_0019DB88.c
+0x001F3690	sndCreateSkillSeTask	inferred	snd sound tasks and playback in game/code_001DEFE0.c
 0x001F3710	sndStartFileLoad	inferred	prints "btl:sound file load start[%s]" and starts the file read for the request
 0x001F3778	sndPollMotSeFileAndSpu	inferred	Logs motSE file and SPU loading stages, moves sound resource to SPU and releases the file handle when ready.
-0x001F3978	sndLoadDataFile	inferred	snd sound tasks and playback in game/code_0019DB88.c
+0x001F3978	sndLoadDataFile	inferred	snd sound tasks and playback in game/code_001DEFE0.c
 0x001F3A30	sndIsCommandBusySigned	inferred	DDS2 00204678 twin; reads sound busy status as signed byte [names_R_FuncNames2.tsv]
 0x001F3A58	sndHasResourceFlagsOneOrEight	inferred	DDS2 002046A0 twin; tests sound node flags bits 1 or 8 [names_R_FuncNames2.tsv]
 0x001F3A78	sndFormatResourceNameFromIndex	inferred	DDS2 002046C0 twin; formats indexed resource id using sound name template [names_R_FuncNames2.tsv]
 0x001F3AA8	sndFormatResourceNameFromUnitMode	inferred	DDS2 002046F0 twin; formats unit mode using sound name template [names_R_FuncNames2.tsv]
 0x001F3AD0	sndMapResourceType	inferred	Maps resource lookup values 1..25 into global model slot indices, rejecting zero and values >=26.
-0x001F3B38	sndAllocListNode	inferred	snd sound tasks and playback in game/code_0019DB88.c
-0x001F3B90	sndFreeListNode	inferred	snd sound tasks and playback in game/code_0019DB88.c
-0x001F3BF8	sndClearList	inferred	snd sound tasks and playback in game/code_0019DB88.c
+0x001F3B38	sndAllocListNode	inferred	snd sound tasks and playback in game/code_001DEFE0.c
+0x001F3B90	sndFreeListNode	inferred	snd sound tasks and playback in game/code_001DEFE0.c
+0x001F3BF8	sndClearList	inferred	snd sound tasks and playback in game/code_001DEFE0.c
 0x001F3CC8	sndLoadMotSeFiles	inferred	Builds and queues up to 29 motor sound filenames, recording handles and logging each load.
-0x001F3DF8	sndFindListNodeForChannel	inferred	snd sound tasks and playback in game/code_0019DB88.c
+0x001F3DF8	sndFindListNodeForChannel	inferred	snd sound tasks and playback in game/code_001DEFE0.c
 0x001F4038	sndReleaseAllSlotOwners	inferred	Byte-identical dds2 twin 0x00204CC8; walks list260 calling func_00204BD0 [names_conflicts.tsv]
 0x001F4078	btlStartMoveOtherUnitsTask	inferred	confidence=high; src/dds1/game/code_001A1960.c:func_001F4078; Creates the other-unit movement task and immediately starts it. [names_qp9.tsv]
-0x001F4098	sndHasActiveFileLoad	inferred	snd sound tasks and playback in game/code_0019DB88.c
+0x001F4098	sndHasActiveFileLoad	inferred	snd sound tasks and playback in game/code_001DEFE0.c
 0x001F40F0	btlQueueUnitSoundSlotFileLoad	inferred	Looks up a battle unit sound slot and requests its file when needed. [names_reviewed12.tsv]
 0x001F41C0	sndPollMotionSePlayback	inferred	U2
 0x001F4398	btlCreateMoveOtherUnitsTask	inferred	Twin of dds2 0x00207728; Allocates task 0x64 whose callback moves other units for selected category. [names_R_FuncNames3.tsv]
 0x001F4430	btlResetMotionSoundFrameCounters	inferred	Battle initialization resets the paired motion-sound frame counters to -1; the ATRAC3 motion-SE path checks one counter and DDS2 advances both. DDS2 twin 0x002050D0. [code-quality cleanup, 2026-10-13]
-0x001F4458	sndLoadBattleBank	inferred	snd sound tasks and playback in game/code_0019DB88.c
+0x001F4458	sndLoadBattleBank	inferred	snd sound tasks and playback in game/code_001DEFE0.c
 0x001F44C0	btlPollMotionSoundResources	inferred	Inferred from the current C implementation in game/code_001DEFE0.c; agent-proposed name checked against its owner, fields and callees (R1 finite names pass).
-0x001F4720	sndHasOccupiedNodeSlots	inferred	snd sound tasks and playback in game/code_0019DB88.c
-0x001F4798	sndFinishEarringPlayback	inferred	snd sound tasks and playback in game/code_0019DB88.c
-0x001F47E8	sndCreateEarringTask	inferred	snd sound tasks and playback in game/code_0019DB88.c
+0x001F4720	sndHasOccupiedNodeSlots	inferred	snd sound tasks and playback in game/code_001DEFE0.c
+0x001F4798	sndFinishEarringPlayback	inferred	snd sound tasks and playback in game/code_001DEFE0.c
+0x001F47E8	sndCreateEarringTask	inferred	snd sound tasks and playback in game/code_001DEFE0.c
 0x001F4950	sndCreateAtracEffectLoadTask	inferred	Creates task that loads indexed ATRAC sound-effect file and initializes playback state. [names_reviewed5.tsv]
 0x001F49D0	sndStartDeadAtracLoad	inferred	Fam
 0x001F4AA8	sndUpdateEarringDeadPlayback	inferred	Handles ATRAC3 dead-load completion and playback-end events; both named in retail log strings.
-0x001F4B98	sndFinishEarringPlaybackTask	inferred	snd sound tasks and playback in game/code_0019DB88.c
+0x001F4B98	sndFinishEarringPlaybackTask	inferred	snd sound tasks and playback in game/code_001DEFE0.c
 0x001F4C90	btlPlayStationedSe1C	inferred	Twin of dds2 0x00205930; Calls sndLoadAndPlayStationedSe with code 0x1C. [names_R_FuncNames3.tsv]
 0x001F4CF0	btlAdvanceTitleStateAfterSound	inferred	Twin of dds2 0x00205990; Task callback calls btlAdvanceTitleState. [names_R_FuncNames3.tsv]
 0x001F4D50	btlExpandPartyFormationAroundCenter	inferred	Inferred from the current C implementation in game/code_001DEFE0.c; agent-proposed name checked against its owner, fields and callees (R1 finite names pass).
@@ -10196,8 +10196,8 @@
 0x003BB18C	frTestFontHandle	inferred	SMT3HD name via SLUS_209.11 0x54F45C, SMT3 name; the font request test_font_Shutdown destroys; was D_003BB18C
 0x003BB190	itfFontTestScriptTask	inferred	confidence=high; src/dds1/game/code_00196478.c:D_003BB190; type=u32 task handle; refs=frTestFontInit,test_font_Process; Stores the font-test BF process task and is used to query task readiness in the test draw loop. [names_qp9.tsv]
 0x003BB1E8	itfMessageFlags	inferred	confidence=high; matched_users=src/dds1/interface/itfMesManager.c:itfMesClearFlags, src/dds1/interface/itfMesManager.c:itfMesSetFlags; Message flag setter/clearer update this shared bitmask. [names_qp9.tsv]
-0x003BB240	sndTestMessageResourceIndex	inferred	confidence=high; matched_users=src/dds1/game/code_0019DB88.c:TestMsgReloadTexture, src/dds1/game/code_0019DB88.c:TestMsgMngD_Process; Resource cycling advances this index modulo four; drawing skips its no-texture entry. [names_qp9.tsv]
-0x003BB244	sndTestMessageTexture	inferred	confidence=high; matched_users=src/dds1/game/code_0019DB88.c:TestMsgReloadTexture, src/dds1/game/code_0019DB88.c:TestMsgMngD_Process; Sound-test message resource cycling loads/releases this texture; the test-message draw task consumes it. [names_qp9.tsv]
+0x003BB240	sndTestMessageResourceIndex	inferred	confidence=high; matched_users=src/dds1/interface/itfTestMesManager.c:TestMsgReloadTexture, src/dds1/interface/itfTestMesManager.c:TestMsgMngD_Process; Resource cycling advances this index modulo four; drawing skips its no-texture entry. [names_qp9.tsv]
+0x003BB244	sndTestMessageTexture	inferred	confidence=high; matched_users=src/dds1/interface/itfTestMesManager.c:TestMsgReloadTexture, src/dds1/interface/itfTestMesManager.c:TestMsgMngD_Process; Sound-test message resource cycling loads/releases this texture; the test-message draw task consumes it. [names_qp9.tsv]
 0x003BB2E4	btlRuntime	inferred	high confidence; src/dds1/game/code_001A04C0.c btlUpdateActiveBattleFrame(): s32 state = D_003BB2E4; Battle runtime pointer guards frame updates and contains active-state flags and the frame counter. [names_reviewed26.tsv]
 0x003BB3A4	btlCommandPanelTaskNameRef	inferred	confidence=high; matched_users=src/dds1/game/code_001A1960.c:btlRecordListedLinkageSkills, src/dds1/game/code_001A1960.c:btlSetTaskPhase5; Initialized pointer targets native btl_panel_command; two users locate that task by name. [names_qp9.tsv]
 0x003BB3C8	btlMahenPanelTaskNameRef	inferred	confidence=high; matched_users=src/dds1/game/code_001A1960.c:btlIsNamedBattleTaskRegistered, src/dds1/game/code_001A1960.c:func_001AD1F8; Initialized pointer targets native bpnl_mahen_nm; registration and exit operations look up that task. [names_qp9.tsv]

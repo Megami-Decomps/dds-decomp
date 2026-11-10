@@ -4,7 +4,7 @@
 /*
  * Translation unit boundary recovered at btlCalculateHpActionAmount (twin of
  * DDS1 code_001A5C40). btlCheckSpecialAbility and btlGetActorEntryMultiplier
- * belong to the preceding unit (code_001A8748); the retail calls to them keep
+ * belong to the preceding unit (code_001AA868); the retail calls to them keep
  * their possibly-throwing (non-nothrow) shape, so they must stay external
  * here. A same-unit definition makes reorg's branch-slot liveness scan see
  * through the call and flips the delay-slot annulment of the neighbouring
