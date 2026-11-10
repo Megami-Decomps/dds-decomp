@@ -62,7 +62,7 @@ extern BtlAt3Entry D_003E0F60[];
 extern u32 D_00436AD4;
 extern struct BtlRuntimeTask *btlDeferredTaskHead;
 
-extern f32 btlMeasureFilteredUnitGroupBounds(s32, f32 *, f32 *);
+extern f32 btlMeasureMaskedUnitBounds(s32, f32 *, f32 *);
 
 
 extern char D_00436AE8[];
@@ -101,7 +101,7 @@ extern s32 D_00436AA0;
 
 extern void btlFlagMatchingUnitsDefeatCandidate(s32);
 
-extern f32 btlMeasureUnitIndexListBounds(BtlIndexList *, f32 *, f32 *);
+extern f32 btlMeasureIndexListBounds(BtlIndexList *, f32 *, f32 *);
 
 extern s16 D_00436AB0[];
 
@@ -363,7 +363,7 @@ s32 btlExpandPartyFormationAroundCenter(f32 *center) {
             }
         }
     }
-    btlMeasureFilteredUnitGroupBounds(0x400, 0, 0);
+    btlMeasureMaskedUnitBounds(0x400, 0, 0);
     SDF_VU0_STOREVECTOR_NOMEM(target);
     for (i = count - 1; i >= 0; i--) {
         unit = actors[i];
@@ -574,7 +574,7 @@ void btlPlaceTripleFormationAroundCenter(ActionStateLink *link, BtlUnit *first, 
     slot[link->unit->battleSideSlotIndex] = link->unit;
     slot[first->battleSideSlotIndex] = first;
     slot[second->battleSideSlotIndex] = second;
-    radius = btlMeasureFilteredUnitGroupBounds(0x400, 0, 0) + 200.0f;
+    radius = btlMeasureMaskedUnitBounds(0x400, 0, 0) + 200.0f;
     SDF_VU0_STOREVECTOR_NOMEM(center);
     pos[0] = center[0];
     pos[1] = 0.0f;
@@ -777,7 +777,7 @@ void btlOrientFrontAndBackUnitsTowardTargets(ActionStateLink *link, BtlUnit *a, 
     } else {
         effBTLModelGetSphereCenter(front);
         SDF_VU0_STOREVECTOR(vec[0]);
-        btlMeasureFilteredUnitGroupBounds(target->status.flags & 0x600, 0, 0);
+        btlMeasureMaskedUnitBounds(target->status.flags & 0x600, 0, 0);
         SDF_VU0_STOREVECTOR_NOMEM(vec[1]);
         if (btlAimHorizontalDirectionVU(vec[0], vec[1]) != 0) {
             SDF_VU0_STOREVECTOR_NOMEM(&rot);
@@ -918,7 +918,7 @@ void btlPlacePairedFormationAtFixedCenter(ActionStateLink *link, BtlUnit *other)
     if (btlGetIndexListCount(link->indexWork.indices) == 1) {
         effBTLModelGetSphereCenter((BtlUnit *)btlGetIndexListEntry(link->indexWork.indices, 0));
     } else {
-        btlMeasureUnitIndexListBounds(link->indexWork.indices, 0, 0);
+        btlMeasureIndexListBounds(link->indexWork.indices, 0, 0);
     }
     SDF_VU0_STOREVECTOR(muzzle);
     SDF_VU0_SETVECTOR_Y(0.0f);
@@ -1014,7 +1014,7 @@ void btlPlacePairedFormationNearTarget(ActionStateLink *link, BtlUnit *other) {
             effBTLModelGetSphereCenter(unit);
             reach = unit->reach * unit->scale;
         } else {
-            btlMeasureUnitIndexListBounds(link->indexWork.indices, 0, 0);
+            btlMeasureIndexListBounds(link->indexWork.indices, 0, 0);
             reach = 0.0f;
         }
         SDF_VU0_STOREVECTOR(muzzle);

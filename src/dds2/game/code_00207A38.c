@@ -202,7 +202,7 @@ extern void btlFlagUnitDefeatCandidate(BtlUnit *unit);
 extern void btlClearUnitDefeatCandidate(BtlUnit *unit);
 
 
-extern f32 btlMeasureUnitIndexListBounds(BtlIndexList *list, f32 *maxTop, f32 *minTop);
+extern f32 btlMeasureIndexListBounds(BtlIndexList *list, f32 *maxTop, f32 *minTop);
 
 extern void btlChoosePartyDerivedShadowSkill(ActionStateLink *actor);
 
@@ -427,7 +427,7 @@ f32 btlUnitGetBottomY(BtlUnit *unit) {
     return -position[1] - unit->height * unit->scale * 0.5f;
 }
 
-f32 btlMeasureFilteredUnitGroupBounds(s32 mask, f32 *outMaxTop, f32 *outMinTop) {
+f32 btlMeasureMaskedUnitBounds(s32 mask, f32 *outMaxTop, f32 *outMinTop) {
     f32 position[4];
     BtlUnit *unit;
     f32 scale;
@@ -767,7 +767,7 @@ f32 btlGetExtremeUnitY(u32 mask) {
     return extremeZ;
 }
 
-f32 btlMeasureUnitIndexListBounds(BtlIndexList *list, f32 *maxTop, f32 *minTop) {
+f32 btlMeasureIndexListBounds(BtlIndexList *list, f32 *maxTop, f32 *minTop) {
     f32 position[4];
     BtlUnit *unit;
     f32 scale;

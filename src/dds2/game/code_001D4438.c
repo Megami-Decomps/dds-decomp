@@ -422,7 +422,7 @@ extern BtlActionAnimationRecord *datActionAnimationRecords;
 
 extern void btlRunTask(BtlRuntimeTask *);
 
-extern f32 btlMeasureFilteredUnitGroupBounds(s32, f32 *, f32 *);
+extern f32 btlMeasureMaskedUnitBounds(s32, f32 *, f32 *);
 
 
 extern char D_004192E8[]; /* "MDD_%03X.ADB" */
@@ -4130,7 +4130,7 @@ void btlScheduleSummonActionTasks(ActionStateLink *action) {
         if (!(unit->status.flags & 0xE0)) {
             /* Audited SDK VU pipeline, as in btlUnitFaceTarget: only the
              * external aim routine consumes the two stored vectors. */
-            btlMeasureFilteredUnitGroupBounds(0x400, 0, 0);
+            btlMeasureMaskedUnitBounds(0x400, 0, 0);
             SDF_VU0_STOREVECTOR_NOMEM(center);
             btlUnitGetBodyPosVU(unit);
             SDF_VU0_STOREVECTOR_NOMEM(bodyPosition);

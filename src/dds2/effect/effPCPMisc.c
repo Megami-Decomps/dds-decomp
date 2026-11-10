@@ -2646,7 +2646,7 @@ extern u32 effBTLFieldColorGetVariantSelector(void);
 
 extern u32 effBTLSkillCheckRun(void);
 
-extern f32 btlMeasureFilteredUnitGroupBounds(s32 mask, f32 *maxTop, f32 *minTop);
+extern f32 btlMeasureMaskedUnitBounds(s32 mask, f32 *maxTop, f32 *minTop);
 
 extern u32 effBTLSkillGetInvokeFormation(void);
 
@@ -2670,7 +2670,7 @@ void effPcpUpdateOrbitingAimNode(EffPCPSpanWork *work) {
         return;
     }
     if (effBTLSkillCheckRun() && work->frame == 0) {
-        btlMeasureFilteredUnitGroupBounds(((BtlUnit *)effBTLFieldColorGetVariantSelector())->status.flags & 0x600, NULL, NULL);
+        btlMeasureMaskedUnitBounds(((BtlUnit *)effBTLFieldColorGetVariantSelector())->status.flags & 0x600, NULL, NULL);
         SDF_VU0_STOREVECTOR(center);
         effBTLModelGetSphereCenter((BtlUnit *)effBTLSkillGetInvokeFormation());
         SDF_VU0_STOREVECTOR(muzzle);

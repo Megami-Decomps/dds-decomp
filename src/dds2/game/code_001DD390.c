@@ -6283,7 +6283,7 @@ void btlDebugPrintWorldTransform(s32 x, s32 y) {
     }
 }
 
-extern f32 btlMeasureUnitIndexListBounds(BtlIndexList *, f32 *, f32 *);
+extern f32 btlMeasureIndexListBounds(BtlIndexList *, f32 *, f32 *);
 
 void btlFaceActionParticipantsTowardLinkedTarget(BtlLinkedCommand *action) {
     f32 vec[2][4] __attribute__((aligned(16)));
@@ -6302,7 +6302,7 @@ void btlFaceActionParticipantsTowardLinkedTarget(BtlLinkedCommand *action) {
             }
             effBTLModelGetSphereCenter(first);
         } else {
-            btlMeasureUnitIndexListBounds(action->targetList, 0, 0);
+            btlMeasureIndexListBounds(action->targetList, 0, 0);
         }
         pos = vec[1];
         SDF_VU0_STOREVECTOR(pos);
@@ -6333,7 +6333,7 @@ void btlAimLinkedUnitAtMuzzle(BtlLinkedCommand *action) {
         if (count == 1) {
             effBTLModelGetSphereCenter((BtlUnit *)btlGetIndexListEntry(action->targetList, 0));
         } else {
-            btlMeasureUnitIndexListBounds(action->targetList, 0, 0);
+            btlMeasureIndexListBounds(action->targetList, 0, 0);
         }
         pos = vec[1];
         SDF_VU0_STOREVECTOR(pos);

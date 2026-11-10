@@ -67,7 +67,7 @@ extern struct BtlRuntimeTask *btlDeferredTaskHead;
 
 extern u8 *datActionAnimationRecords;
 
-extern f32 btlMeasureFilteredUnitGroupBounds(s32, f32 *, f32 *);
+extern f32 btlMeasureMaskedUnitBounds(s32, f32 *, f32 *);
 
 extern void btlClearRuntimeFlag2000(void);
 
@@ -227,7 +227,7 @@ s32 btlCheckActorDistanceLimit(void) {
 }
 
 BtlEntryHeightLimitResult btlIsEntryHeightWithinLimit(void) {
-    if (btlMeasureFilteredUnitGroupBounds(BTL_UNIT_STATUS_FLAG_ENEMY, 0, 0) > 600.0f) {
+    if (btlMeasureMaskedUnitBounds(BTL_UNIT_STATUS_FLAG_ENEMY, 0, 0) > 600.0f) {
         return BTL_ENTRY_HEIGHT_LIMIT_RESULT_EXCEEDS_LIMIT;
     }
     return BTL_ENTRY_HEIGHT_LIMIT_RESULT_WITHIN_LIMIT;
