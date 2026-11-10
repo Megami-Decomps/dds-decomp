@@ -10215,6 +10215,7 @@
 0x003BD2B8	sdfDebugLogAppendMode	inferred	confidence=high; src/dds1/game/code_002CC750.c:sdfAppendFormattedDebugLogPair; Retail at mode used to open debug.log. [names_qp9.tsv]
 0x003BD2C0	sdfDebugLogPairFormat	inferred	confidence=high; src/dds1/game/code_002CC750.c:sdfAppendFormattedDebugLogPair; Retail %s %d newline format used for the two supplied debug-log values. [names_qp9.tsv]
 0x003BD2CC	sdfDmacHandlerTable	inferred	SMT3HD data name via SLUS_209.11 0x00551820, 5 agreeing references; was sdfDmacHandlerTable
+0x003BD2D0	sdfCoreDrawBuffSize	inferred	SMT3HD name via SLUS_209.11 0x00551824, sdf/sdfSystem SMT3 rename; was D_003BD2D0
 0x003BD2D4	sdfTickCallback	inferred	confidence=high; src/dds1/game/code_002CF8C8.c:sdfSystemThreadProc; Optional no-argument callback invoked by the recurring tick worker thread. [names_qp9.tsv]
 0x003BD2D8	sdfVblankFlag	inferred	SMT3HD data name via SLUS_209.11 0x0055182C, 3 agreeing references; was sdfVblankFlag
 0x003BD2DC	sdfMemFullCallback	inferred	SMT3HD name via SLUS_209.11 0x00551830, sdf/sdfMemory SMT3 name; was D_003BD2DC
@@ -10446,10 +10447,11 @@
 0x003BD960	effColorEditFadeInFrame	inferred	effEditColorTrack and the alpha range editor (func_002BB188): the fade-in boundary in frames, shown by the editor menu's rows. DDS2 0x00439080.
 0x003BD964	effColorEditFadeOutFrame	inferred	effEditColorTrack and the alpha range editor (func_002BB188): the fade-out boundary in frames, shown by the editor menu's rows. DDS2 0x00439084.
 0x003BD978	sdfCounterAnimationValue	inferred	high confidence; src/dds1/game/code_002C5FB8.c sdfCounterAdvanceBoundedAnimationValue(): if ((s32)D_003BD978 < 0x3C) { Counter-display animation value initialized to zero, advanced up to 60, and stepped down by two. [names_reviewed26.tsv]
+0x003BD990	sdfSystemThreadCB	inferred	SMT3HD name via SLUS_209.11 0x00552040, sdf/sdfSystem SMT3 rename; was D_003BD990
 0x003BD998	sdfThreadSema	inferred	SMT3HD data name via SLUS_209.11 0x00552048, 7 agreeing references; was sdfThreadSema
 0x003BD99C	sdfVblankThreadId	inferred	SMT3HD data name via SLUS_209.11 0x0055204C, 5 agreeing references; was sdfVblankThreadId
 0x003BD9A0	sdfVblankSema	inferred	SMT3HD data name via SLUS_209.11 0x00552050, 2 agreeing references; was sdfVblankSema
-0x003BD9A4	sdfSleepThreadId	inferred	confidence=high; src/dds1/game/code_002CFC18.c:sdfSetMainThreadPriority; Stores the current thread ID immediately before the calling thread sleeps. [names_qp9.tsv]
+0x003BD9A4	sdfMainThreadId	inferred	SMT3HD name via SLUS_209.11 0x00552054, sdf/sdfSystem SMT3 rename; was sdfSleepThreadId
 0x003BD9A8	sdfChipPageInfo	inferred	SMT3HD data name via SLUS_209.11 0x00552058, 3 agreeing references; was sdfChipPageInfo
 0x003BD9AC	sdfChipPageFreeLink	inferred	SMT3HD data name via SLUS_209.11 0x0055205C, 6 agreeing references; was sdfChipPageFreeLink
 0x003BD9B0	sdfChipPageTop	inferred	SMT3HD data name via SLUS_209.11 0x00552060, 3 agreeing references; was sdfChipPageTop
@@ -10624,6 +10626,8 @@
 0x003DF9A0	effSelectedJobHeader	inferred	The selected queue entry's first 0x80 bytes (its FileJob transform, scale and colour), copied when the preview job is made and read by the battle camera placement. DDS2 twin 0x0045C270.
 0x003DFA40	effColorEditColorTrack	inferred	effEditColorTrack: its working copy of the edited SdfColorTrack, which the editor menu's rows also edit; written back each frame. DDS2 0x0045C310.
 0x003DFA68	effColorEditAlphaTrack	inferred	effEditColorTrack and the alpha range editor (func_002BB188): the working copy of the edited SdfAlphaTrack, which the editor menu's rows also edit; written back each frame. DDS2 0x0045C338.
+0x003DFEF0	sdfSystemThreadStack	inferred	SMT3HD name via SLUS_209.11 0x005756C0, sdf/sdfSystem SMT3 rename; was D_003DFEF0
+0x003E1EF0	sdfVblankThreadStack	inferred	SMT3HD name via SLUS_209.11 0x005776C0, sdf/sdfSystem SMT3 rename; was D_003E1EF0
 0x003E26F0	sdfChipCB	inferred	SMT3HD data name via SLUS_209.11 0x00577EC0, 3 agreeing references; was sdfChipCB
 0x003E2748	sdfMemCB	inferred	SMT3HD data name via SLUS_209.11 0x00577F18, 5 agreeing references; was sdfMemCB
 0x003E2770	sdfIopRpcClient	inferred	SMT3HD data name via SLUS_209.11 0x00577F40, 1 agreeing references; was sdfIopRpcClient

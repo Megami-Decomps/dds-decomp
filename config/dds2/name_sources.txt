@@ -10898,6 +10898,7 @@
 0x004389AC	mnuRuntimeWorkHitCallback	inferred	Callback stored by mnuSetRuntimeWorkHitCallback and invoked for overlapping work/runtime records; default points to mnuRuntimeWorkHitNoOp.
 0x004389B0	mnuRuntimeRecordPairCallback	inferred	Callback stored by mnuSetRuntimeRecordPairCallback and invoked for a runtime-record pair; default points to mnuRuntimeRecordPairNoOp.
 0x004389BC	sdfDmacHandlerTable	inferred	SMT3HD data name via SLUS_209.11 0x00551820, 5 agreeing references; was sdfDmacHandlerTable
+0x004389C0	sdfCoreDrawBuffSize	inferred	SMT3HD name via SLUS_209.11 0x00551824, sdf/sdfSystem SMT3 rename; was D_004389C0
 0x004389C8	sdfVblankFlag	inferred	SMT3HD data name via SLUS_209.11 0x0055182C, 3 agreeing references; was sdfVblankFlag
 0x004389CC	sdfMemFullCallback	inferred	SMT3HD name via SLUS_209.11 0x00551830, sdf/sdfMemory SMT3 name; was D_004389CC
 0x004389D0	sdfGrDrawFirstFlag	inferred	SMT3HD data name via SLUS_209.11 0x00551838, 3 agreeing references; was sdfGrDrawFirstFlag
@@ -11139,9 +11140,11 @@
 0x004390E0	mnuMovementRecordTableSetupCount	inferred	Count word supplied to mnuBindMovementRecordTable; retained but not checked by the getter.
 0x004390E4	mnuMenuRegistryParametersBase	inferred	Base pointer set by mnuBindMenuRegistryParameters and indexed by low 8 bits as 0x30-byte MenuRegistryParameters rows.
 0x004390E8	mnuMenuRegistryParametersSetupCount	inferred	The binder stores its supplied count in the first u32 of this existing 8-byte symbol; the trailing word is unknown, and the getter does not check this count.
+0x004390F0	sdfSystemThreadCB	inferred	SMT3HD name via SLUS_209.11 0x00552040, sdf/sdfSystem SMT3 rename; was D_004390F0
 0x004390F8	sdfThreadSema	inferred	SMT3HD data name via SLUS_209.11 0x00552048, 7 agreeing references; was sdfThreadSema
 0x004390FC	sdfVblankThreadId	inferred	SMT3HD data name via SLUS_209.11 0x0055204C, 5 agreeing references; was sdfVblankThreadId
 0x00439100	sdfVblankSema	inferred	SMT3HD data name via SLUS_209.11 0x00552050, 2 agreeing references; was sdfVblankSema
+0x00439104	sdfMainThreadId	inferred	SMT3HD name via SLUS_209.11 0x00552054, sdf/sdfSystem SMT3 rename; was sdfSleepThreadId
 0x00439108	sdfChipPageInfo	inferred	SMT3HD data name via SLUS_209.11 0x00552058, 3 agreeing references; was sdfChipPageInfo
 0x0043910C	sdfChipPageFreeLink	inferred	SMT3HD data name via SLUS_209.11 0x0055205C, 6 agreeing references; was sdfChipPageFreeLink
 0x00439110	sdfChipPageTop	inferred	SMT3HD data name via SLUS_209.11 0x00552060, 3 agreeing references; was sdfChipPageTop
@@ -11324,6 +11327,8 @@
 0x0045C866	mnuStepCounterThreshold	inferred	confidence=high; src/dds2/game/code_00320FD0.c:func_003212A8; Threshold byte compared with accumulated step total; aliases byte +6 of the opaque sixteen-byte parameter block. [names_qp9.tsv]
 0x0045C870	mnuRuntimeHitTargetList	inferred	confidence=high; zeroed MenuRuntimeList header bound to record storage; used by mnuGetRuntimeHitTargetList and mnuAdvanceRuntimeHitTargets. Pair: mnuRuntimeAnimationList in code_00321500.c.
 0x0045C880	mnuRuntimeAnimationList	inferred	confidence=high; zeroed MenuRuntimeList header bound to record storage; used by mnuGetRuntimeAnimationList and mnuAdvanceRuntimeAnimationRecords. Pair: mnuRuntimeHitTargetList in code_00321500.c.
+0x0045C8A0	sdfSystemThreadStack	inferred	SMT3HD name via SLUS_209.11 0x005756C0, sdf/sdfSystem SMT3 rename; was D_0045C8A0
+0x0045E8A0	sdfVblankThreadStack	inferred	SMT3HD name via SLUS_209.11 0x005776C0, sdf/sdfSystem SMT3 rename; was D_0045E8A0
 0x0045F0A0	sdfChipCB	inferred	SMT3HD data name via SLUS_209.11 0x00577EC0, 3 agreeing references; was sdfChipCB
 0x0045F0F8	sdfMemCB	inferred	SMT3HD data name via SLUS_209.11 0x00577F18, 5 agreeing references; was sdfMemCB
 0x0045F120	sdfIopRpcClient	inferred	SMT3HD data name via SLUS_209.11 0x00577F40, 1 agreeing references; was sdfIopRpcClient

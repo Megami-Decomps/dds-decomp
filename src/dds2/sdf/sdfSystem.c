@@ -5,12 +5,12 @@
 #include "basic.h"
 #include "motion.h"
 
-#define D_00551824 D_004389C0
-#define D_00552040 D_004390F0
-#define D_005756C0 D_0045C8A0
-#define D_005776C0 D_0045E8A0
+#define D_00551824 sdfCoreDrawBuffSize
+#define D_00552040 sdfSystemThreadCB
+#define D_005756C0 sdfSystemThreadStack
+#define D_005776C0 sdfVblankThreadStack
 #define D_00551828 sdfTickCallback
-#define D_00552054 sdfSleepThreadId
+#define D_00552054 sdfMainThreadId
 #define sdf_2A8258 sdfFreeMemorySlotFromEitherHeap
 #define sdf_2A84D8 sdfDrainPendingHandlers
 #define func_002A8758 sdfDeleteTrackedThread
