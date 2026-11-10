@@ -1,0 +1,195 @@
+// Data words splat would write as a symbol but that hold plain numbers (falselabels.py in
+// dds-conform-work): masks, packed u16 pairs, text and machine code kept as data.
+rom:0x28B740 reloc:MIPS_NONE symbol:none // 0038A740 outside: 0x00FFFFFF, not D_FFFFFF
+rom:0x2B53D8 reloc:MIPS_NONE symbol:none // 003B43D8 outside: 0x00004000, not D_4000
+rom:0x2B53DC reloc:MIPS_NONE symbol:none // 003B43DC outside: 0x00004000, not D_4000
+rom:0x2B53E0 reloc:MIPS_NONE symbol:none // 003B43E0 outside: 0x00004000, not D_4000
+rom:0x2B54E8 reloc:MIPS_NONE symbol:none // 003B44E8 outside: 0x000FFFFF, not D_FFFFF
+rom:0x2B54EC reloc:MIPS_NONE symbol:none // 003B44EC outside: 0x000FFFFF, not D_FFFFF
+rom:0x2B54F0 reloc:MIPS_NONE symbol:none // 003B44F0 outside: 0x000FFFFF, not D_FFFFF
+rom:0x2B6008 reloc:MIPS_NONE symbol:none // 003B5008 outside: 0x00004000, not D_4000
+rom:0x2F3224 reloc:MIPS_NONE symbol:none // 003F2224 outside: 0x00FFFFFF, not D_FFFFFF
+rom:0x2F3694 reloc:MIPS_NONE symbol:none // 003F2694 outside: 0x00FFFFFF, not D_FFFFFF
+rom:0x2F3B84 reloc:MIPS_NONE symbol:none // 003F2B84 outside: 0x00FFFFFF, not D_FFFFFF
+rom:0x2F46D4 reloc:MIPS_NONE symbol:none // 003F36D4 outside: 0x00FFFFFF, not D_FFFFFF
+rom:0x2F80E4 reloc:MIPS_NONE symbol:none // 003F70E4 outside: 0x00FFFFFF, not D_FFFFFF
+rom:0x2F8724 reloc:MIPS_NONE symbol:none // 003F7724 outside: 0x00FFFFFF, not D_FFFFFF
+rom:0x2F8D14 reloc:MIPS_NONE symbol:none // 003F7D14 outside: 0x00FFFFFF, not D_FFFFFF
+rom:0x2FC3A8 reloc:MIPS_NONE symbol:none // 003FB3A8 outside: 0x00FFFFFF, not D_FFFFFF
+rom:0x2FC3C0 reloc:MIPS_NONE symbol:none // 003FB3C0 outside: 0x00FFFFFF, not D_FFFFFF
+rom:0x2FC510 reloc:MIPS_NONE symbol:none // 003FB510 outside: 0x00FFFFFF, not D_FFFFFF
+rom:0x2FC528 reloc:MIPS_NONE symbol:none // 003FB528 outside: 0x00FFFFFF, not D_FFFFFF
+rom:0x300194 reloc:MIPS_NONE symbol:none // 003FF194 outside: 0x00FFFFFF, not D_FFFFFF
+rom:0x3001AC reloc:MIPS_NONE symbol:none // 003FF1AC outside: 0x00FFFFFF, not D_FFFFFF
+rom:0x3001FC reloc:MIPS_NONE symbol:none // 003FF1FC outside: 0x00FFFFFF, not D_FFFFFF
+rom:0x300214 reloc:MIPS_NONE symbol:none // 003FF214 outside: 0x00FFFFFF, not D_FFFFFF
+rom:0x300264 reloc:MIPS_NONE symbol:none // 003FF264 outside: 0x00FFFFFF, not D_FFFFFF
+rom:0x30027C reloc:MIPS_NONE symbol:none // 003FF27C outside: 0x00FFFFFF, not D_FFFFFF
+rom:0x3002CC reloc:MIPS_NONE symbol:none // 003FF2CC outside: 0x00FFFFFF, not D_FFFFFF
+rom:0x3002E4 reloc:MIPS_NONE symbol:none // 003FF2E4 outside: 0x00FFFFFF, not D_FFFFFF
+rom:0x300334 reloc:MIPS_NONE symbol:none // 003FF334 outside: 0x00FFFFFF, not D_FFFFFF
+rom:0x30034C reloc:MIPS_NONE symbol:none // 003FF34C outside: 0x00FFFFFF, not D_FFFFFF
+rom:0x30053C reloc:MIPS_NONE symbol:none // 003FF53C outside: 0x00FFFFFF, not D_FFFFFF
+rom:0x300554 reloc:MIPS_NONE symbol:none // 003FF554 outside: 0x00FFFFFF, not D_FFFFFF
+rom:0x30056C reloc:MIPS_NONE symbol:none // 003FF56C outside: 0x00FFFFFF, not D_FFFFFF
+rom:0x30070C reloc:MIPS_NONE symbol:none // 003FF70C outside: 0x00FFFFFF, not D_FFFFFF
+rom:0x30078C reloc:MIPS_NONE symbol:none // 003FF78C outside: 0x00FFFFFF, not D_FFFFFF
+rom:0x3007A4 reloc:MIPS_NONE symbol:none // 003FF7A4 outside: 0x00FFFFFF, not D_FFFFFF
+rom:0x3007BC reloc:MIPS_NONE symbol:none // 003FF7BC outside: 0x00FFFFFF, not D_FFFFFF
+rom:0x3007D4 reloc:MIPS_NONE symbol:none // 003FF7D4 outside: 0x00FFFFFF, not D_FFFFFF
+rom:0x3007EC reloc:MIPS_NONE symbol:none // 003FF7EC outside: 0x00FFFFFF, not D_FFFFFF
+rom:0x300804 reloc:MIPS_NONE symbol:none // 003FF804 outside: 0x00FFFFFF, not D_FFFFFF
+rom:0x30081C reloc:MIPS_NONE symbol:none // 003FF81C outside: 0x00FFFFFF, not D_FFFFFF
+rom:0x300834 reloc:MIPS_NONE symbol:none // 003FF834 outside: 0x00FFFFFF, not D_FFFFFF
+rom:0x30084C reloc:MIPS_NONE symbol:none // 003FF84C outside: 0x00FFFFFF, not D_FFFFFF
+rom:0x300864 reloc:MIPS_NONE symbol:none // 003FF864 outside: 0x00FFFFFF, not D_FFFFFF
+rom:0x30087C reloc:MIPS_NONE symbol:none // 003FF87C outside: 0x00FFFFFF, not D_FFFFFF
+rom:0x300894 reloc:MIPS_NONE symbol:none // 003FF894 outside: 0x00FFFFFF, not D_FFFFFF
+rom:0x3008AC reloc:MIPS_NONE symbol:none // 003FF8AC outside: 0x00FFFFFF, not D_FFFFFF
+rom:0x3008C4 reloc:MIPS_NONE symbol:none // 003FF8C4 outside: 0x00FFFFFF, not D_FFFFFF
+rom:0x3008DC reloc:MIPS_NONE symbol:none // 003FF8DC outside: 0x00FFFFFF, not D_FFFFFF
+rom:0x300984 reloc:MIPS_NONE symbol:none // 003FF984 outside: 0x00FFFFFF, not D_FFFFFF
+rom:0x300C6C reloc:MIPS_NONE symbol:none // 003FFC6C outside: 0x00FFFFFF, not D_FFFFFF
+rom:0x300CFC reloc:MIPS_NONE symbol:none // 003FFCFC outside: 0x00FFFFFF, not D_FFFFFF
+rom:0x30C7D4 reloc:MIPS_NONE symbol:none // 0040B7D4 outside: 0x0000FFFF, not D_FFFF
+rom:0x30C998 reloc:MIPS_NONE symbol:none // 0040B998 outside: 0x80000080, not D_80000080
+rom:0x30F650 reloc:MIPS_NONE symbol:none // 0040E650 outside: 0x0000FFFF, not D_FFFF
+rom:0x31AC18 reloc:MIPS_NONE symbol:none // 00419C18 outside: 0x00004000, not D_4000
+rom:0x31AD20 reloc:MIPS_NONE symbol:none // 00419D20 outside: 0x00FFFFFF, not D_FFFFFF
+rom:0x31AD28 reloc:MIPS_NONE symbol:none // 00419D28 outside: 0x00FFFFFF, not D_FFFFFF
+rom:0x31AD30 reloc:MIPS_NONE symbol:none // 00419D30 outside: 0x00FFFFFF, not D_FFFFFF
+rom:0x31AD38 reloc:MIPS_NONE symbol:none // 00419D38 outside: 0x00FFFFFF, not D_FFFFFF
+rom:0x31AD40 reloc:MIPS_NONE symbol:none // 00419D40 outside: 0x00FFFFFF, not D_FFFFFF
+rom:0x31AD48 reloc:MIPS_NONE symbol:none // 00419D48 outside: 0x00FFFFFF, not D_FFFFFF
+rom:0x31AD50 reloc:MIPS_NONE symbol:none // 00419D50 outside: 0x00FFFFFF, not D_FFFFFF
+rom:0x31AD58 reloc:MIPS_NONE symbol:none // 00419D58 outside: 0x00FFFFFF, not D_FFFFFF
+rom:0x31AD60 reloc:MIPS_NONE symbol:none // 00419D60 outside: 0x00FFFFFF, not D_FFFFFF
+rom:0x31AD68 reloc:MIPS_NONE symbol:none // 00419D68 outside: 0x00FFFFFF, not D_FFFFFF
+rom:0x31AD70 reloc:MIPS_NONE symbol:none // 00419D70 outside: 0x00FFFFFF, not D_FFFFFF
+rom:0x31AD78 reloc:MIPS_NONE symbol:none // 00419D78 outside: 0x00FFFFFF, not D_FFFFFF
+rom:0x31AD80 reloc:MIPS_NONE symbol:none // 00419D80 outside: 0x00FFFFFF, not D_FFFFFF
+rom:0x31AD88 reloc:MIPS_NONE symbol:none // 00419D88 outside: 0x00FFFFFF, not D_FFFFFF
+rom:0x31AD90 reloc:MIPS_NONE symbol:none // 00419D90 outside: 0x00FFFFFF, not D_FFFFFF
+rom:0x31AD98 reloc:MIPS_NONE symbol:none // 00419D98 outside: 0x00FFFFFF, not D_FFFFFF
+rom:0x337B5C reloc:MIPS_NONE symbol:none // 00436B5C outside: 0x80000080, not D_80000080
+rom:0x310700 reloc:MIPS_NONE symbol:none // 0040F700 code: 0x00461024, not D_00461024
+rom:0x310708 reloc:MIPS_NONE symbol:none // 0040F708 code: 0x00471025, not corePktFaceList + 0x8E15
+rom:0x31093C reloc:MIPS_NONE symbol:none // 0040F93C code: 0x00441024, not D_00441024
+rom:0x310940 reloc:MIPS_NONE symbol:none // 0040F940 code: 0x00431024, not D_00431024
+rom:0x310970 reloc:MIPS_NONE symbol:none // 0040F970 code: 0x00462823, not D_00462823
+rom:0x310A1C reloc:MIPS_NONE symbol:none // 0040FA1C code: 0x00461823, not D_00461823
+rom:0x310CAC reloc:MIPS_NONE symbol:none // 0040FCAC code: 0x00451021, not D_00451021
+rom:0x2DE600 reloc:MIPS_NONE symbol:none // 003DD600 ascii: 0x00303130, not effQueueGeneratedFileJob
+rom:0x2DE6DC reloc:MIPS_NONE symbol:none // 003DD6DC ascii: 0x00363230, not func_00363230
+rom:0x2DE8BC reloc:MIPS_NONE symbol:none // 003DD8BC ascii: 0x00363530, not func_00363530
+rom:0x2DE9FC reloc:MIPS_NONE symbol:none // 003DD9FC ascii: 0x00363730, not func_00363730
+rom:0x2DEB14 reloc:MIPS_NONE symbol:none // 003DDB14 ascii: 0x00323930, not mnuSetRuntimeWorkHitCallback
+rom:0x2DEBDC reloc:MIPS_NONE symbol:none // 003DDBDC ascii: 0x00366130, not VSync
+rom:0x2DEC7C reloc:MIPS_NONE symbol:none // 003DDC7C ascii: 0x00366230, not func_00366230
+rom:0x2DED1C reloc:MIPS_NONE symbol:none // 003DDD1C ascii: 0x00366330, not func_00366330
+rom:0x2DEE5C reloc:MIPS_NONE symbol:none // 003DDE5C ascii: 0x00366530, not func_00366530
+rom:0x2DEEFC reloc:MIPS_NONE symbol:none // 003DDEFC ascii: 0x00366630, not _sceIDC
+rom:0x2E1A00 reloc:MIPS_NONE symbol:none // 003E0A00 ascii: 0x00454953, not D_00454953
+rom:0x2E1A64 reloc:MIPS_NONE symbol:none // 003E0A64 ascii: 0x00444C52, not D_00444C52
+rom:0x2E1A78 reloc:MIPS_NONE symbol:none // 003E0A78 ascii: 0x0043494D, not D_0043494C + 0x1
+rom:0x2E1A8C reloc:MIPS_NONE symbol:none // 003E0A8C ascii: 0x00464153, not D_00464153
+rom:0x2E1ADC reloc:MIPS_NONE symbol:none // 003E0ADC ascii: 0x00464153, not D_00464153
+rom:0x3111D8 reloc:MIPS_NONE symbol:none // 004101D8 ascii: 0x00462821, not D_00462821
+rom:0x31486C reloc:MIPS_NONE symbol:none // 0041386C ascii: 0x00413848, not D_00413848
+rom:0x32459C reloc:MIPS_NONE symbol:none // 0042359C ascii: 0x00454D41, not D_00454D41
+rom:0x32477C reloc:MIPS_NONE symbol:none // 0042377C ascii: 0x00454741, not D_00454741
+rom:0x29AFF0 reloc:MIPS_NONE symbol:none // 00399FF0 round: 0x00400000, not D_00400000
+rom:0x29AFF4 reloc:MIPS_NONE symbol:none // 00399FF4 round: 0x00400000, not D_00400000
+rom:0x29AFF8 reloc:MIPS_NONE symbol:none // 00399FF8 round: 0x00410000, not D_00410000
+rom:0x29AFFC reloc:MIPS_NONE symbol:none // 00399FFC round: 0x00420000, not D_00420000
+rom:0x29B000 reloc:MIPS_NONE symbol:none // 0039A000 round: 0x00430000, not D_00430000
+rom:0x29B004 reloc:MIPS_NONE symbol:none // 0039A004 round: 0x00440000, not D_00440000
+rom:0x29B008 reloc:MIPS_NONE symbol:none // 0039A008 round: 0x00450000, not D_00450000
+rom:0x29B00C reloc:MIPS_NONE symbol:none // 0039A00C round: 0x00460000, not D_00460000
+rom:0x29B010 reloc:MIPS_NONE symbol:none // 0039A010 round: 0x00470000, not corePktFaceList + 0x7DF0
+rom:0x29B014 reloc:MIPS_NONE symbol:none // 0039A014 round: 0x00480000, not D_00480000
+rom:0x29B090 reloc:MIPS_NONE symbol:none // 0039A090 round: 0x00400000, not D_00400000
+rom:0x29B094 reloc:MIPS_NONE symbol:none // 0039A094 round: 0x00400000, not D_00400000
+rom:0x29B098 reloc:MIPS_NONE symbol:none // 0039A098 round: 0x00400000, not D_00400000
+rom:0x29B09C reloc:MIPS_NONE symbol:none // 0039A09C round: 0x00400000, not D_00400000
+rom:0x29B0A0 reloc:MIPS_NONE symbol:none // 0039A0A0 round: 0x00400000, not D_00400000
+rom:0x29B0A4 reloc:MIPS_NONE symbol:none // 0039A0A4 round: 0x00400000, not D_00400000
+rom:0x29B0A8 reloc:MIPS_NONE symbol:none // 0039A0A8 round: 0x00400000, not D_00400000
+rom:0x29B0AC reloc:MIPS_NONE symbol:none // 0039A0AC round: 0x00400000, not D_00400000
+rom:0x29B0B0 reloc:MIPS_NONE symbol:none // 0039A0B0 round: 0x00400000, not D_00400000
+rom:0x29B0B4 reloc:MIPS_NONE symbol:none // 0039A0B4 round: 0x00400000, not D_00400000
+rom:0x2BF8D4 reloc:MIPS_NONE symbol:none // 003BE8D4 round: 0x00400000, not D_00400000
+rom:0x2C14FC reloc:MIPS_NONE symbol:none // 003C04FC round: 0x00400000, not D_00400000
+rom:0x2C7108 reloc:MIPS_NONE symbol:none // 003C6108 round: 0x00420000, not D_00420000
+rom:0x2C7648 reloc:MIPS_NONE symbol:none // 003C6648 round: 0x00100000, not func_00100000
+rom:0x2CAEC8 reloc:MIPS_NONE symbol:none // 003C9EC8 round: 0x00100000, not func_00100000
+rom:0x2CB1E0 reloc:MIPS_NONE symbol:none // 003CA1E0 round: 0x00100000, not func_00100000
+rom:0x2CB4F8 reloc:MIPS_NONE symbol:none // 003CA4F8 round: 0x00100000, not func_00100000
+rom:0x2CB528 reloc:MIPS_NONE symbol:none // 003CA528 round: 0x003C0000, not D_003C0000
+rom:0x2CB7D4 reloc:MIPS_NONE symbol:none // 003CA7D4 round: 0x003D0000, not D_003D0000
+rom:0x2CB7F4 reloc:MIPS_NONE symbol:none // 003CA7F4 round: 0x00100000, not func_00100000
+rom:0x2DAD98 reloc:MIPS_NONE symbol:none // 003D9D98 round: 0x00400000, not D_00400000
+rom:0x2DADA0 reloc:MIPS_NONE symbol:none // 003D9DA0 round: 0x00410000, not D_00410000
+rom:0x2DADA8 reloc:MIPS_NONE symbol:none // 003D9DA8 round: 0x00420000, not D_00420000
+rom:0x2DADB0 reloc:MIPS_NONE symbol:none // 003D9DB0 round: 0x00430000, not D_00430000
+rom:0x2DADB8 reloc:MIPS_NONE symbol:none // 003D9DB8 round: 0x00440000, not D_00440000
+rom:0x2DADC0 reloc:MIPS_NONE symbol:none // 003D9DC0 round: 0x00450000, not D_00450000
+rom:0x2DADC8 reloc:MIPS_NONE symbol:none // 003D9DC8 round: 0x00460000, not D_00460000
+rom:0x2DADD0 reloc:MIPS_NONE symbol:none // 003D9DD0 round: 0x00470000, not corePktFaceList + 0x7DF0
+rom:0x2DADD8 reloc:MIPS_NONE symbol:none // 003D9DD8 round: 0x00480000, not D_00480000
+rom:0x3016AC reloc:MIPS_NONE symbol:none // 004006AC round: 0x00400000, not D_00400000
+rom:0x311ABC reloc:MIPS_NONE symbol:none // 00410ABC round: 0x00100000, not func_00100000
+rom:0x311AEC reloc:MIPS_NONE symbol:none // 00410AEC round: 0x00400000, not D_00400000
+rom:0x330C08 reloc:MIPS_NONE symbol:none // 0042FC08 round: 0x00100000, not func_00100000
+rom:0x3399C0 reloc:MIPS_NONE symbol:none // 004389C0 round: 0x00100000, not func_00100000
+rom:0x2C7968 reloc:MIPS_NONE symbol:none // 003C6968 packed-bss: 0x00440001, not D_00440001
+rom:0x2C7970 reloc:MIPS_NONE symbol:none // 003C6970 packed-bss: 0x00450001, not D_00450001
+rom:0x2C7978 reloc:MIPS_NONE symbol:none // 003C6978 packed-bss: 0x00460001, not D_00460001
+rom:0x2C7980 reloc:MIPS_NONE symbol:none // 003C6980 packed-bss: 0x00470001, not corePktFaceList + 0x7DF1
+rom:0x2C7988 reloc:MIPS_NONE symbol:none // 003C6988 packed-bss: 0x00480001, not D_00480001
+rom:0x2C8568 reloc:MIPS_NONE symbol:none // 003C7568 packed-bss: 0x00440006, not D_00440006
+rom:0x2C8570 reloc:MIPS_NONE symbol:none // 003C7570 packed-bss: 0x00450006, not D_00450006
+rom:0x2C8578 reloc:MIPS_NONE symbol:none // 003C7578 packed-bss: 0x00460006, not D_00460006
+rom:0x2C8580 reloc:MIPS_NONE symbol:none // 003C7580 packed-bss: 0x00470006, not corePktFaceList + 0x7DF6
+rom:0x2C8588 reloc:MIPS_NONE symbol:none // 003C7588 packed-bss: 0x00480006, not D_00480006
+rom:0x2C9268 reloc:MIPS_NONE symbol:none // 003C8268 packed-bss: 0x00440003, not D_00440003
+rom:0x2C9270 reloc:MIPS_NONE symbol:none // 003C8270 packed-bss: 0x00450003, not D_00450003
+rom:0x2C9278 reloc:MIPS_NONE symbol:none // 003C8278 packed-bss: 0x00460003, not D_00460003
+rom:0x2C9280 reloc:MIPS_NONE symbol:none // 003C8280 packed-bss: 0x00470003, not corePktFaceList + 0x7DF3
+rom:0x2C9288 reloc:MIPS_NONE symbol:none // 003C8288 packed-bss: 0x00480003, not D_00480003
+rom:0x311A80 reloc:MIPS_NONE symbol:none // 00410A80 packed-bss: 0x00440017, not D_00440017
+rom:0x311A90 reloc:MIPS_NONE symbol:none // 00410A90 packed-bss: 0x00480017, not D_00480017
+rom:0x328250 reloc:MIPS_NONE symbol:none // 00427250 packed-bss: 0x00480034, not D_00480034
+rom:0x3282BC reloc:MIPS_NONE symbol:none // 004272BC packed-bss: 0x00480034, not D_00480034
+rom:0x328440 reloc:MIPS_NONE symbol:none // 00427440 packed-bss: 0x00440015, not D_00440015
+rom:0x3284A0 reloc:MIPS_NONE symbol:none // 004274A0 packed-bss: 0x00440015, not D_00440015
+rom:0x2C7738 reloc:MIPS_NONE symbol:none // 003C6738 packed-twin: 0x002E0000, not effAllocateAlternateKindWork
+rom:0x2C7920 reloc:MIPS_NONE symbol:none // 003C6920 packed-twin: 0x003B0001, not D_003B0000 + 0x1
+rom:0x2C7928 reloc:MIPS_NONE symbol:none // 003C6928 packed-twin: 0x003C0001, not D_003C0000 + 0x1
+rom:0x2C7930 reloc:MIPS_NONE symbol:none // 003C6930 packed-twin: 0x003D0001, not D_003D0000 + 0x1
+rom:0x2C7938 reloc:MIPS_NONE symbol:none // 003C6938 packed-twin: 0x003E0001, not D_003E0000 + 0x1
+rom:0x2C7940 reloc:MIPS_NONE symbol:none // 003C6940 packed-twin: 0x003F0001, not D_003F0000 + 0x1
+rom:0x2C7948 reloc:MIPS_NONE symbol:none // 003C6948 packed-twin: 0x00400001, not D_00400000 + 0x1
+rom:0x2C7950 reloc:MIPS_NONE symbol:none // 003C6950 packed-twin: 0x00410001, not D_00410000 + 0x1
+rom:0x2C7958 reloc:MIPS_NONE symbol:none // 003C6958 packed-twin: 0x00420001, not D_00420000 + 0x1
+rom:0x2C7960 reloc:MIPS_NONE symbol:none // 003C6960 packed-twin: 0x00430001, not D_00430000 + 0x1
+rom:0x2C9020 reloc:MIPS_NONE symbol:none // 003C8020 packed-twin: 0x003B0002, not D_003B0000 + 0x2
+rom:0x2C9028 reloc:MIPS_NONE symbol:none // 003C8028 packed-twin: 0x003C0002, not D_003C0000 + 0x2
+rom:0x2C9030 reloc:MIPS_NONE symbol:none // 003C8030 packed-twin: 0x003D0002, not D_003D0000 + 0x2
+rom:0x2C9038 reloc:MIPS_NONE symbol:none // 003C8038 packed-twin: 0x003E0002, not D_003E0000 + 0x2
+rom:0x2C9040 reloc:MIPS_NONE symbol:none // 003C8040 packed-twin: 0x003F0002, not D_003F0000 + 0x2
+rom:0x2C9220 reloc:MIPS_NONE symbol:none // 003C8220 packed-twin: 0x003B0003, not D_003B0000 + 0x3
+rom:0x2C9228 reloc:MIPS_NONE symbol:none // 003C8228 packed-twin: 0x003C0003, not D_003C0000 + 0x3
+rom:0x2C9230 reloc:MIPS_NONE symbol:none // 003C8230 packed-twin: 0x003D0003, not D_003D0000 + 0x3
+rom:0x2C9238 reloc:MIPS_NONE symbol:none // 003C8238 packed-twin: 0x003E0003, not D_003E0000 + 0x3
+rom:0x2C9240 reloc:MIPS_NONE symbol:none // 003C8240 packed-twin: 0x003F0003, not D_003F0000 + 0x3
+rom:0x2C9248 reloc:MIPS_NONE symbol:none // 003C8248 packed-twin: 0x00400003, not D_00400000 + 0x3
+rom:0x2C9250 reloc:MIPS_NONE symbol:none // 003C8250 packed-twin: 0x00410003, not D_00410000 + 0x3
+rom:0x2C9258 reloc:MIPS_NONE symbol:none // 003C8258 packed-twin: 0x00420003, not D_00420000 + 0x3
+rom:0x2C9260 reloc:MIPS_NONE symbol:none // 003C8260 packed-twin: 0x00430003, not D_00430000 + 0x3
+rom:0x2CB524 reloc:MIPS_NONE symbol:none // 003CA524 packed-twin: 0x003B0002, not D_003B0000 + 0x2
+rom:0x311A04 reloc:MIPS_NONE symbol:none // 00410A04 manual: 0x00400053, not D_00400050 + 0x3
+rom:0x3231A0 reloc:MIPS_NONE symbol:none // 004221A0 manual: 0x00320020, not dds3PackSpriteRecords
+rom:0x3231AC reloc:MIPS_NONE symbol:none // 004221AC manual: 0x00320020, not dds3PackSpriteRecords
+rom:0x328428 reloc:MIPS_NONE symbol:none // 00427428 manual: 0x003B0061, not D_003B0060 + 0x1
+rom:0x328488 reloc:MIPS_NONE symbol:none // 00427488 manual: 0x003B0061, not D_003B0060 + 0x1
