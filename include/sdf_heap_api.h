@@ -62,8 +62,7 @@ void sdfMemFreeHandleDirect(struct sdfMemHandle_t **slot);
  * A null outAddress unlocks the payload but still returns its live descriptor. */
 struct sdfMemHandle_t *sdfDevLoadFile(
     const char *name, u32 *outAddress, u32 *outSize, s32 extraBytes);
-struct sdfMemHandle_t *sdfDevLoadFileEx(
-    const char *name, u32 *outAddress, u32 *outSize);
+void *sdfDevLoadFileEx(const char *name, u32 *outData, u32 *outSize);
 
 /* Queue the two heap owners separately: the general heap stores descriptors,
  * while the chip heap stores the address of the cell to release. */
