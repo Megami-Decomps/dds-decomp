@@ -47,8 +47,8 @@ mapped onto DDS's file by aligning the two `.text` sections.
 `src/irx/SDFSDMAN.c` starts from SMT3's text: a function whose code is the same
 in both keeps SMT3's C, and a function DDS changed has SMT3's C adapted to
 DDS's layout, or new C where DDS rewrote it. Of the 72 functions, 37 are
-matching C, 34 are drafts under `NON_MATCHING`, and 1 is still `INCLUDE_ASM` of
-DDS's own code: `sdfAdpcmStreamInit`.
+matching C and 35 are drafts under `NON_MATCHING`, which the build takes
+from DDS's asm.
 
 What changed, as far as the differences show:
 

@@ -10,8 +10,8 @@
 /* DDS's driver is a later revision of SMT3's. The text and names here are
  * SMT3's, from smt3-decomp, adapted where DDS changed the code: 13 bank kinds
  * instead of 7 (SDF_SND_KINDS), a 0x44-byte sdfSndSlot_t, interrupt locks in
- * the BGM paths, and a stream player with less logging. The functions still in
- * DDS's asm are listed in docs/irx-modules.md. */
+ * the BGM paths, and a stream player with less logging. docs/irx-modules.md
+ * has the detail. */
 extern const char aSdfsdmanIFThre[];
 extern const char aSdfsnddrvSOpen[];
 extern const char aSdfsndfileread[];
@@ -2733,7 +2733,166 @@ s32 sdfAdpcmStreamPlay(const char *path, s32 vol, s8 onMemory)
     }
 }
 /* ENDF sdfAdpcmStreamPlay */
+#ifdef NON_MATCHING
+/* 8 instructions longer than the retail code. */
+/* FUNC sdfAdpcmStreamInit */
+/* The stream player thread: wait for a play request, read the APCM header,
+ * set the two voices up and keep the double buffer fed until the end. A mono
+ * stream plays the same buffer on both voices. */
+void sdfAdpcmStreamInit(void *arg)
+{
+    u32 reply[4];
+    u16 vol;
+    u16 entry;
+    u32 voices;
+    u32 sw;
+    u32 i;
+
+    sdfAdpcmPlaySemaParam.initial = 0;
+    sdfAdpcmPlaySemaParam.max = 1;
+    sdfAdpcmPlaySemaParam.option = 0;
+    sdfAdpcmPlaySema = thsemap_CreateSema(&sdfAdpcmPlaySemaParam);
+    if (sdfAdpcmPlaySema <= 0) {
+        stdio_printf(aSdfadpcmCreate);
+        thbase_ExitThread();
+    }
+    sdfAdpcmIntrSemaParam.initial = 0;
+    sdfAdpcmIntrSemaParam.max = 1;
+    sdfAdpcmIntrSemaParam.option = 0;
+    sdfAdpcmIntrSema = thsemap_CreateSema(&sdfAdpcmIntrSemaParam);
+    if (sdfAdpcmIntrSema <= 0) {
+        stdio_printf(aSdfadpcmCreate);
+        thbase_ExitThread();
+    }
+
+    while (1) {
+        thsemap_WaitSema(sdfAdpcmPlaySema);
+        if (sdfAdpcm.onMemory) {
+            sdfSndCallEeRpc(0, NULL, 0, 6, NULL);
+        } else {
+            sdfSndCallEeRpc(0, NULL, 0, 0, reply);
+            if (reply[0] == 0) {
+                stdio_printf(aSdfadpcmAdpcmF);
+                sdfSndPostError(1);
+                continue;
+            }
+        }
+        if (sdfAdpcm.onMemory) {
+            sdfSndCallEeRpc(0, &sdfAdpcmHeader, 16, 7, reply);
+        } else {
+            sdfSndCallEeRpc(0, &sdfAdpcmHeader, 16, 1, reply);
+        }
+        if (sdfAdpcmHeader.type != 11 || sdfAdpcmHeader.magic != 0x4D435041) {
+            for (i = 0; i < 0x10; i++) {
+                stdio_printf(a02xh, ((u8 *)&sdfAdpcmHeader)[i]);
+            }
+            stdio_printf(aSdfadpcmOnMemo, reply[0]);
+            sdfSndPostError(2);
+            goto streamEnd;
+        }
+        if (sdfAdpcm.onMemory) {
+            sdfSndCallEeRpc(0, &sdfAdpcmHeader.sampleLen, 16, 7, reply);
+        } else {
+            sdfSndCallEeRpc(0, &sdfAdpcmHeader.sampleLen, 16, 1, reply);
+        }
+        sdfAdpcm.stereo = sdfAdpcmHeader.stereo;
+        sdfAdpcm.totalBytes = 2 * sdfAdpcmHeader.sampleLen;
+        sdfAdpcm.bytesLeft = 2 * sdfAdpcmHeader.sampleLen;
+        vol = sdfAdpcm.volume << 7;
+        if ((vol & 0x80) != 0) {
+            vol |= 0xFF;
+        }
+        sdfAdpcm.playing = 1;
+        sdfAdpcm.coreId = 0;
+        libsd_sceSdSetCoreAttr(4, 0);
+        sdfAdpcm.core = 0;
+        sdfSndWorkArea->banks[SDF_SND_KINDS].size = 512;
+        sdfAdpcm.iopBuf = (u32)sdfSndWorkArea->banks[SDF_SND_KINDS].data;
+        sdfAdpcm.spuAddr = 0x1E0000;
+        sdfAdpcm.xferIdx = 0;
+        sdfAdpcm.xferBlk = 0;
+        sdfAdpcm.fillBlk = 0;
+        sdfAdpcm.fillIdx = 0;
+        sdfAdpcm.voiceL = 0;
+        sdfAdpcm.voiceR = 1;
+        sdfAdpcm.pitch = sdfAdpcmPitchTbl[sdfAdpcmHeader.freq];
+        libsd_sceSdSetSwitch((s8)sdfAdpcm.coreId | 0x1600,
+                             libsd_sceSdGetSwitch((s8)sdfAdpcm.coreId | 0x1500) & 3);
+        sdfAdpcm.fadeState = 0;
+        sdfAdpcmFillBuffer(1);
+        sdfAdpcmUploadBlock();
+        sdfAdpcmFillBuffer(1);
+        sdfAdpcmUploadBlock();
+        sdfAdpcmFillBuffer(1);
+        sdfAdpcmUploadBlock();
+        sdfAdpcmFillBuffer(1);
+        if (sdfAdpcm.stereo) {
+            entry = (2 * sdfAdpcm.voiceL) | (s8)sdfAdpcm.coreId;
+            libsd_sceSdSetParam(entry, vol);
+            libsd_sceSdSetParam(entry | 0x100, 0);
+            libsd_sceSdSetParam(entry | 0x200, sdfAdpcm.pitch);
+            libsd_sceSdSetParam(entry | 0x300, 0xF);
+            libsd_sceSdSetParam(entry | 0x400, 3);
+            libsd_sceSdSetAddr(entry | 0x2040, 0x1E0000);
+            entry = (2 * sdfAdpcm.voiceR) | (s8)sdfAdpcm.coreId;
+            libsd_sceSdSetParam(entry, 0);
+            libsd_sceSdSetParam(entry | 0x100, vol);
+            libsd_sceSdSetParam(entry | 0x200, sdfAdpcm.pitch);
+            libsd_sceSdSetParam(entry | 0x300, 0xF);
+            libsd_sceSdSetParam(entry | 0x400, 3);
+            libsd_sceSdSetAddr(entry | 0x2040, 0x1E0300);
+        } else {
+            entry = (2 * sdfAdpcm.voiceL) | (s8)sdfAdpcm.coreId;
+            libsd_sceSdSetParam(entry, vol);
+            libsd_sceSdSetParam(entry | 0x100, 0);
+            libsd_sceSdSetParam(entry | 0x200, sdfAdpcm.pitch);
+            libsd_sceSdSetParam(entry | 0x300, 0xF);
+            libsd_sceSdSetParam(entry | 0x400, 3);
+            libsd_sceSdSetAddr(entry | 0x2040, 0x1E0000);
+            entry = (2 * sdfAdpcm.voiceR) | (s8)sdfAdpcm.coreId;
+            libsd_sceSdSetParam(entry, 0);
+            libsd_sceSdSetParam(entry | 0x100, vol);
+            libsd_sceSdSetParam(entry | 0x200, sdfAdpcm.pitch);
+            libsd_sceSdSetParam(entry | 0x300, 0xF);
+            libsd_sceSdSetParam(entry | 0x400, 3);
+            libsd_sceSdSetAddr(entry | 0x2040, 0x1E0000);
+        }
+        sdfAdpcm.fadeState = 1;
+        libsd_sceSdSetSpu2IntrHandler(sdfAdpcmSpu2IntrHandler, NULL);
+        libsd_sceSdSetCoreAttr((s8)(sdfAdpcm.coreId | 4), 1);
+        voices = (1 << sdfAdpcm.voiceL) | (1 << sdfAdpcm.voiceR);
+        libsd_sceSdSetSwitch((s8)sdfAdpcm.coreId | 0x1500, voices);
+        if (sdfAdpcmHeader.reverb) {
+            sw = libsd_sceSdGetSwitch((s8)sdfAdpcm.coreId | 0x1900) | voices;
+        } else {
+            sw = (voices ^ 0xFFFFFF) & libsd_sceSdGetSwitch((s8)sdfAdpcm.coreId | 0x1900);
+        }
+        libsd_sceSdSetSwitch((s8)sdfAdpcm.coreId | 0x1900, sw);
+        libsd_sceSdSetSwitch((s8)sdfAdpcm.coreId | 0x1B00, sw);
+        do {
+            thsemap_WaitSema(sdfAdpcmIntrSema);
+            libsd_sceSdSetCoreAttr((s8)(sdfAdpcm.coreId | 4), 1);
+            if (sdfAdpcm.playing == 0) {
+                break;
+            }
+            libsd_sceSdSetCoreAttr((s8)(sdfAdpcm.coreId | 4), 0);
+            sdfAdpcmUploadBlock();
+            libsd_sceSdSetCoreAttr((s8)(sdfAdpcm.coreId | 4), 1);
+            sdfAdpcmFillBuffer(0);
+        } while (sdfAdpcm.playing);
+
+streamEnd:
+        if (sdfAdpcm.onMemory) {
+            sdfSndCallEeRpc(0, NULL, 0, 8, NULL);
+        } else {
+            sdfSndCallEeRpc(0, NULL, 0, 2, NULL);
+        }
+    }
+}
+/* ENDF sdfAdpcmStreamInit */
+#else
 INCLUDE_ASM("SDFSDMAN", sdfAdpcmStreamInit);
+#endif
 
 ALIGN_TEXT(4);
 IRX_IMPORT_TABLE(libsd, 1, 5);
