@@ -325,7 +325,69 @@ s32 sdfSndFileClose(s32 fd)
 {
     return sdfiopfl_sdfIopFileClose(fd);
 }
+#ifdef NON_MATCHING
+/* The switch compiles to a jump table in asm/irx/SDFSDMAN/rodata.s, which a
+ * C switch cannot reproduce in place. */
+/* FUNC sdfSndGetVolTable */
+/* The volume table for a bank kind, and how many entries it has. */
+u8 *sdfSndGetVolTable(s32 kind, s32 *count)
+{
+    u8 *tbl;
+    s32 unused;
+
+    tbl = NULL;
+    if (count == NULL) {
+        count = &unused;
+    }
+    *count = 0;
+    if (kind < 0) {
+        return NULL;
+    }
+    switch (kind) {
+    case 0:
+        tbl = sdfSndVolTblSeq;
+        *count = 32;
+        break;
+    case 1:
+        tbl = sdfSndVolTblBgm;
+        *count = 128;
+        break;
+    case 2:
+        tbl = sdfSndVolTblSe;
+        *count = 128;
+        break;
+    case 3:
+        tbl = sdfSndVolTblVoice;
+        *count = 32;
+        break;
+    case 4:
+        tbl = sdfSndVolTblKind4;
+        *count = 32;
+        break;
+    case 5:
+        tbl = sdfSndVolTblCore0;
+        *count = 2;
+        break;
+    case 6:
+        tbl = sdfSndVolTblCore1;
+        *count = 2;
+        break;
+    case 7:
+    case 8:
+    case 9:
+    case 10:
+    case 11:
+    case 12:
+        tbl = sdfSndVolTblKind7[kind - 7];
+        *count = 2;
+        break;
+    }
+    return tbl;
+}
+/* ENDF sdfSndGetVolTable */
+#else
 INCLUDE_ASM("SDFSDMAN", sdfSndGetVolTable);
+#endif
 
 #ifdef NON_MATCHING
 /* Scale the slot volume by the per sound entry in its volume table, and by
@@ -413,7 +475,41 @@ s32 sdfSndMidiCbIgnore2(void)
 {
     return 1;
 }
+#ifdef NON_MATCHING
+/* The synthesiser calls this for every MIDI message. Controller 0 on the
+ * pending switch channel picks the next BGM, controller 15 records where the
+ * sequence is so a resume can come back to it.
+ * Matches but for the register the channel number lands in. */
+s32 sdfSndMidiCbMessage(u32 msg, s32 slot)
+{
+    s32 val;
+
+    val = (msg >> 8) & 0xFF;
+    if ((msg & 0xF0) == 0xD0) {
+        switch (msg & 0xF) {
+        case 0:
+            if (sdfSndBgmSwitchReq != 0) {
+                if (sdfSndBgmSwitchMidi < 0) {
+                    if (val == 127) {
+                        sdfSndBgmSwitchReq = 0;
+                        break;
+                    }
+                    sdfSndBgmSwitchMidi = val;
+                }
+                sdfSndBgmSwitchSlot = slot;
+            }
+            break;
+        case 15:
+            sdfSndSlots[slot].location = sdfSndMidiSlotWork[slot].location;
+            break;
+        }
+        return 0;
+    }
+    return msg;
+}
+#else
 INCLUDE_ASM("SDFSDMAN", sdfSndMidiCbMessage);
+#endif
 
 s32 sdfSndTimerHandler(sdfSndTimer_t *tm)
 {
@@ -663,8 +759,118 @@ fail:
 #else
 INCLUDE_ASM("SDFSDMAN", sdfSndMidiSelect);
 #endif
+#ifdef NON_MATCHING
+/* 3 instructions short of the retail code. */
+/* FUNC sdfSndStopAll */
+/* which: 0 every slot, 1 the three sequence slots, anything else the rest. */
+s32 sdfSndStopAll(s32 which)
+{
+    s32 first;
+    s32 last;
+    s32 i;
+    s32 state;
+
+    sdfSndBgmSwitchReq = 0;
+    sdfSndBgmSwitchSlot = -1;
+    sdfSndBgmSwitchMidi = -1;
+    if (which == 0) {
+        first = 0;
+        last = 16;
+    } else if (which == 1) {
+        first = 0;
+        last = 3;
+    } else {
+        first = 3;
+        last = 16;
+    }
+    for (i = first; i < last; i++) {
+        if ((sdfSndMidiWork.tbl->seq[i].slot->flags & 2) != 0) {
+            if (i < 3) {
+                sdfSndSaveResumePoint(i);
+            }
+            intrman_CpuSuspendIntr(&state);
+            modmidi_sceMidi_MidiPlaySwitch(&sdfSndMidiWork, i, 0);
+            intrman_CpuResumeIntr(state);
+            sdfSndSlots[i].vol = 32512;
+            sdfSndSlots[i].is3d = 0;
+            sdfSndSlots[i].fadeIn = 0;
+            sdfSndSlots[i].volStep = 0;
+            sdfSndSlots[i].location = -1;
+            sdfSndSlots[i].id = -1;
+            sdfSndSlots[i].unk34[0] = 0;
+        }
+    }
+}
+/* ENDF sdfSndStopAll */
+#else
 INCLUDE_ASM("SDFSDMAN", sdfSndStopAll);
+#endif
+#ifdef NON_MATCHING
+/* 1 instruction short of the retail code. */
+/* FUNC sdfSndInitSynth */
+/* Takes the work area the EE allocated, then brings up the sequence thread,
+ * its timer, the synthesiser and the MIDI front end. */
+s32 sdfSndInitSynth(sdfSndWorkArea_t *work)
+{
+    iop_thread_t thp;
+    s32 param[2];
+    s32 i;
+
+    for (i = 0; i < 16; i++) {
+        sdfSndSlots[i].vol = 32512;
+        sdfSndSlots[i].volStep = 0;
+        sdfSndSlots[i].fadeIn = 0;
+        sdfSndSlots[i].id = -1;
+        sdfSndSlots[i].location = -1;
+        sdfSndSlots[i].serial = 0;
+        sdfSndSlots[i].unk34[0] = 0;
+    }
+    sdfSndResumeIdx = 0;
+    for (i = 0; i < 32; i++) {
+        sdfSndResume[i].id = -1;
+        sdfSndResume[i].location = -1;
+    }
+    sdfSndListenerAngle = 0;
+    sdfSndListenerZ = 0;
+    sdfSndListenerY = 0;
+    sdfSndListenerX = 0;
+    sdfSndListenerDirty = 0;
+    sdfSndWorkArea = work;
+    work->errCount = 0;
+    work->errCode = -1;
+    sdfSndInitSpu2();
+
+    thp.attr = 0x2000000;
+    thp.thread = sdfSndSeqThread;
+    thp.priority = 30;
+    thp.stacksize = 2048;
+    thp.option = 0;
+    sdfSndSeqThreadId = thbase_CreateThread(&thp);
+    thbase_StartThread(sdfSndSeqThreadId, NULL);
+    sdfSndTimer.thid = sdfSndSeqThreadId;
+    sdfSndTimerSetup(&sdfSndTimer);
+    sdfSndInitWorkAreas();
+    if (modhsyn_sceHSyn_Init(&sdfSndHsynWork, 4167) != 0) {
+        stdio_printf(aSdfsnddrvScehs);
+        return sdfSndPostError(9);
+    } else {
+        param[0] = 3;
+        param[1] = 0;
+        modhsyn_e8(param);
+        modhsyn_e18(1);
+        sdfSndSeqVolume = 127;
+        if (modmidi_sceMidi_Init(&sdfSndMidiWork, 4167) != 0) {
+            stdio_printf(aSdfsnddrvScemi_2);
+            return sdfSndPostError(10);
+        } else {
+            return sdfSndTimerStart(&sdfSndTimer);
+        }
+    }
+}
+/* ENDF sdfSndInitSynth */
+#else
 INCLUDE_ASM("SDFSDMAN", sdfSndInitSynth);
+#endif
 
 /* FUNC sdfSndQuitSynth */
 s32 sdfSndQuitSynth(void)
@@ -711,7 +917,57 @@ s32 sdfSndFindSlotById(s32 idPacked)
 INCLUDE_ASM("SDFSDMAN", sdfSndFindSlotById);
 #endif
 INCLUDE_ASM("SDFSDMAN", sdfSndBgmPlay);
+#ifdef NON_MATCHING
+/* 3 instructions short of the retail code. */
+/* FUNC sdfSndSaveResumePoint */
+/* Remember where a sequence stopped, so a later resume can pick it up. The
+ * table holds 32 entries and wraps. */
+s32 sdfSndSaveResumePoint(s32 slot)
+{
+    s32 id;
+    s32 i;
+    s32 loc;
+    s32 idx;
+    s32 ret;
+
+    ret = 0xBF0000;
+    if (slot >= 0) {
+        id = sdfSndSlots[slot].id;
+        ret = (u16)id;
+        if ((u32)(id - 0x400000) <= 0xBFFFFF) {
+            ret = (u16)sdfSndSlots[slot].id < 0x10;
+            if (ret) {
+                for (i = 0; i < 32; i++) {
+                    ret = sdfSndResume[i].id;
+                    if (ret == id) {
+                        loc = sdfSndSlots[slot].location;
+                        if (loc >= 0) {
+                            sdfSndResume[i].location = loc;
+                        } else {
+                            ret = sdfSndMidiSlotWork[slot].location;
+                            sdfSndResume[i].location = ret;
+                        }
+                        return ret;
+                    }
+                }
+                idx = sdfSndResumeIdx;
+                sdfSndResume[idx].id = sdfSndSlots[slot].id;
+                loc = sdfSndSlots[slot].location;
+                if (loc < 0) {
+                    loc = sdfSndMidiSlotWork[slot].location;
+                }
+                sdfSndResume[idx].location = loc;
+                ret = (sdfSndResumeIdx + 1) & 0x1F;
+                sdfSndResumeIdx = ret;
+            }
+        }
+    }
+    return ret;
+}
+/* ENDF sdfSndSaveResumePoint */
+#else
 INCLUDE_ASM("SDFSDMAN", sdfSndSaveResumePoint);
+#endif
 
 /* FUNC sdfSndFindResumePoint */
 sdfSndResume_t *sdfSndFindResumePoint(s32 id)
@@ -729,9 +985,66 @@ sdfSndResume_t *sdfSndFindResumePoint(s32 id)
     return NULL;
 }
 /* ENDF sdfSndFindResumePoint */
+#ifdef NON_MATCHING
+/* Matches instruction for instruction, but gcc chooses different
+ * registers. */
+/* FUNC sdfSndBgmResume */
+s32 sdfSndBgmResume(sdfSndBgmReq_t *req)
+{
+    sdfSndResume_t *rp;
+    s32 ret;
+    s32 i;
+
+    for (i = 0; i < 16; i++) {
+        if (sdfSndSlots[i].id == req->id) {
+            ret = sdfSndSlots[i].volStep;
+            if (ret < 0) {
+                sdfSndSlots[i].volStep = 32;
+            }
+            return ret;
+        }
+    }
+    rp = sdfSndFindResumePoint(req->id);
+    if (rp != NULL && rp->location >= 0) {
+        req->location = rp->location;
+    } else {
+        req->location = 0;
+    }
+    req->vol = 256;
+    return sdfSndBgmPlay(req);
+}
+/* ENDF sdfSndBgmResume */
+#else
 INCLUDE_ASM("SDFSDMAN", sdfSndBgmResume);
+#endif
 INCLUDE_ASM("SDFSDMAN", sdfSndBgmStop);
-INCLUDE_ASM("SDFSDMAN", sdfSndHsynLoad);
+/* FUNC sdfSndHsynLoad */
+/* Hand the synthesiser the wave data for a bank. */
+s32 sdfSndHsynLoad(s32 bank, s32 slot)
+{
+    sceHSynSlot_t *hs;
+    s32 state;
+
+    hs = &sdfSndHsynSlotWork[slot];
+    hs->unk00 = 0;
+    hs->unk04 = 0;
+    hs->unk08 = 0;
+    hs->unk0C = 0;
+    hs->unk10 = 0;
+    hs->unk02 = 0;
+    hs->unk03 = 0;
+    intrman_CpuSuspendIntr(&state);
+    if (modhsyn_sceHSyn_Load(&sdfSndHsynWork, slot, sdfSndWorkArea->banks[bank].spuAddr,
+                             sdfSndWorkArea->banks[bank].data, 0) != 0 ||
+        modhsyn_sceHSyn_Load(&sdfSndHsynWork, slot, sdfSndWorkArea->banks[bank].spuAddr,
+                             sdfSndWorkArea->banks[bank].data, 1) != 0) {
+        intrman_CpuResumeIntr(state);
+        return stdio_printf(aSdfsnddrvScehs_0);
+    }
+    modhsyn_e15(&sdfSndHsynLoadParam);
+    return intrman_CpuResumeIntr(state);
+}
+/* ENDF sdfSndHsynLoad */
 INCLUDE_ASM("SDFSDMAN", sdfSndSePlay);
 
 #ifdef NON_MATCHING
@@ -848,7 +1161,36 @@ s32 sdfSndSetListener(sdfSndListenerReq_t *req)
 #else
 INCLUDE_ASM("SDFSDMAN", sdfSndSetListener);
 #endif
+#ifdef NON_MATCHING
+/* 1 instruction longer than the retail code. */
+/* FUNC sdfSndSePlay3d */
+/* Play a sound effect at a point in the world. */
+s32 sdfSndSePlay3d(sdfSndSe3dReq_t *req)
+{
+    s32 dx;
+    s32 dz;
+    s32 dist;
+    s32 angle;
+    s32 slot;
+
+    dx = req->x - sdfSndListenerX;
+    dz = req->z - sdfSndListenerZ;
+    dist = sdfSndIsqrt(dx * dx + (req->y - sdfSndListenerY) * (req->y - sdfSndListenerY) +
+                       dz * dz);
+    angle = sdfSndAtan2Deg(-dx, dz);
+    slot = sdfSndSePlayPositional(req->id, angle - sdfSndListenerAngle, dist, req->radius);
+    if (slot >= 0) {
+        sdfSndSlots[slot].is3d = 1;
+        sdfSndSlots[slot].posX = req->x;
+        sdfSndSlots[slot].posY = req->y;
+        sdfSndSlots[slot].posZ = req->z;
+        sdfSndSlots[slot].radius = req->radius;
+    }
+}
+/* ENDF sdfSndSePlay3d */
+#else
 INCLUDE_ASM("SDFSDMAN", sdfSndSePlay3d);
+#endif
 
 /* FUNC sdfSndIsBankLoaded */
 s32 sdfSndIsBankLoaded(s32 kind)
@@ -907,10 +1249,109 @@ void sdfSndSmgLoadThread(void *arg)
     }
 }
 /* ENDF sdfSndSmgLoadThread */
+#ifdef NON_MATCHING
+/* Matches instruction for instruction, but gcc chooses different
+ * registers. */
+/* FUNC sdfSndSetBankAddr */
+/* kind < 0 lays the whole bank table out again from the size and offset
+ * tables; otherwise it just records one bank's wave size. */
+s32 sdfSndSetBankAddr(s32 kind, u32 waveSize)
+{
+    s32 i;
+    u8 *base;
+
+    if (kind >= 0) {
+        sdfSndWorkArea->banks[kind].waveSize = waveSize;
+        return kind;
+    }
+    for (i = 0; i < SDF_SND_KINDS; i++) {
+        sdfSndWorkArea->banks[i].spuAddr = sdfSndBankSizeTbl[i];
+        sdfSndWorkArea->banks[i].waveSize = sdfSndBankAddrTbl[i];
+    }
+    if (sdfSndBankBase == NULL) {
+        sdfSndBankBase = sdfSndWorkArea->banks[0].data;
+    }
+    base = sdfSndBankBase;
+    for (i = 0; i < SDF_SND_KINDS + 1; i++) {
+        sdfSndWorkArea->banks[i].data = &base[sdfSndBankOffTbl[i]];
+        sdfSndWorkArea->banks[i].size = sdfSndBankFlagTbl[i];
+    }
+    return -1;
+}
+/* ENDF sdfSndSetBankAddr */
+#else
 INCLUDE_ASM("SDFSDMAN", sdfSndSetBankAddr);
+#endif
 INCLUDE_ASM("SDFSDMAN", sdfSndStopByGroup);
-INCLUDE_ASM("SDFSDMAN", sdfSndUnloadBank);
+/* FUNC sdfSndUnloadBank */
+s32 sdfSndUnloadBank(s32 kind)
+{
+    if (kind >= 0) {
+        sdfSndStopByGroup(kind);
+        sdfSndWorkArea->banks[kind].waveSize = 0;
+        sdfSndWorkArea->banks[kind].size = 0;
+        sdfSndWorkArea->stat[kind].id = -1;
+        if (kind == 1) {
+            sdfSndBank1Loaded = 0;
+        }
+    }
+}
+/* ENDF sdfSndUnloadBank */
+#ifdef NON_MATCHING
+/* 1 instruction short of the retail code. */
+/* FUNC p2sdIrxSpuIopMap */
+/* Push the work area up to the EE by DMA and wait for it to land. */
+s32 p2sdIrxSpuIopMap(void)
+{
+    SifDmaTransfer_t sdd;
+    s32 state;
+    s32 tries;
+    u32 id;
+    u32 start;
+    u32 now;
+    s32 stat;
+    s32 ret;
+
+    sdd.src = sdfSndWorkArea;
+    sdd.dest = sdfSndWorkArea->eeAddr;
+    tries = 5;
+    sdd.attr = 0;
+    sdd.size = sdfSndWorkArea->size;
+    loadcore_FlushDcache();
+    while (1) {
+        intrman_CpuSuspendIntr(&state);
+        id = sifman_sceSifSetDma(&sdd, 1);
+        intrman_CpuResumeIntr(state);
+        if (id != 0) {
+            break;
+        }
+        thbase_DelayThread(1000);
+        if (--tries == 0) {
+            tries = 10000;
+            stdio_printf(aP2sdirxspuiopm);
+        }
+    }
+    start = thbase_e43();
+    while (1) {
+        intrman_CpuSuspendIntr(&state);
+        stat = sifman_sceSifDmaStat(id);
+        ret = intrman_CpuResumeIntr(state);
+        if (stat < 0) {
+            break;
+        }
+        thbase_DelayThread(1000);
+        now = thbase_e43();
+        if (now - start > 0x1F78A40) {
+            stdio_printf(aP2sdirxspuiopm_0, stat);
+            start = now;
+        }
+    }
+    return ret;
+}
+/* ENDF p2sdIrxSpuIopMap */
+#else
 INCLUDE_ASM("SDFSDMAN", p2sdIrxSpuIopMap);
+#endif
 
 /* FUNC sdfSndFadeOutById */
 INCLUDE_ASM("SDFSDMAN", sdfSndFadeOutById);
@@ -970,8 +1411,69 @@ s32 sdfSndAllocBgmSlot(void)
     return slot;
 }
 /* ENDF sdfSndAllocBgmSlot */
+#ifdef NON_MATCHING
+/* 2 instructions short of the retail code. */
+/* FUNC sdfSndAllocSeSlot */
+s32 sdfSndAllocSeSlot(void)
+{
+    s32 i;
+    s32 slot;
+    u32 serial;
+    s32 state;
+
+    for (i = 3; i < 16; i++) {
+        if ((sdfSndMidiWork.tbl->seq[i].slot->flags & 2) == 0 && i != sdfSndLastSeSlot) {
+            sdfSndLastSeSlot = i;
+            return i;
+        }
+    }
+    serial = -1;
+    slot = -1;
+    for (i = 3; i < 16; i++) {
+        if (sdfSndSlots[i].serial < serial && i != sdfSndLastSeSlot &&
+            sdfSndSlots[i].is3d == 0) {
+            serial = sdfSndSlots[i].serial;
+            slot = i;
+        }
+    }
+    if (slot < 0) {
+        return -1;
+    }
+    intrman_CpuSuspendIntr(&state);
+    modmidi_sceMidi_MidiPlaySwitch(&sdfSndMidiWork, slot, 0);
+    intrman_CpuResumeIntr(state);
+    sdfSndLastSeSlot = slot;
+    return slot;
+}
+/* ENDF sdfSndAllocSeSlot */
+#else
 INCLUDE_ASM("SDFSDMAN", sdfSndAllocSeSlot);
+#endif
+#ifdef NON_MATCHING
+/* 1 instruction short of the retail code. */
+/* FUNC sdfSndSetSeqVolume */
+/* The EE sends 0..15; the driver keeps it in eighths with the odd steps
+ * rounded up to the next full one. */
+s32 sdfSndSetSeqVolume(s32 vol)
+{
+    s32 v;
+    s32 i;
+
+    v = 8 * vol;
+    if ((vol & 1) != 0) {
+        v |= 7;
+    }
+    sdfSndSeqVolume = v;
+    for (i = 0; i < 3; i++) {
+        if ((sdfSndMidiWork.tbl->seq[i].slot->flags & 2) != 0) {
+            sdfSndApplyVolume(sdfSndSlots[i].id, i, sdfSndSeqVolume);
+        }
+    }
+}
+/* ENDF sdfSndSetSeqVolume */
+#else
 INCLUDE_ASM("SDFSDMAN", sdfSndSetSeqVolume);
+#endif
 
 /* FUNC sdfSndFadeOutAll */
 s32 sdfSndFadeOutAll(void)

@@ -205,8 +205,8 @@ typedef struct {
     u32 unk04;
     void *xferBuf;
     u32 xferBufSize;
-    sdfSndBank_t banks[8];
-    u8 unk90[128];
+    sdfSndBank_t banks[SDF_SND_KINDS + 1]; /* 8 in SMT3 */
+    u8 unkF0[32];
     sdfSndBankData_t progData[7];
     u8 unk148[72];
     sdfSndBankStat_t stat[SDF_SND_KINDS];

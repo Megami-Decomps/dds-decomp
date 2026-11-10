@@ -46,16 +46,12 @@ DDS's sound driver is a later revision of SMT3's. Its symbols are SMT3's,
 mapped onto DDS's file by aligning the two `.text` sections.
 `src/irx/SDFSDMAN.c` starts from SMT3's text: a function whose code is the same
 in both keeps SMT3's C, and a function DDS changed has SMT3's C adapted to
-DDS's layout, or new C where DDS rewrote it. Of the 72 functions, 32 are
-matching C, 15 are drafts under `NON_MATCHING`, and 25 are still `INCLUDE_ASM`
-of DDS's own code: `sdfSndGetVolTable`, `sdfSndMidiCbMessage`,
-`sdfSndSeqThread`, `sdfSndStopAll`, `sdfSndInitSynth`, `sdfSndBgmPlay`,
-`sdfSndSaveResumePoint`, `sdfSndBgmResume`, `sdfSndBgmStop`, `sdfSndHsynLoad`,
-`sdfSndSePlay`, `sdfSndUpdate3dVoice`, `sdfSndSePlay3d`, `sdfSndLoadSmg`,
-`sdfSndSetBankAddr`, `sdfSndStopByGroup`, `sdfSndUnloadBank`,
-`p2sdIrxSpuIopMap`, `sdfSndFadeOutById`, `sdfSndAllocSeSlot`,
-`sdfSndSetSeqVolume`, `sdfAdpcmStop`, `sdfAdpcmFillBuffer`,
-`sdfAdpcmSetVolume`, `sdfAdpcmStreamInit`.
+DDS's layout, or new C where DDS rewrote it. Of the 72 functions, 34 are
+matching C, 26 are drafts under `NON_MATCHING`, and 12 are still `INCLUDE_ASM`
+of DDS's own code: `sdfSndSeqThread`, `sdfSndBgmPlay`, `sdfSndBgmStop`,
+`sdfSndSePlay`, `sdfSndUpdate3dVoice`, `sdfSndLoadSmg`, `sdfSndStopByGroup`,
+`sdfSndFadeOutById`, `sdfAdpcmStop`, `sdfAdpcmFillBuffer`, `sdfAdpcmSetVolume`,
+`sdfAdpcmStreamInit`.
 
 What changed, as far as the differences show:
 
