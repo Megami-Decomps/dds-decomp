@@ -220,7 +220,12 @@ void mtrAdvanceGridCellPropagation(MtrGrid *grid) {
     }
 }
 
-INCLUDE_RODATA(const s32, "game/code_00285CE8", D_00425DD8);
+/* Six hex-grid directions. The cell creator interprets each component as
+ * signed after copying these 12 bytes, and swaps X/Y for the other axis. */
+const MtrDirections D_00425DD8 = {{
+    {0, 0xFE}, {1, 0xFF}, {1, 1},
+    {0, 2}, {0xFF, 1}, {0xFF, 0xFF}
+}};
 
 struct sdfMemHandle_t *mtrMantraEventBitPush(void) {
     s8 *data;
