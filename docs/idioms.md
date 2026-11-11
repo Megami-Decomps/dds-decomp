@@ -13936,6 +13936,12 @@ symbol_addrs over all their records. A field of a record is the table plus an
 offset, never a label of its own: an interior label cuts the table and leaves
 its pointer words with an untyped owner.
 
+The effect editor and battle debug menus are `EffQueuedFileObject` records
+and `EffEditorRow` arrays (`include/eff_editor_menu.h`). Each has
+`type:EffQueuedFileObject` or `type:EffEditorRow` in symbol_addrs: splat
+accepts a capitalized type name, and any declared type stops the data string
+guesser, which otherwise wrote a row's first text pointer as `.asciz`.
+
 The Mantra banks have different contents and element widths, so this pass
 does not invent a cross-game identity between them. Preserve every existing
 declaration, bound, cast, index, fixed-point conversion and temporary
