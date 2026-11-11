@@ -167,39 +167,35 @@ void mnuDrawPulsingMenuIcon(MenuTerminalContext *object, s32 amplitude, s32 draw
     }
 }
 
-#ifdef NON_MATCHING
-#include "common.h"
-#include "mnu.h"
-#include "mnu_list.h"
-#include "brs_icon_record.h"
-
-extern void effDrawTextureSlotWithBlendedCornerColors(s32 x, s32 y, s32 depth, u32 blend, s32 flags,
-                                                      struct EffectSlotSet *set, s32 slotIndex, s32 layer);
-
 /* The terminal's list panel: its frame (icon 56), a row band (icon 9) for
  * each entry of its window's list, 0xB0 apart, and its foot (icon 2), all
- * from the terminal's first sprite set. Upstream: INCLUDE_ASM in
- * game/code_00294730. */
+ * from the terminal's first sprite set. The native loop retains the Y-field
+ * address while materializing the X/ID addresses on each pass; keep field
+ * addresses in the guarded row-drawing phase and reread their values.
+ * Qualified stock RTL: docs/matching/terminal-panel-list.md, pass 20.greg. */
 void mnuDrawTerminalPanelListRows(s32 x, s32 y, s32 depth, MenuTerminalContext *object, s32 scale, s32 option) {
     struct EffectSlotSet *texture = mnuCurrentTerminalContext->effectSlots[0];
-    s32 row;
+    s32 row = 0;
 
     effDrawTextureSlotWithBlendedCornerColors(x + mnuCommonIconPlacements[56][BRS_ICON_X] * 16,
                   y + mnuCommonIconPlacements[56][BRS_ICON_Y] * 8, depth, scale, 0, texture,
                   mnuCommonIconPlacements[56][BRS_ICON_ID], option);
-    for (row = 0; row < object->ownedWindows[0]->list->count; row++) {
-        effDrawTextureSlotWithBlendedCornerColors(x + mnuCommonIconPlacements[9][BRS_ICON_X] * 16,
-                      y + mnuCommonIconPlacements[9][BRS_ICON_Y] * 8, depth, scale, 0, texture,
-                      mnuCommonIconPlacements[9][BRS_ICON_ID], option);
-        y += 0xB0;
+    if (row < object->ownedWindows[0]->list->count) {
+        const s16 *rowX = &mnuCommonIconPlacements[9][BRS_ICON_X];
+        const s16 *rowY = &mnuCommonIconPlacements[9][BRS_ICON_Y];
+        const s16 *rowId = &mnuCommonIconPlacements[9][BRS_ICON_ID];
+        do {
+            effDrawTextureSlotWithBlendedCornerColors(x + *rowX * 16,
+                          y + *rowY * 8, depth, scale, 0, texture,
+                          *rowId, option);
+            row++;
+            y += 0xB0;
+        } while (row < object->ownedWindows[0]->list->count);
     }
     effDrawTextureSlotWithBlendedCornerColors(mnuCommonIconPlacements[2][BRS_ICON_X] * 16,
                   mnuCommonIconPlacements[2][BRS_ICON_Y] * 8, depth, scale, 0, texture,
                   mnuCommonIconPlacements[2][BRS_ICON_ID], option);
 }
-#else
-INCLUDE_ASM(const s32, "game/code_00294730", mnuDrawTerminalPanelListRows);
-#endif
 
 void mnuDrawWindowBorderAndScrollBar(s32 x, s32 y, s32 unused, MenuTerminalContext *object, s32 scale, s32 option) {
     struct EffectSlotSet *texture = mnuCurrentTerminalContext->effectSlots[0];
