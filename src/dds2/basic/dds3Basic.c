@@ -61,7 +61,7 @@
 
 extern void Normalize(void);
 void dds3BackupPoseSet(dds3PoseSet_t *node);
-extern EffWorldOps *D_003849D8[EFF_WORLD_KIND_COUNT];
+extern EffWorldOps *dds3BasicFuncTablePtr[EFF_WORLD_KIND_COUNT];
 void dds3DeleteBasic(dds3Basic_t *node);
 
 /* Allocate a node of `kind`, link its owner and run the owner's create hook. */
@@ -82,7 +82,7 @@ dds3Basic_t *dds3AllocBasic(u32 kind) {
     node->word0 = 0;
     node->key = 0;
     node->name = 0;
-    ops = D_003849D8[kind];
+    ops = dds3BasicFuncTablePtr[kind];
     node->ops = ops;
     node->word14 = 0;
     node->workdata = NULL;

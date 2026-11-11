@@ -51,7 +51,7 @@ typedef struct dds3PoseSet_t {
     u8 padCC[4];
 } dds3PoseSet_t;
 
-/* D_003299C0 selects six-word tables; D_00329A20 is kind 1.
+/* dds3BasicFuncTablePtr selects six-word tables; sceneBasicTable is kind 1.
  * The last two words in every populated retail table are zero. */
 typedef struct EffWorldOps {
     s32 (*create)(dds3Basic_t *); /* dds3AllocBasic accepts exactly 1. */

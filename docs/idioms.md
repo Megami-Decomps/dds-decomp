@@ -3755,10 +3755,10 @@ The source payload is borrowed as float vectors, not another short
 world header. Its final VU0 store addresses the destination's separate
 transform vector at `+0x70` through `dds3PoseSet_t`.
 
-The kind directory `D_003299C0` points at complete six-word (`0x18`-byte)
+The kind directory `dds3BasicFuncTablePtr` points at complete six-word (`0x18`-byte)
 `EffWorldOps` tables. Their first four entries are create, destroy, update
 and draw callbacks; both remaining words are zero. Kind 1 selects
-`D_00329A20` and its initializer at DDS1 `0x00110578`, which allocates a
+`sceneBasicTable` and its initializer at DDS1 `0x00110578`, which allocates a
 `0x40`-byte `EvtWorldTable` and eighteen `0x0C`-byte slots. Each slot's
 endpoints are borrowed `dds3Basic_t *` values.
 
