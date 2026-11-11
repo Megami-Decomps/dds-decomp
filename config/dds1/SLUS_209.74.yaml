@@ -466,6 +466,8 @@ segments:
       - [0x2B6030, .rodata, sdf/sdf_Decomp]
       - [0x2B6060, .rodata, sdf/sdfTmx]
       - [0x2B6100, rodata, rodata_003B5100]
+      - [0x2B6C80, .rodata, hand/at3dec]
+      - [0x2B82E8, rodata, rodata_003B72E8]
       - [0x2B9D00, .lit4, kernel/dds3PadManager]
       - [0x2B9D08, .lit4, kernel/dds3KernelDraw]
       - [0x2B9D18, .lit4, script/scrCommonCommand]

@@ -8781,6 +8781,8 @@ at3decModeName4ch = 0x00430FD0; // type:asciz size:0x4
 at3decModeName8ch = 0x00430FD8; // type:asciz size:0x4
 at3decModeNameJoint = 0x00430FE0; // type:asciz size:0x6
 at3decModeNameUnknown = 0x00430FE8; // type:asciz size:0x8
+// at3decModeName indexes all 18 entries; the last five are not a separate object.
+jtbl_00430FF0 = 0x00430FF0; // type:jtbl size:0x48
 D_00431090 = 0x00431090; // type:s32 size:0x104
 D_00431194 = 0x00431194; // type:s32 size:0xD4
 localeconvData = 0x004324B8;

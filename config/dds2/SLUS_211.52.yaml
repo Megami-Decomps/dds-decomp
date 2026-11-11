@@ -489,6 +489,8 @@ segments:
       - [0x32FD40, .rodata, sdf/sdf_Decomp]
       - [0x32FD70, .rodata, sdf/sdfTmx]
       - [0x32FE10, rodata, rodata_0042EE10]
+      - [0x3309D0, .rodata, hand/at3dec]
+      - [0x332038, rodata, rodata_00431038]
       - [0x333E80, .lit4, kernel/dds3PadManager]
       - [0x333E88, .lit4, kernel/dds3KernelDraw]
       - [0x333E98, .lit4, script/scrCommonCommand]

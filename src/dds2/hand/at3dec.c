@@ -708,6 +708,17 @@ s32 at3decDecodeSpectrum(at3decChannel_t *chan, s32 nsub, at3decWork_t *w)
     return 0;
 }
 #else
+
+INCLUDE_RODATA(const s32, "hand/at3dec", at3decOutputFirTaps);
+
+INCLUDE_RODATA(const s32, "hand/at3dec", at3decQmfTaps);
+
+INCLUDE_RODATA(const s32, "hand/at3dec", at3decQmfTapsReversed);
+
+INCLUDE_RODATA(const s32, "hand/at3dec", at3decLowHalfMask);
+
+INCLUDE_RODATA(const s32, "hand/at3dec", at3decScaleFactorShifts);
+
 INCLUDE_ASM(const s32, "hand/at3dec", at3decDecodeSpectrum);
 #endif
 
@@ -1113,7 +1124,138 @@ s32 at3decModeFromName(const char *name)
     return 0;
 }
 
-#ifdef NON_MATCHING
+INCLUDE_RODATA(const s32, "hand/at3dec", at3decGainSteps);
+
+INCLUDE_RODATA(const s32, "hand/at3dec", at3decBandMixWeights);
+
+INCLUDE_RODATA(const s32, "hand/at3dec", at3decDefaultMixWeight);
+
+INCLUDE_RODATA(const s32, "hand/at3dec", at3decJointStereoWeights);
+
+INCLUDE_RODATA(const s32, "hand/at3dec", at3decUnityMixWeight);
+
+INCLUDE_RODATA(const s32, "hand/at3dec", at3decSubbandStartLines);
+
+INCLUDE_RODATA(const s32, "hand/at3dec", D_0042FCE0);
+
+INCLUDE_RODATA(const s32, "hand/at3dec", D_0042FCF0);
+
+INCLUDE_RODATA(const s32, "hand/at3dec", D_0042FCF8);
+
+INCLUDE_RODATA(const s32, "hand/at3dec", D_0042FD00);
+
+INCLUDE_RODATA(const s32, "hand/at3dec", D_0042FD10);
+
+INCLUDE_RODATA(const s32, "hand/at3dec", D_0042FD20);
+
+INCLUDE_RODATA(const s32, "hand/at3dec", D_0042FD40);
+
+INCLUDE_RODATA(const s32, "hand/at3dec", D_0042FD80);
+
+INCLUDE_RODATA(const s32, "hand/at3dec", D_0042FD88);
+
+INCLUDE_RODATA(const s32, "hand/at3dec", D_0042FD98);
+
+INCLUDE_RODATA(const s32, "hand/at3dec", D_0042FDB8);
+
+INCLUDE_RODATA(const s32, "hand/at3dec", D_0042FDF8);
+
+INCLUDE_RODATA(const s32, "hand/at3dec", D_0042FE18);
+
+INCLUDE_RODATA(const s32, "hand/at3dec", D_0042FE20);
+
+INCLUDE_RODATA(const s32, "hand/at3dec", D_0042FE30);
+
+INCLUDE_RODATA(const s32, "hand/at3dec", D_0042FE50);
+
+INCLUDE_RODATA(const s32, "hand/at3dec", D_0042FE90);
+
+INCLUDE_RODATA(const s32, "hand/at3dec", D_0042FF10);
+
+INCLUDE_RODATA(const s32, "hand/at3dec", D_00430000);
+
+INCLUDE_RODATA(const s32, "hand/at3dec", D_00430010);
+
+INCLUDE_RODATA(const s32, "hand/at3dec", D_00430020);
+
+INCLUDE_RODATA(const s32, "hand/at3dec", D_00430028);
+
+INCLUDE_RODATA(const s32, "hand/at3dec", D_00430030);
+
+INCLUDE_RODATA(const s32, "hand/at3dec", D_00430040);
+
+INCLUDE_RODATA(const s32, "hand/at3dec", D_00430050);
+
+INCLUDE_RODATA(const s32, "hand/at3dec", D_00430070);
+
+INCLUDE_RODATA(const s32, "hand/at3dec", D_004300C0);
+
+INCLUDE_RODATA(const s32, "hand/at3dec", D_00430108);
+
+INCLUDE_RODATA(const s32, "hand/at3dec", D_00430120);
+
+INCLUDE_RODATA(const s32, "hand/at3dec", D_00430140);
+
+INCLUDE_RODATA(const s32, "hand/at3dec", D_00430168);
+
+INCLUDE_RODATA(const s32, "hand/at3dec", D_004301A8);
+
+INCLUDE_RODATA(const s32, "hand/at3dec", D_00430228);
+
+INCLUDE_RODATA(const s32, "hand/at3dec", D_00430328);
+
+INCLUDE_RODATA(const s32, "hand/at3dec", D_00430370);
+
+INCLUDE_RODATA(const s32, "hand/at3dec", D_00430388);
+
+INCLUDE_RODATA(const s32, "hand/at3dec", D_004303A8);
+
+INCLUDE_RODATA(const s32, "hand/at3dec", D_004303D0);
+
+INCLUDE_RODATA(const s32, "hand/at3dec", D_00430410);
+
+INCLUDE_RODATA(const s32, "hand/at3dec", D_00430490);
+
+INCLUDE_RODATA(const s32, "hand/at3dec", D_00430590);
+
+INCLUDE_RODATA(const s32, "hand/at3dec", D_004305D8);
+
+INCLUDE_RODATA(const s32, "hand/at3dec", D_004305F0);
+
+INCLUDE_RODATA(const s32, "hand/at3dec", D_00430610);
+
+INCLUDE_RODATA(const s32, "hand/at3dec", D_00430638);
+
+INCLUDE_RODATA(const s32, "hand/at3dec", D_00430678);
+
+INCLUDE_RODATA(const s32, "hand/at3dec", D_004306F8);
+
+INCLUDE_RODATA(const s32, "hand/at3dec", at3decCodeLengthTables);
+
+INCLUDE_RODATA(const s32, "hand/at3dec", at3decDequantTables);
+
+INCLUDE_RODATA(const s32, "hand/at3dec", at3decSymbolLookupTables);
+
+INCLUDE_RODATA(const s32, "hand/at3dec", at3decOverlapWindow);
+
+INCLUDE_RODATA(const s32, "hand/at3dec", at3decOverlapOrder);
+
+INCLUDE_RODATA(const s32, "hand/at3dec", at3decOverlapWindows);
+
+INCLUDE_RODATA(const s32, "hand/at3dec", at3decFallingWindow);
+
+INCLUDE_RODATA(const s32, "hand/at3dec", at3decModeNameMono);
+
+INCLUDE_RODATA(const s32, "hand/at3dec", at3decModeNameStereo);
+
+INCLUDE_RODATA(const s32, "hand/at3dec", at3decModeName4ch);
+
+INCLUDE_RODATA(const s32, "hand/at3dec", at3decModeName8ch);
+
+INCLUDE_RODATA(const s32, "hand/at3dec", at3decModeNameJoint);
+
+INCLUDE_RODATA(const s32, "hand/at3dec", at3decModeNameUnknown);
+
 const char *at3decModeName(s32 mode)
 {
     switch (mode) {
@@ -1130,6 +1272,3 @@ const char *at3decModeName(s32 mode)
     }
     return at3decModeNameUnknown;
 }
-#else
-INCLUDE_ASM(const s32, "hand/at3dec", at3decModeName);
-#endif
