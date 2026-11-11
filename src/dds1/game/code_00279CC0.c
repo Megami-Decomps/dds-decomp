@@ -589,7 +589,7 @@ void mnuBindAssetEffectPayloads(MenuAssets *assets) {
 
 extern char D_003B2330[];
 extern char D_003B2348[];
-extern u32 mnuCampBackdropSpriteResourceNames[];
+extern const char *mnuCampBackdropSpriteResourceNames[];
 extern const char *mnuCampBackdropAnimationResourceNames[];
 
 /* Load the base sprite banks synchronously, bind the payloads, and reset the fifth bank's saved corner colors. */
@@ -597,11 +597,11 @@ void mnuLoadBackdropAssetsAndTintSlots(MenuAssets *assets) {
     s32 i;
     s32 j;
 
-    assets->sprites[0] = effLoadIndexedResource(D_003B2330, (const char *)mnuCampBackdropSpriteResourceNames[1], EFF_RESOURCE_SOURCE_TRANSIENT);
+    assets->sprites[0] = effLoadIndexedResource(D_003B2330, mnuCampBackdropSpriteResourceNames[1], EFF_RESOURCE_SOURCE_TRANSIENT);
     assets->sprites[1] = effCreateResourceSlotSet(assets->sprites[0], 0, 1);
     assets->sprites[2] = effCreateResourceSlotSet(assets->sprites[0], 0, 1);
     assets->sprites[3] = effCreateResourceSlotSet(assets->sprites[0], 0, 1);
-    assets->sprites[4] = effLoadIndexedResource(D_003B2330, (const char *)mnuCampBackdropSpriteResourceNames[0], EFF_RESOURCE_SOURCE_TRANSIENT);
+    assets->sprites[4] = effLoadIndexedResource(D_003B2330, mnuCampBackdropSpriteResourceNames[0], EFF_RESOURCE_SOURCE_TRANSIENT);
     assets->material = effLoadMappedResource(D_003B2348, (const char *)mnuCampBackdropAnimationResourceNames[0]);
     mnuBindAssetEffectPayloads(assets);
     for (i = 0; i < 5; i++) {
@@ -615,7 +615,7 @@ extern char D_003B2330[];
 
 extern char D_003B2348[];
 
-extern u32 mnuCampBackdropSpriteResourceNames[];
+extern const char *mnuCampBackdropSpriteResourceNames[];
 
 extern const char *mnuCampBackdropAnimationResourceNames[];
 

@@ -234,7 +234,6 @@ extern s32 raise(s32 sig);
 
 extern void _exit(s32 code) __attribute__((noreturn));
 
-extern u8 localeconvData[] __attribute__((section(".data")));
 
 extern s32 libcErrno __attribute__((section(".data")));
 

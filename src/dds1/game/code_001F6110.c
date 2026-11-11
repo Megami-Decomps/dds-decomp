@@ -74,7 +74,7 @@ extern void btlClearUnitDefeatCandidate(BtlUnit *unit);
 extern f32 btlMeasureIndexListBounds(BtlIndexList *list, f32 *maxTop, f32 *minTop);
 extern void btlFlagUnitDefeatCandidate(BtlUnit *unit);
 
-extern s32 D_003BB6B8;
+extern const char *btlButtonIconTexturePath;
 extern s32 D_003BD854;
 extern void btlPickCommandElementCheckedTarget(BtlTask *context, s32 action);
 extern void btlPickCommandTargetExcludingActor(BtlTask *context, s32);
@@ -1432,8 +1432,8 @@ void btlDrawButtonIcon(sdfGrOt_t *surface, s32 x, s32 y, s32 topLeftColor, s32 t
 }
 
 void btlOpenButtonIconResource(void) {
-    btlBossDebugPrintf("btl:[%s]\n", D_003BB6B8);
-    D_003BD854 = sdfDevLoadFileEx(D_003BB6B8, &btlButtonIconTexture, 0);
+    btlBossDebugPrintf("btl:[%s]\n", btlButtonIconTexturePath);
+    D_003BD854 = sdfDevLoadFileEx(btlButtonIconTexturePath, &btlButtonIconTexture, 0);
 }
 
 /* Cache and later release the loaded battle resource in battle state. */
@@ -3758,7 +3758,7 @@ void btlSetResourceNameLengthLimit(struct BtlResourceNameRecord *record, u32 max
 
 extern void *btlDebugTopMenuList[2];
 
-INCLUDE_SDATA(const s32, "game/code_001F6110", D_003BB6B8);
+INCLUDE_SDATA(const s32, "game/code_001F6110", btlButtonIconTexturePath);
 
 INCLUDE_SDATA(const s32, "game/code_001F6110", D_003BB6C8);
 

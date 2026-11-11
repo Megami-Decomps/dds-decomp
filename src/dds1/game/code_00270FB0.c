@@ -23,12 +23,7 @@ extern const char D_003B2058[16];
 
 extern char *mnuCampMotionResourceNames[];
 
-typedef struct ResourceRef8 {
-    s32 index;
-    s32 pad;
-} ResourceRef8;
-
-extern ResourceRef8 mnuCampBaseResourceNameRows[];
+extern const char *mnuCampBaseResourceNameRows[][2];
 
 extern char D_003B2020[];
 
@@ -47,7 +42,7 @@ void mnuLoadStaffImageHandles(void) {
     s32 resourceIndex;
 
     for (resourceIndex = 0; resourceIndex < MNU_STAFF_BASE_RESOURCE_COUNT; resourceIndex++) {
-        mnuCampResourceHandles[resourceIndex] = effLoadIndexedResource(D_003B2020, (const char *)mnuCampBaseResourceNameRows[resourceIndex].index, EFF_RESOURCE_SOURCE_RETAINED);
+        mnuCampResourceHandles[resourceIndex] = effLoadIndexedResource(D_003B2020, mnuCampBaseResourceNameRows[resourceIndex][0], EFF_RESOURCE_SOURCE_RETAINED);
     }
 }
 

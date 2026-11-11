@@ -184,7 +184,7 @@ extern void fldEnableSceneGroupAdvancement(void);
 
 extern s8 D_0037F531[];
 
-extern char *D_004368B0;
+extern char *btlScenePanelTaskName;
 
 void fldCreateSceneCleanupTask(void);
 

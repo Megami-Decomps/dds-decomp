@@ -237,7 +237,28 @@ extern s32 raise(s32 sig);
 
 extern void _exit(s32 code) __attribute__((noreturn));
 
-extern u8 localeconvData[] __attribute__((section(".data")));
+typedef struct {
+    char *decimal_point;
+    char *thousands_sep;
+    char *grouping;
+    char *int_curr_symbol;
+    char *currency_symbol;
+    char *mon_decimal_point;
+    char *mon_thousands_sep;
+    char *mon_grouping;
+    char *positive_sign;
+    char *negative_sign;
+    char int_frac_digits;
+    char frac_digits;
+    char p_cs_precedes;
+    char p_sep_by_space;
+    char n_cs_precedes;
+    char n_sep_by_space;
+    char p_sign_posn;
+    char n_sign_posn;
+} lconv_t;
+
+extern lconv_t localeconvData __attribute__((section(".data")));
 
 extern s32 libcErrno __attribute__((section(".data")));
 
@@ -3059,7 +3080,7 @@ char *_setlocale_r(_reent *r, s32 category, const char *locale)
 }
 
 void *_localeconv_r(_reent *r) {
-    return localeconvData;
+    return &localeconvData;
 }
 
 char *setlocale(s32 category, const char *locale) {

@@ -194,7 +194,7 @@ extern void mnuAdvanceTitleStateUnderSemaphore(void);
 
 extern void evtEnableMoonDraw(void);
 
-extern u32 D_00436330[];
+extern const char *fldIndexedResourcePaths[];
 
 
 
@@ -3810,10 +3810,10 @@ void fldUpdatePositionedTextureNodes(void) {
 
 
 void fldLoadResourceByIndex(s32 index) {
-    s32 ids[2];
+    const char *ids[2];
 
-    memcpy(ids, D_00436330, sizeof(ids));
-    fldIndexedResourceHandle = sdfDevLoadFileEx((const char *)(u32)ids[index], (u32 *)&fldIndexedResourceData, 0);
+    memcpy(ids, fldIndexedResourcePaths, sizeof(ids));
+    fldIndexedResourceHandle = sdfDevLoadFileEx(ids[index], (u32 *)&fldIndexedResourceData, 0);
     fldIndexedResourceEffect = dds3EffectLoad(fldIndexedResourceData);
 }
 
@@ -8143,7 +8143,7 @@ INCLUDE_SDATA(const s32, "game/code_001442D0", fldIndexedResourceData);
 
 INCLUDE_SDATA(const s32, "game/code_001442D0", fldIndexedResourceEffect);
 
-INCLUDE_SDATA(const s32, "game/code_001442D0", D_00436330);
+INCLUDE_SDATA(const s32, "game/code_001442D0", fldIndexedResourcePaths);
 
 INCLUDE_SDATA(const s32, "game/code_001442D0", D_00436338);
 

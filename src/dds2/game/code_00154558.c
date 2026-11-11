@@ -84,7 +84,7 @@ extern struct dds3Basic_t *fldPlayerObject;
 
 extern s32 fldNpcModelTable;
 
-extern u32 D_00436330[];
+extern const char *fldIndexedResourcePaths[];
 
 extern s32 fldTakaraCount;
 

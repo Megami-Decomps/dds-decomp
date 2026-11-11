@@ -5800,7 +5800,7 @@ extern f32 btlWorldCameraStartOffset[4], btlWorldCameraStartRotation[4];
 
 extern f32 btlCreatedCameraTarget[4], btlCreatedCameraRotation[4];
 
-extern u32 D_003BB660;
+extern const char *btlGameCameraName;
 
 extern dds3Basic_t *dds3AddCameraObjectBasicTypeFree(s32, u128 *, u128 *);
 
@@ -5830,7 +5830,7 @@ void btlInitializeWorldCamera(void) {
         data->fovUpdatePending |= DDS3_CAMERA_UPDATE_FOV_BIT;
     }
     camera = dds3AddCameraObjectBasicTypeFree(dds3AllocObjectId(), (u128 *)btlCreatedCameraTarget, (u128 *)btlCreatedCameraRotation);
-    camera->name = (const char *)D_003BB660;
+    camera->name = btlGameCameraName;
     dds3GetRadiusPoseSet(camera, 10.0f);
     dds3ObjectBaseCreateMover(camera);
     dds3ObjectBaseSetPadControl(camera, 0);
@@ -5991,21 +5991,21 @@ void btlRefreshWorldCameraHandle(void) {
     }
 }
 
-extern s32 D_003BB668;
+extern const char *btlNonCameraName;
 
-extern s32 D_003BB664;
+extern const char *btlFreeCameraName;
 
 s32 btlGetWorldObjectDefault(void) {
     dds3Basic_t *camera;
     if (!(((BtlState *)btlGetRuntime())->battleFlags & 2)) {
-        return D_003BB668;
+        return (s32)btlNonCameraName;
     }
     camera = dds3GetActiveCameraSceneBasic(dds3GetActiveScene());
     if (camera == NULL) {
-        return D_003BB668;
+        return (s32)btlNonCameraName;
     }
     if (camera->name == 0) {
-        return D_003BB664;
+        return (s32)btlFreeCameraName;
     }
     return (s32)camera->name;
 }
@@ -6255,9 +6255,9 @@ INCLUDE_SDATA(const s32, "game/code_001D0BA0", D_003BB650);
 
 INCLUDE_SDATA(const s32, "game/code_001D0BA0", D_003BB658);
 
-INCLUDE_SDATA(const s32, "game/code_001D0BA0", D_003BB660);
+INCLUDE_SDATA(const s32, "game/code_001D0BA0", btlGameCameraName);
 
-INCLUDE_SDATA(const s32, "game/code_001D0BA0", D_003BB664);
+INCLUDE_SDATA(const s32, "game/code_001D0BA0", btlFreeCameraName);
 
-INCLUDE_SDATA(const s32, "game/code_001D0BA0", D_003BB668);
+INCLUDE_SDATA(const s32, "game/code_001D0BA0", btlNonCameraName);
 

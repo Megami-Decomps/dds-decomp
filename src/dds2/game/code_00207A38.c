@@ -136,7 +136,7 @@ extern BtlRuntimeTask *btlCreateCommandSoundTask(ActionStateLink *, BtlCameraMod
 
 extern u32 D_00436B00;
 
-extern s32 D_00436AF0;
+extern const char *btlButtonIconTexturePath;
 
 extern s32 D_00438F6C;
 
@@ -1499,8 +1499,8 @@ void btlDrawButtonIcon(sdfGrOt_t *surface, s32 x, s32 y, s32 topLeftColor, s32 t
 }
 
 void btlOpenButtonIconResource(void) {
-    btlBossDebugPrintf("btl:[%s]\n", D_00436AF0);
-    D_00438F6C = sdfDevLoadFileEx(D_00436AF0, &btlButtonIconTexture, 0);
+    btlBossDebugPrintf("btl:[%s]\n", btlButtonIconTexturePath);
+    D_00438F6C = sdfDevLoadFileEx(btlButtonIconTexturePath, &btlButtonIconTexture, 0);
 }
 
 void btlRetainButtonTexture(void) {
@@ -4044,7 +4044,7 @@ void btlFormatResourceNameWithoutExtension(const struct BtlResourceNameRecord *r
     sprintf(output, D_00436C58, record->resourceName);
 }
 
-INCLUDE_SDATA(const s32, "game/code_00207A38", D_00436AF0);
+INCLUDE_SDATA(const s32, "game/code_00207A38", btlButtonIconTexturePath);
 
 INCLUDE_SDATA(const s32, "game/code_00207A38", D_00436B00);
 

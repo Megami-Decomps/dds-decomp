@@ -858,7 +858,7 @@ extern char D_004375C8[]; /* "ON " */
 extern char D_004375D0[]; /* "OFF" */
 extern char D_004375D8[]; /* "NORMAL" */
 extern char D_004375E0[]; /* "ADD" */
-extern char D_004375E8[]; /* "SUB" */
+extern char D_004375E8[]; /* "PUB" */
 extern char D_004375F0[]; /* " -- " */
 extern char D_004375F8[]; /* "1STOP" */
 extern char D_00437600[]; /* "DOWN" */

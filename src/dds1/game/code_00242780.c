@@ -101,7 +101,7 @@ extern f32 mnuShopSavedMiddleTransformVector[];
 extern f32 mnuShopSavedFirstTransformVector[];
 extern s32 mnuShopRestoreMiddleVector;
 extern EvtPackedSoundTrackId evtStopEventBgm(s32 eventId, EvtSoundVariation variation);
-extern s32 mnuShopPrimarySpriteNames[];
+extern const char *mnuShopPrimarySpriteNames[];
 
 /* Shift qualifying keys and their supported payload offsets. Preserve the
  * incoming base/offset/ubase arguments when no key overwrites them: the native
@@ -3259,7 +3259,7 @@ void mnuApplyFlagEntries(struct sdfMemHandle_t *snapshotHandle) {
 }
 
 extern const char mnuTerminalSpriteDirectory[];
-extern s32 mnuTerminalPrimarySpriteNames[];
+extern const char *mnuTerminalPrimarySpriteNames[];
 
 /* Load the terminal sprite bank, then derive its additional slot set. */
 void mnuLoadResourceHandles(MenuTerminalWork *menuWork) {
@@ -3267,7 +3267,7 @@ void mnuLoadResourceHandles(MenuTerminalWork *menuWork) {
 
     for (resourceIndex = 0; resourceIndex < 2; resourceIndex++) {
         struct EffectSlotSet *resourceHandle = effLoadIndexedResource(
-            mnuTerminalSpriteDirectory, (const char *)mnuTerminalPrimarySpriteNames[resourceIndex], EFF_RESOURCE_SOURCE_RETAINED);
+            mnuTerminalSpriteDirectory, mnuTerminalPrimarySpriteNames[resourceIndex], EFF_RESOURCE_SOURCE_RETAINED);
 
         menuWork->resourceSets[resourceIndex] = resourceHandle;
         effResolveAndReleaseResource(resourceHandle);

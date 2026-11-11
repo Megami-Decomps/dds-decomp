@@ -93,11 +93,11 @@ extern void btlSetUnitRotation(BtlUnit *, const f32 [4]);
 
 extern char D_00436A28[];
 
-extern u32 D_00436A98;
+extern const char *btlGameCameraName;
 
-extern s32 D_00436A9C;
+extern const char *btlFreeCameraName;
 
-extern s32 D_00436AA0;
+extern const char *btlNonCameraName;
 
 extern void btlFlagMatchingUnitsDefeatCandidate(s32);
 

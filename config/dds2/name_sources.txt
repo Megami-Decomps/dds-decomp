@@ -11785,3 +11785,9 @@
 0x00437D94	fileSaveIconSysSize	inferred	u32 size slot for slSaveWriteFile. DDS1 twin 0x003BC894; was D_00437D94
 0x00422238	evtSceneDispRows	inferred	NodeDiagnosticRow[17] evtSceneDispProcess copies to its stack. DDS1 twin 0x003ACD78; was D_00422238
 0x00385A90	sdfChannels	inferred	SdfChannel[8] sdfResetChannels reloads. DDS1 twin 0x0032A6F0; was D_00385A90
+0x00436A98	btlGameCameraName	inferred	const char * "GAME CAMERA". DDS1 twin 0x003BB660; was D_00436A98
+0x00436A9C	btlFreeCameraName	inferred	const char * "FREE CAMERA". DDS1 twin 0x003BB664; was D_00436A9C
+0x00436AA0	btlNonCameraName	inferred	const char * "NON-CAMERA". DDS1 twin 0x003BB668; was D_00436AA0
+0x00436AF0	btlButtonIconTexturePath	inferred	const char * "/battle/panel/b_bupbst.tmx". DDS1 twin 0x003BB6B8; was D_00436AF0
+0x004368B0	btlScenePanelTaskName	inferred	const char * "btl_panel__". DDS1 twin 0x003BB488; was D_004368B0
+0x00436330	fldIndexedResourcePaths	inferred	const char *[2] {SUN-FD.D3P, SUN-FU.D3P} fldLoadResourceByIndex copies and loads; was D_00436330

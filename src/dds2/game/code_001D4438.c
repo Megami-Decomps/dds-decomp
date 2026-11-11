@@ -257,7 +257,7 @@ extern void btlUpdateAndDrawTargetActorPanels();
 extern char *D_004367CC;
 
 
-extern char *D_004368B0;
+extern char *btlScenePanelTaskName;
 extern void btlLoadResourceBlock(void);
 extern void btlStartRegisteredChildTask(void);
 extern void btlInitializeStaffActorPanels(void);

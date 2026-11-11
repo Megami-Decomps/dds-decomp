@@ -11124,19 +11124,19 @@ u32 fldGetSceneIndexedValue(s32 index) {
 void func_001C4540(void) {
 }
 
-extern const char *D_003BB488;
+extern const char *btlScenePanelTaskName;
 
 extern s32 btlUpdateScenePanelTask(dds3ProcessID_t *);
 
 void fldCreateSceneCleanupTask(void) {
-    dds3ProcessID_t *oldTask = dds3SearchProcessName(D_003BB488);
+    dds3ProcessID_t *oldTask = dds3SearchProcessName(btlScenePanelTaskName);
     BtlState *context;
     dds3ProcessID_t *task;
     if (oldTask == 0) {
         btlGetRuntime();
     }
     context = (BtlState *)btlGetRuntime();
-    task = dds3StartProcess(D_003BB488, 0x2B0E, 1, 1, btlUpdateScenePanelTask, btlClearScenePanelTaskHandle, 0);
+    task = dds3StartProcess(btlScenePanelTaskName, 0x2B0E, 1, 1, btlUpdateScenePanelTask, btlClearScenePanelTaskHandle, 0);
     dds3LinkProcess(context->scriptOwner, task);
     context->cleanupTask = task;
     btlLoadResourceBlock();
@@ -11217,7 +11217,9 @@ INCLUDE_RODATA(const s32, "game/code_001A9780", D_003A32F0);
 
 INCLUDE_RODATA(const s32, "game/code_001A9780", D_003A3368);
 
-INCLUDE_SDATA(const s32, "game/code_001A9780", D_003BB488);
+INCLUDE_SDATA(const s32, "game/code_001A9780", btlScenePanelTaskName);
+
+INCLUDE_SDATA(const s32, "game/code_001A9780", D_003BB48C);
 
 INCLUDE_SDATA(const s32, "game/code_001A9780", D_003BB494);
 

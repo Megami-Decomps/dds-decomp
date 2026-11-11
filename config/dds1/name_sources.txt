@@ -11043,3 +11043,8 @@
 0x0037CDF8	prfMantraFallbackNames	inferred	const char *[2] {"???", "Mantra"}; prfResolveMantraNameOrFallback returns entry 0, entry 1 has no reader; was D_0037CDF8
 0x003ACD78	evtSceneDispRows	inferred	NodeDiagnosticRow[17] evtSceneDispProcess copies to its stack (AREA, MOVER, ... POINT, end row). DDS2 twin 0x00422238; was D_003ACD78
 0x0032A6F0	sdfChannels	inferred	SdfChannel[8] sdfResetChannels reloads. DDS2 twin 0x00385A90; was D_0032A6F0
+0x003BB660	btlGameCameraName	inferred	const char * "GAME CAMERA". DDS2 twin 0x00436A98; was D_003BB660
+0x003BB664	btlFreeCameraName	inferred	const char * "FREE CAMERA". DDS2 twin 0x00436A9C; was D_003BB664
+0x003BB668	btlNonCameraName	inferred	const char * "NON-CAMERA". DDS2 twin 0x00436AA0; was D_003BB668
+0x003BB6B8	btlButtonIconTexturePath	inferred	const char * "/battle/panel/b_bupbst.tmx". DDS2 twin 0x00436AF0; was D_003BB6B8
+0x003BB488	btlScenePanelTaskName	inferred	const char * "btl_panel__". DDS2 twin 0x004368B0; was D_003BB488
