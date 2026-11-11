@@ -39,7 +39,7 @@ extern u32 effColorEditSelectedAlphaKey;
 
 
 
-extern s32 effEditorCurrentMenu;
+extern struct EffQueuedFileObject *effEditorCurrentMenu;
 
 
 

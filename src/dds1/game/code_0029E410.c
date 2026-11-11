@@ -198,7 +198,7 @@ extern struct BtlResourceEntryList *effResourceBankEntries;
 
 extern struct BtlResourceDescriptor *effResourceBankDescriptor;
 
-extern s32 effEditorCurrentMenu;
+extern struct EffQueuedFileObject *effEditorCurrentMenu;
 
 extern void *effQueuedFileObject;
 
@@ -11788,7 +11788,7 @@ extern u8 *effFindAssetData(FileJob *entry);
 
 extern u32 effGetSelectedFileQueueIndex(void);
 
-extern s32 effEditorCurrentMenu;
+extern struct EffQueuedFileObject *effEditorCurrentMenu;
 
 extern void *effQueuedFileObject;
 
@@ -11893,7 +11893,7 @@ s32 effUpdatePartsListEditor(s32 unused) {
     f32 previousScale;
 
     selectionChanged = 0;
-    if ((EffQueuedFileObject *)(u32)effEditorCurrentMenu == &effPartsListMenu) {
+    if (effEditorCurrentMenu == &effPartsListMenu) {
         effPartsListMenu.flags &= ~1;
     }
     if (effFileQueue == NULL) {
@@ -11901,14 +11901,14 @@ s32 effUpdatePartsListEditor(s32 unused) {
     }
     scrolled = 0;
     count = fileQueueCountLinkedJobs(effFileQueue);
-    if ((EffQueuedFileObject *)(u32)effEditorCurrentMenu == &effPartsListMenu) {
-        if (((EffQueuedFileObject *)(u32)effEditorCurrentMenu)->cursor == 0) {
+    if (effEditorCurrentMenu == &effPartsListMenu) {
+        if (effEditorCurrentMenu->cursor == 0) {
             if ((dds3PadBitTable[6] & 2) && effPartsListScroll != 0) {
                 scrolled = 1;
                 effPartsListScroll--;
                 selectionChanged = 1;
             }
-        } else if (((EffQueuedFileObject *)(u32)effEditorCurrentMenu)->cursor == 20 &&
+        } else if (effEditorCurrentMenu->cursor == 20 &&
                    (dds3PadBitTable[7] & 2) &&
                    (u32)(effPartsListScroll + 21) < count) {
             scrolled = 1;
@@ -12052,12 +12052,12 @@ s32 effUpdatePartsListEditor(s32 unused) {
         previousCursor = capacity - 1;
     }
     previousScale = effFileQueue->scaleMultiplier;
-    btlDebugMenuSetupNoOp((void *)(u32)effEditorCurrentMenu);
+    btlDebugMenuSetupNoOp(effEditorCurrentMenu);
     /* The stub is empty: retail stores the v0 it leaves, the effFileQueue
      * just loaded for the scale (0x002B6094). */
-    effEditorCurrentMenu = (s32)(u32)effFileQueue;
-    if ((EffQueuedFileObject *)(u32)effEditorCurrentMenu == &effQueuePostureMenu) {
-        if (((EffQueuedFileObject *)(u32)effEditorCurrentMenu)->flags & 8) {
+    effEditorCurrentMenu = (EffQueuedFileObject *)effFileQueue;
+    if (effEditorCurrentMenu == &effQueuePostureMenu) {
+        if (effEditorCurrentMenu->flags & 8) {
             changed = 1;
         }
     }
@@ -12072,13 +12072,13 @@ s32 effUpdatePartsListEditor(s32 unused) {
         effPartsListScroll = 0;
     }
     btlDebugMenuBeforeRecordNoOp();
-    btlDebugMenuRecordNoOp((void *)(u32)effEditorCurrentMenu);
+    btlDebugMenuRecordNoOp(effEditorCurrentMenu);
     btlDebugMenuAfterRecordNoOp();
     if (previousScale != effFileQueue->scaleMultiplier) {
         changed = 1;
     }
     if (effQueuedFileObject != NULL) {
-        effEditorCurrentMenu = (s32)(u32)effQueuedFileObject;
+        effEditorCurrentMenu = (EffQueuedFileObject *)effQueuedFileObject;
         effQueuedFileObject = NULL;
     }
     sdfMemFreeDirect(allocation);
@@ -12091,8 +12091,8 @@ s32 effUpdatePartsListEditor(s32 unused) {
         result = 0x800001;
     }
     memcpy(effFileQueue, &effEditedQueueHeader, 0x80);
-    if (effPartsPreviewReload || ((EffQueuedFileObject *)(u32)effEditorCurrentMenu == &effPartsListMenu &&
-        (((EffQueuedFileObject *)(u32)effEditorCurrentMenu)->cursor != previousCursor || selectionChanged))) {
+    if (effPartsPreviewReload || (effEditorCurrentMenu == &effPartsListMenu &&
+        (effEditorCurrentMenu->cursor != previousCursor || selectionChanged))) {
         if (effTemporaryFileJob != 0) {
             fileJobDestroy(effTemporaryFileJob);
             effTemporaryFileJob = 0;
@@ -12669,8 +12669,8 @@ u32 effFlagFileQueueActive(void) {
 
 /* Select the queued file object's linked state when present; return zero in either case. */
 u32 effSelectLinkedFileState(void) {
-    if (((EffQueuedFileObject *)effEditorCurrentMenu)->linkedState != NULL) {
-        effQueuedFileObject = ((EffQueuedFileObject *)effEditorCurrentMenu)->linkedState;
+    if (effEditorCurrentMenu->linkedState != NULL) {
+        effQueuedFileObject = effEditorCurrentMenu->linkedState;
     }
     return 0;
 }
@@ -12766,7 +12766,7 @@ u32 effSelectCameraFileJobFromRows(const char *nameKey, const EffCameraCreateRow
         }
     }
 
-    menuObject = (EffQueuedFileObject *)effEditorCurrentMenu;
+    menuObject = effEditorCurrentMenu;
     state = &D_0038F428;
     state->count = count;
     oldIndex = state->cursor;
