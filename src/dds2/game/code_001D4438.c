@@ -310,13 +310,6 @@ typedef struct FxTask {
     BtlUnit *unit;
 } FxTask;
 
-typedef struct SoundEntry {
-    u32 unk0;
-    u32 unk4;
-    u32 unk8;
-} SoundEntry;
-
-extern SoundEntry D_003BDE18[];
 
 extern s128 btlDefaultUnitBodyOffset;
 

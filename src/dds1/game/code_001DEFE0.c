@@ -158,7 +158,7 @@ extern void btlInitLinkedUnitActionCursor(BtlTask *);
 
 extern s32 btlHasSingleLinkedResource(BtlLinkedCommand *);
 
-extern BattleSoundArchiveEntry D_0035F748[BTL_SOUND_ENTRY_COUNT];
+extern BattleSoundArchiveEntry btlSoundArchiveEntries[BTL_SOUND_ENTRY_COUNT];
 
 /* SYSEFF metadata and runtime registrations share these indices. */
 enum { BTL_COMMAND_UNIT_EFFECT_SOUND_SLOT = 0x2C };
@@ -10000,7 +10000,7 @@ extern char D_003A5008[];
 
 extern char D_003A5020[];
 
-/* Consume archive records only for enabled SYSEFF rows; clear unavailable entries. */
+/* Consume archive records only for SYSEFF rows with a path; clear unavailable entries. */
 void sndLoadSysEffLb(void) {
     const char *path = D_003A5008;
     FilePacRequest *archive = (FilePacRequest *)pacLoad(path);
@@ -10012,20 +10012,20 @@ void sndLoadSysEffLb(void) {
     node = archive->packet.queueHead;
     i = 0;
     while (node != NULL) {
-        if (D_0035F748[i].enabled != 0) {
+        if (btlSoundArchiveEntries[i].path != NULL) {
             u32 unk08 = (u32)PAC_WORK_ALLOCATION(node);
-            D_0035F748[i].opaque08 = unk08;
-            D_0035F748[i].archiveData = node->dataCursor;
+            btlSoundArchiveEntries[i].opaque08 = unk08;
+            btlSoundArchiveEntries[i].archiveData = node->dataCursor;
             node = node->next;
         } else {
-            D_0035F748[i].archiveData = 0;
-            D_0035F748[i].opaque08 = 0;
+            btlSoundArchiveEntries[i].archiveData = 0;
+            btlSoundArchiveEntries[i].opaque08 = 0;
         }
         i++;
     }
     for (; i < BTL_SOUND_ENTRY_COUNT; i++) {
-        D_0035F748[i].archiveData = 0;
-        D_0035F748[i].opaque08 = 0;
+        btlSoundArchiveEntries[i].archiveData = 0;
+        btlSoundArchiveEntries[i].opaque08 = 0;
     }
     pacFileHandleFree_(archive);
 }
@@ -10038,8 +10038,8 @@ void btlRefreshSoundEntries(void) {
 
     btlGetRuntime();
     for (i = 0; i < BTL_SOUND_ENTRY_COUNT; i++) {
-        if (D_0035F748[i].archiveData != 0) {
-            btlCreateIndexedSoundResourceNode(i, D_0035F748[i].archiveData);
+        if (btlSoundArchiveEntries[i].archiveData != 0) {
+            btlCreateIndexedSoundResourceNode(i, btlSoundArchiveEntries[i].archiveData);
         }
     }
 }
@@ -10051,7 +10051,7 @@ void sndFreeBattleSoundEntries(void) {
     u32 i;
 
     for (i = 0; i < BTL_SOUND_ENTRY_COUNT; i++, node++) {
-        if (D_0035F748[i].archiveData != 0) {
+        if (btlSoundArchiveEntries[i].archiveData != 0) {
             sndFreeResourceNode(*node);
             *node = 0;
         }
@@ -10077,7 +10077,7 @@ void btlCreateIndexedSoundResourceNode(s32 slotIndex, SoundMixer *source) {
 
 SoundHandleNode *sndCreateSystemEffectHandle(struct dds3ModelHandle_t *actor, s32 index) {
     SoundHandleNode *node = sdfChipAllocZeroDirect(sizeof(SoundHandleNode));
-    BattleSoundArchiveEntry *entry = &D_0035F748[index];
+    BattleSoundArchiveEntry *entry = &btlSoundArchiveEntries[index];
     node->actor = actor;
     node->queue = fileCloneQueueEntries(entry->archiveData);
     return node;
