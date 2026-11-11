@@ -2250,7 +2250,6 @@ void evtSubmitTexturedGradientQuad(s32 x, s32 y, s32 width, s32 height,
     surface->regFunc(surface, list);
 }
 
-#ifdef NON_MATCHING
 #include "common.h"
 
 extern u32 egl_OT_Offset;
@@ -2278,24 +2277,30 @@ void evtSubmitTexturedGradientQuadPoints(f32 topLeftX, f32 topLeftY, f32 topRigh
 
     list = dds3FontReqAllocDrawTag();
     sdf2DLinkTexPacket(list, texture, 0);
+    /* Scale the screen points before converting to fixed-point integers. */
+    topLeftX *= 16.0f;
+    topLeftY *= 8.0f;
+    topRightX *= 16.0f;
+    topRightY *= 8.0f;
+    bottomLeftX *= 16.0f;
+    bottomLeftY *= 8.0f;
+    bottomRightX *= 16.0f;
+    bottomRightY *= 8.0f;
     uLeft = u << 4;
     vTop = v << 4;
     uRight = uLeft + (textureWidth << 4);
     vBottom = vTop + (textureHeight << 4);
     sdfPrimLinkGt4(list, 0x40,
-                   (s32)(topLeftX * 16.0f) + 0x7000, (s32)(topLeftY * 8.0f) + 0x7900, uLeft, vTop, color0,
-                   (s32)(topRightX * 16.0f) + 0x7000, (s32)(topRightY * 8.0f) + 0x7900, uRight, vTop, color1,
-                   (s32)(bottomLeftX * 16.0f) + 0x7000, (s32)(bottomLeftY * 8.0f) + 0x7900, uLeft, vBottom,
+                   (s32)topLeftX + 0x7000, (s32)topLeftY + 0x7900, uLeft, vTop, color0,
+                   (s32)topRightX + 0x7000, (s32)topRightY + 0x7900, uRight, vTop, color1,
+                   (s32)bottomLeftX + 0x7000, (s32)bottomLeftY + 0x7900, uLeft, vBottom,
                    color3,
-                   (s32)(bottomRightX * 16.0f) + 0x7000, (s32)(bottomRightY * 8.0f) + 0x7900, uRight, vBottom,
+                   (s32)bottomRightX + 0x7000, (s32)bottomRightY + 0x7900, uRight, vBottom,
                    color2,
                    -1, NULL);
     surface = &sdfGrOtTable[egl_OT_Offset];
     surface->regFunc(surface, list);
 }
-#else
-INCLUDE_ASM(const s32, "kernel/dds3KernelDraw", evtSubmitTexturedGradientQuadPoints);
-#endif
 
 /* Native rectangle emitter: x/y/width/height, explicit depth, then TL/TR/BR/BL colors. */
 void evtSubmitGradientRectAtDepth(s32 x, s32 y, s32 w, s32 h, u32 depth, s32 color0, s32 color1, s32 color2, s32 color3) {
