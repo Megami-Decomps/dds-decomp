@@ -1,0 +1,179 @@
+{
+  "base_commit": "2ba05347c4f35e16ab23fdb55eb050a6f76492a6",
+  "function": "billAdvanceParticleInstances",
+  "new_matching_functions": 2,
+  "new_matching_retail_bytes": 3632,
+  "games": {
+    "dds1": {
+      "address": "0x0029FB48",
+      "native_bytes": 1816,
+      "whole_owner": "501 match, 0 differ",
+      "source_sha256": "0d8257ee8f48e74515814f42c337a1e8cb5bd03c0f5a820e00651749b71e0889",
+      "ordinary_probed_parity": {
+        "assembly_parity_only_file_directive": true,
+        "allocated_section_parity": true,
+        "relocation_contract_parity": true,
+        "allocated_sections": {
+          ".text": {
+            "size": 124128,
+            "type": "SHT_PROGBITS",
+            "align": 8,
+            "sha256": "1345bdece13d8071b9d64f4985581b1cdfee59b75f538e30e84c8d9cb4193922"
+          },
+          ".data": {
+            "size": 0,
+            "type": "SHT_PROGBITS",
+            "align": 1,
+            "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+          },
+          ".bss": {
+            "size": 0,
+            "type": "SHT_NOBITS",
+            "align": 1,
+            "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+          },
+          ".lit4": {
+            "size": 224,
+            "type": "SHT_PROGBITS",
+            "align": 4,
+            "sha256": "65684e1eebf6478f6f00b7a6f0535c942f140150aba75f71524f11fce092de02"
+          },
+          ".rodata": {
+            "size": 4432,
+            "type": "SHT_PROGBITS",
+            "align": 16,
+            "sha256": "cfb433390fa5d0bf4510a32aa15a63d5ac051442012244488ceb3d7062d85a4a"
+          },
+          ".sdata": {
+            "size": 2104,
+            "type": "SHT_PROGBITS",
+            "align": 8,
+            "sha256": "51d3ab25554a8a7a5436016e58945f6bf1c3dc0d9eb8e29b03ebebfe5de4f345"
+          }
+        },
+        "relocation_counts": {
+          ".rel.text": 3239,
+          ".rela.text": 0,
+          ".rel.rodata": 100,
+          ".rela.rodata": 0,
+          ".rel.sdata": 1,
+          ".rela.sdata": 0
+        }
+      },
+      "whole_owner_log_sha256": "8f81e3237682cf1a112e82aaf98a4fc41086da2057c3c7e23ca34603128316f1",
+      "probe_manifest_sha256": "b3314cc7ed9eb8d3a92b77f91ba1435701816158bf1284e1f4889f7321344d66",
+      "decisive_rtl_sha256": "d89a5928d8444859ce011612933c0e1d63fc8eb51ff8e45f470b1777992a076f"
+    },
+    "dds2": {
+      "address": "0x002E1BB0",
+      "native_bytes": 1816,
+      "whole_owner": "588 match, 0 differ",
+      "source_sha256": "6d8a58e6b05cb68ca53d5b03230704b68a6a95495c690429451d03ba92c5eb24",
+      "ordinary_probed_parity": {
+        "assembly_parity_only_file_directive": true,
+        "allocated_section_parity": true,
+        "relocation_contract_parity": true,
+        "allocated_sections": {
+          ".text": {
+            "size": 146360,
+            "type": "SHT_PROGBITS",
+            "align": 8,
+            "sha256": "738f079f0c1f718a315b0fce6860c96d93073e44738ee797d3ccd1e9ae0504de"
+          },
+          ".data": {
+            "size": 0,
+            "type": "SHT_PROGBITS",
+            "align": 1,
+            "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+          },
+          ".bss": {
+            "size": 0,
+            "type": "SHT_NOBITS",
+            "align": 1,
+            "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+          },
+          ".lit4": {
+            "size": 252,
+            "type": "SHT_PROGBITS",
+            "align": 4,
+            "sha256": "ff78de94d8f779a2d69b53afa4c3cd9a134ef15c98afd1a7907b1c519461519e"
+          },
+          ".rodata": {
+            "size": 5616,
+            "type": "SHT_PROGBITS",
+            "align": 16,
+            "sha256": "8c63600b73bdc7bca9c0757b6518af59d893cafaebc1363346855a850e62cf34"
+          },
+          ".sdata": {
+            "size": 2464,
+            "type": "SHT_PROGBITS",
+            "align": 8,
+            "sha256": "22762cc2cc6a03a0c2759596a6a865d85faa15d0cf16cbcd9bfb28774bbe68b0"
+          }
+        },
+        "relocation_counts": {
+          ".rel.text": 3801,
+          ".rela.text": 0,
+          ".rel.rodata": 130,
+          ".rela.rodata": 0,
+          ".rel.sdata": 2,
+          ".rela.sdata": 0
+        }
+      },
+      "whole_owner_log_sha256": "7e20fc638973e92f344231c7af17587c82f426967404567b92fcbfa7c9dc0f48",
+      "probe_manifest_sha256": "5865261fe40d32fb5635bbdde6d977db39d72a506eaf12ae75efcaae6016e424",
+      "decisive_rtl_sha256": "c8a5e7d44c3dee90c3137cde3f8de783e9ca87ff49484d9c37c701fd61f218e5"
+    }
+  },
+  "controls": {
+    "particle-baseline": {
+      "source_sha256": "d78d4f8e97aff42c02d7d13e79a1c1554cd41c20d596ea223833af65f0b6a78d",
+      "differing_words": 22,
+      "native_bytes": 1816,
+      "emitted_bytes": 1816,
+      "assembly_parity_only_file_directive": true,
+      "allocated_section_parity": true,
+      "relocation_contract_parity": true,
+      "probe_manifest_sha256": "f327a65720ff38098dc107bcc510cc0c38d9f1c1182baa5b11b22e978e6aad96"
+    },
+    "particle-motion-and-count": {
+      "source_sha256": "b7cec20849a833498e7f4707a0ab40a32b82e2690b34a1c5caac996b9f155a57",
+      "differing_words": 22,
+      "native_bytes": 1816,
+      "emitted_bytes": 1816,
+      "assembly_parity_only_file_directive": true,
+      "allocated_section_parity": true,
+      "relocation_contract_parity": true,
+      "probe_manifest_sha256": "5ab09b837ea839724b5a08d4d05e167bbed769e79935fb753e387c8768529ccc"
+    },
+    "particle-family-state": {
+      "source_sha256": "8f8cbfec2ad4a1865029d21f947e7d3eca8cb344a49326eef3c3d86e20ecbf5e",
+      "differing_words": 2,
+      "native_bytes": 1816,
+      "emitted_bytes": 1816,
+      "assembly_parity_only_file_directive": true,
+      "allocated_section_parity": true,
+      "relocation_contract_parity": true,
+      "probe_manifest_sha256": "32f32eaa06e6135018efab99c371c7c49d3249270e9f04f99766d7de23f7ca77"
+    },
+    "particle-early-count": {
+      "source_sha256": "09487ce7bb4fd05280d72c8834ffc8b3ae80f2395298015cb429fac63bf0c28f",
+      "differing_words": 25,
+      "native_bytes": 1816,
+      "emitted_bytes": 1816,
+      "assembly_parity_only_file_directive": true,
+      "allocated_section_parity": true,
+      "relocation_contract_parity": true,
+      "probe_manifest_sha256": "dd8b46927e010ddba6bfecbc5ee7c1d57be39623a10ac619c5473d6370b0e178"
+    }
+  },
+  "validation": {
+    "dds1_retail_sha1": "6d18898e2724bf1d145392766e8ba1e678487419",
+    "dds2_retail_sha1": "9be91ee1b4a535a4cb6ec89237b5a6ba41be2add",
+    "tests": "445 tests in 118 batches: OK",
+    "build_log_sha256": "83722e02547ffa7069f3c1006f9d62aa31e7113c87bc2a2be6c94f7b085ff9de",
+    "test_log_sha256": "c6a032f7f8ab78987798e3bf7b81302aae62169522111759bf462bc3ef0a0ba2",
+    "independent_review_sha256": "35ba7c4d65ea7a1383594070d5153280b9059b178aba1b15c48835d71aec02d1",
+    "review": "Semantic and finite emitted COP2/scratch contract accepted."
+  }
+}

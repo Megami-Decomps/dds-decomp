@@ -1216,8 +1216,6 @@ void billReleaseParticleNode(s32 work) {
     sdfMemFreeDirect(((EffBillFrameState *)work)->allocation);
 }
 
-#ifdef NON_MATCHING
-
 extern EffRandState dds3RandCB[];
 
 extern u8 effOnesVector[];
@@ -1249,6 +1247,8 @@ void billAdvanceParticleInstances(EffClassWork *work) {
     s32 fadeStart;
     s32 fadeEnd;
     s32 retiredState;
+    s32 waitingState;
+    s32 inactiveState;
     u32 firstColor;
     u32 secondColor;
     u32 respawn;
@@ -1269,11 +1269,11 @@ void billAdvanceParticleInstances(EffClassWork *work) {
         config->frame.output.timed.time.progress != 0) {
         return;
     }
-    itemCount = (s32)config->frame.output.timed.count;
     resource = (EffBillFrameState *)work->resource;
     lifetime = config->frame.lifetime;
     entry = (EffBillParticleEntry *)resource->entries;
     asset = resource->asset;
+    itemCount = (s32)config->frame.output.timed.count;
     if (lifetime == 0) {
         return;
     }
@@ -1297,23 +1297,27 @@ void billAdvanceParticleInstances(EffClassWork *work) {
     secondColor = config->colorB & 0xFFFFFF;
     UnpackRGBAWordFloat(secondColor, 1.0f / 128.0f);
     SDF_VU0_STOREVECTOR_NOMEM(secondVector);
+    /* Capture the motion/respawn inputs before initializing private vectors.
+     * See docs/matching/particle-instance-advance.md for the native epochs. */
     acceleration = config->acceleration;
-    SDF_VU0_STOREIDENTITYVECTOR(radialA);
+    gravity = config->gravity;
     respawn = config->frame.respawn;
+    SDF_VU0_STOREIDENTITYVECTOR(radialA);
     SDF_VU0_STOREIDENTITYVECTOR(radialB);
     if (itemCount <= 0) {
         return;
     }
-    gravity = config->gravity;
+    waitingState = -1;
+    inactiveState = -2;
+    retiredState = respawn != 0 ? waitingState : inactiveState;
     item = itemCount;
-    retiredState = respawn != 0 ? -1 : -2;
     for (; item != 0; item--, entry++, vertices += 13, colors += 13) {
         s32 age = entry->age;
 
-        if (age == -2) {
+        if (age == inactiveState) {
             continue;
         }
-        if (age == -1) {
+        if (age == waitingState) {
             if (remainingSpawn != 0) {
                 f32 randomValue;
                 f32 jitter;
@@ -1441,12 +1445,6 @@ void billAdvanceParticleInstances(EffClassWork *work) {
         }
     }
 }
-
-#else
-
-INCLUDE_ASM(const s32, "game/code_0029E410", billAdvanceParticleInstances);
-
-#endif
 
 void billUpdateParticleDrawColorAndTransform(BillCellDrawWork *work) {
     u8 *config = work->config;
