@@ -1,0 +1,21 @@
+# LIBSD.IRX, Sony's SPU2 device library: the register interface the synthesiser
+# and the sound driver both call. See docs/irx-modules.md.
+name: LIBSD.IRX
+sha1: 4fbaa13579d733e14deec9179ac7ad0b9497852e
+
+# Two builds of this module are usually open at once, Nocturne's and the later
+# one shipped with Persona 3 FES, so the IDB is named by path and not by module.
+# The LIB31 copy carries the names; it is a later version, so they are evidence.
+idb: Nocturne (USA)/SOUNDIRX/LIBSD
+
+module:
+  name: Sound_Device_Library
+  version: 0x0303
+  entry: start
+
+paths:
+  target: orig/irx/LIBSD.IRX
+  asm: asm/irx/LIBSD
+  src: src/irx/LIBSD.c
+  build: build/irx/LIBSD
+  symbols: config/irx/LIBSD/symbol_addrs.txt
