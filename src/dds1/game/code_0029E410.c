@@ -11722,6 +11722,11 @@ u32 effPollAttachedFile(void) {
     return result;
 }
 
+extern EffCameraCreateRow D_0038E0B0[2];
+extern EffCameraCreateRow D_0038E200[2];
+extern EffCameraCreateRow D_0038E780[2];
+extern EffCameraCreateRow D_0038E920[2];
+extern EffCameraCreateRow D_0038E960[2];
 extern EffectAssetLink *D_0038E9D8[22];
 
 u8 *effFindAssetData(FileJob *entry) {

@@ -219,6 +219,12 @@ extern void camFollowOffsetVec(u8 *, void *);
 
 
 
+extern EffCameraCreateRow D_003FE5D0[2];
+extern EffCameraCreateRow D_003FE740[2];
+extern EffCameraCreateRow D_003FECE0[2];
+extern EffCameraCreateRow D_003FEF60[2];
+extern EffCameraCreateRow D_003FEFA0[2];
+extern EffCameraCreateRow D_003FF0F0[2];
 extern EffectAssetLink *D_003FF128[24];
 
 typedef struct EffSurfaceEndpoints {
