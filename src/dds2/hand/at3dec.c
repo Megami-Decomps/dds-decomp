@@ -740,59 +740,59 @@ void at3decCarrySilentBand(at3decChannel_t *chan, s32 band)
 /* Parse and reconstruct one channel's sound unit. second is set for the
  * reversed second unit of format 0x12, which starts with a joint stereo
  * header in place of the unit id. Returns 0, or -1 for a bad unit. */
-#ifdef NON_MATCHING
 s32 at3decDecodeSoundUnit(at3decChannel_t *chan, s32 second, at3decWork_t *w)
 {
     at3decGainPoint_t gain[4][8];
     s32 sel[4];
     s32 angle = 0;
-    s32 n, g, i, k, cnt, groups, nbands, band;
+    s32 n, k, cnt, count, band;
 
     if (second) {
         angle = at3decReadBits(4, w);
-        for (i = 0; i < 4; i++) {
-            sel[i] = at3decReadBits(2, w);
+        for (band = 0; band < 4; band++) {
+            sel[band] = at3decReadBits(2, w);
         }
         w->bitPos += 2;
     } else {
         w->bitPos += 6;
     }
     n = at3decReadBits(2, w) + 1;
-    memset(gain, 0, sizeof(gain));
-    for (g = 0; g < n; g++) {
+    band = 0;
+    do {
         cnt = at3decReadBits(3, w);
         for (k = 0; k < cnt; k++) {
-            gain[g][k].level = at3decReadBits(4, w);
-            gain[g][k].loc = at3decReadBits(5, w) << 3;
+            gain[band][k].level = at3decReadBits(4, w);
+            gain[band][k].loc = at3decReadBits(5, w) << 3;
         }
-        gain[g][cnt].loc = 0xFF;
-        gain[g][cnt].level = 4;
-    }
-    for (; g < 4; g++) {
-        gain[g][0].loc = 0xFF;
-        gain[g][0].level = 4;
+        gain[band][k].level = 4;
+        gain[band][k].loc = 0xFF;
+        band++;
+    } while (band < n);
+    for (; band < 4; band++) {
+        gain[band][0].level = 4;
+        gain[band][0].loc = 0xFF;
     }
 
     memcpy(chan->pcm, &chan->pcm[1024], AT3DEC_HISTORY * sizeof(s16));
     memset(chan->spectrum, 0, sizeof(chan->spectrum));
     w->maxLine = n << 8;
 
-    groups = at3decReadBits(5, w);
-    if (groups != 0 && at3decDecodeTonalComponents(chan, groups, n, w) == -1) {
+    count = at3decReadBits(5, w);
+    if (count != 0 && at3decDecodeTonalComponents(chan, count, n, w) == -1) {
         return -1;
     }
     if (at3decDecodeSpectrum(chan, at3decReadBits(5, w) + 1, w) == -1) {
         return -1;
     }
 
-    nbands = n;
+    count = n;
     if ((n << 8) < w->maxLine) {
         s32 t = w->maxLine + 0xF7;
 
         if (t < 0) {
             t = w->maxLine + 0x1F6;
         }
-        nbands = t >> 8;
+        count = t >> 8;
     }
 
     band = 0;
@@ -800,10 +800,11 @@ s32 at3decDecodeSoundUnit(at3decChannel_t *chan, s32 second, at3decWork_t *w)
         if (at3decInverseTransformBand(chan, band, gain[band][0].level) != 0) {
             at3decCarrySilentBand(chan, band);
         }
-        if (at3decApplyGainControl(chan, band++) == -1) {
+        if (at3decApplyGainControl(chan, band) == -1) {
             return -1;
         }
-    } while (band < nbands);
+        band++;
+    } while (band < count);
     for (; band < 4; band++) {
         at3decCarrySilentBand(chan, band);
         if (at3decApplyGainControl(chan, band) == -1) {
@@ -816,16 +817,13 @@ s32 at3decDecodeSoundUnit(at3decChannel_t *chan, s32 second, at3decWork_t *w)
         w->prev = w->cur;
         w->cur.nbands = n;
         w->cur.matrix = &at3decJointStereoWeights[angle];
-        for (i = 0; i < 4; i++) {
-            w->cur.band[i] = &at3decBandMixWeights[sel[i]];
+        for (band = 0; band < 4; band++) {
+            w->cur.band[band] = &at3decBandMixWeights[sel[band]];
         }
     }
     memcpy(chan->gain, gain, sizeof(gain));
     return 0;
 }
-#else
-INCLUDE_ASM(const s32, "hand/at3dec", at3decDecodeSoundUnit);
-#endif
 
 /* For each channel parse its sound unit, then run the QMF synthesis. Format
  * 0x12 stores the second unit byte-reversed at the end of the frame; it is
