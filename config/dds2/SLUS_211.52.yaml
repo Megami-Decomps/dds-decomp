@@ -492,6 +492,7 @@ segments:
       - [0x32FE10, rodata, rodata_0042EE10]
       - [0x330390, .rodata, sdk/libpad]
       - [0x3304E8, rodata, rodata_0042F4E8]
+      - [0x332AA0, .rodata, sdk/libc]
       - [0x3337A0, .rodata, sdk/libkernl]
       - [0x333A38, rodata, rodata_00432A38]
       - [0x333E80, .lit4, kernel/dds3PadManager]

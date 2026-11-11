@@ -1620,6 +1620,16 @@ INCLUDE_ASM(const s32, "sdk/libc", func_0035D938);
 
 INCLUDE_ASM(const s32, "sdk/libc", vfiprintf);
 
+INCLUDE_RODATA(const s32, "sdk/libc", _ctype_);
+
+INCLUDE_RODATA(const s32, "sdk/libc", D_00431BD8);
+
+INCLUDE_RODATA(const s32, "sdk/libc", putsNewline);
+
+INCLUDE_RODATA(const s32, "sdk/libc", D_00431BF0);
+
+INCLUDE_RODATA(const s32, "sdk/libc", D_00431C00);
+
 INCLUDE_ASM(const s32, "sdk/libc", _vfiprintf_r);
 
 s32 __sprint(FILE *fp, __suio *uio) {
@@ -2144,6 +2154,10 @@ error_exit:
 
 #else
 
+INCLUDE_RODATA(const s32, "sdk/libc", D_00431DE0);
+
+INCLUDE_RODATA(const s32, "sdk/libc", D_00431DF0);
+
 INCLUDE_ASM(const s32, "sdk/libc", _vfprintf_r);
 #endif
 
@@ -2200,6 +2214,10 @@ INCLUDE_ASM(const s32, "sdk/libc", func_00360040);
 INCLUDE_ASM(const s32, "sdk/libc", func_003600C0);
 
 INCLUDE_ASM(const s32, "sdk/libc", func_003600E8);
+
+INCLUDE_RODATA(const s32, "sdk/libc", D_00431FF0);
+
+INCLUDE_RODATA(const s32, "sdk/libc", D_00432018);
 
 INCLUDE_ASM(const s32, "sdk/libc", func_003601E0);
 
@@ -2915,6 +2933,10 @@ oneDigit:
 }
 #else
 
+INCLUDE_RODATA(const s32, "sdk/libc", D_00432460);
+
+INCLUDE_RODATA(const s32, "sdk/libc", D_00432470);
+
 INCLUDE_ASM(const s32, "sdk/libc", _dtoa_r);
 #endif
 
@@ -3272,6 +3294,22 @@ INCLUDE_ASM(const s32, "sdk/libc", _multiply);
 
 INCLUDE_ASM(const s32, "sdk/libc", func_00363230);
 
+INCLUDE_RODATA(const s32, "sdk/libc", D_00432480);
+
+INCLUDE_RODATA(const s32, "sdk/libc", D_00432488);
+
+INCLUDE_RODATA(const s32, "sdk/libc", D_00432490);
+
+INCLUDE_RODATA(const s32, "sdk/libc", jtbl_004324A0);
+
+INCLUDE_RODATA(const s32, "sdk/libc", localeconvData);
+
+INCLUDE_RODATA(const s32, "sdk/libc", localeEmptyStr);
+
+INCLUDE_RODATA(const s32, "sdk/libc", D_004324F0);
+
+INCLUDE_RODATA(const s32, "sdk/libc", localeCName);
+
 _Bigint *_pow5mult(_reent *r, _Bigint *b, s32 n)
 {
     _Bigint *power;
@@ -3510,6 +3548,18 @@ INCLUDE_ASM(const s32, "sdk/libc", isinf);
 
 INCLUDE_ASM(const s32, "sdk/libc", isnan);
 
+INCLUDE_RODATA(const s32, "sdk/libc", pow5MultTable);
+
+INCLUDE_RODATA(const s32, "sdk/libc", D_00432508);
+
+INCLUDE_RODATA(const s32, "sdk/libc", pow10Table);
+
+INCLUDE_RODATA(const s32, "sdk/libc", D_004325D8);
+
+INCLUDE_RODATA(const s32, "sdk/libc", D_004325F8);
+
+INCLUDE_RODATA(const s32, "sdk/libc", D_00432600);
+
 INCLUDE_ASM(const s32, "sdk/libc", func_00363DB8);
 
 INCLUDE_ASM(const s32, "sdk/libc", func_00363E28);
@@ -3533,3 +3583,22 @@ INCLUDE_ASM(const s32, "sdk/libc", func_00365068);
 INCLUDE_ASM(const s32, "sdk/libc", _calloc_r);
 
 INCLUDE_ASM(const s32, "sdk/libc", _realloc_r);
+
+INCLUDE_RODATA(const s32, "sdk/libc", D_004326E8);
+
+INCLUDE_RODATA(const s32, "sdk/libc", D_004326F0);
+
+INCLUDE_RODATA(const s32, "sdk/libc", D_004326F8);
+
+INCLUDE_RODATA(const s32, "sdk/libc", D_00432700);
+
+INCLUDE_RODATA(const s32, "sdk/libc", kernlInternalErrorMsg);
+
+INCLUDE_RODATA(const s32, "sdk/libc", ttyMsgPacketTooLarge);
+
+INCLUDE_RODATA(const s32, "sdk/libc", ttyMsgReceiveError);
+
+INCLUDE_RODATA(const s32, "sdk/libc", ttyMsgSendError);
+
+INCLUDE_RODATA(const s32, "sdk/libc", ttyMsgWlenError);
+
