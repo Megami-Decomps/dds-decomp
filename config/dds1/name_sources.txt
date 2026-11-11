@@ -11025,3 +11025,19 @@
 0x003B83C0	pow5MultTable	inferred	SMT3 twin pow5MultTable (sdk/libc _pow5mult reads it at the same instruction); was D_003B83C0
 0x003B83D0	pow10Table	inferred	SMT3 twin pow10Table (sdk/libc _mprec_log10 reads it at the same instruction); was D_003B83D0
 0x0039BCE0	impure_data	inferred	SMT3 twin impure_data (newlib impure.c _reent, _impure_ptr points at it); was D_0039BCE0
+0x003A2AA0	btlHelpLineAttackNames	inferred	const char *[3] {Attack, Shoot, Attack} copied to the stack by btlDrawWindowHelpLine, never read; was D_003A2AA0
+0x003A2AC0	btlHelpLineRevertedNames	inferred	const char *[3] {Revert, Deploy, Withdraw} copied to the stack by btlDrawWindowHelpLine, never read. DDS2 twin 0x004165F0; was D_003A2AC0
+0x003A2AE0	btlHelpLineNormalNames	inferred	const char *[3] {Transform, Deploy, Withdraw} copied to the stack by btlDrawWindowHelpLine, never read. DDS2 twin 0x00416610; was D_003A2AE0
+0x003BB0B0	effRectangleBlurSetupCreateArgs	inferred	void *[2] {&evtUnityCalcArea, NULL}, effRectangleBlurSetupRecord.param. SMT3 D_0054F2B8, DDS2 0x004364A0; was D_003BB0B0
+0x003BB110	effFramebufferQuadSetupCreateArgs	inferred	void *[1] {&effLoadDescD}, effFramebufferQuadSetupRecord.param. DDS2 0x00436500; was D_003BB110
+0x003BB118	filterDebugCreateArgs	inferred	void *[2] {&dblurParam2, NULL}, filterDebugMenu.param. SMT3 D_0054F308, DDS2 0x00436508; was D_003BB118
+0x003BB7E8	btlDebugTopMenuList	inferred	void *[2] {&D_00360348 (the DEBUG MENU page), NULL}, after the row text WIDTH; no reader; was D_003BB7E8
+0x0039D860	tlbKernelEntries	inferred	kernelTlbEntry_t[13], tlbTable.kernelEntries. SMT3 0x0052D6B0; was D_0039D860
+0x0039D930	tlbDefaultEntries	inferred	kernelTlbEntry_t[18], tlbTable.defaultEntries. SMT3 0x0052D780; was D_0039D930
+0x0039DA50	tlbExtendedEntries	inferred	kernelTlbEntry_t[8], tlbTable.extendedEntries. SMT3 0x0052D8A0; was D_0039DA50
+0x0039DAD0	tlbTable	inferred	kernelTlbTable_t read by InitTLB32MB (counts 13/18/8 and the three entry tables). SMT3 0x0052D920; was D_0039DAD0
+0x0034E030	dds3BillboardOtTable	inferred	SMT3 name (0x00317050): sdfGrOt_t *[4] the billboard tag lists register into; DDS2 twin 0x003AA960; was D_0034E030
+0x003306B0	fldDisplayLightSources	inferred	sdf3DLight_t *[4] {&D_00330670, NULL, NULL, NULL}, ambient D_003306C0 follows; entry 0 of the display pointer table. DDS2 twin 0x0038BB50; was D_003306B0
+0x003BC890	fileSaveIconSysAddress	inferred	u32 address slot holding &fileSaveIconSysData for slSaveWriteFile; size slot fileSaveIconSysSize follows. DDS2 twin 0x00437D90; was D_003BC890
+0x003BC894	fileSaveIconSysSize	inferred	u32 size slot (0x3C4) for slSaveWriteFile. DDS2 twin 0x00437D94; was D_003BC894
+0x0037CDF8	prfMantraFallbackNames	inferred	const char *[2] {"???", "Mantra"}; prfResolveMantraNameOrFallback returns entry 0, entry 1 has no reader; was D_0037CDF8

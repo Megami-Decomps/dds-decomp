@@ -3756,6 +3756,8 @@ void btlSetResourceNameLengthLimit(struct BtlResourceNameRecord *record, u32 max
     record->maximumNameLength = maximumNameLength;
 }
 
+extern void *btlDebugTopMenuList[2];
+
 INCLUDE_SDATA(const s32, "game/code_001F6110", D_003BB6B8);
 
 INCLUDE_SDATA(const s32, "game/code_001F6110", D_003BB6C8);
@@ -3839,6 +3841,10 @@ INCLUDE_SDATA(const s32, "game/code_001F6110", D_003BB7D0);
 INCLUDE_SDATA(const s32, "game/code_001F6110", D_003BB7D8);
 
 INCLUDE_SDATA(const s32, "game/code_001F6110", D_003BB7E0);
+
+INCLUDE_SDATA(const s32, "game/code_001F6110", btlDebugTopMenuList);
+
+INCLUDE_SDATA(const s32, "game/code_001F6110", D_003BB7F0);
 
 INCLUDE_SDATA(const s32, "game/code_001F6110", D_003BB7F8);
 

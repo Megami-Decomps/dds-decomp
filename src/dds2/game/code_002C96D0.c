@@ -1826,8 +1826,8 @@ s32 fileWriteIconSysComplete(void) {
 }
 
 extern u8 fileSaveIconSysData[];
-extern u32 D_00437D90;
-extern u32 D_00437D94;
+extern u32 fileSaveIconSysAddress;
+extern u32 fileSaveIconSysSize;
 
 s32 fileBeginLabeledSlotWrite(void) {
     s32 v = fileSelectedSlotIndex + 1;
@@ -1838,7 +1838,7 @@ s32 fileBeginLabeledSlotWrite(void) {
     fileSaveIconSysData[0xFA] = -0x7E;
     fileSaveIconSysData[0xF9] = q + 0x4F;
     fileSaveIconSysData[0xFB] = r + 0x4F;
-    return slSaveWriteFile(D_0042B6B8, &D_00437D90, &D_00437D94, fileWriteIconSysComplete, 0);
+    return slSaveWriteFile(D_0042B6B8, &fileSaveIconSysAddress, &fileSaveIconSysSize, fileWriteIconSysComplete, 0);
 }
 
 extern s32 slSaveWriteFile(const char *fileName, const u32 *dataAddressSlot, const u32 *dataSizeSlot, FileMenuContinuationCallback continuation, struct FileRequest * const *pendingRequestStatus);
@@ -4342,9 +4342,9 @@ INCLUDE_SDATA(const s32, "game/code_002C96D0", D_00437D88);
 
 INCLUDE_SDATA(const s32, "game/code_002C96D0", fileSaveHighlightPhase);
 
-INCLUDE_SDATA(const s32, "game/code_002C96D0", D_00437D90);
+INCLUDE_SDATA(const s32, "game/code_002C96D0", fileSaveIconSysAddress);
 
-INCLUDE_SDATA(const s32, "game/code_002C96D0", D_00437D94);
+INCLUDE_SDATA(const s32, "game/code_002C96D0", fileSaveIconSysSize);
 
 INCLUDE_SDATA(const s32, "game/code_002C96D0", D_00437D98);
 

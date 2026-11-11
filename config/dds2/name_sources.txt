@@ -11770,3 +11770,16 @@
 0x00432500	pow5MultTable	inferred	SMT3 twin pow5MultTable (sdk/libc _pow5mult reads it at the same instruction); was D_00432500
 0x00432510	pow10Table	inferred	SMT3 twin pow10Table (sdk/libc _mprec_log10 reads it at the same instruction); was D_00432510
 0x0040EE60	impure_data	inferred	SMT3 twin impure_data (newlib impure.c _reent, _impure_ptr points at it); was D_0040EE60
+0x004165F0	btlHelpLineRevertedNames	inferred	const char *[3] {Revert, Deploy, Withdraw} copied to the stack by btlDrawWindowHelpLine, never read. DDS1 twin 0x003A2AC0; was D_004165F0
+0x00416610	btlHelpLineNormalNames	inferred	const char *[3] {Transform, Deploy, Withdraw} copied to the stack by btlDrawWindowHelpLine, never read. DDS1 twin 0x003A2AE0; was D_00416610
+0x004364A0	effRectangleBlurSetupCreateArgs	inferred	void *[2] {&evtUnityCalcArea, NULL}, effRectangleBlurSetupRecord.param. SMT3 D_0054F2B8, DDS1 0x003BB0B0; was D_004364A0
+0x00436500	effFramebufferQuadSetupCreateArgs	inferred	void *[1] {&effLoadDescD}, effFramebufferQuadSetupRecord.param. DDS1 0x003BB110; was D_00436500
+0x00436508	filterDebugCreateArgs	inferred	void *[2] {&dblurParam2, NULL}, filterDebugMenu.param. SMT3 D_0054F308, DDS1 0x003BB118; was D_00436508
+0x004109D8	tlbKernelEntries	inferred	kernelTlbEntry_t[13], tlbTable.kernelEntries. SMT3 0x0052D6B0; was D_004109D8
+0x00410AA8	tlbDefaultEntries	inferred	kernelTlbEntry_t[18], tlbTable.defaultEntries. SMT3 0x0052D780; was D_00410AA8
+0x00410BC8	tlbExtendedEntries	inferred	kernelTlbEntry_t[8], tlbTable.extendedEntries. SMT3 0x0052D8A0; was D_00410BC8
+0x00410C48	tlbTable	inferred	kernelTlbTable_t read by InitTLB32MB (counts and the three entry tables). SMT3 0x0052D920; was D_00410C48
+0x003AA960	dds3BillboardOtTable	inferred	SMT3 name (0x00317050): sdfGrOt_t *[4] the billboard tag lists register into; DDS1 twin 0x0034E030; was D_003AA960
+0x0038BB50	fldDisplayLightSources	inferred	sdf3DLight_t *[4] {&D_0038BB10, NULL, NULL, NULL}, ambient D_0038BB60 follows; entry 0 of the display pointer table. DDS1 twin 0x003306B0; was D_0038BB50
+0x00437D90	fileSaveIconSysAddress	inferred	u32 address slot holding &fileSaveIconSysData for slSaveWriteFile; size slot fileSaveIconSysSize follows. DDS1 twin 0x003BC890; was D_00437D90
+0x00437D94	fileSaveIconSysSize	inferred	u32 size slot for slSaveWriteFile. DDS1 twin 0x003BC894; was D_00437D94

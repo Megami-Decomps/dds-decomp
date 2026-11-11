@@ -1758,6 +1758,12 @@ void effEveAPP4Randomize(EffEmit *emitter) {
     } while (recordIndex < recordCount);
 }
 
+extern void *effRectangleBlurSetupCreateArgs[2];
+
+extern void *effFramebufferQuadSetupCreateArgs[1];
+
+extern void *filterDebugCreateArgs[2];
+
 INCLUDE_SDATA(const s32, "effect/effEvent", Eve_BlurShow);
 
 INCLUDE_SDATA(const s32, "effect/effEvent", Eve_PartialMultiBlurShow);
@@ -1786,7 +1792,7 @@ INCLUDE_SDATA(const s32, "effect/effEvent", D_003BB0A0);
 
 INCLUDE_SDATA(const s32, "effect/effEvent", D_003BB0A8);
 
-INCLUDE_SDATA(const s32, "effect/effEvent", D_003BB0B0);
+INCLUDE_SDATA(const s32, "effect/effEvent", effRectangleBlurSetupCreateArgs);
 
 INCLUDE_SDATA(const s32, "effect/effEvent", D_003BB0B8);
 
@@ -1810,11 +1816,11 @@ INCLUDE_SDATA(const s32, "effect/effEvent", D_003BB100);
 
 INCLUDE_SDATA(const s32, "effect/effEvent", D_003BB108);
 
-INCLUDE_SDATA(const s32, "effect/effEvent", D_003BB110);
+INCLUDE_SDATA(const s32, "effect/effEvent", effFramebufferQuadSetupCreateArgs);
 
 INCLUDE_SDATA(const s32, "effect/effEvent", D_003BB114);
 
-INCLUDE_SDATA(const s32, "effect/effEvent", D_003BB118);
+INCLUDE_SDATA(const s32, "effect/effEvent", filterDebugCreateArgs);
 
 INCLUDE_SDATA(const s32, "effect/effEvent", D_003BB120);
 

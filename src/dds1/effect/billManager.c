@@ -144,7 +144,9 @@ void dds3BillboardTagLink(billHandle_t *obj, BillChildPayload *child) {
 
 
 extern BillChildPayload *dds3BillboardTag;
-extern sdfGrOt_t *D_0034E030[5];
+/* Four lists; the flush loop runs over five tag slots, so slot 4 reads the
+ * zero first word of billPairFacingReferenceAxis as its list. */
+extern sdfGrOt_t *dds3BillboardOtTable[4];
 
 void billFlushPendingChildPackets(void) {
     BillChildPayload *node;
@@ -167,7 +169,7 @@ void billFlushPendingChildPackets(void) {
                 sdfDrawTag_t *value = node->pendingLists[listIndex];
 
                 if (value != NULL) {
-                    D_0034E030[listIndex]->regFunc(D_0034E030[listIndex], value);
+                    dds3BillboardOtTable[listIndex]->regFunc(dds3BillboardOtTable[listIndex], value);
                     node->pendingLists[listIndex] = 0;
                 }
             }

@@ -762,7 +762,7 @@ extern u32 D_003BACFC;
 
 extern u32 D_00330738[];
 
-extern u32 D_003306B0[];
+extern sdf3DLight_t *fldDisplayLightSources[4];
 
 extern f32 D_003306C0[];
 
@@ -6910,7 +6910,7 @@ void fldInitializeDisplayPointerTable(void) {
     u32 *displayPointers = D_00330738;
 
     memset(displayPointers, 0, 0x14);
-    displayPointers[0] = (u32)D_003306B0;
+    displayPointers[0] = (u32)fldDisplayLightSources;
     displayPointers[1] = (u32)D_003306C0;
 }
 

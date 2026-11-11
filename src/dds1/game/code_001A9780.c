@@ -5106,21 +5106,25 @@ extern void btlReleaseRegisteredTaskBuffer(dds3ProcessID_t *);
 extern void btlDrawWindowHelpLine(s32,s32,u32,u32,u16,s16);
 extern u8 D_00358FE0[];
 
+extern const char *btlHelpLineAttackNames[3];
+extern const char *btlHelpLineRevertedNames[3];
+extern const char *btlHelpLineNormalNames[3];
+
 INCLUDE_RODATA(const s32, "game/code_001A9780", D_003A2A70);
 
 INCLUDE_RODATA(const s32, "game/code_001A9780", D_003A2A80);
 
 INCLUDE_RODATA(const s32, "game/code_001A9780", D_003A2A90);
 
-INCLUDE_RODATA(const s32, "game/code_001A9780", D_003A2AA0);
+INCLUDE_RODATA(const s32, "game/code_001A9780", btlHelpLineAttackNames);
 
 INCLUDE_RODATA(const s32, "game/code_001A9780", D_003A2AB0);
 
-INCLUDE_RODATA(const s32, "game/code_001A9780", D_003A2AC0);
+INCLUDE_RODATA(const s32, "game/code_001A9780", btlHelpLineRevertedNames);
 
 INCLUDE_RODATA(const s32, "game/code_001A9780", D_003A2AD0);
 
-INCLUDE_RODATA(const s32, "game/code_001A9780", D_003A2AE0);
+INCLUDE_RODATA(const s32, "game/code_001A9780", btlHelpLineNormalNames);
 
 INCLUDE_RODATA(const s32, "game/code_001A9780", D_003A2AF0);
 

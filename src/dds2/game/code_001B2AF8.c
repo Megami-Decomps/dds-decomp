@@ -6030,13 +6030,16 @@ extern void btlReleaseRegisteredTaskBuffer(s32);
 extern void btlDrawWindowHelpLine(s32,s32,u32,u32,u16,s16);
 extern u8 D_003B5B10[];
 
+extern const char *btlHelpLineRevertedNames[3];
+extern const char *btlHelpLineNormalNames[3];
+
 INCLUDE_RODATA(const s32, "game/code_001B2AF8", D_004165E0);
 
-INCLUDE_RODATA(const s32, "game/code_001B2AF8", D_004165F0);
+INCLUDE_RODATA(const s32, "game/code_001B2AF8", btlHelpLineRevertedNames);
 
 INCLUDE_RODATA(const s32, "game/code_001B2AF8", D_00416600);
 
-INCLUDE_RODATA(const s32, "game/code_001B2AF8", D_00416610);
+INCLUDE_RODATA(const s32, "game/code_001B2AF8", btlHelpLineNormalNames);
 
 INCLUDE_RODATA(const s32, "game/code_001B2AF8", D_00416620);
 
