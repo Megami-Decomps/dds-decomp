@@ -3912,6 +3912,13 @@ u8 fileToggleSlotFlagsBit(FileConfigOption option, u32 *flags) {
     }
 }
 
+/* Unreferenced {text, value} rows after an embedded message file; the text is in the font's glyph encoding. */
+typedef struct FileGlyphTextRow {
+    const char *text;
+    s32 value;
+} FileGlyphTextRow;
+extern FileGlyphTextRow fileGlyphTextRows[4];
+
 INCLUDE_RODATA(const s32, "game/code_002C96D0", D_0042B920);
 
 INCLUDE_RODATA(const s32, "game/code_002C96D0", D_0042B938);

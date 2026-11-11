@@ -12589,3 +12589,7 @@ padStateNameDisconnect = 0x003B57A8;
 padRequestNameBusy = 0x003B57B8;
 padRequestNameFailed = 0x003B57C0;
 padRequestNameComplete = 0x003B57C8;
+D_0037DE10 = 0x0037DE10; // type:asciz size:0x18
+D_0037DE28 = 0x0037DE28; // type:asciz size:0x28
+itfMesEmbedded_37DE50 = 0x0037DE50; // type:u8 size:0x198
+fileGlyphTextRows = 0x0037DFE8; // type:FileGlyphTextRow size:0x20

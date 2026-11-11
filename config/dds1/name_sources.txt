@@ -11075,3 +11075,6 @@
 0x003B57B8	padRequestNameBusy	inferred	libpad data, SMT3 padRequestNameBusy 0x0054AA98; was D_003B57B8
 0x003B57C0	padRequestNameFailed	inferred	libpad data, SMT3 padRequestNameFailed 0x0054AAA0; was D_003B57C0
 0x003B57C8	padRequestNameComplete	inferred	libpad data, SMT3 padRequestNameComplete 0x0054AAA8; was D_003B57C8
+0x0037DE28	D_0037DE28	inferred	"(Press SELECT to access debug message)", no reader; split off D_0037DE10 ("Start the game anyway?", SMT3 slNoSpaceStartMsg6 text)
+0x0037DE50	itfMesEmbedded_37DE50	inferred	embedded MSG1 message file (msg_02..msg_04, 0x193 bytes), no reader; SMT3 itfMesEmbedded_<addr> convention; DDS2 0x003E8E48; was inside D_0037DE10
+0x0037DFE8	fileGlyphTextRows	inferred	{glyph-coded text, s32} rows after the embedded message file; no reader in retail, text in the game's font encoding (not decoded); DDS2 0x003E8FE0; was inside D_0037DE10
