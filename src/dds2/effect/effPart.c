@@ -77,6 +77,14 @@ void mdlFree(mdlObj_t *aHandle);
 
 extern dds3EffectFunc_t EffectPCPFuncTable[];
 
+extern void *effPCPThunderSpherePolyDataList[];
+extern void *effPCPThunderPolyDataList[];
+extern void *effPCPThunderRadiatePolyDataList[];
+extern void *effPCPMultiBlurExpDataList[];
+extern void *effPCPSparkleSphereDataList[];
+extern void *effPCPFlashPolySphereDataList[];
+extern void *effPCPMultiFilterExpDataList[];
+extern void *effPCPBlinkMultiBlurDataList[];
 extern void **effPartPCPDataTable[];
 
 void *sdfChipAllocDirect(s32 aSize);

@@ -11617,3 +11617,11 @@
 0x00400508	effTimedRecordBuckets	inferred	EffRecordBucket[9] (name, step, count, records) indexed by record category in effUpdateTimedStates and effSumRecordStatuses. DDS1 twin 0x0038FD88; was D_00400508
 0x0040ABE0	mnuShootingInitializeCallbacks	inferred	Shooting work initialize callbacks indexed by work->state in code_00316E08 (package load, resources, update, NULL); was D_0040ABE0
 0x0040ABF0	mnuShootingUpdateCallbacks	inferred	Shooting work update callbacks indexed by work->state (state 0 no-op, draw and update scene); split had cut it at D_0040ABF4; was D_0040ABF0
+0x003AFF20	effPCPThunderSpherePolyDataList	inferred	SMT3 name via SLUS_209.11 0x0031DD20, effPartPCPDataTable list; was D_003AFF20
+0x003AFF48	effPCPThunderPolyDataList	inferred	SMT3 name via SLUS_209.11 0x0031DD48, effPartPCPDataTable list; was D_003AFF48
+0x003AFFA0	effPCPThunderRadiatePolyDataList	inferred	SMT3 name via SLUS_209.11 0x0031DDA0, effPartPCPDataTable list; was D_003AFFA0
+0x003AFFA8	effPCPMultiBlurExpDataList	inferred	SMT3 name via SLUS_209.11 0x0031DDA8, effPartPCPDataTable list; was D_003AFFA8
+0x003AFFB0	effPCPSparkleSphereDataList	inferred	SMT3 name via SLUS_209.11 0x0031DDB0, effPartPCPDataTable list; was D_003AFFB0
+0x003AFFB8	effPCPFlashPolySphereDataList	inferred	SMT3 name via SLUS_209.11 0x0031DDB8, effPartPCPDataTable list; was D_003AFFB8
+0x003AFFC0	effPCPMultiFilterExpDataList	inferred	SMT3 name via SLUS_209.11 0x0031DDC0, effPartPCPDataTable list; was D_003AFFC0
+0x003AFFC8	effPCPBlinkMultiBlurDataList	inferred	SMT3 name via SLUS_209.11 0x0031DDC8, effPartPCPDataTable list; was D_003AFFC8

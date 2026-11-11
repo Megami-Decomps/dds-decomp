@@ -10876,3 +10876,11 @@
 0x00406BE0	frameObjectList	inferred	SMT3HD name via SLUS_209.11 0x0059AD60, __register_frame_info object list head; was D_00406BE0
 0x00367AE0	mdlDebugProcessEntries	inferred	Model viewer debug process names and update functions, re-registered with fclEncycAllocEntry when the viewer closes. DDS2 twin 0x003C8890; was D_00367AE0
 0x0038FD88	effTimedRecordBuckets	inferred	EffRecordBucket[9] (name, step, count, records) indexed by record category in effUpdateTimedStates and effSumRecordStatuses. DDS2 twin 0x00400508; was D_0038FD88
+0x003535F0	effPCPThunderSpherePolyDataList	inferred	SMT3 name via SLUS_209.11 0x0031DD20, effPartPCPDataTable list; was D_003535F0
+0x00353618	effPCPThunderPolyDataList	inferred	SMT3 name via SLUS_209.11 0x0031DD48, effPartPCPDataTable list; was D_00353618
+0x00353670	effPCPThunderRadiatePolyDataList	inferred	SMT3 name via SLUS_209.11 0x0031DDA0, effPartPCPDataTable list; was D_00353670
+0x00353678	effPCPMultiBlurExpDataList	inferred	SMT3 name via SLUS_209.11 0x0031DDA8, effPartPCPDataTable list; was D_00353678
+0x00353680	effPCPSparkleSphereDataList	inferred	SMT3 name via SLUS_209.11 0x0031DDB0, effPartPCPDataTable list; was D_00353680
+0x00353688	effPCPFlashPolySphereDataList	inferred	SMT3 name via SLUS_209.11 0x0031DDB8, effPartPCPDataTable list; was D_00353688
+0x00353690	effPCPMultiFilterExpDataList	inferred	SMT3 name via SLUS_209.11 0x0031DDC0, effPartPCPDataTable list; was D_00353690
+0x00353698	effPCPBlinkMultiBlurDataList	inferred	SMT3 name via SLUS_209.11 0x0031DDC8, effPartPCPDataTable list; was D_00353698
