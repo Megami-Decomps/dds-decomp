@@ -14,10 +14,10 @@
 #include "fld_camera_link_mode.h"
 #include "fld_map_slot_auxiliary_flag_selector.h"
 #include "fld_camera_model_motion_request.h"
-#include "sdf_vu0.h"
+#include "ps2asm.h"
 #include "fld_stop_entry.h"
 #include "sdf_resource_list_release_api.h"
-#include "kwln_background_fade_api.h"
+#include "dds3_background_fade_api.h"
 #include "fld_scene_ready_api.h"
 #include "fld_camp_check_state_api.h"
 #include "fld_scene_transition_gate_api.h"
@@ -27,9 +27,9 @@
 #include "fld_sky_buffer.h"
 #include "fld_sky_gradient_record.h"
 #include "fld_quad_state.h"
-#include "kwln_frame_draw_buffer.h"
-#include "kwln_draw_buffer.h"
-#include "kwln_fade.h"
+#include "dds3_frame_draw_buffer.h"
+#include "dds3_draw_buffer.h"
+#include "dds3_fade.h"
 #include "mnu_title_stream.h"
 #include "fld_bill_config.h"
 #include "sdf_trig.h"
@@ -53,7 +53,7 @@
 #include "fld_collision_geometry.h"
 #include "fld_scene_request.h"
 #include "fld_spawn_event.h"
-#include "sdf_resource.h"
+#include "sdf_heap_api.h"
 #include "dds3obj.h"
 #include "dds3_world_value.h"
 #include "sdf_texture_file.h"
@@ -66,7 +66,6 @@
 #include "dds3_world_counter.h"
 #include "sdf_vu_matrix.h"
 #include "dds3_world_secondary.h"
-#include "eff_light.h"
 #include "fld_area_work.h"
 #include "fld_elv_camera_scene_api.h"
 #include "fld_spawn_collision.h"
@@ -81,7 +80,7 @@
 #include "sdf_dev_state.h"
 #include "fld_waypoint.h"
 #include "fld_inf.h"
-#include "kwln_task_lifecycle.h"
+#include "dds3_task_lifecycle.h"
 #include "file_request_api.h"
 #include "file_pac.h"
 #include "fld_packed_resource_kind.h"
@@ -92,14 +91,13 @@
 #include "evt_unit.h"
 #include "evt_unit_color_transition.h"
 #include "fpu.h"
-#include "pcp_vu0.h"
 #include "sdf.h"
 #include "sdf_sif_command.h"
 #include "mdl.h"
 #include "scr.h"
-#include "kwln.h"
-#include "kwln_process_registration.h"
-#include "kwln_task_create.h"
+#include "kernel.h"
+#include "dds3_process_registration.h"
+#include "dds3_task_create.h"
 #include "dat_state.h"
 #include "dds3_world_primary.h"
 #include "sdf_packet_alloc.h"
@@ -131,7 +129,7 @@ extern void fldMarkStageExplorationBitmapRegion(s32, s32, s32, s32, s32, s32);
 extern void fldSetFlagBit(s32 area, s32 floor, s32 bit);
 
 extern void datAddCurrencyClamped(s32 delta);
-extern void scrDestroyAllNamedProcesses(void);
+extern void scrAllReleaseScript(void);
 extern void fldSetDeferredFieldCommand(u32 command, u32 parameter);
 
 struct dds3Basic_t;
@@ -673,7 +671,6 @@ FldEventDisplayResourceIndex fldEveHit_AddEveData(
 #include "common.h"
 #include "sdk_libc.h"
 #include "fpu.h"
-#include "pcp_vu0.h"
 #include "sdf_vu_matrix.h"
 #include "eff_transform.h"
 #include "fld.h"
@@ -693,9 +690,9 @@ static inline void fldRotateTriggerCorner(f32 *offset, f32 *rotated, f32 x, f32 
     offset[0] = x;
     offset[1] = y;
     offset[2] = z;
-    VU0_LOAD_VF(vf10, offset);
-    VU0_APPLY_MATRIX(vf10, vf10);
-    VU0_STORE_VF_UNCLOBBERED(vf10, rotated);
+    SDF_VU0_LOADVECTOR(offset);
+    SDF_VU0_APPLYMATRIX();
+    SDF_VU0_STOREVECTOR_NOMEM(rotated);
 }
 
 /* Register a resource's trigger in the next room slot and return the slot:
@@ -750,8 +747,8 @@ FldRoomRecordIndex fldRegisterRoomObject(
         positionZ = resource->transform[2];
         SDF_VU0_COPYVECTOR(rotation, &resource->transform[4]);
         LoadIdentity();
-        VU0_LOAD_VF(vf10, rotation);
-        effMiscQuaternionToMatrixVU();
+        SDF_VU0_LOADVECTOR(rotation);
+        ToMatrix();
         fldRotateTriggerCorner(offset, rotated[0], sizeX * 0.5f, -(sizeY * 0.5f), 0.0f);
         fldRotateTriggerCorner(offset, rotated[1], -(sizeX * 0.5f), -(sizeY * 0.5f), 0.0f);
         fldRotateTriggerCorner(offset, rotated[2], -(sizeX * 0.5f), sizeY * 0.5f, 0.0f);
@@ -762,9 +759,9 @@ FldRoomRecordIndex fldRegisterRoomObject(
             fldEveHitTable[slot].corner[i][2] = rotated[i][2] + positionZ;
             fldEveHitTable[slot].corner[i][3] = 1.0f;
         }
-        VU0_LOAD_VF(vf10, reference);
-        VU0_APPLY_MATRIX(vf10, vf10);
-        VU0_STORE_VF_UNCLOBBERED(vf10, fldEveHitTable[slot].center);
+        SDF_VU0_LOADVECTOR(reference);
+        SDF_VU0_APPLYMATRIX();
+        SDF_VU0_STOREVECTOR_NOMEM(fldEveHitTable[slot].center);
         for (i = 0; i < 4; i++) {
             SDF_VU0_COPYVECTOR(vertices[i], fldEveHitTable[slot].corner[i]);
         }
@@ -988,8 +985,8 @@ FldRoomRecordIndex fldRegisterRoomObject(
         rotation[2] = resource->transform[6];
         rotation[3] = resource->transform[7];
         LoadIdentity();
-        VU0_LOAD_VF(vf10, rotation);
-        effMiscQuaternionToMatrixVU();
+        SDF_VU0_LOADVECTOR(rotation);
+        ToMatrix();
         fldRotateTriggerCorner(offset, rotated[0], -(sizeX * 0.5f), -(sizeY * 0.5f), -(sizeZ * 0.5f));
         fldRotateTriggerCorner(offset, rotated[1], sizeX * 0.5f, -(sizeY * 0.5f), -(sizeZ * 0.5f));
         fldRotateTriggerCorner(offset, rotated[2], -(sizeX * 0.5f), -(sizeY * 0.5f), sizeZ * 0.5f);
@@ -1004,9 +1001,9 @@ FldRoomRecordIndex fldRegisterRoomObject(
             fldEveHitTable[slot].corner[i][2] = rotated[i][2] + positionZ;
             fldEveHitTable[slot].corner[i][3] = 1.0f;
         }
-        VU0_LOAD_VF(vf10, reference);
-        VU0_APPLY_MATRIX(vf10, vf10);
-        VU0_STORE_VF_UNCLOBBERED(vf10, fldEveHitTable[slot].center);
+        SDF_VU0_LOADVECTOR(reference);
+        SDF_VU0_APPLYMATRIX();
+        SDF_VU0_STOREVECTOR_NOMEM(fldEveHitTable[slot].center);
         /* Face 0: corners 0, 1, 2. */
         face = 0;
         vertices[0][0] = fldEveHitTable[slot].corner[0][0];
@@ -1170,12 +1167,12 @@ s32 fldTestRoomProbeFacingAndRange(dds3Basic_t *actor, dds3Basic_t *entry) {
                 position[1] = source->position.y;
                 position[2] = source->position.z;
                 SDF_VU0_LOADVECTOR(actor->poseset->rotation);
-                effMiscQuaternionToMatrixVU();
+                ToMatrix();
                 SDF_VU0_STORE_ROW2(dir);
                 dir[1] = 0.0f;
                 SDF_VU0_LOADVECTOR(dir);
                 SDF_VU0_NORMALIZE();
-                VU0_SCALAR_OP(-1.0f, "vmulx.xyzw vf10, vf10, vf2x");
+                SDF_VU0_SCALEVECTOR_V0(-1.0f);
                 SDF_VU0_COPYVECTOR_A_TO_C();
                 SDF_VU0_LOADVECTOR(position);
                 SDF_VU0_LOADVECTOR_B(actor->poseset->pos);
@@ -1198,7 +1195,7 @@ s32 fldTestRoomProbeFacingAndRange(dds3Basic_t *actor, dds3Basic_t *entry) {
                 return fldEveHitTable[i].crossingDirection == kind;
             case FLD_TRIGGER_SHAPE_KIND_BOX:
                 SDF_VU0_LOADVECTOR(actor->poseset->rotation);
-                effMiscQuaternionToMatrixVU();
+                ToMatrix();
                 SDF_VU0_STORE_ROW2(dir);
                 dir[1] = 0.0f;
                 SDF_VU0_LOADVECTOR(dir);
@@ -1235,12 +1232,12 @@ s32 fldTestRoomProbeFacing(dds3Basic_t *actor, dds3Basic_t *entry) {
                 source = entry->workdata;
                 SDF_VU0_COPYVECTOR(position, &source->position);
                 SDF_VU0_LOADVECTOR(actor->poseset->rotation);
-                effMiscQuaternionToMatrixVU();
+                ToMatrix();
                 SDF_VU0_STORE_ROW2(dir);
                 dir[1] = 0.0f;
                 SDF_VU0_LOADVECTOR(dir);
                 SDF_VU0_NORMALIZE();
-                VU0_SCALAR_OP(-1.0f, "vmulx.xyzw vf10, vf10, vf2x");
+                SDF_VU0_SCALEVECTOR_V0(-1.0f);
                 SDF_VU0_COPYVECTOR_A_TO_C();
                 SDF_VU0_LOADVECTOR(position);
                 SDF_VU0_LOADVECTOR_B(actor->poseset->pos);
@@ -1260,7 +1257,7 @@ s32 fldTestRoomProbeFacing(dds3Basic_t *actor, dds3Basic_t *entry) {
                 return fldEveHitTable[i].crossingDirection == kind;
             case FLD_TRIGGER_SHAPE_KIND_BOX:
                 SDF_VU0_LOADVECTOR(actor->poseset->rotation);
-                effMiscQuaternionToMatrixVU();
+                ToMatrix();
                 SDF_VU0_STORE_ROW2(dir);
                 dir[1] = 0.0f;
                 SDF_VU0_LOADVECTOR(dir);
@@ -1288,12 +1285,12 @@ s32 fldTestActorRoomProbeCondition(s32 roomIndex, dds3Basic_t *actor, f32 *posit
     switch (kind) {
     case FLD_TRIGGER_SHAPE_KIND_SPHERE:
         SDF_VU0_LOADVECTOR(actor->poseset->rotation);
-        effMiscQuaternionToMatrixVU();
+        ToMatrix();
         SDF_VU0_STORE_ROW2(dir);
         dir[1] = 0.0f;
         SDF_VU0_LOADVECTOR(dir);
         SDF_VU0_NORMALIZE();
-        VU0_SCALAR_OP(-1.0f, "vmulx.xyzw vf10, vf10, vf2x");
+        SDF_VU0_SCALEVECTOR_V0(-1.0f);
         SDF_VU0_COPYVECTOR_A_TO_C();
         SDF_VU0_LOADVECTOR(position);
         SDF_VU0_LOADVECTOR_B(actor->poseset->pos);
@@ -1316,7 +1313,7 @@ s32 fldTestActorRoomProbeCondition(s32 roomIndex, dds3Basic_t *actor, f32 *posit
         return fldEveHitTable[roomIndex].crossingDirection == kind;
     case FLD_TRIGGER_SHAPE_KIND_BOX:
         SDF_VU0_LOADVECTOR(actor->poseset->rotation);
-        effMiscQuaternionToMatrixVU();
+        ToMatrix();
         SDF_VU0_STORE_ROW2(dir);
         dir[1] = 0.0f;
         SDF_VU0_LOADVECTOR(dir);
@@ -1432,7 +1429,7 @@ s32 fldEveHit_ScriptEnd(char *flag, u32 slot) {
 u32 fldEveHit_ScriptEnd2(u32 slot) {
     dds3ProcessID_t **task = &fldRoomTaskHandles[slot];
 
-    if (dds3ExistProcess(*task) != KWLN_PROCESS_NOT_REGISTERED) {
+    if (dds3ExistProcess(*task) != DDS3_PROCESS_NOT_REGISTERED) {
         dds3KillProcess(*task, 0);
     }
     *task = NULL;
@@ -1470,16 +1467,16 @@ s32 fldEveHit_ChkEveHitAfter(void) {
 #include "common.h"
 #include "fld_stop_entry.h"
 #include "sdf_resource_list_release_api.h"
-#include "kwln_background_fade_api.h"
+#include "dds3_background_fade_api.h"
 #include "fld_scene_ready_api.h"
 #include "fld_scene_record_api.h"
 #include "fld_light_set.h"
 #include "fld_sky_buffer.h"
 #include "fld_sky_gradient_record.h"
 #include "fld_quad_state.h"
-#include "kwln_frame_draw_buffer.h"
-#include "kwln_draw_buffer.h"
-#include "kwln_fade.h"
+#include "dds3_frame_draw_buffer.h"
+#include "dds3_draw_buffer.h"
+#include "dds3_fade.h"
 #include "mnu_title_stream.h"
 #include "fld_bill_config.h"
 #include "sdf_trig.h"
@@ -1500,7 +1497,7 @@ s32 fldEveHit_ChkEveHitAfter(void) {
 #include "fld_collision_geometry.h"
 #include "fld_scene_request.h"
 #include "fld_spawn_event.h"
-#include "sdf_resource.h"
+#include "sdf_heap_api.h"
 #include "dds3obj.h"
 #include "dds3_world_value.h"
 #include "sdf_texture_file.h"
@@ -1513,7 +1510,6 @@ s32 fldEveHit_ChkEveHitAfter(void) {
 #include "dds3_world_counter.h"
 #include "sdf_vu_matrix.h"
 #include "dds3_world_secondary.h"
-#include "eff_light.h"
 #include "fld_area_work.h"
 #include "fld_spawn_collision.h"
 #include "evt_world.h"
@@ -1527,7 +1523,7 @@ s32 fldEveHit_ChkEveHitAfter(void) {
 #include "sdf_dev_state.h"
 #include "fld_waypoint.h"
 #include "fld_inf.h"
-#include "kwln_task_lifecycle.h"
+#include "dds3_task_lifecycle.h"
 #include "file_request_api.h"
 #include "file_pac.h"
 #include "fld_packed_resource_kind.h"
@@ -1538,13 +1534,12 @@ s32 fldEveHit_ChkEveHitAfter(void) {
 #include "evt_unit.h"
 #include "evt_unit_color_transition.h"
 #include "fpu.h"
-#include "pcp_vu0.h"
 #include "sdf.h"
 #include "sdf_sif_command.h"
 #include "mdl.h"
 #include "scr.h"
-#include "kwln.h"
-#include "kwln_task_create.h"
+#include "kernel.h"
+#include "dds3_task_create.h"
 #include "dat_state.h"
 #include "dds3_world_primary.h"
 #include "sdf_packet_alloc.h"
@@ -1896,7 +1891,7 @@ void fldPurgeEveRngProcesses(void) {
     if (count > 0) {
         dds3ProcessID_t **taskSlot = fldRoomTaskHandles;
         do {
-            if (dds3ExistProcess(*taskSlot) == KWLN_PROCESS_NOT_REGISTERED) {
+            if (dds3ExistProcess(*taskSlot) == DDS3_PROCESS_NOT_REGISTERED) {
                 *taskSlot = NULL;
             }
             slotIndex++;
@@ -2426,7 +2421,7 @@ s32 fldDispatchInteractionAction(s32 messageId, s32 slot) {
                 s32 command;
                 s32 flag;
 
-                scrDestroyAllNamedProcesses();
+                scrAllReleaseScript();
                 command = D_00332E30.extraActions[(s8)D_00332E30.sets[D_003BAE38].messages[row].extraAction].parameter0;
                 flag = D_00332E30.extraActions[(s8)D_00332E30.sets[D_003BAE38].messages[row].extraAction].parameter1;
                 fldSetDeferredFieldCommand(fldGlobalBase.area, command);
@@ -2715,7 +2710,7 @@ void fldApplyActorEntryTrigger(s32 checkTaskRecord) {
     doormovetbl_s *entry;
 
     if (checkTaskRecord != 0) {
-        record = fldEveHitResName_Find(scrGetScriptHandle()->task);
+        record = fldEveHitResName_Find(scrGetScriptHandle()->ProcessID);
         if (record == 0) {
             return;
         }
@@ -3393,16 +3388,16 @@ void fldInitializeActorLinkedSequence(s32 mode, s32 index, fldSceneParam_t *sequ
 #include "common.h"
 #include "fld_stop_entry.h"
 #include "sdf_resource_list_release_api.h"
-#include "kwln_background_fade_api.h"
+#include "dds3_background_fade_api.h"
 #include "fld_scene_ready_api.h"
 #include "fld_scene_record_api.h"
 #include "fld_light_set.h"
 #include "fld_sky_buffer.h"
 #include "fld_sky_gradient_record.h"
 #include "fld_quad_state.h"
-#include "kwln_frame_draw_buffer.h"
-#include "kwln_draw_buffer.h"
-#include "kwln_fade.h"
+#include "dds3_frame_draw_buffer.h"
+#include "dds3_draw_buffer.h"
+#include "dds3_fade.h"
 #include "mnu_title_stream.h"
 #include "fld_bill_config.h"
 #include "sdf_trig.h"
@@ -3423,7 +3418,7 @@ void fldInitializeActorLinkedSequence(s32 mode, s32 index, fldSceneParam_t *sequ
 #include "fld_collision_geometry.h"
 #include "fld_scene_request.h"
 #include "fld_spawn_event.h"
-#include "sdf_resource.h"
+#include "sdf_heap_api.h"
 #include "dds3obj.h"
 #include "dds3_world_value.h"
 #include "sdf_texture_file.h"
@@ -3436,7 +3431,6 @@ void fldInitializeActorLinkedSequence(s32 mode, s32 index, fldSceneParam_t *sequ
 #include "dds3_world_counter.h"
 #include "sdf_vu_matrix.h"
 #include "dds3_world_secondary.h"
-#include "eff_light.h"
 #include "fld_area_work.h"
 #include "fld_spawn_collision.h"
 #include "evt_world.h"
@@ -3450,7 +3444,7 @@ void fldInitializeActorLinkedSequence(s32 mode, s32 index, fldSceneParam_t *sequ
 #include "sdf_dev_state.h"
 #include "fld_waypoint.h"
 #include "fld_inf.h"
-#include "kwln_task_lifecycle.h"
+#include "dds3_task_lifecycle.h"
 #include "file_request_api.h"
 #include "file_pac.h"
 #include "fld_packed_resource_kind.h"
@@ -3461,13 +3455,12 @@ void fldInitializeActorLinkedSequence(s32 mode, s32 index, fldSceneParam_t *sequ
 #include "evt_unit.h"
 #include "evt_unit_color_transition.h"
 #include "fpu.h"
-#include "pcp_vu0.h"
 #include "sdf.h"
 #include "sdf_sif_command.h"
 #include "mdl.h"
 #include "scr.h"
-#include "kwln.h"
-#include "kwln_task_create.h"
+#include "kernel.h"
+#include "dds3_task_create.h"
 #include "dat_state.h"
 #include "dds3_world_primary.h"
 #include "sdf_packet_alloc.h"
@@ -3682,6 +3675,7 @@ s32 fldGetActorStat0(s32 attribute) {
 
 /* Read a selected actor attribute; selector zero maps its motion code.
  * Missing named objects fall through to subsequent attribute cases. */
+
 INCLUDE_RODATA(const s32, "game/code_00138C30", D_003A0270);
 
 INCLUDE_RODATA(const s32, "game/code_00138C30", D_003A0280);
@@ -4470,7 +4464,7 @@ FldActorMotionStepResult fldStepActorMotionByKey(u32 key, f32 *x, f32 *y, f32 *z
 void func_00140F68(void) {
 }
 
-extern s32 fileMenuTaskExists(void);
+extern s32 fmProcessChk(void);
 
 extern u8 fldHasKiretaLabelProcess(void), fldProcKiretaChk(void), fldProcHirakenaiChk(void);
 
@@ -4496,7 +4490,7 @@ s32 fldUpdateTitleBannerTask(dds3ProcessID_t *task) {
     if (fldProcAmChk() != FLD_SCENE_TRANSITION_GATE_PROCEED) {
         return 0;
     }
-    if (fileMenuTaskExists() != 0) {
+    if (fmProcessChk() != 0) {
         return 0;
     }
     if (fldHasKiretaLabelProcess() != 0) {
@@ -4591,3 +4585,4 @@ INCLUDE_SDATA(const s32, "game/code_00138C30", D_003BAE68);
 INCLUDE_SDATA(const s32, "game/code_00138C30", fldPickedActorTemplateKind);
 
 INCLUDE_SDATA(const s32, "game/code_00138C30", addressprocess_id);
+

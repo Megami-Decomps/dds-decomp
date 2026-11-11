@@ -20,9 +20,9 @@
 #include "fr_font_measure.h"
 #include "eff_resource_slots.h"
 #include "sdf_chip.h"
-#include "kwln.h"
-#include "sdf_resource.h"
-#include "pcp_vu0.h"
+#include "kernel.h"
+#include "sdf_heap_api.h"
+#include "ps2asm.h"
 #include "btl_scene_fade.h"
 #include "btl_resource.h"
 #include "eff.h"
@@ -41,7 +41,7 @@
 #include "dat_command.h"
 #include "sdf_sif_command.h"
 #include "mdl_resource_table.h"
-#include "kwln_task_lifecycle.h"
+#include "dds3_task_lifecycle.h"
 /* Declared before first use (were implicit int). */
 extern u8 btlTestSelectedItemCategoryMask(BtlUnit *unit, s32 actorIndex);
 extern u32 sdfQueryChannelBits(s32 channel, datUnitWork_t *sourceRecord, datUnitWork_t *item);
@@ -335,10 +335,10 @@ BtlCommandHitResult btlResolveCommandHitResult(BtlUnit *source, BtlUnit *target,
             evtScriptArgumentFromPointer(targetRecord), command, 0);
         switch (command) {
         case 0xE7:
-            if (evtGetMirroredSolarPhase() != 8) autoMultiplier *= 0.2f;
+            if (evtGetAgeOfMoon() != 8) autoMultiplier *= 0.2f;
             break;
         case 0xE8:
-            if (evtGetMirroredSolarPhase() != 0) autoMultiplier *= 0.2f;
+            if (evtGetAgeOfMoon() != 0) autoMultiplier *= 0.2f;
             break;
         }
         if (target->status.flags & 0x2000000) chance += 30;

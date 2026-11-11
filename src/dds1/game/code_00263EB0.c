@@ -5,7 +5,7 @@
 #include "evt_stage_test_api.h"
 #include "mnu_input.h"
 #include "ui_color.h"
-#include "kwln.h"
+#include "kernel.h"
 #include "mnu.h"
 #include "brs_level_progress_api.h"
 #include "mnu_result.h"
@@ -331,7 +331,7 @@ void mnuStartRewardDialogAndMotion(BrsSkillPackageWork *work) {
 extern s32 btlAddBaseStats(s32 *, datUnitWork_t *);
 extern void mnuRefreshSelectedUnitPanels(datUnitWork_t *, BrsSkillPackageWork *);
 
-void kwlnItemUpdateDisplay(BrsSkillPackageWork *scene) {
+void mnuItemUpdateDisplay(BrsSkillPackageWork *scene) {
     datUnitWork_t *item = scene->selectedRewardRow->unit;
     switch (scene->rewardMode) {
     case 4:
@@ -358,7 +358,7 @@ void kwlnItemUpdateDisplay(BrsSkillPackageWork *scene) {
 
 #include "common.h"
 #include "fr_font_measure.h"
-#include "kwln.h"
+#include "kernel.h"
 #include "eff.h"
 #include "mnu_result.h"
 #include "itf.h"
@@ -381,7 +381,7 @@ s32 brsAdvanceRewardPanelAfterMessage(dds3ProcessID_t *request) {
         if (fclChkMessage() == EVT_MESSAGE_WINDOW_CONTROL_RESULT_NO_ACTIVE_CONTROL) {
             if (panel->rewardMode != 0) {
                 mnuStartRewardDialogAndMotion(panel);
-                kwlnItemUpdateDisplay(panel);
+                mnuItemUpdateDisplay(panel);
                 panel->rewardMode = 0;
             } else {
                 mnuSetPopupEntryFlagged(&panel->transition.state, brsPrimaryRewardPopupEntry);
@@ -590,7 +590,7 @@ void brsNoOpMessageInputCallback(void *work) {
 
 extern u8 *D_003BAA84;
 extern char D_003BC560[];
-extern s32 frFontDrawGlyphChain(_FRQ *, s8, u32);
+extern s32 frDrawFontOt(frFontHandle_t *, s8, u32);
 extern char D_003BC568[];
 
 /* Draw each nonempty reward icon row with its name and formatted parameter. */
@@ -608,8 +608,8 @@ void brsDrawRewardEntryRows(s32 x, s32 y, s32 depth, u32 color, BrsRewardSummary
     for (i = 0; i < 3; i++) {
         u16 id = icon->id;
         u8 parameter = icon->param;
-        _FRQ *iconGlyph;
-        _FRQ *valueGlyph;
+        frFontHandle_t *iconGlyph;
+        frFontHandle_t *valueGlyph;
 
         icon++;
         if (id != 0) {
@@ -621,7 +621,7 @@ void brsDrawRewardEntryRows(s32 x, s32 y, s32 depth, u32 color, BrsRewardSummary
             sprintf(formatted, D_003BC560, parameter);
             valueGlyph = itfCreateFont3TextGlyph(x + 0xC60, y + 0x18, depth, color,
                                        formatted, iconGlyph);
-            frFontDrawGlyphChain(valueGlyph, 1, textStyle);
+            frDrawFontOt(valueGlyph, 1, textStyle);
             frDestroyFontRequestAfter(valueGlyph);
             y += 0xB0;
         }
@@ -630,23 +630,23 @@ void brsDrawRewardEntryRows(s32 x, s32 y, s32 depth, u32 color, BrsRewardSummary
 
 void itfDrawCountText(s32 x, s32 y, s32 z, s32 w, const BrsRewardSummary *info, s32 flags) {
     char text[32];
-    _FRQ *glyph;
+    frFontHandle_t *glyph;
 
     sprintf(text, D_003BC568, info->totalExp);
     glyph = itfCreateFont3TextGlyph(x, y, z, w, text, 0);
     frSetDrawPosition(glyph, x + ((0xBE - frGetStrWidth2(glyph)) << 4), y);
-    frFontDrawGlyphChain(glyph, 1, flags);
+    frDrawFontOt(glyph, 1, flags);
     frDestroyFontRequestAfter(glyph);
 }
 
 void brsDrawMaccaRewardTotal(s32 x, s32 y, s32 z, s32 w, const BrsRewardSummary *info, s32 flags) {
     char text[32];
-    _FRQ *glyph;
+    frFontHandle_t *glyph;
 
     sprintf(text, D_003BC568, info->macca);
     glyph = itfCreateFont3TextGlyph(x, y, z, w, text, 0);
     frSetDrawPosition(glyph, x + ((0xBE - frGetStrWidth2(glyph)) << 4), y);
-    frFontDrawGlyphChain(glyph, 1, flags);
+    frDrawFontOt(glyph, 1, flags);
     frDestroyFontRequestAfter(glyph);
 }
 

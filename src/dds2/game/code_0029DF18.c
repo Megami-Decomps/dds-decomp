@@ -108,7 +108,7 @@ void brsDrawProgressRowEntries(s32 x, s32 y, s32 z, BrsSkillPackageWork *work, B
 /* Shared gray palette retained for the still-ASM unit-info renderer. */
 #include "fr_font.h"
 #include "fr_font_draw_glyph.h"
-extern struct _FRQ *itfCreateFont2TextGlyph(s32, s32, s32, u32, char *, struct _FRQ *);
+extern struct frFontHandle_t *itfCreateFont2TextGlyph(s32, s32, s32, u32, char *, struct frFontHandle_t *);
 
 /* Both placement tables use the same coordinate-row type.  Their initialized
  * array bounds are inferred from the real rows, giving distinct aggregate copy
@@ -130,7 +130,7 @@ void brsDrawProgressRowUnitInfo(s32 x, s32 y, s32 depth, BrsSkillPackageWork *wo
     s32 placement;
     s32 px;
     s32 py;
-    struct _FRQ *glyph;
+    struct frFontHandle_t *glyph;
 
     colors[0] = color;
     colors[1] = color;
@@ -151,7 +151,7 @@ void brsDrawProgressRowUnitInfo(s32 x, s32 y, s32 depth, BrsSkillPackageWork *wo
     py = levelPosition[placement].y;
     sprintf(text, "%2d", work->levelAnimation[rowIndex].level);
     glyph = itfCreateFont2TextGlyph(x + (px << 4), y + (py << 3), 0xFF0000, color, text, 0);
-    frFontDrawGlyphChain(glyph, 1, context);
+    frDrawFontOt(glyph, 1, context);
     frDestroyFontRequestAfter(glyph);
     px = iconPosition[placement].x;
     py = iconPosition[placement].y;
@@ -370,7 +370,7 @@ typedef struct BrsProgressBarCoordinates {
 } BrsProgressBarCoordinates;
 
 extern const char D_004379F0[];
-extern struct _FRQ *itfCreateFont2TextGlyph(s32, s32, s32, u32, char *, struct _FRQ *);
+extern struct frFontHandle_t *itfCreateFont2TextGlyph(s32, s32, s32, u32, char *, struct frFontHandle_t *);
 
 typedef struct { u32 values[4]; } BrsProgressBarPalette;
 extern const BrsProgressBarPalette D_004285B0;
@@ -406,7 +406,7 @@ void brsDrawLevelProgressDetails(s32 x, s32 y, s32 depth, BrsSkillPackageWork *w
     s32 range;
     s32 tailOrigin;
     u32 color = work->levelAnimation[index].alpha | 0x80808000;
-    struct _FRQ *glyph;
+    struct frFontHandle_t *glyph;
     EffectSlotSet *resources;
 
     palette.values[0] = color;
@@ -440,7 +440,7 @@ void brsDrawLevelProgressDetails(s32 x, s32 y, s32 depth, BrsSkillPackageWork *w
     }
     sprintf(text, D_004379F0, endProgress - startProgress);
     glyph = itfCreateFont2TextGlyph(x + 0xC00, y + 0xE0, depth, color, text, 0);
-    frFontDrawGlyphChain(glyph, 1, context);
+    frDrawFontOt(glyph, 1, context);
     frDestroyFontRequestAfter(glyph);
 
     if (startProgress > 0 && endProgress != 0) {
@@ -758,13 +758,13 @@ s32 brsCalcProgressAnimationStep(BrsSkillPackageWork *work, BrsProgressRow *prog
 #include "common.h"
 #include "mnu_result.h"
 #include "sdf_chip.h"
-#include "sdf_resource.h"
-#include "kwln.h"
-#include "kwln_task_create.h"
+#include "sdf_heap_api.h"
+#include "kernel.h"
+#include "dds3_task_create.h"
 #include "mnu_title_effect.h"
 #include "mnu.h"
 #include "file.h"
-#include "kwln_task_lifecycle.h"
+#include "dds3_task_lifecycle.h"
 #include "file_request_api.h"
 #include "sdf_thread.h"
 
@@ -950,7 +950,7 @@ void brsDrawProfileProgressDetails(s32 x, s32 y, s32 depth, BrsSkillPackageWork 
     s32 tailPosition;
     u32 color = work->profileAnimation[index].alpha | 0x80808000;
     u32 barColor;
-    struct _FRQ *glyph;
+    struct frFontHandle_t *glyph;
     EffectSlotSet *resources;
     EffectSlotSet *restoreResources;
 
@@ -986,7 +986,7 @@ void brsDrawProfileProgressDetails(s32 x, s32 y, s32 depth, BrsSkillPackageWork 
         textOffset = scrGetIndexedRecordAddress(profileId, &textAddress) ? 0 : 18;
         glyph = itfCreateConvertedTextGlyph(x + ((textOffset + 0x149) << 4), y + 0xB8, depth,
                                             color, textAddress, NULL);
-        frFontDrawGlyphChain(glyph, 1, context);
+        frDrawFontOt(glyph, 1, context);
         frDestroyFontRequestAfter(glyph);
     } else {
         cap = 0;
@@ -1130,7 +1130,7 @@ void func_002A1038(void) {
 }
 
 /* Copy the packed eight-byte prefix, then append the caller's filename. */
-char *mnuBuildSoundResourcePath(char *pathBuffer, const char *filename) {
+char *sdfSndMakeFilename(char *pathBuffer, const char *filename) {
     *(u64p *)pathBuffer = *(u64p *)D_00437A00;
     return strcat(pathBuffer, filename);
 }
@@ -1155,7 +1155,7 @@ extern s16 D_00438FCC;
 
 extern s32 D_00437A1C;
 
-extern void sndInitializeIopSoundSystem(char *, s32, const s32 *, s32);
+extern void sdfSndInit(char *, s32, const s32 *, s32);
 
 extern void p2sdLoadSMGFile(s32);
 
@@ -1169,7 +1169,7 @@ void mnuInitializeTitleAudioAndEffects(void) {
         return;
     }
     D_004379FC = 1;
-    sndInitializeIopSoundSystem(D_003E0B30, 4, D_003E0B50, 4);
+    sdfSndInit(D_003E0B30, 4, D_003E0B50, 4);
     p2sdLoadSMGFile(D_003D9D60[0]);
     D_00437A18 = 4;
     D_00438FCC = -1;
@@ -1429,3 +1429,4 @@ INCLUDE_SDATA(const s32, "game/code_0029DF18", D_00437A20);
 INCLUDE_SDATA(const s32, "game/code_0029DF18", D_00437A28);
 
 INCLUDE_SDATA(const s32, "game/code_0029DF18", D_00437A2C);
+

@@ -1,19 +1,20 @@
 #include "sdk_ps2.h"
 #include "common.h"
 #include "sdf_map_position_api.h"
-#include "sdf_vu0.h"
+#include "ps2asm.h"
+
+#define VEC3_SPLAT(v, x) ((v)[0] = (x), (v)[1] = (x), (v)[2] = (x))
+
 #include "btl_effect_position.h"
 #include "eff_random.h"
 #include "sdf_chip.h"
 #include "par_cell_api.h"
-#include "sdf_resource.h"
+#include "sdf_heap_api.h"
 #include "eff.h"
 #include "eff_param.h"
 #include "eff_pcp_boss.h"
 #include "eff_flash_fan_color_slot.h"
-#include "pcp_vu0.h"
 #include "sdf_vu_transform_api.h"
-#include "ee_mmi.h"
 #include "mdl.h"
 #include "sdf_chunk.h"
 #include "sdf_projection.h"
@@ -23,7 +24,7 @@ extern void effPCPCrackSetPosition(f32 *dst, const f32 *src);
 extern PairedEffectResources *effPCPBossMETATOBeamCreate(PairedEffectParams *src);
 extern EffThunderGroup *effPCP_ThunderPolyListCreate(EffThunderGroupParams *src);
 
-extern u32 effBTLFieldColorUsesActorSelectors(void);
+extern u32 effBTLSkillCheckRun(void);
 extern u32 effBTLFieldColorGetVariantSelector(void);
 extern f32 effBossLookAtReferenceAxis[4];
 
@@ -54,7 +55,7 @@ void effPCPCrackSizeInit(effPCPCrack_t *work, EffBossCell *cell) {
 /* Create a draw pool and delayed cells for each model map-position group. */
 void effPCPCrackInit(effPCPCrack_t *work)
 {
-    dds3ModelHandle_t *model = effParamWorkGetData(work->paramWork);
+    dds3ModelHandle_t *model = dds3EffectPartGetHandle(work->paramWork);
     EffBossGroup *group;
     EffBossCell *nextCells;
     u32 groupIndex;
@@ -131,7 +132,7 @@ effPCPCrack_t *effPCPCrackCreate(EffBossParams *bossParams, void *effectParams) 
 }
 
 /* Apply the first two packed parameter blocks to the boss effect. */
-effPCPCrack_t *effPCPCrackCreatePCF(const EffParamTable *parameterTable) {
+effPCPCrack_t *effPCPCrackCreatePCF(const dds3EffectPCPData_t *parameterTable) {
     EffBossParams *bossParams;
     void *effectParams;
 
@@ -171,7 +172,7 @@ void effPCPCrackDelete(effPCPCrack_t *work) {
 #include "eff_math.h"
 #include "sdf_quaternion.h"
 extern u32 effMagaCylinderCalcColor(u32, u32);
-extern struct sdfGrOt_t *kwlnSceneSurfaceSets[13][4];
+extern struct sdfGrOt_t *sdfModelOtTable[13][4];
 extern f32 D_003B1FE0[4];
 extern void dds3FlashPolyListSetABGR(dds3FlashPolyList_t *, u32);
 extern void dds3FlashPolyListDraw(dds3FlashPolyList_t *);
@@ -218,7 +219,7 @@ void effPCPCrackDraw(effPCPCrack_t *work) {
 
     frame = work->frame;
     mode = work->head.directionMode;
-    model = effParamWorkGetData(work->paramWork);
+    model = dds3EffectPartGetHandle(work->paramWork);
     map = model->inner;
     SDF_VU0_LOADVECTOR(work->head.position);
     mdlSetPosition(model);
@@ -226,7 +227,7 @@ void effPCPCrackDraw(effPCPCrack_t *work) {
     scaleVector[3] = 0.0f;
     SDF_VU0_LOADVECTOR(scaleVector);
     mdlSetScale(model);
-    mdlLink(model, kwlnSceneSurfaceSets[10]);
+    mdlLink(model, sdfModelOtTable[10]);
     if (work->head.drawTrail) {
         colorStart = work->head.trailColorStartFrame;
         if (frame > colorStart) {
@@ -310,7 +311,7 @@ void effPCPCrackDraw(effPCPCrack_t *work) {
                             SDF_VU0_LOADVECTOR(perpendicular);
                         }
                         SDF_VU0_LOADVECTOR_B(trailWidth);
-                        VU0_SCALE_VF(vf11, blend);
+                        SDF_VU0_SCALEVECTOR_B_BITS(blend);
                         SDF_VU0_MULVECTOR();
                         SDF_VU0_COPYVECTOR_A_TO_B();
                         SDF_VU0_LOADVECTOR(positions + 1);
@@ -466,7 +467,7 @@ void effPCPCrackDraw(effPCPCrack_t *work) {
 
 void effPCPCrackSetPosition(f32 *dst, const f32 *src)
 {
-    PCP_COPY_VECTOR_F32(dst, src);
+    SDF_VU0_COPYVECTOR_F32(dst, src);
 }
 
 void effBossTrailSetColor(effPCPCrack_t *work, s32 value) {
@@ -487,7 +488,7 @@ EffPCPBossWork *effPCPBossBaelCreate(const f32 vector[4], void *paramA, void *pa
 }
 
 /* Apply three packed parameter blocks to the boss effect. */
-EffPCPBossWork *effPCPBossBaelCreatePCF(const EffParamTable *parameterTable) {
+EffPCPBossWork *effPCPBossBaelCreatePCF(const dds3EffectPCPData_t *parameterTable) {
     void *firstBlock;
     void *secondBlock;
     void *thirdBlock;
@@ -523,23 +524,23 @@ void effBossBeamUpdate(EffPCPBossWork *work) {
     u128 matrix[4];
     f32 *direction;
 
-    if (effBTLFieldColorUsesActorSelectors() != 0) {
+    if (effBTLSkillCheckRun() != 0) {
         if (work->frame == 0) {
-            btlUnitGetMuzzlePosVU((struct BtlUnit *)effBTLFieldColorGetVariantSelector());
+            effBTLModelGetSphereCenter((struct BtlUnit *)effBTLFieldColorGetVariantSelector());
             SDF_VU0_STOREVECTOR(work->position);
         }
         direction = work->parameterVector;
         LookAtMatrix(work->position, direction, effBossLookAtReferenceAxis);
         ReverseMatrix();
         SDF_VU0_RESET_ROW3();
-        VU0_STORE_MATRIX(matrix);
+        SDF_VU0_STOREMATRIX(matrix);
     } else {
         work->position[0] = 0;
         work->position[1] = 0;
         work->position[2] = 400.0f;
         work->position[3] = 0;
-        VU0_STORE_VF(vf0, work->position);
-        EE_MMI_UNIT_MATRIX(matrix);
+        SDF_VU0_STOREIDENTITYVECTOR(work->position);
+        SDF_VU0_STOREIDENTITY(matrix);
         direction = work->parameterVector;
     }
     dds3EffectPartSetRotateMatrix(work->modelResource, matrix);
@@ -764,7 +765,7 @@ effPCPCrack_t *effPCPCrack2Create(EffBossParams *bossParams, void *effectParams)
     return work;
 }
 
-effPCPCrack_t *effPCPCrack2CreatePCF(const EffParamTable *data) {
+effPCPCrack_t *effPCPCrack2CreatePCF(const dds3EffectPCPData_t *data) {
     EffBossParams *bossParams;
     void *effectParams;
 
@@ -819,7 +820,7 @@ PairedEffectResources *effPCPBossMETATOBeamCreate(PairedEffectParams *src)
     return work;
 }
 
-PairedEffectResources *effPCPBossMETATOBeamCreatePCF(const EffParamTable *data) {
+PairedEffectResources *effPCPBossMETATOBeamCreatePCF(const dds3EffectPCPData_t *data) {
     void *work;
 
     work = dds3EffectPCPDataGetData(data, 0);

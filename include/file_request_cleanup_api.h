@@ -5,6 +5,6 @@
 #include "file_request_cleanup_result.h"
 
 /* Freeing a completed request invalidates its wrapper; pending work is retained. */
-FileRequestCleanupResult fileRequestFreeIfComplete(struct FileRequest *request);
+FileRequestCleanupResult fileHandleFree(struct FileRequest *request);
 
 #endif /* FILE_REQUEST_CLEANUP_API_H */

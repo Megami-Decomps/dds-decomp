@@ -4,7 +4,7 @@
 /*
  * Translation unit boundary recovered at btlCalculateHpActionAmount (twin of
  * DDS1 code_001A5C40). btlCheckSpecialAbility and btlGetActorEntryMultiplier
- * belong to the preceding unit (code_001A8748); the retail calls to them keep
+ * belong to the preceding unit (code_001AA868); the retail calls to them keep
  * their possibly-throwing (non-nothrow) shape, so they must stay external
  * here. A same-unit definition makes reorg's branch-slot liveness scan see
  * through the call and flips the delay-slot annulment of the neighbouring
@@ -30,7 +30,7 @@
 #include "btl_event_asset_api.h"
 #include "btl_skill_max_api.h"
 #include "dat_calculate_command_base_value_api.h"
-#include "kwln_task_add_child.h"
+#include "dds3_task_add_child.h"
 #include "btl_special_ability.h"
 #include "dat_unit_has_skill_api.h"
 #include "btl_command_partner_output.h"
@@ -47,11 +47,11 @@
 #include "fr_font_measure.h"
 #include "eff_resource_slots.h"
 #include "sdf_chip.h"
-#include "kwln.h"
-#include "kwln_task_priority_query.h"
-#include "kwln_task_create.h"
-#include "sdf_resource.h"
-#include "pcp_vu0.h"
+#include "kernel.h"
+#include "dds3_task_priority_query.h"
+#include "dds3_task_create.h"
+#include "sdf_heap_api.h"
+#include "ps2asm.h"
 #include "btl_scene_fade.h"
 #include "btl_resource.h"
 #include "eff.h"
@@ -65,7 +65,7 @@
 #include "sdf_projection.h"
 #include "btl_action.h"
 #include "scr.h"
-#include "bf_flw0_header.h"
+#include "scr.h"
 #include "dat_state.h"
 #include "btl_resolve_unit_value_api.h"
 #include "btl_select_transform_parameters_api.h"
@@ -73,7 +73,7 @@
 #include "dat_command.h"
 #include "sdf_sif_command.h"
 #include "mdl_resource_table.h"
-#include "kwln_task_lifecycle.h"
+#include "dds3_task_lifecycle.h"
 #include "mdl_flag_api.h"
 #include "btl_target_result.h"
 
@@ -134,7 +134,7 @@ extern char D_004150B0[]; /* "btl:hunt ep=%d[id=%X]\n" */
 
 extern void btlBossDebugPrintf(const char *, ...);
 
-extern EffRandState effSharedRandomState[];
+extern EffRandState dds3RandCB[];
 
 extern void *btlCommandAttributeNames[];
 
@@ -150,7 +150,7 @@ extern s32 btlDoesEnabledStatusMatchCurrentId(datUnitWork_t *, u32);
 
 extern s32 TestMsgMngD_Process(dds3ProcessID_t *task);
 
-extern sdfGrOt_t D_003805A8;
+SYMBOL_AT(sdfGrOt_t, D_003805A8, sdfGrOtTable, 0xA60);
 
 extern u8 D_003B4D08[];
 
@@ -174,7 +174,7 @@ extern u32 datComputeSkillBoostedMaxHp(datUnitWork_t *);
 
 extern u32 datComputeSkillBoostedMaxMp(datUnitWork_t *);
 
-extern sdfGrOt_t D_00380708;
+SYMBOL_AT(sdfGrOt_t, D_00380708, sdfGrOtTable, 0xBC0);
 
 
 extern s32 D_00435CBC;
@@ -186,7 +186,6 @@ extern s32 TestMsgMngC_Process(dds3ProcessID_t *task);
 
 extern u8 D_003B4A28[];
 
-extern dds3ProcessID_t *scrStartScript2(u32 priority, const BfFlw0Header *script, ScrProcedureIndex procedureIndex);
 
 void TestMsgReloadTexture(void);
 
@@ -319,7 +318,7 @@ s32 btlCalculateHpActionAmount(BtlUnit *source, BtlUnit *target, BtlCommandId co
         case 12:
         case 14:
             parameters = datBattleParameters;
-            phase = evtGetMirroredSolarPhase();
+            phase = evtGetAgeOfMoon();
             solar = parameters->solarScale[
                 (source->status.flags & 0x200) ? 0 : 1][phase];
             break;
@@ -348,7 +347,7 @@ s32 btlCalculateHpActionAmount(BtlUnit *source, BtlUnit *target, BtlCommandId co
         btlDoesEnabledStatusMatchCurrentId(&source->partyRecord, 0xE7) &&
         datCommandRecords[command].hpType != 8 &&
         datCommandRecords[command].hpType != 10) {
-        f32 varied = ((dds3GetRandFloatA(effSharedRandomState) - 0.5f) * 2.0f) *
+        f32 varied = ((dds3GetRandFloatA(dds3RandCB) - 0.5f) * 2.0f) *
                      0.5f * automatic + automatic;
         automatic = varied;
     }
@@ -534,7 +533,7 @@ s32 btlCalculateMpActionAmount(BtlUnit *source, BtlUnit *target, BtlCommandId co
         case 12:
         case 14:
             parameters = datBattleParameters;
-            phase = evtGetMirroredSolarPhase();
+            phase = evtGetAgeOfMoon();
             solar = parameters->solarScale[
                 (source->status.flags & 0x200) ? 0 : 1][phase];
             break;
@@ -701,6 +700,7 @@ BtlFearInflictionRollResult btlRollFearChance(
 extern s32 fldCountSceneSlots(void);
 
 /* Combine both contributions; groups of three or more suppress the 30% case. */
+
 INCLUDE_RODATA(const s32, "game/code_001AF4A0", D_00415440);
 
 BtlFearInflictionRollResult btlRollAllFearChance(
@@ -884,10 +884,10 @@ void btlSortActorMuzzleDirections(BtlUnit *unit, BtlIndexList *targets, s32 acti
             for (i = 0; i < last; i++) {
                 pair[0] = btlGetIndexListEntry(targets, i);
                 pair[1] = btlGetIndexListEntry(targets, i + 1);
-                btlUnitGetMuzzlePosVU(pair[0]);
-                VU0_STORE_VF(vf10, muzzle[0]);
-                btlUnitGetMuzzlePosVU(pair[1]);
-                VU0_STORE_VF(vf10, muzzle[1]);
+                effBTLModelGetSphereCenter(pair[0]);
+                SDF_VU0_STOREVECTOR(muzzle[0]);
+                effBTLModelGetSphereCenter(pair[1]);
+                SDF_VU0_STOREVECTOR(muzzle[1]);
                 if ((pair[0]->status.flags & 0x400) && (pair[1]->status.flags & 0x400)) {
                     if (mode == 1) {
                         if (muzzle[0][0] > muzzle[1][0]) {

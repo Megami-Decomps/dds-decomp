@@ -79,7 +79,7 @@ enum {
     EVT_WORLD_SLOT_UNIT = 5   /* unit/group/lip-sync lists: byte offset 0x40 */
 };
 
-struct BfFlw0Header;
+struct scrHeader_t;
 struct dds3ProcessID_t;
 
 /* The object's 18 per-kind intrusive lists. */
@@ -97,7 +97,7 @@ typedef struct evtWorldTable_t {
     dds3Basic_t *playerObject; /* 0x10 */
     const struct sdfMemHandle_t *fieldResourceHandle; /* 0x14: borrowed alias; fldReleaseFieldResources owns its release. */
     struct sdfMemHandle_t *sceneResourceHandle; /* 0x18: retained allocation descriptor; released at teardown. */
-    const struct BfFlw0Header *sceneScript; /* 0x1C: borrowed resolved FLW0 view used for script lookup. */
+    const struct scrHeader_t *sceneScript; /* 0x1C: borrowed resolved FLW0 view used for script lookup. */
     s32 drawEnabled; /* 0x20: controls drawing of kind 2 */
     u8 pad24[0x1C]; /* The SDK constructor allocates 0x40 bytes. */
 } evtWorldTable_t;

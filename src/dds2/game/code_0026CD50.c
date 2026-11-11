@@ -1,11 +1,11 @@
 #include "sdk_ps2.h"
-#include "kwln.h"
+#include "kernel.h"
 #include "mnu_list.h"
-#include "kwln_task_state.h"
+#include "dds3_task_state.h"
 #include "evt_world.h"
-#include "sdf_resource.h"
+#include "sdf_heap_api.h"
 #include "dat_state.h"
-#include "kwln_task_lifecycle.h"
+#include "dds3_task_lifecycle.h"
 #include "mnu_mantra.h"
 #include "mnu_mantra_position_api.h"
 #include "file_request_api.h"
@@ -80,20 +80,20 @@ EvtLoadedRecord *evtCreateLoadedRecord(const u8 *resourceData) {
 extern void mnuRebuildMantraCategoryAvailability(void);
 void mnuLoadMantraNodePositionTable(const u8 *resourceData);
 
-extern void evtPrintDeveloperConsoleMessage(const char *, ...);
+extern void datDebugPrintf(const char *, ...);
 
 /* Load the mantra node-position table synchronously and release the request. */
 void mtrLoadMantraNodePositions(void) {
     struct FileRequest *request;
 
-    evtPrintDeveloperConsoleMessage("Mantra Table Load [/facility/data/mtrMantraBlockData.tbl]\n");
+    datDebugPrintf("Mantra Table Load [/facility/data/mtrMantraBlockData.tbl]\n");
     request = fileLoad("/facility/data/mtrMantraBlockData.tbl");
     while (!pacFileCheckEnd(request)) {
     }
     mnuLoadMantraNodePositionTable(fileGetLoadPtr(request));
     mnuRebuildMantraCategoryAvailability();
     sdfMemFreeDirect(fileGetMemHandle(request));
-    fileRequestFreeIfComplete(request);
+    fileHandleFree(request);
 }
 
 void mnuReleaseMantraNodePositionTable(void);
@@ -219,7 +219,7 @@ void mnuUpdateMantraRecordFlags(MantraFlagResource *work, datUnitWork_t *unit, s
     s32 i = 0;
 
     rank = mnuGetActiveMantraModelFlagState();
-    evtPrintDeveloperConsoleMessage(D_00425098, rank);
+    datDebugPrintf(D_00425098, rank);
     selected = scrGetSelectedScriptEntryId(unit);
     entry = work->flags;
     node = (MantraNodePos *)mnuMantraNodePositionTable->records;
@@ -527,3 +527,4 @@ void scrClearPartyProfileEntryBit15(datUnitWork_t *context, u8 entry) {
 }
 
 INCLUDE_RODATA(const s32, "game/code_0026CD50", D_00425098);
+

@@ -3,12 +3,12 @@
 
 #include "common.h"
 
-struct _FRQ;
+struct frFontHandle_t;
 
-void frSetDrawSpeed(struct _FRQ *glyph, s32 inputValue);
-void frFontEnableContextMode(struct _FRQ *glyph);
-void frSetFontSpace(struct _FRQ *glyph, s32 spacing);
-void frSetDrawPosition(struct _FRQ *glyph, s32 x, s32 y);
-void frSetPriority(struct _FRQ *glyph, u32 unshiftedValue);
+void frSetDrawSpeed(struct frFontHandle_t *glyph, s32 inputValue);
+void frFontEnableContextMode(struct frFontHandle_t *glyph);
+void frSetFontSpace(struct frFontHandle_t *glyph, s32 spacing);
+void frSetDrawPosition(struct frFontHandle_t *glyph, s32 x, s32 y);
+void frSetPriority(struct frFontHandle_t *glyph, u32 unshiftedValue);
 
 #endif

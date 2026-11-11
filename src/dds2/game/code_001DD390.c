@@ -32,7 +32,7 @@
 #include "btl_hunt_mp_recovery_api.h"
 #include "btl_command_target_policy.h"
 #include "dds3_object_flags.h"
-#include "sdf_vu0.h"
+#include "ps2asm.h"
 #include "btl_aim_horizontal_direction_clamped_api.h"
 #include "btl_set_actor_effect_parameter_api.h"
 #include "btl_raise_party_record_status_value.h"
@@ -56,7 +56,7 @@
 #include "btl_task_state.h"
 #include "btl_task_poll_result.h"
 #include "btl_task_condition.h"
-#include "sdf_resource.h"
+#include "sdf_heap_api.h"
 #include "sdf_model.h"
 #include "sdf_model_release_api.h"
 #include "btl.h"
@@ -100,8 +100,6 @@
 #include "mdl_asset_request.h"
 #include "btl_model_and_sound_readiness_api.h"
 #include "file_request_api.h"
-#include "pcp_vu0.h"
-#include "ee_mmi.h"
 #include "fpu.h"
 #include "dat_state.h"
 #include "dat_command.h"
@@ -128,12 +126,12 @@ extern s32 btlIsUnitInActiveList(BtlUnit *unit);
 extern void btlBossDebugPrintfN(s32, s32, s32, const char *, ...);
 
 
-extern EffRandState effSharedRandomState[];
+extern EffRandState dds3RandCB[];
 
 extern void btlDrawUnitTransparencyPasses(BtlUnit *, dds3ModelHandle_t *, sdfModelRootNode_t *, sdfGrOt_t **, u32);
 
 
-extern struct sdfGrOt_t *kwlnSceneSurfaceSets[13][4];
+extern struct sdfGrOt_t *sdfModelOtTable[13][4];
 
 extern sdfGrOt_t *btlUnitTransparencySurfaces[];
 
@@ -213,11 +211,11 @@ extern void btlClearRuntimeFlag2000(void);
 
 extern u8 D_003E9130[];
 
-extern f32 *D_0037F770[];
+extern f32 *dds3LightParam[];
 
-extern u8 kwlnDefaultColorVector[];
+extern u8 dds3AmbientColor[];
 
-extern f32 *D_0037F770[];
+extern f32 *dds3LightParam[];
 
 extern s32 btlDoesEnabledStatusMatchCurrentId(datUnitWork_t *, u32);
 
@@ -2084,6 +2082,7 @@ extern BtlRuntimeTask *btlFindTaskByKind(u16);
 
 /* Return whether the predicate is satisfied by value or registered tasks.
  * Kinds 5/8 accept running (phase 2) or absent, not an existing finishing task. */
+
 INCLUDE_RODATA(const s32, "game/code_001DD390", D_004178A8);
 
 INCLUDE_RODATA(const s32, "game/code_001DD390", D_004178B8);
@@ -2156,7 +2155,7 @@ u8 btlEvalTaskCondition(BtlTaskCondition *condition, s32 currentCount) {
 
 /* Append a cleared task; positive size exposes argument bytes after the header. */
 BtlRuntimeTask *btlAllocTask(s32 size) {
-    BtlRuntimeTask *task = sdfAllocAndClearQuadwords(size + 0x70);
+    BtlRuntimeTask *task = sdfChipAllocZeroDirect(size + 0x70);
     BtlState *work;
     if (size > 0) {
         task->args = task + 1;
@@ -2423,7 +2422,7 @@ void btlInheritActorModelState(BtlUnit *dst, BtlUnit *src) {
 }
 
 /* Native actor-model setup providers used by btlBindUnitModel. */
-extern s32 mdlSpawnCameraSlotViewerObject(s32 kind, s32 id);
+extern s32 evtSetRegistUnit(s32 kind, s32 id);
 
 #include "dds3_world_primary.h"
 
@@ -2455,7 +2454,7 @@ void btlBindUnitModel(BtlUnit *unit, u32 kind, u32 index) {
         reused = battle->findModelActor(kind, index);
         if (reused != NULL) {
             if (reused->resourceKind != kind || reused->resourceIndex != index) {
-                key = mdlSpawnCameraSlotViewerObject(kind, index);
+                key = evtSetRegistUnit(kind, index);
                 object = dds3SearchSceneBasic(
                     (dds3Basic_t *)dds3GetActiveScene(), (u32)key, 5);
                 dds3DeleteSceneBasicData(object);
@@ -2467,7 +2466,7 @@ void btlBindUnitModel(BtlUnit *unit, u32 kind, u32 index) {
         battle->beforeActorModelReady(unit);
     }
     if (reused == NULL) {
-        key = mdlSpawnCameraSlotViewerObject(kind, index);
+        key = evtSetRegistUnit(kind, index);
         unit->effectObject = dds3SearchSceneBasic(
             (dds3Basic_t *)dds3GetActiveScene(), (u32)key, 5);
         objectData = (EffectObjectData *)unit->effectObject->workdata;
@@ -2475,7 +2474,7 @@ void btlBindUnitModel(BtlUnit *unit, u32 kind, u32 index) {
         model = unit->ext->owner;
         unit->ext->flags |= 0x200000;
         SDF_VU0_SETSCALE1VECTOR();
-        VU0_SCALAR_OP(unit->actorScale, "vmulx.xyzw vf10, vf10, vf2x");
+        SDF_VU0_SCALEVECTOR_V0(unit->actorScale);
         inner = unit->effectObject->poseset;
         inner->flags = (inner->flags | 1) & ~2;
         SDF_VU0_STOREVECTOR(inner->scale);
@@ -3096,7 +3095,7 @@ BtlActorEffectPositionResult btlSetActorEffectParameter(BtlUnit *unit, s32 mode)
 
 void effBTLModelGetMarkPosition2(BtlUnit *unit, s32 mode) {
     if (btlSetActorEffectParameter(unit, mode) == BTL_ACTOR_EFFECT_POSITION_UNAVAILABLE) {
-        btlUnitGetMuzzlePosVU(unit);
+        effBTLModelGetSphereCenter(unit);
     }
 }
 
@@ -3174,11 +3173,11 @@ void btlSetUnitRotation(BtlUnit *unit, const f32 quat[4]) {
         SDF_VU0_LOADVECTOR(quat);
         if (unit->status.flags & 0x10) {
             SDF_VU0_LOADVECTOR_B(D_004179E0);
-            effMiscQuatMultiplyVU();
+            Mult();
         }
         SDF_VU0_STOREVECTOR_NOMEM(unit->orientation);
         SDF_VU0_LOADVECTOR_B(D_004179E0);
-        effMiscQuatMultiplyVU();
+        Mult();
         SDF_VU0_STOREVECTOR_NOMEM(result);
         if (unit->status.flags & 2) {
             dds3SetRotPoseSet(unit->effectObject, (u128 *)result);
@@ -3321,7 +3320,7 @@ void btlDrawUnitTransparencyPasses(BtlUnit *unit, dds3ModelHandle_t *model, sdfM
         packet[4] = 0x72801;
         packet[5] = 0x47;
         sdfDrawTagLink(list, (u32)packet);
-        surfaces[i]->append(surfaces[i], list);
+        surfaces[i]->regFunc(surfaces[i], list);
     }
     savedFlags = model->inner->drawFlags;
     model->flags |= MDL_SKIP_ANCHORS;
@@ -3340,11 +3339,11 @@ void btlDrawUnitTransparencyPasses(BtlUnit *unit, dds3ModelHandle_t *model, sdfM
         packet[4] = 0x51801;
         packet[5] = 0x47;
         sdfDrawTagLink(list, (u32)packet);
-        surfaces[i]->append(surfaces[i], list);
+        surfaces[i]->regFunc(surfaces[i], list);
     }
     sdfModelCopyStat(overlay, model->inner);
     if (unit->status.flags & 2) {
-        overlay->lighting = (struct SdfDmaTagHeader *)unit->ext->endpointWork;
+        overlay->lighting = unit->ext->endpointWork;
     } else {
         overlay->lighting = NULL;
     }
@@ -3360,7 +3359,7 @@ void btlDrawUnitTransparencyPasses(BtlUnit *unit, dds3ModelHandle_t *model, sdfM
         packet[4] = btlTransparencySurfaceTestValues[i];
         packet[5] = 0x47;
         sdfDrawTagLink(list, (u32)packet);
-        surfaces[i]->append(surfaces[i], list);
+        surfaces[i]->regFunc(surfaces[i], list);
     }
     mdlSetEffectColor(model, color);
     for (item = model->resourceItems; item != NULL; item = item->next) {
@@ -3403,12 +3402,12 @@ void btlUpdateUnitTransparency(BtlUnit *unit) {
                                      SDF_MODEL_MATERIAL_RESOURCES_RELEASE_DEFERRED);
                     unit->transparencyModel = 0;
                     if (unit->status.flags & 2) {
-                        info->inner->lighting = (struct SdfDmaTagHeader *)unit->ext->endpointWork;
+                        info->inner->lighting = unit->ext->endpointWork;
                     } else {
                         info->inner->lighting = 0;
                     }
                     mdlSetColor(info, color);
-                    mdlLink(info, kwlnSceneSurfaceSets[0]);
+                    mdlLink(info, sdfModelOtTable[0]);
                     dds3ObjectBaseOffFlag(unit->effectObject, 1);
                     btlBossDebugPrintf(D_00417940, unit);
                 }
@@ -3423,7 +3422,7 @@ void btlUpdateUnitTransparency(BtlUnit *unit) {
     }
 }
 
-extern sdfGrFrameSet_t D_0040B290;
+extern sdfGrFrameSet_t sdfGrFrameSet;
 
 extern sdfGrOt_t *btlMirrorSourceTransparencySurfaces[];
 
@@ -3443,9 +3442,9 @@ void btlDrawUnitMirrorTransparency(BtlUnit *unit) {
     }
     unit->mirror->transparencyBuffer = sdfGrAllocPacketBuff(0x70000);
     list = sdfPrimAllocDrawTag(0);
-    sdfLinkStoreImage(list, D_0040B290.buffers[2],
+    sdfLinkStoreImage(list, sdfGrFrameSet.buffers[2],
                             0, 0, 0x200, 0xE0, unit->mirror->transparencyBuffer, 0, 0, 0);
-    btlMirrorSourceTransparencySurfaces[0]->append(btlMirrorSourceTransparencySurfaces[0], list);
+    btlMirrorSourceTransparencySurfaces[0]->regFunc(btlMirrorSourceTransparencySurfaces[0], list);
     info = unit->ext->owner;
     if (unit->transparencyModel == 0) {
         unit->transparencyModel = sdfModelMake(info->sub->resourceList, info->sub->itemList);
@@ -3460,9 +3459,9 @@ void btlDrawUnitMirrorTransparency(BtlUnit *unit) {
         return;
     }
     list = sdfPrimAllocDrawTag(0);
-    sdfLinkLoadImage(list, D_0040B290.buffers[2],
+    sdfLinkLoadImage(list, sdfGrFrameSet.buffers[2],
                               0, 0, 0x200, 0xE0, unit->mirror->transparencyBuffer, 0);
-    btlMirrorTargetTransparencySurfaces[0]->append(btlMirrorTargetTransparencySurfaces[0], list);
+    btlMirrorTargetTransparencySurfaces[0]->regFunc(btlMirrorTargetTransparencySurfaces[0], list);
     btlDrawUnitTransparencyPasses(unit->mirror, info, unit->mirror->transparencyModel, btlMirrorTargetTransparencySurfaces, unit->mirror->overlayColor);
 }
 
@@ -3524,7 +3523,7 @@ void btlWarpUnitToMotionReach(BtlUnit *unit, BtlUnit *target, s32 index) {
     btlUnitGetBodyPosVU(unit);
     SDF_VU0_STOREVECTOR(bodyPos);
     if (target != NULL) {
-        btlUnitGetMuzzlePosVU(target);
+        effBTLModelGetSphereCenter(target);
         SDF_VU0_STOREVECTOR_NOMEM(muzzlePos);
         muzzlePos[1] = bodyPos[1];
         SDF_VU0_LOADVECTOR(muzzlePos);
@@ -3533,18 +3532,18 @@ void btlWarpUnitToMotionReach(BtlUnit *unit, BtlUnit *target, s32 index) {
         SDF_VU0_NORMALIZE();
     } else {
         SDF_VU0_LOADVECTOR(unit->orientation);
-        effMiscQuaternionToMatrixVU();
+        ToMatrix();
         SDF_VU0_LOADVECTOR(D_003E9130);
         SDF_VU0_APPLYMATRIX();
         SDF_VU0_LOADVECTOR_B(bodyPos);
     }
-    VU0_SCALAR_OP(reach, "vmulx.xyzw vf10, vf10, vf2x");
+    SDF_VU0_SCALEVECTOR_V0(reach);
     SDF_VU0_ADDVECTOR();
     SDF_VU0_STOREVECTOR(world);
     SDF_VU0_LOADVECTOR(unit->orientation);
-    effMiscQuaternionToMatrixVU();
+    ToMatrix();
     SDF_VU0_LOADVECTOR(unit->bodyOffset);
-    VU0_SCALAR_OP(unit->scale, "vmulx.xyzw vf10, vf10, vf2x");
+    SDF_VU0_SCALEVECTOR_V0(unit->scale);
     SDF_VU0_APPLYMATRIX();
     SDF_VU0_NEGVECTOR_XYZ();
     SDF_VU0_LOADVECTOR_B(world);
@@ -3555,7 +3554,7 @@ void btlWarpUnitToMotionReach(BtlUnit *unit, BtlUnit *target, s32 index) {
         if (sdfModelGetMarkPos(unit->ext->owner->inner, 0) == 0) {
             dds3GetPosPoseSet(unit->effectObject);
         }
-        VU0_SCALAR_OP(0.0f, "vaddx.y vf10, vf0, vf2x");
+        SDF_VU0_SETVECTOR_Y_V0(0.0f);
         SDF_VU0_LOADVECTOR_B(world);
         SDF_VU0_SUBVECTOR();
         SDF_VU0_GETLENGTH(distance);
@@ -3683,28 +3682,28 @@ s32 btlApproachTargetTask(BtlApproachTaskArgs *args) {
         args->motionReachOffset = table->nodes[unit->motionId].reachOffset * unit->scale;
     }
     reach = args->motionReachOffset + target->reach * target->scale;
-    btlUnitGetMuzzlePosVU(unit);
+    effBTLModelGetSphereCenter(unit);
     SDF_VU0_STOREVECTOR(fromPos);
-    btlUnitGetMuzzlePosVU(target);
+    effBTLModelGetSphereCenter(target);
     SDF_VU0_STOREVECTOR_NOMEM(toPos);
     toPos[1] = fromPos[1];
     SDF_VU0_LOADVECTOR(fromPos);
-    VU0_LOAD_VF_PTR(vf11, toPos);
+    SDF_VU0_LOADVECTOR_B_F32_NV(toPos);
     SDF_VU0_COPYVECTOR_A_TO_C();
     SDF_VU0_SUBVECTOR();
     SDF_VU0_NORMALIZE();
-    VU0_SCALAR_OP(reach, "vmulx.xyzw vf10, vf10, vf2x");
+    SDF_VU0_SCALEVECTOR_V0(reach);
     SDF_VU0_ADDVECTOR();
     SDF_VU0_COPYVECTOR_C_TO_B();
-    VU0_LERP_VF10(0.8f / scale);
+    SDF_VU0_INTERPOLATE(0.8f / scale);
     SDF_VU0_STOREVECTOR(pos);
     SDF_VU0_LOADVECTOR_B(fromPos);
     SDF_VU0_SUBVECTOR();
     SDF_VU0_GETLENGTH(dist);
     SDF_VU0_LOADVECTOR(unit->orientation);
-    effMiscQuaternionToMatrixVU();
+    ToMatrix();
     SDF_VU0_LOADVECTOR(unit->bodyOffset);
-    VU0_SCALAR_OP(unit->scale, "vmulx.xyzw vf10, vf10, vf2x");
+    SDF_VU0_SCALEVECTOR_V0(unit->scale);
     SDF_VU0_APPLYMATRIX();
     SDF_VU0_NEGVECTOR_XYZ();
     SDF_VU0_LOADVECTOR_B(pos);
@@ -3754,7 +3753,7 @@ s32 btlUpdateUnitPositionInterpolationTask(BtlPosLerpTaskArgs *args) {
         }
         SDF_VU0_LOADVECTOR(&args->from);
         SDF_VU0_LOADVECTOR_B(&args->to);
-        VU0_LERP_VF10(args->t);
+        SDF_VU0_INTERPOLATE(args->t);
         SDF_VU0_STOREVECTOR(pos);
         btlSetUnitPosition(unit, pos);
     } else {
@@ -3933,6 +3932,7 @@ BtlRuntimeTask *btlScheduleRefreshTask(BtlUnit *unit) {
 }
 
 /* Task-start callbacks do not return a status to the scheduler. */
+
 INCLUDE_RODATA(const s32, "game/code_001DD390", D_00417AF0);
 
 INCLUDE_RODATA(const s32, "game/code_001DD390", D_00417B10);
@@ -4014,10 +4014,10 @@ u32 btlUpdateModelChangeTask(BtlModelChangeArgs *args) {
             u32 secondColor;
 
             SDF_VU0_LOADVECTOR(unit->colorStart);
-            EE_MMI_RGBA_PACK_UNIT(packedStart[0], 128.0f);
+            MMI_RGBA_PACK_UNIT(packedStart[0], 128.0f);
             firstColor = packedStart[0];
             SDF_VU0_LOADVECTOR(unit->colorEnd);
-            EE_MMI_RGBA_PACK_UNIT(packedEnd[0], 128.0f);
+            MMI_RGBA_PACK_UNIT(packedEnd[0], 128.0f);
             secondColor = packedEnd[0];
             evtSetUnitLightAndAmbient(unit->ext, 0, firstColor, secondColor);
         }
@@ -4570,9 +4570,9 @@ u32 btlUnitBaseLightTask(BtlUnitBaseLightArgs *work) {
                 SDF_VU0_COPYVECTOR(unit->colorEnd, info->secondColor);
                 SDF_VU0_COPYVECTOR(unit->lightDirection, info->direction);
             } else {
-                f32 *defaultLight = D_0037F770[0];
+                f32 *defaultLight = dds3LightParam[0];
                 SDF_VU0_COPYVECTOR(unit->colorStart, defaultLight);
-                SDF_VU0_COPYVECTOR(unit->colorEnd, kwlnDefaultColorVector);
+                SDF_VU0_COPYVECTOR(unit->colorEnd, dds3AmbientColor);
                 SDF_VU0_COPYVECTOR(unit->lightDirection, defaultLight + 4);
                 btlBossDebugPrintf("btl:base light error[%p]\n", unit);
             }
@@ -4629,7 +4629,7 @@ u32 btlStiffenDamageShakeStep(BtlStiffenTaskArgs *args) {
     }
     if (0.5f < args->scale) {
         BtlUnit *actor;
-        scale = args->scale * (dds3GetRandFloatA(effSharedRandomState) * 0.5f + 0.5f);
+        scale = args->scale * (dds3GetRandFloatA(dds3RandCB) * 0.5f + 0.5f);
         if (args->count & 1) {
             scale = -scale;
         }
@@ -4839,7 +4839,7 @@ BtlTaskPollResult btlPollGunLoad(GunLoadArgs *loadArgs) {
     }
     btlBossDebugPrintf("btl:gun & finish load end[%p]\n", loadArgs->request);
     unit->gunResource = (void *)sdfMemLock(fileGetMemHandle(loadArgs->request));
-    fileRequestFreeIfComplete(loadArgs->request);
+    fileHandleFree(loadArgs->request);
     unit->gunResourceFlags = (unit->gunResourceFlags & ~4) | 8;
     return BTL_TASK_POLL_END_DELAY;
 }
@@ -5089,8 +5089,8 @@ void btlUpdateActiveActorModelState(void) {
                 pulse = 2.0f - pulse;
             }
             SDF_VU0_SETSCALE1VECTOR();
-            VU0_SCALAR_OP(pulse * 1.6f + 0.3f, "vmulx.xyzw vf10, vf10, vf2x");
-            EE_MMI_RGBA_PACK(packed[0]);
+            SDF_VU0_SCALEVECTOR_V0(pulse * 1.6f + 0.3f);
+            SDF_VU0_dds3ColorFtoI(packed[0], 128.0f);
             btlBlendUnitColor(unit, (packed[0] & 0xFFFFFF) | 0x80000000, 0);
         }
     }
@@ -5305,7 +5305,7 @@ BtlUnit *btlFindUnitByModeFlagged(s32 unitId) {
 
 /* Allocate a native header followed by capacity pointer entries. */
 BtlIndexList *btlAllocateIndexList(s32 capacity) {
-    BtlIndexList *list = sdfAllocAndClearQuadwords(capacity * 4 + 12);
+    BtlIndexList *list = sdfChipAllocZeroDirect(capacity * 4 + 12);
     list->capacity = capacity;
     list->entries = (struct BtlUnit **)(list + 1);
     list->count = 0;
@@ -5384,7 +5384,7 @@ void btlApplyUnitEffectScale(BtlUnit *unit) {
     if (unit->status.flags & 2) {
         btlInitializeEffectVectorsFromSourceRecords(unit, unit->resourceKind, unit->resourceIndex);
         SDF_VU0_SETSCALE1VECTOR();
-        VU0_SCALAR_OP(unit->actorScale, "vmulx.xyzw vf10, vf10, vf2x");
+        SDF_VU0_SCALEVECTOR_V0(unit->actorScale);
         inner = unit->effectObject->poseset;
         inner->flags |= OBJECT_TRANSFORM_FLAG_UPDATE_PENDING;
         inner->flags &= ~OBJECT_TRANSFORM_FLAG_MATRIX_CACHE_VALID;
@@ -5471,7 +5471,7 @@ void btlNormalizeActionCameraKeyScales(BtlLinkedCommand *action) {
             SDF_VU0_LOADVECTOR(key + 16);
             SDF_VU0_NEGVECTOR_XYZ();
             SDF_VU0_LOADVECTOR_B(pos);
-            VU0_SCALAR_OP(key[20] - 1.0f, "vmulx.xyzw vf10, vf10, vf2x");
+            SDF_VU0_SCALEVECTOR_V0(key[20] - 1.0f);
             SDF_VU0_ADDVECTOR();
             SDF_VU0_STOREVECTOR(pos);
             key[20] = 1.0f;
@@ -5623,10 +5623,10 @@ s32 btlAdjustCameraDirectionForDefaultPlane(BtlCamState *state) {
         vector[3] = 0.0f;
         if (-20.0f < vector[1]) {
             SDF_VU0_LOADVECTOR(state->position);
-            VU0_SET_VF10_COMPONENT(y, 0.0f);
+            SDF_VU0_SETVECTOR_Y(0.0f);
             SDF_VU0_COPYVECTOR_A_TO_B();
             SDF_VU0_LOADVECTOR(vector);
-            VU0_SET_VF10_COMPONENT(y, 0.0f);
+            SDF_VU0_SETVECTOR_Y(0.0f);
             SDF_VU0_SUBVECTOR();
             SDF_VU0_NORMALIZE();
             SDF_VU0_STOREVECTOR(direction);
@@ -5663,10 +5663,10 @@ s32 btlAdjustCameraDirectionForPlane(BtlCamState *state, f32 height) {
         vector[3] = 0.0f;
         if (height < vector[1]) {
             SDF_VU0_LOADVECTOR(state->position);
-            VU0_SET_VF10_COMPONENT(y, 0.0f);
+            SDF_VU0_SETVECTOR_Y(0.0f);
             SDF_VU0_COPYVECTOR_A_TO_B();
             SDF_VU0_LOADVECTOR(vector);
-            VU0_SET_VF10_COMPONENT(y, 0.0f);
+            SDF_VU0_SETVECTOR_Y(0.0f);
             SDF_VU0_SUBVECTOR();
             SDF_VU0_NORMALIZE();
             SDF_VU0_STOREVECTOR(direction);
@@ -5911,7 +5911,7 @@ void btlUpdateBattleCameraFrame(void) {
         }
         if (flags & 0x80000) {
             SDF_VU0_LOADVECTOR(scene->cameraCommand.rotation);
-            effMiscQuaternionToMatrixVU();
+            ToMatrix();
             SDF_VU0_LOADVECTOR(scene->cameraCommand.camera.position);
             SDF_VU0_APPLYMATRIX_XYZ();
             SDF_VU0_LOADVECTOR_B(scene->cameraCommand.translation);
@@ -5928,7 +5928,7 @@ void btlUpdateBattleCameraFrame(void) {
     }
     SDF_VU0_LOADVECTOR(scene->cameraCommand.camera.direction);
     SDF_VU0_STOREVECTOR(&data->localEyeOffset);
-    VU0_SCALAR_OP(-scene->cameraCommand.camera.distance, "vmulx.xyzw vf10, vf10, vf2x");
+    SDF_VU0_SCALEVECTOR_V0(-scene->cameraCommand.camera.distance);
     SDF_VU0_LOADVECTOR_B(scene->cameraCommand.camera.position);
     SDF_VU0_ADDVECTOR();
     SDF_VU0_STOREVECTOR_B(&data->worldEye);
@@ -6010,12 +6010,12 @@ void btlSetMotionTransformFieldOfView(BtlCamState *object, f32 fovRadians) {
 
 void btlInitMotionTransformFromVectors(BtlCamState *object, const f32 *origin, const f32 *direction) {
     SDF_VU0_LOADVECTOR(direction);
-    effMiscQuaternionToMatrixVU();
+    ToMatrix();
     SDF_VU0_LOADVECTOR(D_003E9130);
     SDF_VU0_APPLYMATRIX_XYZ();
     SDF_VU0_STOREVECTOR(object->direction);
     VU0_SET_VF2X(1.0f);
-    VU0_MUL_VF2X(vf10, vf10);
+    VU0_MULX_XYZW_VF10_VF10_VF2X();
     SDF_VU0_COPYVECTOR_A_TO_B();
     SDF_VU0_LOADVECTOR(origin);
     SDF_VU0_ADDVECTOR();
@@ -6209,6 +6209,12 @@ INCLUDE_RODATA(const s32, "game/code_001DD390", D_00417CA8);
 
 INCLUDE_RODATA(const s32, "game/code_001DD390", D_00417CB8);
 
+INCLUDE_RODATA(const s32, "game/code_001DD390", D_00417CC8);
+
+INCLUDE_RODATA(const s32, "game/code_001DD390", D_00417CD8);
+
+INCLUDE_RODATA(const s32, "game/code_001DD390", D_00417CE8);
+
 void btlResetCameraMotion(BtlLinkedCommand *action) {
     BtlState *work = (BtlState *)btlGetRuntime();
     BtlUnit *unit;
@@ -6285,7 +6291,7 @@ void btlDebugPrintWorldTransform(s32 x, s32 y) {
     }
 }
 
-extern f32 btlMeasureUnitIndexListBounds(BtlIndexList *, f32 *, f32 *);
+extern f32 btlMeasureIndexListBounds(BtlIndexList *, f32 *, f32 *);
 
 void btlFaceActionParticipantsTowardLinkedTarget(BtlLinkedCommand *action) {
     f32 vec[2][4] __attribute__((aligned(16)));
@@ -6302,14 +6308,14 @@ void btlFaceActionParticipantsTowardLinkedTarget(BtlLinkedCommand *action) {
             if (target != 0 && (target->status.flags & 0x600) == (first->status.flags & 0x600)) {
                 return;
             }
-            btlUnitGetMuzzlePosVU(first);
+            effBTLModelGetSphereCenter(first);
         } else {
-            btlMeasureUnitIndexListBounds(action->targetList, 0, 0);
+            btlMeasureIndexListBounds(action->targetList, 0, 0);
         }
         pos = vec[1];
         SDF_VU0_STOREVECTOR(pos);
         if (target != 0) {
-            btlUnitGetMuzzlePosVU(target);
+            effBTLModelGetSphereCenter(target);
             SDF_VU0_STOREVECTOR(vec[0]);
             if (target->status.flags & 0x80000) {
                 if (btlAimHorizontalDirectionVU(vec[0], pos) != 0) {
@@ -6333,14 +6339,14 @@ void btlAimLinkedUnitAtMuzzle(BtlLinkedCommand *action) {
     if (count != 0) {
         target = action->link->unit;
         if (count == 1) {
-            btlUnitGetMuzzlePosVU((BtlUnit *)btlGetIndexListEntry(action->targetList, 0));
+            effBTLModelGetSphereCenter((BtlUnit *)btlGetIndexListEntry(action->targetList, 0));
         } else {
-            btlMeasureUnitIndexListBounds(action->targetList, 0, 0);
+            btlMeasureIndexListBounds(action->targetList, 0, 0);
         }
         pos = vec[1];
         SDF_VU0_STOREVECTOR(pos);
         if (target != 0) {
-            btlUnitGetMuzzlePosVU(target);
+            effBTLModelGetSphereCenter(target);
             SDF_VU0_STOREVECTOR(vec[0]);
             if (target->status.flags & 0x80000) {
                 if (btlAimHorizontalDirectionVU(vec[0], pos) != 0) {
@@ -6359,6 +6365,7 @@ typedef char BattleIndexWork_battleExperienceReward_offset_check[
     ((u32)&((BattleIndexWork *)0)->battleExperienceReward == 0x54) ? 1 : -1];
 typedef char BattleIndexWork_moneyReward_offset_check[
     ((u32)&((BattleIndexWork *)0)->moneyReward == 0x58) ? 1 : -1];
+
 INCLUDE_SDATA(const s32, "game/code_001DD390", btlDeferredTaskHead);
 
 INCLUDE_SDATA(const s32, "game/code_001DD390", D_00436A28);
@@ -6394,3 +6401,4 @@ INCLUDE_SDATA(const s32, "game/code_001DD390", D_00436A98);
 INCLUDE_SDATA(const s32, "game/code_001DD390", D_00436A9C);
 
 INCLUDE_SDATA(const s32, "game/code_001DD390", D_00436AA0);
+

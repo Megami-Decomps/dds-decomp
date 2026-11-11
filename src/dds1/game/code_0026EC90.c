@@ -4,9 +4,9 @@
 #include "mnu_title_stream.h"
 #include "fr_font_measure.h"
 #include "eff_resource_slots.h"
-#include "kwln.h"
-#include "kwln_task_create.h"
-#include "sdf_resource.h"
+#include "kernel.h"
+#include "dds3_task_create.h"
+#include "sdf_heap_api.h"
 #include "sdf_trig.h"
 #include "mnu.h"
 #include "mnu_movie.h"
@@ -14,14 +14,14 @@
 #include "mnu_movie_playback_api.h"
 #include "mnu_movie_resource.h"
 #include "itf.h"
-#include "kwln_task_lifecycle.h"
-#include "kwln_fade.h"
+#include "dds3_task_lifecycle.h"
+#include "dds3_fade.h"
 
 extern u8 D_0037B8BC[];
 
 extern movieStream_t mnuMovieDrawContext;
 
-extern sdfGrOt_t D_003253C8;
+SYMBOL_AT(sdfGrOt_t, D_003253C8, sdfGrOtTable, 0x880);
 
 extern char D_003B1140[]; /* "mnuStaffImageProc" */
 
@@ -40,7 +40,7 @@ extern s32 D_003BC618;
 extern void mnuLoadMovieRollSprite(void);
 extern void mnuInitializeMovieRollEntry(void);
 extern void sdfSetGridScaledDrawBounds(s32 column, s32 row, s32 width, s32 height, u32 drawColor);
-extern void sdfMovieDrawFrame(movieStream_t *, sdfGrOt_t *);
+extern void release_movieobj2(movieStream_t *, sdfGrOt_t *);
 
 /* Three signed image-relative control points per movie image bank. */
 typedef struct StaffImageCorners {
@@ -234,9 +234,9 @@ void mnuReleaseStaffRollText(void) {
     frwFreeStaffFont();
 }
 
-extern _FRQ *frwGetStaffFontFRQ();
+extern frFontHandle_t *frwGetStaffFontFRQ();
 s32 mnuDrawStaffRollText(f32 x, f32 y, s32 alternate, u32 color, const char *source) {
-    _FRQ *glyph;
+    frFontHandle_t *glyph;
 
     if (alternate == 0) {
         glyph = frwGetStaffFontFRQ(
@@ -246,7 +246,7 @@ s32 mnuDrawStaffRollText(f32 x, f32 y, s32 alternate, u32 color, const char *sou
             (s32)(x * 16.0f), (s32)(y * 8.0f), 0, 0, 1, (u64)8, color, source, 0);
     }
     frGetStrWidth2(glyph);
-    frFontDrawGlyphWithSharedFlags(glyph, 1);
+    frDrawFontEx(glyph, 1);
     return frDestroyFontRequestAfter(glyph);
 }
 
@@ -508,7 +508,7 @@ s32 mnuStopStaffTasks(void) {
 }
 
 s32 movieDrawProc(dds3ProcessID_t *task) {
-    sdfMovieDrawFrame(&mnuMovieDrawContext, &D_003253C8);
+    release_movieobj2(&mnuMovieDrawContext, &D_003253C8);
     return 0;
 }
 
@@ -706,3 +706,4 @@ INCLUDE_SDATA(const s32, "game/code_0026EC90", D_003BC620);
 INCLUDE_SDATA(const s32, "game/code_0026EC90", D_003BC628);
 
 INCLUDE_SDATA(const s32, "game/code_0026EC90", PlayingNo);
+

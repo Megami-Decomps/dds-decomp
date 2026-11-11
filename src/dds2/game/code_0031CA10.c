@@ -1,12 +1,12 @@
 #include "sdk_ps2.h"
 #include "eff.h"
 #include "common.h"
-#include "sdf_resource.h"
+#include "sdf_heap_api.h"
 #include "mnu_shooting.h"
 
 void itfDeactivateModelInstance(ModelInstance *item);
 void itfDrawModelInstanceImage(ModelInstance *item);
-extern void evtPrintDeveloperConsoleMessage(const char *, ...);
+extern void datDebugPrintf(const char *, ...);
 
 extern u32 itfIndexedImageResourceBanks[];
 
@@ -84,7 +84,7 @@ ModelInstanceWork *itfCreateModelInstanceWork(s32 listCount, s32 *instanceCounts
     u8 *records;
 
     for (i = 0; i < listCount; i++) allocationSize += instanceCounts[i] * sizeof(ModelInstance);
-    evtPrintDeveloperConsoleMessage("SpriteWork Object Size %d\n", allocationSize);
+    datDebugPrintf("SpriteWork Object Size %d\n", allocationSize);
     allocation = sdfMemAllocDirect(allocationSize);
     work = (ModelInstanceWork *)sdfMemGetPtr(allocation);
     memset(work, 0, allocationSize);

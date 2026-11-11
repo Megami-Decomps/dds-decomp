@@ -13,7 +13,7 @@ not prove that we recovered the original source spelling or variable names.
 - **No fakematches.** Instruction-emitting inline asm is allowed only for
   COP2/VU0 and MMI sequences gcc 2.96 cannot emit from C, under the rules in docs/idioms.md
   ("Inline asm: COP2 and MMI"): try C first, use the shared macros in
-  `include/pcp_vu0.h` and `include/ee_mmi.h`, and keep the asm small inside
+  `include/ps2asm.h` (shared with smt3-decomp), and keep the asm small inside
   real C. A mostly-asm body needs a `/* libvu0: ... */` or
   `/* vu0 routine: ... */` marker, otherwise check_unit reports `ASMBODY` and
   it stays `INCLUDE_ASM`. The `fsqrtf` helper is in `include/fpu.h`. Not allowed:
@@ -318,7 +318,7 @@ Other diff tools:
 
 Neither game ships symbols, so nearly every function and variable name here
 was chosen by contributors. Names follow Atlus's convention: a lowercase
-module prefix plus CamelCase, e.g. `sdfAddHandler` or `btlResetRuntime`.
+module prefix plus CamelCase, e.g. `DmacAddHandler` or `btlResetRuntime`.
 `config/<v>/name_sources.txt` marks each name as `evidence` (the binary names
 the function in its own debug text) or `inferred` (our choice). Treat
 `inferred` names as descriptions, not original symbols.
@@ -339,7 +339,7 @@ writes a curated row in `config/<v>/symbol_addrs.txt`, records provenance in
 the units you renamed in (`CONTEXT`).
 
 - Names follow the Atlus convention: a lowercase module prefix plus CamelCase
-  (`sdfAddHandler`, `btlResetRuntime`), with no numbers or clone letters.
+  (`DmacAddHandler`, `btlResetRuntime`), with no numbers or clone letters.
 - `evidence` is only for a name the binary carries for that function itself,
   e.g. in its own debug message. Everything else, including names from the
   Persona 3/4 decomps and task labels, is `inferred`.
@@ -386,7 +386,7 @@ revert: it starts from the unit's original text and adds the ported functions
 one at a time with only the declarations they need, keeping a function only if
 `check_unit` stays clean. ee-gcc's CONTEXT effect (see `docs/idioms.md`) makes a
 bulk port flip neighbouring functions, so this recovers the ports that a single
-bad neighbour would otherwise undo. It also adds `#include "pcp_vu0.h"` /
+bad neighbour would otherwise undo. It also adds `#include "ps2asm.h"` /
 `"fpu.h"` when a kept body uses `SDF_VU0_COPYVECTOR` / `fsqrtf`.
 
 ```sh

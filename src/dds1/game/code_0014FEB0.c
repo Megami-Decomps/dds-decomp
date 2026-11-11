@@ -1,7 +1,7 @@
 #include "common.h"
 #include "sdf_chip.h"
 #include "bill_object_api.h"
-#include "sdf_resource.h"
+#include "sdf_heap_api.h"
 #include "sdf_texture_file.h"
 #include "eff.h"
 #include "eff_node.h"
@@ -146,7 +146,7 @@ BillChildPayload *BillboardLoadTex(SdfTextureFileHeader *resource) {
 void effReleaseSharedTextureRecord(BillChildPayload *entry) {
     entry->refCount--;
     if (entry->refCount == 0) {
-        sdfTexReleaseReferenceViaHandler(entry->texture);
+        sdfTexFreeDelayed(entry->texture);
         sdfMemFreeDirect(entry->allocation);
     }
 }

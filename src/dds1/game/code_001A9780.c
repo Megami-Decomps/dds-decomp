@@ -23,7 +23,7 @@
 #include "btl_command_target_policy.h"
 #include "btl_command_status_target_index.h"
 #include "btl_named_task_pair_status_api.h"
-#include "sdf_vu0.h"
+#include "ps2asm.h"
 #include "btl_set_actor_effect_parameter_api.h"
 #include "btl_projected_screen_point.h"
 #include "dsp_message_window_api.h"
@@ -47,7 +47,7 @@ extern void itfSetTextDrawLimit(s32 limit);
 #include "btl_command_panel_owner_linkage_skill_api.h"
 #include "btl_priority_input_availability_api.h"
 #include "btl_effect_active_api.h"
-#include "kwln_task_add_child.h"
+#include "dds3_task_add_child.h"
 #include "btl_special_ability.h"
 #include "btl_effect_position.h"
 #include "evt_message_window_api.h"
@@ -64,10 +64,9 @@ extern void itfSetTextDrawLimit(s32 limit);
 #include "eff_resource_slots.h"
 #include "eff_resource_source_lifetime.h"
 #include "sdf_chip.h"
-#include "sdf_resource.h"
+#include "sdf_heap_api.h"
 #include "btl_scene_fade.h"
 #include "btl_resource.h"
-#include "pcp_vu0.h"
 #include "btl_ui.h"
 #include "btl_tracked_task_slot_api.h"
 #include "btl_phase_panel_work.h"
@@ -83,14 +82,14 @@ extern void itfSetTextDrawLimit(s32 limit);
 #include "btl_boss_debug_api.h"
 #include "eff.h"
 #include "btl_action.h"
-#include "kwln.h"
-#include "kwln_process_registration.h"
-#include "kwln_task_create.h"
+#include "kernel.h"
+#include "dds3_process_registration.h"
+#include "dds3_task_create.h"
 #include "dat_state.h"
 #include "dat_calculated_stat_value_api.h"
 #include "dat_world_field_flags.h"
 #include "dat_command.h"
-#include "kwln_task_lifecycle.h"
+#include "dds3_task_lifecycle.h"
 #include "mdl_flag_api.h"
 
 extern void btlDrawActorPanelHighlights(BtlUnit *, BattleActorPanelWork *, s32, s8);
@@ -165,13 +164,13 @@ extern EventRosterStat *datRosterDetails;
 
 
 
-extern EffRandState effSharedRandomState[];
+extern EffRandState dds3RandCB[];
 
 extern void btlAllocatePanelTaskWork(void);
 
 extern void itfMesMngRelease(ItfMesWindowIndex window);
 
-extern EffRandState effSharedRandomState[];
+extern EffRandState dds3RandCB[];
 
 void btlClearAllActorEntrySlots(BtlUnit *unit);
 
@@ -468,7 +467,7 @@ u32 btlGetHuntPenaltyFlags(BtlUnit *unit, BtlUnit *enemy) {
     }
     flags = record->huntPenaltyFlags;
     if (flags == 0x18) {
-        return (dds3GetRandA((EffRandState *)effSharedRandomState) & 1) ? 0x10 : 8;
+        return (dds3GetRandA((EffRandState *)dds3RandCB) & 1) ? 0x10 : 8;
     }
     return flags & 0x18;
 }
@@ -888,7 +887,7 @@ void btlInitializeCommandPanelSlotTables(void) {
     BattleCmdPanelSlotTable tableB = D_003A1FC0;
     s32 i;
 
-    btlCommandPanelWork = sdfAllocAndClearQuadwords(0xCC);
+    btlCommandPanelWork = sdfChipAllocZeroDirect(0xCC);
     btlCommandPanelWork->state = BTL_COMMAND_PANEL_STATE_ENTERING;
     btlCommandPanelWork->classIndex = 0;
     btlCommandPanelWork->labelEntry = btlGetActorIdForClass(btlCommandPanelWork->classIndex);
@@ -968,6 +967,34 @@ INCLUDE_RODATA(const s32, "game/code_001A9780", D_003A1E38);
 INCLUDE_RODATA(const s32, "game/code_001A9780", D_003A1E58);
 
 INCLUDE_RODATA(const s32, "game/code_001A9780", D_003A1E80);
+
+INCLUDE_RODATA(const s32, "game/code_001A9780", D_003A1EB0);
+
+INCLUDE_RODATA(const s32, "game/code_001A9780", D_003A1EC8);
+
+INCLUDE_RODATA(const s32, "game/code_001A9780", D_003A1EE0);
+
+INCLUDE_RODATA(const s32, "game/code_001A9780", D_003A1EF0);
+
+INCLUDE_RODATA(const s32, "game/code_001A9780", D_003A1F00);
+
+INCLUDE_RODATA(const s32, "game/code_001A9780", D_003A1F10);
+
+INCLUDE_RODATA(const s32, "game/code_001A9780", D_003A1F20);
+
+INCLUDE_RODATA(const s32, "game/code_001A9780", D_003A1F38);
+
+INCLUDE_RODATA(const s32, "game/code_001A9780", D_003A1F48);
+
+INCLUDE_RODATA(const s32, "game/code_001A9780", D_003A1F58);
+
+INCLUDE_RODATA(const s32, "game/code_001A9780", D_003A1F68);
+
+INCLUDE_RODATA(const s32, "game/code_001A9780", D_003A1F78);
+
+INCLUDE_RODATA(const s32, "game/code_001A9780", D_003A1F88);
+
+INCLUDE_RODATA(const s32, "game/code_001A9780", D_003A1F98);
 
 INCLUDE_RODATA(const s32, "game/code_001A9780", D_003A1FA8);
 
@@ -1904,7 +1931,7 @@ s32 btlCreateMahenPanelTask(const MesWindowConfig *config) {
     if (btlHasRegisteredAphNamePanelTask() != 0) {
         dds3KillProcess(btlGetTrackedProcess(BTL_TRACKED_PROCESS_APH_NAME_PANEL), 0);
     }
-    work = sdfAllocAndClearQuadwords(sizeof(*work));
+    work = sdfChipAllocZeroDirect(sizeof(*work));
     work->config = *config;
     work->state = 0;
     for (i = 0; i < 9; i++) {
@@ -1926,7 +1953,7 @@ u32 btlIsNamedBattleTaskRegistered(void) {
 
     task = btlGetTrackedProcess(BTL_TRACKED_PROCESS_MAHEN_PANEL);
     if (task != 0) {
-        if (dds3ExistProcess(task) != KWLN_PROCESS_NOT_REGISTERED) {
+        if (dds3ExistProcess(task) != DDS3_PROCESS_NOT_REGISTERED) {
             task = dds3SearchProcessName(btlMahenPanelTaskNameRef);
             if (task != 0) {
                 return 1;
@@ -1975,7 +2002,7 @@ s32 btlCreateAnalysisPanelTask(BtlUnit *unit, s32 duration) {
     if (btlHasRegisteredAphNamePanelTask() != 0) {
         dds3KillProcess(btlGetTrackedProcess(BTL_TRACKED_PROCESS_APH_NAME_PANEL), 0);
     }
-    data = sdfAllocAndClearQuadwords(sizeof(*data));
+    data = sdfChipAllocZeroDirect(sizeof(*data));
     data->transitionState = BTL_ANALYSIS_PANEL_TRANSITION_ENTERING;
     data->page = 0;
     data->x = -20;
@@ -1996,7 +2023,7 @@ u32 btlHasRegisteredAnalysisPanelTask(void) {
 
     task = btlGetTrackedProcess(BTL_TRACKED_PROCESS_ANALYSIS_PANEL);
     if (task != 0) {
-        if (dds3ExistProcess(task) != KWLN_PROCESS_NOT_REGISTERED) {
+        if (dds3ExistProcess(task) != DDS3_PROCESS_NOT_REGISTERED) {
             task = dds3SearchProcessName(btlAnalyzPanelTaskNameRef);
             if (task != 0) {
                 return 1;
@@ -2052,7 +2079,7 @@ s32 btlCreateGuidePanelTask(s32 windowIndex, s32 entryIndex) {
     if (btlIsNamedBattleTaskRegistered() != 0) {
         dds3KillProcess(btlGetTrackedProcess(BTL_TRACKED_PROCESS_MAHEN_PANEL), 0);
     }
-    data = sdfAllocAndClearQuadwords(sizeof(*data));
+    data = sdfChipAllocZeroDirect(sizeof(*data));
     data->state = BTL_GUIDE_PANEL_STATE_FADE_IN;
     data->unk1C = 0x18;
     data->y = 0x60;
@@ -2081,7 +2108,7 @@ u32 btlHasRegisteredGuidePanelTask(void) {
 
     task = btlGetTrackedProcess(BTL_TRACKED_PROCESS_GUIDE_PANEL);
     if (task != 0) {
-        if (dds3ExistProcess(task) != KWLN_PROCESS_NOT_REGISTERED) {
+        if (dds3ExistProcess(task) != DDS3_PROCESS_NOT_REGISTERED) {
             task = dds3SearchProcessName(D_003BB3C4);
             if (task != 0) {
                 return 1;
@@ -2130,7 +2157,7 @@ u32 btlHasRegisteredPsechgPanelTask(void) {
 
     task = btlGetTrackedProcess(BTL_TRACKED_PROCESS_PHASE_CHANGE_PANEL);
     if (task != 0) {
-        if (dds3ExistProcess(task) != KWLN_PROCESS_NOT_REGISTERED) {
+        if (dds3ExistProcess(task) != DDS3_PROCESS_NOT_REGISTERED) {
             task = dds3SearchProcessName(D_003BB3BC);
             if (task != 0) {
                 return 1;
@@ -2168,7 +2195,7 @@ s32 btlCreatePhaseChangePanelTask(s32 variant) {
         battle->battleFlags |= 0x200;
     }
     btlTrackedTaskHandles->phaseGate = 0;
-    work = sdfAllocAndClearQuadwords(sizeof(*work));
+    work = sdfChipAllocZeroDirect(sizeof(*work));
     if (variant == 0) {
         work->variant = 0;
         points = &firstPoints;
@@ -2197,7 +2224,7 @@ u32 btlHasRegisteredSkillNamePanelTask(void) {
 
     task = btlGetTrackedProcess(BTL_TRACKED_PROCESS_SKILL_NAME_PANEL);
     if (task != 0) {
-        if (dds3ExistProcess(task) != KWLN_PROCESS_NOT_REGISTERED) {
+        if (dds3ExistProcess(task) != DDS3_PROCESS_NOT_REGISTERED) {
             task = dds3SearchProcessName(D_003BB3AC);
             if (task != 0) {
                 return 1;
@@ -2216,7 +2243,7 @@ s32 btlCreateSkillNamePanel(const u8 *text) {
     BtlState *battle = (BtlState *)btlGetRuntime();
     dds3ProcessID_t *task = btlGetTrackedProcess(BTL_TRACKED_PROCESS_SKILL_NAME_PANEL);
     BtlPanelTransitionWork *work;
-    struct _FRQ *glyph;
+    struct frFontHandle_t *glyph;
 
     if (btlHasRegisteredSkillNamePanelTask() != 0) {
         dds3KillProcess(task, 0);
@@ -2230,7 +2257,7 @@ s32 btlCreateSkillNamePanel(const u8 *text) {
     if (btlIsNamedBattleTaskRegistered() != 0) {
         dds3KillProcess(btlGetTrackedProcess(BTL_TRACKED_PROCESS_MAHEN_PANEL), 0);
     }
-    work = sdfAllocAndClearQuadwords(sizeof(*work));
+    work = sdfChipAllocZeroDirect(sizeof(*work));
     work->text = text;
     work->frames = 30;
     work->fade = 0;
@@ -2256,7 +2283,7 @@ u32 btlHasRegisteredAphNamePanelTask(void) {
 
     task = btlGetTrackedProcess(BTL_TRACKED_PROCESS_APH_NAME_PANEL);
     if (task != 0) {
-        if (dds3ExistProcess(task) != KWLN_PROCESS_NOT_REGISTERED) {
+        if (dds3ExistProcess(task) != DDS3_PROCESS_NOT_REGISTERED) {
             task = dds3SearchProcessName(D_003BB3A8);
             if (task != 0) {
                 return 1;
@@ -2293,7 +2320,7 @@ s32 btlReplaceDialogTasksAndQueueMessage(s32 windowIndex, s32 entryIndex) {
     if (btlHasRegisteredAphNamePanelTask() != 0) {
         dds3KillProcess(task, 0);
     }
-    data = (MsgQueueTaskData *)sdfAllocAndClearQuadwords(0x40);
+    data = (MsgQueueTaskData *)sdfChipAllocZeroDirect(0x40);
     if (btlHasRegisteredSkillNamePanelTask() != 0) {
         dds3KillProcess(btlGetTrackedProcess(BTL_TRACKED_PROCESS_SKILL_NAME_PANEL), 0);
     }
@@ -2596,12 +2623,12 @@ extern void btlDrawAnalysisPanelSilhouette(BtlLinkedCommand *, BtlAnalysisPanelW
 extern void btlDrawCompositePanelSprites(void *, s32, s32, u32);
 extern void btlDrawAnalysisPanelVitalBars(BtlAnalysisPanelWork *, s32, s32, s32, s32);
 extern u16 *btlGatherEnemyCommands(BtlUnit *, s16 *);
-extern s32 frFontDrawGlyphChain(struct _FRQ *, s8, u32);
-extern s32 frFontDrawGlyphWithSharedFlags(struct _FRQ *, s8);
+extern s32 frDrawFontOt(struct frFontHandle_t *, s8, u32);
+extern s32 frDrawFontEx(struct frFontHandle_t *, s8);
 
 /* Shared text submission: choose the standard shared draw flags and enqueue. */
-static inline void btlSubmitSharedTextGlyph(struct _FRQ *glyph) {
-    frFontDrawGlyphWithSharedFlags(glyph, 1);
+static inline void btlSubmitSharedTextGlyph(struct frFontHandle_t *glyph) {
+    frDrawFontEx(glyph, 1);
     frDestroyFontRequestAfter(glyph);
 }
 extern const u8 *D_003BAA74, *D_003BAA80, *D_003BAA88;
@@ -2618,7 +2645,7 @@ s32 btlUpdateAndDrawAnalysisPanel(dds3ProcessID_t *task) {
     BtlState *battle;
     BtlAnalysisPanelWork *work;
     s32 row;
-    struct _FRQ *glyph;
+    struct frFontHandle_t *glyph;
 
     battle = (BtlState *)btlGetRuntime();
     work = (BtlAnalysisPanelWork *)dds3GetProcessData(task);
@@ -2665,10 +2692,10 @@ s32 btlUpdateAndDrawAnalysisPanel(dds3ProcessID_t *task) {
                         break;
                     }
                     sprintf(text, D_003BB400, actor->partyRecord.level);
-                    glyph = (struct _FRQ *)itfCreateFont2TextGlyph((work->x + xOffset) << 4,
+                    glyph = (struct frFontHandle_t *)itfCreateFont2TextGlyph((work->x + xOffset) << 4,
                                           (work->y - 2) << 3, 0xFF0000,
                                           0x80808000 | (s32)work->alpha, text, 0);
-                    frFontDrawGlyphChain(glyph, 1, 0x53);
+                    frDrawFontOt(glyph, 1, 0x53);
                     frDestroyFontRequestAfter(glyph);
                     break;
                 }
@@ -2706,10 +2733,10 @@ s32 btlUpdateAndDrawAnalysisPanel(dds3ProcessID_t *task) {
                     sprintf(text, D_003BB408, actor->partyRecord.hp,
                                   actor->partyRecord.maxhp);
                     btlDrawAnalysisPanelVitalBars(work, 0, work->x, work->y, work->alpha);
-                    glyph = (struct _FRQ *)itfCreateFont2TextGlyph((work->x + xOffset) << 4,
+                    glyph = (struct frFontHandle_t *)itfCreateFont2TextGlyph((work->x + xOffset) << 4,
                                           (work->y + 17) << 3, 0xFF0000,
                                           0x80808000 | (s32)work->alpha, text, 0);
-                    frFontDrawGlyphChain(glyph, 1, 0x53);
+                    frDrawFontOt(glyph, 1, 0x53);
                     frDestroyFontRequestAfter(glyph);
                     break;
                 }
@@ -2727,10 +2754,10 @@ s32 btlUpdateAndDrawAnalysisPanel(dds3ProcessID_t *task) {
                     sprintf(text, D_003BB408, actor->partyRecord.mp,
                                   actor->partyRecord.maxMp);
                     btlDrawAnalysisPanelVitalBars(work, 1, work->x, work->y, work->alpha);
-                    glyph = (struct _FRQ *)itfCreateFont2TextGlyph((work->x + xOffset) << 4,
+                    glyph = (struct frFontHandle_t *)itfCreateFont2TextGlyph((work->x + xOffset) << 4,
                                           (work->y + 41) << 3, 0xFF0000,
                                           0x80808000 | (s32)work->alpha, text, 0);
-                    frFontDrawGlyphChain(glyph, 1, 0x53);
+                    frDrawFontOt(glyph, 1, 0x53);
                     frDestroyFontRequestAfter(glyph);
                     break;
                 }
@@ -2884,6 +2911,7 @@ s32 btlAdvancePanelCornerPhase(BtlLinkedCommand *command, BtlAnalysisPanelWork *
 }
 
 extern f32 D_003A2460[4];
+
 INCLUDE_RODATA(const s32, "game/code_001A9780", D_003A2450);
 
 INCLUDE_RODATA(const s32, "game/code_001A9780", D_003A2460);
@@ -3513,7 +3541,7 @@ extern void btlReleaseRegisteredChildTaskWork(dds3ProcessID_t *);
 
 void btlStartRegisteredChildTask(void) {
     s32 context = (s32)(u32)btlGetRuntime();
-    u32 data = (u32)sdfAllocAndClearQuadwords(sizeof(BattleRegisteredPanelWork));
+    u32 data = (u32)sdfChipAllocZeroDirect(sizeof(BattleRegisteredPanelWork));
     dds3ProcessID_t *task = dds3StartProcess(D_003BB3C0, 0x2B0E, 1, 1, btlUpdateRegisteredPanelTask, btlReleaseRegisteredChildTaskWork, data);
     dds3LinkProcess((dds3ProcessID_t *)*(u32 *)(context + 0x29C), task);
     btlSetTrackedProcess(BTL_TRACKED_PROCESS_REGISTERED_ACTOR_PANEL_CHILD, task);
@@ -3664,6 +3692,7 @@ extern const BattlePhaseFadeLimits D_003A2890;
 extern const BattlePhaseXBounds D_003A28C0;
 
 /* Advance phase-panel movement, cropping and corner fades in the supplied work. */
+
 INCLUDE_RODATA(const s32, "game/code_001A9780", D_003A2870);
 
 INCLUDE_RODATA(const s32, "game/code_001A9780", D_003A2880);
@@ -3768,7 +3797,7 @@ extern void btlDrawPhaseChangePanelStrips(BattlePhasePanelWork *);
 #include "btl_stat_effect_offsets.h"
 #include "btl_command_panel_owner_linkage_skill_api.h"
 #include "btl_effect_active_api.h"
-#include "kwln_task_add_child.h"
+#include "dds3_task_add_child.h"
 #include "btl_special_ability.h"
 #include "btl_effect_position.h"
 #include "evt_message_window_api.h"
@@ -3783,10 +3812,9 @@ extern void btlDrawPhaseChangePanelStrips(BattlePhasePanelWork *);
 #include "fr_font.h"
 #include "eff_resource_slots.h"
 #include "sdf_chip.h"
-#include "sdf_resource.h"
+#include "sdf_heap_api.h"
 #include "btl_scene_fade.h"
 #include "btl_resource.h"
-#include "pcp_vu0.h"
 #include "btl_ui.h"
 #include "btl_phase_panel_work.h"
 #include "btl_roster_pair.h"
@@ -3797,11 +3825,11 @@ extern void btlDrawPhaseChangePanelStrips(BattlePhasePanelWork *);
 #include "btl_boss_debug_api.h"
 #include "eff.h"
 #include "btl_action.h"
-#include "kwln.h"
-#include "kwln_task_create.h"
+#include "kernel.h"
+#include "dds3_task_create.h"
 #include "dat_state.h"
 #include "dat_command.h"
-#include "kwln_task_lifecycle.h"
+#include "dds3_task_lifecycle.h"
 #include "mdl_flag_api.h"
 #include "btl_start_voice_row.h"
 
@@ -3855,6 +3883,7 @@ void btlDrawPhaseChangePanelStrips(BattlePhasePanelWork *work) {
     }
 }
 #else
+
 INCLUDE_RODATA(const s32, "game/code_001A9780", D_003A28F8);
 
 INCLUDE_ASM(const s32, "game/code_001A9780", btlDrawPhaseChangePanelStrips);
@@ -4108,6 +4137,7 @@ void btlDrawPhaseChangePanelEchoes(BattlePhasePanelWork *work) {
 }
 
 /* The quad renderer owns this complete four-slot mode-zero bank. */
+
 INCLUDE_RODATA(const s32, "game/code_001A9780", D_003A2968);
 
 const s32 D_003A2978[4] = {0x21, 0x22, 0x2C, 0x2D};
@@ -4171,8 +4201,8 @@ void btlInitializeCommandOptionState(BattleSceneObject *object) {
     s32 extent;
 
     memcpy(initialRows, D_003A2998, sizeof(initialRows));
-    btlCommandSelectionHighlightWork = sdfAllocAndClearQuadwords(0x38);
-    work = sdfAllocAndClearQuadwords(sizeof(BattleCommandLayoutWork));
+    btlCommandSelectionHighlightWork = sdfChipAllocZeroDirect(0x38);
+    work = sdfChipAllocZeroDirect(sizeof(BattleCommandLayoutWork));
     extent = 180;
     btlCommandOptionAnimationWork = (u32)work;
     slot = &btlResourceBlock->resA->workEntries[0x10];
@@ -4376,7 +4406,7 @@ void btlUpdateAndDrawCommandSelectionHighlight(BattleSceneObject *object, s32 ki
 #include "btl_stat_effect_offsets.h"
 #include "btl_command_panel_owner_linkage_skill_api.h"
 #include "btl_effect_active_api.h"
-#include "kwln_task_add_child.h"
+#include "dds3_task_add_child.h"
 #include "btl_special_ability.h"
 #include "btl_effect_position.h"
 #include "evt_message_window_api.h"
@@ -4391,10 +4421,9 @@ void btlUpdateAndDrawCommandSelectionHighlight(BattleSceneObject *object, s32 ki
 #include "fr_font.h"
 #include "eff_resource_slots.h"
 #include "sdf_chip.h"
-#include "sdf_resource.h"
+#include "sdf_heap_api.h"
 #include "btl_scene_fade.h"
 #include "btl_resource.h"
-#include "pcp_vu0.h"
 #include "btl_ui.h"
 #include "btl_phase_panel_work.h"
 #include "btl_roster_pair.h"
@@ -4405,11 +4434,11 @@ void btlUpdateAndDrawCommandSelectionHighlight(BattleSceneObject *object, s32 ki
 #include "btl_boss_debug_api.h"
 #include "eff.h"
 #include "btl_action.h"
-#include "kwln.h"
-#include "kwln_task_create.h"
+#include "kernel.h"
+#include "dds3_task_create.h"
 #include "dat_state.h"
 #include "dat_command.h"
-#include "kwln_task_lifecycle.h"
+#include "dds3_task_lifecycle.h"
 #include "mdl_flag_api.h"
 #include "btl_start_voice_row.h"
 #include "btl_command_layout_work.h"
@@ -4629,6 +4658,7 @@ void func_001B3300(BattleSceneObject *scene, s32 kind) {
                                   btlResourceBlock->resA, 17, 0x53);
 }
 #else
+
 INCLUDE_RODATA(const s32, "game/code_001A9780", D_003A2A30);
 
 INCLUDE_ASM(const s32, "game/code_001A9780", func_001B3300);
@@ -4649,7 +4679,7 @@ void btlCreateSelectionTrailTask(s32 unused, s32 previousRow, s32 targetRow) {
     if (task != NULL) {
         dds3KillProcess(task, 0);
     }
-    work = sdfAllocAndClearQuadwords(sizeof(*work));
+    work = sdfChipAllocZeroDirect(sizeof(*work));
     if (previousRow < targetRow) {
         distance = (targetRow - previousRow) * 23;
         work->direction = 1;
@@ -4749,9 +4779,9 @@ extern const BattlePanelColors D_003A2A80;
 
 extern void btlUpdatePanelTransitionGradients(BtlPanelTransitionWork *);
 
-struct _FRQ;
+struct frFontHandle_t;
 
-extern s32 frFontDrawGlyphWithSharedFlags(struct _FRQ *, s8);
+extern s32 frDrawFontEx(struct frFontHandle_t *, s8);
 
 s32 btlUpdateSkillNamePanelTask(dds3ProcessID_t *task) {
     BattlePanelColors colors = D_003A2A80;
@@ -4759,7 +4789,7 @@ s32 btlUpdateSkillNamePanelTask(dds3ProcessID_t *task) {
     s16 *fade;
     s32 i;
     s32 width;
-    struct _FRQ *glyph;
+    struct frFontHandle_t *glyph;
 
     if (btlGetTrackedProcess(BTL_TRACKED_PROCESS_SKILL_NAME_PANEL) == 0) {
         return 0;
@@ -4963,7 +4993,7 @@ void btlReleaseDialogTaskData(dds3ProcessID_t *task) {
 void btlCreateMessageWindow(void) {
     BtlCommandHintWork *window;
     btlGetRuntime();
-    window = sdfAllocAndClearQuadwords(0x40);
+    window = sdfChipAllocZeroDirect(0x40);
     D_003BB3DC = window;
     window->unk10 = 0x14;
     window->colors[0] = 0x1800080;
@@ -4985,7 +5015,7 @@ void btlCreateMessageWindow(void) {
 #include "btl_stat_effect_offsets.h"
 #include "btl_command_panel_owner_linkage_skill_api.h"
 #include "btl_effect_active_api.h"
-#include "kwln_task_add_child.h"
+#include "dds3_task_add_child.h"
 #include "btl_special_ability.h"
 #include "btl_effect_position.h"
 #include "evt_message_window_api.h"
@@ -5000,10 +5030,9 @@ void btlCreateMessageWindow(void) {
 #include "fr_font.h"
 #include "eff_resource_slots.h"
 #include "sdf_chip.h"
-#include "sdf_resource.h"
+#include "sdf_heap_api.h"
 #include "btl_scene_fade.h"
 #include "btl_resource.h"
-#include "pcp_vu0.h"
 #include "btl_ui.h"
 #include "btl_phase_panel_work.h"
 #include "btl_roster_pair.h"
@@ -5014,22 +5043,22 @@ void btlCreateMessageWindow(void) {
 #include "btl_boss_debug_api.h"
 #include "eff.h"
 #include "btl_action.h"
-#include "kwln.h"
-#include "kwln_task_create.h"
+#include "kernel.h"
+#include "dds3_task_create.h"
 #include "dat_state.h"
 #include "dat_command.h"
-#include "kwln_task_lifecycle.h"
+#include "dds3_task_lifecycle.h"
 #include "mdl_flag_api.h"
 #include "btl_start_voice_row.h"
 #include "itf.h"
 
 extern void itfSetTextDrawLimit(s32 limit);
 
-struct _FRQ;
-struct FrFontTextBank;
-extern struct _FRQ *itfDrawTextWithSelectedFontMode(s32, s32, s32, s8, u16, s32);
-extern u8 *MessageNumSearch(s32, struct FrFontTextBank *, s32);
-extern struct FrFontTextBank *datCommandHelpMessages;
+struct frFontHandle_t;
+struct frTextBank_t;
+extern struct frFontHandle_t *itfDrawTextWithSelectedFontMode(s32, s32, s32, s8, u16, s32);
+extern u8 *MessageNumSearch(s32, struct frTextBank_t *, s32);
+extern struct frTextBank_t *datCommandHelpMessages;
 /* Draw one hint text line at a battle window's top-left: kinds 0 and 9 draw
  * text id textId in a font mode (0 or 1), any other kind draws that entry of
  * the datCommandHelpMessages text bank, and the glyph chain is then tinted, drawn and
@@ -5039,7 +5068,7 @@ extern struct FrFontTextBank *datCommandHelpMessages;
  * queue calls between the three kinds. Otherwise it differs from retail only in
  * register allocation and scheduling. */
 void btlDrawWindowHelpLine(s32 x, s32 y, u32 unusedColor, u32 childColor, u16 textId, s16 kind) {
-    struct _FRQ *glyph;
+    struct frFontHandle_t *glyph;
 
     itfSetTextDrawLimit(0x13);
     switch (kind) {
@@ -5050,13 +5079,13 @@ void btlDrawWindowHelpLine(s32 x, s32 y, u32 unusedColor, u32 childColor, u16 te
         glyph = itfDrawTextWithSelectedFontMode(x << 4, (y + 12) << 3, 0xFF0000, 1, textId, 2);
         break;
     default:
-        glyph = itfDrawColor(x << 4, (y + 12) << 3, 0xFF0000, 1, 0, 0, 0x80,
+        glyph = MessageRequestNS(x << 4, (y + 12) << 3, 0xFF0000, 1, 0, 0, 0x80,
                              MessageNumSearch(kind, datCommandHelpMessages, 0), NULL);
         break;
     }
     if (glyph != NULL) {
         frSetFontColor(glyph, childColor);
-        frFontDrawGlyphWithSharedFlags(glyph, 1);
+        frDrawFontEx(glyph, 1);
         frDestroyFontRequestAfter(glyph);
     }
     itfSetTextDrawLimit(-1);
@@ -5074,6 +5103,7 @@ extern BattleRosterTable *btlGetActorLinkageSkillList(BattleSceneObject *,u16 *)
 extern void btlReleaseRegisteredTaskBuffer(dds3ProcessID_t *);
 extern void btlDrawWindowHelpLine(s32,s32,u32,u32,u16,s16);
 extern u8 D_00358FE0[];
+
 INCLUDE_RODATA(const s32, "game/code_001A9780", D_003A2A70);
 
 INCLUDE_RODATA(const s32, "game/code_001A9780", D_003A2A80);
@@ -5321,6 +5351,7 @@ extern const BattlePanelColors D_003A2B20;
 extern u8 *D_003BAA8C;
 
 /* Advance new-LINKAGE notices; return -1 after closing and updating notice flags. */
+
 INCLUDE_RODATA(const s32, "game/code_001A9780", D_003A2B20);
 
 s32 btlUpdateLinkageNoticeTask(dds3ProcessID_t *task) {
@@ -5430,6 +5461,7 @@ extern const BattlePanelColors D_003A2B50;
 
 /* Advance the command-panel notice dialog: fade in, hold, look up the panel, fade out;
  * return -1 after closing the channel once the phase leaves 0-6. */
+
 INCLUDE_RODATA(const s32, "game/code_001A9780", D_003A2B50);
 
 s32 btlUpdateCommandNoticeTask(dds3ProcessID_t *task) {
@@ -5527,7 +5559,7 @@ void btlInitializeSelectionWork(void) {
     s16 *state;
     s32 i;
     memcpy(initial, btlSoundSlotDefaults, sizeof(initial));
-    allocated = sdfAllocAndClearQuadwords(0x30);
+    allocated = sdfChipAllocZeroDirect(0x30);
     btlLinkedSelectionTaskBuffer = allocated;
     state = allocated->rowFade;
     source = (u32 *)initial;
@@ -5643,7 +5675,7 @@ s32 func_001B5CD8(void) {
 #include "btl_stat_effect_offsets.h"
 #include "btl_command_panel_owner_linkage_skill_api.h"
 #include "btl_effect_active_api.h"
-#include "kwln_task_add_child.h"
+#include "dds3_task_add_child.h"
 #include "btl_special_ability.h"
 #include "btl_effect_position.h"
 #include "evt_message_window_api.h"
@@ -5658,10 +5690,9 @@ s32 func_001B5CD8(void) {
 #include "fr_font.h"
 #include "eff_resource_slots.h"
 #include "sdf_chip.h"
-#include "sdf_resource.h"
+#include "sdf_heap_api.h"
 #include "btl_scene_fade.h"
 #include "btl_resource.h"
-#include "pcp_vu0.h"
 #include "btl_ui.h"
 #include "btl_phase_panel_work.h"
 #include "btl_roster_pair.h"
@@ -5672,11 +5703,11 @@ s32 func_001B5CD8(void) {
 #include "btl_boss_debug_api.h"
 #include "eff.h"
 #include "btl_action.h"
-#include "kwln.h"
-#include "kwln_task_create.h"
+#include "kernel.h"
+#include "dds3_task_create.h"
 #include "dat_state.h"
 #include "dat_command.h"
-#include "kwln_task_lifecycle.h"
+#include "dds3_task_lifecycle.h"
 #include "mdl_flag_api.h"
 #include "btl_start_voice_row.h"
 extern void btlReleaseSelectionTaskBuffer(void);
@@ -5751,6 +5782,7 @@ s32 func_001B60E8(void) {
     return 1;
 }
 #else
+
 INCLUDE_RODATA(const s32, "game/code_001A9780", D_003A2BD0);
 
 INCLUDE_ASM(const s32, "game/code_001A9780", func_001B60E8);
@@ -7828,7 +7860,7 @@ typedef struct BattleHudOffsets { s32 values[5][2]; } BattleHudOffsets;
 typedef struct BattleHudSprites { s32 values[5]; } BattleHudSprites;
 extern const BattleHudSprites D_003A2DB0;
 extern const BattlePanelColors D_003A2DC8;
-extern sdfGrOt_t D_003255A8;
+SYMBOL_AT(sdfGrOt_t, D_003255A8, sdfGrOtTable, 0xA60);
 extern void eglSetOt(u32);
 extern void evtSubmitPrimaryGsTest(s32,s32,s32,s32,s32,s32,s32,s32);
 extern void btlDrawButtonIconFixed64(sdfGrOt_t *,s32,s32,s32,s32,s32,s32,s32);
@@ -8034,7 +8066,7 @@ void btlDrawActorVitalGauge(BtlUnit *unit, s32 current, s32 displayed, s32 maxim
         btlResourceBlock->resA->workEntries[sprite].parameters[0] = 0;
 }
 
-extern sdfGrOt_t D_003255A8;
+SYMBOL_AT(sdfGrOt_t, D_003255A8, sdfGrOtTable, 0xA60);
 
 #include "sdf_packet_alloc.h"
 
@@ -8062,7 +8094,7 @@ s32 btlDrawGouraudTexturedPanelQuad(s32 x0, s32 y0, s32 x1, s32 y1,
         x2 * 0x10 + 0x7000, y2 * 8 + 0x7900, uFixed, vBottom, colors[2],
         x3 * 0x10 + 0x7000, y3 * 8 + 0x7900, uRight, vBottom, colors[3],
         0xFEFFD0, NULL);
-    D_003255A8.append(&D_003255A8, list);
+    D_003255A8.regFunc(&D_003255A8, list);
     return 1;
 }
 
@@ -8203,15 +8235,15 @@ void fldSubmitSceneObjectAtCoordinates(s32 x, s32 y, u32 color, char *text) {
 
     itfSetTextDrawLimit(0x13);
     glyph = itfCreateFont2TextGlyph(x << 4, y << 3, 0, color, text, 0);
-    frFontDrawGlyphChain(glyph, 1, 0x53);
-    frDestroyFontRequestAfter((struct _FRQ *)(u32)glyph);
+    frDrawFontOt(glyph, 1, 0x53);
+    frDestroyFontRequestAfter((struct frFontHandle_t *)(u32)glyph);
     itfSetTextDrawLimit(-1);
 }
 
 extern u8 *D_003BAA8C;
 
 void btlDrawIndexedBattleEntryGlyphs(s32 x, s32 y, s32 z, s32 w, u16 index) {
-    struct _FRQ *handle;
+    struct frFontHandle_t *handle;
     itfSetTextDrawLimit(0x13);
     handle = itfCreateConvertedTextGlyph(x << 4, y << 3, z, w, D_003BAA8C + index * 17, 0);
     btlSubmitSharedTextGlyph(handle);
@@ -8221,7 +8253,7 @@ void btlDrawIndexedBattleEntryGlyphs(s32 x, s32 y, s32 z, s32 w, u16 index) {
 extern u8 *D_003BAA84;
 
 void btlQueueIndexedTextWithinDrawLimit(s32 x, s32 y, s32 z, s32 w, u16 index) {
-    struct _FRQ *handle;
+    struct frFontHandle_t *handle;
     itfSetTextDrawLimit(0x13);
     handle = itfCreateConvertedTextGlyph(x << 4, y << 3, z, w, D_003BAA84 + index * 25, 0);
     btlSubmitSharedTextGlyph(handle);
@@ -8735,7 +8767,7 @@ void btlDrawActorCommandRows(BattleSceneObject *ctx, u16 kind, u16 page, u16 col
     s32 y = 0x14C;
     u16 *list;
     u32 color;
-    struct _FRQ *glyph;
+    struct frFontHandle_t *glyph;
     BtlCommandUseError failure;
     BtlCommandVitalCostAmount cost;
     u32 iconColor;
@@ -8879,7 +8911,7 @@ void func_001BE590(BattleSceneObject *object) {
             u32 color;
             s32 x;
             s32 y;
-            struct _FRQ *glyph;
+            struct frFontHandle_t *glyph;
             BattleSelectionWork *selection;
 
             switch (row) {
@@ -8979,7 +9011,7 @@ void btlDrawRetreatCommandLabel(s32 unused) {
     u8 text[8];
     BtlState *battle;
     s32 color;
-    struct _FRQ *handle;
+    struct frFontHandle_t *handle;
 
     memcpy(text, D_003BB450, sizeof(text));
     battle = (BtlState *)btlGetRuntime();
@@ -9135,6 +9167,7 @@ static inline void btlUpdateSceneCommandSelection(BattleSceneObject *object) {
 }
 
 /* Drive the command-panel state machine; state five terminates its task. */
+
 INCLUDE_RODATA(const s32, "game/code_001A9780", D_003A2E50);
 
 INCLUDE_RODATA(const s32, "game/code_001A9780", D_003A2E60);
@@ -9270,7 +9303,7 @@ void btlOpenBattleCommandPanel(BtlTask *task) {
 
     if (dds3SearchProcessName(btlCommandPanelTaskNameRef) == 0) {
         scene = (BtlState *)btlGetRuntime();
-        object = sdfAllocAndClearQuadwords(sizeof(*object));
+        object = sdfChipAllocZeroDirect(sizeof(*object));
         fldInitializeSceneObject(object, task);
         handle = dds3StartProcess(btlCommandPanelTaskNameRef, 0x2B0E, 1, 1,
                                btlUpdateBattleSceneCommands, btlReleaseCommandPanelTask, (u32)object);
@@ -9288,7 +9321,7 @@ void btlOpenBattleCommandPanel(BtlTask *task) {
                 scene->battleFlags &= ~0x100000;
                 handle = dds3StartProcess(D_003BB3D4, 0x2B0E, 1, 1,
                                        btlUpdateCommandNoticeTask, btlReleaseWindowTask,
-                                       (u32)sdfAllocAndClearQuadwords(0x18));
+                                       (u32)sdfChipAllocZeroDirect(0x18));
                 dds3LinkProcess(scene->scriptOwner, handle);
                 btlSetTrackedProcess(BTL_TRACKED_PROCESS_TUTORIAL_COMMAND_NOTICE, handle);
                 fclDestroyMessage();
@@ -9300,7 +9333,7 @@ void btlOpenBattleCommandPanel(BtlTask *task) {
                 scene->battleFlags &= ~0x100000;
                 handle = dds3StartProcess(D_003BB3D0, 0x2B0E, 1, 1,
                                        btlUpdateLinkageNoticeTask, btlFinishTrackedBattleTaskAndCloseWindow,
-                                       (u32)sdfAllocAndClearQuadwords(0x18));
+                                       (u32)sdfChipAllocZeroDirect(0x18));
                 dds3LinkProcess(scene->scriptOwner, handle);
                 btlSetTrackedProcess(BTL_TRACKED_PROCESS_LINKAGE_NOTICE, handle);
                 fclDestroyMessage();
@@ -9463,7 +9496,7 @@ void btlAdvanceTargetPanelAnimation(SceneAiWork *work, s32 mode) {
     }
 }
 
-extern void btlUnitGetMuzzlePosVU(BtlUnit *);
+extern void effBTLModelGetSphereCenter(BtlUnit *);
 
 void btlDrawTargetMarker(BtlUnit *unit, SceneAiWork *work, u32 index) {
     BtlProjectedScreenPoint screenPoint;
@@ -9483,9 +9516,9 @@ void btlDrawTargetMarker(BtlUnit *unit, SceneAiWork *work, u32 index) {
 
     btlGetRuntime();
     if (btlSetActorEffectParameter(unit, 0) == BTL_ACTOR_EFFECT_POSITION_UNAVAILABLE) {
-        btlUnitGetMuzzlePosVU(unit);
+        effBTLModelGetSphereCenter(unit);
     } else if ((unit->status.flags & 0x8000000) != 0) {
-        btlUnitGetMuzzlePosVU(unit);
+        effBTLModelGetSphereCenter(unit);
         SDF_VU0_STOREVECTOR_NOMEM(muzzle);
         muzzle[1] = -24.0f;
         SDF_VU0_LOADVECTOR(muzzle);
@@ -9816,8 +9849,8 @@ extern void btlDrawCenteredPanelSegments(s32 width);
 /* Draw selected actor names and advance the battle scene's actor panels. */
 void btlUpdateAndDrawTargetActorPanels(SceneAiWork *work) {
     BtlUnit *unit;
-    struct _FRQ *glyph;
-    struct _FRQ *categoryGlyph;
+    struct frFontHandle_t *glyph;
+    struct frFontHandle_t *categoryGlyph;
     s32 width;
     s32 categoryWidth;
     s32 totalWidth;
@@ -9837,7 +9870,7 @@ void btlUpdateAndDrawTargetActorPanels(SceneAiWork *work) {
                 width = frGetStrWidth2(glyph);
                 btlDrawCenteredPanelSegments(width);
                 frSetDrawPosition(glyph, (0x100 - (width >> 1)) << 4, 0x220);
-                frFontDrawGlyphChain(glyph, 1, 0x53);
+                frDrawFontOt(glyph, 1, 0x53);
                 frDestroyFontRequestAfter(glyph);
             } else {
                 glyph = itfCreateConvertedTextGlyph(0x640, 0x200, 0, 0xA09DC380,
@@ -9849,7 +9882,7 @@ void btlUpdateAndDrawTargetActorPanels(SceneAiWork *work) {
                 totalWidth = width + categoryWidth;
                 btlDrawCenteredPanelSegments(totalWidth);
                 frSetDrawPosition(categoryGlyph, (0x100 - (totalWidth >> 1)) << 4, 0x220);
-                frFontDrawGlyphWithSharedFlags((struct _FRQ *)categoryGlyph, 1);
+                frDrawFontEx((struct frFontHandle_t *)categoryGlyph, 1);
                 frDestroyFontRequestAfter(categoryGlyph);
                 if (categoryWidth == 0) {
                     s32 centeredNameX = -(width >> 1);
@@ -9857,7 +9890,7 @@ void btlUpdateAndDrawTargetActorPanels(SceneAiWork *work) {
                 } else {
                     frSetDrawPosition(glyph, (categoryWidth - (width >> 1) + 0xF8) << 4, 0x220);
                 }
-                frFontDrawGlyphChain(glyph, 1, 0x53);
+                frDrawFontOt(glyph, 1, 0x53);
                 frDestroyFontRequestAfter(glyph);
             }
         }
@@ -9967,7 +10000,7 @@ SceneAiWork *btlCreateTargetSelectionWork(BtlTask *source) {
     BtlState *battle;
 
     battle = (BtlState *)btlGetRuntime();
-    work = (SceneAiWork *)sdfAllocAndClearQuadwords(sizeof(SceneAiWork));
+    work = (SceneAiWork *)sdfChipAllocZeroDirect(sizeof(SceneAiWork));
     object = (BattleSceneObject *)dds3GetProcessData(
         dds3SearchProcessName(btlCommandPanelTaskNameRef));
     work->eligibleTargets = btlAllocateIndexList(0xD);
@@ -10133,6 +10166,7 @@ extern const BtlActorSlotLimits D_003A30D8;
 extern void btlUpdateActorSlotOrderColors(s32, s32);
 
 /* Advance enabled slot-order states, scales, fades and secondary corner colors. */
+
 INCLUDE_RODATA(const s32, "game/code_001A9780", D_003A30A8);
 
 INCLUDE_RODATA(const s32, "game/code_001A9780", D_003A30D8);
@@ -10272,6 +10306,7 @@ extern const SceneSlotCoordinate D_003A31A0[8];
 extern void btlDrawActorSlotOrderSecondarySprite(EffectSlotSet *, s32, s32, s32, s32, s32, s32);
 
 /* Draw enabled bank-selected slot-order sprites with their current colors and scales. */
+
 INCLUDE_RODATA(const s32, "game/code_001A9780", D_003A3130);
 
 INCLUDE_RODATA(const s32, "game/code_001A9780", D_003A3140);
@@ -10424,6 +10459,7 @@ void btlDrawActorSlotOrderSecondarySprite(EffectSlotSet *work, s32 entry, s32 x,
 }
 
 /* Advance one slot-order secondary state and its four corner-color adjustments. */
+
 INCLUDE_RODATA(const s32, "game/code_001A9780", D_003A3220);
 
 void btlUpdateActorSlotOrderColors(s32 bank, s32 index) {
@@ -11109,11 +11145,11 @@ void btlAllocatePanelTaskWork(void) {
     do {
         btlGetRuntime();
     } while (0);
-    btlTrackedTaskHandles = sdfAllocAndClearQuadwords(0x58);
+    btlTrackedTaskHandles = sdfChipAllocZeroDirect(0x58);
     memset(btlTrackedTaskHandles, 0, 0x38);
-    D_003BD83C = sdfAllocAndClearQuadwords(0xD8);
-    D_003BD840[0] = sdfAllocAndClearQuadwords(0x274);
-    D_003BD840[1] = sdfAllocAndClearQuadwords(0x274);
+    D_003BD83C = sdfChipAllocZeroDirect(0xD8);
+    D_003BD840[0] = sdfChipAllocZeroDirect(0x274);
+    D_003BD840[1] = sdfChipAllocZeroDirect(0x274);
 }
 
 static inline void btlDestroyTrackedTaskIfPresent(BtlTrackedProcessSlot slot) {
@@ -11171,6 +11207,8 @@ void fldDestroySceneTasksAndBuffers(void) {
 }
 
 INCLUDE_RODATA(const s32, "game/code_001A9780", D_003A32F0);
+
+INCLUDE_RODATA(const s32, "game/code_001A9780", D_003A3368);
 
 INCLUDE_SDATA(const s32, "game/code_001A9780", D_003BB488);
 
@@ -11259,3 +11297,4 @@ INCLUDE_SDATA(const s32, "game/code_001A9780", D_003BB5C8);
 INCLUDE_SDATA(const s32, "game/code_001A9780", D_003BB5D0);
 
 INCLUDE_SDATA(const s32, "game/code_001A9780", D_003BB5D8);
+

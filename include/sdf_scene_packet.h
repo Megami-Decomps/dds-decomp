@@ -2,7 +2,7 @@
 #define SDF_SCENE_PACKET_H
 
 #include "sdf.h"
-#include "sdf_packet_patch.h"
+#include "libsdf.h"
 #include "sdf_gs_context.h"
 #include "sdf_gs_scene_state.h"
 
@@ -36,9 +36,7 @@ void sdfGrSetDrawEnv(SdfSceneDrawPacket *packet,
 
 /* Linked metadata precedes the DMA drawing payload by one quadword. */
 typedef struct SdfSceneNode {
-    SdfPacketPatchLink link;
-    sdfGrFrameSet_t *view;
-    u8 padC[4];
+    sdfPreDrawHook_t link; /* option0 holds the sdfGrFrameSet_t */
     SdfGsPacketHeader header;
     SdfGsDrawDefaultsRegisters drawDefaults;
     SdfGsContextRegisters contextOne;
@@ -52,8 +50,6 @@ typedef struct SdfSceneNode {
 
 typedef char SdfSceneNode_size_must_be_0x220[
     (sizeof(SdfSceneNode) == 0x220) ? 1 : -1];
-typedef char SdfSceneNode_view_at_0x08[
-    ((u32)&((SdfSceneNode *)0)->view == 0x08) ? 1 : -1];
 typedef char SdfSceneNode_header_at_0x10[
     ((u32)&((SdfSceneNode *)0)->header == 0x10) ? 1 : -1];
 typedef char SdfSceneNode_frameContextOne_at_0x180[

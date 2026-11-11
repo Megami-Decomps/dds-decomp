@@ -22,10 +22,10 @@
 #include "fr_font.h"
 #include "eff_resource_slots.h"
 #include "sdf_chip.h"
-#include "sdf_resource.h"
+#include "sdf_heap_api.h"
 #include "btl_scene_fade.h"
 #include "btl_resource.h"
-#include "pcp_vu0.h"
+#include "ps2asm.h"
 #include "btl_ui.h"
 #include "sdf.h"
 #include "btl.h"
@@ -40,13 +40,13 @@
 #include "eff.h"
 #include "btl_action.h"
 #include "btl_ai_table.h"
-#include "kwln.h"
+#include "kernel.h"
 #include "dat_state.h"
 #include "dat_calculated_stat_value_api.h"
 #include "btl_actor_attribute_api.h"
 #include "pty_roster_api.h"
 #include "dat_command.h"
-#include "kwln_task_lifecycle.h"
+#include "dds3_task_lifecycle.h"
 /* Declared before first use (were implicit int). */
 extern u8 btlTestSelectedItemCategoryMask(BtlUnit *unit, s32 actorIndex);
 extern s32 fldCountSceneSlots(void);
@@ -241,10 +241,9 @@ u32 btlGetAdjustedSlotAffinity(BtlUnit *unit, s32 unused, DatAffinitySelector se
 #include "fr_font.h"
 #include "eff_resource_slots.h"
 #include "sdf_chip.h"
-#include "sdf_resource.h"
+#include "sdf_heap_api.h"
 #include "btl_scene_fade.h"
 #include "btl_resource.h"
-#include "pcp_vu0.h"
 #include "btl_ui.h"
 #include "sdf.h"
 #include "btl.h"
@@ -253,11 +252,11 @@ u32 btlGetAdjustedSlotAffinity(BtlUnit *unit, s32 unused, DatAffinitySelector se
 #include "eff.h"
 #include "btl_action.h"
 #include "btl_ai_table.h"
-#include "kwln.h"
+#include "kernel.h"
 #include "dat_state.h"
 #include "pty_roster_api.h"
 #include "dat_command.h"
-#include "kwln_task_lifecycle.h"
+#include "dds3_task_lifecycle.h"
 #include "sdf_debug_api.h"
 #include "btl_actor_command_selector_value_api.h"
 #include "evt_run_context_api.h"
@@ -482,6 +481,7 @@ f32 btlGetRewardLevelMultiplier(BtlUnit *acquirer, BtlUnit *enemy, BtlRewardLeve
 }
 
 /* Read the money reward with the same eligibility and 100-fold table flag. */
+
 INCLUDE_RODATA(const s32, "game/code_001A7180", D_003A1B90);
 
 INCLUDE_RODATA(const s32, "game/code_001A7180", D_003A1BA8);

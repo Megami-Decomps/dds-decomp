@@ -5,7 +5,7 @@
 #include "prf_profile_cap.h"
 #include "mdl_flag_api.h"
 
-extern void evtPrintDeveloperConsoleMessage(const char *, ...);
+extern void datDebugPrintf(const char *, ...);
 extern void mtrRecomputeMantraFlagsForPartyUnit(datUnitWork_t *);
 extern void mtrMantraBitResetUnit(datUnitWork_t *);
 extern MantraFlagResource *evtAllocateMantraSelectionWork(datUnitWork_t *, s32);
@@ -21,7 +21,7 @@ void mtrMantraSetBit(datUnitWork_t *record) {
     MantraNodePos *node;
     s32 i;
 
-    evtPrintDeveloperConsoleMessage(D_00425F30, record->unitId);
+    datDebugPrintf(D_00425F30, record->unitId);
     if (evtBitCheck(0xBA0) != 0 && evtBitCheck(0x80E) == 0) {
         mtrRecomputeMantraFlagsForPartyUnit(record);
     } else {

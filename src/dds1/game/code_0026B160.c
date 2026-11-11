@@ -1,9 +1,9 @@
 #include "common.h"
 #include "mnu_movie_menu_selection_index.h"
-#include "kwln_fade.h"
-#include "sdf_resource.h"
-#include "kwln_task_lifecycle.h"
-#include "kwln_task_runner.h"
+#include "dds3_fade.h"
+#include "sdf_heap_api.h"
+#include "dds3_task_lifecycle.h"
+#include "dds3_task_runner.h"
 #include "mnu.h"
 #include "mnu_sprite_resource.h"
 #include "mnu_movie_playback_api.h"
@@ -56,7 +56,7 @@ extern void mnuDrawMovieMenuSpriteSlot18(s32 volume);
 extern u8 mnuIsAnyMenuInputPressed(void);
 extern void dds3PlayMovieByIndex(s32 index);
 extern u8 mnuGetMoviePlaybackMode(void);
-extern void sdfSoundSetChannelCount(u32 channelCount);
+extern void sdfSndSetChannelCount(u32 channelCount);
 extern void mnuRequestDefaultMovieResource(void);
 extern void mnuDrawMovieMenuSpriteLayers(s32 context);
 extern void mnuResetMovieMenuOpeningAnimation(void);
@@ -81,7 +81,7 @@ extern void fldPrepareDeferredSceneTransition(void);
 extern void mnuDrawMovieMenuSpriteSlot1A(s32 alpha);
 extern void dds3FadeClear(void);
 
-KwlnTaskUpdateResult mnuUpdateMovieMenuTask(dds3ProcessID_t *task) {
+dds3TaskUpdateResult_t mnuUpdateMovieMenuTask(dds3ProcessID_t *task) {
     s32 alpha;
     MnuMovieMenuPollResult menuAction;
     MnuMovieMenuSelectionIndex selectedItem;
@@ -261,7 +261,7 @@ KwlnTaskUpdateResult mnuUpdateMovieMenuTask(dds3ProcessID_t *task) {
             mnuMovieMenuState->state = 0x11;
             mnuMovieMenuState->cursor = 0;
             dds3FadeOut(0, 0, 0, 0x16);
-            sdfSoundSetChannelCount(0x2D);
+            sdfSndSetChannelCount(0x2D);
             mnuMovieMenuState->movieSkipped = 1;
         }
         if (mnuIsMoviePlaybackFinished() != SDF_MOVIE_COMPLETION_INCOMPLETE) {
@@ -499,7 +499,7 @@ KwlnTaskUpdateResult mnuUpdateMovieMenuTask(dds3ProcessID_t *task) {
         mnuDrawMovieMenuBackgroundQuad(0x80);
         break;
     }
-    return KWLN_TASK_UPDATE_RETAIN_CALLBACK;
+    return DDS3_TASK_UPDATE_RETAIN_CALLBACK;
 }
 
 extern dds3ProcessID_t *mnuCreateTitleMenuTask(s32 mode);

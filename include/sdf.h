@@ -2,6 +2,7 @@
 #define SDF_H
 
 #include "common.h"
+#include "libsdf.h"
 #include "sdf_list_node.h"
 #include "sdf_gs_packet.h"
 #include "sdf_texture_clamp.h"
@@ -92,33 +93,6 @@ typedef struct SdfQuad {
     u32 word[4];
 } SdfQuad;
 
-/* Per-texture reference count and non-owning clone source (0x8). */
-typedef struct SdfTexRef {
-    struct sdfTexHandle_t *cloneSource; /* Borrowed source pointer; marks the shared-primary clone path. */
-    s32 refCount;
-} SdfTexRef;
-
-/* Texture buffer GPU command words (0x40); DDS1/2 game/code_002D10B0/00329F60.c. */
-typedef struct sdfTexPacket_t {
-    s32 gifTagWord; /* Low GIFtag word; NLOOP occupies bits 0-14. */
-    u32 gifTagControl; /* High GIFtag control word; one packed register. */
-    u64 gifTagRegisters; /* Packed register list: A+D. */
-    u64 samplingState; /* GS TEX1 data, including minification/magnification filters. */
-    u64 samplingRegister; /* GS TEX1_1/TEX1_2 register selector. */
-    u64 textureState; /* GS TEX0 data. */
-    u64 textureRegister; /* GS TEX0_1/TEX0_2 register selector. */
-    u64 clampState; /* GS CLAMP data. */
-    u64 clampRegister; /* GS CLAMP_1/CLAMP_2 register selector. */
-} sdfTexPacket_t;
-
-typedef char SdfTexBuf_size_must_be_0x40[(sizeof(sdfTexPacket_t) == 0x40) ? 1 : -1];
-typedef char SdfTexBuf_registers_offset_must_be_8[
-    ((u32)&((sdfTexPacket_t *)0)->gifTagRegisters == 8) ? 1 : -1];
-typedef char SdfTexBuf_sampling_register_offset_must_be_0x18[
-    ((u32)&((sdfTexPacket_t *)0)->samplingRegister == 0x18) ? 1 : -1];
-typedef char SdfTexBuf_texture_register_offset_must_be_0x28[
-    ((u32)&((sdfTexPacket_t *)0)->textureRegister == 0x28) ? 1 : -1];
-
 /* Known sdfGsMemSlice_t allocation categories. Unknown u32 values are preserved. */
 enum SdfTexResourceAllocationMode {
     SDF_TEX_RESOURCE_FREE = 0,
@@ -128,20 +102,6 @@ enum SdfTexResourceAllocationMode {
     SDF_TEX_RESOURCE_KNOWN_MODE_COUNT = 4
 };
 
-/* Native VRAM range descriptor (0x1C), shared by textures, graph buffers and streams. */
-typedef struct sdfGsMemSlice_t {
-    struct sdfGsMemSlice_t *next; /* 0x00 */
-    struct sdfGsMemSlice_t *prev; /* 0x04 */
-    u32 allocationMode;         /* 0x08: known categories above; unknown values remain valid */
-    u32 word;                   /* 0x0C: VRAM offset in 32-bit words */
-    s32 size;                   /* 0x10: range length in 32-bit words */
-    s16 width;                  /* 0x14 */
-    s16 height;                 /* 0x16 */
-    s32 format;                 /* 0x18: GS pixel-storage mode */
-} sdfGsMemSlice_t;
-
-typedef char SdfTexResource_size_must_be_0x1C[
-    (sizeof(sdfGsMemSlice_t) == 0x1C) ? 1 : -1];
 /* Allocate a low-VRAM image block and record its logical dimensions and format.
  * The caller owns the returned block and releases it with the masked updater below. */
 sdfGsMemSlice_t *sdfGsAllocFrameBuff(s32 width, s32 height, s32 format);
@@ -265,7 +225,7 @@ typedef char SdfStreamFrameNode_readContext_offset_must_be_0x60[
     ((u32)&((sdfIpuDecodeCb_t *)0)->readContext == 0x60) ? 1 : -1];
 
 void sdfIpuMakeToIpuDmaTag(sdfIpuDecodeCb_t *, u8 *, s32);
-void sdfAdvanceStreamPlayback(s32 cadence);
+void sdfIpuRunDecode(s32 cadence);
 /* Store the stream-frame draw-path word unchanged; 1 selects the alternate path. */
 void sdfSetStreamFrameDrawMode(u32 mode);
 
@@ -357,43 +317,12 @@ typedef char SdfGraphModeDefaults_size_must_be_0xC[
 typedef char SdfGraphModeDefaults_interlace_must_be_at_0xA[
     ((u32)&((SdfGraphModeDefaults *)0)->interlace == 0xA) ? 1 : -1];
 
-/* Linked texture and its two buffers/resources (0x40); DDS1/2 sdf/sdfTex.c and game texture units. */
-typedef struct sdfTexHandle_t {
-    struct sdfTexHandle_t *next;
-    struct sdfTexHandle_t *prev;
-    SdfTexRef *reference;
-    s16 width;
-    s16 height;
-    sdfGsMemSlice_t *primaryResource;
-    sdfGsMemSlice_t *secondaryResource;
-    u8 paletteCount;
-    u8 clutFormat;
-    u8 pixelFormat;
-    u8 maxMipLevel;
-    u16 lodParameters; /* Packed GS TEX1 L/K parameters. */
-    u8 unk1E;
-    SdfTextureClampMode clampMode; /* 0x1F: 0xFF leaves GS CLAMP state zero; otherwise low nibble is copied. */
-    s32 resourceKey;
-    s32 battleTextureSlot;
-    sdfTexPacket_t *primaryBuffer;
-    sdfTexPacket_t *secondaryBuffer;
-    u8 *paletteData; /* 0x30: retained copy of the texture's palette colors. */
-    s32 paletteDataSize; /* 0x34: palette byte count from sdfTexGetClutDataSize. */
-    s32 unk38;
-    u8 *intensityMap; /* 0x3C: lazily generated weighted-RGB intensity bytes. */
-} sdfTexHandle_t;
-
-typedef char SdfTex_size_must_be_0x40[
-    (sizeof(sdfTexHandle_t) == 0x40) ? 1 : -1];
-typedef char SdfTex_clampMode_offset_must_be_0x1F[
-    ((u32)&((sdfTexHandle_t *)0)->clampMode == 0x1F) ? 1 : -1];
-
 /* Release one caller-owned texture reference. The direct form releases the
  * texture immediately when this is the last reference; the handler form queues
  * that final release for deferred processing. Neither function consumes more
  * than the single reference represented by the supplied pointer. */
 void sdfTexReleaseReference(sdfTexHandle_t *texture);
-void sdfTexReleaseReferenceViaHandler(sdfTexHandle_t *texture);
+void sdfTexFreeDelayed(sdfTexHandle_t *texture);
 
 /* Texture resource accessors and palette helpers shared by both title providers. */
 u8 sdfTexGetCLUTCount(sdfTexHandle_t *texture);
@@ -410,42 +339,12 @@ u64 sdfTexGetClampReg(sdfTexHandle_t *texture);
 /* Semaphore ID and attached work pointers (0x14); DDS1/2 game/code_002D10B0/00329F60.c. */
 
 
-/* DMA packet list cursors and endpoints (0x20); DDS1/2 game/code_002D33C8/0032C278.c. */
-typedef struct sdfDrawTag_t {
-    struct sdfDrawTag_t *next; /* CPU link between lists; first/last are DMA addresses. */
-    u32 head;
-    u32 tail;
-    u32 unkC;
-    u32 firstReferenceSource; /* Optional first DMA reference prefix. */
-    u32 secondReferenceSource; /* Optional second DMA reference prefix. */
-    u32 unk18;
-    u32 unk1C;
-} sdfDrawTag_t;
-
-typedef char SdfListHead_link_layout[
-    (sizeof(sdfDrawTag_t) == 0x20 &&
-     (u32)&((sdfDrawTag_t *)0)->next == 0 &&
-     (u32)&((sdfDrawTag_t *)0)->head == 4 &&
-     (u32)&((sdfDrawTag_t *)0)->tail == 8) ? 1 : -1];
-
-/* Draw-surface pool entry (0x20); the SDK initializes and flushes this owner. */
-typedef struct sdfGrOt_t {
-    struct sdfGrOt_t *next; /* 0x00 */
-    sdfDrawTag_t *tagHead;       /* 0x04 */
-    sdfDrawTag_t *tagTail;        /* 0x08 */
-    u32 unkC;
-    void (*append)(struct sdfGrOt_t *, sdfDrawTag_t *);      /* 0x10 */
-    s32 (*prepend)(struct sdfGrOt_t *, s32, sdfDrawTag_t *); /* 0x14 */
-    u32 unk18;
-    u32 unk1C;
-} sdfGrOt_t;
-
 typedef char sdfGrOt_t_size_must_be_0x20[(sizeof(sdfGrOt_t) == 0x20) ? 1 : -1];
 typedef char sdfGrOt_t_owner_layout[
     ((u32)&((sdfGrOt_t *)0)->tagHead == 4 &&
      (u32)&((sdfGrOt_t *)0)->tagTail == 8 &&
-     (u32)&((sdfGrOt_t *)0)->append == 0x10 &&
-     (u32)&((sdfGrOt_t *)0)->prepend == 0x14) ? 1 : -1];
+     (u32)&((sdfGrOt_t *)0)->regFunc == 0x10 &&
+     (u32)&((sdfGrOt_t *)0)->callbackFunc == 0x14) ? 1 : -1];
 
 /* Callback-list hooks also accept the shared task-entry no-op. */
 typedef void (*SdfListCallback)();
@@ -490,14 +389,6 @@ typedef struct SdfDmaSrc {
     u8 pad2[6];
     u64 vifCommands;
 } SdfDmaSrc;
-
-/* REF tag and VIF commands followed by the trailing chain tag (0x20).
- * The complete trailing quadword is cleared before its NEXT header is patched. */
-typedef struct sdfGrRefPacketHeader_t {
-    u64 dmaTag;
-    u64 vifCommands;
-    int __attribute__((mode(TI))) nextTag;
-} sdfGrRefPacketHeader_t;
 
 typedef char sdfGrRefPacketHeader_t_size_must_be_0x20[
     sizeof(sdfGrRefPacketHeader_t) == 0x20 ? 1 : -1];
@@ -569,122 +460,73 @@ typedef union SdfSubParam {
 typedef char SdfSubParam_size_must_be_0x18[
     (sizeof(SdfSubParam) == 0x18) ? 1 : -1];
 
-/* Asset holding texture and resource entries (0x48); DDS1/2 game/code_002D9748/003325F8.c. */
-typedef struct sdfMat_t {
-    u32 unk00; /* Word from the serialized asset-parameter header. */
-    u16 unk04; /* Halfword from the serialized asset-parameter header. */
-    u8 dirtyFlags; /* 0x06: pending state-group changes for the two draw entries */
-    u8 pad07;
-    struct SdfAssetEntry *drawEntries[2]; /* 0x08: owned 0xA0-byte draw entries */
-    u32 primaryStateWordFirst; /* 0x10: first word set by primary-state updates */
-    u32 primaryStateWordSecond; /* 0x14: second word set by primary-state updates */
-    u32 secondaryColor; /* 0x18 */
-    f32 primaryStateFloat; /* 0x1C: interpolated primary-state float */
-    u32 primaryStateWordThird; /* 0x20 */
-    u32 unk24;
-    u32 primaryStateWordFourth; /* 0x28: retained as raw bits */
-    sdfTexHandle_t *texture;
-    sdfTexHandle_t *secondaryTexture; /* 0x30 */
-    u32 secondaryMode;       /* 0x34: secondary packet and palette selector */
-    SdfSubParam *primarySubParam; /* 0x38 */
-    SdfSubParam *secondarySubParam; /* 0x3C */
-    f32 scalarPairFirst; /* 0x40 */
-    f32 scalarPairSecond; /* 0x44 */
-} sdfMat_t;
+/* Layout checks on libsdf.h's material types. */
 
-typedef char SdfAsset_size_must_be_0x48[
-    (sizeof(sdfMat_t) == 0x48) ? 1 : -1];
-typedef char SdfAsset_unk04_at_4[
-    ((u32)&((sdfMat_t *)0)->unk04 == 4) ? 1 : -1];
-typedef char SdfAsset_dirtyFlags_at_6[
-    ((u32)&((sdfMat_t *)0)->dirtyFlags == 6) ? 1 : -1];
-typedef char SdfAsset_drawEntries_offset_must_be_0x08[
-    ((u32)&((sdfMat_t *)0)->drawEntries == 0x08) ? 1 : -1];
-typedef char SdfAsset_primaryStateWordFirst_offset_must_be_0x10[
-    ((u32)&((sdfMat_t *)0)->primaryStateWordFirst == 0x10) ? 1 : -1];
-typedef char SdfAsset_primaryStateWordSecond_offset_must_be_0x14[
-    ((u32)&((sdfMat_t *)0)->primaryStateWordSecond == 0x14) ? 1 : -1];
-typedef char SdfAsset_primaryStateFloat_offset_must_be_0x1C[
-    ((u32)&((sdfMat_t *)0)->primaryStateFloat == 0x1C) ? 1 : -1];
-typedef char SdfAsset_primaryStateWordThird_offset_must_be_0x20[
-    ((u32)&((sdfMat_t *)0)->primaryStateWordThird == 0x20) ? 1 : -1];
-typedef char SdfAsset_primaryStateWordFourth_offset_must_be_0x28[
-    ((u32)&((sdfMat_t *)0)->primaryStateWordFourth == 0x28) ? 1 : -1];
-typedef char SdfAsset_dirtyFlags_offset_must_be_0x06[
-    ((u32)&((sdfMat_t *)0)->dirtyFlags == 0x06) ? 1 : -1];
-typedef char SdfAsset_primarySubParam_offset_must_be_0x38[
-    ((u32)&((sdfMat_t *)0)->primarySubParam == 0x38) ? 1 : -1];
-typedef char SdfAsset_secondarySubParam_offset_must_be_0x3C[
-    ((u32)&((sdfMat_t *)0)->secondarySubParam == 0x3C) ? 1 : -1];
-typedef char SdfAsset_scalarPairFirst_offset_must_be_0x40[
-    ((u32)&((sdfMat_t *)0)->scalarPairFirst == 0x40) ? 1 : -1];
-typedef char SdfAsset_scalarPairSecond_offset_must_be_0x44[
-    ((u32)&((sdfMat_t *)0)->scalarPairSecond == 0x44) ? 1 : -1];
-
-/* Draw entries store six transform floats and expose the same bytes as three qwords. */
-typedef union SdfDrawTransform {
-    f32 m[6];
-    u64 words[3];
-} SdfDrawTransform;
-
-/* The cached GS TEX1, TEX0 and CLAMP values shared by texture draw records. */
-typedef struct SdfGsTextureStateValues {
-    u64 sampling;
-    u64 texture;
-    u64 clamp;
-} SdfGsTextureStateValues;
-
-typedef char SdfGsTextureStateValues_size_must_be_0x18[
-    (sizeof(SdfGsTextureStateValues) == 0x18) ? 1 : -1];
-
-/* Native 0xA0-byte draw-entry block allocated by SDF_ASSET_DRAW_ENTRY_BYTES. */
-typedef struct SdfAssetEntry {
-    u32 pad00;             /* 0x00 */
-    u32 unk04;             /* 0x04 */
-    u32 unk08;             /* 0x08 */
-    u32 secondaryColor;    /* 0x0C: packed color applied by the secondary draw state */
-    u32 primaryStateWordThird; /* 0x10: copied from the owning asset, or forced to zero. */
-    u32 unk14;             /* 0x14 */
-    u32 pad18;             /* 0x18 */
-    f32 unk1C;             /* 0x1C */
-    u32 alphaState;        /* 0x20: packed GS ALPHA_2 state emitted by the VU transfer builder */
-    u32 secondaryMode;     /* 0x24: secondary packet mode copied from sdfMat_t */
-    f32 y;                 /* 0x28 */
-    f32 x;                 /* 0x2C */
-    u8 pad30[8];           /* 0x30 */
-    SdfGsTextureStateValues primaryTextureState; /* 0x38 */
-    SdfGsTextureStateValues secondaryTextureState; /* 0x50 */
-    SdfDrawTransform transforms[2]; /* 0x68 */
-    u32 vifItopCommand;    /* 0x98: VIF ITOP with immediate 0xC */
-    u32 vifMscalCommand;   /* 0x9C: VIF MSCAL with microprogram index zero */
-} SdfAssetEntry;
-
-typedef char SdfAssetEntry_size_must_be_0xA0[
-    (sizeof(SdfAssetEntry) == 0xA0) ? 1 : -1];
-typedef char SdfAssetEntry_primaryStateWordThird_offset_must_be_0x10[
-    ((u32)&((SdfAssetEntry *)0)->primaryStateWordThird == 0x10) ? 1 : -1];
-typedef char SdfAssetEntry_primaryTextureState_offset_must_be_0x38[
-    ((u32)&((SdfAssetEntry *)0)->primaryTextureState == 0x38) ? 1 : -1];
-typedef char SdfAssetEntry_secondaryTextureState_offset_must_be_0x50[
-    ((u32)&((SdfAssetEntry *)0)->secondaryTextureState == 0x50) ? 1 : -1];
-typedef char SdfAssetEntry_transforms_offset_must_be_0x68[
-    ((u32)&((SdfAssetEntry *)0)->transforms == 0x68) ? 1 : -1];
-typedef char SdfAssetEntry_vifItopCommand_offset_must_be_0x98[
-    ((u32)&((SdfAssetEntry *)0)->vifItopCommand == 0x98) ? 1 : -1];
-typedef char SdfAssetEntry_vifMscalCommand_offset_must_be_0x9C[
-    ((u32)&((SdfAssetEntry *)0)->vifMscalCommand == 0x9C) ? 1 : -1];
+typedef char sdfMatPacket_t_ambient_at_0x04[
+    ((u32)&((sdfMatPacket_t *)0)->ambient == 0x04) ? 1 : -1];
+typedef char sdfMatPacket_t_diffuse_at_0x08[
+    ((u32)&((sdfMatPacket_t *)0)->diffuse == 0x08) ? 1 : -1];
+typedef char sdfMatPacket_t_mtexDiffuse_at_0x0C[
+    ((u32)&((sdfMatPacket_t *)0)->mtexDiffuse == 0x0C) ? 1 : -1];
+typedef char sdfMatPacket_t_refmapColor_at_0x14[
+    ((u32)&((sdfMatPacket_t *)0)->refmapColor == 0x14) ? 1 : -1];
+typedef char sdfMatPacket_t_constant_at_0x1C[
+    ((u32)&((sdfMatPacket_t *)0)->constant == 0x1C) ? 1 : -1];
+typedef char sdfMatPacket_t_mtexAlpha_at_0x20[
+    ((u32)&((sdfMatPacket_t *)0)->mtexAlpha == 0x20) ? 1 : -1];
+typedef char sdfMatPacket_t_mtexAlgo_at_0x24[
+    ((u32)&((sdfMatPacket_t *)0)->mtexAlgo == 0x24) ? 1 : -1];
+typedef char sdfMatPacket_t_fdBias_at_0x28[
+    ((u32)&((sdfMatPacket_t *)0)->fdBias == 0x28) ? 1 : -1];
+typedef char sdfMatPacket_t_clampData_at_0x48[
+    ((u32)&((sdfMatPacket_t *)0)->clampData == 0x48) ? 1 : -1];
+typedef char sdfMatPacket_t_texTm_at_0x68[
+    ((u32)&((sdfMatPacket_t *)0)->texTm == 0x68) ? 1 : -1];
+typedef char sdfMatPacket_t_mtexTexTm_at_0x80[
+    ((u32)&((sdfMatPacket_t *)0)->mtexTexTm == 0x80) ? 1 : -1];
+typedef char sdfMatPacket_t_cmd_call_spec_at_0x98[
+    ((u32)&((sdfMatPacket_t *)0)->cmd_call_spec == 0x98) ? 1 : -1];
+typedef char sdfMatPacket_t_cmd_call_kind_at_0x9C[
+    ((u32)&((sdfMatPacket_t *)0)->cmd_call_kind == 0x9C) ? 1 : -1];
+typedef char sdfMat_t_id_at_0x00[
+    ((u32)&((sdfMat_t *)0)->id == 0x00) ? 1 : -1];
+typedef char sdfMat_t_flags_at_0x04[
+    ((u32)&((sdfMat_t *)0)->flags == 0x04) ? 1 : -1];
+typedef char sdfMat_t_duty_at_0x06[
+    ((u32)&((sdfMat_t *)0)->duty == 0x06) ? 1 : -1];
+typedef char sdfMat_t_packet_at_0x08[
+    ((u32)&((sdfMat_t *)0)->packet == 0x08) ? 1 : -1];
+typedef char sdfMat_t_ambient_at_0x10[
+    ((u32)&((sdfMat_t *)0)->ambient == 0x10) ? 1 : -1];
+typedef char sdfMat_t_diffuse_at_0x14[
+    ((u32)&((sdfMat_t *)0)->diffuse == 0x14) ? 1 : -1];
+typedef char sdfMat_t_multiTexDiffuse_at_0x18[
+    ((u32)&((sdfMat_t *)0)->multiTexDiffuse == 0x18) ? 1 : -1];
+typedef char sdfMat_t_constant_at_0x1C[
+    ((u32)&((sdfMat_t *)0)->constant == 0x1C) ? 1 : -1];
+typedef char sdfMat_t_specular_at_0x20[
+    ((u32)&((sdfMat_t *)0)->specular == 0x20) ? 1 : -1];
+typedef char sdfMat_t_specularParm_at_0x24[
+    ((u32)&((sdfMat_t *)0)->specularParm == 0x24) ? 1 : -1];
+typedef char sdfMat_t_refmap_at_0x28[
+    ((u32)&((sdfMat_t *)0)->refmap == 0x28) ? 1 : -1];
+typedef char sdfMat_t_texHandle_at_0x2C[
+    ((u32)&((sdfMat_t *)0)->texHandle == 0x2C) ? 1 : -1];
+typedef char sdfMat_t_multiTexHandle_at_0x30[
+    ((u32)&((sdfMat_t *)0)->multiTexHandle == 0x30) ? 1 : -1];
+typedef char sdfMat_t_multiTexMethod_at_0x34[
+    ((u32)&((sdfMat_t *)0)->multiTexMethod == 0x34) ? 1 : -1];
+typedef char sdfMat_t_uvwParm_at_0x38[
+    ((u32)&((sdfMat_t *)0)->uvwParm == 0x38) ? 1 : -1];
+typedef char sdfMat_t_multiTexUvwParm_at_0x3C[
+    ((u32)&((sdfMat_t *)0)->multiTexUvwParm == 0x3C) ? 1 : -1];
+typedef char sdfMat_t_fdBias_at_0x40[
+    ((u32)&((sdfMat_t *)0)->fdBias == 0x40) ? 1 : -1];
+typedef char sdfMat_t_fdSoften_at_0x44[
+    ((u32)&((sdfMat_t *)0)->fdSoften == 0x44) ? 1 : -1];
 
 extern s32 sdfThreadSema;
-extern SdfThreadNode *sdfVblankThreadId;
-
-/* General-heap allocation descriptor (0x10); links bound the represented span. */
-typedef struct sdfMemHandle_t {
-    struct sdfMemHandle_t *prev; /* 0x00 */
-    struct sdfMemHandle_t *next; /* 0x04 */
-    s32 address;              /* 0x08: start of represented span */
-    u16 state;                /* 0x0C: free, used, or end sentinel */
-    s16 referenceCount;       /* 0x0E: -1 for sentinels */
-} sdfMemHandle_t;
+extern sdfThCB_t *sdfVblankThreadId;
 
 /* Embedded end sentinels and backing-span metadata for the general heap (0x28). */
 typedef struct SdfMemHeap {
@@ -694,74 +536,9 @@ typedef struct SdfMemHeap {
     u32 size;         /* 0x24 */
 } SdfMemHeap;
 
-typedef char SdfMemBlock_size_must_be_0x10[(sizeof(sdfMemHandle_t) == 0x10) ? 1 : -1];
 typedef char SdfMemHeap_size_must_be_0x28[(sizeof(SdfMemHeap) == 0x28) ? 1 : -1];
 
 extern SdfMemHeap sdfMemCB;
-
-#define SDF_CHIP_CLASS_COUNT 7
-
-typedef struct SdfChipCell SdfChipCell;
-typedef struct SdfChipPage SdfChipPage;
-typedef struct sdfChipCB_tag sdfChipCB_tag;
-typedef struct SdfPendingNode SdfPendingNode;
-
-/* A free chip cell carries its next-list link at byte 8. */
-struct SdfChipCell {
-    u8 pad00[8];
-    SdfChipCell *nextFree;
-};
-
-/* One power-of-two allocation class in the chip heap (0x0C). */
-struct sdfChipCB_tag {
-    SdfChipPage *currentPage;
-    SdfChipPage *availablePages;
-    s16 cellSize;
-    s16 cellCount;
-};
-
-typedef SdfChipCell *(*SdfChipAllocateFn)(sdfChipCB_tag *, SdfChipPage *);
-
-/* Per-page allocation metadata for one 4 KiB chip-heap page (0x18). */
-struct SdfChipPage {
-    SdfChipPage *next;
-    u8 *base;
-    SdfChipAllocateFn allocate;
-    sdfChipCB_tag *sizeClass;
-    SdfChipCell *freeCells;
-    s16 usedCells;
-    s16 bumpCellsRemaining;
-};
-
-/* Deferred handlers share one address-word argument at the native dispatch
- * boundary, while their C consumers interpret that word as different owners. */
-typedef void (*SdfPendingCallback)();
-
-/* Interrupt-synchronized deferred callback owner (0x08). */
-typedef struct SdfPendingRequest {
-    SdfPendingCallback handler;
-    SdfPendingNode *pending;
-} SdfPendingRequest;
-
-typedef char SdfChipClass_size_must_be_0x0C[(sizeof(sdfChipCB_tag) == 0x0C) ? 1 : -1];
-typedef char SdfChipPage_size_must_be_0x18[(sizeof(SdfChipPage) == 0x18) ? 1 : -1];
-typedef char SdfPendingRequest_size_must_be_0x08[(sizeof(SdfPendingRequest) == 0x08) ? 1 : -1];
-
-/* Seven size classes followed by the retail range's four-byte alignment tail. */
-typedef struct SdfChipClassTable {
-    sdfChipCB_tag classes[SDF_CHIP_CLASS_COUNT];
-    u8 pad54[4];
-} SdfChipClassTable;
-
-typedef char SdfChipClassTable_size_must_be_0x58[(sizeof(SdfChipClassTable) == 0x58) ? 1 : -1];
-
-extern SdfChipPage *sdfChipPageInfo;
-extern SdfChipPage *sdfChipPageFreeLink;
-extern u8 *sdfChipPageTop;
-extern u8 *sdfChipPageEnd;
-extern s32 sdfChipPageCount[2];
-extern SdfPendingRequest dds3CleanupList;
-extern SdfChipClassTable sdfChipCB;
 
 enum SdfColorTrackMode {
     SDF_COLOR_TRACK_MODE_ENDPOINTS = 0,

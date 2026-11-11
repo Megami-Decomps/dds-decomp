@@ -13,10 +13,10 @@
 #include "eff_resource_slots.h"
 #include "eff_resource_source_lifetime.h"
 #include "eff_resource_list.h"
-#include "kwln.h"
-#include "kwln_task_create.h"
-#include "kwln_fade.h"
-#include "sdf_resource.h"
+#include "kernel.h"
+#include "dds3_task_create.h"
+#include "dds3_fade.h"
+#include "sdf_heap_api.h"
 #include "mnu_result.h"
 #include "brs_ui_update_allowed_api.h"
 #include "mnu_list.h"
@@ -24,7 +24,7 @@
 #include "brs_task.h"
 #include "brs_task_lifecycle_state.h"
 #include "brs_task_poll_done_api.h"
-#include "kwln_task_lifecycle.h"
+#include "dds3_task_lifecycle.h"
 #include "prf_current_record_view.h"
 #include "pty_adjust_item_quantity_api.h"
 
@@ -1204,3 +1204,4 @@ INCLUDE_SDATA(const s32, "game/code_00296E98", D_00437998);
 INCLUDE_SDATA(const s32, "game/code_00296E98", D_004379A0);
 
 INCLUDE_SDATA(const s32, "game/code_00296E98", D_004379A8);
+

@@ -28,10 +28,10 @@
 #include "fr_font.h"
 #include "eff_resource_slots.h"
 #include "sdf_chip.h"
-#include "sdf_resource.h"
+#include "sdf_heap_api.h"
 #include "btl_scene_fade.h"
 #include "btl_resource.h"
-#include "pcp_vu0.h"
+#include "ps2asm.h"
 #include "btl_ui.h"
 #include "sdf.h"
 #include "btl_indexed_ui_resource_api.h"
@@ -43,7 +43,7 @@
 #include "btl_state.h"
 #include "eff.h"
 #include "btl_action.h"
-#include "kwln.h"
+#include "kernel.h"
 #include "dat_state.h"
 #include "dat_calculated_stat_value_api.h"
 #include "dat_affinity_selector.h"
@@ -52,7 +52,7 @@
 #include "btl_resolve_unit_value_api.h"
 #include "btl_select_transform_parameters_api.h"
 #include "dat_command.h"
-#include "kwln_task_lifecycle.h"
+#include "dds3_task_lifecycle.h"
 #include "mdl_flag_api.h"
 #include "snd_slot.h"
 
@@ -93,7 +93,7 @@ extern char D_003A1A40[];
 
 extern datUnitWork_t *btlGetIndexedPartyEntryRecord(s32);
 
-extern EffRandState effSharedRandomState[];
+extern EffRandState dds3RandCB[];
 
 /* Clear the supplied party-record status mask. */
 void btlClearPartyRecordStatusBits(datUnitWork_t *record, s32 mask) {
@@ -1116,7 +1116,7 @@ DatAffinitySelector btlFlagToElementIndex(s32 channelFlag) {
     return datFlagToElementIndex(channelFlag);
 }
 
-extern s32 evtGetMirroredSolarPhase(void);
+extern s32 evtGetAgeOfMoon(void);
 
 BtlSpecialAbilityAvailability btlCheckSpecialAbility(
     const datUnitWork_t *object, DatSkillId skillId) {
@@ -1125,17 +1125,17 @@ BtlSpecialAbilityAvailability btlCheckSpecialAbility(
     }
     switch (skillId) {
     case 0x207:
-        return evtGetMirroredSolarPhase() == 8 ? BTL_SPECIAL_ABILITY_AVAILABLE
+        return evtGetAgeOfMoon() == 8 ? BTL_SPECIAL_ABILITY_AVAILABLE
                                                : BTL_SPECIAL_ABILITY_UNAVAILABLE;
     case 0x208:
-        return evtGetMirroredSolarPhase() == 0 ? BTL_SPECIAL_ABILITY_AVAILABLE
+        return evtGetAgeOfMoon() == 0 ? BTL_SPECIAL_ABILITY_AVAILABLE
                                                : BTL_SPECIAL_ABILITY_UNAVAILABLE;
     default:
         return BTL_SPECIAL_ABILITY_AVAILABLE;
     }
 }
 
-extern EffRandState effSharedRandomState[];
+extern EffRandState dds3RandCB[];
 
 extern BtlEnemySelectionResult btlSelectEnemyDropItem(
     BtlUnit *actor, BtlEnemySelectionContext selectionContext);
@@ -1144,7 +1144,7 @@ s32 btlSelectActorAction(BtlUnit *actor) {
     s32 result = btlSelectEnemyDropItem(
         actor, BTL_ENEMY_SELECTION_CONTEXT_ACTOR_ACTION);
     if (result == BTL_ENEMY_SELECTION_NONE) {
-        result = (dds3GetRandA((EffRandState *)effSharedRandomState) & 1) != 0 ? 2 : 7;
+        result = (dds3GetRandA((EffRandState *)dds3RandCB) & 1) != 0 ? 2 : 7;
     }
     return result;
 }
@@ -1852,6 +1852,7 @@ extern BtlActorStateSnapshot btlSavedPartyUnitStates[3];
 #include "sdf_debug_api.h"
 
 /* Snapshot active party actors for the later party-slot restoration pass. */
+
 INCLUDE_RODATA(const s32, "game/code_001A1960", D_003A18F8);
 
 INCLUDE_RODATA(const s32, "game/code_001A1960", D_003A1908);

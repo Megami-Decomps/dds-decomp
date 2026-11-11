@@ -1,10 +1,10 @@
 #include "sdk_ps2.h"
 #include "common.h"
-#include "kwln_background_fade_api.h"
-#include "sdf_resource.h"
-#include "kwln.h"
-#include "kwln_task_runner.h"
-#include "kwln_task_create.h"
+#include "dds3_background_fade_api.h"
+#include "sdf_heap_api.h"
+#include "kernel.h"
+#include "dds3_task_runner.h"
+#include "dds3_task_create.h"
 #include "mnu.h"
 #include "mnu_sprite_resource.h"
 
@@ -14,7 +14,7 @@ extern void mnuRecreateMenuSelectionList(void);
 extern void mnuSelectMenuListCursorByAdvance(s32);
 extern void mnuLoadTitleMenuAssets(void);
 extern MnuSpriteResourceGroup *mnuCreateMovieSpriteResource(s32, u8, u8);
-extern KwlnTaskUpdateResult mnuUpdateMovieMenuTask(dds3ProcessID_t *);
+extern dds3TaskUpdateResult_t mnuUpdateMovieMenuTask(dds3ProcessID_t *);
 extern u32 D_003BA8EC;
 extern char D_003AFD80[];
 
@@ -23,7 +23,7 @@ extern MovieMenuState *mnuMovieMenuState;
 dds3ProcessID_t *mnuCreateTitleMenuTask(s32 mode) {
     struct sdfMemHandle_t *allocation;
 
-    kwlnFadeBackgroundStartOut(0);
+    dds3FadeBackgroundStartOut(0);
     movieStop();
     allocation = sdfMemAllocDirect(0x40);
     mnuMovieMenuState = (void *)sdfMemLock(allocation);

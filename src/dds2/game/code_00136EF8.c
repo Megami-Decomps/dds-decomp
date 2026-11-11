@@ -6,17 +6,17 @@
 #include "sdf_textured_rect.h"
 #include "sdf_chip.h"
 #include "sdf_dev_state.h"
-#include "kwln.h"
-#include "sdf_resource.h"
+#include "kernel.h"
+#include "sdf_heap_api.h"
 #include "fld_waypoint.h"
 #include "fld_npc_motion.h"
 #include "fld_inf.h"
 #include "fld_title_banner_menu.h"
-#include "kwln_task_lifecycle.h"
+#include "dds3_task_lifecycle.h"
 #include "sdf_vu_matrix.h"
-#include "kwln_fade.h"
+#include "dds3_fade.h"
 #include "fpu.h"
-#include "pcp_vu0.h"
+#include "ps2asm.h"
 #include "dds3obj.h"
 #include "evt_world_source_transform.h"
 #include "fld.h"
@@ -204,7 +204,7 @@ void fldDrawCameraColorLayerPass(void) {
 void fldReleaseCameraColorEffect(void) {
     fldCameraColorEnabled = 0;
     if (fldRainTextureReference != 0) {
-        sdfTexReleaseReferenceViaHandler(fldRainTextureReference);
+        sdfTexFreeDelayed(fldRainTextureReference);
         fldRainTextureReference = 0;
     }
     if (fldCameraColorEffect != 0) {
@@ -2121,6 +2121,7 @@ void fldAddItemBoxObject(f32 x, f32 y, f32 z, f32 extent, f32 height,
 
 void evtMessageExtraActionNoOp(void) {
 }
+
 INCLUDE_SDATA(const s32, "game/code_00136EF8", fldCameraColorLayerScroll);
 
 INCLUDE_SDATA(const s32, "game/code_00136EF8", fldItemBoxObjBuf);
@@ -2136,3 +2137,4 @@ INCLUDE_SDATA(const s32, "game/code_00136EF8", D_00436188);
 INCLUDE_SDATA(const s32, "game/code_00136EF8", fldAuxRecordResource);
 
 INCLUDE_SDATA(const s32, "game/code_00136EF8", fldValueRecordResource);
+

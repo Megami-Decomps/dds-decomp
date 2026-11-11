@@ -17,7 +17,7 @@ enum ParKindStateKind {
 enum { PAR_BILLBOARD_CLONE_FROM_RESOURCE = -1 };
 
 void dds3Particle_EffectInit(struct ParKindState *state);
-void parDispatchKindInit(struct ParKindState *state, s32 index);
-void parDispatchKindUpdate(struct ParKindState *state, s32 index, u32 color, f32 speed);
+void dds3Particle_EffectReset(struct ParKindState *state, s32 index);
+void dds3Particle_EffectSet(struct ParKindState *state, s32 index, u32 color, f32 speed);
 
 #endif

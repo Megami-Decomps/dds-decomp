@@ -1,0 +1,15 @@
+#ifndef DDS3_TASK_CREATE_H
+#define DDS3_TASK_CREATE_H
+
+#include "kernel.h"
+
+/*
+ * Allocate a task and place it in scheduler queues. Returns NULL on allocation
+ * failure. On success, the scheduler owns the task handle and frees it after
+ * its destroy callback; callers may borrow the handle only until finalization.
+ */
+dds3ProcessID_t *dds3StartProcess(const char *name, u32 priority, s32 startDelay,
+                         s32 destroyDelay, dds3ProcessFunc_t update,
+                         dds3ProcessShutdownFunc_t destroy, u32 userValue);
+
+#endif /* DDS3_TASK_CREATE_H */

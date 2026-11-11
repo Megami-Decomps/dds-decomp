@@ -1,73 +1,158 @@
 #ifndef SDF_RESOURCE_H
 #define SDF_RESOURCE_H
 
+/* Engine resource records the packet builders need but the engine owners in
+ * libsdf.h do not have to drag in with them. Same intent as sdf_types.h one
+ * layer down: a unit that builds a VIF packet from a material or a TMX header
+ * includes this and gets the canonical layout, without the queue, file and
+ * motion definitions it has no use for.
+ *
+ * libsdf.h includes this, so there is exactly one definition of each record.
+ * The pointed-to types stay forward declarations on purpose: a unit that also
+ * carries its own copy of one of them keeps compiling. */
+
 #include "common.h"
 
-/* General-heap descriptors are distinct from the data addresses they own. */
-struct sdfMemHandle_t;
+void *sdfDevLoadFileEx(const char *name, u32 *outData, u32 *outSize);
 
-/* Six signed words written by sdfMemGetInfo. */
-typedef struct SdfGeneralHeapStats {
-    s32 totalBytes;
-    s32 freeBytes;
-    s32 largestFreeBytes;
-    s32 smallestFreeBytes;
-    s32 blockCount;
-    s32 freeBlockCount;
-} SdfGeneralHeapStats;
+struct sdfMatPacket_t;
+struct sdfTexPacket_t;
 
-/* Five totals followed by the seven native chip size-class counters. */
-typedef struct SdfChipHeapStats {
-    u32 totalBytes;
-    u32 freeBytes;
-    u32 blockCount;
-    u32 emptyBlockCount;
-    u32 partialBlockCount;
-    u32 usedCells[7];
-} SdfChipHeapStats;
+/* sdfMem: a doubly linked list over one arena. A block's size is the next
+ * handle's ptr minus its own, so the list always ends with a sentinel. */
+typedef struct sdfMemHandle_t
+{
+    struct sdfMemHandle_t *prev;
+    struct sdfMemHandle_t *next;
+    void *ptr;
+    u16 stat; /* sdf_mem_stat; sdfMemGetType returns it */
+    u16 mlock;
+} sdfMemHandle_t;
 
-typedef char SdfGeneralHeapStats_size_must_be_0x18[
-    (sizeof(SdfGeneralHeapStats) == 0x18) ? 1 : -1];
-typedef char SdfChipHeapStats_size_must_be_0x30[
-    (sizeof(SdfChipHeapStats) == 0x30) ? 1 : -1];
+/* GS local memory, allocated in the same list-of-slices shape as sdfMem. */
+typedef struct sdfGsMemSlice_t
+{
+    struct sdfGsMemSlice_t *prev;
+    struct sdfGsMemSlice_t *next;
+    s32 type; /* 0 free */
+    u32 addr;
+    s32 size;
+    s16 w;
+    s16 h;
+    /* The IDB says u32; retail loads it with lw in sdfSetLoadImage, so s32. */
+    s32 pixelFormat;
+} sdfGsMemSlice_t;
 
-struct sdfMemHandle_t *sdfMemAllocDirect(s32 requestedBytes);
-struct sdfMemHandle_t *sdfMemAllocFromTailDirect(s32 requestedBytes);
-struct sdfMemHandle_t *sdfMemTryAllocDirect(s32 requestedBytes);
-/* Address must equal the payload base of a live general-heap allocation; there
- * is no miss exit. This lookup does not change the allocation's reference count. */
-struct sdfMemHandle_t *sdfMemGetHandleByPtr(const void *address);
-void sdfMemGetInfo(SdfGeneralHeapStats *stats);
-void sdfChipGetInfo(SdfChipHeapStats *stats);
+/* DDS counts a texture's references; a duplicate's origin owns the pixels. */
+typedef struct sdfTexRef_t
+{
+    struct sdfTexHandle_t *origin;
+    s32 refCount;
+} sdfTexRef_t;
 
-/* Return the descriptor's payload base as a byte address, not the descriptor. */
-u8 *sdfMemGetPtr(const struct sdfMemHandle_t *block);
-s32 sdfMemGetSize(const struct sdfMemHandle_t *block);
-/* Allocate from the chip heap through 0x400 bytes; larger requests use the
- * general heap and return its locked payload address. */
-void *sdfAllocAuto(s32 size);
-/* Release the sdfAllocAuto base in its source heap; interior pointers are
- * invalid. */
-void sdfFreeAuto(void *data);
-/* Queue release of the sdfAllocAuto base in its source heap; interior pointers
- * are invalid. */
-void sdfFreeAutoDelayed(void *data);
+typedef struct sdfTexHandle_t
+{
+    struct sdfTexHandle_t *prev;
+    struct sdfTexHandle_t *next;
+    sdfTexRef_t *ref;
+    s16 width;
+    s16 height;
+    sdfGsMemSlice_t *pixelGsHandle;
+    sdfGsMemSlice_t *clutGsHandle;
+    u8 numOfCLUT;
+    u8 CLUTFormat;
+    u8 pixelFormat;
+    u8 numOfMipmap;
+    u16 mipmapParam;  /* unconfirmed */
+    u8 flags;         /* unconfirmed */
+    u8 texWrapMode;   /* unconfirmed */
+    u32 texId;        /* unconfirmed */
+    u32 clutId;       /* unconfirmed */
+    struct sdfTexPacket_t *packet;
+    struct sdfTexPacket_t *packetCtx2; /* unconfirmed */
+    void *clutData;
+    u32 clutDataSize;
+    u32 clutColor;
+    /* The intensity table sdfTexSetMonoClut derives from the CLUT, allocated
+     * on first use and written a byte per entry. */
+    u8 *monoClutData;
+} sdfTexHandle_t;
 
-void *sdfMemLock(struct sdfMemHandle_t *allocation);
-void sdfMemUnlock(struct sdfMemHandle_t *allocation);
-void sdfMemFreeDirect(struct sdfMemHandle_t *allocation);
-void sdfMemFreeHandleDirect(struct sdfMemHandle_t **slot);
+typedef u8 sdfTextureClampMode_t;
 
-/* The optional outputs contain a data address and file size, not a descriptor.
- * A null outAddress unlocks the payload but still returns its live descriptor. */
-struct sdfMemHandle_t *sdfDevLoadFile(
-    const char *name, u32 *outAddress, u32 *outSize, s32 extraBytes);
-struct sdfMemHandle_t *sdfDevLoadFileEx(
-    const char *name, u32 *outAddress, u32 *outSize);
+/* One material plus its two prebuilt VIF packets, one per texture context.
+ * sdfhook gives this struct a trailing reserved[88] and 160 bytes; sdfMatNew
+ * allocates 0x48, which is where the struct ends here. */
+typedef struct sdfMat_t
+{
+    u32 id;
+    u16 flags;
+    u8 duty;
+    u8 pad;
+    struct sdfMatPacket_t *packet[2];
+    u32 ambient;
+    u32 diffuse;
+    u32 multiTexDiffuse;
+    f32 constant;
+    u32 specular;
+    u32 specularParm;
+    u32 refmap;
+    sdfTexHandle_t *texHandle;
+    sdfTexHandle_t *multiTexHandle;
+    u32 multiTexMethod;
+    /* Pointee left untyped on purpose: libsdf.h and the IDB spell it the
+     * struct sdfMatUvwParm_t, while sdf3DPrim.c and effPCPMisc.c spell the
+     * same 24 bytes a union of three views. Nothing dereferences these two
+     * through a material; they are stored, passed on and freed. Unifying the
+     * two readings is type recovery, not a header move. */
+    void *uvwParm;
+    void *multiTexUvwParm;
+    f32 fdBias;
+    f32 fdSoften;
+} sdfMat_t;
 
-/* Queue the two heap owners separately: the general heap stores descriptors,
- * while the chip heap stores the address of the cell to release. */
-void sdfMemFreeDelayedDirect(struct sdfMemHandle_t *allocation);
-void sdfChipFreeDelayedDirect(void *memory);
+/* Native 0x40-byte TMX header; sdfTexSetEx and resource loaders consume it. */
+typedef struct TMX_HEADER_t
+{
+    u8 fileType;
+    u8 compression;
+    s16 userId;
+    u32 fileSize;
+    u32 formatId;
+    s32 realSize;
+    u8 numOfCLUT;
+    u8 CLUTFormat;
+    s16 width;
+    s16 height;
+    u8 pixelFormat;
+    u8 numOfMipmap;
+    u16 mipmapParam;
+    u8 flags;
+    sdfTextureClampMode_t texWrapMode;
+    /* The IDB calls 0x1C onward userArea and comment. These two are what this
+     * game puts in its user area; sdfTmx reads both as words. */
+    s32 resourceKey;
+    s32 battleTextureSlot;
+    u8 pad24[0x1C];
+} TMX_HEADER_t;
+
+/* One draw list: the CPU link plus the DMA addresses of its packet chain.
+ *
+ * head, tail and the three reference slots are addresses rather than typed
+ * pointers, and z is an integer, because that is what the nine packet-building
+ * units are compiled from: sdfDrawTagInit writes `z = 0xFFFF` as an integer,
+ * which an f32 member would not reproduce. The IDB types them as pointers and
+ * an f32; nothing in the tree exercises that reading, so the proven one is
+ * kept here. */
+typedef struct sdfDrawTag_t
+{
+    struct sdfDrawTag_t *next;
+    addr_t head;
+    addr_t tail;
+    u32 z;
+    addr_t lightPacket; /* Optional first DMA reference prefix. */
+    addr_t fogPacket;   /* Optional second DMA reference prefix. */
+    addr_t texPacket[2];
+} sdfDrawTag_t;
 
 #endif /* SDF_RESOURCE_H */

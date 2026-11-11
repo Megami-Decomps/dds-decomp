@@ -1,14 +1,14 @@
 #include "sdk_ps2.h"
 #include "common.h"
-#include "kwln_draw_buffer.h"
+#include "dds3_draw_buffer.h"
 #include "sdf_timer.h"
-#include "kwln.h"
-#include "kwln_task_create.h"
-#include "kwln_task_runner.h"
-#include "kwln_process_main_result.h"
+#include "kernel.h"
+#include "dds3_task_create.h"
+#include "dds3_task_runner.h"
+#include "dds3_process_main_result.h"
 #include "fld_file_io_priority_state.h"
 
-extern void kwlnUpdatePadInputState(void);
+extern void dds3RunProcessList(void);
 
 extern s8 D_00435B88;
 extern u32 D_00435B84;
@@ -43,9 +43,9 @@ extern u8 D_00435BC0[];
 extern s32 dds3FirstProcess(dds3ProcessID_t *task);
 extern s32 dds3DrawFirstProcess(dds3ProcessID_t *task);
 extern s32 dds3DrawProcess(dds3ProcessID_t *task);
-extern KwlnTaskUpdateResult dds3BasicMainProcess(dds3ProcessID_t *task);
-extern KwlnTaskUpdateResult dds3BasicDrawProcess(dds3ProcessID_t *task);
-extern KwlnTaskUpdateResult frFlipPacketBuf(dds3ProcessID_t *task);
+extern dds3TaskUpdateResult_t dds3BasicMainProcess(dds3ProcessID_t *task);
+extern dds3TaskUpdateResult_t dds3BasicDrawProcess(dds3ProcessID_t *task);
+extern dds3TaskUpdateResult_t frFlipPacketBuf(dds3ProcessID_t *task);
 extern void frDestroyFontTable(dds3ProcessID_t *task);
 extern s32 dds3DebugDevDumpProcess(dds3ProcessID_t *task);
 
@@ -75,7 +75,7 @@ extern void sdfResetChannels(void);
 
 extern void dds3AdminiCallSequence(s32 requestedMode, const void *requestData, u32 dataBytes, s32 markHistory);
 
-void kwlnInitializeRuntime(void) {
+void dds3FirstInit(void) {
     dds3InitDrawEnv();
     dds3PadInitialize();
     dds3StartProcess(D_00435BB8, 0, 0, 0, dds3FirstProcess, 0, 0);
@@ -175,39 +175,39 @@ void dds3SoftResetOff(void) {
 extern s16 D_00435BA8;
 extern u16 D_00435BAA;
 extern FldFileIoPriorityState D_00435BB4;
-extern u16 D_00438A1E;
-extern u16 D_00438A24;
+extern u16 sdfDrawFrameCounter;
+extern u16 sdfReqDrawDelaySleepCount;
 extern u16 dds3VblanksPerFrame;
 extern void sdfWaitVblank(s32 count);
 extern void sdfGrReqDrawDelay(s32);
-extern void sdfPadBuildButtonStates(void);
+extern void sdfPadWork(void);
 extern void sdfFileCmdThreadSetLoPrio(void);
 extern void sdfFileCmdThreadSetHiPrio(void);
 
-extern KwlnProcessMainResult dds3ProcessMain(void);
+extern dds3ProcessMainResult_t dds3ProcessMain(void);
 
-void kwlnRunMainLoop(void) {
+void dds3KernelMain(void) {
     u32 startTick;
 
-    kwlnInitializeRuntime();
+    dds3FirstInit();
     D_00438D80 = 0;
     while (D_00435B88 == 0) {
         sdfWaitVblank(dds3VblanksPerFrame);
         sdfGrReqDrawDelay(dds3VblanksPerFrame - 1);
-        sdfPadBuildButtonStates();
+        sdfPadWork();
         if (D_00435BB4 != FLD_FILE_IO_PRIORITY_HIGH) {
             sdfFileCmdThreadSetLoPrio();
         }
         if (D_00435B8C == 0) {
             startTick = sdfGetRunTimeCountBase();
-            kwlnUpdatePadInputState();
-            if (dds3ProcessMain() == KWLN_PROCESS_MAIN_STOP) {
+            dds3RunProcessList();
+            if (dds3ProcessMain() == DDS3_PROCESS_MAIN_STOP) {
                 break;
             }
             D_00435B80++;
-            D_00435BA8 = sdfGetRunTimeCount(startTick) - D_00438A24;
+            D_00435BA8 = sdfGetRunTimeCount(startTick) - sdfReqDrawDelaySleepCount;
             D_00438D80 ^= 1;
-            D_00435BAA = D_00438A1E;
+            D_00435BAA = sdfDrawFrameCounter;
         } else if (D_00435B90 > 0) {
             D_00435B90--;
             if (D_00435B90 == 0) {

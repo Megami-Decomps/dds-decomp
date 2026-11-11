@@ -19,7 +19,7 @@ typedef struct SndChannel {
 
 typedef struct SndIopBuffer {
     s32 size;
-    u32 iopAddress; /* IOP address returned by sndReserveIopWorkMemory. */
+    u32 iopAddress; /* IOP address returned by sdfSndIopAlloc. */
 } SndIopBuffer;
 
 /* Prefix and arrays of the MIDI sound state. The IOP image header identifies

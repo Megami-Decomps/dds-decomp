@@ -6,12 +6,12 @@
 #include "sdf_chip.h"
 #include "sdf_packet_list.h"
 #include "sdf_packet_builders.h"
-#include "kwln.h"
-#include "kwln_task_runner.h"
-#include "kwln_task_create.h"
+#include "kernel.h"
+#include "dds3_task_runner.h"
+#include "dds3_task_create.h"
 #include "sdf.h"
 #include "sdf_sif_command.h"
-#include "kwln_task_lifecycle.h"
+#include "dds3_task_lifecycle.h"
 #include "mnu_movie_transfer.h"
 #include "mnu_movie_list.h"
 #include "mnu_movie_playback_api.h"
@@ -39,21 +39,21 @@ extern u64 *dds3PrimFrameRect(s32, s32, s32, s32, s32, u32, u32);
 extern s8 dds3PadBitTable[32];
 extern s8 dds3PadButtonState[64];
 extern SdfMovieDescriptor mnuMovieViewerDrawDescriptor;
-extern u16 D_00438A90[4];
+extern u16 sdfPadButtons[4];
 extern u16 D_00438FF0;
-extern sdfGrOt_t D_003805A8;
-extern sdfGrOt_t D_00380708;
+SYMBOL_AT(sdfGrOt_t, D_003805A8, sdfGrOtTable, 0xA60);
+SYMBOL_AT(sdfGrOt_t, D_00380708, sdfGrOtTable, 0xBC0);
 extern char D_0042A428[];
 
-extern KwlnTaskUpdateResult mnuMovieViewer(dds3ProcessID_t *task);
+extern dds3TaskUpdateResult_t mnuMovieViewer(dds3ProcessID_t *task);
 extern void mnuStartMovieDrawTaskForResource(const char *, const SdfMovieDescriptor *);
 void mnuRequestIndexedMovieResource(s32 index);
 
 void movieStop(void);
 
-KwlnTaskUpdateResult movieMan_Process(dds3ProcessID_t *task) {
-    sdfAdvanceStreamPlayback(0x3c / dds3VblanksPerFrame);
-    return KWLN_TASK_UPDATE_RETAIN_CALLBACK;
+dds3TaskUpdateResult_t movieMan_Process(dds3ProcessID_t *task) {
+    sdfIpuRunDecode(0x3c / dds3VblanksPerFrame);
+    return DDS3_TASK_UPDATE_RETAIN_CALLBACK;
 }
 
 void dds3StartMovieManager(void) {
@@ -311,7 +311,7 @@ void MovieViewerDrawFrameInfo(void) {
     }
 }
 
-KwlnTaskUpdateResult mnuMovieViewer(dds3ProcessID_t *task) {
+dds3TaskUpdateResult_t mnuMovieViewer(dds3ProcessID_t *task) {
     MnuMovieListNode *node;
     s32 nextTop;
 
@@ -339,7 +339,7 @@ KwlnTaskUpdateResult mnuMovieViewer(dds3ProcessID_t *task) {
             mnuMovieList.playing = 0;
         } else {
             s32 previousButtons = D_00438FF0;
-            if (((D_00438A90[0] ^ previousButtons) & D_00438A90[0]) != 0) {
+            if (((sdfPadButtons[0] ^ previousButtons) & sdfPadButtons[0]) != 0) {
                 mnuMovieList.playing = 0;
             }
         }
@@ -369,9 +369,9 @@ KwlnTaskUpdateResult mnuMovieViewer(dds3ProcessID_t *task) {
     mnuMovieList.packets = (sdfDrawTag_t *)sdfPrimAllocDrawTag(0);
     movieDebugDrawInfo();
     MovieViewerDrawFrameInfo();
-    D_003805A8.append(&D_003805A8, mnuMovieList.packets);
-    D_00438FF0 = D_00438A90[0];
-    return KWLN_TASK_UPDATE_RETAIN_CALLBACK;
+    D_003805A8.regFunc(&D_003805A8, mnuMovieList.packets);
+    D_00438FF0 = sdfPadButtons[0];
+    return DDS3_TASK_UPDATE_RETAIN_CALLBACK;
 }
 
 void InitMovieViewer(void) {
@@ -483,7 +483,7 @@ s32 movieViewerDebugDraw(void) {
             }
         }
     }
-    D_00380708.append(&D_00380708, packets);
+    D_00380708.regFunc(&D_00380708, packets);
     return 0;
 }
 

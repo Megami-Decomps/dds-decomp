@@ -3,7 +3,7 @@
 
 #include "common.h"
 
-struct EffBlurTemplate;
+struct effBlurTemplate_t;
 
 /* Shared by ref-counted trail tasks; constructors allocate this full record. */
 typedef struct EffPCPSharedTrail {
@@ -17,7 +17,7 @@ typedef struct EffPCPSharedTrail {
     u32 colors[2];
     f32 scale;
     s32 minSize;
-    struct EffBlurTemplate *obj;
+    struct effBlurTemplate_t *obj;
 } EffPCPSharedTrail;
 
 typedef char EffPCPSharedTrail_size_must_be_0x3C[

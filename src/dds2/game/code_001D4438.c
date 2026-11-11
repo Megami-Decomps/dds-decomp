@@ -23,7 +23,7 @@
 #include "btl_skill_name_index.h"
 #include "btl_action_reaction_motion.h"
 #include "dds3_object_flags.h"
-#include "sdf_vu0.h"
+#include "ps2asm.h"
 #include "btl_set_actor_effect_parameter_api.h"
 #include "btl_raise_party_record_status_value.h"
 #include "btl_actor_resource_bank_api.h"
@@ -39,9 +39,9 @@
 #include "btl_scene_light_params.h"
 #include "btl_scene_lighting_task_args.h"
 #include "sdf_chip.h"
-#include "kwln.h"
-#include "kwln_process_registration.h"
-#include "kwln_task_create.h"
+#include "kernel.h"
+#include "dds3_process_registration.h"
+#include "dds3_task_create.h"
 #include "btl_task_condition.h"
 #include "btl_deferred_unit_status_args.h"
 #include "dat_command.h"
@@ -60,8 +60,7 @@
 #include "btl_action_eligibility.h"
 #include "btl_action_state_handler.h"
 #include "btl_ui.h"
-#include "pcp_vu0.h"
-#include "sdf_resource.h"
+#include "sdf_heap_api.h"
 #include "mdl.h"
 #include "active_sound_node.h"
 #include "btl_sound_node_api.h"
@@ -71,7 +70,7 @@
 #include "dds3_world_counter.h"
 #include "sdf_vu_matrix.h"
 #include "eff_quaternion_nlerp.h"
-#include "kwln_fade.h"
+#include "dds3_fade.h"
 #include "evt_solar.h"
 #include "btl_sound_release_task.h"
 #include "btl_ai_table.h"
@@ -146,7 +145,7 @@ typedef struct SceneScriptState {
 extern SceneControl *btlCommandPanelWork;
 extern BattleSelectionWork *btlLinkedSelectionTaskBuffer;
 extern f32 D_00433724;
-extern f32 *D_0037F770[];
+extern f32 *dds3LightParam[];
 extern u32 btlGetActorCommandClass(BattleSceneObject *, s8);
 extern BtlRuntimeTask *btlCreateEffectTaskWithSourceParams(const void *, u32);
 extern s32 btlCountTasksForOwner(u64);
@@ -188,7 +187,7 @@ extern void dds3MultiBlurOff();
 extern void dds3DistBlurOff();
 extern void dds3RipBlurOff();
 extern void btlMarkRuntimeUpdatePending();
-extern void evtSetSolarOverlayFullyVisible();
+extern void evtEnableMoonDraw();
 extern void btlSyncModelFlagFromEventThresholds();
 extern void btlResetTitleStreamOnBattleFlag();
 extern void btlInitializeWorldCamera();
@@ -275,13 +274,13 @@ extern void datAddHp();
 extern s32 mnuGetSoundBufferStateLocked(void);
 extern void btlBossDebugPrintfN(s32, s32, s32, const char *, ...);
 extern f32 dds3GetRandFloatA(EffRandState *state);
-extern EffRandState effSharedRandomState[];
+extern EffRandState dds3RandCB[];
 extern void btlAdvanceActionSkillCamera(BtlLinkedCommand *);
 extern void btlBuildTargetGroupFramingCameraPose(BtlLinkedCommand *, BtlCamState *);
 struct dds3ModelHandle_t;
 struct sdfGrOt_t;
 extern void btlDrawUnitTransparencyPasses(void *, void *, s32, u8 *, u32);
-extern struct sdfGrOt_t *kwlnSceneSurfaceSets[13][4];
+extern struct sdfGrOt_t *sdfModelOtTable[13][4];
 extern u8 btlUnitTransparencySurfaces[];
 
 
@@ -409,7 +408,7 @@ typedef struct SoundSceneEntry {
     u8 pad26[2];
 } SoundSceneEntry;
 
-extern SndPackedTrackLoadStatus sndFindPackedTrackLoadStatus(u32);
+extern SndPackedTrackLoadStatus p2sdLoadCheckMidi(u32);
 
 
 extern s64 btlForceSceneLightingRestore(SceneLightRestoreArgs *);
@@ -421,7 +420,7 @@ extern BtlActionAnimationRecord *datActionAnimationRecords;
 
 extern void btlRunTask(BtlRuntimeTask *);
 
-extern f32 btlMeasureFilteredUnitGroupBounds(s32, f32 *, f32 *);
+extern f32 btlMeasureMaskedUnitBounds(s32, f32 *, f32 *);
 
 
 extern char D_004192E8[]; /* "MDD_%03X.ADB" */
@@ -516,9 +515,9 @@ extern void p2sdSetPcmBuffer(const void *, s32);
 
 
 
-extern f32 *D_0037F770[];
+extern f32 *dds3LightParam[];
 
-extern u8 kwlnDefaultColorVector[];
+extern u8 dds3AmbientColor[];
 
 extern void fldSkyBattle(void);
 
@@ -1228,7 +1227,7 @@ s32 btlAiTaskUpdate(ActionStateLink *task) {
                     } else {
                         btlDispatchStateHandler(task, 0xC);
                     }
-                } else if (dds3ExistProcess(scene->boundTask) == KWLN_PROCESS_NOT_REGISTERED) {
+                } else if (dds3ExistProcess(scene->boundTask) == DDS3_PROCESS_NOT_REGISTERED) {
                     if (task->indexWork.phase == -1) {
                         btlBossDebugPrintf("btl:AI script return NULL[%p]\n", task);
                         btlDebugPrintf("AI script return NULL\n");
@@ -1911,8 +1910,8 @@ void btlEnterSkillActionState(void) {
 #include "btl_scene_light_params.h"
 #include "btl_scene_lighting_task_args.h"
 #include "sdf_chip.h"
-#include "kwln.h"
-#include "kwln_task_create.h"
+#include "kernel.h"
+#include "dds3_task_create.h"
 #include "btl_task_condition.h"
 #include "dat_command.h"
 #include "btl_scene_fade.h"
@@ -1923,8 +1922,7 @@ void btlEnterSkillActionState(void) {
 #include "btl_unit_tasks.h"
 #include "btl_state.h"
 #include "btl_ui.h"
-#include "pcp_vu0.h"
-#include "sdf_resource.h"
+#include "sdf_heap_api.h"
 #include "mdl.h"
 #include "active_sound_node.h"
 #include "btl_sound_node_api.h"
@@ -1934,7 +1932,7 @@ void btlEnterSkillActionState(void) {
 #include "dds3_world_counter.h"
 #include "sdf_vu_matrix.h"
 #include "eff_quaternion_nlerp.h"
-#include "kwln_fade.h"
+#include "dds3_fade.h"
 #include "evt_solar.h"
 #include "btl_sound_release_task.h"
 #include "btl_ai_table.h"
@@ -2008,10 +2006,6 @@ extern BtlRuntimeTask *btlCreateClearActorEntrySelectionTask(BtlUnit *unit);
 extern BtlRuntimeTask *btlCreateActorPositionEffectTask(BtlUnit *unit);
 extern BtlRuntimeTask *btlCreateLinkedEffectTask(BtlUnit *, s32, u8);
 
-INCLUDE_RODATA(const s32, "game/code_001D4438", D_00417348);
-
-INCLUDE_RODATA(const s32, "game/code_001D4438", D_00417360);
-
 /* Schedule the whole battle action sequence for one command on its actor:
  * the hooked unit sound, sounds, effect load, the other units' movement,
  * approach, per-target hit effects with damage, status and reward tasks
@@ -2027,6 +2021,11 @@ INCLUDE_RODATA(const s32, "game/code_001D4438", D_00417360);
  * a timed actor-effect link and a currency reward from the index work's
  * moneyDrop; the reflected hit's resource chosen by the group's reflection
  * kind; and its state numbers. It keeps retail's call order throughout. */
+
+INCLUDE_RODATA(const s32, "game/code_001D4438", D_00417348);
+
+INCLUDE_RODATA(const s32, "game/code_001D4438", D_00417360);
+
 void func_001D7230(ActionStateLink *actor) {
     BtlState *runtime;
     BtlUnit *unit;
@@ -2881,6 +2880,7 @@ BtlRuntimeTask *btlCreateActorModelBlendTask(BtlUnit *unit, BtlUnit *target,
         s32 index, s32 value, f32 scale);
 
 /* Synchronize up to three LINKAGE actors, then queue skill operands and effects. */
+
 INCLUDE_RODATA(const s32, "game/code_001D4438", D_00417398);
 
 void btlScheduleLinkageActionTasks(ActionStateLink *action) {
@@ -4140,7 +4140,7 @@ void btlScheduleSummonActionTasks(ActionStateLink *action) {
         if (!(unit->status.flags & 0xE0)) {
             /* Audited SDK VU pipeline, as in btlUnitFaceTarget: only the
              * external aim routine consumes the two stored vectors. */
-            btlMeasureFilteredUnitGroupBounds(0x400, 0, 0);
+            btlMeasureMaskedUnitBounds(0x400, 0, 0);
             SDF_VU0_STOREVECTOR_NOMEM(center);
             btlUnitGetBodyPosVU(unit);
             SDF_VU0_STOREVECTOR_NOMEM(bodyPosition);
@@ -4801,7 +4801,7 @@ INCLUDE_RODATA(const s32, "game/code_001D4438", D_00417538);
 INCLUDE_RODATA(const s32, "game/code_001D4438", D_00417548);
 
 ActionStateLink *btlCreateActionSeq(void) {
-    ActionStateLink *seq = sdfAllocAndClearQuadwords(0x180);
+    ActionStateLink *seq = sdfChipAllocZeroDirect(0x180);
     BtlState *work;
     seq->actionNumber = 1;
     btlInitBattleIndexWork(&seq->indexWork);
@@ -4995,3 +4995,4 @@ INCLUDE_SDATA(const s32, "game/code_001D4438", D_00436A10);
 INCLUDE_SDATA(const s32, "game/code_001D4438", D_00436A18);
 
 INCLUDE_SDATA(const s32, "game/code_001D4438", btlDeferredTaskTail);
+

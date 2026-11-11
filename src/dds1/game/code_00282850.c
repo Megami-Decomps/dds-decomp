@@ -8,12 +8,12 @@
 #include "eff_resource_records.h"
 #include "common.h"
 #include "sdf_delayed_resource_check_api.h"
-#include "sdf_vu0.h"
+#include "ps2asm.h"
 #include "evt_stage_test_api.h"
 #include "evt_stage_test_resource_work_result.h"
 #include "pty_bullet_item_count_api.h"
 #include "sdf_vu_matrix.h"
-#include "kwln_draw_buffer.h"
+#include "dds3_draw_buffer.h"
 #include "snd_sequence_volume_pan.h"
 #include "evt_world_object_api.h"
 #include "evt_stage_model_scale.h"
@@ -30,9 +30,8 @@
 #include "sdf_pac_state.h"
 #include "sdf_projection.h"
 #include "sdf_sif_command.h"
-#include "kwln.h"
-#include "kwln_task_create.h"
-#include "pcp_vu0.h"
+#include "kernel.h"
+#include "dds3_task_create.h"
 #include "mnu.h"
 #include "mnu_entry_cost_api.h"
 #include "mnu_entry_use_status_api.h"
@@ -50,116 +49,159 @@
 #include "prf_current_record_view.h"
 #include "evt_stage_test.h"
 #include "dat_command.h"
-#include "eff.h"
-#include "kwln_task_lifecycle.h"
+#include "dds3_task_lifecycle.h"
 #include "btl.h"
 #include "btl_party_command_use_result.h"
 #include "dds3_world_primary.h"
 #include "prf_profile_cap.h"
+#include "sdf_packet_alloc.h"
+
 /* Declared before first use (were implicit int). */
 extern s32 datAddHp(datUnitWork_t *unit, s32 delta);
-extern s32 datAddMp(datUnitWork_t *unit, s32 delta);
-extern void evtFreeStage(void);
-extern void itfSetGridEntryQuantizedAndRefresh(EffectSlotSet *resource, s32 resourceIndex, s32 x, s32 y, s32 width, s32 height);
-extern void kwlnDebugGraphSetEnabled(s8 enabled);
-extern void mnuDrawIconPanelDefaultFlag(s32 x, s32 y, s32 depth, s32 fade, MenuPanelHandles *list, s32 drawArg);
-extern void mnuUpdateWindowPanelHandleStates(MenuPanelHandles *panel);
-extern s32 sdfApplyCommandResults(s32 channel, datUnitWork_t *sourceRecord, datUnitWork_t *item);
-extern void sndDestroyFileQueueWrapper(struct SoundHandleNode *node);
-/* Original-style implicit int, kept: matched code depends on it: sndCreateSystemEffectHandle. */
 
-struct _FRQ;
-extern struct _FRQ *itfCreateFont2TextGlyph(s32, s32, s32, u32, char *, struct _FRQ *);
-extern s32 frFontDrawGlyphChain(struct _FRQ *, s8, u32);
+extern s32 datAddMp(datUnitWork_t *unit, s32 delta);
+
+extern void evtFreeStage(void);
+
+extern void itfSetGridEntryQuantizedAndRefresh(EffectSlotSet *resource, s32 resourceIndex, s32 x, s32 y, s32 width, s32 height);
+
+extern void dds3DebugGraphSetEnabled(s8 enabled);
+
+extern void mnuDrawIconPanelDefaultFlag(s32 x, s32 y, s32 depth, s32 fade, MenuPanelHandles *list, s32 drawArg);
+
+extern void mnuUpdateWindowPanelHandleStates(MenuPanelHandles *panel);
+
+extern s32 sdfApplyCommandResults(s32 channel, datUnitWork_t *sourceRecord, datUnitWork_t *item);
+
+extern void sndDestroyFileQueueWrapper(struct SoundHandleNode *node);
+
+struct frFontHandle_t;
+
+extern struct frFontHandle_t *itfCreateFont2TextGlyph(s32, s32, s32, u32, char *, struct frFontHandle_t *);
+
+extern s32 frDrawFontOt(struct frFontHandle_t *, s8, u32);
+
 extern void effDrawSpriteWithCornerFade(s32, s32, s32, u32, s32, EffectSlotSet *, s32, s32);
+
 extern char D_003BC7A0[];
 
 #define MNU_PANEL_ITEM_COUNT 5
+
 #define MNU_PANEL_STATE_BYTES 0x64
+
 #define MNU_SPRITE_STATE_BYTES 0x20
+
 #define MNU_SIMPLE_SPRITE_BYTES 0x28
+
 #define MNU_PANEL_ITEM_BYTES 0x90
+
 #define MNU_TRANSITION_LIMIT 0x100
+
 #define MNU_TRANSITION_STEP 8
+
 #define MNU_GRADIENT_FADE_STEP 0x20
+
 #define MNU_PROFILE_PHASE_PERIOD 0x200
+
 #define MNU_PROFILE_PHASE_STEP 12
+
 #define MNU_PANEL_TEXTURE_COUNT 9
+
 #define MNU_POPUP_STATE_BYTES 0x4c
+
 #define MNU_POPUP_ENTRY_MARK_BITS 0x60000
+
 #define MNU_PARTY_SLOT_COUNT 5
+
 #define MNU_INPUT_PRIORITY_BIT 1
+
 #define MNU_PAD_TRIGGER_BIT 2
+
 #define MNU_COMMAND_RECORD_BYTES 0x38
+
 #define MNU_COMMAND_ID_MASK 0xFFFF
+
 #define MNU_PERCENT_SCALE 100
+
 #define MNU_COMMAND_USE_STATUS_BOUNDARY 0x200
+
 #define MNU_RATIO_QUARTER_PERCENT 25
+
 #define MNU_RATIO_HALF_PERCENT 50
 
 #define EVT_STAGE_ENTRY_INDEX_MASK 0xFFFF
+
 #define EVT_STAGE_ENTRY_BYTES 60
+
 #define EVT_STAGE_MODEL_RECORD_BYTES 624
+
 #define EVT_STAGE_COLUMN_VALUE_COUNT 8
+
 #define EVT_STAGE_MOTION_SUPPRESS_FALLBACK 1
+
 #define EVT_STAGE_DEFAULT_BLEND_FRAMES 15.0f
+
 #define EVT_STAGE_PROJECTION_BIAS 2048.0f
+
 #define EVT_STAGE_DEFAULT_TARGET_Z -400.0f
+
 #define EVT_STAGE_SCREEN_WORK_BYTES 0x20
+
 #define EVT_STAGE_USE_ENTRY_MOTION 0xffffffffffffffff
 
 extern void evtStageTestQueueMotionSegment(s32, f32, f32);
 
-
-
-
-
-
-
-
-
-
-
-
-
-
 extern void mnuInitPairedPanelResources(MenuEffectPair *, s32, s32 *, s32, s32, EffectSlotSet *, const s32 *);
 
-
 extern void evtStageTestCreateModelEffect(s32);
+
 extern void btlUpdateJobPositionFromModel(struct SoundHandleNode *node);
+
 extern void mnuApplyModelCamera(dds3ModelHandle_t *);
+
 extern void evtStageTestApplyEntryRotation(dds3ModelHandle_t *);
+
 extern void evtStageTestUpdateCamera(void);
-extern f32 sdfViewTargetVector[4];
+
+extern f32 aViewEye[4];
+
 extern f32 aViewTarget[4];
+
 extern f32 aViewDown[4];
-extern u8 sdfViewShakeVector[];
+
+extern u8 dds3QuakeOffset[];
+
 extern u8 evtStageTestViewUpVector[];
+
 extern Matrix4 sdfViewMatrix;
+
 extern u8 D_003270F0[];
+
 extern void evtStageTestAdvanceMotionQueue(void);
+
 extern void mnuQueuePartyPanelSlotBlend(MenuPageWindow *, s32, u32, s32);
+
 extern u8 fldEsutoMaChk(void);
+
 extern u8 fldRiberaMaChk(void);
+
 extern void fldEsutoMaStart(void);
+
 extern void fldRiberaMaStart(void);
+
 extern void mnuPopulatePartyPanelSlot(datUnitWork_t *entry, s32 unused, u32 index, PartyPanel *panel);
 
-
 extern dds3Basic_t *evtAddCamera(f32 *pos, f32 *rot);
-extern char D_003BC7C8[];
 
+extern char D_003BC7C8[];
 
 extern void evtStageTestApplyInitialMotion(s32 initialMotionIndex);
 
 extern s32 D_003BC7B4;
 
-
 extern s32 mnuLookupRangeEntry(u16);
 
 extern void mnuReleaseResourceList(MenuPanelHandles *);
-
 
 extern EvtStageTestResourceWorkResult evtStageTestPollModelRequest(void);
 
@@ -168,11 +210,17 @@ typedef struct MenuPanelItem MenuPanelItem;
 extern void mnuClearPanelGroupSelection(MenuPanelGroup *);
 
 extern MenuPanelItem *mnuCreatePanelItem(void);
+
 extern void mnuInitializePanelGroupGridSlots(MenuPanelItem *, EffectSlotSet *, s32);
+
 extern void mnuInitializePanelItemGridSlots(MenuPanelItem *, EffectSlotSet *, s32);
+
 extern void mnuFreePanelItemWork(MenuPanelItem *);
+
 extern void mnuStorePanelItemValue(MenuPanelItem *, u32);
+
 extern void mnuSetPanelItemSelection(MenuPanelItem *, s32);
+
 extern void mnuSetPanelItemOption(MenuPanelItem *, u32);
 
 extern char D_003B2608[]; /* "battle stage test" */
@@ -180,7 +228,6 @@ extern char D_003B2608[]; /* "battle stage test" */
 extern u8 evtStageTestViewEyeVector[];
 
 extern u8 evtStageTestViewTargetVector[];
-
 
 /* Battle stage test viewer state. Retail addresses it partly through
  * &evtStageTestState.queue.slot[0], hence the negative offsets. */
@@ -190,13 +237,9 @@ extern void btlStopStage(void);
 
 extern s32 evtBattleStageTestScreen(dds3ProcessID_t *task);
 
-
-typedef struct MenuList MenuList;
-
-
 extern void mnuDrawPartyMemberCommandPanel(s32, s32, s32, MenuPageWindow *, s32, s32);
-extern void mnuDrawPartyMemberStatusPanel(s32, s32, s32, MenuPageWindow *, s32, s32);
 
+extern void mnuDrawPartyMemberStatusPanel(s32, s32, s32, MenuPageWindow *, s32, s32);
 
 extern s32 mnuReservePartyPanelRowParameters[];
 
@@ -269,9 +312,6 @@ void mnuAdvancePanelTransition(MenuPageWindow *menu) {
     }
 }
 
-
-
-
 /* Apply a temporary override to the selected node while drawing its panel. */
 void mnuDrawPanelWithTemporaryOverride(s32 x, s32 y, s32 z, s32 overrideValue, MenuPageWindow *menu, s32 surface) {
     s32 positionOffset[2];
@@ -322,7 +362,6 @@ void mnuDrawPanelListDefault(s32 x, s32 y, s32 depth, MenuPageWindow *menu, s32 
     mnuDrawStageTestList(x, y, depth, 0, menu, surface);
 }
 
-
 typedef struct MenuPanelState {
     MenuPanelStatePrefix common;
     MenuGridSlot firstSlot; /* 0x20 */
@@ -341,6 +380,7 @@ typedef struct MenuPanelState {
 } MenuPanelState;
 
 typedef char MenuPanelStateSizeCheck[(sizeof(MenuPanelState) == MNU_PANEL_STATE_BYTES) ? 1 : -1];
+
 typedef char MenuPanelStateResourceHandleOffsetCheck[((u32)&((MenuPanelState *)0)->resourceHandle == 0x60) ? 1 : -1];
 
 /* Allocate a zeroed native panel state with the requested dimensions. */
@@ -512,6 +552,7 @@ struct MenuPanelItem {
 };
 
 extern void mnuSetPanelItemValueAndOption(MenuPanelItem *item, s32 value, s32 option);
+
 extern void mnuDrawPanelItemValue(s32 x, s32 y, s32 depth, s32 mode, MenuPanelItem *item, s32 layer);
 
 /* Draw the five stat panels of a group (values from the party record, if any), then ramp the
@@ -594,7 +635,7 @@ void mnuDrawPartyInfoSprites(s32 x, s32 y, s32 depth, datUnitWork_t *entry,
     s32 vertical;
     s32 remainingRows;
     u16 skillId;
-    struct _FRQ *glyph;
+    struct frFontHandle_t *glyph;
 
     opacity = spriteState->initialValue;
     skillSlotCount = brsGetLevelStepForValue(entry->level);
@@ -648,7 +689,7 @@ void mnuDrawPartyInfoSprites(s32 x, s32 y, s32 depth, datUnitWork_t *entry,
                         x + rows[0][horizontal][0],
                         y + rows[0][horizontal][1] + vertical * 0xA8,
                         depth, 0xA09DC380, D_003BAA8C + skillId * 17, 0);
-                    frFontDrawGlyphChain(glyph, 1, surface);
+                    frDrawFontOt(glyph, 1, surface);
                     frDestroyFontRequestAfter(glyph);
                 } else {
                     effDrawSpriteWithCornerFade(
@@ -682,11 +723,15 @@ void mnuFreeSimpleSpriteWork(MenuSimpleSpriteState *sprite) {
 }
 
 extern s32 prfBuildRawSkillList(u16, PrfSkillList *);
+
 extern const MenuPoint D_003BC780[];
+
 extern const MenuPoint D_003B2450[];
+
 extern const MenuPoint D_003B2468[];
-extern const u8 *D_003BAA8C;
+
 extern void mnuDrawRangeCostAndIcon(s32, s32, s32, s32, u32, datUnitWork_t *, u16, s32, s32, EffectSlotSet *, EffectSlotSet *, u32);
+
 /* Reuse the frame-coordinate workspace for the next phase's row count.
  * See docs/idioms.md, "Profile contents: coordinate-to-counter workspace". */
 void mnuDrawPartyProfilePanelContents(s32 x, s32 y, s32 depth, datUnitWork_t *actor, s32 profile, MenuSimpleSpriteState *panel, s32 surface) {
@@ -703,7 +748,7 @@ void mnuDrawPartyProfilePanelContents(s32 x, s32 y, s32 depth, datUnitWork_t *ac
     u32 fade;
     u16 *skill;
     u16 skillId;
-    struct _FRQ *glyph;
+    struct frFontHandle_t *glyph;
 
     memcpy(&origin, D_003BC780, sizeof(origin));
     memcpy(headings, D_003B2450, sizeof(headings));
@@ -730,7 +775,7 @@ void mnuDrawPartyProfilePanelContents(s32 x, s32 y, s32 depth, datUnitWork_t *ac
             drawY = y + rows[0].y + rowOffset;
             mnuDrawRangeSpriteVariant(drawX - 0x160, drawY, depth, fade, skillId, 0, panel->resourceSets[4], surface);
             glyph = itfCreateConvertedTextGlyph(drawX, drawY, depth, 0xA09DC380, D_003BAA8C + skillId * 17, 0);
-            frFontDrawGlyphChain(glyph, 1, surface);
+            frDrawFontOt(glyph, 1, surface);
             frDestroyFontRequestAfter(glyph);
             mnuDrawRangeCostAndIcon(drawX + 0x7B0, drawY + 0x20, depth, 0x100, fade, actor, skillId, 0, 0, panel->resourceSets[1], panel->resourceSets[2], surface);
         } else {
@@ -740,7 +785,6 @@ void mnuDrawPartyProfilePanelContents(s32 x, s32 y, s32 depth, datUnitWork_t *ac
         rowOffset += 0xA8;
     }
 }
-
 
 void mnuResetGradientFadeColor(MenuGradientFade *state, s32 color) {
     state->color = color;
@@ -1002,6 +1046,7 @@ u32 mnuGetPanelRatioColor(s32 useDefault, s32 amount, s32 divisor) {
 }
 
 extern char D_003BC788[];
+
 extern char D_003BC790[];
 
 void mnuDrawRatioPanelContents(s32 x, s32 y, s32 depth, u32 color, u32 fade,
@@ -1010,7 +1055,7 @@ void mnuDrawRatioPanelContents(s32 x, s32 y, s32 depth, u32 color, u32 fade,
     s32 drawY;
     char text[16];
     u32 separatorColor;
-    struct _FRQ *glyph;
+    struct frFontHandle_t *glyph;
 
     color = fclBlendColor(color, color & ~0xFF, fade);
     separatorColor = fclBlendColor(0xA09DC380, 0xA09DC300, fade);
@@ -1032,7 +1077,7 @@ void mnuDrawRatioPanelContents(s32 x, s32 y, s32 depth, u32 color, u32 fade,
             sprintf(text, D_003BC788, value);
             glyph = itfCreateFont2TextGlyph(x + 0x490, drawY, depth, color, text, 0);
         }
-        frFontDrawGlyphChain(glyph, 1, drawFlags);
+        frDrawFontOt(glyph, 1, drawFlags);
         frDestroyFontRequestAfter(glyph);
     }
 }
@@ -1048,7 +1093,7 @@ void mnuDrawRatioPanelContents(s32 x, s32 y, s32 depth, u32 color, u32 fade,
 #include "evt_stage_test_api.h"
 #include "pty_bullet_item_count_api.h"
 #include "sdf_vu_matrix.h"
-#include "kwln_draw_buffer.h"
+#include "dds3_draw_buffer.h"
 #include "snd_sequence_volume_pan.h"
 #include "evt_world_object_api.h"
 #include "evt_stage_model_scale.h"
@@ -1064,9 +1109,8 @@ void mnuDrawRatioPanelContents(s32 x, s32 y, s32 depth, u32 color, u32 fade,
 #include "sdf_pac_state.h"
 #include "sdf_projection.h"
 #include "sdf_sif_command.h"
-#include "kwln.h"
-#include "kwln_task_create.h"
-#include "pcp_vu0.h"
+#include "kernel.h"
+#include "dds3_task_create.h"
 #include "mnu.h"
 #include "mnu_panel_state.h"
 #include "mnu_staff.h"
@@ -1078,7 +1122,7 @@ void mnuDrawRatioPanelContents(s32 x, s32 y, s32 depth, u32 color, u32 fade,
 #include "evt_stage_test.h"
 #include "dat_command.h"
 #include "eff.h"
-#include "kwln_task_lifecycle.h"
+#include "dds3_task_lifecycle.h"
 #include "btl.h"
 #include "dds3_world_primary.h"
 #include "prf_profile_cap.h"
@@ -1159,7 +1203,6 @@ INCLUDE_ASM(const s32, "game/code_00282850", mnuDrawAndAdvanceRatioPanel);
 void func_00284880(void) {
 }
 
-
 /* Allocate a zeroed native panel item and initialize its three default values. */
 MenuPanelItem *mnuCreatePanelItem(void) {
     MenuPanelItem *panelItem = sdfChipAllocDirect(sizeof(MenuPanelItem));
@@ -1237,7 +1280,7 @@ extern char D_003BC798[];
 void mnuDrawPanelItemDetail(s32 x, s32 y, s32 depth, u32 opacity, s32 mode,
                             MenuPanelItem *item, s32 layer) {
     char text[16];
-    struct _FRQ *glyph;
+    struct frFontHandle_t *glyph;
     EffectSlotSet *set;
     s32 index;
     s32 value;
@@ -1290,7 +1333,7 @@ void mnuDrawPanelItemDetail(s32 x, s32 y, s32 depth, u32 opacity, s32 mode,
             sprintf(text, D_003BC798, item->selection);
             glyph = itfCreateFont2TextGlyph(x + ((offset + 0x6C) << 4), y + 0x50,
                                             depth, color, text, 0);
-            frFontDrawGlyphChain(glyph, 1, layer);
+            frDrawFontOt(glyph, 1, layer);
             frDestroyFontRequestAfter(glyph);
         }
     }
@@ -1298,7 +1341,7 @@ void mnuDrawPanelItemDetail(s32 x, s32 y, s32 depth, u32 opacity, s32 mode,
 
 void mnuDrawPanelItemValue(s32 x, s32 y, s32 depth, s32 mode, MenuPanelItem *item, s32 layer) {
     char buffer[16];
-    struct _FRQ *glyph;
+    struct frFontHandle_t *glyph;
     s32 value;
     u32 opacity = item->initialValue;
     u32 color;
@@ -1327,10 +1370,9 @@ void mnuDrawPanelItemValue(s32 x, s32 y, s32 depth, s32 mode, MenuPanelItem *ite
     color = fclBlendColor(color, color & ~0xFF, opacity);
     sprintf(buffer, D_003BC7A0, value);
     glyph = itfCreateFont2TextGlyph(x + 0x340, y + 0x28, depth, color, buffer, 0);
-    frFontDrawGlyphChain(glyph, 1, layer);
+    frDrawFontOt(glyph, 1, layer);
     frDestroyFontRequestAfter(glyph);
 }
-
 
 void mnuSetProfilePanelValues(MenuProfilePanel *panel, s32 capValue, s32 progressValue) {
     panel->capValue = capValue;
@@ -1365,8 +1407,11 @@ void mnuCacheProfilePanelGridPositions(MenuProfilePanel *panel, u32 grid, u32 fi
 }
 
 extern void uiDrawTexturedSurfaceAtFarDepth(s32);
+
 extern void uiPrepareMenuBackgroundSurface(s32, s32);
+
 extern void uiDrawSurfaceAtNearDepth(u32);
+
 /* Draw the filled profile bar and its animated background strips. */
 void mnuDrawProfilePanel(s32 x, s32 y, s32 z, MenuProfilePanel *panel, s32 surface) {
     s32 progress = panel->option;
@@ -1433,7 +1478,6 @@ void mnuDrawAndAdvanceProfilePanel(s32 x, s32 y, s32 z, MenuProfilePanel *panel,
 void mnuClearPanelTransitionState(MenuPopupState *state) {
     memset(state, 0, MNU_POPUP_STATE_BYTES);
 }
-
 
 void mnuApplyPanelTransitionAction(s32 action, MenuPopupEntry *entry, MenuPopupState *state, u32 argument) {
     MenuPopupCallback callback;
@@ -1655,6 +1699,7 @@ void mnuInitPartyPanelSlots(PartyPanel *panel) {
 }
 
 extern s8 dds3PadButtonState[];
+
 extern u8 D_00324530[];
 
 /* Translate requested inputs using native sign-bit/trigger-bit and nonzero tests.
@@ -1885,7 +1930,9 @@ s32 mnuFindMatchingPartyEntryIndex(const datUnitWork_t *borrowedEntry) {
 }
 
 extern s8 mnuSkillCategoryRangeMapRows[];
+
 extern u16 mnuSkillCategoryRangeBounds[];
+
 extern u16 mnuSkillCategoryRangeUpperBounds[];
 
 /* Match a half-open range, then return its signed mapping value; unmatched IDs return zero. */
@@ -2265,6 +2312,7 @@ u16 mnuGetPartyEntryMenuValue(datUnitWork_t *entry) {
 }
 
 extern u16 D_0037CE00[];
+
 /* Match an item ID, select its mode-dependent SE ID, and start it; id changes roles. */
 s32 sndPlayPartyItemSe(u32 id, s32 soundMode) {
     u16 *soundRow = D_0037CE00;
@@ -2286,8 +2334,8 @@ s32 sndPlayPartyItemSe(u32 id, s32 soundMode) {
     return 0;
 }
 
-
 extern u32 datComputeSkillBoostedMaxHp(datUnitWork_t *);
+
 extern u32 datComputeSkillBoostedMaxMp(datUnitWork_t *);
 
 /* Apply a permanent stat/capacity item and refill eligible vitals.
@@ -2402,7 +2450,6 @@ s32 btlItemApplyDirectEffect(MenuPageWindow *context, u16 item, s32 mode,
     p2sdPlaySE(7, 127, 63);
     return 1;
 }
-
 
 /* Return the first matching status-icon index in native priority order, or none. */
 MnuPartyStatusIconIndex mnuGetPartyStatusIconIndex(const datUnitWork_t *partyRecord) {
@@ -2542,14 +2589,23 @@ void evtStageTestCopyEntryRotation(s32 encodedIndex, f32 *rotation) {
 }
 
 extern u8 D_003B2520[];
+
 extern u8 D_003B2530[];
+
 extern u8 D_003B2540[];
+
 extern u8 D_003B2550[];
+
 extern void dds3SetSoftenBias(s32 frames, f32 first, f32 second);
+
 extern void dds3SetLightColor(s32 blendFrames, s32 lightIndex, const f32 *color);
+
 extern void dds3SetLightDir(s32 blendFrames, s32 lightIndex, const f32 *direction);
+
 extern void dds3SetAmbientColor(s32 mode, f32 *color);
+
 extern void dds3SetFogColor(s32 mode, f32 *color);
+
 extern void dds3SetFogPara(s32 mode, f32 x, f32 y, f32 z, f32 w);
 
 /* Restore color targets, projection settings and the stage viewer's view vectors. */
@@ -2571,10 +2627,10 @@ void evtStageTestResetViewAndLighting(void)
     dds3SetFogColor(0, drawColor);
     dds3SetFogPara(0, 255.0f, 255.0f, 2000.0f, 30000.0f);
     dds3ScreenParam.camera.fov = 0.7551905f;
-    SDF_VU0_COPYVECTOR(sdfViewTargetVector, evtStageTestViewTargetVector);
+    SDF_VU0_COPYVECTOR(aViewEye, evtStageTestViewTargetVector);
     SDF_VU0_COPYVECTOR(aViewTarget, evtStageTestViewEyeVector);
     SDF_VU0_COPYVECTOR(aViewDown, evtStageTestViewUpVector);
-    VU0_LOAD_MATRIX(&sdfViewMatrix);
+    SDF_VU0_LOADMATRIX(&sdfViewMatrix);
     sdf3DSetCamera(&dds3ScreenParam, &sdfViewMatrix);
 }
 
@@ -2586,6 +2642,7 @@ void mnuSetStageTestCameraOffset(f32 offset) {
 }
 
 extern s8 D_0037CE90[];
+
 extern u8 D_0037CE98[];
 
 void evtStageTestInit(s32 mode) {
@@ -2713,6 +2770,7 @@ void evtStageTestSelectEntryWithoutInitialValue(
     evtStageTestSelectEntry(
         entryIndex, EVT_STAGE_USE_ENTRY_MOTION, assetRequestMode);
 }
+
 /* Poll model requests: 0 for an empty queue, 1 while handling a request, 2 otherwise. */
 EvtStageTestResourceWorkResult evtStageTestPollModelRequest(void) {
     StageTestSlot *slot = evtStageTestState.queue.slot;
@@ -2803,7 +2861,6 @@ void cmpResetStatusModelPos(void) {
     *(s32 *)(evtStageTestViewEyeVector + 8) = 0;
 }
 
-
 /* Apply the active entry's model position and scale-dependent view depth.
  * Retain the post-call entry rereads and subtraction-based scaling expressions. */
 void mnuApplyModelCamera(dds3ModelHandle_t *model) {
@@ -2836,7 +2893,7 @@ void mnuApplyModelCamera(dds3ModelHandle_t *model) {
 void evtStageTestApplyEntryRotation(dds3ModelHandle_t *model) {
     StageTestEntry *stageEntry = (StageTestEntry *)(evtStageTestState.queue.slot[0].entryIndex * EVT_STAGE_ENTRY_BYTES + (s32)evtStageTestState.entries);
 
-    sdfConvertEulerAnglesToQuaternionVU(stageEntry->rotation[0] * 3.14159265f / 180.0f, stageEntry->rotation[1] * 3.14159265f / 180.0f,
+    FromEuler(stageEntry->rotation[0] * 3.14159265f / 180.0f, stageEntry->rotation[1] * 3.14159265f / 180.0f,
                   stageEntry->rotation[2] * 3.14159265f / 180.0f);
     mdlSetRotate(model);
 }
@@ -2850,24 +2907,24 @@ void evtStageTestUpdateCamera(void)
 
     drawBufferIndex = dds3GetFrameID();
     evtStageTestResetViewAndLighting();
-    SDF_VU0_COPYVECTOR(sdfViewTargetVector, evtStageTestViewTargetVector);
+    SDF_VU0_COPYVECTOR(aViewEye, evtStageTestViewTargetVector);
     SDF_VU0_COPYVECTOR(aViewTarget, evtStageTestViewEyeVector);
     SDF_VU0_COPYVECTOR(aViewDown, evtStageTestViewUpVector);
-    sdfCameraBuildProjection(&dds3ScreenParam.camera);
+    sdf3DMakeScreenParam(&dds3ScreenParam.camera);
     SDF_VU0_LOADVECTOR(aViewTarget);
-    SDF_VU0_LOADVECTOR_B(sdfViewTargetVector);
+    SDF_VU0_LOADVECTOR_B(aViewEye);
     SDF_VU0_SUBVECTOR();
     SDF_VU0_NORMALIZE();
-    VU0_SCALAR_OP(600.0f, "vmulx.xyzw vf10, vf10, vf2x");
+    SDF_VU0_SCALEVECTOR_V0(600.0f);
     SDF_VU0_ADDVECTOR();
-    SDF_VU0_LOADVECTOR_B(sdfViewShakeVector);
+    SDF_VU0_LOADVECTOR_B(dds3QuakeOffset);
     SDF_VU0_ADDVECTOR();
     SDF_VU0_STOREVECTOR(&eye);
-    SDF_VU0_LOADVECTOR(sdfViewTargetVector);
+    SDF_VU0_LOADVECTOR(aViewEye);
     SDF_VU0_ADDVECTOR();
     SDF_VU0_STOREVECTOR_NOMEM(&target);
     LookAtMatrix((const f32 *)&eye, (const f32 *)&target, aViewDown);
-    VU0_STORE_MATRIX_UNCLOBBERED(&sdfViewMatrix);
+    SDF_VU0_STOREMATRIX_NOMEM(&sdfViewMatrix);
     sdf3DMakeViewportPacket((struct ConsMatrixPacket *)(D_003270F0 + drawBufferIndex * 8000), &dds3ScreenParam, &sdfViewMatrix);
     sdf3DSetCamera(&dds3ScreenParam, &sdfViewMatrix);
 }
@@ -3000,6 +3057,7 @@ void evtStageTestAdvanceMotionQueue(void) {
 }
 
 struct SoundHandleNode;
+
 extern struct SoundHandleNode * sndCreateSystemEffectHandle(struct dds3ModelHandle_t *actor, s32 index);
 
 /* Replace the attached model effect with the native fixed request; argument is unused. */
@@ -3034,9 +3092,13 @@ s32 evtStageTestHasModelEffect(void) {
 }
 
 extern s32 D_003BC7BC;
+
 extern const char *D_003BC7B8;
+
 extern char D_003BC7C0[];
+
 extern sdfGrOt_t sdfGrOtTable[];
+
 extern f32 dds3CameraObjectBasicGetFovy(const dds3Basic_t *camera);
 
 INCLUDE_RODATA(const s32, "game/code_00282850", D_003B2520);
@@ -3107,9 +3169,9 @@ void evtStageTestDrawCameraTransformDebug(void) {
                                                            camera->poseset->rotation[1],
                                                            camera->poseset->rotation[2]));
     surface = &sdfGrOtTable[96];
-    surface->append(surface, list);
+    surface->regFunc(surface, list);
     list = dds3FontReqAllocDrawTag();
-    (&sdfGrOtTable[40])->append(&sdfGrOtTable[40], list);
+    (&sdfGrOtTable[40])->regFunc(&sdfGrOtTable[40], list);
 }
 
 u32 evtStageTestCameraUpdate(void) {
@@ -3127,10 +3189,11 @@ void *evtCreateBattleStageTestCamera(void) {
     return evtStageTestCameraUpdate;
 }
 
-extern sdfGrOt_t D_00325708;
+SYMBOL_AT(sdfGrOt_t, D_00325708, sdfGrOtTable, 0xBC0);
+
 extern s32 D_003BC7D0;
+
 extern s32 D_003BC7D4;
-#include "sdf_packet_alloc.h"
 
 /* Draw the battle-stage selector; confirmation creates the selected world object
  * and returns its camera callback before the four trigger-bit ID adjustments. */
@@ -3143,7 +3206,7 @@ s32 evtBattleStageTestScreen(dds3ProcessID_t *task) {
     sdfDrawTagLink(packetList, (u32)sdfDevPrintf(0x7A80, 0x7C60, 0xFEFFFF, 6, "F%03d_%03d", D_003BC7D0, D_003BC7D4));
     sdfDrawTagLink(packetList, (u32)sdfDevPrintf(0x7900, 0x7D20, 0xFEFFFF, 0, "L,R = EVENT SELECT"));
     sdfDrawTagLink(packetList, (u32)sdfDevPrintf(0x7900, 0x7D80, 0xFEFFFF, 0, "RR  = ENTER"));
-    D_00325708.append(&D_00325708, packetList);
+    D_00325708.regFunc(&D_00325708, packetList);
     if (dds3PadButtonState[0x21] < 0) {
         evtLoadArea(D_003BC7D0, D_003BC7D4);
         return (s32)evtCreateBattleStageTestCamera;
@@ -3170,35 +3233,13 @@ void evtDestroyBattleStageTestWorldNode(dds3ProcessID_t *task) {
 /* Destroy the named battle-stage-test task hierarchy and disable the debug graph. */
 void evtBattleStageTestStopTask(void) {
     dds3KillProcessName(D_003B2608, 1);
-    kwlnDebugGraphSetEnabled(0);
+    dds3DebugGraphSetEnabled(0);
 }
 
 /* Enable the debug graph and create the battle-stage selector task with its cleanup callback. */
 void btlCreateStageTestTask(void) {
-    kwlnDebugGraphSetEnabled(1);
+    dds3DebugGraphSetEnabled(1);
     dds3StartProcess(D_003B2608, 0x2b0c, 1, 1, evtBattleStageTestScreen, evtDestroyBattleStageTestWorldNode, 0);
-}
-
-/* Release the device state, packet nodes, copied name, and wrapper only after
- * the device lifecycle closes; otherwise retain the pending request. */
-FileRequestCleanupResult pacFileHandleFree(request)
-    FilePacRequest *request;
-{
-    if (request->state == FILE_REQUEST_STATE_COMPLETE) {
-        sdfFileCmdHandle_t *deviceRequest = request->deviceRequest;
-        if (deviceRequest != NULL) {
-            sdfFileCmdFree(deviceRequest);
-        }
-        sdfPacFree(&request->packet);
-        sdfChipFreeDirect(request->name);
-        sdfChipFreeDirect((void *)request);
-        return FILE_REQUEST_CLEANUP_FREED;
-    }
-    return FILE_REQUEST_CLEANUP_PENDING;
-}
-
-s32 pacFileHandleFree_(void *request) {
-    return pacFileHandleFree(request);
 }
 
 INCLUDE_RODATA(const s32, "game/code_00282850", D_003B2608);
@@ -3230,3 +3271,4 @@ INCLUDE_SDATA(const s32, "game/code_00282850", D_003BC7C8);
 INCLUDE_SDATA(const s32, "game/code_00282850", D_003BC7D0);
 
 INCLUDE_SDATA(const s32, "game/code_00282850", D_003BC7D4);
+

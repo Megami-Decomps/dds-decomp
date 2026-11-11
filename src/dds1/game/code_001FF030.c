@@ -9,8 +9,7 @@
 #include "sdf_draw.h"
 #include "evt_unit.h"
 #include "mdl.h"
-#include "ee_mmi.h"
-#include "pcp_vu0.h"
+#include "ps2asm.h"
 #include "btl_action.h"
 #include "btl_ai_table.h"
 #include "btl_ai_scratch.h"
@@ -34,7 +33,7 @@ void btlRunWeightedAiAction(BtlTask *task, s32 rowIndex) {
     u16 speciesId;
     s32 slotIndex;
 
-    btlActionScratchWork = sdfAllocAndClearQuadwords(sizeof(BtlAiScratchWork));
+    btlActionScratchWork = sdfChipAllocZeroDirect(sizeof(BtlAiScratchWork));
     speciesId = task->unit->partyRecord.unitId;
     slotIndex = btlPickWeightedAiSlot(task->unit, speciesId, rowIndex);
     btlRunAiAction(task, datEnemyAiRecords[speciesId].slot[rowIndex][slotIndex].actionId, datEnemyAiRecords[speciesId].slot[rowIndex][slotIndex].packedAction);

@@ -8,7 +8,7 @@ struct itfpanel_t;
 struct sdfTexHandle_t;
 
 /* The panel owns its allocations and borrows the caller's shared texture. */
-struct itfpanel_t *itfCreateUiSpriteByKind(s32 kind,
+struct itfpanel_t *itfPnlRegist2(s32 kind,
     const struct sdfTexHandle_t *borrowedTexture);
 
 void itfPnlDrawTag(struct itfpanel_t *panel, struct sdfDrawTag_t *list);

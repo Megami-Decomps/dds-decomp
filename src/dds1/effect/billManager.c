@@ -1,20 +1,18 @@
 #include "sdk_ps2.h"
 #include "sdf_gs_header.h"
 #include "common.h"
-#include "sdf_vu0.h"
-#include "kwln_draw_buffer.h"
-#include "kwln_frame_draw_buffer.h"
+#include "ps2asm.h"
+#include "dds3_draw_buffer.h"
+#include "dds3_frame_draw_buffer.h"
 #include "bill_state_packet.h"
 #include "sdf_trig.h"
 #include "sdf_chip.h"
 #include "sdf_packet_list.h"
 #include "sdf_compact_vertex_vif_packet.h"
 #include "bill_object_api.h"
-#include "sdf_resource.h"
+#include "sdf_heap_api.h"
 #include "sdf_texture_file.h"
 #include "eff.h"
-#include "ee_mmi.h"
-#include "pcp_vu0.h"
 #include "sdf.h"
 #include "sdf_texture_primary_buffer_api.h"
 
@@ -28,7 +26,7 @@ typedef struct DmaPacketHeader DmaPacketHeader;
 extern void sdf3DMakeDirectRefPacket(DmaPacketHeader *packet, u32 source, s32 bytes);
 extern void sdfBillBoardMakeTMPacket(u8 *packet, const f32 *matrix);
 extern f32 aViewTarget[4];
-extern f32 sdfViewTargetVector[4];
+extern f32 aViewEye[4];
 extern f32 billChildFacingReferenceAxis[4];
 extern f32 dds3BillboardTagParam[4];
 extern f64 fabs(f64 value);
@@ -69,10 +67,10 @@ void dds3BillboardTagLink(billHandle_t *obj, BillChildPayload *child) {
         sdf3DMakeDirectRefPacket((DmaPacketHeader *)packet,
             (u32)sdfTexGetPacket(child->texture),
             sdfTexGetPacketLength(child->texture));
-        sdfAppendReferencePacket(child->pendingLists[selected], packet);
+        sdfDrawTagLinkRef(child->pendingLists[selected], packet);
         if ((u16)(child->variant & 1) != 0) {
             SDF_VU0_LOADVECTOR(aViewTarget);
-            SDF_VU0_LOADVECTOR_B(sdfViewTargetVector);
+            SDF_VU0_LOADVECTOR_B(aViewEye);
             SDF_VU0_SUBVECTOR();
             SDF_VU0_NORMALIZE();
             SDF_VU0_LOADVECTOR_B(billChildFacingReferenceAxis);
@@ -83,9 +81,9 @@ void dds3BillboardTagLink(billHandle_t *obj, BillChildPayload *child) {
             SDF_VU0_LOADIDENTITY();
             SDF_VU0_LOADVECTOR_BARRIER(dds3BillboardTagParam);
             SDF_VU0_SCALE_XYZ();
-            VU0_STORE_MATRIX(matrix);
+            SDF_VU0_STOREMATRIX(matrix);
         } else {
-            EE_MMI_UNIT_MATRIX(matrix);
+            SDF_VU0_STOREIDENTITY(matrix);
         }
         geometry = (u8 *)sdfGrAllocPacketBuff(0x38);
         sdfBillBoardMakeTMPacket(geometry, matrix);
@@ -169,7 +167,7 @@ void billFlushPendingChildPackets(void) {
                 sdfDrawTag_t *value = node->pendingLists[listIndex];
 
                 if (value != NULL) {
-                    D_0034E030[listIndex]->append(D_0034E030[listIndex], value);
+                    D_0034E030[listIndex]->regFunc(D_0034E030[listIndex], value);
                     node->pendingLists[listIndex] = 0;
                 }
             }
@@ -184,8 +182,8 @@ void billFlushPendingChildPackets(void) {
     dds3BillboardTag = NULL;
 }
 
-extern KwlnFrameDrawBuffer kwlnFrameDrawPacketRecords[];
-extern void sdfBuildMaskedFrameRegisterReference(const u8 *source, SdfDmaReferenceChainPacket *packet, s32 gsContext);
+extern dds3FrameDrawBuffer_t dds3FrameDrawPacketRecords[];
+extern void sdfGrSetFrameMaskRGB(const u8 *source, SdfDmaReferenceChainPacket *packet, s32 gsContext);
 extern f32 billPairFacingReferenceAxis[4];
 extern f32 billPairFacingScale[4];
 extern BillRenderPair *billPendingRenderPairList;
@@ -213,7 +211,7 @@ void billAppendPairedQuadEntry(billHandle_t *obj, BillRenderPair *node) {
         node->packetList = (sdfDrawTag_t *)sdfGrAllocPacketBuff(0x20);
         sdfDrawTagInit(node->packetList);
         framePacket = (SdfDmaReferenceChainPacket *)sdfGrAllocPacketBuff(0x40);
-        sdfBuildMaskedFrameRegisterReference(kwlnFrameDrawPacketRecords[dds3GetFrameID()].baseBytes, framePacket, 0);
+        sdfGrSetFrameMaskRGB(dds3FrameDrawPacketRecords[dds3GetFrameID()].baseBytes, framePacket, 0);
         sdfDrawTagLinkRefGif(node->packetList, (u32)framePacket);
         state = (BillStatePacket *)sdfGrAllocPacketBuff(0x40);
         state->dmaTag = 3;
@@ -249,16 +247,16 @@ void billAppendPairedQuadEntry(billHandle_t *obj, BillRenderPair *node) {
         sdf3DMakeDirectRefPacket((DmaPacketHeader *)packet,
             (u32)sdfTexGetPacket(node->children[0]->texture),
             sdfTexGetPacketLength(node->children[0]->texture));
-        sdfAppendReferencePacket(node->packetList, packet);
+        sdfDrawTagLinkRef(node->packetList, packet);
         packet = sdfGrAllocPacketBuff(0x20);
         sdf3DMakeDirectRefPacket((DmaPacketHeader *)packet,
             (u32)sdfTexGetPacketCtx2(node->children[1]->texture),
             sdfTexGetPacketCtx2Length(node->children[1]->texture));
-        sdfAppendReferencePacket(node->packetList, packet);
+        sdfDrawTagLinkRef(node->packetList, packet);
         geometry = (u8 *)sdfGrAllocPacketBuff(0x38);
         if (node->cameraFacingMode == 1) {
             SDF_VU0_LOADVECTOR(aViewTarget);
-            SDF_VU0_LOADVECTOR_B(sdfViewTargetVector);
+            SDF_VU0_LOADVECTOR_B(aViewEye);
             SDF_VU0_SUBVECTOR();
             SDF_VU0_NORMALIZE();
             SDF_VU0_LOADVECTOR_B(billPairFacingReferenceAxis);
@@ -269,9 +267,9 @@ void billAppendPairedQuadEntry(billHandle_t *obj, BillRenderPair *node) {
             SDF_VU0_LOADIDENTITY();
             SDF_VU0_LOADVECTOR_BARRIER(billPairFacingScale);
             SDF_VU0_SCALE_XYZ();
-            VU0_STORE_MATRIX(matrix);
+            SDF_VU0_STOREMATRIX(matrix);
         } else {
-            EE_MMI_UNIT_MATRIX(matrix);
+            SDF_VU0_STOREIDENTITY(matrix);
         }
         sdfBillBoardMakeTMPacket(geometry, matrix);
         sdfDrawTagLink(node->packetList, (u32)geometry);
@@ -385,8 +383,8 @@ void dds3MultiBillboardPktLink(BillRenderPair *pair) {
     data[1]->count = 0;
 }
 
-extern sdfGrOt_t D_00325228;
-extern void sdfBuildFrameRegisterReference(const u8 *source, SdfDmaReferenceChainPacket *packet, s32 gsContext);
+SYMBOL_AT(sdfGrOt_t, D_00325228, sdfGrOtTable, 0x6E0);
+extern void sdfGrSetFrameMaskReset(const u8 *source, SdfDmaReferenceChainPacket *packet, s32 gsContext);
 
 void billFlushPendingRenderPairs(void) {
     BillRenderPair *node = billPendingRenderPairList;
@@ -400,7 +398,7 @@ void billFlushPendingRenderPairs(void) {
             if (work->count != 0) {
                 dds3MultiBillboardPktLink(node);
             }
-            D_00325228.append(&D_00325228, node->packetList);
+            D_00325228.regFunc(&D_00325228, node->packetList);
             node->packetList = NULL;
             node = node->next;
         } while (node != NULL);
@@ -408,7 +406,7 @@ void billFlushPendingRenderPairs(void) {
     list = (sdfDrawTag_t *)sdfGrAllocPacketBuff(0x20);
     sdfDrawTagInit(list);
     texture = (SdfDmaReferenceChainPacket *)sdfGrAllocPacketBuff(0x40);
-    sdfBuildFrameRegisterReference(kwlnFrameDrawPacketRecords[dds3GetFrameID()].baseBytes, texture, 0);
+    sdfGrSetFrameMaskReset(dds3FrameDrawPacketRecords[dds3GetFrameID()].baseBytes, texture, 0);
     sdfDrawTagLinkRefGif(list, (u32)texture);
     packet = (BillStatePacket *)sdfGrAllocPacketBuff(0x40);
     packet->dmaTag = 3;
@@ -420,7 +418,7 @@ void billFlushPendingRenderPairs(void) {
     packet->alpha = 0x48;
     packet->alphaRegister = 0x42;
     sdfDrawTagLink(list, (u32)packet);
-    D_00325228.append(&D_00325228, list);
+    D_00325228.regFunc(&D_00325228, list);
     billPendingRenderPairList = NULL;
 }
 
@@ -586,7 +584,7 @@ u32 dds3Billboard_P2AColorMul(u32 colorA, u32 colorB) {
     color2[0] = colorB;
     EE_MMI_RGBA_UNPACK(color2, unit);
     SDF_VU0_MULVECTOR();
-    EE_MMI_RGBA_PACK(packed);
+    SDF_VU0_dds3ColorFtoI(packed, 128.0f);
     blended[0] = packed;
     return blended[0];
 }

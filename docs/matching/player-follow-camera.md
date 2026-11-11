@@ -76,7 +76,7 @@ the later far-vector W instead made it overlap the divisor and was not a fix.
 Independent review must cover more than the last four words. In particular:
 
 - Retain the scene-object slot and reload the node at the native call phases.
-- `dds3CameraObjectBasicSetWorldEye` consumes the near vector; it is not a
+- `dds3CameraObjectBasicGetCameraTM` consumes the near vector; it is not a
   getter. Read the tilt state again at the later divisor decision.
 - Preserve separate sine/cosine calls, fresh row reads, and binary32
   division-before-multiplication order.

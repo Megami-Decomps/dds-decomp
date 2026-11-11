@@ -5,9 +5,9 @@
 #include "sdf_quaternion.h"
 #include "sdf_mat4.h"
 #include "fr_font.h"
-#include "sdf_resource.h"
+#include "sdf_heap_api.h"
 #include "fpu.h"
-#include "pcp_vu0.h"
+#include "ps2asm.h"
 typedef struct Vec3 {
     float x; // 0x00
     float y; // 0x04
@@ -21,14 +21,14 @@ extern float vecLength(float *vector);
 
 
 
-struct _FRQ;
-extern s32 frFontDrawGlyphWithSharedFlags(struct _FRQ *glyph, s8 mode);
+struct frFontHandle_t;
+extern s32 frDrawFontEx(struct frFontHandle_t *glyph, s8 mode);
 
 void sdfCounterDrawGlyphAtGridCell(s32 gridX, s32 gridY, u32 style, const u8 *text) {
-    struct _FRQ *glyph;
+    struct frFontHandle_t *glyph;
 
     glyph = itfCreateConvertedTextGlyph(gridX << 4, gridY << 3, 0, style, text, 0);
-    frFontDrawGlyphWithSharedFlags(glyph, 1);
+    frDrawFontEx(glyph, 1);
     frDestroyFontRequestAfter(glyph);
 }
 

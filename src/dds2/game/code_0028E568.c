@@ -1,5 +1,5 @@
 #include "sdk_ps2.h"
-#include "pcp_vu0.h"
+#include "ps2asm.h"
 #include "mnu_mantra.h"
 #include "mnu_mantra_position_api.h"
 #include "mdl_flag_api.h"
@@ -10,7 +10,7 @@
 #include "prf_profile_cap.h"
 
 
-extern void evtPrintDeveloperConsoleMessage(const char *, ...);
+extern void datDebugPrintf(const char *, ...);
 
 extern void mnuArmMantraLimitLineFlags(struct MantraDrawPool *pool, u32);
 
@@ -138,7 +138,7 @@ s32 mnuInitMantraMapScroll(MnuStatusResource *object) {
         }
     }
     work = &object->menu;
-    evtPrintDeveloperConsoleMessage(D_00427268, work->drawBits.drawRank);
+    datDebugPrintf(D_00427268, work->drawBits.drawRank);
     rankIndex = work->drawBits.drawRank == 0 ? 0 : work->drawBits.drawRank - 1;
     rank = work->drawBits.drawRank;
     switch (rank) {
@@ -240,7 +240,7 @@ s32 mnuAdvanceMantraSelectionCursor(MnuStatusResource *object, s32 centerOnNode)
     memset(movement, 0, sizeof(movement));
     movement[0] = target[0] - work->scrollX;
     movement[1] = target[1] - work->scrollY;
-    VU0_LOAD_VF_PTR(vf10, movement);
+    SDF_VU0_LOADVECTOR_F32_NV(movement);
     SDF_VU0_GETLENGTH(distance);
     SDF_VU0_NORMALIZE();
     step = distance - distance * 0.9f;
@@ -250,8 +250,8 @@ s32 mnuAdvanceMantraSelectionCursor(MnuStatusResource *object, s32 centerOnNode)
     if (distance < step) {
         step = distance;
     }
-    VU0_SCALAR_OP_CLOBBER(step, "vmulx.xyzw vf10, vf10, vf2x");
-    VU0_STORE_VF_PTR(vf10, movement);
+    SDF_VU0_SCALEVECTOR_V0_CLOBBER(step);
+    SDF_VU0_STOREVECTOR_F32_NV(movement);
     work->scrollX += movement[0];
     work->scrollY += movement[1];
     work->scrollEndX = work->scrollX + layouts[layout][4];
@@ -326,7 +326,7 @@ void mnuBuildMantraSourceList(MnuStatusResource *status) {
             break;
         }
     }
-    evtPrintDeveloperConsoleMessage("Used EventFlag [0x%x] - [0x%x]\n", 0x920, 0x923 + used);
+    datDebugPrintf("Used EventFlag [0x%x] - [0x%x]\n", 0x920, 0x923 + used);
     mnuMantraPublishedSourceRecords = status->menu.records;
 }
 
@@ -391,7 +391,7 @@ s32 mnuFindMantraSourceCandidate(MnuStatusResource *object, MantraMenuSrc *state
     slotIndex = 0;
     slot = &object->menu.unitEntries[0];
     modelFlagState = mnuGetActiveMantraModelFlagState();
-    evtPrintDeveloperConsoleMessage(mnuMantraActiveStateDebugFormat, modelFlagState);
+    datDebugPrintf(mnuMantraActiveStateDebugFormat, modelFlagState);
 
     for (; slotIndex < 5; slotIndex++, slot++) {
         if (slot->nodeId != 0) {
@@ -400,7 +400,7 @@ s32 mnuFindMantraSourceCandidate(MnuStatusResource *object, MantraMenuSrc *state
             for (; entryIndex < 6; entryIndex++) {
                 entry = record->neighbors[entryIndex];
                 if (entry != 0 && modelFlagState < entry->modelFlagState) {
-                    evtPrintDeveloperConsoleMessage(mnuMantraMemberEventDebugFormat, slotIndex);
+                    datDebugPrintf(mnuMantraMemberEventDebugFormat, slotIndex);
                     state->fields.unitIndex = record->id;
                     state->selectedIndex = slotIndex;
                     return 1;
@@ -409,7 +409,7 @@ s32 mnuFindMantraSourceCandidate(MnuStatusResource *object, MantraMenuSrc *state
         }
     }
 
-    evtPrintDeveloperConsoleMessage(mnuMantraNoNeighborCandidateDebugText);
+    datDebugPrintf(mnuMantraNoNeighborCandidateDebugText);
     if (modelFlagState == MNU_MANTRA_MODEL_FLAG_STATE_LEVEL_0) {
         requirements = mnuMantraState0ProfileRequirements;
         requirementCount = 16;
@@ -432,7 +432,7 @@ s32 mnuFindMantraSourceCandidate(MnuStatusResource *object, MantraMenuSrc *state
                 value = ptyGetProfileRecordValue(party, id);
                 cap = ptyGetProfileRecordCap(id);
                 if (value == cap) {
-                    evtPrintDeveloperConsoleMessage(mnuMantraProfileCandidateDebugFormat, slotIndex,
+                    datDebugPrintf(mnuMantraProfileCandidateDebugFormat, slotIndex,
                                                     party->unitId, id);
                     state->fields.unitIndex = id;
                     state->selectedIndex = slotIndex;
@@ -562,7 +562,7 @@ void mnuSelectMantraLimitLine(MnuStatusResource *object, u16 id) {
             break;
         }
     }
-    evtPrintDeveloperConsoleMessage(
+    datDebugPrintf(
         "-----------------------LimitLineSetting!!!!!!!!![%x]\n", flags);
     if (flags != 0) {
         mnuArmMantraLimitLineFlags(object->selectionController, flags);
@@ -626,7 +626,7 @@ s32 mnuScanMantraSourceCandidates(MnuStatusResource *object) {
         rank--;
         modelRank = mnuGetActiveMantraModelFlagState();
         if (modelRank < rank) changed = 1;
-        evtPrintDeveloperConsoleMessage("DrawRank!!!!!!!!!!!!!!!!!!![%d][%d]\n", modelRank, rank);
+        datDebugPrintf("DrawRank!!!!!!!!!!!!!!!!!!![%d][%d]\n", modelRank, rank);
         if (rank < modelRank) rank = modelRank;
         object->menu.drawBits.drawRank = rank;
         if (record->fields.kind < rank) {
@@ -657,7 +657,7 @@ s32 mnuScanMantraSourceCandidates(MnuStatusResource *object) {
                     if (evtTestMantraNodePartyRequirements(record->mantraId, 0)) {
                         record->fields.queued = 1;
                         changed = 1;
-                        evtPrintDeveloperConsoleMessage("Event Mantra Hiding[%d]!!!!!!!!!!\n", record->mantraId);
+                        datDebugPrintf("Event Mantra Hiding[%d]!!!!!!!!!!\n", record->mantraId);
                     }
                 }
                 break;
@@ -671,7 +671,7 @@ s32 mnuScanMantraSourceCandidates(MnuStatusResource *object) {
                         record->fields.queued = 1;
                         changed = 1;
                         record->targetId = party->unitId;
-                        evtPrintDeveloperConsoleMessage("Event Mantra High Rank[%d]!!!!!!!!!!\n", record->mantraId);
+                        datDebugPrintf("Event Mantra High Rank[%d]!!!!!!!!!!\n", record->mantraId);
                     }
                 }
                 break;
@@ -680,7 +680,7 @@ s32 mnuScanMantraSourceCandidates(MnuStatusResource *object) {
                     if (prfReqCheckWithFallback(selectedParty, record->mantraId)) {
                         record->fields.queued = 1;
                         changed = 1;
-                        evtPrintDeveloperConsoleMessage("Event Mantra Rare[%d]!!!!!!!!!!\n", record->mantraId);
+                        datDebugPrintf("Event Mantra Rare[%d]!!!!!!!!!!\n", record->mantraId);
                     }
                 }
                 break;

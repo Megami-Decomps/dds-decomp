@@ -1,6 +1,6 @@
 #include "sdk_ps2.h"
 #include "common.h"
-#include "sdf_vu0.h"
+#include "ps2asm.h"
 #include "snd_sequence_volume_pan.h"
 #include "sdf_vector_latch.h"
 #include "sdf_counter_display.h"
@@ -77,7 +77,6 @@ void sdfInitInnerVectors(void) {
     fldLocalMapCameraObject->ops->update(fldLocalMapCameraObject);
 }
 
-#include "pcp_vu0.h"
 extern char D_003B3D48[];
 s32 sdfLoadMapCounterCameraVectorsForMask(s32 mask) {
     f32 position[4];

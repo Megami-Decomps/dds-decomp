@@ -1,13 +1,13 @@
 #include "sdk_ps2.h"
 #include "common.h"
-#include "sdf_resource.h"
+#include "sdf_heap_api.h"
 #include "mnu_shooting.h"
 #include "sdf.h"
 
 
 enum { SLOT_IN_USE = 1 };
 
-extern void evtPrintDeveloperConsoleMessage(const char *format, ...);
+extern void datDebugPrintf(const char *format, ...);
 
 /* Sprite-number work pool: one header followed by typed slots. */
 MnuSpriteNumberPool *itfCreateSpriteWorkPool(u32 count) {
@@ -18,7 +18,7 @@ MnuSpriteNumberPool *itfCreateSpriteWorkPool(u32 count) {
     pool->allocation = allocation;
     pool->count = count;
     pool->slots = (MnuSpriteNumberSlot *)(pool + 1);
-    evtPrintDeveloperConsoleMessage("Sprite Num Work Crate Size[%d]\n", size);
+    datDebugPrintf("Sprite Num Work Crate Size[%d]\n", size);
     return pool;
 }
 
@@ -165,7 +165,7 @@ MnuHitEffectPool *itfCreateSpriteHitEffectWorkPool(u32 count) {
     pool->allocation = allocation;
     pool->count = count;
     pool->slots = (MnuHitEffectSlot *)(pool + 1);
-    evtPrintDeveloperConsoleMessage("Sprite HitEffect Work Crate Size[%d]\n", size);
+    datDebugPrintf("Sprite HitEffect Work Crate Size[%d]\n", size);
     return pool;
 }
 

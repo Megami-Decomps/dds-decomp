@@ -13,7 +13,7 @@
 #include "pty_accumulate_stat_gains_api.h"
 #include "mnu_result.h"
 #include "brs_result_counter_completion_api.h"
-#include "kwln.h"
+#include "kernel.h"
 #include "mdl_flag_api.h"
 #include "prf_profile_cap.h"
 #include "prf_current_record_view.h"
@@ -478,12 +478,12 @@ void brsBuildUnitProgressRow(BrsProgressRow *progressRow, datUnitWork_t *partyRe
         prfGetCapValue(ptyGetCurrentProfileId(partyRecord) & 0xFFFF));
 }
 
-struct _FRQ;
-extern void frSetFontSize(struct _FRQ *, s32, s32);
+struct frFontHandle_t;
+extern void frSetFontSize(struct frFontHandle_t *, s32, s32);
 
 void mnuSetFontChainDimensionsAndMeasure(u32 fontContext) {
-    frSetFontSize((struct _FRQ *)(u32)fontContext, 0xc, 0x10);
-    frSetFontSpace((struct _FRQ *)(u32)fontContext,
+    frSetFontSize((struct frFontHandle_t *)(u32)fontContext, 0xc, 0x10);
+    frSetFontSpace((struct frFontHandle_t *)(u32)fontContext,
         -4);
 }
 
@@ -578,3 +578,4 @@ void brsDrawActiveUnitProgressRows(s32 x, s32 y, s32 z, s32 alpha, BrsActiveProg
 }
 
 INCLUDE_RODATA(const s32, "game/code_002653A0", D_003AFBA0);
+

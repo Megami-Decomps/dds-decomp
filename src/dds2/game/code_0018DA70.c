@@ -3,11 +3,11 @@
 #include "bill_object_api.h"
 #include "sdf_packet_list.h"
 #include "common.h"
-#include "kwln_background_fade_api.h"
-#include "sdf_vu0.h"
-#include "kwln_draw_buffer.h"
+#include "dds3_background_fade_api.h"
+#include "ps2asm.h"
+#include "dds3_draw_buffer.h"
 #include "sdf_trig.h"
-#include "kwln_frame_draw_buffer.h"
+#include "dds3_frame_draw_buffer.h"
 #include "sdf_chip.h"
 #include "sdf_texture_draw_packet.h"
 #include "btl_effect_position.h"
@@ -15,7 +15,6 @@
 #include "eff_blur.h"
 #include "eff.h"
 #include "eff_math.h"
-#include "pcp_vu0.h"
 
 
 extern void effPCP_ThunderPolyListDraw(EffThunderGroup *group);
@@ -28,14 +27,14 @@ void effPCPBossMETATOBeamDelete(PairedEffectResources *pair) {
     sdfChipFreeDirect(pair);
 }
 
-extern u32 effBTLFieldColorGetOriginalSelector(void);
+extern u32 effBTLSkillGetInvokeFormation(void);
 
 void effUpdatePairedResources(PairedEffectResources *work) {
     s32 total = work->total;
     s32 frame = work->frame;
     s32 fadeIn = work->fadeIn;
     s32 fadeOut = work->fadeOut;
-    u32 actor = effBTLFieldColorGetOriginalSelector();
+    u32 actor = effBTLSkillGetInvokeFormation();
     s32 remain;
     f32 t;
     u32 blendColor;
@@ -62,10 +61,10 @@ void effUpdatePairedResources(PairedEffectResources *work) {
                 SDF_VU0_COPYVECTOR_A_TO_C();
                 SDF_VU0_STOREVECTOR(record->points[0]);
                 SDF_VU0_LOADVECTOR_B(work->startVec);
-                VU0_LERP_VF10(0.33f);
+                SDF_VU0_INTERPOLATE(0.33f);
                 SDF_VU0_STOREVECTOR(record->points[1]);
                 SDF_VU0_COPYVECTOR_C_TO_A();
-                VU0_LERP_VF10(0.66f);
+                SDF_VU0_INTERPOLATE(0.66f);
                 SDF_VU0_STOREVECTOR(record->points[2]);
                 SDF_VU0_STOREVECTOR_B(record->points[3]);
                 effPCP_ThunderPolyListSetColor(work->resource[resourceIndex], blendColor);
@@ -93,154 +92,154 @@ typedef dds3Effect_Blur_t BlurSource;
 struct sdfDrawTag_t;
 struct sdfGrRefPacketHeader_t;
 
-extern sdfGrOt_t D_003803E8;
-extern KwlnFrameDrawBuffer kwlnFrameDrawPacketRecords[];
+SYMBOL_AT(sdfGrOt_t, D_003803E8, sdfGrOtTable, 0x8A0);
+extern dds3FrameDrawBuffer_t dds3FrameDrawPacketRecords[];
 #include "sdf_packet_alloc.h"
-extern void sdfBuildFrameRegisterReference(const u8 *source, SdfDmaReferenceChainPacket *packet, s32 gsContext);
+extern void sdfGrSetFrameMaskReset(const u8 *source, SdfDmaReferenceChainPacket *packet, s32 gsContext);
 
 extern u32 dds3NullDrawProc(void);
 
 
-void effBuildBlurTransformedQuad(const BlurSource *source, BlurPacketQuad *quad, u8 fixedPointCoordinates)
+void dds3EffectBlurDrawQuad(const BlurSource *source, effBlurPrimTriStrip_t *quad, u8 fixedPointCoordinates)
 {
     f32 centerX, centerY, scale, cosine, sine;
     f32 scaledU, scaledV, u, v;
 
     /* Scratch coordinates first normalize the center, then rotate each sample. */
 
-    quad->color[0] = ((u8 *)&source->color)[0];
-    quad->color[1] = ((u8 *)&source->color)[1];
-    quad->color[2] = ((u8 *)&source->color)[2];
-    quad->color[3] = ((u8 *)&source->color)[3];
+    quad->r = ((u8 *)&source->abgr)[0];
+    quad->g = ((u8 *)&source->abgr)[1];
+    quad->b = ((u8 *)&source->abgr)[2];
+    quad->a = ((u8 *)&source->abgr)[3];
     if (fixedPointCoordinates == 0) {
-        quad->vertices[0].x = (source->corners[0][0] << 4) + 0x7000;
-        quad->vertices[0].y = (source->corners[0][1] << 3) + 0x7900;
-        quad->vertices[1].x = quad->vertices[0].x;
-        quad->vertices[1].y = (source->corners[1][1] << 3) + 0x7900;
-        quad->vertices[2].x = (source->corners[1][0] << 4) + 0x7000;
-        quad->vertices[2].y = quad->vertices[0].y;
-        quad->vertices[3].x = quad->vertices[2].x;
-        quad->vertices[3].y = quad->vertices[1].y;
-        quad->vertices[0].s = source->corners[0][0] * (1.0f / 512.0f);
-        quad->vertices[0].t = source->corners[0][1] * (1.0f / 512.0f);
-        quad->vertices[1].s = quad->vertices[0].s;
-        quad->vertices[1].t = source->corners[1][1] * (1.0f / 512.0f);
-        quad->vertices[2].s = source->corners[1][0] * (1.0f / 512.0f);
-        quad->vertices[2].t = quad->vertices[0].t;
-        quad->vertices[3].s = quad->vertices[2].s;
-        quad->vertices[3].t = quad->vertices[1].t;
+        quad->vtx[0].x = (source->xy[0][0] << 4) + 0x7000;
+        quad->vtx[0].y = (source->xy[0][1] << 3) + 0x7900;
+        quad->vtx[1].x = quad->vtx[0].x;
+        quad->vtx[1].y = (source->xy[1][1] << 3) + 0x7900;
+        quad->vtx[2].x = (source->xy[1][0] << 4) + 0x7000;
+        quad->vtx[2].y = quad->vtx[0].y;
+        quad->vtx[3].x = quad->vtx[2].x;
+        quad->vtx[3].y = quad->vtx[1].y;
+        quad->vtx[0].s = source->xy[0][0] * (1.0f / 512.0f);
+        quad->vtx[0].t = source->xy[0][1] * (1.0f / 512.0f);
+        quad->vtx[1].s = quad->vtx[0].s;
+        quad->vtx[1].t = source->xy[1][1] * (1.0f / 512.0f);
+        quad->vtx[2].s = source->xy[1][0] * (1.0f / 512.0f);
+        quad->vtx[2].t = quad->vtx[0].t;
+        quad->vtx[3].s = quad->vtx[2].s;
+        quad->vtx[3].t = quad->vtx[1].t;
     } else {
-        quad->vertices[0].x = source->corners[0][0] + 0x7000;
-        quad->vertices[0].y = source->corners[0][1] + 0x7900;
-        quad->vertices[1].x = quad->vertices[0].x;
-        quad->vertices[1].y = source->corners[1][1] + 0x7900;
-        quad->vertices[2].x = source->corners[1][0] + 0x7000;
-        quad->vertices[2].y = quad->vertices[0].y;
-        quad->vertices[3].x = quad->vertices[2].x;
-        quad->vertices[3].y = quad->vertices[1].y;
-        quad->vertices[0].s = source->corners[0][0] * (1.0f / 8192.0f);
-        quad->vertices[0].t = source->corners[0][1] * (1.0f / 4096.0f);
-        quad->vertices[1].s = quad->vertices[0].s;
-        quad->vertices[1].t = source->corners[1][1] * (1.0f / 4096.0f);
-        quad->vertices[2].s = source->corners[1][0] * (1.0f / 8192.0f);
-        quad->vertices[2].t = quad->vertices[0].t;
-        quad->vertices[3].s = quad->vertices[2].s;
-        quad->vertices[3].t = quad->vertices[1].t;
+        quad->vtx[0].x = source->xy[0][0] + 0x7000;
+        quad->vtx[0].y = source->xy[0][1] + 0x7900;
+        quad->vtx[1].x = quad->vtx[0].x;
+        quad->vtx[1].y = source->xy[1][1] + 0x7900;
+        quad->vtx[2].x = source->xy[1][0] + 0x7000;
+        quad->vtx[2].y = quad->vtx[0].y;
+        quad->vtx[3].x = quad->vtx[2].x;
+        quad->vtx[3].y = quad->vtx[1].y;
+        quad->vtx[0].s = source->xy[0][0] * (1.0f / 8192.0f);
+        quad->vtx[0].t = source->xy[0][1] * (1.0f / 4096.0f);
+        quad->vtx[1].s = quad->vtx[0].s;
+        quad->vtx[1].t = source->xy[1][1] * (1.0f / 4096.0f);
+        quad->vtx[2].s = source->xy[1][0] * (1.0f / 8192.0f);
+        quad->vtx[2].t = quad->vtx[0].t;
+        quad->vtx[3].s = quad->vtx[2].s;
+        quad->vtx[3].t = quad->vtx[1].t;
     }
-    quad->vertices[0].depth = 0;
-    quad->vertices[0].xyzControl = 0;
-    quad->vertices[1].depth = 0;
-    quad->vertices[1].xyzControl = 0;
-    quad->vertices[2].depth = 0;
-    quad->vertices[2].xyzControl = 0;
-    quad->vertices[3].depth = 0;
-    quad->vertices[3].xyzControl = 0;
+    quad->vtx[0].z = 0;
+    quad->vtx[0].adc = 0;
+    quad->vtx[1].z = 0;
+    quad->vtx[1].adc = 0;
+    quad->vtx[2].z = 0;
+    quad->vtx[2].adc = 0;
+    quad->vtx[3].z = 0;
+    quad->vtx[3].adc = 0;
     if (fixedPointCoordinates == 0) {
-        u = source->position[0] + 256.0f;
-        v = source->position[1] + 224.0f;
+        u = source->center[0] + 256.0f;
+        v = source->center[1] + 224.0f;
         centerX = u * (1.0f / 512.0f);
         centerY = v * (1.0f / 448.0f);
     } else {
-        u = source->position[0] + 4096.0f;
-        v = source->position[1] + 1792.0f;
+        u = source->center[0] + 4096.0f;
+        v = source->center[1] + 1792.0f;
         centerX = u * (1.0f / 8192.0f);
         centerY = v * (1.0f / 3584.0f);
     }
-    scale = source->displacement;
-    cosine = sdfCos(source->angle);
-    sine = sdfSin(source->angle);
-    scaledU = (quad->vertices[0].s - centerX) * scale;
-    scaledV = (quad->vertices[0].t - centerY) * scale;
+    scale = source->scale;
+    cosine = sdfCos(source->rotate);
+    sine = sdfSin(source->rotate);
+    scaledU = (quad->vtx[0].s - centerX) * scale;
+    scaledV = (quad->vtx[0].t - centerY) * scale;
     u = scaledU * cosine - scaledV * sine;
     v = scaledU * sine + scaledV * cosine;
-    quad->vertices[0].s = u + centerX;
-    quad->vertices[0].t = v + centerY;
-    scaledU = (quad->vertices[1].s - centerX) * scale;
-    scaledV = (quad->vertices[1].t - centerY) * scale;
+    quad->vtx[0].s = u + centerX;
+    quad->vtx[0].t = v + centerY;
+    scaledU = (quad->vtx[1].s - centerX) * scale;
+    scaledV = (quad->vtx[1].t - centerY) * scale;
     u = scaledU * cosine - scaledV * sine;
     v = scaledU * sine + scaledV * cosine;
-    quad->vertices[1].s = u + centerX;
-    quad->vertices[1].t = v + centerY;
-    scaledU = (quad->vertices[2].s - centerX) * scale;
-    scaledV = (quad->vertices[2].t - centerY) * scale;
+    quad->vtx[1].s = u + centerX;
+    quad->vtx[1].t = v + centerY;
+    scaledU = (quad->vtx[2].s - centerX) * scale;
+    scaledV = (quad->vtx[2].t - centerY) * scale;
     u = scaledU * cosine - scaledV * sine;
     v = scaledU * sine + scaledV * cosine;
-    quad->vertices[2].s = u + centerX;
-    quad->vertices[2].t = v + centerY;
-    scaledU = (quad->vertices[3].s - centerX) * scale;
-    scaledV = (quad->vertices[3].t - centerY) * scale;
+    quad->vtx[2].s = u + centerX;
+    quad->vtx[2].t = v + centerY;
+    scaledU = (quad->vtx[3].s - centerX) * scale;
+    scaledV = (quad->vtx[3].t - centerY) * scale;
     u = scaledU * cosine - scaledV * sine;
     v = scaledU * sine + scaledV * cosine;
-    quad->vertices[3].s = u + centerX;
-    quad->vertices[3].t = v + centerY;
+    quad->vtx[3].s = u + centerX;
+    quad->vtx[3].t = v + centerY;
 }
 
 
-void effBuildBlurUnitTextureQuad(const BlurSource *source, BlurPacketQuad *quad, u8 fixedPointCoordinates)
+void effBuildBlurUnitTextureQuad(const BlurSource *source, effBlurPrimTriStrip_t *quad, u8 fixedPointCoordinates)
 {
-    quad->color[0] = 0x80;
-    quad->color[1] = 0x80;
-    quad->color[2] = 0x80;
-    quad->color[3] = ((u8 *)&source->color)[3];
+    quad->r = 0x80;
+    quad->g = 0x80;
+    quad->b = 0x80;
+    quad->a = ((u8 *)&source->abgr)[3];
     if (fixedPointCoordinates == 0) {
-        quad->vertices[0].x = (source->corners[0][0] << 4) + 0x7000;
-        quad->vertices[0].y = (source->corners[0][1] << 3) + 0x7900;
-        quad->vertices[1].x = quad->vertices[0].x;
-        quad->vertices[1].y = (source->corners[1][1] << 3) + 0x7900;
-        quad->vertices[2].x = (source->corners[1][0] << 4) + 0x7000;
-        quad->vertices[2].y = quad->vertices[0].y;
-        quad->vertices[3].x = quad->vertices[2].x;
-        quad->vertices[3].y = quad->vertices[1].y;
+        quad->vtx[0].x = (source->xy[0][0] << 4) + 0x7000;
+        quad->vtx[0].y = (source->xy[0][1] << 3) + 0x7900;
+        quad->vtx[1].x = quad->vtx[0].x;
+        quad->vtx[1].y = (source->xy[1][1] << 3) + 0x7900;
+        quad->vtx[2].x = (source->xy[1][0] << 4) + 0x7000;
+        quad->vtx[2].y = quad->vtx[0].y;
+        quad->vtx[3].x = quad->vtx[2].x;
+        quad->vtx[3].y = quad->vtx[1].y;
     } else {
-        quad->vertices[0].x = source->corners[0][0] + 0x7000;
-        quad->vertices[0].y = source->corners[0][1] + 0x7900;
-        quad->vertices[1].x = quad->vertices[0].x;
-        quad->vertices[1].y = source->corners[1][1] + 0x7900;
-        quad->vertices[2].x = source->corners[1][0] + 0x7000;
-        quad->vertices[2].y = quad->vertices[0].y;
-        quad->vertices[3].x = quad->vertices[2].x;
-        quad->vertices[3].y = quad->vertices[1].y;
+        quad->vtx[0].x = source->xy[0][0] + 0x7000;
+        quad->vtx[0].y = source->xy[0][1] + 0x7900;
+        quad->vtx[1].x = quad->vtx[0].x;
+        quad->vtx[1].y = source->xy[1][1] + 0x7900;
+        quad->vtx[2].x = source->xy[1][0] + 0x7000;
+        quad->vtx[2].y = quad->vtx[0].y;
+        quad->vtx[3].x = quad->vtx[2].x;
+        quad->vtx[3].y = quad->vtx[1].y;
     }
-    quad->vertices[0].s = 0.0f;
-    quad->vertices[0].t = 0.0f;
-    quad->vertices[1].s = 0.0f;
-    quad->vertices[1].t = 1.0f;
-    quad->vertices[2].s = 1.0f;
-    quad->vertices[2].t = 0.0f;
-    quad->vertices[3].s = 1.0f;
-    quad->vertices[3].t = 1.0f;
-    quad->vertices[0].depth = 0;
-    quad->vertices[0].xyzControl = 0;
-    quad->vertices[1].depth = 0;
-    quad->vertices[1].xyzControl = 0;
-    quad->vertices[2].depth = 0;
-    quad->vertices[2].xyzControl = 0;
-    quad->vertices[3].depth = 0;
-    quad->vertices[3].xyzControl = 0;
+    quad->vtx[0].s = 0.0f;
+    quad->vtx[0].t = 0.0f;
+    quad->vtx[1].s = 0.0f;
+    quad->vtx[1].t = 1.0f;
+    quad->vtx[2].s = 1.0f;
+    quad->vtx[2].t = 0.0f;
+    quad->vtx[3].s = 1.0f;
+    quad->vtx[3].t = 1.0f;
+    quad->vtx[0].z = 0;
+    quad->vtx[0].adc = 0;
+    quad->vtx[1].z = 0;
+    quad->vtx[1].adc = 0;
+    quad->vtx[2].z = 0;
+    quad->vtx[2].adc = 0;
+    quad->vtx[3].z = 0;
+    quad->vtx[3].adc = 0;
 }
 
 
-void effDrawBlurRectangle(const dds3Effect_Blur_t *source)
+void dds3EffectBlur(const dds3Effect_Blur_t *source)
 {
     sdfDrawTag_t *list;
     void *tag;
@@ -251,7 +250,7 @@ void effDrawBlurRectangle(const dds3Effect_Blur_t *source)
         list = (sdfDrawTag_t *)sdfGrAllocPacketBuff(0x20);
         sdfDrawTagInit(list);
         tag = (void *)sdfGrAllocPacketBuff(0x20);
-        sdfGrLinkDispFrameTex(list, (u32)kwlnFrameDrawPacketRecords[dds3GetFrameID()].baseBytes, tag);
+        sdfGrLinkDispFrameTex(list, (u32)dds3FrameDrawPacketRecords[dds3GetFrameID()].baseBytes, tag);
         samplingPacket = (void *)sdfGrAllocPacketBuff(0x30);
         samplingPacket[0] = 2;
         samplingPacket[1] = 0x5000000210000000ULL;
@@ -277,7 +276,7 @@ void effDrawBlurRectangle(const dds3Effect_Blur_t *source)
         blendPacket[3] = 0xE;
         blendPacket[4] = 0x31001;
         blendPacket[5] = 0x47;
-        blendPacket[6] = source->blendControl;
+        blendPacket[6] = source->blend;
         blendPacket[7] = 0x42;
         sdfDrawTagLink(list, (u32)blendPacket);
         clampPacket = (void *)sdfGrAllocPacketBuff(0x30);
@@ -285,7 +284,7 @@ void effDrawBlurRectangle(const dds3Effect_Blur_t *source)
         clampPacket[1] = 0x5000000210000000ULL;
         clampPacket[2] = 0x1000000000008001ULL;
         clampPacket[3] = 0xE;
-        if (kwlnFadeIsBackgroundOverlayActive() != KWLN_BACKGROUND_OVERLAY_INACTIVE) {
+        if (dds3FadeIsBackgroundOverlayActive() != DDS3_BACKGROUND_OVERLAY_INACTIVE) {
             clampPacket[4] = 0x2DC19000009ULL;
         } else {
             clampPacket[4] = 0x37C00000009ULL;
@@ -293,15 +292,15 @@ void effDrawBlurRectangle(const dds3Effect_Blur_t *source)
         clampPacket[5] = 8;
         sdfDrawTagLink(list, (u32)clampPacket);
         drawPacket = effPkt2DAllocTriStrip(1, 0);
-        effBuildBlurTransformedQuad(source, effPkt2DGetPrimPtr(drawPacket), 0);
+        dds3EffectBlurDrawQuad(source, effPkt2DGetPrimPtr(drawPacket), 0);
         sdfDrawTagLink(list, (u32)drawPacket);
-        D_003803E8.append(&D_003803E8, list);
+        D_003803E8.regFunc(&D_003803E8, list);
     }
 }
 
-extern void sdfBuildMaskedFrameRegisterReference(const u8 *source, SdfDmaReferenceChainPacket *packet, s32 gsContext);
+extern void sdfGrSetFrameMaskRGB(const u8 *source, SdfDmaReferenceChainPacket *packet, s32 gsContext);
 
-void effAppendBlurRenderState(struct sdfDrawTag_t *list, s32 blendControl, sdfTexHandle_t *resource)
+void dds3EffectBlurDrawFrameMask(struct sdfDrawTag_t *list, s32 blendControl, sdfTexHandle_t *resource)
 {
     SdfDmaReferenceChainPacket *framePacket;
     u64 *blendPacket;
@@ -309,7 +308,7 @@ void effAppendBlurRenderState(struct sdfDrawTag_t *list, s32 blendControl, sdfTe
     void *tag;
 
     framePacket = (SdfDmaReferenceChainPacket *)sdfGrAllocPacketBuff(0x40);
-    sdfBuildMaskedFrameRegisterReference(kwlnFrameDrawPacketRecords[dds3GetFrameID()].baseBytes, framePacket, 1);
+    sdfGrSetFrameMaskRGB(dds3FrameDrawPacketRecords[dds3GetFrameID()].baseBytes, framePacket, 1);
     sdfDrawTagLinkRefGif(list, (u32)framePacket);
 
     blendPacket = (u64 *)sdfGrAllocPacketBuff(0x40);
@@ -336,7 +335,7 @@ void effAppendBlurRenderState(struct sdfDrawTag_t *list, s32 blendControl, sdfTe
     sdfDrawTagLink(list, (u32)blendPacket);
 
     tag = (void *)sdfGrAllocPacketBuff(0x20);
-    sdfGrLinkDispFrameTex(list, (u32)kwlnFrameDrawPacketRecords[dds3GetFrameID()].baseBytes, tag);
+    sdfGrLinkDispFrameTex(list, (u32)dds3FrameDrawPacketRecords[dds3GetFrameID()].baseBytes, tag);
 
     samplingPacket = (u64 *)sdfGrAllocPacketBuff(0x30);
     samplingPacket[0] = 2;
@@ -363,7 +362,7 @@ void effAppendBlurRenderState(struct sdfDrawTag_t *list, s32 blendControl, sdfTe
     clampPacket[1] = 0x5000000210000000ULL;
     clampPacket[2] = 0x1000000000008001ULL;
     clampPacket[3] = 0xE;
-    if (kwlnFadeIsBackgroundOverlayActive() != KWLN_BACKGROUND_OVERLAY_INACTIVE) {
+    if (dds3FadeIsBackgroundOverlayActive() != DDS3_BACKGROUND_OVERLAY_INACTIVE) {
         clampPacket[4] = 0x2DC19000009ULL;
     } else {
         clampPacket[4] = 0x37C00000009ULL;
@@ -375,7 +374,7 @@ void effAppendBlurRenderState(struct sdfDrawTag_t *list, s32 blendControl, sdfTe
 
 
 /* Build the two draw packets for `source` and append them to `list`. */
-void effAppendBlurRectanglePackets(struct sdfDrawTag_t *list, const BlurSource *source,
+void dds3EffectBlurDrawAlphaMulti(struct sdfDrawTag_t *list, const BlurSource *source,
                                    u8 fixedPointCoordinates) {
     SdfDrawPacket *packet;
 
@@ -383,53 +382,53 @@ void effAppendBlurRectanglePackets(struct sdfDrawTag_t *list, const BlurSource *
     effBuildBlurUnitTextureQuad(source, effPkt2DGetPrimPtr(packet), fixedPointCoordinates);
     sdfDrawTagLink(list, (u32)packet);
     packet = effPkt2DAllocTriStrip(1, 0);
-    effBuildBlurTransformedQuad(source, effPkt2DGetPrimPtr(packet), fixedPointCoordinates);
+    dds3EffectBlurDrawQuad(source, effPkt2DGetPrimPtr(packet), fixedPointCoordinates);
     sdfDrawTagLink(list, (u32)packet);
 }
 
 
 /* Queue a 0x40-byte textured packet for the current frame buffer onto `list`, then let the filter ops draw it. */
-void effDrawBlurListWithFramePacket(struct sdfDrawTag_t *list) {
+void dds3EffectBlurDrawFrameMaskReset(struct sdfDrawTag_t *list) {
     SdfDmaReferenceChainPacket *packet = (SdfDmaReferenceChainPacket *)sdfGrAllocPacketBuff(0x40);
 
-    sdfBuildFrameRegisterReference(kwlnFrameDrawPacketRecords[dds3GetFrameID()].baseBytes, packet, 1);
+    sdfGrSetFrameMaskReset(dds3FrameDrawPacketRecords[dds3GetFrameID()].baseBytes, packet, 1);
     sdfDrawTagLinkRefGif(list, (u32)packet);
-    D_003803E8.append(&D_003803E8, list);
+    D_003803E8.regFunc(&D_003803E8, list);
 }
 
 extern u32 dds3NullDrawProc(void);
-extern void effAppendBlurRenderState(struct sdfDrawTag_t *list, s32 blendControl, sdfTexHandle_t *resource);
+extern void dds3EffectBlurDrawFrameMask(struct sdfDrawTag_t *list, s32 blendControl, sdfTexHandle_t *resource);
 
 /* Queue blend setup and both rectangle packets, then finish with the filter draw. */
-void effDrawBlurSource(const BlurSource *source, sdfTexHandle_t *resource, u8 fixedPointCoordinates) {
+void dds3EffectBlurDraw(const BlurSource *source, sdfTexHandle_t *resource, u8 fixedPointCoordinates) {
     struct sdfDrawTag_t *list;
 
     if (dds3NullDrawProc() == 0) {
         list = (void *)sdfGrAllocPacketBuff(0x20);
         sdfDrawTagInit(list);
-        effAppendBlurRenderState(list, source->blendControl, resource);
-        effAppendBlurRectanglePackets(list, source, fixedPointCoordinates);
-        effDrawBlurListWithFramePacket(list);
+        dds3EffectBlurDrawFrameMask(list, source->blend, resource);
+        dds3EffectBlurDrawAlphaMulti(list, source, fixedPointCoordinates);
+        dds3EffectBlurDrawFrameMaskReset(list);
     }
 }
 
 void dds3EffectBlurSetRect(dds3Effect_PartialMultiBlurParam_t *work) {
-    s32 x = work->source.position[0] + 0x100;
-    s32 y = work->source.position[1] + 0xE0;
-    s32 extent = work->extent;
+    s32 x = work->Blur.center[0] + 0x100;
+    s32 y = work->Blur.center[1] + 0xE0;
+    s32 extent = work->area;
 
-    work->source.corners[0][0] = x - extent;
-    work->source.corners[0][1] = y - extent;
-    work->source.corners[1][0] = x + extent;
-    work->source.corners[1][1] = y + extent;
-    effDrawBlurRectangle(&work->source);
+    work->Blur.xy[0][0] = x - extent;
+    work->Blur.xy[0][1] = y - extent;
+    work->Blur.xy[1][0] = x + extent;
+    work->Blur.xy[1][1] = y + extent;
+    dds3EffectBlur(&work->Blur);
 }
 
 
 
 /* Clone a blur template into a fresh allocation. */
-EffBlurTemplate *dds3EffectPartialMultiBlurCreate(const dds3Effect_PartialMultiBlurParam_t *src) {
-    EffBlurTemplate *dst = sdfChipAllocDirect(sizeof(EffBlurTemplate));
+effBlurTemplate_t *dds3EffectPartialMultiBlurCreate(const dds3Effect_PartialMultiBlurParam_t *src) {
+    effBlurTemplate_t *dst = sdfChipAllocDirect(sizeof(effBlurTemplate_t));
 
     dst->texture = dds3BillboardGetGeneralTex(2);
     memcpy(&dst->body, src, sizeof(*src));

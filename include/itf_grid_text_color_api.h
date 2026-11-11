@@ -6,7 +6,7 @@
 struct GridTextWidget;
 struct GridTextListItem;
 
-/* Index consumed by sdfPktInit and resolved through sdfDevConsColorTable. */
+/* Index consumed by sdfDevSetPrintCB and resolved through sdfDevConsColorTable. */
 typedef s32 ItfGridTextColorTableIndex;
 
 /* Select the message-color table entry for a grid row. */

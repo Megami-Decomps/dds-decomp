@@ -30,3 +30,4 @@ void fldCreateLocalMapCamera(void) {
 INCLUDE_RODATA(const s32, "game/code_002C3800", D_003B3D48);
 
 INCLUDE_SDATA(const s32, "game/code_002C3800", fldLocalMapCameraObject);
+

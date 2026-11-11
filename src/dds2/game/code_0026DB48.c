@@ -1,10 +1,10 @@
-#include "kwln.h"
+#include "kernel.h"
 #include "mnu_list.h"
-#include "kwln_task_state.h"
+#include "dds3_task_state.h"
 #include "evt_world.h"
-#include "sdf_resource.h"
+#include "sdf_heap_api.h"
 #include "dat_state.h"
-#include "kwln_task_lifecycle.h"
+#include "dds3_task_lifecycle.h"
 
 extern s32 scrTestEntryFlag(datUnitWork_t *context, u16 entryId, u32 bit);
 extern void scrClearEntryFlag(datUnitWork_t *context, u16 entryId, u32 bit);

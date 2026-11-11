@@ -217,7 +217,7 @@ after the helper in the matching game-code cases.
 Use the existing `ffabsf` helper when the surrounding instruction sequence
 supports it. DDS1/DDS2 `dds3BillboardGetDirectionScale` is the paired
 reference; DDS1 `func_001726E8` is a larger transfer. This is a module
-convention, not a global replacement rule: `kwlnAdvanceShakeOffsets` in the
+convention, not a global replacement rule: `dds3RunQuake` in the
 kernel uses builtin `fabsf` and changes code under the helper. Check the whole
 unit and preserve the kernel exception. Do not introduce another asm spelling
 or replace an unrelated arithmetic expression just to constrain scheduling.
@@ -354,8 +354,8 @@ earlier carries `REG_EH_REGION 0`, which turns `func_002E9450`'s
 has one flag set. Under the default flags the whole 40-function extent
 matches with two ordinary changes:
 
-- the four `jal; ld $31` tails (`sndSendFilenameCommand`,
-  `sndSendChannelControlCommand`, `sndSendChannelGroupCommand140/150`) go
+- the four `jal; ld $31` tails (`sdfSndSendFilenameCommand`,
+  `sdfSndSendChannelControlCommand`, `sdfSndSendChannelGroupCommand140/150`) go
   through `static inline u32 sndSendCommand(u32 command, const void *packet,
   u32 size) { return sdfSndSendSyncCmd(command, 0, packet, size); }` and
   are `u32` functions returning it. A `void` caller or a `void` helper still
@@ -760,7 +760,7 @@ functions use trampolines and are a different case.
   `game/code_00335EE8`/`code_00336768`.
   The rule is general: a stack scratch vector or matrix that only VU0 `lqc2`
   asm reads, through its address, is `volatile` in the original. The
-  Euler-to-quaternion converters (`sdfConvertEulerAnglesToQuaternionVU`,
+  Euler-to-quaternion converters (`FromEuler`,
   `FromEulerXYZ`, both games) match only with a
   `volatile f32 quaternion[4]`: the plain array lets the scheduler reorder the
   four component stores. If retail stores a scratch vector strictly in program
@@ -804,8 +804,8 @@ functions use trampolines and are a different case.
   `u64` parameter gives the same `dsrl` but then needs `dsll32/dsra32` before a
   `u32` argument, and a 64-bit `or` with an immediate becomes `li` + `or`;
   `u32`/`s32` give `srl`/`sra`. `void f(u8 channel) { snd(((channel >> 3) & 0xF) |
-  0x110, 0, 0, 0); }` matches (DDS1 `sndSendChannelGroupCommand110`/`sndSendChannelGroupCommand110Duplicate`/
-  `sndSendChannelGroupCommand140`/`sndSendChannelGroupCommand150`, with the same
+  0x110, 0, 0, 0); }` matches (DDS1 `sdfSndSendChannelGroupCommand110`/`sdfSndSendChannelGroupCommand110Duplicate`/
+  `sdfSndSendChannelGroupCommand140`/`sdfSndSendChannelGroupCommand150`, with the same
   three named commands in DDS2).
 - Preserve a 32-bit packet field's unsigned width when storing it through a
   wider lvalue. `u32 descriptor = 0x20000000 | (quadwords & 0xFFFF);` followed
@@ -1210,7 +1210,7 @@ than manufacture effects. Whole-unit and complete-build acceptance still apply.
 ## Shared text submission and declarations before first use
 
 DDS1 `func_001BDF60` (`0x001BDF60`, 1584 bytes) shares the sequence
-`frFontDrawGlyphWithSharedFlags(glyph, 1)` followed by
+`frDrawFontEx(glyph, 1)` followed by
 `frDestroyFontRequestAfter(glyph)` with nine other native sites.
 A plain `btlSubmitSharedTextGlyph` static inline is used at all ten sites,
 across seven functions in `game/code_001A9780.c`; this is a recurring text
@@ -1423,7 +1423,7 @@ declared or defined old-style (K&R), not as `f(void)`:
 
 ```c
 void func_00196390(ctx)
-    FrFontCtx *ctx;
+    frMsgInfo_t *ctx;
 { ... }
 ```
 
@@ -1465,8 +1465,8 @@ allowed on the same terms as COP2:
    copies, `por` for `u128` moves). An instruction that `u128` C reproduces
    may not be written as asm; say in the macro comment or parked note which
    C was tried.
-2. **Shared macros, not ad-hoc blocks.** MMI idioms live in `include/ee_mmi.h`
-   (COP2 ones in `include/pcp_vu0.h`), one idiom per macro, used in more than
+2. **Shared macros, not ad-hoc blocks.** COP2 and MMI idioms live in
+   `include/ps2asm.h`, one idiom per macro, used in more than
    one place or mirroring a known SDK macro; each macro comment names the
    retail pattern it reproduces. Operands come from C (`"r"`), not hard-coded
    registers, unless the SDK macro hard-codes them. A load or store of the
@@ -1522,16 +1522,21 @@ and packet construction remain ordinary C.
 | Segment | DDS1 | DDS2 | Contents |
 |---|---|---|---|
 | `hand/crt0` | `func_00100000` .. `func_001001D0` (4) | `func_00100000` .. `func_001001D0` (4) | program entry `_start` (register/FPU clear, `.bss` clear, `SetupThread`/`SetupHeap` syscalls, `Exit`), the `Exit(0)` stub and the syscall 0x23 stub |
-| `hand/vu/corePktVu0Run` | `corePktVu0Run` | `corePktVu0Run` | DMA/VIF-polled unpack of scratchpad vertex records through VU0 `vlqi` loads |
-| `hand/vu/corePktEmitRefMapPass` | `corePktEmitRefMapPass` | `corePktEmitRefMapPass` | node vertex lighting loop, then `corePktLerpUVColorChain` and a `j corePktEmitTexTrisCtx2` tail |
-| `hand/vu/corePktApplyFaceDivColor` | `corePktApplyFaceDivColor` | `corePktApplyFaceDivColor` | per-vertex alpha clamp loop plus a linked-list copy |
-| `hand/vu/sdfVuVertexKernels` | `corePktSkinPointsFirst` .. `corePktXfmUV` (15) | `corePktSkinPointsFirst` .. `corePktXfmUV` (15) | VU0 macro-mode loops over 0x60-byte vertex records (transform, offset, scale, normalise, clip flags) |
 | `hand/mem/sdfMemClearBlocks` | `func_002E73F0` | `func_00340298` | 128-byte `sq` block clear entered by a computed `jr` (Duff's device), `memset` fallback |
+
+The VU0 vertex kernels (`corePktSkinPointsFirst` .. `corePktXfmUV`, `corePktApplyFaceDivColor`,
+`corePktEmitRefMapPass`, `corePktVu0Run`) are `INCLUDE_ASM` in `sdf/sdfVu1`, as in SMT3, with
+SMT3's `NON_MATCHING` drafts.
 
 ### Macro list
 
 Each macro reproduces one retail instruction pattern; the header comment names
 the plain-C forms that were tried. Use these instead of writing the asm again.
+
+The tables below use the old DDS macro names. `include/ee_mmi.h`,
+`pcp_vu0.h`, `sdf_vu0.h` and `mdl_dev_slot_color.h` are gone; each macro is
+now the `include/ps2asm.h` macro with the same expansion, and forms only DDS
+uses are in that header's last block.
 
 `include/ee_mmi.h` (MMI, with the COP2 moves they are fused with):
 
@@ -1599,7 +1604,7 @@ transfers its bits to a GPR; it does not convert the float to an integer.
 in a GPR, pass the actual float value through that constraint rather than
 introducing a separate C integer temporary with an `mfc1` output block.
 
-The distinction closed DDS2 `sdfTexBlendPaletteToTintedIntensityVU`, the 400-byte texture palette
+The distinction closed DDS2 `sdfTexSetClutColor`, the 400-byte texture palette
 blender. Explicit transfer outputs created GPR quantities whose expanded
 local-allocation intervals occupied `$3` and `$4`, moving the subsequent CLUT
 branch operand to `$5`. Direct float inputs remained float pseudos through
@@ -1845,7 +1850,7 @@ word input instead of erasing its alignment with a byte-blob pointer.
 
 The event manager's former nine-word `EffTemplateBody` is the same
 0x24-byte `dds3Effect_PartialMultiFilterParam_t` consumed by `dds3EffectPartialMultiFilterCreate`.
-The live textured-square work is the canonical 0x28-byte `EffResourceRectWork`,
+The live textured-square work is the canonical 0x28-byte `dds3Effect_PartialMultiFilter_t`,
 not a second body-plus-word layout. Its selected source handle follows `params`.
 The event setup table, its whole-parameter setters and the viewer's 0x24-byte
 parameter copies all use the same canonical record.
@@ -2022,7 +2027,7 @@ The SDK's float-key-pool payload is the separate 16-byte `SdfKeyPoolNode`;
 do not conflate its kind at `+0x0C` with the 32-byte callback owner.
 
 The message initializer is a distinct native SDK protocol boundary.
-`sdfStoreMessageWordsAndNotifyConsumer` transports four 32-bit words;
+`sdfModelOtInit` transports four 32-bit words;
 field setup passes physical entries 34, 40, 42 and 41. Its work word selects
 entry 40, where `sdfModelSetOtCallbacks` installs
 `sdfGrSortOtReg(SdfPool *, SdfKeyPoolNode *)` and
@@ -2555,11 +2560,11 @@ computed with `tools/ee_gcc_allocations.py`. Natural source shapes that flip it:
     `void`. Correcting only that initializer result fixes the DDS1 **52/90-word**
     residual. Reusing the existing `EvtWindowContext` asset prefix gives
     **47 match, 0 differ** and **50 match, 0 differ** for the two current units.
-    `fileRequestFreeIfComplete` also has its genuine `s32` declaration, but an
+    `fileHandleFree` also has its genuine `s32` declaration, but an
     independent control with that call still declared `void` remains exact:
     the initializer return is the decisive change.
     A currently matching `void` C definition is not conclusive negative evidence.
-    Both games' `sdfAllocAndClearQuadwords` actually forward the buffer returned
+    Both games' `sdfChipAllocZeroDirect` actually forward the buffer returned
     by `sdfZeroMemQuad`; both formatted-packet wrappers return the cursor
     saved by their assembly helper and consumed by real packet-append callers.
     Giving those producers genuine `void *` results preserves **4 match, 0 differ**
@@ -2881,7 +2886,7 @@ loads or stores even when every instruction is right:
 - A table that really lives in `.rodata` is `const`: the `const` extern makes
   its loads unchanging, the false anti-dependence on a later store goes away,
   and sched2 picks the other load first (DDS1/DDS2 `CodeFunc_Comm`:
-  `extern const ScrCommand D_0039E288[]`; mutable spelling swaps two loads
+  `extern const scrCommandTable_t scrCommandTable[]`; mutable spelling swaps two loads
   around the `bnel` slot).
 - A flag word that is really a bitfield in a struct with callback-pointer
   members takes the aggregate's alias set, which orders the flag store
@@ -3324,7 +3329,7 @@ it executes always, on the taken path, or on the not-taken path. Compare
 CFG or register assignment is a different experiment.
 
 A matched nullable-pointer example is DDS1 `func_002BE4B8` (624 bytes,
-`game/code_002BC8F0`) and its DDS2 twin `func_00305C40`. Their natural
+`game/code_002BE448`) and its DDS2 twin `func_00305C40`. Their natural
 `if (color == NULL) { defaults; } else { color->rgba; ... }` becomes a
 `bnezl` with the first color-word load in its taken-only slot. That load
 must not execute for the null/default arm. Both complete units passed
@@ -3416,7 +3421,7 @@ a distinct failed shape here: it produced `movn` and a shorter function.
 
 The resource-rectangle family has two real parameter records. The `0x24`
 `dds3Effect_PartialMultiFilterParam_t` stores extent and center in its first three words,
-then embeds an `0x18` `EffResourceRectDrawParams` at `+0xC`. That inner
+then embeds an `0x18` `effResourceRectDrawParams_t` at `+0xC`. That inner
 record contains four color bytes, signed blend control, and four signed
 bounds. The `0x28` owner appends its source handle at `+0x24`.
 
@@ -3430,7 +3435,7 @@ and pass `&work->params.draw`.
 These renderers finish with the canonical `SdfPoolNode.append` callback,
 which returns `void`; the four effect dispatch consumers also ignore any
 result. The pixel-bound generator therefore has a real
-`void (EffResourceRectWork *)` contract, not an invented scalar result.
+`void (dds3Effect_PartialMultiFilter_t *)` contract, not an invented scalar result.
 Changing the nested layout and provider contract preserves the native
 nine-word clone and both bound generators.
 
@@ -3799,7 +3804,7 @@ prints `mtrChkMantraCompleteMaster!!` and checks the six mastery flags
 through a nine-entry unit-index map. Its owner is `datUnitWork_t`, not
 an integer with an ad hoc `+4` access. The actual providers are
 `s32 evtBitCheck(s32)`, `s32 prfAreAllRequiredProfileFlagsSet(datUnitWork_t *)`,
-and the existing variadic `void evtPrintDeveloperConsoleMessage`.
+and the existing variadic `void datDebugPrintf`.
 
 With these contracts, ordinary automatic array initializers and early
 returns are text-exact. The arrays replace their two source
@@ -4371,7 +4376,7 @@ The font parent pool allocates `0x44`-byte `_FRQ` nodes. Their
 `previous` link is at `+0x24`, `next` at `+0x28`, and child chain at
 `+0x1C`. The packed word/halfword/byte members are the existing font
 owner's actual representations, not alternative controller views.
-`FrFontCtx` is a separate `0x20`-byte encoded-text draw controller:
+`frMsgInfo_t` is a separate `0x20`-byte encoded-text draw controller:
 input bytes at `+0x10`, glyph chain at `+0x14`, and cursor at `+0x18`.
 Glyph-only setters must receive the glyph, not a cast to that controller.
 
@@ -4900,14 +4905,14 @@ distinct from the complete primary actor-status record above.
 ## GS graphics transfer-worker control
 
 DDS2 `0032A230` uses the separate control bytes `D_00438A1C` and
-`D_00438A1D`, not `sdfGrDrawBusy` or the `gsMemDelayedResrcCB`
+`sdfDrawSyncFlag`, not `sdfGrDrawBusy` or the `gsMemDelayedResrcCB`
 object. The transfer drain rechecks `D_00438A1C` after `SleepThread`;
-`sdfDrawSync` polls volatile `D_00438A1D`. Keep both control bytes
+`sdfDrawSync` polls volatile `sdfDrawSyncFlag`. Keep both control bytes
 volatile, clear the active byte before testing the reset byte, and retain
 the existing volatile GS image-upload semaphore contract.
 
 DDS1 `002D1380` has the same protocol with `D_003BD32C` and
-`D_003BD32D`. Retail `002D51B0`/`002D5218`/`002D5258` repeatedly
+`sdfDrawSyncFlag`. Retail `002D51B0`/`002D5218`/`002D5258` repeatedly
 checks the reset byte while polling hardware; `002D52DC`/`002D5338`
 reloads it after sleeping, and `sdfDrawSync` polls the active byte
 at `002D54B0`. These real shared controls justify the volatile byte
@@ -5505,7 +5510,7 @@ field-store scheduling differences are independent of this repair.
 
 ## Event-viewer selected-label primary owners
 
-Both 228-byte `evtDrawSelectedEntryLabel` providers receive an
+Both 228-byte `evtObjectListSub` providers receive an
 `EvtRuntimeGroup *` and the owning `EvtRuntime *`. The signed word at
 group +8 is `entryHeader.word`; the name address is the corresponding
 `runtime->entryName[index]` row, not a second padded view or raw runtime
@@ -5679,7 +5684,7 @@ The packet header's register list is `0x5151` (RGBAQ/XYZ2 twice).
 Its local constructor prototype follows the C provider's `SdfDrawPacket *`
 and `s64` register-list contract. Encoded allocator addresses convert to
 packet/list pointers at SDK boundaries. The final pool-node-to-list-head
-callback conversion reuses `sdfFlushPoolNodes`' shared first/last prefix;
+callback conversion reuses `sdfGrOtClose`' shared first/last prefix;
 embedding the list header in the pool node remains a dedicated SDK type debt.
 
 ## DDS2 progress-icon fields belong to the existing row
@@ -5738,7 +5743,7 @@ instead of integer-address formals and one-input forwarding.
 `fileManager.c` supplies three distinct, finite interfaces:
 `pacFileCheckEnd(FileRequest *)`,
 `fileGetMemHandle(FileWork *)` returning `u32`, and
-`fileRequestFreeIfComplete(FileCleanup *)` returning `s32`.
+`fileHandleFree(FileCleanup *)` returning `s32`.
 The battle units `001C8890`/`001DD390` now declare these opaque provider
 tags before first use, instead of relying on implicit declarations or
 `s32 (s32)` prototypes.
@@ -6588,7 +6593,7 @@ selection controller `001C08B8`.
 ## Field scatter effects retain their actual work pointer
 
 DDS2 `code_00124040` stores `dds3EffectDistortionBlurCreate`'s returned
-`EffBlurScatterWork *` in `D_00435F74` and later passes it to
+`effBlurScatterWork_t *` in `D_00435F74` and later passes it to
 `dds3EffectDistortionBlurDelete`. The retained global is a work pointer,
 not an arithmetic handle; the two pointer-to-integer stores and the
 integer-to-pointer destruction cast are unnecessary. The serialized
@@ -6709,7 +6714,7 @@ the address-word inputs and the local cast aliases, with no change to
 the playback or movie-track work. Every real caller supplies the pointer.
 
 Keep deliberate extra-argument calls through the existing unprototyped
-declarations: for example DDS2 `evtViewerFrameChangeUpdate` also supplies
+declarations: for example DDS2 `evtFrameChangeMenu` also supplies
 its step and input-table address. Likewise `0024C650` sets `a0=viewer`,
 `a1=value` and `a2=curFrame` for `mnuFxWorldScrollDelta`; do not invent its
 three additional incoming scratch values. The timeline provider's
@@ -6876,7 +6881,7 @@ claim that the remaining banner controller has matched.
 
 DDS2's command-list text helpers receive a 32-bit handle from
 `itfCreateConvertedTextGlyph`, then pass its glyph pointer to
-`frFontDrawGlyphWithSharedFlags(_FRQ *, s8)`. The provider in
+`frDrawFontEx(_FRQ *, s8)`. The provider in
 `interface/frFont.c` forwards that pointer and mode to the chain renderer.
 Use the same explicit word-to-pointer boundary as the adjacent
 `frDestroyFontRequestAfter` call, rather than relying on an
@@ -7124,7 +7129,7 @@ integer adapter, and this closure does not claim a parser-body match.
 DDS1 `code_00248580`'s atlas-slot and number-sprite clients return and queue
 `struct _FRQ *` from the existing text providers; their handles are
 not integer IDs. The local declarations now agree with the providers,
-including `frFontDrawGlyphChain`'s `s8` option and `u32` priority. No provider
+including `frDrawFontOt`'s `s8` option and `u32` priority. No provider
 or shared header changes are needed. The selected-row candidate at
 `0x248E68` remains ASM: its two independent instructions at `+0x9C/+0xA0`
 are still exchanged, so this adapter retirement claims no new body match.
@@ -7378,7 +7383,7 @@ the list returned by `sdfPrimAllocDrawTag` as `sdfDrawTag_t *` too.
 `sdf3DLinkInitPacket` receives that CPU list owner as
 its first argument and a `DmaPacketHeader *` as its second argument.
 Only the second argument is converted to the genuine packet-address
-word submitted to `sdfAppendReferencePacket`. Neither the software
+word submitted to `sdfDrawTagLinkRef`. Neither the software
 list wrappers nor their callers need an integer-to-pointer round trip.
 Keep encoded program addresses, DMA tag words, and allocator/range
 address-word interfaces unchanged.
@@ -7448,8 +7453,8 @@ The owner migration leaves both 600-byte creator bodies byte-exact.
 
 ## DMA formatter output buffers are CPU pointers
 
-Both games' `sdfBuildMaskedFrameRegisterReference` /
-`sdfBuildFrameRegisterReference` build reference-chain tags in a caller-provided
+Both games' `sdfGrSetFrameMaskRGB` /
+`sdfGrSetFrameMaskReset` build reference-chain tags in a caller-provided
 `SdfDmaReferenceChainPacket *`. Their first argument is different:
 it remains the SDK source-address word, with the native
 offsets added before `sdfGrSetRefGifPacket` encodes it. All C
@@ -7489,8 +7494,8 @@ loads and pending/frame/message stores without artificial temporaries.
 
 ## Blur and rectangle sources retain CPU texture pointers
 
-`EffBlurTemplate`, `EffBlurScatterWork` and `EffBlurScaleWork` store the
-selected `sdfTexHandle_t *` at `+0x2C`; `EffResourceRectWork` stores it at `+0x24`.
+`effBlurTemplate_t`, `effBlurScatterWork_t` and `effBlurScaleWork_t` store the
+selected `sdfTexHandle_t *` at `+0x2C`; `dds3Effect_PartialMultiFilter_t` stores it at `+0x24`.
 The four viewer channel caches carry the same pointers selected from
 `EvtRuntimeGroup.texture`, not resource indices or DMA address words.
 DDS1 kind work retains a direct texture. DDS2 retains the existing
@@ -7583,7 +7588,7 @@ retain their existing contracts.
 ## Battle texture preview retains its allocated CPU packet
 
 `btlDrawResourcePreview` keeps the column factory's true `void *` result
-beside the existing `KwlnSpriteVertex *` payload cursor. Only the latter
+beside the existing `dds3EffectSpriteVertex_t *` payload cursor. Only the latter
 owns the vertex fields. The SDK `+0x20` helper still takes and returns a
 scalar address/extent word, and append still consumes a physical `u32`;
 those are the two explicit word boundaries, not alternate CPU views.
@@ -8061,7 +8066,7 @@ migrate to those same arrays, with sizes and offsets unchanged.
 `evtHokanMultFilter` writes only the resource rectangle's 0x14-byte prefix,
 leaving its existing bounds untouched. Its packed RGBA word and the
 renderer's four channel reads justify the documented color union in
-`EffResourceRectDrawParams`. Other packed colors remain plain `u32`.
+`effResourceRectDrawParams_t`. Other packed colors remain plain `u32`.
 The blender units are exact at 32/0 each; the private owner proof also gates
 all 147 existing header consumers with no changed retail words.
 
@@ -8612,7 +8617,7 @@ extra geometry buffers or assembly is needed.
 
 ## Controller geometry uses scoped magnitudes and signed angle sectors
 
-`kwlnUpdatePadInputState` (DDS1 `0x00103B10`, DDS2 `0x00103A00`, 1268 bytes)
+`dds3RunProcessList` (DDS1 `0x00103B10`, DDS2 `0x00103A00`, 1268 bytes)
 uses separate direction-vector length, dot product and angle values, then a
 loop-local stick magnitude. The degree conversion, 22-degree bias, division
 by 45 and remainder modulo eight are genuine signed-integer stages. This
@@ -9506,7 +9511,7 @@ fourth lane too. The neighboring empty/zero-return functions remain
 unnamed: these callback tables do not establish a distinct role for
 every dormant entrypoint.
 
-## Trace-justified switch tails: fileReqPoll
+## Trace-justified switch tails: sdfMcFuncGetInfo1
 
 The 248-byte twins at DDS1 `0x00289AA0` and DDS2 `0x002C9020` use
 the primary `FileReqEntry` and the default `-O2 -G8` configuration.
@@ -9528,7 +9533,7 @@ The deciding property is twofold:
   leaves an extra branch; returning directly from it also disturbs allocation.
 
 Both original whole units gate at 23 matches, zero differences with
-`fileReqInit` still in assembly. Poll also matches in the private no-sibling
+`sdfMcFuncGetInfo` still in assembly. Poll also matches in the private no-sibling
 envelope, but is **not** flag-sensitive: it provides no second independent
 site for changing that envelope's compiler flags.
 
@@ -9538,7 +9543,7 @@ The device units expose two distinct worker selections. The default worker
 chooses the disc/host/PFS path builder in `sdfFileMakeFilename`; the
 fallback worker is read by the native file-path classifier only when the
 input lacks a colon. `sdfFileSetDefaultSrc` sets both, while
-`sdfDevSetFallbackDeviceWorker` changes the latter independently.
+`sdfFileCmdSetDefaultDevice` changes the latter independently.
 `sdfFileCmdMakeRealFileName` builds cdrom0/host0/pfs0 paths or copies worker-three
 input; unsupported workers return NULL. The normalized-path allocation stays
 0x80 bytes. Existing fixed-size buffers, length assumptions and copy forms
@@ -9551,7 +9556,7 @@ it does not introduce a new staging form or change either interface.
 
 `sdfPuts` selects the bound IOP print RPC or local `%s` printing.
 `sdfCdImageRead` retains partial-sector bytes while consuming the
-current disc file, and `sdfDevInitializeHddPfsDebugMode` preserves the native
+current disc file, and `sdfHddInit` preserves the native
 module-loading, power-off setup and mount sequence, including early returns
 and the unchecked mount result.
 
@@ -9820,7 +9825,7 @@ ages and clear cell history/vertex counts. `dds3SpPoly_Ring_Old_New` emits
 origin/radial-point pairs and duplicates the first pair to close the fan;
 it is not a two-radius strip.
 
-`dds3SpPoly_RingDraw`, `dds3SpPoly_SphereRingDraw` and `polyUpdateRotatingBandCells`
+`dds3SpPoly_RingDraw`, `dds3SpPoly_SphereRingDraw` and `dds3SpPoly_RollRingDraw`
 advance their records, update geometry and queue the cell system. Arc records
 are seeded by `dds3SpPoly_SphereRingAllBuffInit` and reset individually by
 `dds3SpPoly_SphereRingBuffInit`; rotating-band ages are seeded by
@@ -9864,7 +9869,7 @@ the parameter, position, optional normal, UV and color streams. Preserve vec3
 MMI packing, the optional allocator, UV packing paths, termination and alignment.
 
 `dds3UpdateCrossfade` captures the first frame and draws the held texture with
-decreasing alpha; `dds3EndCrossfade` releases it and clears the active state.
+decreasing alpha; `dds3CrossfadeEnd` releases it and clears the active state.
 The native start/end strings explicitly identify crossfade. The previous DDS1
 textured-quad name described a drawing detail rather than this lifecycle.
 
@@ -10356,7 +10361,7 @@ their consumers, not guessed skill identities or unnamed scalar fields:
 | `dds3Particle_BlurDelete` | 0x00159CD8 / 0x001618C8 | Releases the table's point/slot allocation, not a separate node. |
 | `dds3Particle_BlurClearItem` | 0x00159F30 / 0x00161B20 | Clears the selected slot's point count, not a bit flag. |
 | `dds3Particle_Track2SetExp` | 0x0015A118 / 0x00161D08 | Three-vertex history variant: center plus opposing width edges; the DDS2 name now agrees with DDS1. |
-| `effReturnCallbackValue` | 0x0018CE30 / 0x00194A68 | Returns the incoming callback word unchanged; the unsigned DDS1 and signed DDS2 C surfaces are retained. |
+| `effDebugResetMenu` | 0x0018CE30 / 0x00194A68 | Empty stub returning its menu argument; SMT3's body destroys and recreates the menu. |
 
 The width factor is not an angle or an opacity, and this function does not
 normalize its input axis. The reflecting emitter uses the radius captured
@@ -10781,7 +10786,7 @@ caller resets it before polling.
 DDS1 also has `btlDrawScaledFrameBufferQuad` (`00211B88`), which references the
 current draw-buffer frame texture packet via `sdfGrLinkDispFrameTex` (record
 offset `0x1A0`) before its scaled quad. The same frame sampling path is used by
-`effDrawBlurRectangle`; the framebuffer interpretation has medium confidence.
+`dds3EffectBlur`; the framebuffer interpretation has medium confidence.
 `btlDrawWindOverlay` (`002121E8`) obtains the wind texture, draws three tinted
 sweeps interleaved with grey frame quads, restores frame packets and advances
 the sweep. `btlDrawFlatGridCell` (`00212680`) draws the six flat triangles using
@@ -10873,15 +10878,15 @@ batch's owned allocations. `sdfImageSetDmacHandler` is the registered
 wakeup callback and retains the native -1 result. `sdfGsMemCheckLinkConsistence`
 only walks the two endpoints; it neither changes the heads nor returns a node.
 
-`sdfTexBlendPaletteToTintedIntensityVU` blends cloned palette RGB toward
+`sdfTexSetClutColor` blends cloned palette RGB toward
 intensity-scaled tint, preserving alpha, then queues secondary upload.
 The retained intensity map uses RGB weights 77, 150 and 29. The existing
 VU0 operands, accumulation order and both CLUT-format loops are unchanged.
 `sdfGrOtInit` initializes adjacent pool entries and links them;
 the native positive-count requirement and existing control flow remain intact.
 
-`sdfBuildMaskedFrameRegisterReference` references the FRAME write at scene
-offset 0x180 or 0x190; `sdfBuildFrameRegisterReference` references the ordinary
+`sdfGrSetFrameMaskRGB` references the FRAME write at scene
+offset 0x180 or 0x190; `sdfGrSetFrameMaskReset` references the ordinary
 context FRAME write at 0x70 or 0xB0. In both APIs, zero selects GS context one
 and all other values select context two. The native `sdfGrStdDrawEnvPredraw`
 stores register IDs FRAME_1/2 at 0x188/0x198 and ORs the alternate values with
@@ -11241,7 +11246,7 @@ The existing ITF fan/strip constants independently distinguish `0x4D` from
 `0x4C`. Color selection, coordinate scale/bias, packet values, argument types,
 legacy caller declarations and statement order are unchanged.
 
-## Trace-justified pixel conversion reuse: kwlnDebugGraphUpdate
+## Trace-justified pixel conversion reuse: dds3DebugGraphUpdate
 
 The two timing graphs (`0x00104290` in DDS1 and `0x00104180` in DDS2,
 872 bytes each) display current measurements and held peaks. All four draws
@@ -11486,7 +11491,7 @@ that the node itself is freed.
 
 `sdfGetRunTimeCountBase` reads EE timer0 count at `0x10000000`. The existing callers'
 signed and unsigned declarations remain unchanged. Its timing use also supports
-`sdfLoadModulesAndBindNamedResourceRpc`: optional/required IOP module loading
+`SdfIopInit`: optional/required IOP module loading
 followed by retries of the named-resource RPC binding.
 
 `corePktClosePacket` pads active nonempty work, updates its cursor, writes
@@ -11565,13 +11570,13 @@ semaphore. It ignores the passed device/callback context and returns zero.
 `SdfFileRpcServerThreadProc` registers the synchronous stream dispatcher, loads
 `SDFIOPFL.IRX`, wakes its creator and enters the RPC loop.
 
-`sndGetTrackBalanceFirstComponent` and `sndGetTrackBalanceSecondComponent` name only their
+`sdfSndGetTrackBalanceFirstComponent` and `sdfSndGetTrackBalanceSecondComponent` name only their
 observable arithmetic roles in the nonnegative balance query.
-`sndGetMidiChannelTable` returns the channel-array address at the MIDI state
+`sdfSndGetMidiChannelTable` returns the channel-array address at the MIDI state
 prefix, established by `SndWork` layout assertions and its startup initializer;
 the existing game-specific return types remain unchanged.
-`sndGetMidiStateWordPair` retains the opaque adjacent-word semantics, while
-`sndCopyGroupedMidiStateBytes` packs the two 24-byte groups into caller storage.
+`sdfSndGetMidiStateWordPair` retains the opaque adjacent-word semantics, while
+`sdfSndCopyGroupedMidiStateBytes` packs the two 24-byte groups into caller storage.
 No voice, pause, or playback interpretation is inferred.
 
 DDS1's direct fixed-size icon renderer now shares DDS2's established
@@ -11642,7 +11647,7 @@ segment. That native quirk remains explicit and unchanged.
 `dds3FlashPolyListSetABGR` and `dds3FlashPolyListSetScale` are the five-position
 fan pool setters, separate from the triple-vertex pool's existing generic
 setters. `sdfGetCdClock` preserves its 20-tick cache gate, three return
-cases and month-as-year input quirk. `sndTryDispatchQueuedCommand` attempts one
+cases and month-as-year input quirk. `sdfSndCmdTrans` attempts one
 ring send: zero means accepted, one means empty or rejected. Its producer and
 worker loops retain their opposite continuation conditions.
 `sdfSndLoadSQFile` forwards `strlen` bytes with command bit 0x80,
@@ -11741,7 +11746,7 @@ party-record status mask, AI-counter threshold, device seek operation,
 power-off semaphore context and selected autoattack unit. These values
 belong in the wrapper's real formals and call expressions, not in an
 unprototyped call that depends on incoming `$a0`-`$a2` surviving.
-DDS2 `evtWriteOutputBytes` likewise passes all three arguments to the SDK
+DDS2 `evtWriteRecord` likewise passes all three arguments to the SDK
 `sceWrite`; its existing 32-bit address word is converted to `const void *`
 at that API boundary. The power-off callback receives its registered
 `void *` context and converts the semaphore ID to the SDK's `int`.
@@ -12054,16 +12059,12 @@ Constructor input is the payload base for types zero/one and payload
 +0x40 for two through four, not an owner-record +0x04/+0x44 slot.
 Its original void surface and native result propagation are retained.
 
-Seven event-setup paths in each game use the same exact sequence:
-`effReturnEventSetupWord(recordAddressWord)`,
-`effEventSetupBeforeRecordNoOp()`, `effEventSetupRecordNoOp(record)`,
-then `effEventSetupAfterRecordNoOp()`. The first returns the input word
-unchanged; the other three are matched empty entries. Names describe
-observed order and record argument only, without inventing a hidden
-operation. Preserve zero-formal definitions, DDS1's pointer extern and
-DDS2's unprototyped externs; the shared word-returning declaration is
-otherwise identical. Unregistered stubs, all-zero admin-mode request
-forwarders and the unknown control-byte reader remain unnamed.
+Seven event-setup paths in each game run SMT3's effect debug menu sequence on
+their `effDebugMenu_t`: `dblurUpdateHandle(menu)`, `effDebugAllocDrawTag()`,
+`effDebugDrawMenu(menu)`, `effDebugLinkDrawTag()`. DDS keeps the whole
+`effDebug*` block (DDS1 0x0018CDD0..0x0018CE68) as empty stubs in SMT3's
+order and with SMT3's prototypes; `dblurUpdateHandle` and `effDebugResetMenu`
+return their argument.
 
 ## Parameter-node default callbacks
 
@@ -12248,12 +12249,12 @@ remain intact; only the four accessor/mode function names and callers change.
 
 ## Actor selectors, task hooks and surface-alpha modes
 
-`effBTLFieldColorUsesActorSelectors` returns one in both games. Its real effect
+`effBTLSkillCheckRun` returns one in both games. Its real effect
 consumers select original/variant actor muzzle positions and status flags
 instead of fixed positions or existing resource matrices. This is not a
 battle-active check, nor does it validate either stored selector.
 
-The empty `sdfRuntimeTaskTeardownHook` runs after the GBWK hierarchy is
+The empty `dds3GlobalWorkUserInit` runs after the GBWK hierarchy is
 destroyed and before the backing allocation is released. It remains empty.
 `btlCompleteEffectTaskImmediately` reports completion without per-frame work:
 the scheduler enters its end-delay phase on a nonzero callback result.
@@ -12433,7 +12434,7 @@ claiming a callback is unregistered.
 
 `sdfSndSyncCmd` receives the sequence immediately after queuing
 in `sdfSndSendSyncCmd`, then does nothing. It does not wait, synchronize
-or update state. `sndSendChannelGroupCommand110Duplicate` is a separate
+or update state. `sdfSndSendChannelGroupCommand110Duplicate` is a separate
 native copy of the command-`0x110` sender, not a new command kind.
 
 `dds3LoadOwnedSpriteRecordList` and its `Duplicate` entry use the same
@@ -13809,7 +13810,7 @@ grid, pages through the flag bank, and toggles its selection with
 described above.
 
 The RGB editors install `evtNoOpRGBEditorRow` in the final row-callback
-argument of `evtDrawMenuFrame`. Native DDS1 0023A9B4..E8 and DDS2
+argument of `evtMenuDisp`. Native DDS1 0023A9B4..E8 and DDS2
 00255864..98 materialize the callback and store it at SP+8 before the call.
 The frame helper invokes rows with list, X, Y, row index, and context.
 These empty registered renderers are not unreferenced stubs, and are
@@ -14098,7 +14099,7 @@ that two data tables are twins.
 
 The file-menu glyph words distinguish two producers:
 `fileMenuConvertedTextGlyph` stores `itfCreateConvertedTextGlyph`'s result,
-whereas `fileMenuStringGlyph` stores `frFontBuildGlyphChain`'s result before
+whereas `fileMenuStringGlyph` stores `frSetFontString`'s result before
 spacing, positioning, coloring and drawing it. They are glyph pointers, not
 the shared font-rendering flags.
 
@@ -14339,16 +14340,16 @@ all original declarations, casts, draw coordinates and state tests.
 
 ## Record-pool and scatter packet banks
 
-`effRecordPoolDrawParams` is shared by the fan, triangle and quad pool paths;
+`effPCPFlashPolyParams` is shared by the fan, triangle and quad pool paths;
 retain its existing array declaration and each native 0x2C reset. The fan
-and quad renderers choose `effFanPoolTriangleIndices` and
-`effQuadPoolTriangleIndices`, respectively. Both full banks hold eighteen
+and quad renderers choose `effPCPFlashFanIndices` and
+`effPCPFlashQuadIndices`, respectively. Both full banks hold eighteen
 packed triangle words: six five-point fans or nine quads, rather than just
 the fifteen or sixteen triangles consumed by one full draw batch.
 
-The direct-submission banks remain distinct: `effScaledFanDrawSurfaces`,
-`effTrianglePoolDrawSurfaces`, `effQuadPoolDrawSurfaces` and
-`effTransformedFanDrawSurfaces`. Preserve the two null tail cells in the
+The direct-submission banks remain distinct: `effPCPFlashFanSurfaces`,
+`effPCPFlashTriangleSurfaces`, `effPCPFlashQuadSurfaces` and
+`effPCPFlashFanHSurfaces`. Preserve the two null tail cells in the
 triangle and transformed-fan banks and the existing separate state/drawing
 lists for non-direct fan modes. Do not rename their shared pool-node pointees.
 
@@ -14356,8 +14357,8 @@ lists for non-direct fan modes. Do not rename their shared pool-node pointees.
 The ring builder writes XYZ before the quadword load and normalization; its
 untouched W is not a reason to replace the record with a local or constant.
 
-The scatter object has separate `effScatterDrawParams`,
-`effScatterTriangleIndices` and `effScatterDrawSurfaces`. Its full index bank
+The scatter object has separate `effDebugPoly`,
+`effScatterTriangleIndices` and `effPCPScatterSurfaceByQueue`. Its full index bank
 contains twenty-four triangles over thirteen vertex pairs, though one full
 batch submits only sixteen triangles over eighteen vertices. Retain the
 byte-array view, all remaining index words and the four surface pointers.
@@ -14388,22 +14389,22 @@ these are plain NUL-terminated strings, not MSG1 packs or new C literals.
 
 ## Resource fallbacks and parameter-work defaults
 
-`effResourceDrawParams` is the descriptor filled by instanced triangle
+`dds3NeedleModelPrimParam` is the descriptor filled by instanced triangle
 drawing. When no private streams exist, it uses twelve vertices from
-`effResourceDefaultTrianglePoints` and the twelve packed entries in
-`effResourceDefaultTriangleColors`, then submits through the mode-indexed
-`effResourceDrawSurfaces` bank. Keep the existing array views, shared descriptor
+`dds3NeedleModelDefaultPoints` and the twelve packed entries in
+`dds3NeedleModelDefaultColors`, then submits through the mode-indexed
+`dds3NeedleModelDrawSurfaces` bank. Keep the existing array views, shared descriptor
 reset and native color triplets; do not invent a new shape or normalize alpha.
 
-`effModelDefaultPosition`, `effModelDefaultQuaternion` and
-`effModelDefaultScale` feed the primary-vector, quaternion-to-basis and
+`effPartModelPosInit`, `effPartModelRotInit` and
+`effPartModelScaleInit` feed the primary-vector, quaternion-to-basis and
 tertiary-vector providers in `dds3EffectPartModelInit`. Matched transform updates use
 the primary and tertiary providers for position and scale. The first two
 native records are both four zero floats, at distinct addresses; the scale
 record is `(1,1,1,0)`. In particular, do not replace the native zero quaternion
 with a mathematical identity quaternion or change either W value.
 
-`effParameterPresetBanks` is the kind-then-table-index fallback used by
+`effPartPCPDataTable` is the kind-then-table-index fallback used by
 dispatched-work creation and cloning only when the kind lacks a duplicate
 callback. The full native bank is 0x70 bytes: twenty-eight pointer cells, eight
 non-null and twenty null. Retain its unsized `void **[]` declaration, its
@@ -14444,18 +14445,18 @@ from the already named chip-release request. `sdfIopRpcClient`
 is bound to the named-resource service and reused for the packed name/data
 requests; its existing SDK client-prefix declaration is unchanged.
 
-The graphics buffer-service worker uses `sdfGraphicsBufferThread` and its
-0x1000-byte `sdfGraphicsBufferThreadStack`. The transfer worker uses the
-separate 0x8000-byte `sdfGraphicsTransferThreadStack`; its stored
+The graphics buffer-service worker uses `sdfDispThreadCB` and its
+0x1000-byte `sdfDispThreadStack`. The transfer worker uses the
+separate 0x8000-byte `sdfDrawThreadStack`; its stored
 `sdfDrawThreadId` is also woken by the graph interrupt callback.
 Keep the existing byte arrays, stack sizes, priorities and per-game pointer
 versus integer argument carriers. `reqGsReset` is set during
 worker initialization and cleared immediately before the current-mode GS
-reset. `sdfGsCaptureStoreImage` is the existing SDK descriptor reused for
+reset. `sdfGrStoreImage` is the existing SDK descriptor reused for
 both color-buffer captures; its existing uncached-address expression stays
 unchanged, not a new alias view.
 
-`sdfMotionCommandHandlers` retains the native constructor pointer followed
+`sdfMotGenMorphTable` retains the native constructor pointer followed
 by a null entry and the existing unchecked low-halfword index dispatch.
 `sdfMotMorphTable` binds model slot indices and weights; its five
 release/bind/sample/capture/blend callbacks and final opaque word are kept.
@@ -14472,9 +14473,9 @@ only the 0–15 bytes needed for alignment; do not merge the banks.
 `effWaveEmitterNegativeYAxis` is the existing `(0,-1,0,0)` vector loaded into
 VF10 by the wave-emitter update, with its original VU0 operations retained.
 
-`fileManagerTaskName` is the C-owned eight-byte `fileManagerProc` task-name object,
+`fileManagerProcName` is the C-owned eight-byte `fileManagerProc` task-name object,
 not an imported small-data blob. Keep its existing `.sdata` placement and
-array bound. `fileActiveCardDetectionRequestIndex` selects the request entry
+array bound. `sdfMcInfo` selects the request entry
 used by the manager's card synchronization/type/format polling and retry;
 it is distinct from the file-menu request index.
 
@@ -14507,7 +14508,7 @@ parameter numerically instead, so no artificial counterpart is introduced.
 
 ## Sound command transport and startup storage
 
-`sndCommandRing` is the existing thirty-two-entry, 0x80-byte packet ring.
+`sdfSndCmdPacketRing` is the existing thirty-two-entry, 0x80-byte packet ring.
 `sdfSndCmdIndex` and `sdfSndCmdTailIndex` retain their volatile u16
 declarations, signed cursor casts and unchecked payload-copy contract.
 The worker consumes entries and advances the read cursor; the producer
@@ -14516,13 +14517,13 @@ publishes the write cursor. No synchronization or wrap logic changes.
 `sdfSndBurstReqMode` is set only during sound initialization: the
 producer dispatches commands itself while this flag is nonzero, and otherwise
 wakes `sdfSndCmdBuf`. The startup descriptor
-`sndCommandThreadParameters` retains its 0x30-byte owner, priority 0x42 and
-0x1000-byte `sndCommandThreadStack`; `sndRpcServerThreadStack` is the separate
+`sdfSndCmdThreadParam` retains its 0x30-byte owner, priority 0x42 and
+0x1000-byte `sdfSndCmdThreadStack`; `sdfSifRpcThreadStack` is the separate
 0x1000-byte RPC-server stack submitted at priority 0x43.
 
 `sdfSndTransBuf` is the existing SIF transfer descriptor filled before
 `sceSifSetDma`. Naming leaves its type, fields and existing retry body alone.
-`sndCachedListenerState` caches six scaled integer values for command 0x160;
+`sdfSndListenerPrevState` caches six scaled integer values for command 0x160;
 preserve the opaque two-word prefix and the complete 32-byte copy rather
 than initializing or reinterpreting those words. All names are inferred
 from matched consumers and paired native storage; no code, flags, layouts,
@@ -14577,13 +14578,13 @@ DDS2 integer-handle declarations rather than imposing a new common view.
 
 `sdfFileHostRootPath` remains the 64-byte, C-owned `host0:` buffer. Its
 six-byte prefix copy and unchecked path/slash/NUL appending are unchanged.
-`sdfDevRpcClient` keeps the existing 0x30-byte context owner and its SDK
+`sdfPrintRpcClient` keeps the existing 0x30-byte context owner and its SDK
 client prefix; naming introduces no alternate RPC layout.
 
-`sdfDevReadSectorBuffer`, `sdfCdImageOffset` and
+`sdfCdSectorBuf`, `sdfCdImageOffset` and
 `sdfCdImageCurrActive` retain partial reads from the same 0x800-byte
 disc sector. Keep the existing signed byte-count arithmetic and transfer
-calls. `sdfDevHddModuleArguments` and `sdfDevPfsModuleArguments` are packed
+calls. `sdfHddIrxArgs` and `sdfHddPfsIrxArgs` are packed
 NUL-separated arguments, not format strings: the loader consumes 0xC bytes
 for `-o`, `18`, `-n`, `32`, and 0x12 bytes for `-m`, `18`, `-o`, `10`,
 `-n`, `64`, respectively. All native zeros, imports, declarations, casts,
@@ -14827,7 +14828,7 @@ declaration in billManager and s32 zero-store carrier declaration in the
 initialization unit are retained. `billPendingRenderPairList` is the
 corresponding intrusive paired-stream head. No lifecycle or owner changes.
 
-`effScatterPoolDrawParams` is the native 0x30-byte shared draw descriptor.
+`effPCPScatterDrawParams` is the native 0x30-byte shared draw descriptor.
 The index bank has twenty native packed triangle words: the full path uses
 sixteen for twenty-four vertices; the remaining four words stay present.
 The texture-coordinate bank retains all forty-eight words (192 bytes),
@@ -15418,8 +15419,8 @@ exactly (86 units, 4655 C functions). The complete manifest and receipts are
 
 ## Runtime startup does not return the admin request's scratch register
 
-`kwlnInitializeRuntime` is a `void` initializer in both games. Its only caller,
-`kwlnRunMainLoop`, ignores the result; retail ends the initializer with a sibling
+`dds3FirstInit` is a `void` initializer in both games. Its only caller,
+`dds3KernelMain`, ignores the result; retail ends the initializer with a sibling
 jump to the administrative request API and never reads that API's `$v0`.
 A decompiler's `return dds3AdminiCallSequence(...)` is not evidence that either
 function has a returned status contract. Keep the existing truthful `void`
@@ -15691,7 +15692,7 @@ Their per-frame `memcpy` uses `sizeof` the real body and preserves the
 retail aligned doubleword copy without an over-aligned nominal alias.
 The dynamic-work snapshots still use their real leading `params` member.
 
-The complete cutover removes the obsolete `kwln_draw_params.h`, its
+The complete cutover removes the obsolete draw parameter header, its
 tautological cross-view layout checks, and the unused scalar/bounds field
 aliases from C. Both kernel units gate at 42/0, both effect-event
 units at 103/0, and both complete linked games pass their retail SHA-1.

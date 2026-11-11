@@ -2,13 +2,13 @@
 #define EVT_UNIT_H
 
 #include "common.h"
-#include "kwln.h"
+#include "kernel.h"
 #include "eff_transform.h"
 
 struct dds3ModelHandle_t;
 struct dds3PathBasicControl_t;
 struct sdfTexHandle_t;
-struct SdfLightingPacketStorage;
+struct sdf3DLightParallelPacket_t;
 
 /* Values stored in evtUnitHandle_t.motionState; the field remains a signed halfword. */
 typedef enum EvtUnitMotionState {
@@ -108,7 +108,7 @@ typedef struct evtUnitHandle_t {
         u8 pad64[4];
         u32 color64;                /* Destination packed RGB/alpha word */
     };
-    struct SdfLightingPacketStorage *endpointWork; /* 0x68: owned lighting packet storage */
+    struct sdf3DLightParallelPacket_t *endpointWork; /* 0x68: owned lighting packet storage */
     u32 value;                     /* 0x6C */
     f32 targetVector[4];           /* 0x70 */
     dds3Basic_t *effObj;          /* 0x80: kind-5 world node owning this motion work. */
@@ -224,7 +224,7 @@ evtUnitHandle_t *evtCreateUnitTransitionWork(dds3Basic_t *effObj, struct dds3Mod
  * handle; owner and effObj are not freed. NULL is a no-op; always returns 1. */
 s32 evtDeleteUnitHandle(evtUnitHandle_t *work);
 
-void evtSetUnitValueTransition(evtUnitHandle_t *unit, dds3Basic_t *target, s32 duration);
+void evtLinkLightObjectBasic(evtUnitHandle_t *unit, dds3Basic_t *target, s32 duration);
 void evtSetUnitLightDir(evtUnitHandle_t *unit, EvtUnitDirectionTransitionFrames durationFrames);
 void evtSetUnitColorRGB(evtUnitHandle_t *unit, s32 duration, u32 color);
 void evtSetUnitColorA(evtUnitHandle_t *unit, s32 duration, u32 color);
@@ -232,7 +232,7 @@ void evtUnitLightOn(evtUnitHandle_t *unit);
 evtUnitHandle_t *evtGetUnitHandle2(dds3Basic_t *unit);
 void evtSetWaitMotion(evtUnitHandle_t *unit, s32 value);
 
-KwlnTaskUpdateResult evtTickPackLoad(dds3ProcessID_t *task);
-void evtDestroyEventPackTask(dds3ProcessID_t *task);
+dds3TaskUpdateResult_t evtCheckScriptDone(dds3ProcessID_t *task);
+void evtWaitEventPackLoad(dds3ProcessID_t *task);
 
 #endif /* EVT_UNIT_H */

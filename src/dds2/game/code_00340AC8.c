@@ -1,49 +1,48 @@
 #include "common.h"
-#include "sdf_vu0.h"
+#include "ps2asm.h"
 #include "fpu.h"
 #include "sdf_trig.h"
 #include "eff_random.h"
-#include "pcp_vu0.h"
 #include "sdf_vu_matrix.h"
 
 #define EFF_QUAT_SLERP_DOT_LIMIT 0.99899996f
 
-extern EffRandState D_0040BAE8;
+extern EffRandState sdfDefaultRandCB;
 
-/* Persona 4 effMiscQuatMultiplyVU @ 004BCE50 (src/Graphics/Effect/effMisc.c), recompiled unchanged */
+/* Persona 4 Mult @ 004BCE50 (src/Graphics/Effect/effMisc.c), recompiled unchanged */
 
 
 
-extern f32 D_0040B530[4];
+extern f32 sdfUnitXVector[4];
 
 extern f32 D_00435B38;
 
 
 
 /* vu0 routine: vf10 = quaternion product vf10 * vf11 */
-void effMiscQuatMultiplyVU(void)
+void Mult(void)
 {
-    VU0_QUAT_MUL_VF10_VF11();
+    VU0_SEQ_MULT();
 }
 
 /* VU-register calling convention: vf10 is the quaternion input and result. */
 /* vu0 routine: vf10 = inverse of quaternion vf10 (conjugate / |q|^2) */
 void Inverse(void)
 {
-    VU0_QUAT_INVERSE_VF10();
+    VU0_SEQ_INVERSE();
 }
 
 /* Persona 4 Normalize @ 004BCE80 (src/Graphics/Effect/effMisc.c), recompiled unchanged */
 void Normalize(void)
 {
-    VU0_NORMALIZE_XYZW_VF10();
+    VU0_SEQ_NORMALIZE();
 }
 
-/* Retail reduction: (x*x)*(y*y) + z*z + w*w from vf10, not the usual squared length. */
-f32 effMiscQuatLengthSqVU(void)
+/* Squared length, but retail's vmulay multiplies x*x by y*y instead of adding them. */
+f32 LengthSq(void)
 {
     f32 componentMetric;
-    VU0_SEQ_SDF_2_C0510(componentMetric);
+    VU0_QUAT_LENGTHSQ(componentMetric);
     return componentMetric;
 }
 
@@ -60,9 +59,9 @@ void FromRotation(f32 angle)
 {
     f32 halfAngle = angle * 0.5f;
     f32 trigValue = sdfSin(halfAngle);
-    VU0_SCALAR_OP(trigValue, "vmulx.xyzw vf10, vf10, vf2x");
+    SDF_VU0_SCALEVECTOR_V0(trigValue);
     trigValue = sdfCos(halfAngle);
-    VU0_SCALAR_OP(trigValue, "vmulx.w vf10, vf0, vf2x");
+    VU0_SEQ_FROM_ROTATION(trigValue);
 }
 
 /* As above, but write the second VU quaternion register (vf11). */
@@ -70,16 +69,16 @@ void FromRotation_B(f32 angle)
 {
     f32 halfAngle = angle * 0.5f;
     f32 trigValue = sdfSin(halfAngle);
-    VU0_SCALAR_OP(trigValue, "vmulx.xyzw vf11, vf11, vf2x");
+    SDF_VU0_SCALEVECTOR_B_V0(trigValue);
     trigValue = sdfCos(halfAngle);
-    VU0_SCALAR_OP(trigValue, "vmulx.w vf11, vf0, vf2x");
+    VU0_SEQ_FROM_ROTATION_B(trigValue);
 }
 
 /* Persona 4 func_004bceb0 @ 004BCEB0 (src/Graphics/Effect/effMisc.c), recompiled unchanged */
 /* vu0 routine: rotation matrix vf28-vf31 from the quaternion in vf10 */
-void effMiscQuaternionToMatrixVU(void)
+void ToMatrix(void)
 {
-    VU0_QUAT_TO_MATRIX_VF10();
+    VU0_SEQ_TO_MATRIX();
 }
 
 
@@ -111,7 +110,7 @@ void FromEulerXYZ(f32 x, f32 y, f32 z) {
     SDF_VU0_LOADVECTOR((f32 *)quaternion);
 }
 
-void sdfConvertEulerAnglesToQuaternionVU(f32 x, f32 y, f32 z) {
+void FromEuler(f32 x, f32 y, f32 z) {
     volatile f32 quaternion[4] __attribute__((aligned(16)));
     f32 half;
     f32 cx;
@@ -137,9 +136,9 @@ void sdfConvertEulerAnglesToQuaternionVU(f32 x, f32 y, f32 z) {
     SDF_VU0_LOADVECTOR((f32 *)quaternion);
 }
 
-extern f32 D_0040BAA0[4];
-extern f32 D_0040BAB0[4];
-extern f32 D_0040BAC0[4];
+extern f32 sdfQuatPoleDown[4];
+extern f32 sdfQuatPoleUp[4];
+extern f32 sdfMathConstants[4];
 
 /* vu0 routine: compose pitch and offset-adjusted planar direction quaternions. */
 void LookAt(f32 xOffset, f32 yOffset) {
@@ -166,9 +165,9 @@ void LookAt(f32 xOffset, f32 yOffset) {
     horizontalSquared = x * x + z * z;
     if (horizontalSquared < 0.000001f) {
         if (y < t) {
-            SDF_VU0_LOADVECTOR(D_0040BAA0);
+            SDF_VU0_LOADVECTOR(sdfQuatPoleDown);
         } else {
-            SDF_VU0_LOADVECTOR(D_0040BAB0);
+            SDF_VU0_LOADVECTOR(sdfQuatPoleUp);
         }
         return;
     }
@@ -190,7 +189,7 @@ void LookAt(f32 xOffset, f32 yOffset) {
     t = x + xOffset;
     offsetSquared = t * t + adjustedZ * adjustedZ;
     if (offsetSquared < 0.000001f) {
-        SDF_VU0_LOADVECTOR_B(D_0040BAC0);
+        SDF_VU0_LOADVECTOR_B(sdfMathConstants);
     } else {
         s = frsqrtf(1.0f, offsetSquared);
         quaternion[0] = 0.0f;
@@ -199,7 +198,7 @@ void LookAt(f32 xOffset, f32 yOffset) {
         quaternion[3] = adjustedZ * s;
         SDF_VU0_LOADVECTOR_B(quaternion);
     }
-    effMiscQuatMultiplyVU();
+    Mult();
 }
 
 /* vu0 routine: blend vf10/vf11 along the shorter quaternion arc into vf10.
@@ -228,7 +227,7 @@ void Slerp(f32 blendAmount)
         firstWeight = sdfSin(firstWeight * angleBetween) / sineAngle;
         secondWeight = sdfSin(secondWeight * angleBetween) / sineAngle;
     }
-    VU0_SET_SCALARS_VF2_VF3(firstWeight, secondWeight);
+    VU0_SET_WEIGHTS_VF2X_VF3X(firstWeight, secondWeight);
     VU0_WEIGHTED_SUM_VF10_VF12();
     Normalize();
 }
@@ -246,7 +245,7 @@ void Lerp(f32 blendAmount)
     }
     {
         f32 firstWeight = 1.0f - blendAmount;
-        VU0_SET_SCALARS_VF2_VF3(firstWeight, blendAmount);
+        VU0_SET_WEIGHTS_VF2X_VF3X(firstWeight, blendAmount);
         VU0_WEIGHTED_SUM_VF10_VF12();
     }
     Normalize();
@@ -258,9 +257,9 @@ f32 EulerAngleAxisY(void)
 {
     f32 rotatedZ;
     f32 rotatedX;
-    effMiscQuaternionToMatrixVU();
+    ToMatrix();
     /* PEXEW exchanges words 0 and 2: output 0 is Z, while output 1 is X. */
-    SDF_VU0_LOADVECTOR_BARRIER(D_0040B530);
+    SDF_VU0_LOADVECTOR_BARRIER(sdfUnitXVector);
     SDF_VU0_APPLYMATRIX_XYZ();
     VU0_SEQ_EULER_ANGLE_AXIS_Y(rotatedZ, rotatedX);
     return sdfAtan2(rotatedZ, rotatedX);
@@ -277,7 +276,7 @@ u32 dds3GetRandA(EffRandState* state)
     u32 rand;
     if (state == ((void*)0))
     {
-        state = &D_0040BAE8;
+        state = &sdfDefaultRandCB;
     }
     x0 = state->words[0];
     x1 = state->words[1];

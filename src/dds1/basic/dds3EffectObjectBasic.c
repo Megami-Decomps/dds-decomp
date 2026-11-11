@@ -1,35 +1,121 @@
 #include "sdk_ps2.h"
+#include "mdl.h"
 #include "common.h"
 #include "sdf_map_position_api.h"
-#include "sdf_vu0.h"
-#include "dds3_object_flags.h"
-#include "mdl.h"
+#include "ps2asm.h"
+#include "sdf_vu_matrix.h"
+#include "sdf_trig.h"
+#include "sdf_model.h"
+#include "sdf_chunk.h"
 #include "sdf_chip.h"
-#include "bill_object_api.h"
-#include "sdf_resource.h"
-#include "eff_dependency.h"
-#include "eff_parameter_position_readiness.h"
-#include "eff_object.h"
-#include "eff_object_dispatch_api.h"
-#include "pcp_vu0.h"
 #include "dds3obj.h"
+#include "dds3_basic_array_cursor.h"
+#include "dds3_object_flags.h"
+#include "eff_dependency.h"
+#include "eff_object.h"
+#include "evt_world_source_transform.h"
+#include "evt_unit.h"
+#include "evt_unit_motion_step_result.h"
+#include "eff.h"
+#include "eff_node.h"
+#include "eff_event.h"
+#include "eff_event_sound.h"
+#include "btl_sound.h"
+#include "bill_object_api.h"
+#include "effect_value_object.h"
+#include "fld_actor_motion_step_result_api.h"
+#include "sdf_heap_api.h"
+#include "eff_parameter_position_readiness.h"
+#include "eff_object_dispatch_api.h"
 #include "dds3_object_control_slot.h"
 #include "dds3_object_base_resource_view.h"
 #include "dds3_object_resource_state.h"
 #include "dds3_scene_membership.h"
-#include "eff.h"
 #include "eff_magatuhi_api.h"
-#include "eff_node.h"
 #include "eff_create_node_from_parameter.h"
 #include "eff_node_descriptor.h"
-#include "eff_event.h"
-#include "eff_event_sound.h"
-#include "evt_world_source_transform.h"
 #include "sdf_draw.h"
-#include "btl_sound.h"
 #include "dds3_world_counter.h"
-#include "sdf_vu_matrix.h"
 #include "sdf_vu_matrix_multiply_api.h"
+#include "fld_area_work.h"
+#include "dds3_basic_lifecycle.h"
+#include "fld_bill_config.h"
+#include "fld.h"
+#include "fpu.h"
+
+/* Release each dependency according to the active state, clearing ownership
+ * before releasing the next dependency. State 4 only borrows its handle. */
+void FreeEffectData(EffectDependencyState *state) {
+    EffectDependencyState *data = state;
+
+    switch (data->state) {
+    case EFF_DEPENDENCY_STATE_BOUND_EFFECT_NODE:
+        if (data->handle != NULL) {
+            dds3EffectDelete(data->handle);
+            data->handle = NULL;
+        }
+        break;
+    case EFF_DEPENDENCY_STATE_BILLBOARD_ANIMATION:
+    case EFF_DEPENDENCY_STATE_BILLBOARD_NODE:
+        if (data->handle != NULL) {
+            dds3BillboardDelete(data->handle);
+            data->handle = NULL;
+        }
+        break;
+    case EFF_DEPENDENCY_STATE_BORROWED_HANDLE:
+        if (data->handle != NULL) {
+            data->handle = NULL;
+        }
+        break;
+    case EFF_DEPENDENCY_STATE_EVENT_CUT:
+        if (data->node != NULL) {
+            effEveBEDCutDelete(data->node);
+            data->node = NULL;
+        }
+        if (data->handle != NULL) {
+            effEveBEDDelete(data->handle);
+            data->handle = NULL;
+        }
+        if (data->vector != NULL) {
+            sdfChipFreeDirect(data->vector);
+            data->vector = NULL;
+        }
+        break;
+    case EFF_DEPENDENCY_STATE_MAGATUHI_TWO_ROWS:
+    case EFF_DEPENDENCY_STATE_MAGATUHI_FOUR_ROWS:
+        if (data->handle != NULL) {
+            dds3EffectDelete(data->handle);
+            data->handle = NULL;
+        }
+        if (data->node != NULL) {
+            sdfChipFreeDirect(data->node);
+            data->node = NULL;
+        }
+        if (data->vector != NULL) {
+            sdfChipFreeDirect(data->vector);
+            data->vector = NULL;
+        }
+        break;
+    }
+    data->state = EFF_DEPENDENCY_STATE_EMPTY;
+    data->handle = NULL;
+}
+
+s32 dds3EffectObjectBasicConstructor(dds3Basic_t *obj) {
+    EffectDependencyState *data;
+
+    dds3InitPoseSet(obj);
+    obj->workdata = sdfChipAllocDirect(0x50);
+    memset(obj->workdata, 0, 0x50);
+    data = obj->workdata;
+    data->objectHandle = dds3ObjectBaseInitControlWorkData(obj);
+    dds3ObjectBaseOnFlag(obj, 0x60);
+    return 1;
+}
+
+/* Shadow projection reads this byte from the native unit layout. */
+typedef char EvtUnitShadowLevelOffsetCheck[
+    ((u32)&((evtUnitHandle_t *)0)->shadowLevel == 0xD3) ? 1 : -1];
 
 #define EFF_OBJ_KIND EFF_WORLD_KIND_EFFECT_OBJECT
 #define EFF_OBJ_VECTOR_BYTES 0x10
@@ -41,10 +127,7 @@
 #define EFF_OBJ_OWNER_KIND_EXTRA 0x11
 #define EFF_OBJ_OWNER_BILL_KIND 5
 
-
-
 typedef dds3PoseSet_t EffectParameters;
-
 
 void dds3FreePoseSet(dds3Basic_t *node);
 void dds3ObjectBaseFreeControlWorkData(dds3ObjectBaseControlWorkData_t *objectBase);
@@ -69,13 +152,7 @@ extern dds3Basic_t *dds3GetFirstWorldObjectNodeOfKind2(void);
 
 extern billHandle_t *billCreateFromResource(s32 kind, const char *path);
 
-
-
-
-
 extern void dds3SetRadiusPoseSet(dds3PoseSet_t *node);
-
-
 
 /* Release dependencies, object base, then slot data; the object and data must exist. */
 void dds3EffectObjectBasicDestructor(dds3Basic_t *obj) {
@@ -115,12 +192,12 @@ s32 dds3EffectObjectBasicMainProcedure(dds3Basic_t *obj) {
                 case 4: case 5: case 6: case 7: case 8: case 9:
                     SDF_VU0_LOADVECTOR(data->owner->poseset->rotation);
                     SDF_VU0_STOREVECTOR(rotation);
-                    effMiscQuaternionToMatrixVU();
+                    ToMatrix();
                     break;
                 case EFF_OBJ_OWNER_KIND_EXTRA:
                     SDF_VU0_LOADVECTOR(((EvtWorldSourceTransformPrefix *)data->owner->workdata)->rotation);
                     SDF_VU0_STOREVECTOR(rotation);
-                    effMiscQuaternionToMatrixVU();
+                    ToMatrix();
                     break;
                 default:
                     SDF_VU0_LOADIDENTITY();
@@ -172,8 +249,8 @@ s32 dds3EffectObjectBasicMainProcedure(dds3Basic_t *obj) {
         if (node != NULL && moved) {
             effCopyVectorToNodeInstance(node, position);
             SDF_VU0_LOADVECTOR(rotation);
-            effMiscQuaternionToMatrixVU();
-            VU0_STORE_MATRIX(matrix);
+            ToMatrix();
+            SDF_VU0_STOREMATRIX(matrix);
             effApplyNodeTransformMatrix(node, matrix);
         }
         result = effInvokeNodeConditionOrAcceptDefault(node);
@@ -288,8 +365,6 @@ dds3Basic_t *dds3AddEffectObjectBasic(u32 worldCounter, const u128 *position, co
     data->ownerKind = 0;
     return obj;
 }
-
-
 
 dds3Basic_t *AddP2AEffect(billHandle_t *bill, const u128 *vec, s32 extra) {
     f32 vector[4];
@@ -505,7 +580,6 @@ dds3Basic_t *dds3AddD3PEffectObjectBasic(void *resourceData, const u128 *firstVe
 
 extern const EffectEventVectorParameters D_0039F7D0;
 
-
 dds3Basic_t *AddBEDEffect(source, firstVector, secondVector)
     SoundMixer *source;
     const u128 *firstVector;
@@ -545,7 +619,6 @@ dds3Basic_t *AddBEDEffect(source, firstVector, secondVector)
     }
     return obj;
 }
-
 
 dds3Basic_t *dds3AddBEDEffectObjectBasic2(struct SoundMixer *resource, const u128 *position, const void *scale) {
     return AddBEDEffect(resource, position, scale);
@@ -763,6 +836,7 @@ s32 dds3EffectObjectPresetMG12(dds3Basic_t *obj) {
         }
     }
 }
+
 /* Copy ready inputs into two or four vector rows, then dispatch the whole existing block.
    An unavailable input leaves its destination row/scalar unchanged, not zeroed. */
 s32 dds3EffectObjectSetMG12Pos(dds3Basic_t *obj, dds3Basic_t *first, dds3Basic_t *second, dds3Basic_t *third, dds3Basic_t *fourth)
@@ -879,6 +953,165 @@ s32 dds3EffectObjectBasicLinkObjectIndex(dds3Basic_t *obj, dds3Basic_t *owner, s
     return 1;
 }
 
+/* Clear the kind-7 owner link and entry, preserving every flag except 4 and 8.
+ * The caller supplies an existing effect resource; this does not free its owner. */
+void dds3EffectObjectBasicUnlinkObject(dds3Basic_t *owner) {
+    EffectDependencyState *resource = owner->workdata;
+
+    resource->entryId = 0;
+    resource->owner = NULL;
+    resource->ownerKind = 0;
+    resource->flags &= ~4;
+    resource->flags &= ~8;
+}
+
+struct billHandle_t;
+extern void dds3EffectObjectBasicStatOn(dds3Basic_t *object, u32 flags);
+extern void dds3BillboardSetAnimNumber(struct billHandle_t *billboard, u32 entry);
+
+/* Complete 0x30-byte FLD1 type-11 effect descriptor. The field resolver
+ * passes its resource data pointer directly to the billboard binder. */
+
+/* Bind a billboard config to the owner's resource, copy the source vector and set up the billboard by config kind. */
+void dds3EffectObjectBasicSetFldEx(dds3Basic_t *owner, BillConfig *config) {
+    EffectDependencyState *resource = owner->workdata;
+    dds3PoseSet_t *source = owner->poseset;
+
+    resource->config = config;
+    resource->sourcePosition[0] = source->pos[0];
+    resource->sourcePosition[1] = source->pos[1];
+    resource->sourcePosition[2] = source->pos[2];
+    resource->sourcePosition[3] = source->pos[3];
+    dds3EffectObjectBasicStatOn(owner, 0x10);
+    switch (resource->config->kind) {
+    case 0:
+    case 3:
+        dds3BillboardSetXYOffset((struct billHandle_t *)resource->handle, resource->config->width, resource->config->height);
+        if (resource->config->kind == 3) {
+            dds3BillboardSetDrawType(resource->handle, 1);
+        }
+        if (resource->config->flags & 1) {
+            dds3BillboardSetMode(resource->handle, 2);
+            return;
+        }
+        if (resource->config->flags & 2) {
+            dds3BillboardSetMode(resource->handle, 3);
+            return;
+        }
+        break;
+    case 2:
+        break;
+    case 1:
+        dds3BillboardSetAnimNumber(resource->handle, resource->config->entry);
+        break;
+    }
+}
+
+extern u8 fldTestMapTargetFlag(s32 mapId, u32 slotIndex, s32 bit);
+extern s32 fldGetMapSlotByte(s32 mapId, u32 slotIndex, s32 valueIndex);
+extern f32 aViewEye[4];
+
+void dds3EffectObjectBasicCalcFldEx(dds3Basic_t *object) {
+    EffectDependencyState *resource = object->workdata;
+    BillConfig *config;
+    f32 direction[4] __attribute__((aligned(16)));
+    f32 normalizedDirection[4] __attribute__((aligned(16)));
+    f32 dx;
+    f32 dy;
+    f32 value; /* z delta, then projection distance */
+    f32 distance;
+    u32 projectionDistanceWord;
+
+    if ((resource->flags & 0x10) == 0) {
+        return;
+    }
+
+    config = resource->config;
+    if (config->mapSelector != 0) {
+        s32 mapId = fldGlobalBase.area;
+        u32 slotIndex = fldGlobalBase.floor + 1;
+
+        if (fldTestMapTargetFlag(mapId, slotIndex, config->mapSelector)) {
+            resource->flags &= ~1;
+        } else {
+            resource->flags |= 1;
+        }
+    }
+
+    dx = aViewEye[0] - resource->sourcePosition[0];
+    dy = aViewEye[1] - resource->sourcePosition[1];
+    value = aViewEye[2] - resource->sourcePosition[2];
+    projectionDistanceWord = config->projectionDistance;
+    distance = fsqrtf(dx * dx + dy * dy + value * value);
+
+    if (projectionDistanceWord != 0) {
+        direction[0] = -dx;
+        direction[1] = -dy;
+        direction[2] = -value;
+        direction[3] = 1.0f;
+        SDF_VU0_LOADVECTOR(direction);
+        SDF_VU0_NORMALIZE();
+        SDF_VU0_STOREVECTOR(normalizedDirection);
+        {
+            dds3PoseSet_t *inner;
+
+            value = (f32)projectionDistanceWord;
+            inner = object->poseset;
+
+            inner->pos[0] = resource->sourcePosition[0] - normalizedDirection[0] * value;
+            inner->pos[1] = resource->sourcePosition[1] - normalizedDirection[1] * value;
+            inner->pos[2] = resource->sourcePosition[2] - normalizedDirection[2] * value;
+        }
+    }
+
+    switch (config->kind) {
+    case 0:
+    case 3:
+        if (config->fadeStart == 0 && config->fadeEnd == 0) {
+            return;
+        }
+        {
+            f32 start = (f32)config->fadeStart;
+            f32 end = (f32)config->fadeEnd;
+            s32 alpha;
+            u32 parameter;
+
+            if (distance < start) {
+                parameter = 0x00808080;
+            } else if (end < distance) {
+                parameter = 0x80808080;
+            } else {
+                alpha = (s32)(((distance - start) * 128.0f) / (end - start));
+                if (alpha >= 129) {
+                    alpha = 128;
+                }
+                if (alpha < 0) {
+                    alpha = 0;
+                }
+                parameter = ((u32)alpha << 24) | 0x00808080;
+            }
+            dds3BillboardSetRGBA((struct billHandle_t *)resource->handle, parameter);
+        }
+        break;
+    case 2:
+        break;
+    case 1:
+        if (config->mapSelector != 0) {
+            s32 entry = fldGetMapSlotByte(fldGlobalBase.area,
+                                         (u32)fldGlobalBase.floor + 1,
+                                         config->mapSelector);
+
+            if (entry != -1) {
+                dds3BillboardSetAnimNumber((struct billHandle_t *)resource->handle, (u32)entry);
+            }
+        }
+        break;
+
+    default:
+        break;
+    }
+}
+
 INCLUDE_RODATA(const s32, "basic/dds3EffectObjectBasic", D_0039F7D0);
 
 INCLUDE_RODATA(const s32, "basic/dds3EffectObjectBasic", D_0039F800);
@@ -900,3 +1133,4 @@ INCLUDE_RODATA(const s32, "basic/dds3EffectObjectBasic", D_0039F8E8);
 INCLUDE_RODATA(const s32, "basic/dds3EffectObjectBasic", D_0039F900);
 
 INCLUDE_RODATA(const s32, "basic/dds3EffectObjectBasic", D_0039F918);
+

@@ -6,22 +6,22 @@
 
 /* One buffered atlas preview: TEX0/TEX1/CLAMP, then a four-corner textured strip. */
 typedef struct FrFontAtlasCorner {
-    FrFontGsWrite uv;
-    FrFontGsWrite rgbaq;
-    FrFontGsWrite xyz;
+    frFontGsWrite_t uv;
+    frFontGsWrite_t rgbaq;
+    frFontGsWrite_t xyz;
 } FrFontAtlasCorner;
 
 typedef struct FrFontAtlasDraw {
     u64 gifTag;
     u64 gifRegisters;
-    FrFontGsWrite tex0;
-    FrFontGsWrite tex1;
-    FrFontGsWrite clamp;
+    frFontGsWrite_t tex0;
+    frFontGsWrite_t tex1;
+    frFontGsWrite_t clamp;
     FrFontAtlasCorner corners[4];
 } FrFontAtlasDraw;
 
 typedef struct FrFontAtlasPacket {
-    FrFontDmaTag dma;
+    frFontDmaTag_t dma;
     FrFontAtlasDraw draw;
 } FrFontAtlasPacket;
 

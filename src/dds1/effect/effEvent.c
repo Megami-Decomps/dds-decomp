@@ -6,15 +6,14 @@
 #include "sdf_packet_list.h"
 #include "common.h"
 #include "sdf_map_position_api.h"
-#include "sdf_vu0.h"
+#include "ps2asm.h"
 #include "sdf_vu_rotation_axes.h"
 #include "sdf_sif_command.h"
 #include "sdf_trig.h"
 #include "eff_random.h"
 #include "sdf_chip.h"
 #include "eff_param.h"
-#include "sdf_resource.h"
-#include "ee_mmi.h"
+#include "sdf_heap_api.h"
 #include "btl_sound.h"
 #include "eff_blur.h"
 #include "eff_rectangle_blur_api.h"
@@ -26,92 +25,68 @@
 #include "eff_event.h"
 #include "eff_event_work_api.h"
 #include "eff_event_sound.h"
-#include "eff_event_setup.h"
-#include "eff_event_setup_readiness.h"
+#include "effDebug.h"
 #include "eff_event_bill.h"
 #include "eff_event_bill_batch.h"
-#include "pcp_vu0.h"
 #include "sdf_vu_transform_api.h"
 #include "sdf_texture_primary_buffer_api.h"
 #include "sdf_vu_matrix.h"
 #include "sdf_gs_blend.h"
+#include "sdf_packet_alloc.h"
+#include "eff_packet_params.h"
+#include "sdf_asset_create.h"
+#include "sdf_asset_state.h"
+#include "evt_unit.h"
+#include "mdl.h"
+#include "eff_channel_layout.h"
+#include "fr_font.h"
+#include "font_mem_control_api.h"
 
 #define EFF_EVENT_VECTOR_COMPONENTS 4
-#define EFF_EVENT_BEZIER_WEIGHT_COUNT 4
-#define EFF_EVENT_BEZIER_SLOT_BYTES 0x60
-#define EFF_EVENT_SLOT_HEADER_BYTES 0xC
-#define EFF_EVENT_CURVE_POINT_STRIDE 3
-#define EFF_EVENT_CURVE_FINISHED_INDEX 7
-#define EFF_EVENT_CURVE_DEFAULT_STEP 0.05f
-#define EFF_EVENT_CURVE_MIDDLE_FACTOR 3.0f
-#define EFF_EVENT_DRAW_LIST_BYTES 0x20
-#define EFF_EVENT_PROJECTED_X_BIAS 0x700
-#define EFF_EVENT_PROJECTED_Y_BIAS 0xF20
-#define EFF_EVENT_PROJECTED_Y_SCALE 2
-#define EFF_EVENT_GS_X_BIAS 0x7000
-#define EFF_EVENT_GS_Y_BIAS 0x7900
-#define EFF_EVENT_GS_X_SHIFT 4
-#define EFF_EVENT_GS_Y_SHIFT 3
-#define EFF_EVENT_GS_X_SCALE 0x10
-#define EFF_EVENT_GS_Y_SCALE 8
-#define EFF_EVENT_OVERLAY_DEPTH 0xFF0000
-#define EFF_EVENT_MARKER_WIDTH 0x20 /* GS coordinate units, not pixels. */
-#define EFF_EVENT_MARKER_HEIGHT 0x10 /* GS coordinate units, not pixels. */
-#define EFF_EVENT_MARKER_COLOR 0x60008080
+
 #define EFF_EVENT_BLUR_SOURCE_BYTES 0x28
+
 #define EFF_EVENT_BLUR_RESOURCE_INDEX 2
+
 #define EFF_EVENT_STAGGERED_RESOURCE_INDEX 3
+
 #define EFF_EVENT_SQUARE_RESOURCE_INDEX 0
+
 #define EFF_EVENT_STAGGERED_SLOT_COUNT 4
+
 #define EFF_EVENT_NEUTRAL_COLOR 0x80808080
+
 #define EFF_EVENT_EVENT_RECORD_BYTES 0x30
+
 #define EFF_EVENT_HALF_TURN 3.14159265f
+
 #define EFF_EVENT_RANDOM_MIDPOINT 0.5f
+
 #define EFF_EVENT_JITTER_RANGE 0.3f
+
 #define EFF_EVENT_JITTER_BASE 0.7f
 
-/* The event curve array stores segmented slots, separate from effMath's cubic slots. */
-typedef struct EffSegmentedBezierArray {
-    EffSegmentedBezierSlot *slots;
-    u32 slotCount;
-    struct sdfMemHandle_t *allocation;
-} EffSegmentedBezierArray;
+extern effScreenDrawParams_t Eve_Blur;
 
-typedef char EffSegmentedBezierArraySizeAssert[(sizeof(EffSegmentedBezierArray) == 0xC) ? 1 : -1];
-typedef char EffSegmentedBezierArraySlotsOffsetAssert[
-    ((u32)&((EffSegmentedBezierArray *)0)->slots == 0x00) ? 1 : -1];
-typedef char EffSegmentedBezierArrayCountOffsetAssert[
-    ((u32)&((EffSegmentedBezierArray *)0)->slotCount == 0x04) ? 1 : -1];
-typedef char EffSegmentedBezierArrayAllocationOffsetAssert[
-    ((u32)&((EffSegmentedBezierArray *)0)->allocation == 0x08) ? 1 : -1];
+extern effScreenDrawParams_t D_00355908;
 
-
-
-/* Packet-source layouts and concrete blur owners mirror their constructors.
- * Equal-sized parameter prefixes do not make the blur variants interchangeable. */
-
-/* EffBlurTemplate and its copied body are declared in eff_blur.h. */
-
-
-
-
-
-
-
-
-
-extern EffScreenDrawParams Eve_Blur;
-extern EffScreenDrawParams D_00355908;
 extern dds3Effect_Filter_t Eve_Filter;
-extern EffScreenDrawParams D_003559A0;
-extern dds3Effect_PartialMultiBlurParam_t effTexturedBlurSetupParameters;
-extern dds3Effect_DistortionBlurParam_t effScatterBlurSetupParameters;
-extern EffScreenDrawParams D_00355E48;
-extern dds3Effect_Filter_t D_00355F88;
-extern dds3Effect_PartialMultiFilterParam_t effResourceRectangleSetupParameters;
-extern dds3Effect_RippleBlurParam_t effStaggeredBlurSetupParameters;
 
-extern EffResourceRectWork *hEve_PartialMultiFilter;
+extern effScreenDrawParams_t evtUnityCalcArea;
+
+extern dds3Effect_PartialMultiBlurParam_t mblurParam;
+
+extern dds3Effect_DistortionBlurParam_t dblurParam;
+
+extern effScreenDrawParams_t D_00355E48;
+
+extern dds3Effect_Filter_t D_00355F88;
+
+extern dds3Effect_PartialMultiFilterParam_t mfilterParam;
+
+extern dds3Effect_RippleBlurParam_t rblurParam;
+
+extern dds3Effect_PartialMultiFilter_t *hEve_PartialMultiFilter;
 
 extern s8 Eve_PartialMultiFilterShow;
 
@@ -119,536 +94,37 @@ extern s8 Eve_FilterShow;
 
 extern s8 D_003BB073;
 
-extern EffBlurScaleWork *hEve_RippleBlur;
+extern effBlurScaleWork_t *hEve_RippleBlur;
 
 extern s8 Eve_RippleBlurShow;
 
-extern EffBlurScatterWork *hEve_DistortionBlur;
+extern effBlurScatterWork_t *hEve_DistortionBlur;
 
 extern s8 Eve_DistortionBlurShow;
 
-extern EffBlurTemplate *hEve_PartialMultiBlur;
+extern effBlurTemplate_t *hEve_PartialMultiBlur;
 
 extern s8 Eve_PartialMultiBlurShow;
 
 extern s8 Eve_BlurShow;
-extern u8 D_003558D8[];
-extern u8 D_003558A8[];
-extern u8 D_00355948[];
-extern u8 D_00355970[];
-extern sdfGrOt_t kwlnPositionedTextSurface;
-#include "sdf_packet_alloc.h"
 
-extern void effBlurStepScaleSlotsAndDraw(EffBlurScaleWork *arg);
+extern u8 D_003558D8[];
+
+extern u8 D_003558A8[];
+
+extern u8 D_00355948[];
+
+extern u8 D_00355970[];
+
+extern void dds3EffectRippleBlurDraw(effBlurScaleWork_t *arg);
+
 extern void dds3EffectFilter(dds3Effect_Filter_t *arg);
 
-/* Allocate contiguous slots followed by their count and allocation handle. */
-EffSegmentedBezierArray *effCreateSlotArray(u32 count) {
-    s32 slotBytes = count * EFF_EVENT_BEZIER_SLOT_BYTES;
-    sdfMemHandle_t *allocation = sdfMemAllocDirect(slotBytes + EFF_EVENT_SLOT_HEADER_BYTES);
-    EffSegmentedBezierSlot *slot = (EffSegmentedBezierSlot *)sdfMemLock(allocation);
-    EffSegmentedBezierArray *table = (EffSegmentedBezierArray *)((u8 *)slot + slotBytes);
-    u32 index = 0;
-    table->allocation = allocation;
-    table->slots = slot;
-    table->slotCount = count;
-    if (count != 0) {
-        do {
-            index++;
-            slot->pointIndex = 0;
-            slot->t = 0;
-            slot->parameterStep = EFF_EVENT_CURVE_DEFAULT_STEP;
-            slot++;
-        } while (index < count);
-    }
-    return table;
-}
-
-/* Release the allocation handle stored after the contiguous slot array. */
-void effReleaseSlotArrayAllocation(EffSegmentedBezierArray *header) {
-    sdfMemFreeDirect(header->allocation);
-}
-
-/* Return 0 before evaluation only for the point-index sentinel 7. Overflow t
- * clamps to 1 and advances the index by three; there is no general bounds check. */
-s32 effStepActiveBezierSlot(EffSegmentedBezierArray *table, s32 index, f32 *out) {
-    EffSegmentedBezierSlot *slot = &table->slots[index];
-    u32 pointIndex = slot->pointIndex;
-    f32 weights[EFF_EVENT_BEZIER_WEIGHT_COUNT];
-    f32 t;
-    f32 u;
-    EffBezierPoint *controlPoints;
-
-    if (pointIndex == EFF_EVENT_CURVE_FINISHED_INDEX) {
-        return 0;
-    }
-    t = slot->t;
-    u = 1.0f - t;
-    controlPoints = &slot->controlPoints[pointIndex];
-    weights[0] = u * u * u;
-    weights[1] = t * (u * u) * EFF_EVENT_CURVE_MIDDLE_FACTOR;
-    weights[2] = t * t * u * EFF_EVENT_CURVE_MIDDLE_FACTOR;
-    weights[3] = t * t * t;
-    out[0] = controlPoints[0].x * weights[0] + controlPoints[1].x * weights[1] + controlPoints[2].x * weights[2] + controlPoints[3].x * weights[3];
-    out[1] = controlPoints[0].y * weights[0] + controlPoints[1].y * weights[1] + controlPoints[2].y * weights[2] + controlPoints[3].y * weights[3];
-    out[2] = controlPoints[0].z * weights[0] + controlPoints[1].z * weights[1] + controlPoints[2].z * weights[2] + controlPoints[3].z * weights[3];
-    out[3] = 1.0f;
-    t += slot->parameterStep;
-    if (t > 1.0f) {
-        t = 1.0f;
-        pointIndex += EFF_EVENT_CURVE_POINT_STRIDE;
-    }
-    slot->t = t;
-    slot->pointIndex = pointIndex;
-    return 1;
-}
-
-/* Evaluate at the entry t before advancing. The first segment carries excess t;
- * the second stores t = 1 and returns 0 after producing output at the entry t. */
-s32 effPCPBezierEval(EffSegmentedBezierSlot *slot, f32 *out) {
-    f32 weights[EFF_EVENT_BEZIER_WEIGHT_COUNT];
-    u32 pointIndex = slot->pointIndex;
-    f32 t = slot->t;
-    EffBezierPoint *controlPoints = &slot->controlPoints[pointIndex];
-    f32 u = 1.0f - t;
-
-    weights[0] = u * u * u;
-    weights[1] = t * (u * u) * EFF_EVENT_CURVE_MIDDLE_FACTOR;
-    weights[2] = t * t * u * EFF_EVENT_CURVE_MIDDLE_FACTOR;
-    weights[3] = t * t * t;
-    out[0] = controlPoints[0].x * weights[0] + controlPoints[1].x * weights[1] + controlPoints[2].x * weights[2] + controlPoints[3].x * weights[3];
-    out[1] = controlPoints[0].y * weights[0] + controlPoints[1].y * weights[1] + controlPoints[2].y * weights[2] + controlPoints[3].y * weights[3];
-    out[2] = controlPoints[0].z * weights[0] + controlPoints[1].z * weights[1] + controlPoints[2].z * weights[2] + controlPoints[3].z * weights[3];
-    out[3] = 1.0f;
-    t += slot->parameterStep;
-    if (t > 1.0f) {
-        if (pointIndex < EFF_EVENT_CURVE_POINT_STRIDE) {
-            t -= 1.0f;
-            pointIndex += EFF_EVENT_CURVE_POINT_STRIDE;
-        } else {
-            slot->t = 1.0f;
-            return 0;
-        }
-    }
-    slot->pointIndex = pointIndex;
-    slot->t = t;
-    return 1;
-}
-
-/* Evaluate four control points starting at pointIndex into xyz with w = 1;
- * unlike the stepping paths, this does not update t or the point index. */
-void effEvaluateSlotBezierPosition(EffSegmentedBezierSlot *slot, f32 *out) {
-    EffBezierPoint *controlPoints = &slot->controlPoints[slot->pointIndex];
-    f32 t = slot->t;
-    f32 u = 1.0f - t;
-    f32 w[EFF_EVENT_BEZIER_WEIGHT_COUNT];
-
-    w[0] = u * u * u;
-    w[1] = t * (u * u) * EFF_EVENT_CURVE_MIDDLE_FACTOR;
-    w[2] = t * t * u * EFF_EVENT_CURVE_MIDDLE_FACTOR;
-    w[3] = t * t * t;
-
-    out[0] = controlPoints[0].x * w[0] + controlPoints[1].x * w[1] + controlPoints[2].x * w[2] + controlPoints[3].x * w[3];
-    out[1] = controlPoints[0].y * w[0] + controlPoints[1].y * w[1] + controlPoints[2].y * w[2] + controlPoints[3].y * w[3];
-    out[2] = controlPoints[0].z * w[0] + controlPoints[1].z * w[1] + controlPoints[2].z * w[2] + controlPoints[3].z * w[3];
-    out[3] = 1.0f;
-}
-
-/* Reset only curve progress and its default step; retain all control points. */
-void effInitSlotTail(EffSegmentedBezierArray *table, s32 index) {
-    EffSegmentedBezierSlot *slot = &table->slots[index];
-
-    slot->parameterStep = EFF_EVENT_CURVE_DEFAULT_STEP;
-    slot->pointIndex = slot->t = 0;
-}
-
-/* Return the selected slot; index bounds remain the caller's responsibility. */
-EffSegmentedBezierSlot *effGetSlotAt(EffSegmentedBezierArray *table, s32 index) {
-    return &table->slots[index];
-}
-
-extern u64 *dds3PrimFrameRect(s32, s32, s32, s32, s32, u32, u32);
-
-/* Project a point and draw a filled/bordered marker with 0x20/0x10 GS-unit extents. */
-void effDebugPointDraw(f32 *position) {
-    sdfDrawTag_t *list = (sdfDrawTag_t *)sdfGrAllocPacketBuff(EFF_EVENT_DRAW_LIST_BYTES);
-    f32 screen[EFF_EVENT_VECTOR_COMPONENTS];
-    s32 pixel[2]; /* written, never read; retail keeps the frame slot */
-    s32 x;
-    s32 y;
-    sdfGrOt_t *scene;
-
-    sdfDrawTagInit(list);
-    SDF_VU0_LOADVECTOR(position);
-    effScreenOffset();
-    SDF_VU0_STOREVECTOR(screen);
-    x = (s32)screen[0] - EFF_EVENT_PROJECTED_X_BIAS;
-    y = (s32)screen[1] * EFF_EVENT_PROJECTED_Y_SCALE - EFF_EVENT_PROJECTED_Y_BIAS;
-    pixel[0] = x;
-    pixel[1] = y;
-    sdfDrawTagLink(list, (u32)(dds3PrimFrameRect((x << EFF_EVENT_GS_X_SHIFT) + EFF_EVENT_GS_X_BIAS, (y << EFF_EVENT_GS_Y_SHIFT) + EFF_EVENT_GS_Y_BIAS, EFF_EVENT_OVERLAY_DEPTH, EFF_EVENT_MARKER_WIDTH, EFF_EVENT_MARKER_HEIGHT, EFF_EVENT_MARKER_COLOR, EFF_EVENT_MARKER_COLOR)));
-    scene = &kwlnPositionedTextSurface;
-    scene->append(scene, (sdfDrawTag_t *)list);
-}
-
-/* Project a point and use color for both the marker's fill and border. */
-void effDebugPointDraw2(f32 *position, s32 color) {
-    sdfDrawTag_t *list = (sdfDrawTag_t *)sdfGrAllocPacketBuff(EFF_EVENT_DRAW_LIST_BYTES);
-    f32 screen[EFF_EVENT_VECTOR_COMPONENTS];
-    s32 pixel[2]; /* written, never read; retail keeps the frame slot */
-    s32 x;
-    s32 y;
-    sdfGrOt_t *scene;
-
-    sdfDrawTagInit(list);
-    SDF_VU0_LOADVECTOR(position);
-    effScreenOffset();
-    SDF_VU0_STOREVECTOR(screen);
-    x = (s32)screen[0] - EFF_EVENT_PROJECTED_X_BIAS;
-    y = (s32)screen[1] * EFF_EVENT_PROJECTED_Y_SCALE - EFF_EVENT_PROJECTED_Y_BIAS;
-    pixel[0] = x;
-    pixel[1] = y;
-    sdfDrawTagLink(list, (u32)(dds3PrimFrameRect((x << EFF_EVENT_GS_X_SHIFT) + EFF_EVENT_GS_X_BIAS, (y << EFF_EVENT_GS_Y_SHIFT) + EFF_EVENT_GS_Y_BIAS, EFF_EVENT_OVERLAY_DEPTH, EFF_EVENT_MARKER_WIDTH, EFF_EVENT_MARKER_HEIGHT, color, color)));
-    scene = &kwlnPositionedTextSurface;
-    scene->append(scene, (sdfDrawTag_t *)list);
-}
-
-extern u64 *dds3PrimLine(s32 x0, s32 y0, s32 z0, s32 color0, s32 x1, s32 y1, s32 z1, s32 color1, s32 flags);
-
-/* Draw a GS line between two projected points, using the fixed marker color. */
-void effDebugLineDraw(f32 *from, f32 *to) {
-    sdfDrawTag_t *list = (sdfDrawTag_t *)sdfGrAllocPacketBuff(EFF_EVENT_DRAW_LIST_BYTES);
-    f32 start[EFF_EVENT_VECTOR_COMPONENTS];
-    f32 end[EFF_EVENT_VECTOR_COMPONENTS];
-    s32 pixel[4]; /* written, never read; retail keeps the frame slot */
-    s32 x0;
-    s32 y0;
-    s32 x1;
-    s32 y1;
-    sdfGrOt_t *scene;
-
-    sdfDrawTagInit(list);
-    SDF_VU0_LOADVECTOR(from);
-    effScreenOffset();
-    SDF_VU0_STOREVECTOR(start);
-    SDF_VU0_LOADVECTOR(to);
-    effScreenOffset();
-    SDF_VU0_STOREVECTOR(end);
-    x0 = (s32)start[0] - EFF_EVENT_PROJECTED_X_BIAS;
-    y0 = (s32)start[1] * EFF_EVENT_PROJECTED_Y_SCALE - EFF_EVENT_PROJECTED_Y_BIAS;
-    x1 = (s32)end[0] - EFF_EVENT_PROJECTED_X_BIAS;
-    y1 = (s32)end[1] * EFF_EVENT_PROJECTED_Y_SCALE - EFF_EVENT_PROJECTED_Y_BIAS;
-    pixel[0] = x0;
-    pixel[1] = y0;
-    pixel[2] = x1;
-    pixel[3] = y1;
-    sdfDrawTagLink(list, (u32)(dds3PrimLine((x0 << EFF_EVENT_GS_X_SHIFT) + EFF_EVENT_GS_X_BIAS, (y0 << EFF_EVENT_GS_Y_SHIFT) + EFF_EVENT_GS_Y_BIAS, EFF_EVENT_OVERLAY_DEPTH, EFF_EVENT_MARKER_COLOR, (x1 << EFF_EVENT_GS_X_SHIFT) + EFF_EVENT_GS_X_BIAS, (y1 << EFF_EVENT_GS_Y_SHIFT) + EFF_EVENT_GS_Y_BIAS, EFF_EVENT_OVERLAY_DEPTH, EFF_EVENT_MARKER_COLOR, 0)));
-    scene = &kwlnPositionedTextSurface;
-    scene->append(scene, (sdfDrawTag_t *)list);
-}
-
-/* Draw a GS line between two projected points, using color at both vertices. */
-void effDebugLineDraw2(f32 *from, f32 *to, s32 color) {
-    sdfDrawTag_t *list = (sdfDrawTag_t *)sdfGrAllocPacketBuff(EFF_EVENT_DRAW_LIST_BYTES);
-    f32 start[EFF_EVENT_VECTOR_COMPONENTS];
-    f32 end[EFF_EVENT_VECTOR_COMPONENTS];
-    s32 pixel[4]; /* written, never read; retail keeps the frame slot */
-    s32 x0;
-    s32 y0;
-    s32 x1;
-    s32 y1;
-    sdfGrOt_t *scene;
-
-    sdfDrawTagInit(list);
-    SDF_VU0_LOADVECTOR(from);
-    effScreenOffset();
-    SDF_VU0_STOREVECTOR(start);
-    SDF_VU0_LOADVECTOR(to);
-    effScreenOffset();
-    SDF_VU0_STOREVECTOR(end);
-    x0 = (s32)start[0] - EFF_EVENT_PROJECTED_X_BIAS;
-    y0 = (s32)start[1] * EFF_EVENT_PROJECTED_Y_SCALE - EFF_EVENT_PROJECTED_Y_BIAS;
-    x1 = (s32)end[0] - EFF_EVENT_PROJECTED_X_BIAS;
-    y1 = (s32)end[1] * EFF_EVENT_PROJECTED_Y_SCALE - EFF_EVENT_PROJECTED_Y_BIAS;
-    pixel[0] = x0;
-    pixel[1] = y0;
-    pixel[2] = x1;
-    pixel[3] = y1;
-    sdfDrawTagLink(list, (u32)(dds3PrimLine((x0 << EFF_EVENT_GS_X_SHIFT) + EFF_EVENT_GS_X_BIAS, (y0 << EFF_EVENT_GS_Y_SHIFT) + EFF_EVENT_GS_Y_BIAS, EFF_EVENT_OVERLAY_DEPTH, color, (x1 << EFF_EVENT_GS_X_SHIFT) + EFF_EVENT_GS_X_BIAS, (y1 << EFF_EVENT_GS_Y_SHIFT) + EFF_EVENT_GS_Y_BIAS, EFF_EVENT_OVERLAY_DEPTH, color, 0)));
-    scene = &kwlnPositionedTextSurface;
-    scene->append(scene, (sdfDrawTag_t *)list);
-}
-
-/* Submit a formatted native command at biased screen coordinates. */
-void effDebugStringDraw(s32 x, s32 y, s32 commandIndex, s32 format) {
-    sdfDrawTag_t *task = (sdfDrawTag_t *)sdfGrAllocPacketBuff(EFF_EVENT_DRAW_LIST_BYTES);
-    sdfGrOt_t *scene;
-
-    sdfDrawTagInit(task);
-    sdfDrawTagLink(task, (u32)(sdfDevPrintf((x << EFF_EVENT_GS_X_SHIFT) + EFF_EVENT_GS_X_BIAS, (y << EFF_EVENT_GS_Y_SHIFT) + EFF_EVENT_GS_Y_BIAS, EFF_EVENT_OVERLAY_DEPTH, commandIndex, (const char *)format)));
-    scene = &kwlnPositionedTextSurface;
-    scene->append(scene, (sdfDrawTag_t *)task);
-}
-
 extern sdfGrOt_t sdfGrOtTable[];
 
-void effDebugWireframeSphereDraw(const f32 *center, u32 color, f32 radius) {
-    f32 point[4] __attribute__((aligned(16)));
-    f32 matrix[4][4] __attribute__((aligned(16)));
-    f32 vertices[40][4] __attribute__((aligned(16)));
-    u32 colors[40];
-    sdfDrawTag_t *list;
-    sdfGrOt_t *surface;
-    f32 (*out)[4];
-    f32 latitude;
-    f32 longitude;
-    f32 ringRadius;
-    f32 ringY;
-    u32 pass;
-    u32 ring = 0;
-    u32 segment;
+extern sdfMat_t *effDebugSelectCursorMat;
 
-    list = (sdfDrawTag_t *)sdfGrAllocPacketBuff(0x20);
-    sdfDrawTagInit(list);
-    do {
-        colors[ring++] = color;
-    } while (ring < 40);
-
-    EE_MMI_UNIT_MATRIX(matrix);
-    for (pass = 0; pass < 2; pass++) {
-        latitude = 0.0f;
-        for (ring = 0; ring < 14; ring++) {
-            latitude += 0.20943949f;
-            out = vertices;
-            longitude = 0.0f;
-            ringY = radius * sdfCos(latitude);
-            ringRadius = radius * sdfSin(latitude);
-            VU0_LOAD_MATRIX(matrix);
-            SDF_VU0_LOADVECTOR_B(center);
-            point[0] = ringRadius;
-            point[1] = ringY;
-            point[2] = 0.0f;
-            SDF_VU0_LOADVECTOR(point);
-            SDF_VU0_VECTOR_W_SET_ZERO();
-            SDF_VU0_APPLYMATRIX();
-            SDF_VU0_ADDVECTOR();
-
-            for (segment = 0; segment < 20; segment++) {
-                SDF_VU0_STOREVECTOR(*out);
-                out++;
-                longitude += 0.31415924429893494f;
-                point[0] = sdfCos(longitude) * ringRadius;
-                point[1] = ringY;
-                point[2] = sdfSin(longitude) * ringRadius;
-                SDF_VU0_LOADVECTOR(point);
-                SDF_VU0_VECTOR_W_SET_ZERO();
-                SDF_VU0_APPLYMATRIX();
-                SDF_VU0_ADDVECTOR();
-                SDF_VU0_STOREVECTOR(*out);
-                out++;
-            }
-            sdfDrawTagLink(list, (u32)effDebugDrawWireModel(vertices, colors, 40, 0x80));
-        }
-        SetRotateMatrixX(1.5707963f);
-        VU0_LOAD_MATRIX_B_F32(matrix);
-        sdfComposeVuMatrixFromRegisters();
-        VU0_STORE_MATRIX_UNCLOBBERED(matrix);
-    }
-    surface = &sdfGrOtTable[55];
-    surface->append(surface, list);
-}
-
-#include "eff_packet_params.h"
-#include "sdf_asset_create.h"
-#include "sdf_asset_state.h"
-
-extern sdfMat_t *D_003BB068;
-extern f32 D_003BB06C;
-extern f32 effTriangleVertexScratch[4][4];
-extern u32 D_00355870[4];
-extern sdfGrOt_t D_00325028;
-extern void *effPkt3DPrimMakePoly(sdf3DPrimPolyParm_t *params);
-
-extern void sdf3DPrimLinkMat(sdfDrawTag_t *packetList, sdfMat_t *asset, s32 (*allocatePacket)(s32));
-extern void sdf3DPrimLinkTm(sdfDrawTag_t *packetList, s32 (*allocatePacket)(s32));
-
-void effDebugSelectCursorDraw(f32 *position) {
-    sdfMat_t *asset = D_003BB068;
-    sdfDrawTag_t *list;
-    sdf3DPrimPolyParm_t packet;
-
-    if (asset == NULL) {
-        asset = sdfMatNew();
-        D_003BB068 = asset;
-        sdfMatSetConstant(asset, 1.0f);
-    }
-
-    list = (sdfDrawTag_t *)sdfGrAllocPacketBuff(0x20);
-    sdfDrawTagInit(list);
-    SetRotateMatrixY(D_003BB06C);
-    D_003BB06C += 0.10471974313259125f;
-    SDF_VU0_LOADVECTOR(position);
-    VU0_ADD_VF31_VF10_XYZ();
-    sdf3DPrimLinkTm(list, NULL);
-    memset(&packet, 0, 0x2C);
-    packet.attr = 0x4000;
-    effTriangleVertexScratch[2][2] = 0.0f;
-    packet.vertexColor = D_00355870;
-    packet.color = 0x80808080;
-
-    effTriangleVertexScratch[0][0] = 0.0f;
-    effTriangleVertexScratch[0][1] = 0.0f;
-    effTriangleVertexScratch[0][2] = 0.0f;
-    effTriangleVertexScratch[1][0] = 15.0f;
-    effTriangleVertexScratch[1][1] = -30.0f;
-    effTriangleVertexScratch[1][2] = 0.0f;
-    effTriangleVertexScratch[2][0] = -15.0f;
-    effTriangleVertexScratch[2][1] = -30.0f;
-
-    packet.faceCount = 1;
-    packet.pointCount = 3;
-    packet.vertex = (u128 *)effTriangleVertexScratch;
-    packet.uv = NULL;
-    sdf3DPrimLinkMat(list, D_003BB068, NULL);
-    sdfDrawTagLink(list, (u32)effPkt3DPrimMakePoly(&packet));
-    D_00325028.append(&D_00325028, list);
-}
-
-extern sdfGrOt_t sdfGrOtTable[];
-
-/* Draw horizontal rings, vertical sides, and the two sets of cap diameters. */
-void effDebugWireframeCylinderDraw(const f32 *center, u32 color, f32 radius, f32 height) {
-    f32 point[4]; /* The line provider consumes xyz; preserve the untouched w lane. */
-    f32 vertices[40][4];
-    u32 colors[40];
-    sdfDrawTag_t *list;
-    f32 (*out)[4];
-    sdfGrOt_t *surface;
-    u32 ring;
-    u32 segment;
-    f32 y;
-    f32 heightStep;
-    f32 angleStep;
-    f32 angle;
-    f32 oppositeAngle;
-
-    list = (sdfDrawTag_t *)sdfGrAllocPacketBuff(0x20);
-    sdfDrawTagInit(list);
-    for (ring = 0; ring < 40; ring++) {
-        colors[ring] = color;
-    }
-    heightStep = height / 19.0f;
-    angleStep = 0.31415924429893494f;
-    y = -height * 0.5f;
-    for (ring = 0; ring < 20; ring++) {
-        angle = 0.0f;
-        out = vertices;
-        point[0] = radius;
-        point[1] = y;
-        point[2] = 0.0f;
-        SDF_VU0_LOADVECTOR_B(center);
-        SDF_VU0_LOADVECTOR(point);
-        SDF_VU0_ADDVECTOR();
-        for (segment = 0; segment < 20; segment++) {
-            SDF_VU0_STOREVECTOR(*out);
-            out++;
-            angle += angleStep;
-            point[0] = sdfCos(angle) * radius;
-            point[1] = y;
-            point[2] = sdfSin(angle) * radius;
-            SDF_VU0_LOADVECTOR(point);
-            SDF_VU0_ADDVECTOR();
-            SDF_VU0_STOREVECTOR(*out);
-            out++;
-        }
-        sdfDrawTagLink(list, (u32)effDebugDrawWireModel(vertices, colors, 40, 0x80));
-        y += heightStep;
-    }
-
-    out = vertices;
-    SDF_VU0_LOADVECTOR_B(center);
-    angle = 0.0f;
-    for (segment = 0; segment < 20; segment++) {
-        point[0] = sdfCos(angle) * radius;
-        point[1] = -height * 0.5f;
-        point[2] = sdfSin(angle) * radius;
-        SDF_VU0_LOADVECTOR(point);
-        SDF_VU0_ADDVECTOR();
-        SDF_VU0_STOREVECTOR(*out);
-        out++;
-        point[0] = sdfCos(angle) * radius;
-        point[1] = height * 0.5f;
-        point[2] = sdfSin(angle) * radius;
-        SDF_VU0_LOADVECTOR(point);
-        SDF_VU0_ADDVECTOR();
-        SDF_VU0_STOREVECTOR(*out);
-        out++;
-        angle += angleStep;
-    }
-    sdfDrawTagLink(list, (u32)effDebugDrawWireModel(vertices, colors, 40, 0x80));
-
-    out = vertices;
-    SDF_VU0_LOADVECTOR_B(center);
-    angle = 0.0f;
-    for (segment = 0; segment < 10; segment++) {
-        point[0] = sdfCos(angle) * radius;
-        point[1] = -height * 0.5f;
-        point[2] = sdfSin(angle) * radius;
-        SDF_VU0_LOADVECTOR(point);
-        SDF_VU0_ADDVECTOR();
-        SDF_VU0_STOREVECTOR(*out);
-        out++;
-        oppositeAngle = angle + 3.1415926f;
-        point[0] = sdfCos(oppositeAngle) * radius;
-        point[1] = -height * 0.5f;
-        point[2] = sdfSin(oppositeAngle) * radius;
-        SDF_VU0_LOADVECTOR(point);
-        SDF_VU0_ADDVECTOR();
-        SDF_VU0_STOREVECTOR(*out);
-        out++;
-        angle += angleStep;
-    }
-    sdfDrawTagLink(list, (u32)effDebugDrawWireModel(vertices, colors, 20, 0x80));
-
-    out = vertices;
-    SDF_VU0_LOADVECTOR_B(center);
-    angle = 0.0f;
-    for (segment = 0; segment < 10; segment++) {
-        point[0] = sdfCos(angle) * radius;
-        point[1] = height * 0.5f;
-        point[2] = sdfSin(angle) * radius;
-        SDF_VU0_LOADVECTOR(point);
-        SDF_VU0_ADDVECTOR();
-        SDF_VU0_STOREVECTOR(*out);
-        out++;
-        oppositeAngle = angle + 3.1415926f;
-        point[0] = sdfCos(oppositeAngle) * radius;
-        point[1] = height * 0.5f;
-        point[2] = sdfSin(oppositeAngle) * radius;
-        SDF_VU0_LOADVECTOR(point);
-        SDF_VU0_ADDVECTOR();
-        SDF_VU0_STOREVECTOR(*out);
-        out++;
-        angle += angleStep;
-    }
-    sdfDrawTagLink(list, (u32)effDebugDrawWireModel(vertices, colors, 20, 0x80));
-    surface = &sdfGrOtTable[55];
-    surface->append(surface, list);
-}
-
-
-
-/* Submit a filled rectangle and its line-strip border. Keep native width/height
- * scaling and the distinct shift/multiply forms used by the other draw paths. */
-void effDebugWindowDraw(s32 x, s32 y, s32 width, s32 height, s32 fillColor, s32 borderColor) {
-    sdfDrawTag_t *list = (sdfDrawTag_t *)sdfGrAllocPacketBuff(EFF_EVENT_DRAW_LIST_BYTES);
-    sdfGrOt_t *scene;
-
-    sdfDrawTagInit(list);
-    sdfDrawTagLink(list, (u32)(dds3PrimFrameRect(x * EFF_EVENT_GS_X_SCALE + EFF_EVENT_GS_X_BIAS, y * EFF_EVENT_GS_Y_SCALE + EFF_EVENT_GS_Y_BIAS, EFF_EVENT_OVERLAY_DEPTH, width * EFF_EVENT_GS_X_SCALE, height * EFF_EVENT_GS_Y_SCALE, fillColor, borderColor)));
-    scene = &kwlnPositionedTextSurface;
-    scene->append(scene, (sdfDrawTag_t *)list);
-}
+extern f32 effDebugSelectCursorAngle;
 
 void Eve_BlurON(void) {
     Eve_BlurShow = 1;
@@ -664,7 +140,7 @@ void Eve_BlurSetParam(const dds3Effect_Blur_t *parameters) {
 }
 
 /* Expose the rectangle-blur parameter block by address. */
-EffScreenDrawParams *Eve_BlurGetParam(void) {
+effScreenDrawParams_t *Eve_BlurGetParam(void) {
     return &Eve_Blur;
 }
 
@@ -682,7 +158,7 @@ void Eve_PartialMultiBlurSetParam(dds3Effect_PartialMultiBlurParam_t *parameters
 }
 
 /* Return the current textured-blur work without retaining it. */
-EffBlurTemplate *Eve_PartialMultiBlurGetParams(void) {
+effBlurTemplate_t *Eve_PartialMultiBlurGetParams(void) {
     return hEve_PartialMultiBlur;
 }
 
@@ -709,7 +185,7 @@ void Eve_DistortionBlurSetParam(dds3Effect_DistortionBlurParam_t *parameters) {
 }
 
 /* Return the current filter-blur work without retaining it. */
-EffBlurScatterWork *Eve_DistortionBlurGetParams(void) {
+effBlurScatterWork_t *Eve_DistortionBlurGetParams(void) {
     return hEve_DistortionBlur;
 }
 
@@ -736,7 +212,7 @@ void Eve_RippleBlurSetParam(dds3Effect_RippleBlurParam_t *parameters) {
 }
 
 /* Return the current staggered-blur work without retaining it. */
-EffBlurScaleWork *Eve_RippleBlurGetParams(void) {
+effBlurScaleWork_t *Eve_RippleBlurGetParams(void) {
     return hEve_RippleBlur;
 }
 
@@ -763,7 +239,7 @@ void effCopyFramebufferQuadParameters(const dds3Effect_Blur_t *source) {
 }
 
 /* Expose the framebuffer-quad parameter block by address. */
-EffScreenDrawParams *effGetCh73Params(void) {
+effScreenDrawParams_t *effGetCh73Params(void) {
     return &D_00355908;
 }
 
@@ -795,21 +271,21 @@ void Eve_PartialMultiFilterOFF(void) {
 
 /* Copy the resource template body while preserving its selected resource. */
 void Eve_PartialMultiFilterSetParam(dds3Effect_PartialMultiFilterParam_t *parameters) {
-    hEve_PartialMultiFilter->params = *parameters;
+    hEve_PartialMultiFilter->param = *parameters;
 }
 
 /* Return the current textured-square work without retaining it. */
-EffResourceRectWork *Eve_PartialMultiFilterGetParams(void) {
+dds3Effect_PartialMultiFilter_t *Eve_PartialMultiFilterGetParams(void) {
     return hEve_PartialMultiFilter;
 }
 
 void Eve_PartialMultiFilterSetTex(sdfTexHandle_t *texture) {
-    hEve_PartialMultiFilter->texture = texture;
+    hEve_PartialMultiFilter->hAlphaTex = texture;
 }
 
 /* Install the textured-square resource-table texture while retaining its body. */
 void Eve_PartialMultiFilterSetDefTex(void) {
-    hEve_PartialMultiFilter->texture = dds3BillboardGetGeneralTex(EFF_EVENT_SQUARE_RESOURCE_INDEX);
+    hEve_PartialMultiFilter->hAlphaTex = dds3BillboardGetGeneralTex(EFF_EVENT_SQUARE_RESOURCE_INDEX);
 }
 
 /* Clone the four default work templates; only the staggered slot count is overridden. */
@@ -818,22 +294,22 @@ void Eve_EffectInit(void) {
     hEve_DistortionBlur = dds3EffectDistortionBlurCreate((dds3Effect_DistortionBlurParam_t *)D_003558A8);
     hEve_PartialMultiFilter = dds3EffectPartialMultiFilterCreate((dds3Effect_PartialMultiFilterParam_t *)D_00355948);
     hEve_RippleBlur = dds3EffectRippleBlurCreate((dds3Effect_RippleBlurParam_t *)D_00355970);
-    Eve_RippleBlurGetParams()->params.count = EFF_EVENT_STAGGERED_SLOT_COUNT;
+    Eve_RippleBlurGetParams()->params.number = EFF_EVENT_STAGGERED_SLOT_COUNT;
 }
 
 /* Dispatch enabled draw families independently, in their native order. */
-void effDispatchActive(void) {
+void Eve_EffectDraw(void) {
     if (Eve_BlurShow) {
-        effDrawBlurRectangle(&Eve_Blur.source);
+        dds3EffectBlur(&Eve_Blur.source);
     }
     if (Eve_PartialMultiBlurShow) {
-        effDrawBlurPixelRectWithResource(hEve_PartialMultiBlur);
+        dds3EffectPartialMultiBlurDraw(hEve_PartialMultiBlur);
     }
     if (Eve_DistortionBlurShow) {
-        effBlurStepScatterSlotsAndDraw(hEve_DistortionBlur);
+        dds3EffectDistortionBlurDraw(hEve_DistortionBlur);
     }
     if (Eve_RippleBlurShow) {
-        effBlurStepScaleSlotsAndDraw(hEve_RippleBlur);
+        dds3EffectRippleBlurDraw(hEve_RippleBlur);
     }
     if (D_003BB073) {
         effBlurDrawFramebufferQuad(&D_00355908.source);
@@ -842,28 +318,33 @@ void effDispatchActive(void) {
         dds3EffectFilter(&Eve_Filter);
     }
     if (Eve_PartialMultiFilterShow) {
-        effResourceRectDrawPixels(hEve_PartialMultiFilter);
+        dds3EffectPartialMultiFilterDraw(hEve_PartialMultiFilter);
     }
 }
 
-/* callbackResult must be valid whenever callback is present. */
-extern EffEventSetupRecord effRectangleBlurSetupRecord;
+/* The result slot must be valid whenever the create callback is present. */
+extern effDebugMenu_t effRectangleBlurSetupRecord;
+
+extern s8 dds3PadBitTable[];
+
 extern s8 effRectangleBlurSetupReady;
-extern s8 D_0039862B[];
-extern void effEventSetupBeforeRecordNoOp(void);
-extern void effEventSetupRecordNoOp(void *);
-extern void effEventSetupAfterRecordNoOp(void);
+
+
+extern void effDebugAllocDrawTag(void);
+
+
+extern void effDebugLinkDrawTag(void);
 
 /* Prepare once per flag cycle, then run the registered operations while ready.
  * A negative control byte clears readiness only after those operations. */
-EffEventSetupReadiness effUpdateCh72Params(void) {
+s32 effUpdateCh72Params(void) {
     u8 ready = effRectangleBlurSetupReady;
 
     if (effRectangleBlurSetupReady == 0) {
-        EffEventSetupRecord *state = &effRectangleBlurSetupRecord;
+        effDebugMenu_t *state = &effRectangleBlurSetupRecord;
 
-        if (state->callback != NULL) {
-            *state->callbackResult = state->callback(state->source);
+        if (state->create != NULL) {
+            *state->param = state->create(state->source);
         }
         if (state->destination != NULL) {
             if (state->source != NULL) {
@@ -874,40 +355,41 @@ EffEventSetupReadiness effUpdateCh72Params(void) {
         effRectangleBlurSetupReady = ready;
     }
     if (ready != 0) {
-        effReturnEventSetupWord((u32)&effRectangleBlurSetupRecord);
-        effEventSetupBeforeRecordNoOp();
-        effEventSetupRecordNoOp(&effRectangleBlurSetupRecord);
-        effEventSetupAfterRecordNoOp();
+        dblurUpdateHandle(&effRectangleBlurSetupRecord);
+        effDebugAllocDrawTag();
+        effDebugDrawMenu(&effRectangleBlurSetupRecord);
+        effDebugLinkDrawTag();
     }
-    if (D_0039862B[0] < 0) {
+    if (dds3PadBitTable[3] < 0) {
         effRectangleBlurSetupReady = 0;
     }
     return effRectangleBlurSetupReady;
 }
 
 /* Expose this screen-draw setup block; no parameter copy is made. */
-EffScreenDrawParams *effGetLoadDescA(void) {
-    return &D_003559A0;
+effScreenDrawParams_t *evtGetUnityCalcArea(void) {
+    return &evtUnityCalcArea;
 }
 
 /* Replace the screen-draw source prefix while preserving the trailing bytes. */
-void effSetLoadDescA(const dds3Effect_Blur_t *parameters) {
-    memcpy(&D_003559A0, parameters, EFF_EVENT_BLUR_SOURCE_BYTES);
+void evtSetUnityCalcArea(const dds3Effect_Blur_t *parameters) {
+    memcpy(&evtUnityCalcArea, parameters, EFF_EVENT_BLUR_SOURCE_BYTES);
 }
 
-extern EffEventSetupRecord mblurDebugMenu;
+extern effDebugMenu_t mblurDebugMenu;
+
 extern s8 mblurDone;
 
 /* Prepare the blur-template callback from its explicit parameter block,
  * then process the channel; its optional copy still uses source/destination. */
-EffEventSetupReadiness effEventAdvanceBlurTemplateSetup(void) {
+s32 mblurProcess(void) {
     u8 ready = mblurDone;
 
     if (mblurDone == 0) {
-        EffEventSetupRecord *state = &mblurDebugMenu;
+        effDebugMenu_t *state = &mblurDebugMenu;
 
-        if (state->callback != NULL) {
-            *state->callbackResult = state->callback(&effTexturedBlurSetupParameters);
+        if (state->create != NULL) {
+            *state->param = state->create(&mblurParam);
         }
         if (state->destination != NULL) {
             if (state->source != NULL) {
@@ -918,39 +400,40 @@ EffEventSetupReadiness effEventAdvanceBlurTemplateSetup(void) {
         mblurDone = ready;
     }
     if (ready != 0) {
-        effReturnEventSetupWord((u32)&mblurDebugMenu);
-        effEventSetupBeforeRecordNoOp();
-        effEventSetupRecordNoOp(&mblurDebugMenu);
-        effEventSetupAfterRecordNoOp();
+        dblurUpdateHandle(&mblurDebugMenu);
+        effDebugAllocDrawTag();
+        effDebugDrawMenu(&mblurDebugMenu);
+        effDebugLinkDrawTag();
     }
-    if (D_0039862B[0] < 0) {
+    if (dds3PadBitTable[3] < 0) {
         mblurDone = 0;
     }
     return mblurDone;
 }
 
 /* Expose the blur-template setup parameters by address. */
-dds3Effect_PartialMultiBlurParam_t *effEventGetBlurTemplateSetupParams(void) {
-    return &effTexturedBlurSetupParameters;
+dds3Effect_PartialMultiBlurParam_t *mblurGetParam(void) {
+    return &mblurParam;
 }
 
 /* Replace the setup template; this does not modify the active blur work. */
-void effEventSetBlurTemplateParameters(dds3Effect_PartialMultiBlurParam_t *parameters) {
-    effTexturedBlurSetupParameters = *parameters;
+void mblurSetParam(dds3Effect_PartialMultiBlurParam_t *parameters) {
+    mblurParam = *parameters;
 }
 
-extern EffEventSetupRecord dblurDebugMenu;
+extern effDebugMenu_t dblurDebugMenu;
+
 extern s8 dblurDone;
 
 /* Prepare scatter setup from its explicit parameters, then process the channel. */
-EffEventSetupReadiness effEventAdvanceScatterBlurSetup(void) {
+s32 dblurProcess(void) {
     u8 ready = dblurDone;
 
     if (dblurDone == 0) {
-        EffEventSetupRecord *state = &dblurDebugMenu;
+        effDebugMenu_t *state = &dblurDebugMenu;
 
-        if (state->callback != NULL) {
-            *state->callbackResult = state->callback(&effScatterBlurSetupParameters);
+        if (state->create != NULL) {
+            *state->param = state->create(&dblurParam);
         }
         if (state->destination != NULL) {
             if (state->source != NULL) {
@@ -961,39 +444,40 @@ EffEventSetupReadiness effEventAdvanceScatterBlurSetup(void) {
         dblurDone = ready;
     }
     if (ready != 0) {
-        effReturnEventSetupWord((u32)&dblurDebugMenu);
-        effEventSetupBeforeRecordNoOp();
-        effEventSetupRecordNoOp(&dblurDebugMenu);
-        effEventSetupAfterRecordNoOp();
+        dblurUpdateHandle(&dblurDebugMenu);
+        effDebugAllocDrawTag();
+        effDebugDrawMenu(&dblurDebugMenu);
+        effDebugLinkDrawTag();
     }
-    if (D_0039862B[0] < 0) {
+    if (dds3PadBitTable[3] < 0) {
         dblurDone = 0;
     }
     return dblurDone;
 }
 
 /* Expose the scatter-blur setup parameters by address. */
-dds3Effect_DistortionBlurParam_t *effEventGetScatterBlurSetupParams(void) {
-    return &effScatterBlurSetupParameters;
+dds3Effect_DistortionBlurParam_t *dblurGetParam(void) {
+    return &dblurParam;
 }
 
 /* Replace setup parameters without replacing the active filter-blur work. */
-void effEventSetScatterBlurParameters(dds3Effect_DistortionBlurParam_t *parameters) {
-    effScatterBlurSetupParameters = *parameters;
+void dblurSetParam(dds3Effect_DistortionBlurParam_t *parameters) {
+    dblurParam = *parameters;
 }
 
-extern EffEventSetupRecord effFramebufferQuadSetupRecord;
+extern effDebugMenu_t effFramebufferQuadSetupRecord;
+
 extern s8 D_003BB114;
 
 /* Prepare from the channel's source, process it, then honor the control-byte reset. */
-EffEventSetupReadiness effEventAdvanceScreenDrawSetup(void) {
+s32 effEventAdvanceScreenDrawSetup(void) {
     u8 ready = D_003BB114;
 
     if (D_003BB114 == 0) {
-        EffEventSetupRecord *state = &effFramebufferQuadSetupRecord;
+        effDebugMenu_t *state = &effFramebufferQuadSetupRecord;
 
-        if (state->callback != NULL) {
-            *state->callbackResult = state->callback(state->source);
+        if (state->create != NULL) {
+            *state->param = state->create(state->source);
         }
         if (state->destination != NULL) {
             if (state->source != NULL) {
@@ -1004,19 +488,19 @@ EffEventSetupReadiness effEventAdvanceScreenDrawSetup(void) {
         D_003BB114 = ready;
     }
     if (ready != 0) {
-        effReturnEventSetupWord((u32)&effFramebufferQuadSetupRecord);
-        effEventSetupBeforeRecordNoOp();
-        effEventSetupRecordNoOp(&effFramebufferQuadSetupRecord);
-        effEventSetupAfterRecordNoOp();
+        dblurUpdateHandle(&effFramebufferQuadSetupRecord);
+        effDebugAllocDrawTag();
+        effDebugDrawMenu(&effFramebufferQuadSetupRecord);
+        effDebugLinkDrawTag();
     }
-    if (D_0039862B[0] < 0) {
+    if (dds3PadBitTable[3] < 0) {
         D_003BB114 = 0;
     }
     return D_003BB114;
 }
 
 /* Expose the other screen-draw setup block by address. */
-EffScreenDrawParams *effGetLoadDescD(void) {
+effScreenDrawParams_t *effGetLoadDescD(void) {
     return &D_00355E48;
 }
 
@@ -1025,18 +509,19 @@ void effSetLoadDescD(const dds3Effect_Blur_t *parameters) {
     memcpy(&D_00355E48, parameters, EFF_EVENT_BLUR_SOURCE_BYTES);
 }
 
-extern EffEventSetupRecord filterDebugMenu;
+extern effDebugMenu_t filterDebugMenu;
+
 extern s8 evtViewerDirty;
 
 /* Prepare solid-rectangle setup from the channel source, then process it. */
-EffEventSetupReadiness evtViewerCheckDirty(void) {
+s32 evtViewerCheckDirty(void) {
     u8 ready = evtViewerDirty;
 
     if (evtViewerDirty == 0) {
-        EffEventSetupRecord *state = &filterDebugMenu;
+        effDebugMenu_t *state = &filterDebugMenu;
 
-        if (state->callback != NULL) {
-            *state->callbackResult = state->callback(state->source);
+        if (state->create != NULL) {
+            *state->param = state->create(state->source);
         }
         if (state->destination != NULL) {
             if (state->source != NULL) {
@@ -1047,39 +532,40 @@ EffEventSetupReadiness evtViewerCheckDirty(void) {
         evtViewerDirty = ready;
     }
     if (ready != 0) {
-        effReturnEventSetupWord((u32)&filterDebugMenu);
-        effEventSetupBeforeRecordNoOp();
-        effEventSetupRecordNoOp(&filterDebugMenu);
-        effEventSetupAfterRecordNoOp();
+        dblurUpdateHandle(&filterDebugMenu);
+        effDebugAllocDrawTag();
+        effDebugDrawMenu(&filterDebugMenu);
+        effDebugLinkDrawTag();
     }
-    if (D_0039862B[0] < 0) {
+    if (dds3PadBitTable[3] < 0) {
         evtViewerDirty = 0;
     }
     return evtViewerDirty;
 }
 
 /* Expose the solid-rectangle setup parameters by address. */
-dds3Effect_Filter_t *effEventGetSolidRectangleSetupParams(void) {
+dds3Effect_Filter_t *dblurGetParam2(void) {
     return &D_00355F88;
 }
 
 /* Replace the setup block rather than the active solid-rectangle parameters. */
-void effEventSetSolidRectangleParameters(dds3Effect_Filter_t *parameters) {
+void dblurSetParam2(dds3Effect_Filter_t *parameters) {
     D_00355F88 = *parameters;
 }
 
-extern EffEventSetupRecord mfilterDebugMenu;
-extern s8 D_003BB12C;
+extern effDebugMenu_t mfilterDebugMenu;
+
+extern s8 mfilterDone;
 
 /* Prepare resource-template setup from its explicit body, then process the channel. */
-EffEventSetupReadiness mfilterRun(void) {
-    u8 ready = D_003BB12C;
+s32 mfilterRun(void) {
+    u8 ready = mfilterDone;
 
-    if (D_003BB12C == 0) {
-        EffEventSetupRecord *state = &mfilterDebugMenu;
+    if (mfilterDone == 0) {
+        effDebugMenu_t *state = &mfilterDebugMenu;
 
-        if (state->callback != NULL) {
-            *state->callbackResult = state->callback(&effResourceRectangleSetupParameters);
+        if (state->create != NULL) {
+            *state->param = state->create(&mfilterParam);
         }
         if (state->destination != NULL) {
             if (state->source != NULL) {
@@ -1087,42 +573,43 @@ EffEventSetupReadiness mfilterRun(void) {
             }
         }
         ready = 1;
-        D_003BB12C = ready;
+        mfilterDone = ready;
     }
     if (ready != 0) {
-        effReturnEventSetupWord((u32)&mfilterDebugMenu);
-        effEventSetupBeforeRecordNoOp();
-        effEventSetupRecordNoOp(&mfilterDebugMenu);
-        effEventSetupAfterRecordNoOp();
+        dblurUpdateHandle(&mfilterDebugMenu);
+        effDebugAllocDrawTag();
+        effDebugDrawMenu(&mfilterDebugMenu);
+        effDebugLinkDrawTag();
     }
-    if (D_0039862B[0] < 0) {
-        D_003BB12C = 0;
+    if (dds3PadBitTable[3] < 0) {
+        mfilterDone = 0;
     }
-    return D_003BB12C;
+    return mfilterDone;
 }
 
 /* Expose the resource-template setup body by address. */
 dds3Effect_PartialMultiFilterParam_t *mfilterGetParam(void) {
-    return &effResourceRectangleSetupParameters;
+    return &mfilterParam;
 }
 
 /* Replace the setup body without replacing the active textured-square work. */
 void mfilterSetParam(dds3Effect_PartialMultiFilterParam_t *parameters) {
-    effResourceRectangleSetupParameters = *parameters;
+    mfilterParam = *parameters;
 }
 
-extern EffEventSetupRecord rblurDebugMenu;
+extern effDebugMenu_t rblurDebugMenu;
+
 extern s8 rblurDone;
 
 /* Prepare scale-blur setup from its explicit parameters, then process the channel. */
-EffEventSetupReadiness rblurProcess(void) {
+s32 rblurProcess(void) {
     u8 ready = rblurDone;
 
     if (rblurDone == 0) {
-        EffEventSetupRecord *state = &rblurDebugMenu;
+        effDebugMenu_t *state = &rblurDebugMenu;
 
-        if (state->callback != NULL) {
-            *state->callbackResult = state->callback(&effStaggeredBlurSetupParameters);
+        if (state->create != NULL) {
+            *state->param = state->create(&rblurParam);
         }
         if (state->destination != NULL) {
             if (state->source != NULL) {
@@ -1133,12 +620,12 @@ EffEventSetupReadiness rblurProcess(void) {
         rblurDone = ready;
     }
     if (ready != 0) {
-        effReturnEventSetupWord((u32)&rblurDebugMenu);
-        effEventSetupBeforeRecordNoOp();
-        effEventSetupRecordNoOp(&rblurDebugMenu);
-        effEventSetupAfterRecordNoOp();
+        dblurUpdateHandle(&rblurDebugMenu);
+        effDebugAllocDrawTag();
+        effDebugDrawMenu(&rblurDebugMenu);
+        effDebugLinkDrawTag();
     }
-    if (D_0039862B[0] < 0) {
+    if (dds3PadBitTable[3] < 0) {
         rblurDone = 0;
     }
     return rblurDone;
@@ -1146,12 +633,12 @@ EffEventSetupReadiness rblurProcess(void) {
 
 /* Expose the scale-blur setup parameters by address. */
 dds3Effect_RippleBlurParam_t *rblurGetParam(void) {
-    return &effStaggeredBlurSetupParameters;
+    return &rblurParam;
 }
 
 /* Replace setup parameters without replacing the active staggered-blur work. */
 void rblurSetParam(dds3Effect_RippleBlurParam_t *parameters) {
-    effStaggeredBlurSetupParameters = *parameters;
+    rblurParam = *parameters;
 }
 
 SoundMixer *effEveBEDCreate(SoundMixer *source) {
@@ -1162,9 +649,7 @@ void effEveBEDDelete(SoundMixer *mixer) {
     sndMixerDestroy(mixer);
 }
 
-
 extern u8 D_003563F0[];
-
 
 extern s32 D_003BB140;
 
@@ -1178,8 +663,6 @@ struct effEveBEDCutHandle_t {
     struct evtUnitHandle_t *actor; /* Linked event unit supplies its model owner. */
     effBTLCutHandle_t *effect;
 };
-
-
 
 struct BtlUnit;
 
@@ -1222,10 +705,8 @@ void effEveBEDCutSetUnitHandle(effEveBEDCutHandle_t *work, struct evtUnitHandle_
     work->actor = actor;
 }
 
-#include "evt_unit.h"
-#include "mdl.h"
-
 extern void effEveBEDPartGetPositionPtr(EffEventInit *source, EffectVectorRequest *params);
+
 extern const f32 D_003A12E0[4];
 
 /* Callbacks consume the VU0 output buffers; see docs/idioms.md,
@@ -1249,9 +730,9 @@ void effEventUpdateEffectParameters(effEveBEDCutHandle_t *work) {
     list = effect->list;
     SDF_VU0_LOADVECTOR(work->init.orientation);
     SDF_VU0_LOADVECTOR_B(D_003A12E0);
-    effMiscQuatMultiplyVU();
-    effMiscQuaternionToMatrixVU();
-    VU0_STORE_MATRIX_NOCLOBBER(rotationMatrix);
+    Mult();
+    ToMatrix();
+    SDF_VU0_STOREMATRIX_NOMEM(rotationMatrix);
     count = list->count;
     entry = list->entries;
     color = work->init.color;
@@ -1271,8 +752,8 @@ void effEventUpdateEffectParameters(effEveBEDCutHandle_t *work) {
                 if (entry->aimParams.kind == 5) {
                     sdfModelGetMarkPosMatrix(model, entry->aimParams.count);
                     SDF_VU0_LOADMATRIX_B(rotationMatrix);
-                    sdfComposeVuMatrixFromRegisters();
-                    VU0_STORE_MATRIX_NOCLOBBER(matrix);
+                    MultMatrixNoArg();
+                    SDF_VU0_STOREMATRIX_NOMEM(matrix);
                     dds3EffectPartSetRotateMatrix(effect->parameterWorks[entryIndex], matrix);
                 } else {
                     mdlGetScale(work->actor->owner);
@@ -1280,10 +761,10 @@ void effEventUpdateEffectParameters(effEveBEDCutHandle_t *work) {
                     sdfModelGetMarkPosMatrix(model, entry->aimParams.count);
                     if (scale != 0.0f) {
                         SDF_VU0_SETSCALE1VECTOR();
-                        VU0_SCALAR_OP(1.0f / scale, "vmulx.xyzw vf10, vf10, vf2x");
+                        SDF_VU0_SCALEVECTOR_V0(1.0f / scale);
                         SDF_VU0_SCALE_XYZ();
                     }
-                    VU0_STORE_MATRIX_NOCLOBBER(matrix);
+                    SDF_VU0_STOREMATRIX_NOMEM(matrix);
                     dds3EffectPartSetRotateMatrix(effect->parameterWorks[entryIndex], matrix);
                 }
             }
@@ -1360,11 +841,12 @@ void effSimpleBEDSetRGBA(effSimpleBED_t *work, u32 color) {
     effEveBEDCutSetParams(work->owner, &work->init);
 }
 
-
-
 extern f32 D_003563A0[];
+
 extern f32 D_003563B8[];
-extern f32 sdfViewTargetVector[4];
+
+extern f32 aViewEye[4];
+
 extern f32 aViewDown[4];
 
 /* vu0 routine: leave the selected aim point in vf10, not a C return value.
@@ -1408,7 +890,7 @@ void effEveBEDPartGetPositionPtr(EffEventInit *source, EffectVectorRequest *para
         dir[2] = half < radius ? -radius : -half;
         dir[0] = dir[1] = 0.0f;
         pos[1] = y;
-        LookAtMatrix(pos, sdfViewTargetVector, aViewDown);
+        LookAtMatrix(pos, aViewEye, aViewDown);
         ReverseMatrix();
         SDF_VU0_LOADVECTOR(dir);
         SDF_VU0_VECTOR_W_SET_ZERO();
@@ -1426,9 +908,9 @@ void effEveBEDPartGetPositionPtr(EffEventInit *source, EffectVectorRequest *para
         dir[2] = 1.0f;
         dir[1] = 0.0f;
         SDF_VU0_LOADVECTOR(source->orientation);
-        effMiscQuaternionToMatrixVU();
-        sdfVuLoadSecondaryRotationMatrixY(D_003563B8[directionMode]);
-        sdfComposeVuMatrixFromRegisters();
+        ToMatrix();
+        SetRotateMatrixY_B(D_003563B8[directionMode]);
+        MultMatrixNoArg();
         SDF_VU0_LOADVECTOR(dir);
         SDF_VU0_VECTOR_W_SET_ZERO();
         SDF_VU0_APPLYMATRIX();
@@ -1443,6 +925,7 @@ void effEveBEDPartGetPositionPtr(EffEventInit *source, EffectVectorRequest *para
 extern billHandle_t *billCreateFromResource(s32 kind, const char *path);
 
 /* Allocate particles plus their owner, copy parameters and acquire shared textures. */
+
 INCLUDE_RODATA(const s32, "effect/effEvent", D_003A12E0);
 
 EffEventBillSet *effEVECombParSmokeCreate(EffEventBillParams *src) {
@@ -1542,6 +1025,7 @@ void effEVECombParSmokePartInit(EffEventBillSet *work, s32 index) {
 }
 
 extern f32 aViewTarget[4];
+
 extern void dds3BillboardDraw(billHandle_t *obj);
 
 /* vu0 routine: camera-right normalization and position addition use the
@@ -1556,7 +1040,7 @@ void effEventUpdateBillboardParticles(EffEventBillSet *work) {
     f32 acceleration, swayPhaseStep, swayAmplitudeStep;
 
     SDF_VU0_LOADVECTOR(aViewTarget);
-    SDF_VU0_LOADVECTOR_B(sdfViewTargetVector);
+    SDF_VU0_LOADVECTOR_B(aViewEye);
     SDF_VU0_SUBVECTOR();
     SDF_VU0_LOADVECTOR_B(aViewDown);
     SDF_VU0_OUTERPRODUCT();
@@ -1647,9 +1131,12 @@ void effEventUpdateBillboardParticles(EffEventBillSet *work) {
 }
 
 struct DmaPacketHeader;
+
 extern void sdf3DMakeDirectRefPacket(struct DmaPacketHeader *packet, u32 sourceAddress, s32 payloadBytes);
+
 extern void sdfBillBoardMakeTMPacket(u8 *packet, const f32 *matrix);
-extern sdfGrOt_t D_003252A8;
+
+SYMBOL_AT(sdfGrOt_t, D_003252A8, sdfGrOtTable, 0x760);
 
 extern sdfTexHandle_t *dds3BillboardGetTex(billHandle_t *effect);
 
@@ -1686,14 +1173,14 @@ void effEVECombParSmokeDraw(EffEventBillSet *work) {
     textureBuffer = sdfTexGetPacket(primaryTexture);
     textureBytes = sdfTexGetPacketLength(primaryTexture);
     sdf3DMakeDirectRefPacket(texturePacket, (u32)textureBuffer, textureBytes);
-    sdfAppendReferencePacket(primaryList, (u32)texturePacket);
+    sdfDrawTagLinkRef(primaryList, (u32)texturePacket);
     secondaryTexture = dds3BillboardGetTex(D_003BB148);
     texturePacket = (struct DmaPacketHeader *)sdfGrAllocPacketBuff(0x20);
     textureBuffer = sdfTexGetPacket(secondaryTexture);
     textureBytes = sdfTexGetPacketLength(secondaryTexture);
     sdf3DMakeDirectRefPacket(texturePacket, (u32)textureBuffer, textureBytes);
-    sdfAppendReferencePacket(secondaryList, (u32)texturePacket);
-    EE_MMI_UNIT_MATRIX(matrix);
+    sdfDrawTagLinkRef(secondaryList, (u32)texturePacket);
+    SDF_VU0_STOREIDENTITY(matrix);
     geometryPacket = (u8 *)sdfGrAllocPacketBuff(0x38);
     sdfBillBoardMakeTMPacket(geometryPacket, matrix[0]);
     sdfDrawTagLink(primaryList, (u32)geometryPacket);
@@ -1701,7 +1188,7 @@ void effEVECombParSmokeDraw(EffEventBillSet *work) {
     sdfBillBoardMakeTMPacket(geometryPacket, matrix[0]);
     sdfDrawTagLink(secondaryList, (u32)geometryPacket);
     SDF_VU0_LOADVECTOR(aViewTarget);
-    SDF_VU0_LOADVECTOR_B(sdfViewTargetVector);
+    SDF_VU0_LOADVECTOR_B(aViewEye);
     SDF_VU0_SUBVECTOR();
     SDF_VU0_LOADVECTOR_B(aViewDown);
     SDF_VU0_OUTERPRODUCT();
@@ -1899,7 +1386,7 @@ void effEVECombParSmokeDraw(EffEventBillSet *work) {
     statePacket->registers.alpha.value = 0x44;
     statePacket->registers.alpha.registerId = SDF_GS_ALPHA_1;
     sdfDrawTagLink(stateList, (u32)statePacket);
-    D_003252A8.append(&D_003252A8, stateList);
+    D_003252A8.regFunc(&D_003252A8, stateList);
     stateList = (sdfDrawTag_t *)sdfGrAllocPacketBuff(0x20);
     sdfDrawTagInit(stateList);
     statePacket = (sdfPrimTransPacket_t *)sdfGrAllocPacketBuff(0x40);
@@ -1914,9 +1401,9 @@ void effEVECombParSmokeDraw(EffEventBillSet *work) {
     statePacket->registers.alpha.registerId = SDF_GS_ALPHA_1;
     sdfDrawTagLink(stateList, (u32)statePacket);
     surface = &sdfGrOtTable[60];
-    surface->append(surface, stateList);
-    (surface - 1)->append(surface - 1, primaryList);
-    surface->append(surface, secondaryList);
+    surface->regFunc(surface, stateList);
+    (surface - 1)->regFunc(surface - 1, primaryList);
+    surface->regFunc(surface, secondaryList);
 }
 
 /* Copy one full vector quadword through vf10, including its fourth component. */
@@ -1953,7 +1440,6 @@ void effEVECombParSmokeSetParams(EffEventBillParams *destination, const EffEvent
 void effEVECombParSmokeCreate2(void) {
     effEVECombParSmokeCreate(D_003563F0);
 }
-
 
 EffChanWork *effAPPoint4Create(const EffChanHead *source, u16 kind, void *params) {
     const EffChanHead *head = source;
@@ -1995,9 +1481,275 @@ EffChanWork *effAPPoint4CreatePCF(void *data) {
     return effAPPoint4Create(block0, dds3EffectPCPDataGetType(data, 1), block1);
 }
 
-INCLUDE_SDATA(const s32, "effect/effEvent", D_003BB068);
+#define EFF_CURVE_ROW_FLOATS 4
 
-INCLUDE_SDATA(const s32, "effect/effEvent", D_003BB06C);
+#define EFF_CURVE_SCALAR_SOURCE_OFFSET 16
+
+#define EFF_CURVE_SOURCE_ROW_COUNT 4
+
+#define EFF_CHANNEL_ALPHA_SCALE 127.0f
+
+#define EFF_CHANNEL_ALPHA_SHIFT 24
+
+#define EFF_CHANNEL_RGB_COLOR 0x00808080
+
+extern void effAPPoint4PartInit(EffChanWork *work, u32 recordIndex);
+
+/* Clone channel work, allocate slots and duplicate a parameter template per record.
+ * The record count is captured before allocation; a nonpositive delay modulus becomes one. */
+EffChanWork *effAPPoint4Copy(EffChanSource *source) {
+    u32 recordCount = source->head.count;
+    sdfMemHandle_t *allocationHandle = sdfMemAllocDirect(recordCount * sizeof(EffChanRecord) + sizeof(EffChanWork));
+    EffChanWork *work = (EffChanWork *)sdfMemLock(allocationHandle);
+    EffChanRecord *recordCursor = (EffChanRecord *)(work + 1);
+    effPartHandle_t *parameterTemplate;
+    s32 delayModulus;
+    u32 recordIndex;
+
+    work->head = source->head;
+    work->buffer = allocationHandle;
+    work->records = recordCursor;
+    if (work->head.spread <= 0) {
+        work->head.spread = 1;
+    }
+    work->slots = dds3Bezier4PCreate(recordCount);
+    if (recordCount != 0) {
+        parameterTemplate = source->owner->param;
+        delayModulus = work->head.spread;
+        for (recordIndex = 0; recordIndex < recordCount; recordIndex++) {
+            recordCursor->param = dds3EffectPartCopy(parameterTemplate);
+            recordCursor->delay = -(dds3GetRandA((EffRandState *)effDefaultRandomState) % delayModulus);
+            recordCursor++;
+        }
+    }
+    return work;
+}
+
+/* Release slot storage, every duplicated parameter and the backing allocation in native order. */
+void effAPPoint4Delete(EffChanWork *work) {
+    EffChanRecord *recordCursor;
+    u32 recordIndex = 0;
+    u32 recordCount;
+
+    dds3Bezier4PDelete(work->slots);
+    recordCount = work->head.count;
+    recordCursor = work->records;
+    if (recordCount != 0) {
+        do {
+            dds3EffectPartDelete(recordCursor->param);
+            recordCursor++;
+            recordIndex++;
+        } while (recordIndex < recordCount);
+    }
+    sdfMemFreeDirect(work->buffer);
+}
+
+/* vu0 routine: Jitter four control points normal to the path and viewing direction.
+ * Reuse the final edge normal for the endpoint; retain XYZ-only scale initialization. */
+void effAPPoint4PartInit(EffChanWork *work, u32 recordIndex) {
+    f32 jitterScale[4];
+    f32 lastNormal[4];
+    f32 viewDirection[4];
+    f32 jitteredPoint[4];
+    EffChanRecord *record = work->records + recordIndex;
+    EffCubicBezierSlot *bezierSlot;
+    f32 cursorStep;
+    f32 centeredRandom;
+
+    SDF_VU0_LOADVECTOR(aViewEye);
+    SDF_VU0_LOADVECTOR_B(aViewTarget);
+    SDF_VU0_SUBVECTOR();
+    SDF_VU0_STOREVECTOR(viewDirection);
+    cursorStep = 1.0f / (f32)work->head.steps;
+    bezierSlot = dds3Bezier4PGetPart(work->slots, recordIndex);
+    bezierSlot->t = 0;
+    bezierSlot->step = cursorStep;
+
+    centeredRandom = dds3GetRandFloatA(effDefaultRandomState) - 0.5f;
+    jitterScale[0] = work->head.jitter[0] * (centeredRandom + centeredRandom);
+    jitterScale[1] = jitterScale[0];
+    jitterScale[2] = jitterScale[0];
+    SDF_VU0_LOADVECTOR(work->head.controlPoints[0]);
+    SDF_VU0_LOADVECTOR_B(work->head.controlPoints[1]);
+    SDF_VU0_COPYVECTOR_A_TO_C();
+    SDF_VU0_SUBVECTOR();
+    SDF_VU0_LOADVECTOR_B(viewDirection);
+    SDF_VU0_OUTERPRODUCT();
+    SDF_VU0_NORMALIZE();
+    SDF_VU0_LOADVECTOR_B(jitterScale);
+    SDF_VU0_MULVECTOR();
+    SDF_VU0_ADDVECTOR_A_C();
+    SDF_VU0_STOREVECTOR(jitteredPoint);
+    bezierSlot->controlPoints[0][0] = jitteredPoint[0];
+    bezierSlot->controlPoints[0][1] = jitteredPoint[1];
+    bezierSlot->controlPoints[0][2] = jitteredPoint[2];
+
+    centeredRandom = dds3GetRandFloatA(effDefaultRandomState) - 0.5f;
+    jitterScale[0] = work->head.jitter[1] * (centeredRandom + centeredRandom);
+    jitterScale[1] = jitterScale[0];
+    jitterScale[2] = jitterScale[0];
+    SDF_VU0_LOADVECTOR(work->head.controlPoints[1]);
+    SDF_VU0_LOADVECTOR_B(work->head.controlPoints[2]);
+    SDF_VU0_COPYVECTOR_A_TO_C();
+    SDF_VU0_SUBVECTOR();
+    SDF_VU0_LOADVECTOR_B(viewDirection);
+    SDF_VU0_OUTERPRODUCT();
+    SDF_VU0_NORMALIZE();
+    SDF_VU0_LOADVECTOR_B(jitterScale);
+    SDF_VU0_MULVECTOR();
+    SDF_VU0_ADDVECTOR_A_C();
+    SDF_VU0_STOREVECTOR(jitteredPoint);
+    bezierSlot->controlPoints[1][0] = jitteredPoint[0];
+    bezierSlot->controlPoints[1][1] = jitteredPoint[1];
+    bezierSlot->controlPoints[1][2] = jitteredPoint[2];
+
+    centeredRandom = dds3GetRandFloatA(effDefaultRandomState) - 0.5f;
+    jitterScale[0] = work->head.jitter[2] * (centeredRandom + centeredRandom);
+    jitterScale[1] = jitterScale[0];
+    jitterScale[2] = jitterScale[0];
+    SDF_VU0_LOADVECTOR(work->head.controlPoints[2]);
+    SDF_VU0_LOADVECTOR_B(work->head.controlPoints[3]);
+    SDF_VU0_COPYVECTOR_A_TO_C();
+    SDF_VU0_SUBVECTOR();
+    SDF_VU0_LOADVECTOR_B(viewDirection);
+    SDF_VU0_OUTERPRODUCT();
+    SDF_VU0_NORMALIZE();
+    SDF_VU0_STOREVECTOR(lastNormal);
+    SDF_VU0_LOADVECTOR_B(jitterScale);
+    SDF_VU0_MULVECTOR();
+    SDF_VU0_ADDVECTOR_A_C();
+    SDF_VU0_STOREVECTOR(jitteredPoint);
+    bezierSlot->controlPoints[2][0] = jitteredPoint[0];
+    bezierSlot->controlPoints[2][1] = jitteredPoint[1];
+    bezierSlot->controlPoints[2][2] = jitteredPoint[2];
+
+    centeredRandom = dds3GetRandFloatA(effDefaultRandomState) - 0.5f;
+    jitterScale[0] = work->head.jitter[3] * (centeredRandom + centeredRandom);
+    jitterScale[1] = jitterScale[0];
+    jitterScale[2] = jitterScale[0];
+    SDF_VU0_LOADVECTOR(lastNormal);
+    SDF_VU0_LOADVECTOR_B(jitterScale);
+    SDF_VU0_MULVECTOR();
+    SDF_VU0_LOADVECTOR_B(work->head.controlPoints[3]);
+    SDF_VU0_ADDVECTOR();
+    SDF_VU0_STOREVECTOR(jitteredPoint);
+    bezierSlot->controlPoints[3][0] = jitteredPoint[0];
+    bezierSlot->controlPoints[3][1] = jitteredPoint[1];
+    bezierSlot->controlPoints[3][2] = jitteredPoint[2];
+    dds3EffectPartSetColor(record->param, 0);
+}
+
+/* Step active records, update their packed color/position callbacks, and optionally recycle.
+ * The slot-zero lookup precedes the empty-count check; retain the time snapshot and later stored increments. */
+void effAPPoint4Draw(EffChanWork *work) {
+    EffChanRecord *recordCursor = work->records;
+    struct EffCubicBezierArray *bezierSlots = work->slots;
+    u32 recordCount = work->head.count;
+    u32 recordIndex = 0;
+    u8 cycleEnabled = work->head.enabled;
+    s32 activeSteps = work->head.steps;
+    s32 delayModulus = work->head.spread;
+    s32 fadeInSteps = work->head.fadeIn;
+    s32 fadeOutSteps = work->head.fadeOut;
+    f32 position[3];
+
+    (void)dds3Bezier4PGetPart(bezierSlots, 0);
+    if (recordCount == 0) {
+        return;
+    }
+    do {
+        s32 recordTime = recordCursor->delay;
+
+        if (recordTime == 0) {
+            effAPPoint4PartInit(work, recordIndex);
+        }
+        if (recordTime > 0 && recordTime <= activeSteps) {
+            f32 opacity;
+            s32 fadePhase;
+            u32 alpha;
+            u32 color;
+
+            dds3Bezier4PPartRun(bezierSlots, recordIndex, position);
+            fadePhase = fadeInSteps > recordTime;
+            if (fadePhase) {
+                opacity = (f32)recordTime / (f32)fadeInSteps;
+            } else {
+                fadePhase = activeSteps - recordTime;
+                if (fadePhase <= fadeOutSteps) {
+                    opacity = (f32)fadePhase / (f32)fadeOutSteps;
+                } else {
+                    opacity = 1.0f;
+                }
+            }
+            alpha = (u32)(opacity * EFF_CHANNEL_ALPHA_SCALE);
+            color = (alpha << EFF_CHANNEL_ALPHA_SHIFT) | EFF_CHANNEL_RGB_COLOR;
+            dds3EffectPartSetColor(recordCursor->param, color);
+            dds3EffectPartSetPosition(recordCursor->param, position);
+            dds3EffectPartDraw(recordCursor->param);
+        }
+        if (recordTime < activeSteps) {
+            recordCursor->delay++;
+        } else if (cycleEnabled != 0) {
+            recordCursor->delay = -(dds3GetRandA((EffRandState *)effDefaultRandomState) % delayModulus);
+        } else {
+            recordCursor->delay++;
+        }
+        recordCursor++;
+        recordIndex++;
+    } while (recordIndex < recordCount);
+}
+
+/* Copy XYZ from four float4 rows without touching destination W, then copy four trailing scalars. */
+void effCopyVertRows(EffChan *channel, f32 *source) {
+    f32 *sourceRow;
+    u32 rowIndex;
+    f32 *scalarCursor;
+    f32 *destinationRow;
+
+    sourceRow = source;
+    rowIndex = 0;
+    source += EFF_CURVE_SCALAR_SOURCE_OFFSET;
+    scalarCursor = channel->rows->secondary;
+    destinationRow = channel->rows->primary;
+    do {
+        rowIndex++;
+        destinationRow[0] = sourceRow[0];
+        destinationRow[1] = sourceRow[1];
+        destinationRow[2] = sourceRow[2];
+        sourceRow += EFF_CURVE_ROW_FLOATS;
+        destinationRow += EFF_CURVE_ROW_FLOATS;
+        *scalarCursor = *source++;
+        scalarCursor++;
+    } while (rowIndex < EFF_CURVE_SOURCE_ROW_COUNT);
+}
+
+/* Jitter each slot and choose its initial unsigned-modulo step.
+ * Stored record time is one ahead of the Bezier cursor parameter's sampled step. */
+void effEveAPP4Randomize(EffEmit *emitter) {
+    EffChanWork *channelWork = emitter->primitive;
+    u32 stepModulus = channelWork->head.steps;
+    u32 recordCount = channelWork->head.count;
+    EffChanRecord *recordCursor = channelWork->records;
+    u32 recordIndex = 0;
+    EffCubicBezierSlot *bezierSlot;
+    s32 randomStep;
+    f32 cursorStep;
+
+    if (recordCount == 0) {
+        return;
+    }
+    do {
+        effAPPoint4PartInit(channelWork, recordIndex);
+        recordCursor->delay = dds3GetRandA((EffRandState *)effDefaultRandomState) % stepModulus;
+        bezierSlot = dds3Bezier4PGetPart(channelWork->slots, recordIndex);
+        recordIndex++;
+        randomStep = recordCursor->delay;
+        cursorStep = bezierSlot->step;
+        recordCursor->delay = randomStep + 1;
+        recordCursor++;
+        bezierSlot->t = cursorStep * (f32)randomStep;
+    } while (recordIndex < recordCount);
+}
 
 INCLUDE_SDATA(const s32, "effect/effEvent", Eve_BlurShow);
 
@@ -2061,7 +1813,7 @@ INCLUDE_SDATA(const s32, "effect/effEvent", D_003BB120);
 
 INCLUDE_SDATA(const s32, "effect/effEvent", D_003BB128);
 
-INCLUDE_SDATA(const s32, "effect/effEvent", D_003BB12C);
+INCLUDE_SDATA(const s32, "effect/effEvent", mfilterDone);
 
 INCLUDE_SDATA(const s32, "effect/effEvent", D_003BB130);
 
@@ -2074,3 +1826,4 @@ INCLUDE_SDATA(const s32, "effect/effEvent", D_003BB144);
 INCLUDE_SDATA(const s32, "effect/effEvent", D_003BB148);
 
 INCLUDE_SDATA(const s32, "effect/effEvent", D_003BB14C);
+

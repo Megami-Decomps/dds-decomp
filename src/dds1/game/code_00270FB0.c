@@ -7,15 +7,15 @@
 #include "fr_font.h"
 #include "itf_draw_grid.h"
 #include "mnu_staff.h"
-#include "kwln.h"
-#include "sdf_resource.h"
+#include "kernel.h"
+#include "sdf_heap_api.h"
 #include "dat_state.h"
 #include "mnu.h"
 #include "eff.h"
 #include "mnu_shop.h"
 #include "mnu_camp_work.h"
 #include "mnu_list.h"
-#include "kwln_task_lifecycle.h"
+#include "dds3_task_lifecycle.h"
 
 extern struct EffectSlotSet *mnuCampResourceHandles[];
 
@@ -75,6 +75,7 @@ void mnuReleaseStaffImageHandles(struct EffectSlotSet **resources) {
 }
 
 /* Return this category's handle array and count; unknown categories have none. */
+
 INCLUDE_RODATA(const s32, "game/code_00270FB0", D_003B2020);
 
 struct EffectSlotSet **mnuGetStaffCategoryEntries(MnuStaffVisualCategory category, s32 *outEntryCount,
@@ -233,3 +234,4 @@ INCLUDE_SDATA(const s32, "game/code_00270FB0", campExitState);
 INCLUDE_SDATA(const s32, "game/code_00270FB0", D_003BC6B5);
 
 INCLUDE_SDATA(const s32, "game/code_00270FB0", mnuCampInputTaskName);
+

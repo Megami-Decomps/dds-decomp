@@ -74,4 +74,9 @@ run "$cc1" \
     -quiet -O2 $flags "$cc_in" -o "$cc_out"
 # DDS_KEEP_S=path keeps the compiler's assembly (check_unit measures inline asm).
 if [ -n "$DDS_KEEP_S" ]; then cp "$cc_out" "$DDS_KEEP_S"; fi
-run "$ee/ee/bin/as" -EL -G8 -g -Iinclude -o "$out" "$cc_out"
+# The assembler gets the unit's -G, and no -g under -g0, as from the gcc driver.
+asg=-G8 asdbg=-g
+for f in $flags; do
+    case $f in -G*) asg=$f ;; -g0) asdbg= ;; esac
+done
+run "$ee/ee/bin/as" -EL $asg $asdbg -Iinclude -o "$out" "$cc_out"

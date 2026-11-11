@@ -3,8 +3,8 @@
 #include "sdf_gs_alpha_register_api.h"
 #include "sdf_gs_register_submit_api.h"
 #include "common.h"
-#include "kwln_draw_buffer.h"
-#include "kwln_frame_draw_buffer.h"
+#include "dds3_draw_buffer.h"
+#include "dds3_frame_draw_buffer.h"
 #include "sdf_cons_matrix_packet.h"
 #include "sdf_dma_packet_header.h"
 #include "sdf_chip.h"
@@ -20,7 +20,7 @@
 #include "sdf.h"
 #include "sdf_draw.h"
 #include "sdf_projection.h"
-#include "pcp_vu0.h"
+#include "ps2asm.h"
 #include "sdf_primitive_packet_api.h"
 #include "sdf_packet_append.h"
 #include "grid_packed_vertex.h"
@@ -519,19 +519,19 @@ extern DmaPacketHeader D_003DFAF0[2];
 
 extern sdfDrawTag_t D_003DFB30[2];
 
-extern SdfLightingPacketStorage D_003DFB70[2];
+extern sdf3DLightParallelPacket_t D_003DFB70[2];
 
 extern ConsMatrixPacket D_003DFD30[2];
 
-extern SdfLightSources D_00324770;
+extern sdf3DLight_t *dds3LightParam[3];
 
-extern f32 kwlnDefaultColorVector[4];
+extern sdfVector4_t dds3AmbientColor;
 
 extern Matrix4 sdfViewMatrix;
 
 extern f32 aViewTarget[4];
 
-extern f32 sdfViewTargetVector[4];
+extern f32 aViewEye[4];
 
 extern f32 aViewDown[4];
 
@@ -540,19 +540,19 @@ extern void sdf3DLinkInitPacket(sdfDrawTag_t *, DmaPacketHeader *);
 
 
 /* Rebuild the view matrix and both frame banks' matrix and lighting packet lists. */
-void itfInitDoubleBufferedScenePackets(void) {
+void cmpDrawSetup3DView(void) {
     s32 i;
 
-    sdfCameraBuildProjection(&dds3ScreenParam.camera);
-    LookAtMatrix(aViewTarget, sdfViewTargetVector, aViewDown);
-    VU0_STORE_MATRIX_UNCLOBBERED(&sdfViewMatrix);
+    sdf3DMakeScreenParam(&dds3ScreenParam.camera);
+    LookAtMatrix(aViewTarget, aViewEye, aViewDown);
+    SDF_VU0_STOREMATRIX_NOMEM(&sdfViewMatrix);
     for (i = 0; i < 2; i++) {
         sdfDrawTagInit(&D_003DFAB0[i]);
         sdf3DLinkInitPacket(&D_003DFAB0[i], &D_003DFAF0[i]);
         sdf3DMakeViewportPacket((struct ConsMatrixPacket *)&D_003DFD30[i], &dds3ScreenParam, &sdfViewMatrix);
         sdfDrawTagLink(&D_003DFAB0[i], (u32)&D_003DFD30[i]);
         sdfDrawTagInit(&D_003DFB30[i]);
-        sdf3DMakeLightParallelPacket(&D_003DFB70[i], D_00324770, kwlnDefaultColorVector);
+        sdf3DMakeLightParallelPacket(&D_003DFB70[i], dds3LightParam, &dds3AmbientColor);
         sdfDrawTagLink(&D_003DFB30[i], (u32)&D_003DFB70[i]);
     }
 }
@@ -576,7 +576,7 @@ void cmpDrawSpriteFlag(u8 enabled, s32 alternate, s32 kind) {
     sdfDrawTagInit(context);
     sdfDrawTagLink(context, (u32)packet);
     entry = &sdfGrOtTable[kind];
-    entry->append(entry, context);
+    entry->regFunc(entry, context);
 }
 
 void itfSetPrimaryFramebufferAlphaFlag(u8 value, u32 kind) {
@@ -601,7 +601,7 @@ void cmpDrawSprite(u64 data, s32 alternate, s32 kind) {
     sdfDrawTagInit(context);
     sdfDrawTagLink(context, (u32)packet);
     entry = &sdfGrOtTable[kind];
-    entry->append(entry, context);
+    entry->regFunc(entry, context);
 }
 
 void sdfSubmitGsTestOneRegisterPacket(u64 data, u32 kind) {
@@ -626,7 +626,7 @@ void cmpDrawSprite2(s32 data, s32 alternate, s32 kind) {
     sdfDrawTagInit(context);
     sdfDrawTagLink(context, (u32)packet);
     entry = &sdfGrOtTable[kind];
-    entry->append(entry, context);
+    entry->regFunc(entry, context);
 }
 
 void sdfSubmitGsAlphaOneRegisterPacket(u32 data, u32 kind) {
@@ -647,7 +647,7 @@ void cmpDrawSpriteIndexed(s32 data, s32 kind) {
     sdfDrawTagInit(context);
     sdfDrawTagLink(context, (u32)packet);
     entry = &sdfGrOtTable[kind];
-    entry->append(entry, context);
+    entry->regFunc(entry, context);
 }
 
 void cmpDrawSpriteIndexed2(s32 data, s32 kind) {
@@ -664,7 +664,7 @@ void cmpDrawSpriteIndexed2(s32 data, s32 kind) {
     sdfDrawTagInit(context);
     sdfDrawTagLink(context, (u32)packet);
     entry = &sdfGrOtTable[kind];
-    entry->append(entry, context);
+    entry->regFunc(entry, context);
 }
 
 /* Fill all four words with value without assigning a corner or channel order. */
@@ -706,7 +706,7 @@ void cmpDrawTriG(const u32 *xs, const u32 *ys, u32 z, const u32 *colors, u32 sur
     sdfDrawTagInit(list);
     sdfDrawTagLink(list, (u32)packet);
     surface = &sdfGrOtTable[surfaceIndex];
-    surface->append(surface, list);
+    surface->regFunc(surface, list);
 }
 
 extern void itfDrawColoredRectangle(u32, u32, u32, u32, u32, const u32 *, u32, u32);
@@ -752,7 +752,7 @@ void itfDrawColoredRectangle(u32 x, u32 y, u32 z, u32 width, u32 height, const u
     sdfDrawTagInit(list);
     sdfDrawTagLink(list, (u32)packet);
     surface = &sdfGrOtTable[surfaceIndex];
-    surface->append(surface, list);
+    surface->regFunc(surface, list);
 }
 
 void uiDrawGradientColorRect(u32 x, u32 y, u32 z, u32 width, u32 height, const u32 *vertexColors, u32 surfaceIndex) {
@@ -798,7 +798,7 @@ void cmpDrawBoxLine(u32 x0, u32 y0, u32 z0, u32 x1, u32 y1, u32 z1,
     sdfDrawTagInit(list);
     sdfDrawTagLink(list, (u32)packet);
     surface = &sdfGrOtTable[surfaceIndex];
-    surface->append(surface, list);
+    surface->regFunc(surface, list);
 }
 
 
@@ -845,25 +845,25 @@ void cmpDraw3DPoly(const f32 *first, const f32 *second, const f32 *third,
     textureCoordinates[2][1] = 0.0f;
     sdfDrawTagLink(list, (u32)sdf3DPrimMakePoly(&request));
     surface = &sdfGrOtTable[surfaceIndex];
-    surface->append(surface, list);
+    surface->regFunc(surface, list);
 }
 
-extern KwlnFrameDrawBuffer kwlnFrameDrawPacketRecords[];
+extern dds3FrameDrawBuffer_t dds3FrameDrawPacketRecords[];
 
-extern void sdfBuildMaskedFrameRegisterReference(const u8 *, SdfDmaReferenceChainPacket *, s32);
+extern void sdfGrSetFrameMaskRGB(const u8 *, SdfDmaReferenceChainPacket *, s32);
 
-extern void sdfBuildFrameRegisterReference(const u8 *, SdfDmaReferenceChainPacket *, s32);
+extern void sdfGrSetFrameMaskReset(const u8 *, SdfDmaReferenceChainPacket *, s32);
 
 void uiDrawActiveSurfaceRegion(s32 surfaceIndex) {
     sdfDrawTag_t *list = (sdfDrawTag_t *)sdfGrAllocPacketBuff(0x20);
     SdfDmaReferenceChainPacket *texture;
     sdfDrawTagInit(list);
     texture = (SdfDmaReferenceChainPacket *)sdfGrAllocPacketBuff(0x40);
-    sdfBuildMaskedFrameRegisterReference(kwlnFrameDrawPacketRecords[dds3GetFrameID()].baseBytes, texture, 0);
+    sdfGrSetFrameMaskRGB(dds3FrameDrawPacketRecords[dds3GetFrameID()].baseBytes, texture, 0);
     sdfDrawTagLinkRefGif(list, (u32)texture);
     {
         sdfGrOt_t *surface = &sdfGrOtTable[surfaceIndex];
-        surface->append(surface, list);
+        surface->regFunc(surface, list);
     }
 }
 
@@ -872,11 +872,11 @@ void sdfDispatchSurfaceWithPreparedTexturePacket(s32 surfaceIndex) {
     SdfDmaReferenceChainPacket *texture;
     sdfDrawTagInit(list);
     texture = (SdfDmaReferenceChainPacket *)sdfGrAllocPacketBuff(0x40);
-    sdfBuildFrameRegisterReference(kwlnFrameDrawPacketRecords[dds3GetFrameID()].baseBytes, texture, 0);
+    sdfGrSetFrameMaskReset(dds3FrameDrawPacketRecords[dds3GetFrameID()].baseBytes, texture, 0);
     sdfDrawTagLinkRefGif(list, (u32)texture);
     {
         sdfGrOt_t *surface = &sdfGrOtTable[surfaceIndex];
-        surface->append(surface, list);
+        surface->regFunc(surface, list);
     }
 }
 

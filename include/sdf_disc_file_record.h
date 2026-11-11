@@ -25,7 +25,7 @@ enum {
  * 32-bit read location (image address or CD sector); readModeOut is optional. */
 SdfDiscFileRecord *sdfCdImageSearchFile(
     const char *path, u32 *readLocationOut, SdfDiscReadMode *readModeOut);
-SdfDiscFileRecord *sdfDevFindDiscFileRecordByCdromPath(
+SdfDiscFileRecord *sdfCdImageSearchFileDirect(
     const char *path, u32 *readLocationOut, SdfDiscReadMode *readModeOut);
 
 #endif

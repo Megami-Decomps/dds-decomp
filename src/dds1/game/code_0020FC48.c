@@ -2,7 +2,7 @@
 #include "snd_packed_track_load_status.h"
 #include "btl_runtime_state.h"
 #include "sdf_gs_header.h"
-#include "pcp_vu0.h"
+#include "ps2asm.h"
 #include "common.h"
 #include "btl_unit_model_progress_api.h"
 #include "scr_integer_parameter_api.h"
@@ -10,20 +10,19 @@
 #include "btl_command_target_policy.h"
 #include "btl_resolve_unit_value_api.h"
 #include "sdf_delayed_resource_check_api.h"
-#include "sdf_vu0.h"
 #include "btl_actor_resource_bank_api.h"
 #include "btl_actor_entry_code_api.h"
 #include "btl_event_asset_api.h"
 #include "btl_event_sequence_api.h"
 #include "btl_skill_max_api.h"
-#include "kwln_background_fade_api.h"
-#include "kwln_task_add_child.h"
+#include "dds3_background_fade_api.h"
+#include "dds3_task_add_child.h"
 #include "btl_actor_transform_parameters.h"
 #include "btl_select_transform_parameters_api.h"
 #include "btl_effect_position.h"
 #include "btl_affinity_row.h"
-#include "kwln_draw_buffer.h"
-#include "kwln_frame_draw_buffer.h"
+#include "dds3_draw_buffer.h"
+#include "dds3_frame_draw_buffer.h"
 #include "snd_sequence_volume_pan.h"
 #include "btl_stage_task_cleanup.h"
 #include "sdf_motion.h"
@@ -33,7 +32,7 @@
 #include "sdf_gs_packet.h"
 #include "sdf_chip.h"
 #include "snd_slot.h"
-#include "sdf_resource.h"
+#include "sdf_heap_api.h"
 #include "eff_ref_obj.h"
 #include "file_pac.h"
 #include "dat_state.h"
@@ -60,7 +59,6 @@
 #include "sdf.h"
 #include "sdf_linked_packet.h"
 #include "sdf_packet_builders.h"
-#include "ee_mmi.h"
 #include "mdl.h"
 #include "mdl_asset_request.h"
 #include "dat_command.h"
@@ -70,7 +68,7 @@
 extern void dds3WorkClear(void);
 
 extern void p2sdLoadSMGFile(s32 packed);
-extern SndPackedTrackLoadStatus sndFindPackedTrackLoadStatus(s32 packed);
+extern SndPackedTrackLoadStatus p2sdLoadCheckMidi(s32 packed);
 
 #define BTL_COMMAND_RECORD_BYTES 0x38
 
@@ -323,7 +321,7 @@ void btlRequestSceneEventResources(void) {
     dds3LinkProcess(battleState->scriptOwner, eventTask);
     battleState->sequenceHandle =
         ((battleState->eventPackId - BTL_EVENT_SEQUENCE_ID_BIAS) << 16) + BTL_EVENT_SEQUENCE_BASE;
-    if (sndFindPackedTrackLoadStatus(battleState->sequenceHandle) == SND_PACKED_TRACK_LOAD_NOT_PRESENT) {
+    if (p2sdLoadCheckMidi(battleState->sequenceHandle) == SND_PACKED_TRACK_LOAD_NOT_PRESENT) {
         p2sdLoadSMGFile(battleState->sequenceHandle);
         btlBossDebugPrintf(D_003A6788, battleState->sequenceHandle);
     }
@@ -337,7 +335,7 @@ BtlEventSequenceTaskAvailability btlIsEventSequenceTaskReady(void) {
     if (battle->eventPackId == BTL_EVENT_PACK_ID_NONE) {
         return BTL_EVENT_SEQUENCE_TASK_READY;
     }
-    if (sndFindPackedTrackLoadStatus(battle->sequenceHandle) == SND_PACKED_TRACK_LOAD_NOT_PRESENT) {
+    if (p2sdLoadCheckMidi(battle->sequenceHandle) == SND_PACKED_TRACK_LOAD_NOT_PRESENT) {
         btlBossDebugPrintf(D_003A67A0);
         return BTL_EVENT_SEQUENCE_TASK_NOT_READY;
     }
@@ -394,7 +392,7 @@ void btlBindEventEffectResources(void) {
         s32 slotIndex;
         void *resourceValue;
 
-        resourceValue = evtGetEventPackResourceAddress(battleState->eventPackId, resourceKey);
+        resourceValue = evtGetResorceData(battleState->eventPackId, resourceKey);
         slotIndex = resourceIndex + BTL_EVENT_SOUND_SLOT_FIRST;
         if (resourceValue == 0) {
             btlBossDebugPrintf(D_003A67E8, slotIndex, resourceKey);
@@ -445,7 +443,7 @@ s32 btlCommandSelectEventAction(void) {
         return 1;
     }
     battleState = (BtlState *)btlGetRuntime();
-    actionResource = evtGetEventPackResourceAddress(battleState->eventPackId, actionKey);
+    actionResource = evtGetResorceData(battleState->eventPackId, actionKey);
     if (actionResource == 0) {
         return 1;
     }
@@ -550,7 +548,7 @@ extern char D_003A6848[];
 s32 btlCommandSetSequenceVolumePan(void) {
     BtlState *battleState = (BtlState *)btlGetRuntime();
     s32 sequenceOffset = scrGetIntPara(0);
-    if (sndFindPackedTrackLoadStatus(battleState->sequenceHandle) != SND_PACKED_TRACK_LOAD_NOT_PRESENT) {
+    if (p2sdLoadCheckMidi(battleState->sequenceHandle) != SND_PACKED_TRACK_LOAD_NOT_PRESENT) {
         p2sdPlaySE(battleState->sequenceHandle + sequenceOffset, BTL_EVENT_SEQUENCE_VOLUME, BTL_EVENT_SEQUENCE_PAN);
         btlBossDebugPrintf(D_003A6848, battleState->sequenceHandle + sequenceOffset);
     }
@@ -576,7 +574,7 @@ s32 btlRunSceneActorEventTask(BattleTaskData *data) {
         if ((data->battler->status.flags & 2) == 0) {
             return 1;
         }
-        resource = evtGetEventPackResourceAddress(battle->eventPackId, data->action);
+        resource = evtGetResorceData(battle->eventPackId, data->action);
         if (resource == 0) {
             return 1;
         }
@@ -698,6 +696,7 @@ s32 btlIndexListMatchesEntryCodes(BtlIndexList *indexList,
 
 /* Reject expired positive or negative codes according to the command's rule.
  * A returned code value of zero is not rejected; other expiry rules pass. */
+
 INCLUDE_RODATA(const s32, "game/code_0020FC48", D_003A6738);
 
 INCLUDE_RODATA(const s32, "game/code_0020FC48", D_003A6758);
@@ -984,7 +983,7 @@ BtlPartyCommandUseGateResult btlCheckPartyCommandCounterEligibility(s32 commandI
 
 /* Allocate a cache entry with one reference and insert it at the list head. */
 BattleModelEntry *btlCreateModelEntry(void) {
-    BattleModelEntry *cacheEntry = sdfAllocAndClearQuadwords(sizeof(BattleModelEntry));
+    BattleModelEntry *cacheEntry = sdfChipAllocZeroDirect(sizeof(BattleModelEntry));
     BtlState *battleState;
     BattleModelEntry *previousHead;
     cacheEntry->refCount = 1;
@@ -1040,6 +1039,7 @@ void btlReleaseAllModelEntries(void) {
 }
 
 /* Format the model path into the caller's buffer; nonzero selects devil data. */
+
 INCLUDE_RODATA(const s32, "game/code_0020FC48", D_003A68F8);
 
 void btlFormatModelResourcePath(BtlModelResourceKind modelKind, BtlModelId modelId, char *pathOut) {
@@ -1222,7 +1222,7 @@ u32 btlMulColor(u32 colorA, u32 colorB) {
     color2[0] = colorB;
     EE_MMI_RGBA_UNPACK(color2, unit);
     SDF_VU0_MULVECTOR();
-    EE_MMI_RGBA_PACK(packed);
+    SDF_VU0_dds3ColorFtoI(packed, 128.0f);
     blended[0] = packed;
     return blended[0];
 }
@@ -1276,7 +1276,7 @@ void btlDrawScaledHeldTextureQuad(sdfDrawTag_t *list, s32 primitive, s32 color, 
                          depth, 0);
 }
 
-extern KwlnFrameDrawBuffer kwlnFrameDrawPacketRecords[];
+extern dds3FrameDrawBuffer_t dds3FrameDrawPacketRecords[];
 
 #include "sdf_packet_alloc.h"
 
@@ -1297,7 +1297,7 @@ void btlDrawScaledFrameBufferQuad(sdfDrawTag_t *list, s32 primitive, s32 color, 
 
     packet = (void *)sdfGrAllocPacketBuff(0x20);
     index = dds3GetFrameID();
-    sdfGrLinkDispFrameTex(list, (u32)(kwlnFrameDrawPacketRecords[index].baseBytes), (sdfGrRefPacketHeader_t *)packet);
+    sdfGrLinkDispFrameTex(list, (u32)(dds3FrameDrawPacketRecords[index].baseBytes), (sdfGrRefPacketHeader_t *)packet);
     halfWidth = 0x1000;
     halfHeight = 0x700;
     xOffset = (s32)((f32)halfWidth * scale);
@@ -1325,19 +1325,18 @@ void btlBuildOverlayQuadPacket(sdfDrawTag_t *list, s32 primitive, s32 color, s32
 
 #ifdef NON_MATCHING
 #include "sdf_gs_header.h"
-#include "pcp_vu0.h"
 #include "common.h"
 #include "btl_actor_resource_bank_api.h"
 #include "btl_event_asset_api.h"
 #include "btl_skill_max_api.h"
-#include "kwln_background_fade_api.h"
-#include "kwln_task_add_child.h"
+#include "dds3_background_fade_api.h"
+#include "dds3_task_add_child.h"
 #include "btl_actor_transform_parameters.h"
 #include "btl_select_transform_parameters_api.h"
 #include "btl_effect_position.h"
 #include "btl_affinity_row.h"
-#include "kwln_draw_buffer.h"
-#include "kwln_frame_draw_buffer.h"
+#include "dds3_draw_buffer.h"
+#include "dds3_frame_draw_buffer.h"
 #include "snd_sequence_volume_pan.h"
 #include "btl_stage_task_cleanup.h"
 #include "sdf_motion.h"
@@ -1346,7 +1345,7 @@ void btlBuildOverlayQuadPacket(sdfDrawTag_t *list, s32 primitive, s32 color, s32
 #include "sdf_packet_list.h"
 #include "sdf_chip.h"
 #include "snd_slot.h"
-#include "sdf_resource.h"
+#include "sdf_heap_api.h"
 #include "eff_ref_obj.h"
 #include "file_pac.h"
 #include "dat_state.h"
@@ -1365,7 +1364,6 @@ void btlBuildOverlayQuadPacket(sdfDrawTag_t *list, s32 primitive, s32 color, s32
 #include "sdf.h"
 #include "sdf_linked_packet.h"
 #include "sdf_packet_builders.h"
-#include "ee_mmi.h"
 #include "mdl.h"
 #include "mdl_asset_request.h"
 #include "dat_command.h"
@@ -1376,7 +1374,7 @@ void btlBuildOverlayQuadPacket(sdfDrawTag_t *list, s32 primitive, s32 color, s32
 #include "sdf_trig.h"
 
 extern sdfTexHandle_t *sdfGetOrCreateTextureForReference(void *, struct RefObj *);
-extern sdfGrOt_t D_00325708;
+SYMBOL_AT(sdfGrOt_t, D_00325708, sdfGrOtTable, 0xBC0);
 extern struct RefObj *D_003D75C0;
 extern void effAppendGouraudTexturedQuadPacket(sdfDrawTag_t *, s32,
                                                s32, s32, f32, f32, s32,
@@ -1465,9 +1463,9 @@ INCLUDE_ASM(const s32, "game/code_0020FC48", btlDrawWindOverlaySweep);
 
 extern u32 effGetWindTextureHandle(void);
 
-extern void sdfBuildMaskedFrameRegisterReference(const u8 *, SdfDmaReferenceChainPacket *, s32);
+extern void sdfGrSetFrameMaskRGB(const u8 *, SdfDmaReferenceChainPacket *, s32);
 
-extern void sdfBuildFrameRegisterReference(const u8 *, SdfDmaReferenceChainPacket *, s32);
+extern void sdfGrSetFrameMaskReset(const u8 *, SdfDmaReferenceChainPacket *, s32);
 
 extern u32 btlMulColor(u32, u32);
 
@@ -1484,7 +1482,7 @@ void btlDrawWindOverlay(sdfDrawTag_t *list, u32 color, s32 depth) {
         btlCopyPaletteLowByteToAlpha((s32 *)btlRuntimeState.resource->palette);
     }
     tag = (SdfDmaReferenceChainPacket *)sdfGrAllocPacketBuff(0x40);
-    sdfBuildMaskedFrameRegisterReference(kwlnFrameDrawPacketRecords[dds3GetFrameID()].baseBytes, tag, 1);
+    sdfGrSetFrameMaskRGB(dds3FrameDrawPacketRecords[dds3GetFrameID()].baseBytes, tag, 1);
     sdfDrawTagLinkRefGif(list, (u32)tag);
     registers = (SdfPacket *)sdfGrAllocPacketBuff(0x40);
     registers[0].unk0 = 3;
@@ -1519,7 +1517,7 @@ void btlDrawWindOverlay(sdfDrawTag_t *list, u32 color, s32 depth) {
         btlRuntimeState.phaseSpeed = -0.02f;
     }
     tag = (SdfDmaReferenceChainPacket *)sdfGrAllocPacketBuff(0x40);
-    sdfBuildFrameRegisterReference(kwlnFrameDrawPacketRecords[dds3GetFrameID()].baseBytes, tag, 1);
+    sdfGrSetFrameMaskReset(dds3FrameDrawPacketRecords[dds3GetFrameID()].baseBytes, tag, 1);
     sdfDrawTagLinkRefGif(list, (u32)tag);
 }
 
@@ -1757,7 +1755,7 @@ void btlInitFadeColors(void) {
     btlRuntimeState.phase = 0.0f;
 }
 
-extern sdfGrOt_t D_00325708;
+SYMBOL_AT(sdfGrOt_t, D_00325708, sdfGrOtTable, 0xBC0);
 
 extern void btlDrawCapturedScreenTileOverlay(sdfDrawTag_t *, u32, u32, u32, u32, s32);
 
@@ -1767,7 +1765,7 @@ BtlRuntimeFadeStepResult btlUpdateFadeIn(void) {
         btlRuntimeState.color18 += 0x10000000;
     }
     btlDrawCapturedScreenTileOverlay(packets, btlRuntimeState.color14, btlRuntimeState.color1C, btlRuntimeState.color10, btlRuntimeState.color18, -0x100);
-    D_00325708.append(&D_00325708, packets);
+    D_00325708.regFunc(&D_00325708, packets);
     if ((btlRuntimeState.color14 & 0xFF000000) > 0x08000000) {
         btlRuntimeState.color14 -= 0x08000000;
         btlRuntimeState.color1C -= 0x08000000;
@@ -1830,7 +1828,7 @@ BtlRuntimeFadeStepResult btlUpdateFadeOut(void) {
     packets = dds3FontReqAllocDrawTag();
     btlDrawCapturedScreenTileOverlay(packets, btlRuntimeState.color14, btlRuntimeState.color1C,
                  btlRuntimeState.color10, btlRuntimeState.color18, -0x100);
-    D_00325708.append(&D_00325708, packets);
+    D_00325708.regFunc(&D_00325708, packets);
     if ((btlRuntimeState.color10 & 0xFF000000) > 0x0C000000) {
         btlRuntimeState.color10 -= 0x0C000000;
     } else {
@@ -1841,9 +1839,9 @@ BtlRuntimeFadeStepResult btlUpdateFadeOut(void) {
 
 extern s32 dds3AllocRenderTexture(u16 width, u16 height, f32 value);
 
-extern u8 D_00325870[];
+extern u8 dds3DrawEnv[];
 
-#include "kwln_texture_reference_flag_api.h"
+#include "dds3_texture_reference_flag_api.h"
 
 void btlClearOverlayBuffers(void) {
     u8 *entry;
@@ -1851,7 +1849,7 @@ void btlClearOverlayBuffers(void) {
     u64 clearValue;
     dds3AllocRenderTexture(0x200, 0xe0, 0.0f);
     dds3RenderTextureON();
-    entry = D_00325870;
+    entry = dds3DrawEnv;
     i = 0;
     clearValue = 0x80008000ULL;
     entry += 0x1b70;
@@ -1888,15 +1886,15 @@ void btlInitializeGraphicsRuntime(void) {
     sdfPreDrawTagInit(context);
     sdfLinkStoreFrameImage(packetList, context, 0, 0, 0x200, 0xe0, (s32)runtime->frameBuffer, 0, 0, 0);
     sdfPreDrawChainLink((SdfPacketChain *)D_00325860, context);
-    D_00325708.append(&D_00325708, packetList);
+    D_00325708.regFunc(&D_00325708, packetList);
 }
 
 void btlSubmitFrameAndQueueRuntimeHandle(void) {
     BattleRuntimeState *runtime = &btlRuntimeState;
     sdfDrawTag_t *packetList = (sdfDrawTag_t *)sdfPrimAllocDrawTag(0);
-    sdfLinkLoadImage(packetList, dds3RenderTexture->primaryResource,
+    sdfLinkLoadImage(packetList, dds3RenderTexture->pixelGsHandle,
                               0, 0, 0x200, 0xe0, (s32)runtime->frameBuffer, 0);
-    D_00325708.append(&D_00325708, packetList);
+    D_00325708.regFunc(&D_00325708, packetList);
     sdfMemFreeDelayedDirect(runtime->frameBufferAllocation);
     runtime->frameBufferAllocation = 0;
     runtime->frameBuffer = 0;
@@ -1907,9 +1905,9 @@ void btlInitializeOverlayGraphics(void) {
     sdfDrawTag_t *packetList = (sdfDrawTag_t *)sdfPrimAllocDrawTag(0);
     sdfPreDrawTag_t *context = (sdfPreDrawTag_t *)sdfGrAllocPacketBuff(16);
     sdfPreDrawTagInit(context);
-    sdfPrimLinkFrameMovePacket(packetList, context, dds3RenderTexture->primaryResource, 0, 0, 0, 0, 0x200, 0xe0, 0, 0);
+    sdfPrimLinkFrameMovePacket(packetList, context, dds3RenderTexture->pixelGsHandle, 0, 0, 0, 0, 0x200, 0xe0, 0, 0);
     sdfPreDrawChainLink((SdfPacketChain *)D_00325860, context);
-    D_00325708.append(&D_00325708, packetList);
+    D_00325708.regFunc(&D_00325708, packetList);
     btlRuntimeState.options |= 1;
 }
 
@@ -1948,7 +1946,7 @@ s32 btlUpdateRuntimeFadeState(void) {
         } else {
             mode = btlRuntimeState.fadeMode;
             if (mode == 2) {
-                kwlnFadeBackgroundStartOut(0);
+                dds3FadeBackgroundStartOut(0);
                 dds3DrawFlag |= 0x10000000;
                 if (btlRuntimeState.counter < 3) {
                     fldSkyDrawFilter();
@@ -2027,7 +2025,7 @@ void btlActivateRuntime(u8 fadeMode) {
     battle->active = 1;
     battle->pending = 0;
     battle->options = 0;
-    if (kwlnFadeIsBackgroundOverlayActive() != KWLN_BACKGROUND_OVERLAY_INACTIVE) {
+    if (dds3FadeIsBackgroundOverlayActive() != DDS3_BACKGROUND_OVERLAY_INACTIVE) {
         battle->options |= 4;
     }
 }
@@ -2280,9 +2278,9 @@ s32 mnuListMoveCursor(BtlDebugMenuCursor *menuList) {
 
 /* Queue text at pixel coordinates, using the font's native X/Y scaling. */
 s32 mnuQueueColoredGlyphAtPosition(s32 x, s32 y, s32 text) {
-    struct _FRQ *textGlyph = itfCreateMeasuredTextGlyph(x << 4, y << 3, MNU_LIST_TEXT_DEPTH,
+    struct frFontHandle_t *textGlyph = itfCreateMeasuredTextGlyph(x << 4, y << 3, MNU_LIST_TEXT_DEPTH,
         MNU_LIST_NORMAL_COLOR, (const char *)(u32)text, NULL);
-    frFontDrawGlyphChain(textGlyph, 0, 0x60);
+    frDrawFontOt(textGlyph, 0, 0x60);
     return frDestroyFontRequestAfter(textGlyph);
 }
 
@@ -2301,11 +2299,11 @@ s32 btlDrawSelectableListRows(s32 x, s32 y, s32 unusedMode, BtlDebugMenuCursor *
     selectedIndex = selectionState->cursor;
     rowY = y;
     for (; itemIndex < endIndex; itemIndex++) {
-        struct _FRQ *textGlyph = itfCreateMeasuredTextGlyph(x << 4, rowY << 3,
+        struct frFontHandle_t *textGlyph = itfCreateMeasuredTextGlyph(x << 4, rowY << 3,
             MNU_LIST_TEXT_DEPTH,
             itemIndex == selectedIndex ? MNU_LIST_SELECTED_COLOR : MNU_LIST_NORMAL_COLOR,
             (const char *)(u32)rowTexts[itemIndex], NULL);
-        frFontDrawGlyphChain(textGlyph, 0, 0x60);
+        frDrawFontOt(textGlyph, 0, 0x60);
         frDestroyFontRequestAfter(textGlyph);
         rowY += MNU_LIST_ROW_HEIGHT;
     }
@@ -2324,7 +2322,7 @@ extern void *sdfDevPrintf(s32, s32, s32, s32, const char *, ...);
 
 extern u8 D_003BBAA8[];
 
-extern sdfGrOt_t kwlnPositionedTextSurface;
+extern sdfGrOt_t sdfDebugGrOt;
 
 /* Submit formatted indices in one packet list, then draw the text column.
  * Preserve the separate fixed-point and pixel-coordinate arithmetic. */
@@ -2355,7 +2353,7 @@ s32 mnuDrawSelectableMenuRows(s32 x, s32 y, s32 frameWidth, BtlDebugMenuCursor *
             rowY += MNU_LIST_FIXED_ROW_HEIGHT;
         }
     }
-    kwlnPositionedTextSurface.append(&kwlnPositionedTextSurface, (sdfDrawTag_t *)indexPackets);
+    sdfDebugGrOt.regFunc(&sdfDebugGrOt, (sdfDrawTag_t *)indexPackets);
     return btlDrawSelectableListRows(x + MNU_LIST_LABEL_OFFSET, y, frameWidth, selectionState, rowTexts);
 }
 
@@ -2755,7 +2753,7 @@ s32 btlUpdateBattleModelDebugEditor(void) {
             state->runtimeFlags &= ~0x200;
         }
         if (btlDebugActorStatusEditorRows[btlDebugActorStatusEditor.selected].target == &btlDebugEditorMotionSlot.muzzleGuideScale) {
-            btlUnitGetMuzzlePosVU(unit);
+            effBTLModelGetSphereCenter(unit);
             SDF_VU0_STOREVECTOR_NOMEM(position);
             btlDebugDrawScaledPositionGuide(position, 0x10106020, 0, btlDebugEditorMotionSlot.muzzleGuideScale * btlDebugEditorActorStatus.scale);
         }
@@ -2940,6 +2938,8 @@ extern void btlDebugMenuAfterRecordNoOp(void);
 extern void btlApplyDebugEncounterPartySelection(void);
 /* Preview/select a debug encounter or pack; return one when it can launch. */
 /* Keep the native snapshot/save/restore order around the debug window calls. */
+#include "btl_preemptive_outcome_result.h"
+
 INCLUDE_RODATA(const s32, "game/code_0020FC48", D_003A7128);
 
 INCLUDE_RODATA(const s32, "game/code_0020FC48", D_003A7138);
@@ -2994,13 +2994,11 @@ INCLUDE_RODATA(const s32, "game/code_0020FC48", D_003A72B8);
 
 INCLUDE_RODATA(const s32, "game/code_0020FC48", D_003A72C8);
 
-#include "btl_preemptive_outcome_result.h"
-
 s32 btlUpdateDebugEncounterSelector(void) {
     BtlState *state = (BtlState *)btlGetRuntime();
     u32 i;
     u16 enemy;
-    struct _FRQ *glyph;
+    struct frFontHandle_t *glyph;
     s32 encounter;
 
     if (dds3PadBitTable[3] < 0) {
@@ -3037,7 +3035,7 @@ s32 btlUpdateDebugEncounterSelector(void) {
                     glyph = itfCreateConvertedTextGlyph((btlDebugEncounterWindowView.x + 185) << 4,
                         (btlDebugEncounterWindowView.y + i * 24) << 3, 0, MNU_LIST_NORMAL_COLOR,
                         D_003BAA74 + enemy * 17, NULL);
-                    frFontDrawGlyphChain(glyph, 1, 0x53);
+                    frDrawFontOt(glyph, 1, 0x53);
                     frDestroyFontRequestAfter(glyph);
                 }
             }
@@ -4965,4 +4963,3 @@ INCLUDE_RODATA(const s32, "game/code_0020FC48", D_003ABA38);
 
 INCLUDE_RODATA(const s32, "game/code_0020FC48", D_003ABA50);
 
-INCLUDE_RODATA(const s32, "game/code_0020FC48", D_003ABA68);

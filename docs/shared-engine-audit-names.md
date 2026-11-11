@@ -92,7 +92,7 @@ In particular, DDS's `workdata` remains its native u32 representation.
 
 ## Matching-sensitive exclusion
 
-Both DDS games keep `sdfFlushPoolNodes` (DDS1 0x002D4490, DDS2
+Both DDS games keep `sdfGrOtClose` (DDS1 0x002D4490, DDS2
 0x0032D340). Nocturne calls the same function `sdfGrOtClose`. The exclusions
 remain in `config/smt3_names_exclude.txt`: the renamed declaration changes
 ee-gcc 2.96's allocation in the full-unit `sdfDrawTexturedQuad`.

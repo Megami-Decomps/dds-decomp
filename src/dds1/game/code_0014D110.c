@@ -15,7 +15,7 @@ extern const char *fldEveHitResName_Find(struct dds3ProcessID_t *task);
 extern void fldApplyCurrentTaskScene(const char *name);
 #include "sdf.h"
 #include "fpu.h"
-#include "pcp_vu0.h"
+#include "ps2asm.h"
 #include "dds3obj.h"
 #include "dds3_basic_array_cursor.h"
 #include "dds3_object_mode.h"
@@ -107,7 +107,7 @@ extern void fldSetCameraNodeModeWithTen(void);
 
 extern void fldPreparePlayerSceneCameraTarget(void);
 
-extern void evtSetSolarOverlayFullyVisible(void);
+extern void evtEnableMoonDraw(void);
 
 extern void fldResetPlayerSceneObjectState(void);
 
@@ -182,7 +182,7 @@ extern s32 D_003BAF9C;
 
 extern void fldPreparePlayerSceneCameraTarget(void);
 
-extern void evtSetSolarOverlayFullyVisible(void);
+extern void evtEnableMoonDraw(void);
 
 
 void fldNpcHojiRefresh(void);
@@ -198,7 +198,7 @@ s32 fldCmdQueryActorEntrySceneStatus(void) {
         scrSetIntReturnValue(0);
         return 1;
     }
-    entry = dds3SearchSceneBasic(world, fldEveHitResID_Find(scrGetScriptHandle()->task), 0x11);
+    entry = dds3SearchSceneBasic(world, fldEveHitResID_Find(scrGetScriptHandle()->ProcessID), 0x11);
     if (entry == 0) {
         scrSetIntReturnValue(0);
         return 1;
@@ -232,7 +232,7 @@ s32 fldCmdQueryAlternateActorEntrySceneStatus(void) {
         scrSetIntReturnValue(0);
         return 1;
     }
-    entry = dds3SearchSceneBasic(world, fldEveHitResID_Find(scrGetScriptHandle()->task), 0x11);
+    entry = dds3SearchSceneBasic(world, fldEveHitResID_Find(scrGetScriptHandle()->ProcessID), 0x11);
     if (entry == 0) {
         scrSetIntReturnValue(0);
         return 1;
@@ -283,7 +283,7 @@ s32 fldCmdTestActorEntryCondition(void) {
         scrSetIntReturnValue(0);
         return 1;
     }
-    entry = dds3SearchSceneBasic(world, fldEveHitResID_Find(scrGetScriptHandle()->task), 0x11);
+    entry = dds3SearchSceneBasic(world, fldEveHitResID_Find(scrGetScriptHandle()->ProcessID), 0x11);
     if (entry == 0) {
         scrSetIntReturnValue(0);
         return 1;
@@ -509,7 +509,7 @@ s32 fldCmdSetSolarOverlayMode(void) {
         evtDisableMoonDraw();
         break;
     case FLD_SOLAR_OVERLAY_MODE_SHOW_MOON:
-        evtSetSolarOverlayFullyVisible();
+        evtEnableMoonDraw();
         fldGlobalBase.unk138 = 1;
         break;
     case FLD_SOLAR_OVERLAY_MODE_MOON_FADE_OUT:
@@ -1109,7 +1109,7 @@ s32 fldCommand_FLD_CHK_EVE(void) {
 extern FldActivationEntry D_0034C8F0[];
 
 s32 fldCmdPushSceneParam(void) {
-    s32 room = fldFindRoomIdByTask(scrGetScriptHandle()->task);
+    s32 room = fldFindRoomIdByTask(scrGetScriptHandle()->ProcessID);
 
     switch (scrGetIntPara(0)) {
     case 0:
@@ -1139,13 +1139,13 @@ u32 fldCommand_FLD_SET_TAKARA_OPEN(void) {
     s32 room;
 
     script = scrGetScriptHandle();
-    room = fldFindRoomIdByTask(script->task);
+    room = fldFindRoomIdByTask(script->ProcessID);
     fldActivateFlaggedObject(room);
     return 1;
 }
 
 u32 fldCommand_FLD_CHK_TAKARA_OPEN(void) {
-    if (fldTestObjectActivationFlag(fldFindRoomIdByTask(scrGetScriptHandle()->task)) != 0) {
+    if (fldTestObjectActivationFlag(fldFindRoomIdByTask(scrGetScriptHandle()->ProcessID)) != 0) {
         scrSetIntReturnValue(1);
     } else {
         scrSetIntReturnValue(0);
@@ -1160,7 +1160,7 @@ u32 fldCmdSetCurrentTaskScene(void) {
         fldApplyCurrentTaskScene(0);
         return 1;
     }
-    scene = fldEveHitResName_Find(scrGetScriptHandle()->task);
+    scene = fldEveHitResName_Find(scrGetScriptHandle()->ProcessID);
     if (scene) {
         fldApplyCurrentTaskScene(scene);
     }
@@ -1256,3 +1256,4 @@ u32 fldCommand_FLD_ELV_ENDCHK(void) {
 INCLUDE_SDATA(const s32, "game/code_0014D110", fldRoomNameSentinel);
 
 INCLUDE_SDATA(const s32, "game/code_0014D110", D_003BB000);
+

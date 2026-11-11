@@ -12,7 +12,7 @@
 #include "eff_resource_slots.h"
 #include "eff_resource_source_lifetime.h"
 #include "mnu_input.h"
-#include "kwln.h"
+#include "kernel.h"
 #include "pty_skill_menu_api.h"
 #include "mnu.h"
 #include "mnu_item_requirement_api.h"
@@ -20,7 +20,7 @@
 #include "mnu_party_menu_data.h"
 #include "brs_level_progress_api.h"
 #include "mnu_panel_state.h"
-#include "sdf_resource.h"
+#include "sdf_heap_api.h"
 #include "mnu_staff.h"
 #include "mnu_ability_target_category.h"
 #include "mnu_list.h"
@@ -120,7 +120,7 @@ extern s32 mnuLookupRangeEntry(u16);
 extern u16 mnuGetAdjustedEntryValue(s32, datUnitWork_t *);
 extern s32 mnuGetRangeEntryFlatValue(s32);
 extern u8 mnuGetRangeEntryKind(u32);
-extern _FRQ *itfCreateFont2TextGlyph(s32, s32, s32, u32, char *, _FRQ *);
+extern frFontHandle_t *itfCreateFont2TextGlyph(s32, s32, s32, u32, char *, frFontHandle_t *);
 extern void mnuDrawRepeatedPanelSprites(s32, s32, s32, s32, s32, EffectSlotSet *, s32, s32);
 extern char D_00437BF8[];
 
@@ -143,8 +143,8 @@ extern void mnuReleasePartyIconBundles(MenuPageWindow *);
 
 extern void mnuClearEntries(MenuPageWindow *);
 
-extern _FRQ *itfDrawUnderscoreTextSegment(s32, s32, s32, u32, const u8 *, s32);
-extern _FRQ *itfDrawTextWithSelectedFontMode(s32, s32, s32, s8, u16, s32);
+extern frFontHandle_t *itfDrawUnderscoreTextSegment(s32, s32, s32, u32, const u8 *, s32);
+extern frFontHandle_t *itfDrawTextWithSelectedFontMode(s32, s32, s32, s8, u16, s32);
 
 extern u8 *D_00435E54;
 
@@ -160,7 +160,7 @@ extern u8 frDisableMode(u8);
 
 extern MenuPopupEntry mnuCampPartySelectionReturnPopupEntry[];
 
-extern struct sdfGrOt_t *kwlnSceneSurfaceSets[13][4];
+extern struct sdfGrOt_t *sdfModelOtTable[13][4];
 
 extern s8 evtStageTestUpdate(struct sdfGrOt_t **);
 
@@ -342,7 +342,7 @@ extern void ptyRecomputeMaxHpMp(datUnitWork_t *unit);
 
 extern void scrClearSecondaryScriptFlag(datUnitWork_t *unit, u16 flagId);
 
-extern s32 frFontDrawGlyphChain(_FRQ *, s8, u32);
+extern s32 frDrawFontOt(frFontHandle_t *, s8, u32);
 
 
 
@@ -372,7 +372,7 @@ void mnuDrawStaffPartySelectionPanel(dds3ProcessID_t *task) {
     MenuStaffChoices *choices = (MenuStaffChoices *)context->party;
     datUnitWork_t *unit = &DDS3_GBWK->party[context->partyWindow.lists[0]->cursor->index];
     s32 selection;
-    _FRQ *glyph;
+    frFontHandle_t *glyph;
 
     mnuDrawCampIconBackdropByKind(1, task);
     mnuCreateStaffImageSprite(12);
@@ -398,7 +398,7 @@ void mnuDrawStaffPartySelectionPanel(dds3ProcessID_t *task) {
         } else {
             glyph = itfCreateConvertedTextGlyph(0x2B0, 0xA20, 0, 0xA09DC380, (const u8 *)D_003E78D0[0], 0);
             frSetFontColorNo(glyph, 4);
-            frFontDrawGlyphChain(glyph, 1, 0x53);
+            frDrawFontOt(glyph, 1, 0x53);
             frDestroyFontRequestAfter(glyph);
             selection = mnuGetPartyEntryCurrentId(unit);
             if (selection != 0) {
@@ -655,7 +655,7 @@ extern void mnuDrawPartySelectionListEntry(s32, s32, s32, MenuList *, MenuListNo
 #include "mnu_list.h"
 
 
-extern _FRQ *itfCreateFont2TextGlyph(s32, s32, s32, u32, char *, _FRQ *);
+extern frFontHandle_t *itfCreateFont2TextGlyph(s32, s32, s32, u32, char *, frFontHandle_t *);
 
 
 /* One row of the party-selection list: the camp row slot, then for a member
@@ -669,7 +669,7 @@ void mnuDrawPartySelectionListEntry(s32 x, s32 y, s32 depth, struct MenuList *li
     MenuStaffContext *context = list->context;
     u32 level = node->sortKeySecondary;
     char text[0x10];
-    _FRQ *glyph;
+    frFontHandle_t *glyph;
     s32 posX;
 
     mnuDrawCampGridResourceSlot(x, y, depth, (s32)list, (u32)node, texture);
@@ -685,7 +685,7 @@ void mnuDrawPartySelectionListEntry(s32 x, s32 y, s32 depth, struct MenuList *li
         posX = x + 0x7D0;
         sprintf(text, "%2d", level);
         glyph = itfCreateFont2TextGlyph(posX, y, 0, 0xA09DC380, text, NULL);
-        frFontDrawGlyphChain(glyph, 1, 0x53);
+        frDrawFontOt(glyph, 1, 0x53);
         frDestroyFontRequestAfter(glyph);
         break;
     case 1:
@@ -1037,7 +1037,7 @@ void mnuDrawPartySelectionPreviewPanel(MenuContext *context, MenuPageBar *hpBar,
     s32 labelId;
     u32 textColor;
     s32 i;
-    _FRQ *glyph;
+    frFontHandle_t *glyph;
     EffectSlotSet **panelModels;
 
     labelId = ptyGetCurrentProfileId(entry);
@@ -1098,12 +1098,12 @@ void mnuDrawPartySelectionPreviewPanel(MenuContext *context, MenuPageBar *hpBar,
         } else {
             glyph = itfCreateConvertedTextGlyph(0xE10, 0xBB0, 0, textColor,
                                                 textAddress, 0);
-            frFontDrawGlyphChain(glyph, 1, 0x53);
+            frDrawFontOt(glyph, 1, 0x53);
             frDestroyFontRequestAfter(glyph);
         }
     } else {
         glyph = itfCreateConvertedTextGlyph(0xE10, 0xBB0, 0, textColor, D_00437BF0, 0);
-        frFontDrawGlyphChain(glyph, 1, 0x53);
+        frDrawFontOt(glyph, 1, 0x53);
         frDestroyFontRequestAfter(glyph);
     }
 
@@ -1622,11 +1622,11 @@ void mnuDrawSlotIcons(s32 x, MenuPageWindow *page) {
     datUnitWork_t *slot = &DDS3_GBWK->party[page->lists[0]->cursor->index];
     s32 i;
     s32 y = 0xb40;
-    _FRQ *handle;
+    frFontHandle_t *handle;
     for (i = 0; i < 2; i++, y += 0xb8) {
         handle = itfDrawUnderscoreTextSegment(0x3c0, y, 0, 0xa09dc359, (const u8 *)(D_00435E54 + slot->unitId * 45), i);
         if (handle != 0) {
-            frFontDrawGlyphChain(handle, 1, 0x53);
+            frDrawFontOt(handle, 1, 0x53);
             frDestroyFontRequestAfter(handle);
         }
     }
@@ -1642,14 +1642,14 @@ void mnuDrawSelectedPartySlotMarkers(s32 context, StaffSlots *resources) {
 
 void mnuDrawTextSprite(s32 x, s32 y, s32 width, u32 color, const char *text, s32 flags) {
     s32 top = y - 0x10;
-    _FRQ *handle;
+    frFontHandle_t *handle;
     frEnableMode(1);
-    handle = frFontAppendTextToGlyphChain(text, 0, 0, 0, 0);
+    handle = frLinkFontString(text, 0, 0, 0, 0);
     frSetDrawPosition(handle, x, top);
     frSetPriority(handle, width << 4);
     frSetFontColor(handle, color);
     frDisableMode(1);
-    frFontDrawGlyphChain(handle, 1, flags);
+    frDrawFontOt(handle, 1, flags);
     frDestroyFontRequestAfter(handle);
 }
 
@@ -1709,7 +1709,7 @@ s32 mnuDrawSelectedStaffPartyView(dds3ProcessID_t *callback) {
         mnuDrawIconPanelFullFade(0, 0, 0, menuWork->iconPanel, 0x53);
         mnuUpdateWindowPanelHandleStatesKindFourFive(menuWork->iconPanel);
     }
-    evtStageTestUpdate(kwlnSceneSurfaceSets[0]);
+    evtStageTestUpdate(sdfModelOtTable[0]);
     return menuSetHandler((void *)context, 1, (void *)callback);
 }
 
@@ -1750,7 +1750,7 @@ void mnuDrawRangeCostAndIcon(s32 x, s32 y, s32 depth, s32 xOffset, u32 fade,
     char text[16];
     u32 color;
     s32 value;
-    _FRQ *glyph;
+    frFontHandle_t *glyph;
     u8 chainFlag;
     s32 kind;
     s32 hpOffset = 0;
@@ -1783,7 +1783,7 @@ void mnuDrawRangeCostAndIcon(s32 x, s32 y, s32 depth, s32 xOffset, u32 fade,
         sprintf(text, D_00437BF8, value);
         glyph = itfCreateFont2TextGlyph(x + hpOffset, y - 8, depth, color, text, 0);
         frSetFontColorNo(glyph, chainFlag);
-        frFontDrawGlyphChain(glyph, 1, texture);
+        frDrawFontOt(glyph, 1, texture);
         frDestroyFontRequestAfter(glyph);
     } else {
         mnuDrawRepeatedPanelSprites(x, y, depth, 0x100, 3, costResource, 0x1B, texture);
@@ -2977,10 +2977,10 @@ s32 mnuStepSkillDetailControl(dds3ProcessID_t *callback) {
 }
 
 void mnuDrawSelectionLabel(u16 id) {
-    _FRQ *label = itfDrawTextWithSelectedFontMode(0x11B0, 0xA88, 0, 0, id, 1);
+    frFontHandle_t *label = itfDrawTextWithSelectedFontMode(0x11B0, 0xA88, 0, 0, id, 1);
 
     frSetFontColor(label, 0xA09DC35A);
-    frFontDrawGlyphChain(label, 1, 0x53);
+    frDrawFontOt(label, 1, 0x53);
     frDestroyFontRequestAfter(label);
 }
 
@@ -3003,7 +3003,7 @@ void mnuDrawAffinityParticipantLabels(u16 affinity, s32 resource, s32 labels) {
 
     for (i = 0; i < 3; i++, y += 0xC0) {
         s32 kind = ptyGetAffinityKind(affinity, i);
-        _FRQ *glyph = 0;
+        frFontHandle_t *glyph = 0;
 
         if (kind < 0) {
             if (kind == -1) {
@@ -3031,7 +3031,7 @@ void mnuDrawAffinityParticipantLabels(u16 affinity, s32 resource, s32 labels) {
                                        0, 1, (EffectSlotSet *)(u32)resource, 0xA, 0x53);
         }
         if (glyph != 0) {
-            frFontDrawGlyphChain(glyph, 1, 0x53);
+            frDrawFontOt(glyph, 1, 0x53);
             frDestroyFontRequestAfter(glyph);
         }
     }
@@ -3616,7 +3616,7 @@ void mnuEnableCampBadgeFade(u32 *flags) {
 }
 
 MenuList *mnuCreateListState(u32 owner, u32 visibleCount, s32 rowSpacing) {
-    MenuList *node = (MenuList *)sdfAllocAndClearQuadwords(sizeof(*node));
+    MenuList *node = (MenuList *)sdfChipAllocZeroDirect(sizeof(*node));
     node->id = owner;
     node->visibleCount = visibleCount;
     node->rowStep = rowSpacing * 8;
@@ -3665,7 +3665,7 @@ MenuListNode *mnuListAppendNode(list, text)
     MenuList *list;
     const void *text;
 {
-    MenuListNode *node = sdfAllocAndClearQuadwords(sizeof(*node));
+    MenuListNode *node = sdfChipAllocZeroDirect(sizeof(*node));
     s32 index = list->count;
     MenuListNode *last;
 
@@ -3737,7 +3737,7 @@ MenuListNode *mnuInsertListNodeRelativeToAnchor(MenuList *list, MenuListNode *an
         return node;
     }
 
-    node = sdfAllocAndClearQuadwords(sizeof(MenuListNode));
+    node = sdfChipAllocZeroDirect(sizeof(MenuListNode));
     node->text = text;
     if (options & MNU_LIST_INSERT_AFTER_ANCHOR) {
         node->prev = anchor;
@@ -4500,3 +4500,4 @@ INCLUDE_SDATA(const s32, "game/code_002B0278", D_00437C20);
 INCLUDE_SDATA(const s32, "game/code_002B0278", D_00437C28);
 
 INCLUDE_SDATA(const s32, "game/code_002B0278", D_00437C30);
+

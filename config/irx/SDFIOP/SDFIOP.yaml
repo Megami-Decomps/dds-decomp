@@ -1,0 +1,17 @@
+# SDFIOP.IRX, the IRX module loader. See docs/irx-modules.md.
+name: SDFIOP.IRX
+sha1: 1c25beac5727db17ff027990bd61f64d9693acc6
+
+# The fields tools/irx.py writes into .iopmod. Everything else in the
+# container is derived from the link.
+module:
+  name: sdf_iop_manager
+  version: 0x0000
+  entry: start
+
+paths:
+  target: orig/irx/SDFIOP.IRX
+  asm: asm/irx/SDFIOP
+  src: src/irx/SDFIOP.c
+  build: build/irx/SDFIOP
+  symbols: config/irx/SDFIOP/symbol_addrs.txt

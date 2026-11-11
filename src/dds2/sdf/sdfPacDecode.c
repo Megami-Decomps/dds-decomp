@@ -1,473 +1,592 @@
-#include "sdk_ps2.h"
 #include "common.h"
-#include "sdf_chip.h"
-#include "sdf_resource.h"
-#include "sdf.h"
-#include "sdf_pac_packet.h"
-#include "sdf_pac_callback.h"
-#include "sdf_pac_state.h"
-#include "sdf_pac_decode.h"
-#include "sdf_pac_work.h"
-#include "sdf_pac_reloc.h"
-#include "sdf_resource_list_item.h"
-#include "sdf_texture_file.h"
-#include "sdf_pac_decoder.h"
+#include "libsdf.h"
 
-enum {
-    PAC_COMMAND_PAYLOAD = 1,
-    PAC_COMMAND_ALLOCATION_LIST = 2,
-    PAC_COMMAND_MODEL = 6,
-    PAC_COMMAND_MOTION = 8,
-    PAC_COMMAND_TEXTURE_LIST = 9,
-    PAC_COMMAND_END = 0xFF,
-    PAC_ENCODING_RAW = 0,
-    PAC_ENCODING_COMPRESSED = 1,
-    PAC_HEADER_BYTES = 0x10,
-    PAC_EXTENSION_BYTES_MASK = 0xF0,
-    PAC_ENCODING_MASK = 0xF,
-    PAC_STATE_USE_PACKET_MEMORY = 1,
-    PAC_STATE_ALLOCATE_HIGH = 2
-};
+/* Declared here because no header carries these. */
+extern void *memcpy(void *a, const void *b, size_t c);
+extern void *memset(void *a, s32 b, size_t c);
 
+extern void *sdfChipAllocDirect(s32 aSize);
+extern void *sdfChipAllocZeroDirect(s32 aSize);
+extern void sdfChipFreeDirect(void *aPtr);
 
+extern sdfMemHandle_t *sdfMemAllocDirect(s32 aSize);
+extern sdfMemHandle_t *sdfMemAllocFromTailDirect(s32 aSize);
+extern void *sdfMemLock(sdfMemHandle_t *aHandle);
+extern void sdfMemFreeHandleDirect(sdfMemHandle_t **aHandlePtr);
 
-void sdfPacMemDecoderInit(PacState *state, SdfPacStreamPacketHeader *packet);
+extern sdfTexHandle_t *sdfTexSet(void *aTex);
+extern sdfTexHandle_t *sdfTexSetDirect(void *aTex);
+extern sdfItemArray_t *sdfTexListNew(s32 aInitCapa);
 
-void sdfPacModelDecoderInit(PacState *state, SdfPacStreamPacketHeader *packet);
+extern void sdfDecompInit(struct sdfDecomp_t *cb, u8 *dst);
+extern s32 sdfDecomp(struct sdfDecomp_t *cb, const u8 *src, s32 length);
+extern void sdfAddressResolver(s32 *aDataBody, saddr_t aOffset, u8 *aAddrInfoPtr, s32 aAddrInfoLeng);
 
-void sdfPacMotionDecoderInit(PacState *state, SdfPacStreamPacketHeader *packet);
-
-void sdfPacTmxDecoderInit(PacState *state, SdfPacStreamPacketHeader *packet);
-
-void sdfPacMemDecoderFuncInit(PacState *state, SdfPacStreamPacketHeader *packet);
-
-void sdfDecodePacNodeAndAdvanceTail(PacState *state);
-
-void sdfPacModelDecoderEndFunc(PacState *state);
-
-void sdfPacMotionDecoderEndFunc(PacState *state);
-
-
-
+s32 sdfPacStdCallback(sdfPacDecodeCb_t *cb, s32 cause, sdfPacStdBlockHeader_t *hdr);
+void sdfPacNewBlock(sdfPacDecodeCb_t *cb);
+void sdfPacEndBlock(sdfPacDecodeCb_t *cb);
+sdfPacDecodeResrc_t *sdfPacNewResrc(sdfPacDecodeCb_t *cb, const sdfPacStdBlockHeader_t *hdr);
+void sdfPacMemDecoderFunc(sdfPacDecodeCb_t *cb);
+void sdfPacMemDecompDecoderFunc(sdfPacDecodeCb_t *cb);
+void sdfPacMemStayDecoderFunc(sdfPacDecodeCb_t *cb);
+void sdfPacMemDecoderFuncInit(sdfPacDecodeCb_t *cb, sdfPacStdBlockHeader_t *hdr);
+void sdfPacMemDecoderInit(sdfPacDecodeCb_t *cb, sdfPacStdBlockHeader_t *hdr);
+void sdfPacModelDecoderEndFunc(sdfPacDecodeCb_t *cb);
+void sdfPacModelDecoderInit(sdfPacDecodeCb_t *cb, sdfPacStdBlockHeader_t *hdr);
+void sdfPacMotionDecoderEndFunc(sdfPacDecodeCb_t *cb);
+void sdfPacMotionDecoderInit(sdfPacDecodeCb_t *cb, sdfPacStdBlockHeader_t *hdr);
+void sdfPacTmxDecoderFunc(sdfPacDecodeCb_t *cb);
+void sdfPacTmxDecompDecoderFunc(sdfPacDecodeCb_t *cb);
+void sdfPacTmxStayDecoderFunc(sdfPacDecodeCb_t *cb);
+void sdfPacTmxDecoderInitFunc(sdfPacDecodeCb_t *cb, sdfPacStdBlockHeader_t *hdr,
+                              sdfPacTmxDecodeCb_t *tmxCb);
+void sdfPacTmxDecoderEndFunc(sdfPacDecodeCb_t *cb);
+void sdfPacTmxDecoderInit(sdfPacDecodeCb_t *cb, sdfPacStdBlockHeader_t *hdr);
+void sdfPacTexListDecoderTmxBodyEndFunc(sdfPacDecodeCb_t *cb);
+void sdfPacTexListDecoder1(sdfPacDecodeCb_t *cb);
+void sdfPacTexListDecoder0(sdfPacDecodeCb_t *cb);
+void sdfPacTexListDecoderInit(sdfPacDecodeCb_t *cb, sdfPacStdBlockHeader_t *hdr);
 
 
+void sdfPacMarkPhaseFinished(sdfPacDecodeCb_t *aState);
+void sdfPacResetOutputToAllocationEntry(sdfPacDecodeCb_t *aState);
+void sdfPacTexListDecoderTmxHeaderEndFunc(sdfPacDecodeCb_t *cb);
+extern void sdfTexListAdd(sdfItemArray_t *aList, sdfTexHandle_t *aTexHandle);
 
-void sdfPacTmxDecoderInitFunc(PacState *state, SdfPacStreamPacketHeader *packet, PacBuf *buffer);
-
-void sdfPacTmxDecoderEndFunc(PacState *state);
-
-void sdfPacAdvanceAllocationEntry(PacState *state);
-
-void sdfPacResetOutputToAllocationEntry(PacState *state);
-
-
-
-
-
-
-extern void sdfPacAdvanceCallbackBoundary(PacState *state);
-
-/* Feed one input span through packet-boundary, skip, and decoder phases. */
-SdfPacPhase sdfPacDecode(PacState *state, const u8 *input, s32 inputByteCount) {
-    s32 consumeBytes;
-
-    state->inputCursor = input;
-    state->inputAvailable = inputByteCount;
-    while (state->inputAvailable > 0) {
-        switch (state->phase) {
-        case SDF_PAC_PHASE_COMPLETE:
-            return SDF_PAC_PHASE_COMPLETE;
-        case SDF_PAC_PHASE_CALLBACK_BOUNDARY:
-            sdfPacAdvanceCallbackBoundary(state);
-            break;
-        case SDF_PAC_PHASE_SKIP_BYTES:
-            consumeBytes = state->pendingBytes;
-            if (state->inputAvailable < consumeBytes) {
-                consumeBytes = state->inputAvailable;
-            }
-            sdfPacUseSrc(state, consumeBytes);
-            state->pendingBytes -= consumeBytes;
-            if (state->pendingBytes == 0) {
-                state->phase = SDF_PAC_PHASE_CALLBACK_BOUNDARY;
-            }
-            break;
-        case SDF_PAC_PHASE_INPUT_HANDLER:
-            state->onInput(state);
-            break;
-        }
-    }
-    return state->phase;
-}
-
-/* Queue a private copy of the packet header and any extension bytes. */
-PacWork *sdfPacNewResrc(PacState *state, const SdfPacStreamPacketHeader *packet) {
-    s32 extensionBytes = packet->flags & PAC_EXTENSION_BYTES_MASK;
-    PacWork *node = sdfAllocAndClearQuadwords(extensionBytes + sizeof(PacWork) + PAC_HEADER_BYTES);
-    node->owner = state;
-    memcpy(node->packet, packet, extensionBytes + PAC_HEADER_BYTES);
-    if (state->queueTail == NULL) {
-        state->queueHead = node;
+void sdfPacInit(sdfPacDecodeCb_t *cb, sdfPacCallbackFunc callback)
+{
+    memset(cb, 0, sizeof(*cb));
+    cb->currBlockNum = -1;
+    if (callback != NULL) {
+        cb->callback = callback;
     } else {
-        state->queueTail->next = node;
+        cb->callback = sdfPacStdCallback;
     }
-    state->queueTail = node;
-    return node;
 }
 
-/* Remove an item already in its owner's queue, free it, and return its successor. */
-PacWork *sdfPacFreeResrc(PacWork *work) {
-    PacState *state = work->owner;
-    PacWork **incomingLink = &state->queueHead;
-    PacWork *currentWork = state->queueHead;
-    PacWork *previousWork = NULL;
-    PacWork *nextWork;
-    while (currentWork != work) {
-        previousWork = currentWork;
-        incomingLink = &currentWork->next;
-        currentWork = *incomingLink;
-    }
-    nextWork = work->next;
-    *incomingLink = nextWork;
-    if (state->queueTail == work) {
-        state->queueTail = previousWork;
-    }
-    sdfChipFreeDirect(work);
-    return nextWork;
+void sdfPacSetStay(sdfPacDecodeCb_t *cb)
+{
+    cb->flag |= SDF_PAC_STATE_STAY;
 }
 
-/* Dispatch recognized PAC commands; one marks end-of-stream. */
-SdfPacPacketCallbackResult sdfPacStdCallback(PacState *state, SdfPacPacketCallbackEvent event, SdfPacStreamPacketHeader *packet) {
-    if (event == SDF_PAC_CALLBACK_EVENT_PACKET_HEADER) {
-        switch (packet->command) {
-        case PAC_COMMAND_PAYLOAD:
-            sdfPacMemDecoderInit(state, packet);
-            return SDF_PAC_CALLBACK_CONTINUE;
-        case PAC_COMMAND_ALLOCATION_LIST:
-            sdfPacTmxDecoderInit(state, packet);
-            return SDF_PAC_CALLBACK_CONTINUE;
-        case PAC_COMMAND_MODEL:
-            sdfPacModelDecoderInit(state, packet);
-            return SDF_PAC_CALLBACK_CONTINUE;
-        case PAC_COMMAND_MOTION:
-            sdfPacMotionDecoderInit(state, packet);
-            return SDF_PAC_CALLBACK_CONTINUE;
-        case PAC_COMMAND_TEXTURE_LIST:
-            sdfPacTexListDecoderInit(state, packet);
-            return SDF_PAC_CALLBACK_CONTINUE;
-        case PAC_COMMAND_END:
-            return SDF_PAC_CALLBACK_FINISHED;
-        default:
-            return SDF_PAC_CALLBACK_UNHANDLED_COMMAND;
+void sdfPacSetFromTail(sdfPacDecodeCb_t *cb)
+{
+    cb->flag |= SDF_PAC_STATE_FROMTAIL;
+}
+
+void sdfPacFree(sdfPacDecodeCb_t *cb)
+{
+    sdfPacDecodeResrc_t *cursor = cb->resrcHead;
+    sdfPacDecodeResrc_t *current = cursor;
+
+    while (cursor != NULL) {
+        cursor = cursor->next;
+        sdfChipFreeDirect(current);
+        current = cursor;
+    }
+}
+
+void sdfPacMarkPhaseFinished(sdfPacDecodeCb_t *aState)
+{
+    aState->stat = -1;
+}
+
+void sdfPacUseSrc(sdfPacDecodeCb_t *cb, s32 size)
+{
+    cb->srcData += size;
+    cb->srcLength -= size;
+    cb->srcTotal += size;
+}
+
+void sdfPacNewBlock(sdfPacDecodeCb_t *cb)
+{
+    sdfPacStdBlockHeader_t *packet;
+    u32 alignmentOffset;
+    u32 packetBytes;
+    u32 headerBytes;
+    u32 payloadBytes;
+    s32 (*callback)();
+    s32 result;
+
+    alignmentOffset = cb->srcTotal & 0x3F;
+    if (alignmentOffset != 0) {
+        cb->stat = 1;
+        cb->rest = 0x40 - alignmentOffset;
+        return;
+    }
+    packet = (sdfPacStdBlockHeader_t *)cb->srcData;
+    sdfPacUseSrc(cb, 0x10);
+    packetBytes = packet->size;
+    cb->currBlockNum++;
+    headerBytes = (packet->flags & SDF_PAC_EXTRA_MASK) + 0x10;
+    payloadBytes = packetBytes - headerBytes;
+    cb->rest = payloadBytes;
+    callback = (s32 (*)())cb->callback;
+    result = callback(cb, 0, packet, payloadBytes);
+    if (result == 1) {
+        sdfPacMarkPhaseFinished(cb);
+        return;
+    }
+    if (result == 2) {
+        cb->stat = 1;
+        cb->rest = (cb->rest + 0x3F) & ~0x3F;
+    } else {
+        cb->stat = 2;
+    }
+}
+
+void sdfPacEndBlock(sdfPacDecodeCb_t *cb)
+{
+    s32 result;
+    sdfPacDecodeResrc_t *tail;
+    sdfPacDecodeResrc_t *scan;
+    sdfPacDecodeResrc_t *next;
+
+    result = cb->callback(cb, 1, (sdfPacStdBlockHeader_t *)cb->resrcTail->header);
+    if (result == 1) {
+        sdfPacMarkPhaseFinished(cb);
+        return;
+    }
+    if (result == 4) {
+        tail = cb->resrcTail;
+        scan = cb->resrcHead;
+        if (scan == tail) {
+            cb->resrcTail = NULL;
+            cb->resrcHead = NULL;
+        } else {
+            while ((next = scan->next) != tail) {
+                scan = next;
+            }
+            /* Retail clears the link but leaves the multi-item tail unchanged. */
+            scan->next = NULL;
+        }
+        sdfChipFreeDirect(tail);
+    }
+    cb->stat = 0;
+}
+
+s32 sdfPacDecode(sdfPacDecodeCb_t *cb, const u8 *data, s32 length)
+{
+    cb->srcData = data;
+    cb->srcLength = length;
+    while (cb->srcLength > 0) {
+        switch ((s8)cb->stat) {
+        case -1:
+            return -1;
+        case 0:
+            sdfPacNewBlock(cb);
+            break;
+        case 1: {
+            s32 len = cb->rest;
+
+            if (cb->srcLength < len) {
+                len = cb->srcLength;
+            }
+            sdfPacUseSrc(cb, len);
+            cb->rest -= len;
+            if (cb->rest == 0) {
+                cb->stat = 0;
+            }
+            break;
+        }
+        case 2:
+            cb->decoder(cb);
+            break;
         }
     }
-    return SDF_PAC_CALLBACK_CONTINUE;
+    return (s8)cb->stat;
 }
 
-/* Return the resource-extension payload when its extension-length nibble is nonzero. */
-const char *sdfPacGetResrcFileName(PacWork *work) {
-    SdfPacStreamPacketHeader *extension = (SdfPacStreamPacketHeader *)work->packet;
-    s32 extensionBytes = extension->flags & PAC_EXTENSION_BYTES_MASK;
-    if (extensionBytes <= 0) {
+sdfPacDecodeResrc_t *sdfPacNewResrc(sdfPacDecodeCb_t *cb, const sdfPacStdBlockHeader_t *hdr)
+{
+    s32 extra = hdr->flags & SDF_PAC_EXTRA_MASK;
+    sdfPacDecodeResrc_t *aWork = sdfChipAllocZeroDirect(extra + sizeof(sdfPacDecodeResrc_t));
+
+    aWork->cb = cb;
+    memcpy(aWork->header, hdr, extra + sizeof(*hdr));
+    if (cb->resrcTail == NULL) {
+        cb->resrcHead = aWork;
+    } else {
+        cb->resrcTail->next = aWork;
+    }
+    cb->resrcTail = aWork;
+    return aWork;
+}
+
+sdfPacDecodeResrc_t *sdfPacFreeResrc(sdfPacDecodeResrc_t *resrc)
+{
+    sdfPacDecodeCb_t *aState = resrc->cb;
+    sdfPacDecodeResrc_t **link = &aState->resrcHead;
+    sdfPacDecodeResrc_t *current = aState->resrcHead;
+    sdfPacDecodeResrc_t *previous = NULL;
+    sdfPacDecodeResrc_t *next;
+
+    if (current != resrc) {
+        do {
+            previous = current;
+            current = previous->next;
+            link = &previous->next;
+        } while (current != resrc);
+    }
+    next = resrc->next;
+    *link = next;
+    if (aState->resrcTail == resrc) {
+        aState->resrcTail = previous;
+    }
+    sdfChipFreeDirect(resrc);
+    return next;
+}
+
+s32 sdfPacStdCallback(sdfPacDecodeCb_t *cb, s32 cause, sdfPacStdBlockHeader_t *hdr)
+{
+    if (cause == 0) {
+        switch (hdr->fileType) {
+        case DDS3_FT_EFFECT:
+            sdfPacMemDecoderInit(cb, hdr);
+            return 0;
+        case DDS3_FT_TMX:
+            sdfPacTmxDecoderInit(cb, hdr);
+            return 0;
+        case DDS3_FT_MODEL:
+            sdfPacModelDecoderInit(cb, hdr);
+            return 0;
+        case DDS3_FT_MOTION:
+            sdfPacMotionDecoderInit(cb, hdr);
+            return 0;
+        case DDS3_FT_TEXLIST:
+            sdfPacTexListDecoderInit(cb, hdr);
+            return 0;
+        case DDS3_FT_END:
+            return 1;
+        default:
+            return 3;
+        }
+    }
+    return 0;
+}
+
+char *sdfPacGetResrcFileName(sdfPacDecodeResrc_t *resrc)
+{
+    sdfPacStdBlockHeader_t *packet = (sdfPacStdBlockHeader_t *)resrc->header;
+    s32 extra = packet->flags & SDF_PAC_EXTRA_MASK;
+
+    if (extra <= 0) {
         return NULL;
     }
-    return (const char *)extension->payload;
+    return (char *)(packet + 1);
 }
 
-/* Incrementally copy raw payload bytes, invoking completion at zero remaining. */
-void sdfPacMemDecoderFunc(PacState *state) {
-    s32 copyBytes = state->pendingBytes;
-    s32 inputBytes = state->inputAvailable;
-    if (inputBytes < copyBytes) {
-        copyBytes = inputBytes;
+void sdfPacMemDecoderFunc(sdfPacDecodeCb_t *cb)
+{
+    s32 len = cb->rest;
+
+    if (cb->srcLength < len) {
+        len = cb->srcLength;
     }
-    /* Completion is tested only after consuming a nonzero chunk. */
-    if (copyBytes != 0) {
-        memcpy(state->outputCursor, state->inputCursor, copyBytes);
-        sdfPacUseSrc(state, copyBytes);
-        state->outputCursor += copyBytes;
-        {
-            s32 bytesRemaining = state->pendingBytes - copyBytes;
-            state->pendingBytes = bytesRemaining;
-            if (bytesRemaining != 0) {
-                return;
-            }
+    if (len != 0) {
+        memcpy(cb->dst, cb->srcData, len);
+        sdfPacUseSrc(cb, len);
+        cb->dst += len;
+        cb->rest -= len;
+        if (cb->rest == 0) {
+            cb->onEnd(cb);
         }
-        state->onComplete(state);
     }
 }
 
-/* Feed compressed input to the active decoder until it finishes. */
-void sdfPacMemDecompDecoderFunc(PacState *state) {
-    s32 inputBytes = state->inputAvailable;
-    SdfPacDecoderResult result = sdfDecomp((SdfPacDecoder *)state->decoder, state->inputCursor, inputBytes);
-    sdfPacUseSrc(state, inputBytes - ((SdfPacDecoder *)state->decoder)->remainingInputBytes);
-    if (result == SDF_PAC_DECODE_INCOMPLETE) {
+void sdfPacMemDecompDecoderFunc(sdfPacDecodeCb_t *cb)
+{
+    s32 len = cb->srcLength;
+    s32 done = sdfDecomp(cb->decomp, cb->srcData, len);
+
+    sdfPacUseSrc(cb, len - cb->decomp->remain);
+    if (done != 0) {
+        sdfChipFreeDirect(cb->decomp);
+        cb->onEnd(cb);
+    }
+}
+
+void sdfPacMemStayDecoderFunc(sdfPacDecodeCb_t *cb)
+{
+    s32 len = cb->rest;
+
+    if (cb->srcLength < len) {
+        len = cb->srcLength;
+    }
+    if (len != 0) {
+        sdfPacUseSrc(cb, len);
+        cb->rest -= len;
+        if (cb->rest == 0) {
+            cb->onEnd(cb);
+        }
+    }
+}
+
+void sdfPacMemDecoderFuncInit(sdfPacDecodeCb_t *cb, sdfPacStdBlockHeader_t *hdr)
+{
+    s32 size = hdr->realSize;
+    sdfPacDecodeResrc_t *aWork;
+
+    if (size == 0) {
+        size = hdr->size + (hdr->flags & SDF_PAC_EXTRA_MASK) - sizeof(*hdr);
+    }
+    if (cb->flag & SDF_PAC_STATE_STAY) {
+        aWork = sdfPacNewResrc(cb, hdr);
+        aWork->data = (u8 *)(hdr + 1);
+        cb->decoder = sdfPacMemStayDecoderFunc;
         return;
     }
-    sdfChipFreeDirect(state->decoder);
-    state->onComplete(state);
-}
-
-/* Consume a packet's bytes without allocating its decoded payload. */
-void sdfPacMemStayDecoderFunc(PacState *state) {
-    s32 skipBytes = state->pendingBytes;
-    if (state->inputAvailable < skipBytes) {
-        skipBytes = state->inputAvailable;
-    }
-    if (skipBytes != 0) {
-        sdfPacUseSrc(state, skipBytes);
-        {
-            s32 bytesRemaining = state->pendingBytes - skipBytes;
-            state->pendingBytes = bytesRemaining;
-            if (bytesRemaining != 0) {
-                return;
-            }
-        }
-        state->onComplete(state);
-    }
-}
-
-/* Allocate or skip a payload and select its raw/compressed input handler. */
-void sdfPacMemDecoderFuncInit(PacState *state, SdfPacStreamPacketHeader *packet) {
-    s32 allocationSize = packet->decodedSize;
-    if (allocationSize == 0) {
-        allocationSize = packet->packetByteCount + (packet->flags & PAC_EXTENSION_BYTES_MASK) - PAC_HEADER_BYTES;
-    }
-    if (state->flags & PAC_STATE_USE_PACKET_MEMORY) {
-        PacWork *node = sdfPacNewResrc(state, packet);
-        node->dataCursor = packet->payload;
-        state->onInput = sdfPacMemStayDecoderFunc;
+    cb->stat = 2;
+    aWork = sdfPacNewResrc(cb, hdr);
+    if (cb->flag & SDF_PAC_STATE_FROMTAIL) {
+        aWork->resrc = sdfMemAllocFromTailDirect(size);
     } else {
-        PacWork *node;
-        state->phase = SDF_PAC_PHASE_INPUT_HANDLER;
-        node = sdfPacNewResrc(state, packet);
-        if (state->flags & PAC_STATE_ALLOCATE_HIGH) {
-            node->resourceHandle = sdfMemAllocFromTailDirect(allocationSize);
-        } else {
-            node->resourceHandle = sdfMemAllocDirect(allocationSize);
-        }
-        state->outputCursor = node->dataCursor = (u8 *)sdfMemLock(PAC_WORK_ALLOCATION(node));
-        switch (packet->flags & PAC_ENCODING_MASK) {
-        case PAC_ENCODING_RAW:
-            state->onInput = sdfPacMemDecoderFunc;
-            break;
-        case PAC_ENCODING_COMPRESSED: {
-            SdfPacDecoder *decoder = sdfChipAllocDirect(0x20);
-            state->decoder = (u8 *)decoder;
-            sdfDecompInit(decoder, state->outputCursor);
-            state->onInput = sdfPacMemDecompDecoderFunc;
-            break;
-        }
-        default:
-            break;
-        }
+        aWork->resrc = sdfMemAllocDirect(size);
     }
-}
-
-/* Begin a regular payload; completion is the normal packet finalizer. */
-void sdfPacMemDecoderInit(PacState *state, SdfPacStreamPacketHeader *packet) {
-    sdfPacMemDecoderFuncInit(state, packet);
-    state->onComplete = sdfDecodePacNodeAndAdvanceTail;
-}
-
-/* Apply the relocation record at the front of the queued payload. */
-void sdfPacModelDecoderEndFunc(PacState *state) {
-    PacWork *work = state->queueTail;
-    PacReloc *record = (PacReloc *)work->dataCursor;
-    u8 *payload = record->payload;
-    s32 tableBytes = record->tableBytes;
-    work->dataCursor = payload;
-    if (tableBytes != 0) {
-        sdfAddressResolver((s32 *)payload, (u32)payload, payload + record->tableOffset, tableBytes);
-        record->tableBytes = 0;
-    }
-    sdfDecodePacNodeAndAdvanceTail(state);
-}
-
-/* Begin a payload that must be relocated before normal finalization. */
-void sdfPacModelDecoderInit(PacState *state, SdfPacStreamPacketHeader *packet) {
-    sdfPacMemDecoderFuncInit(state, packet);
-    state->onComplete = sdfPacModelDecoderEndFunc;
-}
-
-/* Complete the second relocation-command variant with the same word fixups. */
-void sdfPacMotionDecoderEndFunc(PacState *state) {
-    PacWork *work = state->queueTail;
-    PacReloc *record = (PacReloc *)work->dataCursor;
-    u8 *payload = record->payload;
-    s32 tableBytes = record->tableBytes;
-    work->dataCursor = payload;
-    if (tableBytes != 0) {
-        sdfAddressResolver((s32 *)payload, (u32)payload, payload + record->tableOffset, tableBytes);
-        record->tableBytes = 0;
-    }
-    sdfDecodePacNodeAndAdvanceTail(state);
-}
-
-/* Begin the second relocation-command variant. */
-void sdfPacMotionDecoderInit(PacState *state, SdfPacStreamPacketHeader *packet) {
-    sdfPacMemDecoderFuncInit(state, packet);
-    state->onComplete = sdfPacMotionDecoderEndFunc;
-}
-
-/* Incrementally copy a resource chunk before processing its resource slot. */
-void sdfPacTmxDecoderFunc(PacState *state) {
-    PacBuf *resourceBuffer = state->resourceBuffer;
-    s32 copyBytes = resourceBuffer->remainingBytes;
-    if (state->inputAvailable < copyBytes) {
-        copyBytes = state->inputAvailable;
-    }
-    if (copyBytes != 0) {
-        memcpy(resourceBuffer->cursor, state->inputCursor, copyBytes);
-        sdfPacUseSrc(state, copyBytes);
-        resourceBuffer->cursor += copyBytes;
-        {
-            s32 bytesRemaining = resourceBuffer->remainingBytes - copyBytes;
-            resourceBuffer->remainingBytes = bytesRemaining;
-            if (bytesRemaining != 0) {
-                return;
-            }
-        }
-        resourceBuffer->texture = sdfTexSet((SdfTextureFileHeader *)sdfMemLock(resourceBuffer->resourceSlot));
-        sdfMemFreeHandleDirect(&resourceBuffer->resourceSlot);
-        state->onComplete(state);
-    }
-}
-
-/* Decode a chunk before processing and releasing its resource slot. */
-void sdfPacTmxDecompDecoderFunc(PacState *state) {
-    /* This handler offers pendingBytes, unlike the packet-level decoder. */
-    s32 inputBytes = state->pendingBytes;
-    SdfPacDecoderResult result = sdfDecomp((SdfPacDecoder *)state->decoder, state->inputCursor, inputBytes);
-    sdfPacUseSrc(state, inputBytes - ((SdfPacDecoder *)state->decoder)->remainingInputBytes);
-    if (result == SDF_PAC_DECODE_INCOMPLETE) {
-        return;
-    }
-    {
-        PacBuf *resourceBuffer = state->resourceBuffer;
-        resourceBuffer->texture = sdfTexSet((SdfTextureFileHeader *)sdfMemLock(resourceBuffer->resourceSlot));
-        sdfMemFreeHandleDirect(&resourceBuffer->resourceSlot);
-    }
-    sdfChipFreeDirect(state->decoder);
-    state->onComplete(state);
-}
-
-/* Skip the remaining resource chunk and process its existing cursor. */
-void sdfPacTmxStayDecoderFunc(PacState *state) {
-    PacBuf *resourceBuffer = state->resourceBuffer;
-    s32 skipBytes = resourceBuffer->remainingBytes;
-    if (state->inputAvailable < skipBytes) {
-        skipBytes = state->inputAvailable;
-    }
-    if (skipBytes != 0) {
-        sdfPacUseSrc(state, skipBytes);
-        {
-            s32 bytesRemaining = resourceBuffer->remainingBytes - skipBytes;
-            resourceBuffer->remainingBytes = bytesRemaining;
-            if (bytesRemaining != 0) {
-                return;
-            }
-        }
-        resourceBuffer->texture = sdfTexSetDirect((SdfTextureFileHeader *)resourceBuffer->cursor);
-        state->onComplete(state);
-    }
-}
-
-/* Point the resource buffer at one allocation packet: keep it in packet memory, or allocate a
- * block and copy (raw) or decode (compressed) the payload into it. */
-void sdfPacTmxDecoderInitFunc(PacState *state, SdfPacStreamPacketHeader *packet, PacBuf *buffer) {
-    state->resourceBuffer = buffer;
-    buffer->remainingBytes = packet->packetByteCount - PAC_HEADER_BYTES;
-    if (state->flags & PAC_STATE_USE_PACKET_MEMORY) {
-        state->onInput = sdfPacTmxStayDecoderFunc;
-        buffer->cursor = (u8 *)(state->inputCursor - PAC_HEADER_BYTES);
-        return;
-    }
-    if (state->flags & PAC_STATE_ALLOCATE_HIGH) {
-        buffer->resourceSlot = sdfMemAllocFromTailDirect(packet->packetByteCount);
-    } else {
-        buffer->resourceSlot = sdfMemAllocDirect(packet->packetByteCount);
-    }
-    buffer->cursor = (u8 *)sdfMemLock(buffer->resourceSlot);
-    memcpy(buffer->cursor, packet, PAC_HEADER_BYTES);
-    buffer->cursor += PAC_HEADER_BYTES;
-    switch (packet->flags) {
-    case PAC_ENCODING_RAW:
-        state->onInput = sdfPacTmxDecoderFunc;
+    aWork->data = sdfMemLock(aWork->resrc);
+    cb->dst = aWork->data;
+    switch (hdr->flags & SDF_PAC_ENCODING_MASK) {
+    case 0:
+        cb->decoder = sdfPacMemDecoderFunc;
         break;
-    case PAC_ENCODING_COMPRESSED: {
-        SdfPacDecoder *decoder = sdfChipAllocDirect(0x20);
-        state->decoder = (u8 *)decoder;
-        sdfDecompInit(decoder, buffer->cursor);
-        state->onInput = sdfPacTmxDecompDecoderFunc;
+    case 1: {
+        struct sdfDecomp_t *decomp = sdfChipAllocDirect(sizeof(*decomp));
+
+        cb->decomp = decomp;
+        sdfDecompInit(decomp, cb->dst);
+        cb->decoder = sdfPacMemDecompDecoderFunc;
         break;
     }
     }
 }
 
-void sdfPacTmxDecoderEndFunc(PacState *state) {
-    state->queueTail->resourceHandle = state->slot.resource->texture;
-    sdfChipFreeDirect(state->slot.resource);
-    sdfDecodePacNodeAndAdvanceTail(state);
+void sdfPacMemDecoderInit(sdfPacDecodeCb_t *cb, sdfPacStdBlockHeader_t *hdr)
+{
+    sdfPacMemDecoderFuncInit(cb, hdr);
+    cb->onEnd = sdfPacEndBlock;
 }
 
-/* Allocate decoder state for a complete resource packet. */
-void sdfPacTmxDecoderInit(PacState *state, SdfPacStreamPacketHeader *packet) {
-    sdfPacNewResrc(state, packet);
-    {
-        PacBuf *allocation = (PacBuf *)sdfChipAllocDirect(0x10);
-        state->slot.resource = allocation;
-        sdfPacTmxDecoderInitFunc(state, packet, allocation);
+void sdfPacModelDecoderEndFunc(sdfPacDecodeCb_t *cb)
+{
+    sdfPacDecodeResrc_t *aWork = cb->resrcTail;
+    sdfPacReloc_t *reloc = (sdfPacReloc_t *)aWork->data;
+    u8 *payload = reloc->payload;
+    s32 bytes = reloc->tableBytes;
+
+    aWork->data = payload;
+    if (bytes != 0) {
+        sdfAddressResolver((s32 *)payload, EE_ADDR_S(payload), payload + reloc->tableOffset, bytes);
+        reloc->tableBytes = 0;
     }
-    state->onComplete = sdfPacTmxDecoderEndFunc;
+    sdfPacEndBlock(cb);
 }
 
-/* Start the next allocation entry at its inline descriptor. */
-void sdfPacTexListDecoderTmxHeaderEndFunc(PacState *state) {
-    sdfPacTmxDecoderInitFunc(state, &state->slot.list->entry, &state->slot.list->buffer);
-    state->onComplete = sdfPacAdvanceAllocationEntry;
+void sdfPacModelDecoderInit(sdfPacDecodeCb_t *cb, sdfPacStdBlockHeader_t *hdr)
+{
+    sdfPacMemDecoderFuncInit(cb, hdr);
+    cb->onEnd = sdfPacModelDecoderEndFunc;
 }
 
-/* Reset the output cursor to the current allocation entry and hook the copy
-   and completion callbacks. */
-void sdfPacResetOutputToAllocationEntry(PacState *state) {
-    state->outputCursor = (u8 *)&state->slot.list->entry;
-    state->pendingBytes = 0x10;
-    state->onInput = sdfPacMemDecoderFunc;
-    state->onComplete = sdfPacTexListDecoderTmxHeaderEndFunc;
+void sdfPacMotionDecoderEndFunc(sdfPacDecodeCb_t *cb)
+{
+    sdfPacDecodeResrc_t *aWork = cb->resrcTail;
+    sdfPacReloc_t *reloc = (sdfPacReloc_t *)aWork->data;
+    u8 *payload = reloc->payload;
+    s32 bytes = reloc->tableBytes;
+
+    aWork->data = payload;
+    if (bytes != 0) {
+        sdfAddressResolver((s32 *)payload, EE_ADDR_S(payload), payload + reloc->tableOffset, bytes);
+        reloc->tableBytes = 0;
+    }
+    sdfPacEndBlock(cb);
 }
 
-/* Advance the entry index and complete or request the next entry. */
-void sdfPacAdvanceAllocationEntry(PacState *state) {
-    PacListAllocation *allocation = state->slot.list;
-    /* Transfer the decoded texture's acquired reference into the resource list. */
-    sdfTexListAdd(PAC_WORK_TEXTURE_LIST(state->queueTail), allocation->buffer.texture);
-    {
-        s32 nextIndex = allocation->entryIndex + 1;
-        allocation->entryIndex = nextIndex;
-        if (nextIndex == allocation->entryCount) {
-            sdfChipFreeDirect(allocation);
-            sdfDecodePacNodeAndAdvanceTail(state);
-        } else {
-            sdfPacResetOutputToAllocationEntry(state);
+void sdfPacMotionDecoderInit(sdfPacDecodeCb_t *cb, sdfPacStdBlockHeader_t *hdr)
+{
+    sdfPacMemDecoderFuncInit(cb, hdr);
+    cb->onEnd = sdfPacMotionDecoderEndFunc;
+}
+
+void sdfPacTmxDecoderFunc(sdfPacDecodeCb_t *cb)
+{
+    sdfPacTmxDecodeCb_t *buf = cb->decodeCb;
+    s32 len = buf->rest;
+
+    if (cb->srcLength < len) {
+        len = cb->srcLength;
+    }
+    if (len != 0) {
+        memcpy(buf->workPtr, cb->srcData, len);
+        sdfPacUseSrc(cb, len);
+        buf->workPtr += len;
+        buf->rest -= len;
+        if (buf->rest == 0) {
+            buf->texHandle = sdfTexSet(sdfMemLock(buf->memHandle));
+            sdfMemFreeHandleDirect(&buf->memHandle);
+            cb->onEnd(cb);
         }
     }
 }
 
-/* Discard pending input until the next allocation entry can start; check the
-   boundary even when no bytes are consumed. */
-void sdfPacSkipAllocationEntryBytes(PacState *state) {
-    s32 skipBytes = state->inputAvailable;
-    if (state->pendingBytes < skipBytes) {
-        skipBytes = state->pendingBytes;
+void sdfPacTmxDecompDecoderFunc(sdfPacDecodeCb_t *cb)
+{
+    s32 len = cb->rest;
+    s32 done = sdfDecomp(cb->decomp, cb->srcData, len);
+
+    sdfPacUseSrc(cb, len - cb->decomp->remain);
+    if (done != 0) {
+        sdfPacTmxDecodeCb_t *buf = cb->decodeCb;
+
+        buf->texHandle = sdfTexSet(sdfMemLock(buf->memHandle));
+        sdfMemFreeHandleDirect(&buf->memHandle);
+        sdfChipFreeDirect(cb->decomp);
+        cb->onEnd(cb);
     }
-    sdfPacUseSrc(state, skipBytes);
+}
+
+void sdfPacTmxStayDecoderFunc(sdfPacDecodeCb_t *cb)
+{
+    sdfPacTmxDecodeCb_t *buf = cb->decodeCb;
+    s32 len = buf->rest;
+
+    if (cb->srcLength < len) {
+        len = cb->srcLength;
+    }
+    if (len != 0) {
+        sdfPacUseSrc(cb, len);
+        buf->rest -= len;
+        if (buf->rest == 0) {
+            buf->texHandle = sdfTexSetDirect(buf->workPtr);
+            cb->onEnd(cb);
+        }
+    }
+}
+
+void sdfPacTmxDecoderInitFunc(sdfPacDecodeCb_t *cb, sdfPacStdBlockHeader_t *hdr,
+                             sdfPacTmxDecodeCb_t *tmxCb)
+{
+    cb->decodeCb = tmxCb;
+    tmxCb->rest = hdr->size - 0x10;
+    if (cb->flag & SDF_PAC_STATE_STAY) {
+        cb->decoder = sdfPacTmxStayDecoderFunc;
+        tmxCb->workPtr = (u8 *)(cb->srcData - 0x10);
+        return;
+    }
+    if (cb->flag & SDF_PAC_STATE_FROMTAIL) {
+        tmxCb->memHandle = sdfMemAllocFromTailDirect(hdr->size);
+    } else {
+        tmxCb->memHandle = sdfMemAllocDirect(hdr->size);
+    }
+    tmxCb->workPtr = sdfMemLock(tmxCb->memHandle);
+    memcpy(tmxCb->workPtr, hdr, 0x10);
+    tmxCb->workPtr += 0x10;
+    switch (hdr->flags) {
+    case 0:
+        cb->decoder = sdfPacTmxDecoderFunc;
+        break;
+    case 1: {
+        struct sdfDecomp_t *decomp = sdfChipAllocDirect(sizeof(*decomp));
+
+        cb->decompBuffer = (u8 *)decomp;
+        sdfDecompInit(decomp, tmxCb->workPtr);
+        cb->decoder = sdfPacTmxDecompDecoderFunc;
+        break;
+    }
+    }
+}
+
+void sdfPacTmxDecoderEndFunc(sdfPacDecodeCb_t *cb)
+{
+    cb->resrcTail->resrc = cb->slot.decodeCb->texHandle;
+    sdfChipFreeDirect(cb->slot.decodeCb);
+    sdfPacEndBlock(cb);
+}
+
+void sdfPacTmxDecoderInit(sdfPacDecodeCb_t *cb, sdfPacStdBlockHeader_t *hdr)
+{
+    sdfPacTmxDecodeCb_t *buf;
+
+    sdfPacNewResrc(cb, hdr);
+    buf = sdfChipAllocDirect(sizeof(*buf));
+    cb->slot.decodeCb = buf;
+    sdfPacTmxDecoderInitFunc(cb, hdr, buf);
+    cb->onEnd = sdfPacTmxDecoderEndFunc;
+}
+
+void sdfPacTexListDecoderTmxHeaderEndFunc(sdfPacDecodeCb_t *cb)
+{
+    sdfPacTmxDecoderInitFunc(cb, &cb->slot.list->currHeader, &cb->slot.list->tmxCb);
+    cb->onEnd = sdfPacTexListDecoderTmxBodyEndFunc;
+}
+
+void sdfPacResetOutputToAllocationEntry(sdfPacDecodeCb_t *aState)
+{
+    aState->dst = (u8 *)&aState->slot.list->currHeader;
+    aState->rest = 0x10;
+    aState->decoder = sdfPacMemDecoderFunc;
+    aState->onEnd = sdfPacTexListDecoderTmxHeaderEndFunc;
+}
+
+void sdfPacTexListDecoderTmxBodyEndFunc(sdfPacDecodeCb_t *cb)
+{
+    sdfPacTexListDecodeCb_t *list = cb->slot.list;
+
+    sdfTexListAdd(cb->resrcTail->resrc, list->tmxCb.texHandle);
     {
-        s32 bytesRemaining = state->pendingBytes - skipBytes;
-        state->pendingBytes = bytesRemaining;
+        s32 nextIndex = list->currNum + 1;
+
+        list->currNum = nextIndex;
+        if (nextIndex == list->count) {
+            sdfChipFreeDirect(list);
+            sdfPacEndBlock(cb);
+        } else {
+            sdfPacResetOutputToAllocationEntry(cb);
+        }
+    }
+}
+
+void sdfPacTexListDecoder1(sdfPacDecodeCb_t *cb)
+{
+    s32 skipBytes = cb->srcLength;
+
+    if (cb->rest < skipBytes) {
+        skipBytes = cb->rest;
+    }
+    sdfPacUseSrc(cb, skipBytes);
+    {
+        s32 bytesRemaining = cb->rest - skipBytes;
+
+        cb->rest = bytesRemaining;
         if (bytesRemaining != 0) {
             return;
         }
     }
-    sdfPacResetOutputToAllocationEntry(state);
+    sdfPacResetOutputToAllocationEntry(cb);
+}
+
+void sdfPacTexListDecoder0(sdfPacDecodeCb_t *cb)
+{
+    u32 count;
+    sdfPacTexListDecodeCb_t *list;
+    sdfPacDecodeResrc_t *aWork;
+
+    if (cb->srcLength != 0) {
+        count = *(const u32 *)cb->srcData;
+        sdfPacUseSrc(cb, 4);
+        list = cb->slot.list;
+        aWork = cb->resrcTail;
+        list->count = count;
+        list->currNum = 0;
+        aWork->resrc = sdfTexListNew(count);
+        cb->rest = ((count * 4 + 0x53) & -0x40) - 0x14;
+        cb->decoder = sdfPacTexListDecoder1;
+    }
+}
+
+void sdfPacTexListDecoderInit(sdfPacDecodeCb_t *cb, sdfPacStdBlockHeader_t *hdr)
+{
+    sdfPacNewResrc(cb, hdr);
+    cb->slot.list = sdfChipAllocDirect(sizeof(sdfPacTexListDecodeCb_t));
+    cb->decoder = sdfPacTexListDecoder0;
 }

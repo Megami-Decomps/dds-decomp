@@ -14,13 +14,13 @@
 #include "evt_unit_object_key.h"
 #include "eff_random_mod.h"
 #include "sdf_trig.h"
-#include "kwln_task_create.h"
+#include "dds3_task_create.h"
 #include "eff_manager_task.h"
 #include "eff_random.h"
 #include "dds3_path.h"
 #include "dds3_slot1_handler_api.h"
 extern void fldApplyCurrentTaskScene(const char *name);
-#include "pcp_vu0.h"
+#include "ps2asm.h"
 #include "fpu.h"
 #include "dds3obj.h"
 #include "dds3_basic_array_cursor.h"
@@ -380,7 +380,7 @@ s32 fldCmdQueryActorEntrySceneStatus(void) {
         scrSetIntReturnValue(0);
         return 1;
     }
-    entry = dds3SearchSceneBasic(world, fldEveHitResID_Find(scrGetScriptHandle()->task), 0x11);
+    entry = dds3SearchSceneBasic(world, fldEveHitResID_Find(scrGetScriptHandle()->ProcessID), 0x11);
     if (entry == 0) {
         scrSetIntReturnValue(0);
         return 1;
@@ -414,7 +414,7 @@ s32 fldCmdQueryAlternateActorEntrySceneStatus(void) {
         scrSetIntReturnValue(0);
         return 1;
     }
-    entry = dds3SearchSceneBasic(world, fldEveHitResID_Find(scrGetScriptHandle()->task), 0x11);
+    entry = dds3SearchSceneBasic(world, fldEveHitResID_Find(scrGetScriptHandle()->ProcessID), 0x11);
     if (entry == 0) {
         scrSetIntReturnValue(0);
         return 1;
@@ -465,7 +465,7 @@ s32 fldCmdTestActorEntryCondition(void) {
         scrSetIntReturnValue(0);
         return 1;
     }
-    entry = dds3SearchSceneBasic(world, fldEveHitResID_Find(scrGetScriptHandle()->task), 0x11);
+    entry = dds3SearchSceneBasic(world, fldEveHitResID_Find(scrGetScriptHandle()->ProcessID), 0x11);
     if (entry == 0) {
         scrSetIntReturnValue(0);
         return 1;
@@ -677,7 +677,7 @@ s32 fldCmdSetSolarOverlayMode(void) {
         evtDisableMoonDraw();
         break;
     case FLD_SOLAR_OVERLAY_MODE_SHOW_MOON:
-        evtSetSolarOverlayFullyVisible();
+        evtEnableMoonDraw();
         fldGlobalBase.unk138 = 1;
         break;
     case FLD_SOLAR_OVERLAY_MODE_MOON_FADE_OUT:
@@ -1450,7 +1450,7 @@ INCLUDE_RODATA(const s32, "game/code_00154558", D_00414090);
 s32 fldCmdPushSceneParam(void) {
     s32 room;
 
-    room = fldFindRoomIdByTask(scrGetScriptHandle()->task);
+    room = fldFindRoomIdByTask(scrGetScriptHandle()->ProcessID);
     switch (scrGetIntPara(0)) {
     case 0:
         scrSetIntReturnValue(D_003A8EB0[room].kind);
@@ -1478,7 +1478,7 @@ u32 fldCommand_FLD_SET_TAKARA_OPEN(void) {
     s32 room;
 
     script = scrGetScriptHandle();
-    room = fldFindRoomIdByTask(script->task);
+    room = fldFindRoomIdByTask(script->ProcessID);
     fldActivateFlaggedObject(room);
     return 1;
 }
@@ -1486,7 +1486,7 @@ u32 fldCommand_FLD_SET_TAKARA_OPEN(void) {
 extern u8 fldTestObjectActivationFlag(u32 flagIndex);
 
 u32 fldCommand_FLD_CHK_TAKARA_OPEN(void) {
-    if (fldTestObjectActivationFlag(fldFindRoomIdByTask(scrGetScriptHandle()->task)) != 0) {
+    if (fldTestObjectActivationFlag(fldFindRoomIdByTask(scrGetScriptHandle()->ProcessID)) != 0) {
         scrSetIntReturnValue(1);
     } else {
         scrSetIntReturnValue(0);
@@ -1501,7 +1501,7 @@ u32 fldCmdSetCurrentTaskScene(void) {
         fldApplyCurrentTaskScene(0);
         return 1;
     }
-    scene = fldEveHitResName_Find(scrGetScriptHandle()->task);
+    scene = fldEveHitResName_Find(scrGetScriptHandle()->ProcessID);
     if (scene) {
         fldApplyCurrentTaskScene(scene);
     }
@@ -1606,7 +1606,7 @@ u32 fldCommand_FLD_WARP_RUN_START(void) {
     if (fldDoor_ChkWarp()) {
         scene = 0;
     } else {
-        scene = fldEveHitResID_Find(scrGetScriptHandle()->task);
+        scene = fldEveHitResID_Find(scrGetScriptHandle()->ProcessID);
     }
     fldApplyActorEntryTrigger(scene);
     return 1;
@@ -1716,7 +1716,7 @@ s32 fldCommand_FLD_SET_ENCOUNT(void) {
 
 s32 fldCommand_FLD_EXIT_CAMERA(void) {
     scrProcessWork_s *work = scrGetScriptHandle();
-    const char *entry = fldEveHitResName_Find(work->task);
+    const char *entry = fldEveHitResName_Find(work->ProcessID);
 
     if (entry != NULL) {
         fldDoor_ExitCamera(entry);
@@ -1782,7 +1782,7 @@ s32 fldCommand_FLD_GET_KIRETA(void) {
 
 /* Roll against the threshold associated with the mirrored solar phase. */
 s32 fldCmdRollMirroredSolarThreshold(void) {
-    s32 solarPhaseThreshold = fldMirroredSolarThresholds[evtGetMirroredSolarPhase()];
+    s32 solarPhaseThreshold = fldMirroredSolarThresholds[evtGetAgeOfMoon()];
     s32 roll = (s32)dds3GetRandIntA(0, 100);
     if (solarPhaseThreshold >= roll) {
         scrSetIntReturnValue(1);
@@ -1878,7 +1878,7 @@ extern void dds3PolygonManagerInit(void);
 
 extern void dds3ParticleManagerInit(void);
 
-extern void effFieldTaskStartupHook(void);
+extern void effDebugInit(void);
 
 extern void Eve_EffectInit(void);
 
@@ -1896,7 +1896,7 @@ void fldCreateFieldEffectTask(void) {
     dds3ParticleManagerInit();
     dds3StartProcess("effect_f", 0x2B04, 0, 0, effSubmitFieldBlendStateTask, NULL, 0);
     dds3StartProcess(D_004363F8, 0x2B18, 0, 0, dds3EffectManagerRun, effManagerInitializeSubsystems, 0);
-    effFieldTaskStartupHook();
+    effDebugInit();
     Eve_EffectInit();
     effBTLFieldColorResetFlags();
 }
@@ -1906,3 +1906,4 @@ INCLUDE_SDATA(const s32, "game/code_00154558", fldRoomNameSentinel);
 INCLUDE_SDATA(const s32, "game/code_00154558", D_004363F0);
 
 INCLUDE_SDATA(const s32, "game/code_00154558", D_004363F8);
+

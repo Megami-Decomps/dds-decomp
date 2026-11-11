@@ -8,16 +8,16 @@
 #include "btl_command_target_policy.h"
 #include "btl_resolve_unit_value_api.h"
 #include "sdf_delayed_resource_check_api.h"
-#include "sdf_vu0.h"
+#include "ps2asm.h"
 #include "btl_actor_resource_bank_api.h"
 #include "btl_actor_entry_code_api.h"
 #include "scr_integer_return_value_api.h"
 #include "btl_script_resource_api.h"
 #include "btl_event_asset_api.h"
 #include "btl_event_sequence_api.h"
-#include "kwln_background_fade_api.h"
+#include "dds3_background_fade_api.h"
 #include "btl_skill_max_api.h"
-#include "kwln_task_add_child.h"
+#include "dds3_task_add_child.h"
 #include "btl_actor_transform_parameters.h"
 #include "btl_select_transform_parameters_api.h"
 #include "btl_effect_position.h"
@@ -33,7 +33,7 @@
 #include "sdf_packet_list.h"
 #include "sdf_chip.h"
 #include "snd_slot.h"
-#include "sdf_resource.h"
+#include "sdf_heap_api.h"
 #include "file_pac.h"
 #include "btl_state.h"
 #include "btl_scene_initializer.h"
@@ -50,7 +50,6 @@
 #include "btl_command_target_eligibility.h"
 #include "btl_party_command_use_result.h"
 #include "btl_command_required_entry_match.h"
-#include "pcp_vu0.h"
 #include "sdf_vu_transform_api.h"
 #include "sdf_vu_matrix.h"
 #include "sdf.h"
@@ -162,7 +161,7 @@ extern BtlLightParams D_0037FA90;
 
 extern BtlLightParams D_0037FAD0;
 
-extern BtlLightParams kwlnOverlayAmbientColor;
+extern BtlLightParams dds3AmbientColor2;
 extern s32 btlCountTasksByKind(u16);
 
 
@@ -181,17 +180,17 @@ extern s8 dds3PadBitTable[32];
 extern void btlReleaseOwnedData(void);
 
 
-extern sdfGrOt_t D_00380608;
+SYMBOL_AT(sdfGrOt_t, D_00380608, sdfGrOtTable, 0xAC0);
 
 extern u8 D_00380860[];
 
-extern u8 D_00380870[];
+extern u8 dds3DrawEnv[];
 
 extern sdfTexHandle_t *dds3RenderTexture;
 
 extern s32 dds3AllocRenderTexture(u16 width, u16 height, f32 value);
 
-#include "kwln_texture_reference_flag_api.h"
+#include "dds3_texture_reference_flag_api.h"
 
 extern void func_0022D040(void);
 
@@ -265,7 +264,7 @@ extern void *sdfDevPrintf(s32, s32, s32, s32, const char *, ...);
 
 extern u8 D_00436EF8[];
 
-extern sdfGrOt_t kwlnPositionedTextSurface;
+extern sdfGrOt_t sdfDebugGrOt;
 
 extern s32 abs(s32);
 
@@ -411,10 +410,10 @@ extern char D_0041B6D8[]; /* "btl:event BE load[e%03d]\n" */
 extern char D_0041B6F8[]; /* "btl:event SMG free[%X]\n" */
 
 extern char D_0041B710[]; /* "btl:BSE free\n" */
-extern SndPackedTrackLoadStatus sndFindPackedTrackLoadStatus(s32);
+extern SndPackedTrackLoadStatus p2sdLoadCheckMidi(s32);
 extern void p2sdLoadSMGFile(s32);
 
-extern void sndReleaseMidiTrack(s32);
+extern void sdfSndReleaseMidiTrack(s32);
 
 /* Reset event state and request the scene's script/task resources.
  * The raw unsigned event word is deliberately converted to signed 16-bit.
@@ -453,12 +452,12 @@ void btlRequestSceneEventResources(void) {
     btlBossDebugPrintf(D_0041B6D8, battleState->eventPackId);
     dds3LinkProcess(battleState->scriptOwner, eventTask);
     battleState->sequenceHandle = BTL_EVENT_SEQUENCE_BASE + ((battleState->eventPackId - BTL_EVENT_SEQUENCE_ID_BIAS) << 16);
-    if (sndFindPackedTrackLoadStatus(battleState->sequenceHandle) != SND_PACKED_TRACK_LOAD_NOT_PRESENT) {
-        sndReleaseMidiTrack(battleState->sequenceHandle);
+    if (p2sdLoadCheckMidi(battleState->sequenceHandle) != SND_PACKED_TRACK_LOAD_NOT_PRESENT) {
+        sdfSndReleaseMidiTrack(battleState->sequenceHandle);
         btlBossDebugPrintf(D_0041B6F8, battleState->sequenceHandle);
     }
-    if (sndFindPackedTrackLoadStatus(0x10000) != SND_PACKED_TRACK_LOAD_NOT_PRESENT) {
-        sndReleaseMidiTrack(0x10000);
+    if (p2sdLoadCheckMidi(0x10000) != SND_PACKED_TRACK_LOAD_NOT_PRESENT) {
+        sdfSndReleaseMidiTrack(0x10000);
         btlBossDebugPrintf(D_0041B710);
     }
     battleState->eventFlags |= 6;
@@ -480,14 +479,14 @@ BtlEventSequenceTaskAvailability btlIsEventSequenceTaskReady(void) {
         return BTL_EVENT_SEQUENCE_TASK_READY;
     }
     if (battle->eventFlags & 4) {
-        if (sndFindPackedTrackLoadStatus(battle->sequenceHandle) == SND_PACKED_TRACK_LOAD_NOT_PRESENT) {
+        if (p2sdLoadCheckMidi(battle->sequenceHandle) == SND_PACKED_TRACK_LOAD_NOT_PRESENT) {
             p2sdLoadSMGFile(battle->sequenceHandle);
             battle->eventFlags &= ~4;
             btlBossDebugPrintf("btl:event SMG load[%X]\n", battle->sequenceHandle);
         }
         return BTL_EVENT_SEQUENCE_TASK_NOT_READY;
     }
-    if (sndFindPackedTrackLoadStatus(battle->sequenceHandle) == SND_PACKED_TRACK_LOAD_NOT_PRESENT) {
+    if (p2sdLoadCheckMidi(battle->sequenceHandle) == SND_PACKED_TRACK_LOAD_NOT_PRESENT) {
         p2sdLoadSMGFile(battle->sequenceHandle);
         btlBossDebugPrintf("btl:SMG load wait\n");
         return BTL_EVENT_SEQUENCE_TASK_NOT_READY;
@@ -538,7 +537,7 @@ void btlBindEventEffectResources(void) {
     for (resourceIndex = 0; resourceIndex < BTL_EVENT_SOUND_RESOURCE_COUNT; resourceIndex++) {
         EvtPackSecondaryResourceId resourceKey = resourceIndex + BTL_EVENT_SOUND_KEY_FIRST;
         s32 slotIndex = resourceIndex + BTL_EVENT_SOUND_SLOT_FIRST;
-        void *resourceValue = evtGetEventPackResourceAddress(battleState->eventPackId, resourceKey);
+        void *resourceValue = evtGetResorceData(battleState->eventPackId, resourceKey);
 
         if (resourceValue == 0) {
             btlBossDebugPrintf(D_0041B780, slotIndex, resourceKey);
@@ -584,7 +583,7 @@ s32 btlCommandSelectEventAction(void) {
         return 1;
     }
     battleState = (BtlState *)btlGetRuntime();
-    actionResource = evtGetEventPackResourceAddress(battleState->eventPackId, actionKey);
+    actionResource = evtGetResorceData(battleState->eventPackId, actionKey);
     if (actionResource == 0) {
         return 1;
     }
@@ -686,7 +685,7 @@ s32 btlCommandPlayUnitMotion(void) {
 s32 btlCommandSetSequenceVolumePan(void) {
     BtlState *battleState = (BtlState *)btlGetRuntime();
     s32 sequenceOffset = scrGetIntPara(0);
-    if (sndFindPackedTrackLoadStatus(battleState->sequenceHandle) != SND_PACKED_TRACK_LOAD_NOT_PRESENT) {
+    if (p2sdLoadCheckMidi(battleState->sequenceHandle) != SND_PACKED_TRACK_LOAD_NOT_PRESENT) {
         p2sdPlaySE(battleState->sequenceHandle + sequenceOffset, BTL_EVENT_SEQUENCE_VOLUME, BTL_EVENT_SEQUENCE_PAN);
         btlBossDebugPrintf(D_0041B7E0, battleState->sequenceHandle + sequenceOffset);
     }
@@ -811,7 +810,7 @@ s32 btlRunSceneActorEventTask(BattleScriptTaskData *record) {
         if (!(record->object->status.flags & 2)) {
             return 1;
         }
-        resource = evtGetEventPackResourceAddress(battle->eventPackId, record->group);
+        resource = evtGetResorceData(battle->eventPackId, record->group);
         if (resource == 0) {
             return 1;
         }
@@ -965,6 +964,7 @@ s32 btlIndexListMatchesEntryCodes(BtlIndexList *indexList,
 
 /* Reject expired positive or negative codes according to the command's rule.
  * A returned code value of zero is not rejected; other expiry rules pass. */
+
 INCLUDE_RODATA(const s32, "game/code_0022AC10", D_0041B768);
 
 INCLUDE_RODATA(const s32, "game/code_0022AC10", D_0041B780);
@@ -1234,7 +1234,7 @@ BtlPartyCommandUseGateResult btlCheckSelectedPartyCommandEligibility(s32 command
 
 /* Allocate a cache entry with one reference and insert it at the list head. */
 BattleModelEntry *btlCreateModelEntry(void) {
-    BattleModelEntry *cacheEntry = sdfAllocAndClearQuadwords(sizeof(BattleModelEntry));
+    BattleModelEntry *cacheEntry = sdfChipAllocZeroDirect(sizeof(BattleModelEntry));
     BtlStateModelCacheView *battleState;
     BattleModelEntry *previousHead;
     cacheEntry->refCount = 1;
@@ -1513,12 +1513,12 @@ void btlInitLightParams(void) {
     D_0037FAD0.unk10 = 0;
     D_0037FAD0.unk14 = 0;
     D_0037FAD0.unk18 = 0;
-    kwlnOverlayAmbientColor.r = 1.15f;
-    kwlnOverlayAmbientColor.g = 1.15f;
-    kwlnOverlayAmbientColor.b = 1.15f;
+    dds3AmbientColor2.r = 1.15f;
+    dds3AmbientColor2.g = 1.15f;
+    dds3AmbientColor2.b = 1.15f;
 }
 
-extern EffRandState effSharedRandomState[];
+extern EffRandState dds3RandCB[];
 void func_0022D040(void) {
     s32 row;
     s32 column;
@@ -1540,18 +1540,18 @@ void func_0022D040(void) {
 
     for (row = 0; row < btlRuntimeState.particleRowCount; row++) {
         for (column = 0; column < btlRuntimeState.particlesPerRow; column++) {
-            direction[0] = (dds3GetRandFloatA(effSharedRandomState) - 0.5f) * 2.0f;
-            direction[1] = (dds3GetRandFloatA(effSharedRandomState) - 0.5f) * 2.0f;
-            direction[2] = (dds3GetRandFloatA(effSharedRandomState) - 0.5f) * 2.0f;
+            direction[0] = (dds3GetRandFloatA(dds3RandCB) - 0.5f) * 2.0f;
+            direction[1] = (dds3GetRandFloatA(dds3RandCB) - 0.5f) * 2.0f;
+            direction[2] = (dds3GetRandFloatA(dds3RandCB) - 0.5f) * 2.0f;
             VU0_NORMALIZE_PACKED_VECTOR(direction);
             btlRuntimeState.ownedData[row * btlRuntimeState.particlesPerRow + column].direction[0] = direction[0];
             btlRuntimeState.ownedData[row * btlRuntimeState.particlesPerRow + column].direction[1] = direction[1];
             btlRuntimeState.ownedData[row * btlRuntimeState.particlesPerRow + column].direction[2] = direction[2];
             btlRuntimeState.ownedData[row * btlRuntimeState.particlesPerRow + column].rotationAngle = 0;
-            value = dds3GetRandFloatA(effSharedRandomState);
+            value = dds3GetRandFloatA(dds3RandCB);
             btlRuntimeState.ownedData[row * btlRuntimeState.particlesPerRow + column].rotationSpeed = (value * 0.5f + 0.5f) * 0.31415925f;
             btlRuntimeState.ownedData[row * btlRuntimeState.particlesPerRow + column].displacement = 0;
-            value = dds3GetRandFloatA(effSharedRandomState);
+            value = dds3GetRandFloatA(dds3RandCB);
             btlRuntimeState.ownedData[row * btlRuntimeState.particlesPerRow + column].displacementSpeed = (value * 0.5f + 0.5f) * 9.999998093f;
             btlRuntimeState.ownedData[row * btlRuntimeState.particlesPerRow + column].alpha = 0x80;
             btlRuntimeState.ownedData[row * btlRuntimeState.particlesPerRow + column].age = 0;
@@ -1578,7 +1578,8 @@ extern u32 btlCapturedScreenTilePacketParameters[];
 extern f32 btlCapturedScreenTileVertexOffsets[6][2];
 extern f32 btlCapturedScreenTileNormal[4];
 extern f32 D_00384790[4][4];
-extern sdfGrOt_t D_00380708, D_00380628;
+SYMBOL_AT(sdfGrOt_t, D_00380708, sdfGrOtTable, 0xBC0);
+SYMBOL_AT(sdfGrOt_t, D_00380628, sdfGrOtTable, 0xAE0);
 
 typedef struct BtlTileAlphaPacket {
     SdfGsPacketHeader header;
@@ -1643,7 +1644,7 @@ BtlRuntimeFadeStepResult btlDrawCapturedScreenTileOverlay(
         packet->registers.alpha.registerId = 0x42;
         sdfDrawTagLink(list, (u32)packet);
         btlBuildOverlayQuadPacket(list, 0x40, backgroundColor, -0x100);
-        D_00380708.append(&D_00380708, list);
+        D_00380708.regFunc(&D_00380708, list);
     }
     if (btlRuntimeState.options & 1) {
         list = (sdfDrawTag_t *)sdfGrAllocPacketBuff(0x20);
@@ -1659,7 +1660,7 @@ BtlRuntimeFadeStepResult btlDrawCapturedScreenTileOverlay(
         packet->registers.alpha.registerId = 0x42;
         sdfDrawTagLink(list, (u32)packet);
         btlDrawScaledHeldTextureQuad(list, 0x40, color, -0x100, 1.0f);
-        D_00380608.append(&D_00380608, list);
+        D_00380608.regFunc(&D_00380608, list);
         if (D_00436D10 == NULL) {
             D_00436D10 = sdfMatNew();
             btlInitLightParams();
@@ -1671,12 +1672,12 @@ BtlRuntimeFadeStepResult btlDrawCapturedScreenTileOverlay(
         }
         tiles = (sdfDrawTag_t *)sdfGrAllocPacketBuff(0x20);
         sdfDrawTagInit(tiles);
-        VU0_LOAD_MATRIX(D_00384790);
+        SDF_VU0_LOADMATRIX(D_00384790);
         ReverseMatrix();
         waveRadius = 640.0f;
         sdf3DPrimLinkTm(tiles, NULL);
-        dds3RenderTexture->primaryBuffer->clampState = 0x37C00000008ULL;
-        sdfSetAssetPrimaryTextureAddress(D_00436D10, dds3RenderTexture);
+        dds3RenderTexture->packet->clamp.data = 0x37C00000008ULL;
+        sdfMatSetTex(D_00436D10, dds3RenderTexture);
         sdf3DPrimLinkMat(tiles, D_00436D10, NULL);
         btlCapturedScreenTileDrawParams.color = 0x80808080;
         btlCapturedScreenTileDrawParams.vertex = (u128 *)positions;
@@ -1736,7 +1737,7 @@ BtlRuntimeFadeStepResult btlDrawCapturedScreenTileOverlay(
                         axis[2] = btlRuntimeState.ownedData[row * btlRuntimeState.particlesPerRow + column].direction[2];
                         SetRotateMatrixAxis_B((RwV3d *)axis,
                             btlRuntimeState.ownedData[row * btlRuntimeState.particlesPerRow + column].rotationAngle);
-                        sdfComposeVuMatrixFromRegisters();
+                        MultMatrixNoArg();
                         btlRuntimeState.ownedData[row * btlRuntimeState.particlesPerRow + column].rotationAngle +=
                             btlRuntimeState.ownedData[row * btlRuntimeState.particlesPerRow + column].rotationSpeed;
                         btlRuntimeState.ownedData[row * btlRuntimeState.particlesPerRow + column].displacement +=
@@ -1779,7 +1780,7 @@ draw_tile:
                     center[2] = depth;
                     centerX = centerOffsetX + 0x1000;
                     centerY = centerOffsetY + 0xE00;
-                    VU0_LOAD_VF($vf11, center);
+                    SDF_VU0_LOADVECTOR_B(center);
                     for (vertex = 0; vertex < 6; vertex++) {
                         pixelX = centerX + (s32)(btlCapturedScreenTileVertexOffsets[vertex][0] * size);
                         pixelY = centerY + (s32)(btlCapturedScreenTileVertexOffsets[vertex][1] * size);
@@ -1788,14 +1789,14 @@ draw_tile:
                         positions[vertex][0] = width * (f32)(pixelX - 0x1000) / 4096.0f;
                         positions[vertex][1] = height * (f32)(pixelY - 0xE00) / 3584.0f;
                         positions[vertex][2] = depth;
-                        VU0_LOAD_VF($vf10, positions[vertex]);
-                        VU0_SUB($vf10, $vf10, $vf11);
-                        VU0_APPLY_MATRIX($vf10, $vf10);
-                        VU0_ADD($vf10, $vf10, $vf11);
-                        VU0_STORE_VF($vf10, positions[vertex]);
-                        VU0_LOAD_VF($vf10, btlCapturedScreenTileNormal);
-                        VU0_ROTATE_VEC($vf10, $vf10);
-                        VU0_STORE_VF($vf10, normals[vertex]);
+                        SDF_VU0_LOADVECTOR(positions[vertex]);
+                        SDF_VU0_SUBVECTOR();
+                        SDF_VU0_APPLYMATRIX();
+                        SDF_VU0_ADDVECTOR();
+                        SDF_VU0_STOREVECTOR(positions[vertex]);
+                        SDF_VU0_LOADVECTOR(btlCapturedScreenTileNormal);
+                        SDF_VU0_APPLYMATRIX_XYZ();
+                        SDF_VU0_STOREVECTOR(normals[vertex]);
                     }
                     sdfDrawTagLink(tiles, (u32)effPkt3DPrimMakePoly(&btlCapturedScreenTileDrawParams));
                 }
@@ -1821,7 +1822,7 @@ draw_tile:
         packet->registers.alpha.value = 0x44;
         packet->registers.alpha.registerId = 0x42;
         sdfDrawTagLink(tiles, (u32)packet);
-        D_00380628.append(&D_00380628, tiles);
+        D_00380628.regFunc(&D_00380628, tiles);
     }
     return complete;
 }
@@ -1867,7 +1868,7 @@ void btlClearOverlayBuffers(void) {
     u64 clearValue;
     dds3AllocRenderTexture(0x200, 0xe0, 0.0f);
     dds3RenderTextureON();
-    entry = D_00380870;
+    entry = dds3DrawEnv;
     i = 0;
     clearValue = 0x80008000ULL;
     entry += 0x1b70;
@@ -1899,15 +1900,15 @@ void btlInitializeGraphicsRuntime(void) {
     sdfPreDrawTagInit(context);
     sdfLinkStoreFrameImage(packetList, context, 0, 0, 0x200, 0xe0, (s32)runtime->frameBuffer, 0, 0, 0);
     sdfPreDrawChainLink((SdfPacketChain *)D_00380860, context);
-    D_00380608.append(&D_00380608, packetList);
+    D_00380608.regFunc(&D_00380608, packetList);
 }
 
 void btlSubmitFrameAndQueueRuntimeHandle(void) {
     BattleRuntimeState *runtime = &btlRuntimeState;
     sdfDrawTag_t *packetList = (sdfDrawTag_t *)sdfPrimAllocDrawTag(0);
-    sdfLinkLoadImage(packetList, dds3RenderTexture->primaryResource,
+    sdfLinkLoadImage(packetList, dds3RenderTexture->pixelGsHandle,
                               0, 0, 0x200, 0xe0, (s32)runtime->frameBuffer, 0);
-    D_00380608.append(&D_00380608, packetList);
+    D_00380608.regFunc(&D_00380608, packetList);
     sdfMemFreeDelayedDirect(runtime->frameBufferAllocation);
     runtime->frameBufferAllocation = 0;
     runtime->frameBuffer = 0;
@@ -1918,9 +1919,9 @@ void btlInitializeOverlayGraphics(void) {
     sdfDrawTag_t *packetList = (sdfDrawTag_t *)sdfPrimAllocDrawTag(0);
     sdfPreDrawTag_t *context = (sdfPreDrawTag_t *)sdfGrAllocPacketBuff(16);
     sdfPreDrawTagInit(context);
-    sdfPrimLinkFrameMovePacket(packetList, context, dds3RenderTexture->primaryResource, 0, 0, 0, 0, 0x200, 0xe0, 0, 0);
+    sdfPrimLinkFrameMovePacket(packetList, context, dds3RenderTexture->pixelGsHandle, 0, 0, 0, 0, 0x200, 0xe0, 0, 0);
     sdfPreDrawChainLink((SdfPacketChain *)D_00380860, context);
-    D_00380608.append(&D_00380608, packetList);
+    D_00380608.regFunc(&D_00380608, packetList);
     btlRuntimeState.options |= 1;
 }
 
@@ -1958,7 +1959,7 @@ s32 btlUpdateRuntimeFadeState(void) {
         } else {
             mode = btlRuntimeState.fadeMode;
             if (mode == 2) {
-                kwlnFadeBackgroundStartOut(0);
+                dds3FadeBackgroundStartOut(0);
                 dds3DrawFlag |= 0x10000000;
                 if (btlRuntimeState.counter < 3) {
                     fldSkyDrawFilter();
@@ -2036,7 +2037,7 @@ void btlActivateRuntime(u8 condition) {
     battle->active = 1;
     battle->pending = 0;
     battle->options = 0;
-    if (kwlnFadeIsBackgroundOverlayActive() != KWLN_BACKGROUND_OVERLAY_INACTIVE) {
+    if (dds3FadeIsBackgroundOverlayActive() != DDS3_BACKGROUND_OVERLAY_INACTIVE) {
         battle->options |= 4;
     }
 }
@@ -2285,9 +2286,9 @@ s32 mnuListMoveCursor(MenuList *menuList) {
 
 /* Queue text at pixel coordinates, using the font's native X/Y scaling. */
 s32 mnuQueueColoredGlyphAtPosition(s32 x, s32 y, s32 text) {
-    struct _FRQ *textGlyph = itfCreateMeasuredTextGlyph(x << 4, y << 3, MNU_LIST_TEXT_DEPTH,
+    struct frFontHandle_t *textGlyph = itfCreateMeasuredTextGlyph(x << 4, y << 3, MNU_LIST_TEXT_DEPTH,
         MNU_LIST_NORMAL_COLOR, (const char *)(u32)text, NULL);
-    frFontDrawGlyphChain(textGlyph, 0, 0x60);
+    frDrawFontOt(textGlyph, 0, 0x60);
     return frDestroyFontRequestAfter(textGlyph);
 }
 
@@ -2306,11 +2307,11 @@ s32 btlDrawSelectableListRows(s32 x, s32 y, s32 unusedMode, MenuList *selectionS
     selectedIndex = selectionState->cursor;
     rowY = y;
     for (; itemIndex < endIndex; itemIndex++) {
-        struct _FRQ *textGlyph = itfCreateMeasuredTextGlyph(x << 4, rowY << 3,
+        struct frFontHandle_t *textGlyph = itfCreateMeasuredTextGlyph(x << 4, rowY << 3,
             MNU_LIST_TEXT_DEPTH,
             itemIndex == selectedIndex ? MNU_LIST_SELECTED_COLOR : MNU_LIST_NORMAL_COLOR,
             (const char *)(u32)rowTexts[itemIndex], NULL);
-        frFontDrawGlyphChain(textGlyph, 0, 0x60);
+        frDrawFontOt(textGlyph, 0, 0x60);
         frDestroyFontRequestAfter(textGlyph);
         rowY += MNU_LIST_ROW_HEIGHT;
     }
@@ -2352,7 +2353,7 @@ s32 mnuDrawSelectableMenuRows(s32 x, s32 y, s32 frameWidth, MenuList *selectionS
             rowY += MNU_LIST_FIXED_ROW_HEIGHT;
         }
     }
-    kwlnPositionedTextSurface.append(&kwlnPositionedTextSurface, (sdfDrawTag_t *)indexPackets);
+    sdfDebugGrOt.regFunc(&sdfDebugGrOt, (sdfDrawTag_t *)indexPackets);
     return btlDrawSelectableListRows(x + MNU_LIST_LABEL_OFFSET, y, frameWidth, selectionState, rowTexts);
 }
 
@@ -2786,7 +2787,7 @@ s32 btlUpdateBattleModelDebugEditor(void) {
             battle->runtimeFlags &= ~0x200;
         }
         if (btlDebugActorStatusEditorRows[btlDebugActorStatusEditor.cursor].valueAddress == (u32)&btlDebugEditorMotionSlot.muzzleGuideScale) {
-            btlUnitGetMuzzlePosVU(unit);
+            effBTLModelGetSphereCenter(unit);
             SDF_VU0_STOREVECTOR_NOMEM(position);
             btlDebugDrawScaledPositionGuide(position, 0x10106020, 0, btlDebugEditorMotionSlot.muzzleGuideScale * btlDebugEditorActorStatus.scale);
         }
@@ -2976,6 +2977,8 @@ extern void btlApplyDebugEncounterPartySelection(void);
 /* Edit encounter settings, preview party/enemy names, and launch the test. */
 /* Preview/select a debug encounter or pack; return one when it can launch. */
 /* Keep the native snapshot/save/restore order around the debug window calls. */
+#include "btl_preemptive_outcome_result.h"
+
 INCLUDE_RODATA(const s32, "game/code_0022AC10", D_0041C118);
 
 INCLUDE_RODATA(const s32, "game/code_0022AC10", D_0041C128);
@@ -3034,13 +3037,11 @@ INCLUDE_RODATA(const s32, "game/code_0022AC10", D_0041C2C8);
 
 INCLUDE_RODATA(const s32, "game/code_0022AC10", D_0041C2D8);
 
-#include "btl_preemptive_outcome_result.h"
-
 s32 btlUpdateDebugEncounterSelector(void) {
     BtlState *state = (BtlState *)btlGetRuntime();
     u32 i;
     u16 unitId;
-    struct _FRQ *glyph;
+    struct frFontHandle_t *glyph;
     s32 encounter;
 
     if (dds3PadBitTable[3] < 0) {
@@ -3080,7 +3081,7 @@ s32 btlUpdateDebugEncounterSelector(void) {
                 glyph = itfCreateConvertedTextGlyph((btlDebugEncounterWindowView.x - 72) << 4,
                     (btlDebugEncounterWindowView.y + i * 24) << 3, 0, MNU_LIST_NORMAL_COLOR,
                     (const u8 *)datUnitNames + unitId * 17, NULL);
-                frFontDrawGlyphChain(glyph, 1, 0x53);
+                frDrawFontOt(glyph, 1, 0x53);
                 frDestroyFontRequestAfter(glyph);
             }
         }
@@ -3091,7 +3092,7 @@ s32 btlUpdateDebugEncounterSelector(void) {
                     glyph = itfCreateConvertedTextGlyph((btlDebugEncounterWindowView.x + 185) << 4,
                         (btlDebugEncounterWindowView.y + i * 24) << 3, 0, MNU_LIST_NORMAL_COLOR,
                         (const u8 *)D_00435E4C + unitId * 17, NULL);
-                    frFontDrawGlyphChain(glyph, 1, 0x53);
+                    frDrawFontOt(glyph, 1, 0x53);
                     frDestroyFontRequestAfter(glyph);
                 }
             }
@@ -5114,4 +5115,3 @@ INCLUDE_RODATA(const s32, "game/code_0022AC10", D_00420FA8);
 
 INCLUDE_RODATA(const s32, "game/code_0022AC10", D_00420FC0);
 
-INCLUDE_RODATA(const s32, "game/code_0022AC10", D_00420FD8);

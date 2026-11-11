@@ -1,10 +1,26 @@
 #include "sdk_ps2.h"
+#include "bill_object_api.h"
+#include "sdf_asset_state.h"
+#include "sdf_asset_create.h"
+#include "sdf_packet_list.h"
+#include "common.h"
+#include "eff_billboard_resource_work.h"
+#include "sdf_trig.h"
+#include "sdf_chip.h"
+#include "sdf_packet_append.h"
+#include "sdf_heap_api.h"
+#include "ps2asm.h"
+
+#define VEC3_SPLAT(v, x) ((v)[0] = (x), (v)[1] = (x), (v)[2] = (x))
+
+#include "sdf_vu_matrix.h"
+#include "eff.h"
+#include "eff_matrix4.h"
+#include "eff_resource_render_state.h"
+#include "sdf_packet_alloc.h"
 #include "sdf_projection.h"
 #include "sdf_model_packet_callback.h"
-#include "common.h"
 #include "sdf_map_position_api.h"
-#include "eff_matrix4.h"
-#include "sdf_vu0.h"
 #include "sdf_vu_rotation_axes.h"
 #include "eff_pcp_paired_event_row.h"
 #include "eff_pcp_spawn_range_event_row.h"
@@ -13,7 +29,6 @@
 #include "eff_packet_params.h"
 #include "eff_pcp_fade_timer.h"
 #include "btl_effect_position.h"
-#include "sdf_trig.h"
 #include "eff_random.h"
 #include "sdf_model.h"
 #include "eff_pcp_event_place.h"
@@ -21,21 +36,13 @@
 #include "fpu.h"
 #include "btl.h"
 #include "eff_pcp_beam.h"
-#include "sdf_asset_state.h"
-#include "sdf_asset_create.h"
 #include "sdf_motion.h"
 #include "sdf_motion_next_result.h"
-#include "sdf_chip.h"
-#include "sdf_packet_list.h"
-#include "sdf_packet_append.h"
 #include "eff_thunder_vector.h"
-#include "bill_object_api.h"
-#include "sdf_resource.h"
 #include "btl_sound.h"
 #include "eff_blur.h"
 #include "eff_pcp_long_fade_timer.h"
 #include "eff_pcp_shared_trail.h"
-#include "eff.h"
 #include "eff_resource_rect_api.h"
 #include "eff_math.h"
 #include "eff_node.h"
@@ -66,18 +73,24 @@
 #include "eff_pcp_span.h"
 #include "mdl.h"
 #include "sdf_chunk.h"
-#include "pcp_vu0.h"
 #include "sdf_vu_transform_api.h"
-#include "sdf_vu_matrix.h"
 #include "sdf_vu_matrix_multiply_api.h"
-#include "ee_mmi.h"
-#include "bill_object_api.h"
+
+/* Create the shared billboard set with its default colour and scale. */
+EffBillboardSetWork *effPCPSparkleSphereCreate(EffBillboardSetParams *params) {
+    EffBillboardSetWork *billboard = (EffBillboardSetWork *)sdfChipAllocDirect(sizeof(EffBillboardSetWork));
+
+    billboard->mode = params->mode;
+    billboard->handle = dds3BillboardGeneral(2);
+    dds3BillboardSetMode(billboard->handle, 2);
+    billboard->color = 0x80808080;
+    billboard->scale = 100.0f;
+    return billboard;
+}
 
 /* Every compact timeline precedes one variant-specific SDK parameter payload.
    Respawn copies that payload only, not its live resource/allocation tail. */
 typedef dds3Effect_PartialMultiBlurParam_t EffPCPTexturedBlurParams;
-
-
 
 typedef struct {
     EffPCPCompactTimelineParams timeline;
@@ -101,41 +114,65 @@ typedef struct {
 
 /* Scatter and scale callbacks share this work; their factory selects the resource view. */
 extern s8 D_003BB04C;
+
 extern s32 D_003BB048;
 
 extern EffPCPSharedTrail *pBlinkMultiBlurBase;
 
-
 /* The update uses unsigned frame bounds; the initial sweep interval is
  * computed as a signed difference of the parameter words. */
-extern void dds3EffectRippleBlurReset(EffBlurScaleWork *work);
-extern void effBlurStepScaleSlotsAndDraw(EffBlurScaleWork *work);
+extern void dds3EffectRippleBlurReset(effBlurScaleWork_t *work);
+
+extern void dds3EffectRippleBlurDraw(effBlurScaleWork_t *work);
+
 extern void effPCPHama02PartInit(EffPCPStaggered *work, s32 index);
+
 extern void effPCPMHanma01PartInit(EffPCPDelayedPairs *work, s32 index);
+
 struct EffPCPBeamWork;
+
 extern void effPCPRingPolyExpSetVertex(f32 value, struct EffPCPBeamWork *work);
+
 extern void SetRotateMatrixY(f32 scale);
+
 extern void SetRotateMatrixX_B(f32 angle);
-extern struct sdfGrOt_t *kwlnSceneSurfaceSets[13][4];
-extern u32 effBTLFieldColorUsesActorSelectors(void);
+
+extern struct sdfGrOt_t *sdfModelOtTable[13][4];
+
+extern u32 effBTLSkillCheckRun(void);
+
 extern u32 effBTLFieldColorGetVariantSelector(void);
 
-
 extern u8 effPCP_ShockWave01_ThunderSpherePoly_Param[];
+
 extern u8 effPCP_Houden01_ThunderSpherePoly_Param[];
+
 extern u8 effPCP_Megidora01_ThunderSpherePoly_Param[];
+
 extern u8 effPCP_Megidoraon01_ThunderSpherePoly_Param[];
+
 extern u8 effMuzzleThunderRayParams[];
+
 extern u8 effCyanBlueRayPairParams[];
+
 extern u8 effWhiteYellowRayPairParams[];
+
 extern u8 effYellowOrangeRayPairParams[];
+
 extern u8 effBrownRedRayPairParams[];
+
 extern u8 effOrangeVioletRayPairParams[];
+
 extern u8 effOffsetMuzzleThunderRayParams[];
+
 extern u8 effCyanBlueRaySingleParams[];
+
 extern u8 effWhiteYellowRaySingleParams[];
+
 extern u8 effYellowOrangeRaySingleParams[];
+
 extern u8 effBrownRedRaySingleParams[];
+
 extern u8 effOrangeVioletRaySingleParams[];
 
 typedef struct EffPCPRingWork {
@@ -145,16 +182,19 @@ typedef struct EffPCPRingWork {
     f32 scale;
     billHandle_t *handle;
 } EffPCPRingWork;
+
 void effPCPSparkleSphereDelete(EffPCPRingWork *work) {
     dds3BillboardDelete(work->handle);
     sdfChipFreeDirect(work);
 }
 
 extern f32 aViewTarget[4];
-extern f32 sdfViewTargetVector[4];
-extern void dds3BillboardDraw(billHandle_t *effect);
-extern u32 effMagaCylinderCalcColor(u32 flags, u32 color);
 
+extern f32 aViewEye[4];
+
+extern void dds3BillboardDraw(billHandle_t *effect);
+
+extern u32 effMagaCylinderCalcColor(u32 flags, u32 color);
 
 /* Places a ring of 10 shrinking, brightening copies of the handle along the
  * fixed view direction. */
@@ -167,21 +207,21 @@ void effPCPSparkleSphereDraw(EffPCPRingWork *work) {
     u32 color;
     s32 i;
 
-    VU0_LOAD_VF($vf10, sdfViewTargetVector);
-    VU0_LOAD_VF($vf11, aViewTarget);
+    SDF_VU0_LOADVECTOR(aViewEye);
+    SDF_VU0_LOADVECTOR_B(aViewTarget);
     SDF_VU0_SUBVECTOR();
     SDF_VU0_NORMALIZE();
-    VU0_STORE_VF($vf10, dir);
+    SDF_VU0_STOREVECTOR(dir);
     handle = work->handle;
     size[0] = work->scale;
     size[1] = work->scale;
     size[2] = work->scale;
-    VU0_LOAD_VF($vf10, size);
-    VU0_LOAD_VF($vf11, dir);
+    SDF_VU0_LOADVECTOR(size);
+    SDF_VU0_LOADVECTOR_B(dir);
     SDF_VU0_MULVECTOR();
-    VU0_LOAD_VF($vf11, work);
+    SDF_VU0_LOADVECTOR_B(work);
     SDF_VU0_ADDVECTOR();
-    VU0_STORE_VF($vf10, pos);
+    SDF_VU0_STOREVECTOR(pos);
     effCopyVector(handle->position, pos);
     scale = work->scale;
     color = 0x10808080;
@@ -214,11 +254,11 @@ void effPCPHama01PartInit(EffPCPTwinWork *work, s32 slotIndex) {
     u128 mtx[4];
 
     SetRotateMatrixY((dds3GetRandFloatA(effDefaultRandomState) - 0.5f) * 2.0f * 6.283185f);
-    VU0_STORE_MATRIX_NOCLOBBER(mtx);
+    SDF_VU0_STOREMATRIX_NOMEM(mtx);
     dds3EffectPartSetRotateMatrix(work->pair[slotIndex][0], mtx);
     dds3EffectPartSetRotateMatrix(work->pair[slotIndex][1], mtx);
-    mdlSingleMotion(effParamWorkGetData(work->pair[slotIndex][0]), 0, 0);
-    mdlSingleMotion(effParamWorkGetData(work->pair[slotIndex][1]), 0, 0);
+    mdlSingleMotion(dds3EffectPartGetHandle(work->pair[slotIndex][0]), 0, 0);
+    mdlSingleMotion(dds3EffectPartGetHandle(work->pair[slotIndex][1]), 0, 0);
     work->counter[slotIndex] = dds3GetRandA((EffRandState *)effDefaultRandomState) % 10;
 }
 
@@ -271,7 +311,6 @@ void effPCPHama01Delete(EffPCPTwinWork *work) {
     sdfChipFreeDirect(work);
 }
 
-
 EffPCPTwinWork *effPCPHama01Copy(EffPCPTwinWork *src) {
     EffPCPTwinWork *work = sdfChipAllocDirect(sizeof(EffPCPTwinWork));
     s32 slotIndex;
@@ -292,7 +331,6 @@ EffPCPTwinWork *effPCPHama01Copy(EffPCPTwinWork *src) {
     return work;
 }
 
-
 /* Per-frame update of the 8 twin slots: a slot whose countdown reached zero
  * fires its handle pair; after frame 0x18 its position is pushed to the shared
  * handle. */
@@ -307,19 +345,19 @@ void effPCPHama01Draw(EffPCPTwinWork *work) {
             work->counter[slotIndex]--;
             continue;
         }
-        obj[0] = effParamWorkGetData(work->pair[slotIndex][0]);
-        obj[1] = effParamWorkGetData(work->pair[slotIndex][1]);
+        obj[0] = dds3EffectPartGetHandle(work->pair[slotIndex][0]);
+        obj[1] = dds3EffectPartGetHandle(work->pair[slotIndex][1]);
         SDF_VU0_LOADVECTOR(work);
         mdlSetPosition(obj[0]);
         dds3EffectPartSetScale(work->pair[slotIndex][0], work->scale * 1.5f);
         dds3EffectPartSetScale(work->pair[slotIndex][1], 1.75f);
         mdlSetColor(obj[1], work->color);
-        mdlLink(obj[0], kwlnSceneSurfaceSets[10]);
+        mdlLink(obj[0], sdfModelOtTable[10]);
         sdfModelGetMarkPos(obj[0]->inner, 1);
         posp = &pos;
         SDF_VU0_STOREVECTOR_NOMEM(posp);
         mdlSetPosition(obj[1]);
-        mdlLink(obj[1], kwlnSceneSurfaceSets[10]);
+        mdlLink(obj[1], sdfModelOtTable[10]);
         if (work->frame > 0x18) {
             dds3EffectPartSetPosition(work->shared[slotIndex], posp);
             dds3EffectPartDraw(work->shared[slotIndex]);
@@ -346,15 +384,14 @@ void effPCPHama02PartInit(EffPCPStaggered *work, s32 index) {
     u128 mtx[4];
 
     SetRotateMatrixY((dds3GetRandFloatA(effDefaultRandomState) - 0.5f) * 2.0f * 6.283185f);
-    VU0_STORE_MATRIX_NOCLOBBER(mtx);
+    SDF_VU0_STOREMATRIX_NOMEM(mtx);
     dds3EffectPartSetRotateMatrix(work->handle[index * 2], mtx);
     dds3EffectPartSetRotateMatrix(work->handle[index * 2 + 1], mtx);
-    mdlSingleMotion(effParamWorkGetData(work->handle[index * 2]), 0, 0);
-    mdlSingleMotion(effParamWorkGetData(work->handle[index * 2 + 1]), 0, 0);
+    mdlSingleMotion(dds3EffectPartGetHandle(work->handle[index * 2]), 0, 0);
+    mdlSingleMotion(dds3EffectPartGetHandle(work->handle[index * 2 + 1]), 0, 0);
     work->verticalOffset[index] = dds3GetRandFloatA(effDefaultRandomState) * 150.0f;
     work->remainingDelay[index] = dds3GetRandA((EffRandState *)effDefaultRandomState) % 10;
 }
-
 
 EffPCPStaggered *effPCPHama02Create(void *args) {
     EffPCPStaggered *work = sdfChipAllocDirect(sizeof(EffPCPStaggered));
@@ -412,7 +449,6 @@ EffPCPStaggered *effPCPHama02Copy(EffPCPStaggered *source) {
     return work;
 }
 
-
 void effPCPHama02Draw(EffPCPStaggered *work) {
     dds3ModelHandle_t *obj[2];
     f32 pos[4];
@@ -422,8 +458,8 @@ void effPCPHama02Draw(EffPCPStaggered *work) {
         if (work->remainingDelay[i] != 0) {
             work->remainingDelay[i]--;
         } else {
-            obj[0] = effParamWorkGetData(work->handle[i * 2]);
-            obj[1] = effParamWorkGetData(work->handle[i * 2 + 1]);
+            obj[0] = dds3EffectPartGetHandle(work->handle[i * 2]);
+            obj[1] = dds3EffectPartGetHandle(work->handle[i * 2 + 1]);
             pos[0] = work->position[0];
             pos[2] = work->position[2];
             pos[1] = (work->position[1] - work->verticalOffset[i] + 100.0f) * work->scale;
@@ -432,10 +468,10 @@ void effPCPHama02Draw(EffPCPStaggered *work) {
             dds3EffectPartSetScale(work->handle[i * 2], work->scale * 1.5f);
             dds3EffectPartSetScale(work->handle[i * 2 + 1], 1.5f);
             mdlSetColor(obj[1], work->color);
-            mdlLink(obj[0], kwlnSceneSurfaceSets[10]);
+            mdlLink(obj[0], sdfModelOtTable[10]);
             sdfModelGetMarkPos(obj[0]->inner, 1);
             mdlSetPosition(obj[1]);
-            mdlLink(obj[1], kwlnSceneSurfaceSets[10]);
+            mdlLink(obj[1], sdfModelOtTable[10]);
         }
     }
 }
@@ -457,7 +493,7 @@ void effPCPHamaonPartInit(EffPCPCrossWork *work, u32 i, u32 j) {
     u128 mtx[4];
     f32 angle;
 
-    mdlSingleMotion(effParamWorkGetData(work->handle[i][j]), 0, 0);
+    mdlSingleMotion(dds3EffectPartGetHandle(work->handle[i][j]), 0, 0);
     angle = (f32)j * -1.0471974f;
     if (i == 0) {
         SetRotateMatrixY(angle);
@@ -468,7 +504,7 @@ void effPCPHamaonPartInit(EffPCPCrossWork *work, u32 i, u32 j) {
     } else {
         SetRotateMatrixZ(angle);
     }
-    VU0_STORE_MATRIX(mtx);
+    SDF_VU0_STOREMATRIX(mtx);
     dds3EffectPartSetRotateMatrix(work->handle[i][j], mtx);
     if ((j + 1) & 1) {
         work->remainingDelay[i][j] = 0;
@@ -483,7 +519,7 @@ EffPCPCrossWork *effPCPHamaonCreate(void *src) {
     s32 j;
 
     work->base = dds3EffectPCPDataPartCreate(src, 0);
-    mdlSingleMotion(effParamWorkGetData(work->base), 0, 0);
+    mdlSingleMotion(dds3EffectPartGetHandle(work->base), 0, 0);
     for (i = 0; i < 4; i++) {
         for (j = 0; j < 3; j++) {
             if (j == 0) {
@@ -516,14 +552,13 @@ void effPCPHamaonDelete(EffPCPCrossWork *work) {
     sdfChipFreeDirect(work);
 }
 
-
 EffPCPCrossWork *effPCPHamaonCopy(EffPCPCrossWork *src) {
     EffPCPCrossWork *work = sdfChipAllocDirect(sizeof(EffPCPCrossWork));
     s32 i;
     s32 j;
 
     work->base = dds3EffectPartCopy(src->base);
-    mdlSingleMotion(effParamWorkGetData(work->base), 0, 0);
+    mdlSingleMotion(dds3EffectPartGetHandle(work->base), 0, 0);
     for (i = 0; i < 4; i++) {
         for (j = 0; j < 3; j++) {
             work->handle[i][j] = dds3EffectPartCopy(src->handle[i][0]);
@@ -538,7 +573,6 @@ EffPCPCrossWork *effPCPHamaonCopy(EffPCPCrossWork *src) {
     return work;
 }
 
-
 /* Per-frame update of the cross effect: scales the anchor model and fires each
  * of the 12 slots whose countdown has expired. */
 void effPCPHamaonDraw(EffPCPCrossWork *work) {
@@ -547,22 +581,22 @@ void effPCPHamaonDraw(EffPCPCrossWork *work) {
     s32 i;
     s32 j;
 
-    anchor = effParamWorkGetData(work->base);
+    anchor = dds3EffectPartGetHandle(work->base);
     SDF_VU0_LOADVECTOR(work);
     mdlSetPosition(anchor);
     dds3EffectPartSetScale(work->base, work->scale);
-    mdlLink(anchor, kwlnSceneSurfaceSets[10]);
+    mdlLink(anchor, sdfModelOtTable[10]);
     for (i = 0; i < 4; i++) {
         for (j = 0; j < 3; j++) {
             if (work->remainingDelay[i][j] != 0) {
                 work->remainingDelay[i][j]--;
                 continue;
             }
-            obj = effParamWorkGetData(work->handle[i][j]);
+            obj = dds3EffectPartGetHandle(work->handle[i][j]);
             mdlSetColor(obj, work->color);
             sdfModelGetMarkPos(anchor->inner, i * 4 + j + 1);
             mdlSetPosition(obj);
-            mdlLink(obj, kwlnSceneSurfaceSets[10]);
+            mdlLink(obj, sdfModelOtTable[10]);
         }
     }
 }
@@ -579,16 +613,14 @@ void effPCPHamaonSetColor(EffPCPCrossWork *work, u32 val) {
     work->color = val;
 }
 
-
 /* Re-arms slot `index`: registers both handles of the pair and rolls a new
  * random countdown. */
 void effPCPMHanma01PartInit(EffPCPDelayedPairs *work, s32 index) {
 
-    mdlSingleMotion(effParamWorkGetData(work->handle[index * 2]), 0, 0);
-    mdlSingleMotion(effParamWorkGetData(work->handle[index * 2 + 1]), 0, index & 1);
+    mdlSingleMotion(dds3EffectPartGetHandle(work->handle[index * 2]), 0, 0);
+    mdlSingleMotion(dds3EffectPartGetHandle(work->handle[index * 2 + 1]), 0, index & 1);
     work->remainingDelay[index] = dds3GetRandA((EffRandState *)effDefaultRandomState) % 10;
 }
-
 
 EffPCPDelayedPairs *effPCPMHanma01Create(void *source) {
     EffPCPDelayedPairs *work = sdfChipAllocDirect(sizeof(EffPCPDelayedPairs));
@@ -647,7 +679,6 @@ EffPCPDelayedPairs *effPCPMHanma01Copy(EffPCPDelayedPairs *source) {
     return work;
 }
 
-
 void effPCPMHanma01Draw(EffPCPDelayedPairs *work) {
     dds3ModelHandle_t *obj[2];
     u128 vec;
@@ -657,16 +688,16 @@ void effPCPMHanma01Draw(EffPCPDelayedPairs *work) {
         if (work->remainingDelay[i] != 0) {
             work->remainingDelay[i]--;
         } else {
-            obj[0] = effParamWorkGetData(work->handle[i * 2]);
-            obj[1] = effParamWorkGetData(work->handle[i * 2 + 1]);
+            obj[0] = dds3EffectPartGetHandle(work->handle[i * 2]);
+            obj[1] = dds3EffectPartGetHandle(work->handle[i * 2 + 1]);
             SDF_VU0_LOADVECTOR_BARRIER(work);
             mdlSetPosition(obj[0]);
             mdlSetColor(obj[1], work->color);
-            mdlLink(obj[0], kwlnSceneSurfaceSets[10]);
+            mdlLink(obj[0], sdfModelOtTable[10]);
             sdfModelGetMarkPos(obj[0]->inner, 1);
             SDF_VU0_STOREVECTOR_NOMEM(&vec);
             mdlSetPosition(obj[1]);
-            mdlLink(obj[1], kwlnSceneSurfaceSets[10]);
+            mdlLink(obj[1], sdfModelOtTable[10]);
         }
     }
 }
@@ -736,6 +767,7 @@ EffPCPChargeWork *effPCPMudoCopy(EffPCPChargeWork *source) {
 }
 
 extern u16 effChargeSamplePeriods[8];
+
 extern f32 effChargePointScaleFactors[8];
 
 /* vu0 routine: capture staggered model points, then draw their growing history. */
@@ -757,12 +789,12 @@ void effPCPMudoDraw(EffPCPChargeWork *work) {
     }
     work->updateCount++;
     color = effMagaCylinderCalcColor(work->color, work->baseColor);
-    bill = effParamWorkGetData(work->primaryHandle);
-    model = effParamWorkGetData(work->secondaryHandle);
+    bill = dds3EffectPartGetHandle(work->primaryHandle);
+    model = dds3EffectPartGetHandle(work->secondaryHandle);
     scale = work->scale * 1.5f;
     dds3EffectPartSetScale(work->secondaryHandle, scale);
     dds3EffectPartSetPosition(work->secondaryHandle, work->vectorWords);
-    mdlLink(model, kwlnSceneSurfaceSets[10]);
+    mdlLink(model, sdfModelOtTable[10]);
     captureRow = work->historyCount;
     if (captureRow < 25) {
         for (point = 0; point < 7; point++) {
@@ -853,13 +885,13 @@ void effPCPHwave01Draw(EffPCPSpawnOnceWork *work) {
     dds3ModelHandle_t *obj;
     u128 vec;
 
-    obj = effParamWorkGetData(work->primaryHandle);
+    obj = dds3EffectPartGetHandle(work->primaryHandle);
     SDF_VU0_LOADVECTOR_BARRIER(work->vector);
     mdlSetPosition(obj);
     dds3EffectPartSetColor(work->secondaryHandle, work->color);
-    mdlLink(obj, kwlnSceneSurfaceSets[10]);
+    mdlLink(obj, sdfModelOtTable[10]);
     sdfModelGetMarkPos(obj->inner, 1);
-    VU0_STORE_VF_TO_MEMORY(vf10, vec);
+    SDF_VU0_STOREVECTOR_MEMOPS_BARRIER(vec);
     dds3EffectPartSetPosition(work->secondaryHandle, &vec);
     dds3EffectPartDraw(work->secondaryHandle);
 }
@@ -871,7 +903,6 @@ void effPCPHwave01SetPosition(f32 destinationPosition[4], const f32 sourcePositi
 void effPCPHwave01SetColor(EffPCPSpawnOnceWork *work, u32 val) {
     work->color = val;
 }
-
 
 /* The 8-, 12- and 30-particle variants allocate a common prefix followed
    by their actual handle count. Spawn, shift and release use the same tail. */
@@ -886,6 +917,7 @@ typedef struct EffPCPThunderGroup {
 #define EFF_DEG2RAD 0.017453292f
 
 extern EffThunderFragmentParams effSharedSpawnParams[];
+
 extern u8 D_00354D50[];
 
 /* Spawns 12 particles in a ring: every second particle advances the ring angle
@@ -923,19 +955,19 @@ void effPCPZiodin01Init(EffPCPThunderGroup *group) {
         dir[0] = sinv;
         dir[1] = (dds3GetRandFloatA(effDefaultRandomState) - 0.5f) * 2.0f + 2.0f;
         dir[2] = cosv;
-        VU0_LOAD_VF($vf10, dir);
+        SDF_VU0_LOADVECTOR(dir);
         SDF_VU0_NORMALIZE();
-        VU0_STORE_VF($vf10, dir);
+        SDF_VU0_STOREVECTOR(dir);
         reach = (dds3GetRandFloatA(effDefaultRandomState) * 0.65f + (1.0f - 0.65f)) * 350.0f;
         scale[2] = reach;
         scale[0] = reach;
         scale[1] = -reach;
-        VU0_LOAD_VF($vf10, dir);
-        VU0_LOAD_VF($vf11, scale);
+        SDF_VU0_LOADVECTOR(dir);
+        SDF_VU0_LOADVECTOR_B(scale);
         SDF_VU0_MULVECTOR();
-        VU0_LOAD_VF($vf11, D_00354D50);
+        SDF_VU0_LOADVECTOR_B(D_00354D50);
         SDF_VU0_ADDVECTOR();
-        VU0_STORE_VF($vf10, effSharedSpawnParams);
+        SDF_VU0_STOREVECTOR(effSharedSpawnParams);
         if (scale[0] < 250.0f) {
             speed = (dds3GetRandFloatA(effDefaultRandomState) - 0.5f) * 2.0f * 2.5f + 5.0f;
             life = dds3GetRandA((EffRandState *)effDefaultRandomState) % 5 + 5;
@@ -978,7 +1010,6 @@ void *effPCPZiodin01Copy(void) {
     return work;
 }
 
-
 /* Shifts the first `count` handles' objects by the work position for the
  * duration of their update, then puts the original vectors back. */
 static inline void effPcpShiftThunderHandles(EffPCPThunderGroup *work, s32 count) {
@@ -988,15 +1019,15 @@ static inline void effPcpShiftThunderHandles(EffPCPThunderGroup *work, s32 count
 
     for (i = 0; i < count; i++) {
         obj = effPCP_ThunderPolyGetParam(work->handles[i]);
-        VU0_LOAD_VF($vf10, obj->end);
-        VU0_STORE_VF($vf10, &saved[1]);
-        VU0_LOAD_VF($vf11, work);
+        SDF_VU0_LOADVECTOR(obj->end);
+        SDF_VU0_STOREVECTOR(&saved[1]);
+        SDF_VU0_LOADVECTOR_B(work);
         SDF_VU0_ADDVECTOR();
-        VU0_STORE_VF($vf10, obj->end);
-        VU0_LOAD_VF($vf10, obj->start);
-        VU0_STORE_VF($vf10, &saved[0]);
+        SDF_VU0_STOREVECTOR(obj->end);
+        SDF_VU0_LOADVECTOR(obj->start);
+        SDF_VU0_STOREVECTOR(&saved[0]);
         SDF_VU0_ADDVECTOR();
-        VU0_STORE_VF($vf10, obj->start);
+        SDF_VU0_STOREVECTOR(obj->start);
         effPCP_ThunderPolyDraw(work->handles[i]);
         SDF_VU0_COPYVECTOR(obj->start, &saved[0]);
         SDF_VU0_COPYVECTOR(obj->end, &saved[1]);
@@ -1057,9 +1088,9 @@ void effPCPZiodin02Init(EffPCPThunderGroup *group) {
         effPCPZiodin02Param->start[0] = 0;
         effPCPZiodin02Param->start[2] = 0;
         effPCPZiodin02Param->start[1] = -height;
-        VU0_LOAD_VF($vf10, effPCPZiodin02Param->start);
+        SDF_VU0_LOADVECTOR(effPCPZiodin02Param->start);
                 SDF_VU0_APPLYMATRIX_XYZ();
-        VU0_STORE_VF($vf10, effPCPZiodin02Param->start);
+        SDF_VU0_STOREVECTOR(effPCPZiodin02Param->start);
         effPCPZiodin02Param->start[0] += effPCPZiodin02Param->end[0];
         effPCPZiodin02Param->start[2] += effPCPZiodin02Param->end[2];
         if (height < 300.0f) {
@@ -1155,9 +1186,9 @@ void effPCPZiodin03Init(EffPCPThunderGroup *group) {
         effPCPZiodin03Param->start[0] = 0;
         effPCPZiodin03Param->start[2] = 0;
         effPCPZiodin03Param->start[1] = -height;
-        VU0_LOAD_VF($vf10, effPCPZiodin03Param->start);
+        SDF_VU0_LOADVECTOR(effPCPZiodin03Param->start);
                 SDF_VU0_APPLYMATRIX_XYZ();
-        VU0_STORE_VF($vf10, effPCPZiodin03Param->start);
+        SDF_VU0_STOREVECTOR(effPCPZiodin03Param->start);
         effPCPZiodin03Param->start[0] += effPCPZiodin03Param->end[0];
         effPCPZiodin03Param->start[2] += effPCPZiodin03Param->end[2];
         if (height < 300.0f) {
@@ -1254,9 +1285,9 @@ void effPCPZiodin04Init(EffPCPThunderGroup *group) {
         effPCPZiodin04Param->start[0] = 0;
         effPCPZiodin04Param->start[2] = 0;
         effPCPZiodin04Param->start[1] = -height;
-        VU0_LOAD_VF($vf10, effPCPZiodin04Param->start);
+        SDF_VU0_LOADVECTOR(effPCPZiodin04Param->start);
                 SDF_VU0_APPLYMATRIX_XYZ();
-        VU0_STORE_VF($vf10, effPCPZiodin04Param->start);
+        SDF_VU0_STOREVECTOR(effPCPZiodin04Param->start);
         effPCPZiodin04Param->start[0] += effPCPZiodin04Param->end[0];
         effPCPZiodin04Param->start[2] += effPCPZiodin04Param->end[2];
         if (height < 300.0f) {
@@ -1388,6 +1419,7 @@ void effPCPMZiodin01SetColor(EffPCPThunderGroup *work, u32 val) {
 }
 
 extern void SetRotateMatrixZ_B(f32 angle);
+
 extern EffThunderFragmentParams effSideBurstSpawnParams[];
 
 /* 8 pieces flung sideways from below; the rotation matrix is composed by the
@@ -1411,9 +1443,9 @@ void effPCPMZiodin02Init(EffPCPThunderGroup *group) {
         SetRotateMatrixX((dds3GetRandFloatA(effDefaultRandomState) - 0.5f) * 2.0f * (30.0f * EFF_DEG2RAD));
         SetRotateMatrixZ_B((dds3GetRandFloatA(effDefaultRandomState) - 0.5f) * 2.0f * (30.0f * EFF_DEG2RAD));
         MultMatrixRevNoArg();
-        VU0_LOAD_VF($vf10, params->start);
+        SDF_VU0_LOADVECTOR(params->start);
                 SDF_VU0_APPLYMATRIX_XYZ();
-        VU0_STORE_VF($vf10, params->start);
+        SDF_VU0_STOREVECTOR(params->start);
         params->start[0] += params->end[0];
         params->start[2] += params->end[2];
         group->handles[i] = effPCP_ThunderPolyCreate(params);
@@ -1577,9 +1609,9 @@ void effPCPShockWave02Init(EffPCPThunderGroup *group) {
         effPCPShockWave02Param->start[0] = 0;
         effPCPShockWave02Param->start[2] = 0;
         effPCPShockWave02Param->start[1] = -height;
-        VU0_LOAD_VF($vf10, effPCPShockWave02Param->start);
+        SDF_VU0_LOADVECTOR(effPCPShockWave02Param->start);
                 SDF_VU0_APPLYMATRIX_XYZ();
-        VU0_STORE_VF($vf10, effPCPShockWave02Param->start);
+        SDF_VU0_STOREVECTOR(effPCPShockWave02Param->start);
         effPCPShockWave02Param->start[0] += effPCPShockWave02Param->end[0];
         effPCPShockWave02Param->start[2] += effPCPShockWave02Param->end[2];
         if (height < 300.0f) {
@@ -1731,7 +1763,7 @@ EffPCPSharedTrailRef *effPCPBlinkMultiBlurCreate(EffPCPTrailParams *params) {
     if (D_003BB048 == 0) {
         pBlinkMultiBlurBase = sdfChipAllocDirect(sizeof(EffPCPSharedTrail));
         pBlinkMultiBlurBase->obj = dds3EffectPartialMultiBlurCreate(&params->res);
-        pBlinkMultiBlurBase->color = params->res.source.color;
+        pBlinkMultiBlurBase->color = params->res.Blur.abgr;
         pBlinkMultiBlurBase->frame = 0;
         pBlinkMultiBlurBase->flags = 0x80808080;
         pBlinkMultiBlurBase->pos[0] = 0;
@@ -1769,23 +1801,24 @@ typedef struct EffPCPTrailWork {
     u32 colors[2];
     f32 scale; /* multiplies the computed trail size */
     s32 minSize;
-    EffBlurTemplate *obj;
+    effBlurTemplate_t *obj;
 } EffPCPTrailWork;
 
 typedef char EffPCPTrailWork_size_must_be_0x38[
     (sizeof(EffPCPTrailWork) == 0x38) ? 1 : -1];
+
 typedef char EffPCPTrailWork_sizeInput_offset_must_be_0x1C[
     ((u32)&((EffPCPTrailWork *)0)->sizeInput == 0x1C) ? 1 : -1];
 
 extern s32 effPCPBlurScreenOffset(f32 value);
-extern u32 effMagaCylinderCalcColor(u32 flags, u32 color);
+
 #define EFF_SHARED_TRAIL ((EffPCPSharedTrail *)pBlinkMultiBlurBase)
 
 void effPCPBlinkMultiBlurDraw(ref)
     EffPCPSharedTrailRef *ref;
 {
     EffPCPSharedTrail *work;
-    EffBlurTemplate *obj;
+    effBlurTemplate_t *obj;
     f32 pos[4];
 
     if (ref->frame == 0) {
@@ -1804,16 +1837,16 @@ void effPCPBlinkMultiBlurDraw(ref)
     ref->frame = ref->frame + 1;
     if (work->frame < work->limit) {
         work->color = work->colors[work->frame & 1];
-        VU0_LOAD_VF($vf10, work);
-        obj->body.extent = (s32)((f32)effPCPBlurScreenOffset(EFF_SHARED_TRAIL->sizeInput) * EFF_SHARED_TRAIL->scale);
-        VU0_STORE_VF($vf10, pos);
-        obj->body.source.position[0] = (s32)pos[0] - 0x800;
-        obj->body.source.position[1] = ((s32)pos[1] - 0x800) << 1;
-        if (obj->body.extent < EFF_SHARED_TRAIL->minSize) {
-            obj->body.extent = EFF_SHARED_TRAIL->minSize;
+        SDF_VU0_LOADVECTOR(work);
+        obj->body.area = (s32)((f32)effPCPBlurScreenOffset(EFF_SHARED_TRAIL->sizeInput) * EFF_SHARED_TRAIL->scale);
+        SDF_VU0_STOREVECTOR(pos);
+        obj->body.Blur.center[0] = (s32)pos[0] - 0x800;
+        obj->body.Blur.center[1] = ((s32)pos[1] - 0x800) << 1;
+        if (obj->body.area < EFF_SHARED_TRAIL->minSize) {
+            obj->body.area = EFF_SHARED_TRAIL->minSize;
         }
-        obj->body.source.color = effMagaCylinderCalcColor(EFF_SHARED_TRAIL->flags, EFF_SHARED_TRAIL->color);
-        effDrawBlurPixelRectWithResource(obj);
+        obj->body.Blur.abgr = effMagaCylinderCalcColor(EFF_SHARED_TRAIL->flags, EFF_SHARED_TRAIL->color);
+        dds3EffectPartialMultiBlurDraw(obj);
         EFF_SHARED_TRAIL->frame++;
     }
 }
@@ -1830,12 +1863,11 @@ void effPCPBlinkMultiBlurSetArea(u32 unused, f32 value) {
     pBlinkMultiBlurBase->sizeInput = value;
 }
 
-
 EffPCPTrailWork *effPCPMultiBlurExpCreate(EffPCPTrailParams *params) {
     EffPCPTrailWork *work = sdfChipAllocDirect(sizeof(EffPCPTrailWork));
 
     work->obj = dds3EffectPartialMultiBlurCreate(&params->res);
-    work->color = params->res.source.color;
+    work->color = params->res.Blur.abgr;
     work->frame = 0;
     work->flags = 0x80808080;
     work->pos[0] = 0.0f;
@@ -1858,17 +1890,17 @@ void effPCPMultiBlurExpDelete(EffPCPTrailWork *work) {
 /* Per-frame update: places the trail object from the work position and
  * alternates its colour between two entries until the count runs out. */
 void effPCPMultiBlurExpDraw(EffPCPTrailWork *work) {
-    EffBlurTemplate *obj;
+    effBlurTemplate_t *obj;
     f32 pos[4];
 
     obj = work->obj;
-    VU0_LOAD_VF($vf10, work->pos);
-    obj->body.extent = (s32)((f32)effPCPBlurScreenOffset(work->sizeInput) * work->scale);
-    VU0_STORE_VF($vf10, pos);
-    obj->body.source.position[0] = (s32)pos[0] - 0x800;
-    obj->body.source.position[1] = ((s32)pos[1] - 0x800) << 1;
-    if (obj->body.extent < work->minSize) {
-        obj->body.extent = work->minSize;
+    SDF_VU0_LOADVECTOR(work->pos);
+    obj->body.area = (s32)((f32)effPCPBlurScreenOffset(work->sizeInput) * work->scale);
+    SDF_VU0_STOREVECTOR(pos);
+    obj->body.Blur.center[0] = (s32)pos[0] - 0x800;
+    obj->body.Blur.center[1] = ((s32)pos[1] - 0x800) << 1;
+    if (obj->body.area < work->minSize) {
+        obj->body.area = work->minSize;
     }
     if (work->frame < work->count) {
         work->color = work->colors[work->frame & 1];
@@ -1876,8 +1908,8 @@ void effPCPMultiBlurExpDraw(EffPCPTrailWork *work) {
         work->color = work->colors[0];
     }
     work->frame++;
-    obj->body.source.color = effMagaCylinderCalcColor(work->flags, work->color);
-    effDrawBlurPixelRectWithResource(obj);
+    obj->body.Blur.abgr = effMagaCylinderCalcColor(work->flags, work->color);
+    dds3EffectPartialMultiBlurDraw(obj);
 }
 
 void effPCPMultiBlurExpSetPosition(void *dst, const f32 sourcePosition[4]) {
@@ -1905,7 +1937,7 @@ EffPCPCompactFadeWork *effPCPMultiFilterExpCreate(EffPCPCompactRectParams *param
     work->fadeOut = params->timeline.fadeOut;
     work->startExtent = params->timeline.startExtent;
     work->endExtent = params->timeline.endExtent;
-    work->baseColor = params->res.draw.rgba;
+    work->baseColor = params->res.Filter.rgba;
     return work;
 }
 
@@ -1916,9 +1948,6 @@ EffPCPCompactFadeWork *effPCPMultiFilterExpCreatePCF(void *args) {
     return effPCPMultiFilterExpCreate(param0);
 }
 
-
-
-
 EffPCPCompactFadeWork *effPCPMultiFilterExpCopy(EffPCPCompactFadeWork *work) {
     EffPCPCompactRectParams params;
 
@@ -1928,7 +1957,7 @@ EffPCPCompactFadeWork *effPCPMultiFilterExpCopy(EffPCPCompactFadeWork *work) {
     params.timeline.fadeOut = work->fadeOut;
     params.timeline.startExtent = work->startExtent;
     params.timeline.endExtent = work->endExtent;
-    memcpy(&params.res, &work->resource.rectangle->params, sizeof(params.res));
+    memcpy(&params.res, &work->resource.rectangle->param, sizeof(params.res));
     return effPCPMultiFilterExpCreate(&params);
 }
 
@@ -1950,7 +1979,7 @@ void effPCPMultiFilterExpDraw(EffPCPCompactFadeWork *work) {
     f32 projected[4];
     s32 frame = work->frame;
     s32 duration = work->duration;
-    EffResourceRectWork *rect = work->resource.rectangle;
+    dds3Effect_PartialMultiFilter_t *rect = work->resource.rectangle;
     s32 fadeIn;
     s32 fadeOut;
     f32 opacity;
@@ -1963,13 +1992,13 @@ void effPCPMultiFilterExpDraw(EffPCPCompactFadeWork *work) {
             SDF_VU0_LOADVECTOR(work->position);
             effScreenOffset();
             SDF_VU0_STOREVECTOR(projected);
-            rect->params.center[0] = (s32)projected[0] - 2048;
-            rect->params.center[1] = ((s32)projected[1] - 2048) << 1;
+            rect->param.center[0] = (s32)projected[0] - 2048;
+            rect->param.center[1] = ((s32)projected[1] - 2048) << 1;
         } else {
-            rect->params.center[0] = 0;
-            rect->params.center[1] = 0;
+            rect->param.center[0] = 0;
+            rect->param.center[1] = 0;
         }
-        rect->params.extent = effPcpInterpolateCompactExtent(
+        rect->param.area = effPcpInterpolateCompactExtent(
             work->startExtent, work->endExtent, frame, duration);
         if (frame < fadeIn && fadeIn != 0) {
             opacity = (f32)frame / (f32)fadeIn;
@@ -1979,9 +2008,9 @@ void effPCPMultiFilterExpDraw(EffPCPCompactFadeWork *work) {
             opacity = 1.0f;
         }
         color = work->color;
-        rect->params.draw.rgba = effMagaCylinderCalcColor(
+        rect->param.Filter.rgba = effMagaCylinderCalcColor(
             effColorBlend(color & 0xFFFFFF, color, opacity), work->baseColor);
-        effResourceRectDrawPixels(rect);
+        dds3EffectPartialMultiFilterDraw(rect);
         work->frame++;
     }
 }
@@ -2012,7 +2041,7 @@ EffPCPCompactFadeWork *effPCPMultiBlurExp2Create(EffPCPCompactTexturedBlurParams
     work->fadeOut = params->timeline.fadeOut;
     work->startExtent = params->timeline.startExtent;
     work->endExtent = params->timeline.endExtent;
-    work->baseColor = params->res.source.color;
+    work->baseColor = params->res.Blur.abgr;
     return work;
 }
 
@@ -2022,7 +2051,6 @@ EffPCPCompactFadeWork *effPCPMultiBlurExp2CreatePCF(void *args) {
     param0 = dds3EffectPCPDataGetData(args, 0);
     return effPCPMultiBlurExp2Create(param0);
 }
-
 
 EffPCPCompactFadeWork *effPCPMultiBlurExp2Copy(EffPCPCompactFadeWork *work) {
     EffPCPCompactTexturedBlurParams params;
@@ -2042,13 +2070,12 @@ void effPCPMultiBlurExp2Delete(EffPCPCompactFadeWork *work) {
     sdfChipFreeDirect(work);
 }
 
-
 /* vu0 routine: project the compact textured rectangle's world-space center. */
 void effPCPMultiBlurExp2Draw(EffPCPCompactFadeWork *work) {
     f32 projected[4];
     s32 frame = work->frame;
     s32 duration = work->duration;
-    EffBlurTemplate *rect = work->resource.blur;
+    effBlurTemplate_t *rect = work->resource.blur;
     s32 fadeIn;
     s32 fadeOut;
     f32 opacity;
@@ -2061,13 +2088,13 @@ void effPCPMultiBlurExp2Draw(EffPCPCompactFadeWork *work) {
             SDF_VU0_LOADVECTOR(work->position);
             effScreenOffset();
             SDF_VU0_STOREVECTOR(projected);
-            rect->body.source.position[0] = (s32)projected[0] - 2048;
-            rect->body.source.position[1] = ((s32)projected[1] - 2048) << 1;
+            rect->body.Blur.center[0] = (s32)projected[0] - 2048;
+            rect->body.Blur.center[1] = ((s32)projected[1] - 2048) << 1;
         } else {
-            rect->body.source.position[0] = 0;
-            rect->body.source.position[1] = 0;
+            rect->body.Blur.center[0] = 0;
+            rect->body.Blur.center[1] = 0;
         }
-        rect->body.extent = effPcpInterpolateCompactExtent(
+        rect->body.area = effPcpInterpolateCompactExtent(
             work->startExtent, work->endExtent, frame, duration);
         if (frame < fadeIn && fadeIn != 0) {
             opacity = (f32)frame / (f32)fadeIn;
@@ -2077,9 +2104,9 @@ void effPCPMultiBlurExp2Draw(EffPCPCompactFadeWork *work) {
             opacity = 1.0f;
         }
         color = work->color;
-        rect->body.source.color = effMagaCylinderCalcColor(
+        rect->body.Blur.abgr = effMagaCylinderCalcColor(
             effColorBlend(color & 0xFFFFFF, color, opacity), work->baseColor);
-        effDrawBlurPixelRectWithResource(rect);
+        dds3EffectPartialMultiBlurDraw(rect);
         work->frame++;
     }
 }
@@ -2122,7 +2149,6 @@ EffPCPFadeTimer *effPCPFilterExpCopy(EffPCPFadeTimerParams *src) {
 void effPCPFilterExpDelete(EffPCPFadeTimer *work) {
     sdfChipFreeDirect(work);
 }
-
 
 extern void dds3EffectFilter(u32 *color);
 
@@ -2167,7 +2193,7 @@ EffPCPFadeTimerLong *effPCPBlurExpCreate(const EffPCPFadeTimerLongParams *src) {
     dst->params = *src;
     dst->colorFrom = 0x80808080;
     dst->frame = 0;
-    dst->colorTo = src->source.color;
+    dst->colorTo = src->source.abgr;
     return dst;
 }
 
@@ -2186,7 +2212,6 @@ void effPCPBlurExpDelete(EffPCPFadeTimerLong *work) {
     sdfChipFreeDirect(work);
 }
 
-
 /* Same timeline as effPCPFilterExpDraw on the longer work layout. */
 void effPCPBlurExpDraw(EffPCPFadeTimerLong *work) {
     s32 frame = work->frame;
@@ -2199,12 +2224,12 @@ void effPCPBlurExpDraw(EffPCPFadeTimerLong *work) {
         return;
     }
     fadeIn = work->params.fadeIn;
-    work->params.source.position[0] = 0;
-    work->params.source.position[1] = 0;
-    work->params.source.corners[0][0] = 0;
-    work->params.source.corners[0][1] = 0;
-    work->params.source.corners[1][0] = 0x200;
-    work->params.source.corners[1][1] = 0x1C0;
+    work->params.source.center[0] = 0;
+    work->params.source.center[1] = 0;
+    work->params.source.xy[0][0] = 0;
+    work->params.source.xy[0][1] = 0;
+    work->params.source.xy[1][0] = 0x200;
+    work->params.source.xy[1][1] = 0x1C0;
     fadeOut = work->params.fadeOut;
     if (frame < fadeIn && fadeIn != 0) {
         t = (f32)frame / (f32)fadeIn;
@@ -2213,8 +2238,8 @@ void effPCPBlurExpDraw(EffPCPFadeTimerLong *work) {
     } else {
         t = 1.0f;
     }
-    work->params.source.color = effMagaCylinderCalcColor(effColorBlend(work->colorFrom & 0xFFFFFF, work->colorFrom, t), work->colorTo);
-    effDrawBlurRectangle(&work->params.source);
+    work->params.source.abgr = effMagaCylinderCalcColor(effColorBlend(work->colorFrom & 0xFFFFFF, work->colorFrom, t), work->colorTo);
+    dds3EffectBlur(&work->params.source);
     work->frame++;
 }
 
@@ -2235,7 +2260,7 @@ EffPCPCompactWork *effPCPDistortionBlurExpCreate(EffPCPCompactScatterParams *par
     work->endExtent = params->timeline.endExtent;
     work->color = 0x80808080;
     work->frame = 0;
-    work->baseColor = params->res.color;
+    work->baseColor = params->res.abgr;
     return work;
 }
 
@@ -2245,7 +2270,6 @@ EffPCPCompactWork *effPCPDistortionBlurExpCreatePCF(void *args) {
     param0 = dds3EffectPCPDataGetData(args, 0);
     return effPCPDistortionBlurExpCreate(param0);
 }
-
 
 EffPCPCompactWork *effPCPDistortionBlurExpCopy(EffPCPCompactWork *work) {
     EffPCPCompactScatterParams params;
@@ -2267,7 +2291,7 @@ void effPCPDistortionBlurExpDelete(EffPCPCompactWork *work) {
 
 /* vu0 routine: grow the scatter region and project its optional world center. */
 void effPCPDistortionBlurExpDraw(EffPCPCompactWork *work) {
-    EffBlurScatterWork *resource;
+    effBlurScatterWork_t *resource;
     f32 projected[4] __attribute__((aligned(16)));
     s32 frame = work->frame;
     s32 duration = work->duration;
@@ -2286,18 +2310,18 @@ void effPCPDistortionBlurExpDraw(EffPCPCompactWork *work) {
                    (f32)frame / (f32)duration;
     displacement = (s32)displacement;
     resource = work->resource.scatter;
-    resource->params.positionSpread =
+    resource->params.area =
         (f32)work->startExtent + displacement;
     if (work->flags == 0) {
         SDF_VU0_LOADVECTOR(work->position);
         effScreenOffset();
         SDF_VU0_STOREVECTOR(projected);
         resource = work->resource.scatter;
-        resource->params.position[0] = (s32)projected[0] - 2048;
-        resource->params.position[1] = (u32)((s32)projected[1] - 2048) << 1;
+        resource->params.center[0] = (s32)projected[0] - 2048;
+        resource->params.center[1] = (u32)((s32)projected[1] - 2048) << 1;
     } else {
-        resource->params.position[0] = 0;
-        resource->params.position[1] = 0;
+        resource->params.center[0] = 0;
+        resource->params.center[1] = 0;
     }
     if (frame < fadeIn && fadeIn != 0) {
         opacity = (f32)frame / (f32)fadeIn;
@@ -2310,8 +2334,8 @@ void effPCPDistortionBlurExpDraw(EffPCPCompactWork *work) {
     color = effMagaCylinderCalcColor(
         effColorBlend(color & 0xFFFFFF, color, opacity), work->baseColor);
     resource = work->resource.scatter;
-    resource->params.color = color;
-    effBlurStepScatterSlotsAndDraw(resource);
+    resource->params.abgr = color;
+    dds3EffectDistortionBlurDraw(resource);
     work->frame++;
 }
 
@@ -2336,7 +2360,7 @@ EffPCPCompactWork *effPCPRippleBlurExpCreate(EffPCPCompactScaleParams *params) {
     work->endExtent = params->timeline.endExtent;
     work->color = 0x80808080;
     work->frame = 0;
-    work->baseColor = params->res.color;
+    work->baseColor = params->res.abgr;
     return work;
 }
 
@@ -2346,7 +2370,6 @@ EffPCPCompactWork *effPCPRippleBlurExpCreatePCF(void *args) {
     param0 = dds3EffectPCPDataGetData(args, 0);
     return effPCPRippleBlurExpCreate(param0);
 }
-
 
 EffPCPCompactWork *effPCPRippleBlurExpCopy(EffPCPCompactWork *work) {
     EffPCPCompactScaleParams params;
@@ -2368,7 +2391,7 @@ void effPCPRippleBlurExpDelete(EffPCPCompactWork *work) {
 
 /* vu0 routine: grow the scale slots and restart looping world-space bursts. */
 void effPCPRippleBlurExpDraw(EffPCPCompactWork *work) {
-    EffBlurScaleWork *resource;
+    effBlurScaleWork_t *resource;
     f32 projected[4] __attribute__((aligned(16)));
     s32 frame = work->frame;
     s32 duration = work->duration;
@@ -2393,18 +2416,18 @@ void effPCPRippleBlurExpDraw(EffPCPCompactWork *work) {
                    (f32)frame / (f32)duration;
     displacement = (s32)displacement;
     resource = work->resource.scale;
-    resource->params.size =
+    resource->params.area =
         (f32)work->startExtent + displacement;
     if (flags == 0 || flags == 2) {
         SDF_VU0_LOADVECTOR(work->position);
         effScreenOffset();
         SDF_VU0_STOREVECTOR(projected);
         resource = work->resource.scale;
-        resource->params.position[0] = (s32)projected[0] - 2048;
-        resource->params.position[1] = (u32)((s32)projected[1] - 2048) << 1;
+        resource->params.center[0] = (s32)projected[0] - 2048;
+        resource->params.center[1] = (u32)((s32)projected[1] - 2048) << 1;
     } else {
-        resource->params.position[0] = 0;
-        resource->params.position[1] = 0;
+        resource->params.center[0] = 0;
+        resource->params.center[1] = 0;
     }
     if (frame < fadeIn && fadeIn != 0) {
         opacity = (f32)frame / (f32)fadeIn;
@@ -2417,8 +2440,8 @@ void effPCPRippleBlurExpDraw(EffPCPCompactWork *work) {
     color = effMagaCylinderCalcColor(
         effColorBlend(color & 0xFFFFFF, color, opacity), work->baseColor);
     resource = work->resource.scale;
-    resource->params.color = color;
-    effBlurStepScaleSlotsAndDraw(resource);
+    resource->params.abgr = color;
+    dds3EffectRippleBlurDraw(resource);
     work->frame++;
 }
 
@@ -2593,7 +2616,7 @@ EffPCPSpanWork *effPCPBreathCreate(const EffPCPSpanParams *params,
     size = work->params.sweepDegrees * 0.017453292f;
     work->angle = -(size * 0.5f);
     work->spin = size / (f32)((s32)work->params.activeFrames - ((work->params.fadeFrames >> 1) + (s32)work->params.holdFrames));
-    EE_MMI_UNIT_MATRIX(work->matrix);
+    SDF_VU0_STOREIDENTITY(work->matrix);
     work->optionalHandle = 0;
     if (handleParams != NULL) {
         work->optionalHandle = dds3EffectLoad(handleParams);
@@ -2627,10 +2650,9 @@ void effPCPBreathDelete(EffPCPSpanWork *work) {
     sdfChipFreeDirect(work);
 }
 
-
-
 extern f32 btlMeasureMaskedUnitBounds(s32 mask, f32 *maxTop, f32 *minTop);
-extern u32 effBTLFieldColorGetOriginalSelector(void);
+
+extern u32 effBTLSkillGetInvokeFormation(void);
 
 /* On the first frame, center the sweep on the battle group's direction.
    Place the optional node around the anchor, then fade its final frames. */
@@ -2651,19 +2673,19 @@ void effPcpUpdateOrbitingAimNode(EffPCPSpanWork *work) {
     if (end < frame) {
         return;
     }
-    if (effBTLFieldColorUsesActorSelectors() && work->frame == 0) {
+    if (effBTLSkillCheckRun() && work->frame == 0) {
         btlMeasureMaskedUnitBounds(((BtlUnit *)effBTLFieldColorGetVariantSelector())->status.flags & 0x600, NULL, NULL);
         SDF_VU0_STOREVECTOR(center);
-        btlUnitGetMuzzlePosVU((BtlUnit *)effBTLFieldColorGetOriginalSelector());
+        effBTLModelGetSphereCenter((BtlUnit *)effBTLSkillGetInvokeFormation());
         SDF_VU0_STOREVECTOR(muzzle);
         look[0] = center[0] - muzzle[0];
         look[2] = center[2] - muzzle[2];
         work->angle = sdfAtan2(look[0], look[2]) - params->sweepDegrees * EFF_DEG2RAD * 0.5f;
     }
     if (node != 0) {
-        VU0_LOAD_MATRIX(work);
-        sdfVuLoadSecondaryRotationMatrixY(work->angle);
-        sdfComposeVuMatrixFromRegisters();
+        SDF_VU0_LOADMATRIX(work);
+        SetRotateMatrixY_B(work->angle);
+        MultMatrixNoArg();
         aim[0] = aim[1] = 0.0f;
         aim[2] = 1.0f;
         SDF_VU0_LOADVECTOR(aim);
@@ -2679,7 +2701,7 @@ void effPcpUpdateOrbitingAimNode(EffPCPSpanWork *work) {
             work->angle += work->spin;
         }
         SetRotateMatrixY(work->angle);
-        VU0_STORE_MATRIX(mtx);
+        SDF_VU0_STOREMATRIX(mtx);
         effApplyNodeTransformMatrix(node, mtx);
         if (fadeFrames >= remaining && fadeFrames != 0) {
             t = (f32)remaining / (f32)fadeFrames;
@@ -2703,8 +2725,8 @@ void effPCPBreathSetColor(EffPCPSpanWork *work, u32 val) {
 void effPCPBreathSetRotateMatrix(void *dst, void *src) {
     SetRotateMatrixY(3.1415927f);
     SDF_VU0_LOADMATRIX_B(src);
-    sdfComposeVuMatrixFromRegisters();
-    VU0_STORE_MATRIX(dst);
+    MultMatrixNoArg();
+    SDF_VU0_STOREMATRIX(dst);
 }
 
 EffPCPTripleWork *effPCPAgiraoFireCreate(EffPCPTripleParams *params, EffNodeDescriptor **descriptors) {
@@ -2790,13 +2812,13 @@ void effPCPAgiraoFireDraw(EffPCPTripleWork *work) {
     u32 group;
     u32 handleIndex;
 
-    LookAtMatrix(aViewTarget, sdfViewTargetVector, aViewDown);
-    VU0_STORE_MATRIX(basis);
+    LookAtMatrix(aViewTarget, aViewEye, aViewDown);
+    SDF_VU0_STOREMATRIX(basis);
     for (group = 0; group < 3; group++) {
         s32 start = work->head.groupStartFrame[group];
         if (frame >= start) {
             SDF_VU0_LOADVECTOR_B(work->head.origin);
-            VU0_LOAD_MATRIX(basis);
+            SDF_VU0_LOADMATRIX(basis);
             position[0] = work->head.offset[group][0];
             position[1] = work->head.offset[group][1];
             position[2] = 0;
@@ -2825,8 +2847,6 @@ void effPCPAgiraoFireSetColor(EffPCPTripleWork *work, u32 val) {
     work->color = val;
 }
 
-
-
 /* Build a block-set work: copy the parameter block, then create one parameter handle per input block. */
 EffPCPBlockSetWork *effPCPAgiFireballCreate(const EffPCPBlockSetParams *params, void **blocks) {
     EffPCPBlockSetWork *work;
@@ -2841,14 +2861,14 @@ EffPCPBlockSetWork *effPCPAgiFireballCreate(const EffPCPBlockSetParams *params, 
     work->frame = 0;
     work->color = 0x80808080;
     work->mode = EFF_PCP_BLOCK_SET_MODE_DEFAULT;
-    EE_MMI_UNIT_MATRIX(work->matrix);
+    SDF_VU0_STOREIDENTITY(work->matrix);
     work->headHandle = dds3EffectPartCreate(EFF_PARAM_WORK_KIND_VIEWER_CONTEXT, blocks[0]);
     work->handleA[0] = dds3EffectPartCreate(EFF_PARAM_WORK_KIND_EFFECT_NODE, blocks[1]);
     work->handleA[1] = dds3EffectPartCreate(EFF_PARAM_WORK_KIND_EFFECT_NODE, blocks[2]);
     work->handleA[2] = dds3EffectPartCreate(EFF_PARAM_WORK_KIND_EFFECT_NODE, blocks[3]);
     work->handleA[3] = dds3EffectPartCreate(EFF_PARAM_WORK_KIND_EFFECT_NODE, blocks[4]);
     work->handleA[4] = dds3EffectPartCreate(EFF_PARAM_WORK_KIND_VIEWER_CONTEXT, blocks[5]);
-    model = effParamWorkGetData(work->headHandle);
+    model = dds3EffectPartGetHandle(work->headHandle);
     work->count = model->first->frameCount;
     for (i = 0; i < 3; i++) {
         if (work->params.groupSize[i] > 0) {
@@ -2871,7 +2891,6 @@ EffPCPBlockSetWork *effPCPAgiFireballCreate(const EffPCPBlockSetParams *params, 
     work->tailHandle = dds3EffectPartCreate(EFF_PARAM_WORK_KIND_EFFECT_NODE, blocks[14]);
     return work;
 }
-
 
 EffPCPBlockSetWork *effPCPAgiFireballCreatePCF(void *parameterTable) {
     EffPCPBlockSetInputs set;
@@ -2904,7 +2923,7 @@ void effPCPAgiFireballCopySub(EffPCPBlockSetWork *work, EffPCPBlockSetWork *src)
     for (handleIndex = 0; handleIndex < ARRAY_COUNT(work->handleA); handleIndex++) {
         work->handleA[handleIndex] = dds3EffectPartCopy(src->handleA[handleIndex]);
     }
-    headModel = effParamWorkGetData(work->headHandle);
+    headModel = dds3EffectPartGetHandle(work->headHandle);
     work->count = headModel->first->frameCount;
     for (groupIndex = 0; groupIndex < ARRAY_COUNT(work->list); groupIndex++) {
         if (work->params.groupSize[groupIndex] > 0) {
@@ -2925,10 +2944,6 @@ void effPCPAgiFireballCopySub(EffPCPBlockSetWork *work, EffPCPBlockSetWork *src)
     work->tailHandle = dds3EffectPartCopy(src->tailHandle);
 }
 
-
-
-
-
 /* Clone of a block-set work that shares the source's blocks (no back pointer). */
 EffPCPBlockSetWork *effPCPAgiFireballCopy(EffPCPBlockSetWork *src) {
     EffPCPBlockSetWork *work;
@@ -2939,7 +2954,7 @@ EffPCPBlockSetWork *effPCPAgiFireballCopy(EffPCPBlockSetWork *src) {
     work->frame = 0;
     work->color = 0x80808080;
     work->mode = EFF_PCP_BLOCK_SET_MODE_DEFAULT;
-    EE_MMI_UNIT_MATRIX(work->matrix);
+    SDF_VU0_STOREIDENTITY(work->matrix);
     effPCPAgiFireballCopySub(work, src);
     work->source = NULL;
     return work;
@@ -3020,25 +3035,25 @@ void effPcpBlockSetUpdate(EffPCPBlockSetWork *work) {
     }
     color = work->color;
     color = effColorBlend(color & 0xFFFFFF, color, fade);
-    model = effParamWorkGetData(work->headHandle);
+    model = dds3EffectPartGetHandle(work->headHandle);
     if (work->mode == EFF_PCP_BLOCK_SET_MODE_DEFAULT) {
         dds3EffectPartSetPosition(work->headHandle, work->params.position);
-        if (effBTLFieldColorUsesActorSelectors()) {
-            btlUnitGetMuzzlePosVU((void *)effBTLFieldColorGetOriginalSelector());
+        if (effBTLSkillCheckRun()) {
+            effBTLModelGetSphereCenter((void *)effBTLSkillGetInvokeFormation());
             SDF_VU0_STOREVECTOR_NOMEM(muzzle);
             LookAtMatrix(work->params.position, muzzle, D_003551B0);
             ReverseMatrix();
             SDF_VU0_RESET_ROW3();
-            VU0_STORE_MATRIX(matrix);
+            SDF_VU0_STOREMATRIX(matrix);
         } else {
             /* Keep the VU source load and destination store as separate stages. */
-            VU0_LOAD_MATRIX_MEMORY(work->matrix);
-            VU0_STORE_MATRIX(matrix);
+            SDF_VU0_LOADMATRIX_BARRIER(work->matrix);
+            SDF_VU0_STOREMATRIX(matrix);
         }
     }
     dds3EffectPartSetRotateMatrix(work->headHandle, matrix);
     dds3EffectPartSetColor(work->headHandle, color);
-    mdlLink(model, kwlnSceneSurfaceSets[10]);
+    mdlLink(model, sdfModelOtTable[10]);
     SDF_VU0_COPYVECTOR(work->previousPosition, work->currentPosition);
     sdfModelGetMarkPos(model->inner, 1);
     SDF_VU0_STOREVECTOR(work->currentPosition);
@@ -3091,7 +3106,7 @@ void effPcpBlockSetUpdate(EffPCPBlockSetWork *work) {
                     SDF_VU0_MULVECTOR();
                     SDF_VU0_STOREVECTOR(step);
                     SDF_VU0_COPYVECTOR(position, work->previousPosition);
-                    SDF_VU0_LOADVECTOR(sdfViewTargetVector);
+                    SDF_VU0_LOADVECTOR(aViewEye);
                     SDF_VU0_LOADVECTOR_B(aViewTarget);
                     SDF_VU0_SUBVECTOR();
                     SDF_VU0_COPYVECTOR_C_TO_B();
@@ -3173,7 +3188,7 @@ EffPCPBlockSetWork *effPCPAgiFireballSpCopy(EffPCPBlockSetWork *src) {
     work->color = 0x80808080;
     work->mode = EFF_PCP_BLOCK_SET_MODE_SP;
     work->frame = 0;
-    EE_MMI_UNIT_MATRIX(work->matrix);
+    SDF_VU0_STOREIDENTITY(work->matrix);
     work->source = src;
     return work;
 }
@@ -3196,11 +3211,10 @@ EffPCPBlockSetWork *effPCPAgiFireballSp2Copy(EffPCPBlockSetWork *src) {
     work->color = 0x80808080;
     work->mode = EFF_PCP_BLOCK_SET_MODE_SP2;
     work->frame = 0;
-    EE_MMI_UNIT_MATRIX(work->matrix);
+    SDF_VU0_STOREIDENTITY(work->matrix);
     work->source = src;
     return work;
 }
-
 
 EffPCPRotateWork *effPCPAgiFireball2Create(EffPCPRotateParams *src, EffPCPRotateBlockInputs *blocks) {
     EffPCPRotateWork *work;
@@ -3269,7 +3283,7 @@ EffPCPRotateWork *effPCPAgiFireball2Copy(EffPCPRotateWork *src) {
         sub->frame = 0;
         sub->color = 0x80808080;
         sub->mode = EFF_PCP_BLOCK_SET_MODE_DEFAULT;
-        EE_MMI_UNIT_MATRIX(sub->matrix);
+        SDF_VU0_STOREIDENTITY(sub->matrix);
         sub->source = src->blockSets[i];
     }
     return work;
@@ -3334,10 +3348,6 @@ void effPCPAgiFireball2SetRotateMatrix(EffPCPRotateWork *work, const Matrix4 *sr
     }
 }
 
-extern EffRandState effDefaultRandomState[];
-
-
-
 EffPCPSpinWork *effPCPBufuIceCreate(void *src) {
     EffPCPSpinWork *work = sdfChipAllocDirect(0x64);
 
@@ -3345,7 +3355,7 @@ EffPCPSpinWork *effPCPBufuIceCreate(void *src) {
     work->scale = 1.0f;
     work->color = 0x80808080;
     work->handle0 = dds3EffectPCPDataPartCreate(src, 0);
-    EE_MMI_UNIT_MATRIX(work->matrix);
+    SDF_VU0_STOREIDENTITY(work->matrix);
     work->angle = (dds3GetRandFloatA(effDefaultRandomState) - 0.5f) * 2.0f * 0.87266457f;
     if (dds3GetRandA((EffRandState *)effDefaultRandomState) & 1) {
         work->angle += 3.14159265f;
@@ -3360,7 +3370,7 @@ EffPCPSpinWork *effPCPBufuIceCopy(EffPCPSpinWork *src) {
     work->frame = 0;
     work->scale = 1.0f;
     work->color = 0x80808080;
-    EE_MMI_UNIT_MATRIX(work->matrix);
+    SDF_VU0_STOREIDENTITY(work->matrix);
     work->angle = (dds3GetRandFloatA(effDefaultRandomState) - 0.5f) * 2.0f * 0.87266457f;
     if (dds3GetRandA((EffRandState *)effDefaultRandomState) & 1) {
         work->angle += 3.14159265f;
@@ -3374,7 +3384,6 @@ void effPCPBufuIceDelete(EffPCPSpinWork *work) {
     sdfChipFreeDirect(work);
 }
 
-
 void effPCPBufuIceDraw(EffPCPSpinWork *work) {
     effPartHandle_t *handle = work->handle0;
     u128 mtx[4];
@@ -3384,8 +3393,8 @@ void effPCPBufuIceDraw(EffPCPSpinWork *work) {
     dds3EffectPartSetColor(handle, work->color);
     SetRotateMatrixY(work->angle);
     SDF_VU0_LOADMATRIX_B(work->matrix);
-    sdfComposeVuMatrixFromRegisters();
-    VU0_STORE_MATRIX(mtx);
+    MultMatrixNoArg();
+    SDF_VU0_STOREMATRIX(mtx);
     dds3EffectPartSetRotateMatrix(handle, mtx);
     dds3EffectPartDraw(handle);
     work->frame++;
@@ -3405,8 +3414,8 @@ void effPCPBufuIceSetScale(EffPCPSpinWork *work, f32 val) {
 
 /* vu0 routine: copy a 4x4 matrix (four quadwords) through vf28-vf31 */
 void effPCPBufuIceSetRotateMatrix(EffPCPSpinWork *work, const Matrix4 *sourceMatrix) {
-    VU0_LOAD_MATRIX(sourceMatrix);
-    VU0_STORE_MATRIX(work->matrix);
+    SDF_VU0_LOADMATRIX(sourceMatrix);
+    SDF_VU0_STOREMATRIX(work->matrix);
 }
 
 EffPCPSpinWork *effPCPBufuraIceCreate(void *src) {
@@ -3417,7 +3426,7 @@ EffPCPSpinWork *effPCPBufuraIceCreate(void *src) {
     work->color = 0x80808080;
     work->handle0 = dds3EffectPCPDataPartCreate(src, 0);
     work->handle1 = dds3EffectPCPDataPartCreate(src, 1);
-    EE_MMI_UNIT_MATRIX(work->matrix);
+    SDF_VU0_STOREIDENTITY(work->matrix);
     work->angle = (dds3GetRandFloatA(effDefaultRandomState) - 0.5f) * 2.0f * 0.87266457f;
     return work;
 }
@@ -3430,7 +3439,7 @@ EffPCPSpinWork *effPCPBufuraIceCopy(EffPCPSpinWork *src) {
     work->color = 0x80808080;
     work->handle0 = dds3EffectPartCopy(src->handle0);
     work->handle1 = dds3EffectPartCopy(src->handle1);
-    EE_MMI_UNIT_MATRIX(work->matrix);
+    SDF_VU0_STOREIDENTITY(work->matrix);
     work->angle = (dds3GetRandFloatA(effDefaultRandomState) - 0.5f) * 2.0f * 0.87266457f;
     return work;
 }
@@ -3458,8 +3467,8 @@ void effPCPBufuraIceDraw(EffPCPSpinWork *work) {
     dds3EffectPartSetColor(handle[1], work->color);
     SetRotateMatrixY(work->angle);
     SDF_VU0_LOADMATRIX_B(work->matrix);
-    sdfComposeVuMatrixFromRegisters();
-    VU0_STORE_MATRIX_UNCLOBBERED(mtx);
+    MultMatrixNoArg();
+    SDF_VU0_STOREMATRIX_NOMEM(mtx);
     dds3EffectPartSetRotateMatrix(handle[0], mtx);
     dds3EffectPartSetRotateMatrix(handle[1], mtx);
     dds3EffectPartDraw(handle[0]);
@@ -3483,8 +3492,8 @@ void effPCPBufuraIceSetScale(EffPCPSpinWork *work, f32 val) {
 
 /* vu0 routine: copy a 4x4 matrix (four quadwords) through vf28-vf31 */
 void effPCPBufuraIceSetRotateMatrix(EffPCPSpinWork *work, const Matrix4 *sourceMatrix) {
-    VU0_LOAD_MATRIX(sourceMatrix);
-    VU0_STORE_MATRIX(work->matrix);
+    SDF_VU0_LOADMATRIX(sourceMatrix);
+    SDF_VU0_STOREMATRIX(work->matrix);
 }
 
 EffPCPSpinWork *effPCPBufudnIceCreate(void *src) {
@@ -3495,7 +3504,7 @@ EffPCPSpinWork *effPCPBufudnIceCreate(void *src) {
     work->color = 0x80808080;
     work->handle0 = dds3EffectPCPDataPartCreate(src, 0);
     work->handle1 = dds3EffectPCPDataPartCreate(src, 1);
-    EE_MMI_UNIT_MATRIX(work->matrix);
+    SDF_VU0_STOREIDENTITY(work->matrix);
     work->angle = (dds3GetRandFloatA(effDefaultRandomState) - 0.5f) * 2.0f * 0.87266457f;
     return work;
 }
@@ -3508,7 +3517,7 @@ EffPCPSpinWork *effPCPBufudnIceCopy(EffPCPSpinWork *src) {
     work->color = 0x80808080;
     work->handle0 = dds3EffectPartCopy(src->handle0);
     work->handle1 = dds3EffectPartCopy(src->handle1);
-    EE_MMI_UNIT_MATRIX(work->matrix);
+    SDF_VU0_STOREIDENTITY(work->matrix);
     work->angle = (dds3GetRandFloatA(effDefaultRandomState) - 0.5f) * 2.0f * 0.87266457f;
     return work;
 }
@@ -3534,8 +3543,8 @@ void effPCPBufudnIceDraw(EffPCPSpinWork *work) {
     dds3EffectPartSetColor(handle[1], work->color);
     SetRotateMatrixY(work->angle);
     SDF_VU0_LOADMATRIX_B(work->matrix);
-    sdfComposeVuMatrixFromRegisters();
-    VU0_STORE_MATRIX_UNCLOBBERED(mtx);
+    MultMatrixNoArg();
+    SDF_VU0_STOREMATRIX_NOMEM(mtx);
     dds3EffectPartSetRotateMatrix(handle[0], mtx);
     dds3EffectPartSetRotateMatrix(handle[1], mtx);
     dds3EffectPartDraw(handle[0]);
@@ -3559,8 +3568,8 @@ void effPCPBufudnIceSetScale(EffPCPSpinWork *work, f32 val) {
 
 /* vu0 routine: copy a 4x4 matrix (four quadwords) through vf28-vf31 */
 void effPCPBufudnIceSetRotateMatrix(EffPCPSpinWork *work, const Matrix4 *sourceMatrix) {
-    VU0_LOAD_MATRIX(sourceMatrix);
-    VU0_STORE_MATRIX(work->matrix);
+    SDF_VU0_LOADMATRIX(sourceMatrix);
+    SDF_VU0_STOREMATRIX(work->matrix);
 }
 
 /* Creation-slot callback: enable the global effect flag and return a NULL payload. */
@@ -3771,8 +3780,8 @@ void effPcpUpdateMuzzleThunderRay(EffPCPBurstWork *work) {
     f32 distance;
     EffThunderFragmentParams *params;
 
-    if (effBTLFieldColorUsesActorSelectors() != 0) {
-        btlUnitGetMuzzlePosVU((BtlUnit *)effBTLFieldColorGetVariantSelector());
+    if (effBTLSkillCheckRun() != 0) {
+        effBTLModelGetSphereCenter((BtlUnit *)effBTLFieldColorGetVariantSelector());
         SDF_VU0_LOADVECTOR_B(work->position);
         SDF_VU0_SUBVECTOR();
         SDF_VU0_NORMALIZE();
@@ -3806,7 +3815,6 @@ void effPCPEyeThunderSetPosition(void *dst, const f32 sourcePosition[4]) {
 void effPCPEyeThunderSetColor(EffPCPBurstWork *work, u32 val) {
     work->tintColor = val;
 }
-
 
 /* Scaled-effect source uses the game creator's alpha parameter variant. */
 typedef struct {
@@ -3860,9 +3868,6 @@ EffPCPGrowWork *effPCPThunderSphereExpCreatePCF(void *args) {
     return effPCPThunderSphereExpCreate(param0);
 }
 
-
-
-
 EffPCPGrowWork *effPCPThunderSphereExpCopy(EffPCPGrowWork *work) {
     EffPCPScaledThunderParams params;
     EffThunderParameterHead *res;
@@ -3881,8 +3886,6 @@ void effPCPThunderSphereExpDelete(EffPCPGrowWork *work) {
     effPCPThunderSpherePolyDelete(work->handle);
     sdfChipFreeDirect(work);
 }
-
-
 
 /* Preserve the resource query before applying its growth and fade timeline. */
 void effPCPThunderSphereExpDraw(EffPCPGrowWork *work) {
@@ -3956,13 +3959,12 @@ EffPCPBeamNode *dds3RingPolyExpListCreate(u32 segments) {
     node->scale = 1.0f;
     node->assetHandle = sdfMatNew();
     sdfMatSetConstant((struct sdfMat_t *)node->assetHandle, 1.0f);
-    EE_MMI_UNIT_MATRIX(node->localMatrix);
-    EE_MMI_UNIT_MATRIX(node->matrix);
+    SDF_VU0_STOREIDENTITY(node->localMatrix);
+    SDF_VU0_STOREIDENTITY(node->matrix);
     memset(&effBeamDrawParams, 0, sizeof(effBeamDrawParams));
     effBeamDrawParams.attr = 0x4000;
     return node;
 }
-
 
 /* Release the separately retained asset and vertex allocation before the node. */
 void dds3RingPolyExpListDelete(EffPCPBeamNode *work) {
@@ -3971,10 +3973,10 @@ void dds3RingPolyExpListDelete(EffPCPBeamNode *work) {
     sdfChipFreeDirect(work);
 }
 
-
 extern u8 effBeamTriangleIndices[];
+
 extern sdfGrOt_t *effBeamDrawSurfaces[];
-#include "sdf_packet_alloc.h"
+
 extern void *effPkt3DPrimMakePoly(sdf3DPrimPolyParm_t *params);
 
 /* vu0 routine: compose the beam transform and submit batches of its vertices. */
@@ -3989,15 +3991,15 @@ void dds3RingPolyExpListDraw(EffPCPBeamNode *node) {
     }
     list = (sdfDrawTag_t *)sdfGrAllocPacketBuff(0x20);
     sdfDrawTagInit(list);
-    EE_MMI_UNIT_MATRIX(scaleMatrix);
+    SDF_VU0_STOREIDENTITY(scaleMatrix);
     scaleMatrix[2][2] = scaleMatrix[1][1] = scaleMatrix[0][0] = node->scale;
-    VU0_LOAD_MATRIX(node->localMatrix);
+    SDF_VU0_LOADMATRIX(node->localMatrix);
     SDF_VU0_LOADMATRIX_B(node->matrix);
-    sdfComposeVuMatrixFromRegisters();
+    MultMatrixNoArg();
     SDF_VU0_LOADVECTOR(&node->position);
     VU0_ADD_VF31_VF10_XYZ();
     SDF_VU0_LOADMATRIX_B(scaleMatrix);
-    sdfComposeVuMatrixFromRegisters();
+    MultMatrixNoArg();
     sdf3DPrimLinkTm(list, 0);
     sdf3DPrimLinkMat(list, node->assetHandle, 0);
     count = node->vertexCount;
@@ -4018,7 +4020,7 @@ void dds3RingPolyExpListDraw(EffPCPBeamNode *node) {
         sdfDrawTagLink(list, (u32)effPkt3DPrimMakePoly(&effBeamDrawParams));
     }
     entry = effBeamDrawSurfaces[node->drawKind];
-    entry->append(entry, list);
+    entry->regFunc(entry, list);
 }
 
 void effPCPRingPolyExpSetVertex(f32 radius, EffPCPBeamWork *work) {
@@ -4061,14 +4063,10 @@ void effPCPRingPolyExpSetVertex(f32 radius, EffPCPBeamWork *work) {
     }
 }
 
-
-
 void effPCPRingPolyExpInit(EffPCPBeamWork *work) {
     effPCPRingPolyExpSetVertex(work->params.startRadius, work);
     work->frame = 0;
 }
-
-
 
 u8 *effPCPRingPolyExpCreate(src)
     EffPCPBeamParams *src;
@@ -4172,7 +4170,6 @@ void effPCPRingPolyExpDraw(EffPCPBeamWork *work) {
     work->frame++;
 }
 
-
 void effPCPRingPolyExpSetPosition(void *dst, const f32 sourcePosition[4]) {
     SDF_VU0_COPYVECTOR(dst, sourcePosition);
 }
@@ -4187,17 +4184,16 @@ void effPCPRingPolyExpSetColor(EffPCPBeamWork *work, u32 val) {
 
 /* vu0 routine: copy a 4x4 matrix (four quadwords) through vf28-vf31 */
 void effPCPRingPolyExpSetRotateMatrix(EffPCPBeamWork *work, void *src) {
-    VU0_LOAD_MATRIX(src);
-    VU0_STORE_MATRIX(work->node->localMatrix);
+    SDF_VU0_LOADMATRIX(src);
+    SDF_VU0_STOREMATRIX(work->node->localMatrix);
 }
 
 void effPCPRingPolyExpSetDirection(EffPCPBeamWork *work, void *src) {
-    VU0_LOAD_MATRIX(src);
+    SDF_VU0_LOADMATRIX(src);
     SetRotateMatrixX_B(1.5707963f);
-    sdfComposeVuMatrixFromRegisters();
-    VU0_STORE_MATRIX(work->node);
+    MultMatrixNoArg();
+    SDF_VU0_STOREMATRIX(work->node);
 }
-
 
 /* Fill the node's point buffer with four concentric rings (radius, +stepA, +stepB, +stepC) of unit directions, rotated by the VU matrix. */
 void effPCPRingPolyExp2SetVertex(EffPCPBeamLargeWork *work, f32 radius) {
@@ -4226,11 +4222,11 @@ void effPCPRingPolyExp2SetVertex(EffPCPBeamLargeWork *work, f32 radius) {
     points = work->node->points;
     step = 6.2831851f / (f32)work->head.segments;
     if (work->head.mode == 0) {
-        LookAtMatrix(aViewTarget, sdfViewTargetVector, aViewDown);
+        LookAtMatrix(aViewTarget, aViewEye, aViewDown);
         ReverseMatrix();
     } else {
         SetRotateMatrixZ(work->rotationA);
-        sdfVuLoadSecondaryRotationMatrixY(work->rotationB);
+        SetRotateMatrixY_B(work->rotationB);
         MultMatrixRevNoArg();
         work->rotationB += work->rotationStep;
         work->rotationStep *= work->head.rotationDecay;
@@ -4266,7 +4262,6 @@ void effPCPRingPolyExp2SetVertex(EffPCPBeamLargeWork *work, f32 radius) {
     }
 }
 
-
 void effPCPRingPolyExp2Init(EffPCPBeamLargeWork *work) {
     work->rotationA = work->head.degreesA * 0.017453291f;
     work->rotationB = work->head.degreesB * 0.017453291f;
@@ -4276,8 +4271,6 @@ void effPCPRingPolyExp2Init(EffPCPBeamLargeWork *work) {
     effPCPRingPolyExp2SetVertex(work, work->head.initialRadius);
     work->frame = 0;
 }
-
-
 
 /* The clone copies the 0x5C-byte parameter prefix, then attaches its node. */
 u8 *effPCPRingPolyExp2Create(src)
@@ -4333,8 +4326,6 @@ void effPCPRingPolyExp2Delete(EffPCPBeamLargeWork *work) {
     sdfChipFreeDirect(work);
 }
 
-
-
 /* Advance the ring radius, fade the color and mirror the position/color
    into the clone's beam node. */
 void effPCPRingPolyExp2Draw(EffPCPBeamLargeWork *work) {
@@ -4380,8 +4371,8 @@ void effPCPRingPolyExp2SetColor(EffPCPBeamLargeWork *work, u32 val) {
 
 /* vu0 routine: copy a 4x4 matrix (four quadwords) through vf28-vf31 */
 void effPCPRingPolyExp2SetRotateMatrix(EffPCPBeamLargeWork *work, void *src) {
-    VU0_LOAD_MATRIX(src);
-    VU0_STORE_MATRIX(work->node->localMatrix);
+    SDF_VU0_LOADMATRIX(src);
+    SDF_VU0_STOREMATRIX(work->node->localMatrix);
 }
 
 EffPCPGroupSet *effPCPRadiateThunderCreate(EffPCPGroupHead *header, void **sourceResources) {
@@ -4738,7 +4729,6 @@ void effPCPMakkaUpdateNode(sdfModelNode_t *node) {
     }
 }
 
-
 extern const f32 D_003A0EF0[4] __attribute__((aligned(16)));
 
 /* Per-frame update: for each of `count` slots, spawn its model on its start frame, orient/scale it, refresh its children and capture the node vectors. */
@@ -4761,11 +4751,11 @@ void effPcpUpdateStaggeredPulseModels(EffPCPSprayWork *work) {
         if (work->handle[i] == 0) {
             continue;
         }
-        data = effParamWorkGetData(work->handle[i]);
-        sdfConvertEulerAnglesToQuaternionVU(0.0f, work->rotationY[i], 0.0f);
-        if (effBTLFieldColorUsesActorSelectors() && (((BtlUnit *)effBTLFieldColorGetVariantSelector())->status.flags & 0x400)) {
+        data = dds3EffectPartGetHandle(work->handle[i]);
+        FromEuler(0.0f, work->rotationY[i], 0.0f);
+        if (effBTLSkillCheckRun() && (((BtlUnit *)effBTLFieldColorGetVariantSelector())->status.flags & 0x400)) {
             SDF_VU0_LOADVECTOR_B(D_003A0EF0);
-            effMiscQuatMultiplyVU();
+            Mult();
         }
         mdlSetRotate(data);
         vec[3] = 0;
@@ -4788,7 +4778,7 @@ void effPcpUpdateStaggeredPulseModels(EffPCPSprayWork *work) {
             SDF_VU0_LOADVECTOR(vec);
             effPCPMakkaUpdateNode(root);
             sdfModelEvalTm(model);
-            sdfBuildModelPacketsVia(sdfModelLinkOt, kwlnSceneSurfaceSets[10], model);
+            sdfBuildModelPacketsVia(sdfModelLinkOt, sdfModelOtTable[10], model);
         }
     }
     work->frame++;
@@ -4902,7 +4892,6 @@ EffPCPDriftEventWork *effPCPRadiateBEDCopy(EffPCPDriftEventWork *src) {
     return work;
 }
 
-
 void effPCPRadiateBEDDelete(EffPCPDriftEventWork *work) {
     u32 i = 0;
     u32 count = work->params.count;
@@ -4921,7 +4910,6 @@ void effPCPRadiateBEDDelete(EffPCPDriftEventWork *work) {
     sdfMemFreeDirect(work->handle);
 }
 
-
 void effPCPRadiateBEDPartInit(EffPCPDriftEventWork *work, s32 index) {
     EffPCPDriftEventRow *slot;
     f32 spread;
@@ -4937,7 +4925,6 @@ void effPCPRadiateBEDPartInit(EffPCPDriftEventWork *work, s32 index) {
     spread = work->params.angleJitter;
     slot->angleStep = work->params.angleStep * (dds3GetRandFloatA(effDefaultRandomState) * spread + (1.0f - spread));
 }
-
 
 /* vu0 routine: place delayed drift events along expanding rotating rings. */
 void effPCPRadiateBEDDraw(EffPCPDriftEventWork *work) {
@@ -5003,7 +4990,6 @@ void effPCPRadiateBEDDraw(EffPCPDriftEventWork *work) {
         }
     }
 }
-
 
 void effPCPRadiateBEDSetPosition(void *dst, const f32 sourcePosition[4]) {
     SDF_VU0_COPYVECTOR(dst, sourcePosition);
@@ -5116,7 +5102,6 @@ EffPCPPairedEventWork *effPCPRadiateTBCopy(EffPCPPairedEventWork *src) {
     return work;
 }
 
-
 void effPCPRadiateTBDelete(EffPCPPairedEventWork *work) {
     u32 i = 0;
     u32 count = work->params.count;
@@ -5139,7 +5124,6 @@ void effPCPRadiateTBDelete(EffPCPPairedEventWork *work) {
     }
     sdfMemFreeDirect(work->handle);
 }
-
 
 /* Randomises slot `index`: phase spread evenly around a full turn, jittered
  * radius, and a tiltStep whose sign is picked at random. */
@@ -5200,7 +5184,7 @@ void effPCPRadiateTBDraw(EffPCPPairedEventWork *work) {
     place.payload[9] = 100.0f;
     place.payload[10] = 1.0f;
     SDF_VU0_LOADVECTOR(aViewTarget);
-    SDF_VU0_LOADVECTOR_B(sdfViewTargetVector);
+    SDF_VU0_LOADVECTOR_B(aViewEye);
     SDF_VU0_SUBVECTOR();
     SDF_VU0_NORMALIZE();
     SDF_VU0_STOREVECTOR(viewAxis);
@@ -5399,7 +5383,6 @@ void effPCPSpiralBEDDelete(EffPCPSpawnRangeWork *work) {
     sdfMemFreeDirect(work->handle);
 }
 
-
 /* Randomises spawn slot `index` inside the ranges held by the work. */
 void effPCPSpiralBEDPartInit(EffPCPSpawnRangeWork *work, s32 index) {
     EffPCPSpawnRangeEventRow *slot;
@@ -5420,8 +5403,6 @@ void effPCPSpiralBEDPartInit(EffPCPSpawnRangeWork *work, s32 index) {
     spread = work->params.endJitter;
     slot->positionStep = (work->params.endPosition * (dds3GetRandFloatA(effDefaultRandomState) * spread + (1.0f - spread)) * scale - slot->position) / (f32)work->params.duration;
 }
-
-
 
 /* vu0 routine: move delayed radial events, apply damping, then fade and draw. */
 void effPCPSpiralBEDDraw(EffPCPSpawnRangeWork *work) {
@@ -5503,8 +5484,6 @@ void effPCPSpiralBEDSetColor(EffPCPSpawnRangeWork *work, u32 val) {
     work->color = val;
 }
 
-
-
 void effPCPHelperInit(EffPCPMapEventWork *work) {
     EffPCPEventPlace place;
     u32 i = 0;
@@ -5512,7 +5491,7 @@ void effPCPHelperInit(EffPCPMapEventWork *work) {
     dds3ModelHandle_t *model;
     EffPCPMapEventEntry *entry;
 
-    model = effParamWorkGetData(work->modelResource);
+    model = dds3EffectPartGetHandle(work->modelResource);
     model->first->frameStep = work->params.frameStep;
     mdlSingleMotion(model, 0, 0);
     work->frameLimit = model->first->frameCount;
@@ -5541,8 +5520,6 @@ void effPCPHelperInit(EffPCPMapEventWork *work) {
         entry++;
     }
 }
-
-
 
 /* Allocate an event work: copy the parameter head, clear the links, then create the resource and owner from the optional parameters. */
 EffPCPMapEventWork *effPCPHelperBEDCreate(EffPCPEventParamHead *head, void *resourceParams, void *ownerParams) {
@@ -5609,7 +5586,6 @@ void effPCPHelperBEDDelete(EffPCPMapEventWork *work) {
     sdfChipFreeDirect(work);
 }
 
-
 /* vu0 routine: latch map-node motion, then place and fade each event. */
 void effPCPHelperBEDDraw(EffPCPMapEventWork *work) {
     EffPCPEventPlace place;
@@ -5640,13 +5616,13 @@ void effPCPHelperBEDDraw(EffPCPMapEventWork *work) {
     place.payload[9] = 100.0f;
     place.payload[10] = 1.0f;
     if (frameLimit >= frame) {
-        model = effParamWorkGetData(work->modelResource);
+        model = dds3EffectPartGetHandle(work->modelResource);
         mapModel = model->inner;
         SDF_VU0_LOADVECTOR(work->params.position);
         mdlSetPosition(model);
         SDF_VU0_LOADVECTOR(scale);
         mdlSetScale(model);
-        mdlLink(model, kwlnSceneSurfaceSets[10]);
+        mdlLink(model, sdfModelOtTable[10]);
         count = work->count;
         fadeIn = work->params.fadeIn;
         fadeOut = work->params.fadeOut;
@@ -5714,4 +5690,5 @@ INCLUDE_SDATA(const s32, "effect/effPCPMisc", D_003BB048);
 
 INCLUDE_SDATA(const s32, "effect/effPCPMisc", D_003BB04C);
 
-INCLUDE_SDATA(const s32, "effect/effPCPMisc", D_003BB04D);
+INCLUDE_SDATA(const s32, "effect/effPCPMisc", effDebugEnabled);
+

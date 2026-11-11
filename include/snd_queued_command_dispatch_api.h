@@ -10,6 +10,6 @@ enum {
 };
 
 /* Not sent means the queue was empty or SIF declined the packet. */
-SndQueuedCommandDispatchResult sndTryDispatchQueuedCommand(void);
+SndQueuedCommandDispatchResult sdfSndCmdTrans(void);
 
 #endif /* DDS_SND_QUEUED_COMMAND_DISPATCH_API_H */

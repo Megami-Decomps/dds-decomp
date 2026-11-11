@@ -5,7 +5,7 @@
 #include "scr_string_parameter_api.h"
 #include "evt_solar.h"
 #include "eff_random_mod.h"
-#include "kwln_task_create.h"
+#include "dds3_task_create.h"
 #include "eff_manager_task.h"
 #include "eff_random.h"
 #include "mnu_title_sound.h"
@@ -60,7 +60,7 @@ extern s32 fldMirroredSolarThresholds[];
 
 /* Roll against the threshold associated with the mirrored solar phase. */
 s32 fldCmdRollMirroredSolarThreshold(void) {
-    s32 solarPhaseThreshold = fldMirroredSolarThresholds[evtGetMirroredSolarPhase()];
+    s32 solarPhaseThreshold = fldMirroredSolarThresholds[evtGetAgeOfMoon()];
     if (solarPhaseThreshold >= (s32)dds3GetRandIntA(0, 100)) {
         scrSetIntReturnValue(1);
     } else {
@@ -126,7 +126,7 @@ extern void dds3PolygonManagerInit(void);
 
 extern void dds3ParticleManagerInit(void);
 
-extern void effFieldTaskStartupHook(void);
+extern void effDebugInit(void);
 
 extern void Eve_EffectInit(void);
 
@@ -144,9 +144,10 @@ void fldCreateFieldEffectTask(void) {
     dds3ParticleManagerInit();
     dds3StartProcess("effect_f", 0x2B04, 0, 0, effSubmitFieldBlendStateTask, NULL, 0);
     dds3StartProcess(D_003BB008, 0x2B18, 0, 0, dds3EffectManagerRun, effManagerInitializeSubsystems, 0);
-    effFieldTaskStartupHook();
+    effDebugInit();
     Eve_EffectInit();
     effBTLFieldColorResetFlags();
 }
 
 INCLUDE_SDATA(const s32, "game/code_0014F4C8", D_003BB008);
+

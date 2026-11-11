@@ -133,8 +133,8 @@ extern void mnuDrawPartyRowFrameVariant(s32, s32, s32, MenuPageWindow *, s32, s3
 extern void uiDrawActiveSurfaceRegion(s32);
 extern void sdfDispatchSurfaceWithPreparedTexturePacket(s32);
 extern void uiDrawSurfaceAtNearDepth(u32);
-extern struct _FRQ *itfCreateFont2TextGlyph(s32, s32, s32, u32, char *, struct _FRQ *);
-extern s32 frDestroyFontRequestAfter(struct _FRQ *);
+extern struct frFontHandle_t *itfCreateFont2TextGlyph(s32, s32, s32, u32, char *, struct frFontHandle_t *);
+extern s32 frDestroyFontRequestAfter(struct frFontHandle_t *);
 /* Retail forwards the surface word; the selection helper uses five arguments. */
 extern s32 mnuClearWindowPendingFlagAfterSelection();
 extern void mnuDrawPartyPageContents(s32, s32, s32, s32, struct MenuPageResources *, s32);
@@ -161,7 +161,7 @@ void mnuDrawPartyMemberCommandPanel(s32 x, s32 y, s32 z, MenuPageWindow *menu,
     s32 selection;
     s32 level;
     s32 iconX, iconY;
-    struct _FRQ *glyph;
+    struct frFontHandle_t *glyph;
 
     if (panel->flags & 1) {
         return;
@@ -200,7 +200,7 @@ void mnuDrawPartyMemberCommandPanel(s32 x, s32 y, s32 z, MenuPageWindow *menu,
     level = menu->records->slots[panelIndex].level;
     sprintf(text, D_003BC760, level);
     glyph = itfCreateFont2TextGlyph(labelX + 0x150, labelY, z, color, text, NULL);
-    frFontDrawGlyphChain(glyph, 1, surface);
+    frDrawFontOt(glyph, 1, surface);
     frDestroyFontRequestAfter(glyph);
     uiDrawActiveSurfaceRegion(surface);
     mnuDrawPartyPanelSlotWithBlend(x + framePositions[4], y + framePositions[5], 0xFFFFFF,
@@ -260,7 +260,7 @@ void mnuDrawPartyMemberStatusPanel(s32 x, s32 y, s32 z, MenuPageWindow *menu,
     s32 iconX, iconY;
     s32 selection;
     s32 level;
-    struct _FRQ *glyph;
+    struct frFontHandle_t *glyph;
 
     if (panel->flags & 1) {
         return;
@@ -283,7 +283,7 @@ void mnuDrawPartyMemberStatusPanel(s32 x, s32 y, s32 z, MenuPageWindow *menu,
     level = menu->records->slots[panelIndex].level;
     sprintf(text, D_003BC760, level);
     glyph = itfCreateFont2TextGlyph(labelX + 0x170, labelY, z, textColor, text, NULL);
-    frFontDrawGlyphChain(glyph, 1, surface);
+    frDrawFontOt(glyph, 1, surface);
     frDestroyFontRequestAfter(glyph);
     uiDrawActiveSurfaceRegion(surface);
     effDrawSpriteWithCornerFade(x + framePositions[0], y + framePositions[1], 0xFFFFFF,

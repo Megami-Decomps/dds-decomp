@@ -15,8 +15,7 @@
 #include "sdf_draw.h"
 #include "btl_command.h"
 #include "btl_command_affinity_api.h"
-#include "pcp_vu0.h"
-#include "ee_mmi.h"
+#include "ps2asm.h"
 #include "btl_action.h"
 #include "btl_ai_action_api.h"
 #include "btl_ai_table.h"
@@ -178,7 +177,7 @@ void btlSelectAndRunModeAiAction(ActionStateLink *task, u32 mode) {
         break;
     }
     datEnemyAiRecords[0] = D_003BEDD0[table];
-    work = sdfAllocAndClearQuadwords(0x10);
+    work = sdfChipAllocZeroDirect(0x10);
     unit = task->unit;
     btlActionScratchWork = work;
     work->actor = task;
@@ -508,8 +507,6 @@ s32 btlExecuteAiTableAction(ActionStateLink *task, u16 id, u32 packed) {
 #include "sdf_draw.h"
 #include "btl_command.h"
 #include "btl_command_affinity_api.h"
-#include "pcp_vu0.h"
-#include "ee_mmi.h"
 #include "btl_action.h"
 #include "btl_ai_table.h"
 #include "btl_ai_scratch.h"
@@ -713,6 +710,7 @@ s32 btlResolveCommandSlotAndKind(ActionStateLink *task, s32 id, u16 *slot, s32 *
     return 1;
 }
 #else
+
 INCLUDE_RODATA(const s32, "game/code_00211360", D_00419A88);
 
 INCLUDE_ASM(const s32, "game/code_00211360", btlResolveCommandSlotAndKind);
@@ -1861,3 +1859,4 @@ const s32 btlElementMasks[20] = {
 INCLUDE_RODATA(const s32, "game/code_00211360", D_00419C30);
 
 INCLUDE_RODATA(const s32, "game/code_00211360", D_00419C58);
+

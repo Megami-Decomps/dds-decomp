@@ -1,14 +1,13 @@
 #include "sdk_ps2.h"
 #include "common.h"
-#include "sdf_vu0.h"
+#include "ps2asm.h"
 #include "sdf_mat4.h"
 #include "snd_sequence_volume_pan.h"
 #include "eff_random.h"
-#include "sdf_resource.h"
+#include "sdf_heap_api.h"
 #include "mnu_work.h"
 #include "file.h"
 #include "eff_update_flags.h"
-#include "pcp_vu0.h"
 #include "mdl.h"
 #include "mdl_broadcast_callback.h"
 #include "mnu_shooting.h"
@@ -31,7 +30,7 @@ typedef struct SoundSlotPool {
 
 
 
-extern f32 sdfViewTargetVector[4];
+extern f32 aViewEye[4];
 extern void sdfMat4RotateX(SdfMat4 *, f32);
 extern void sdfMat4RotateY(SdfMat4 *, f32);
 extern void sdfMat4RotateZ(SdfMat4 *, f32);
@@ -46,7 +45,7 @@ static inline void mnuSetBasisRow(f32 *row, f32 x, f32 y, f32 z, f32 w) {
 }
 
 
-extern void evtPrintDeveloperConsoleMessage(const char *, ...);
+extern void datDebugPrintf(const char *, ...);
 
 
 extern SoundSlotPool *dds3SoundSlotPool;
@@ -69,7 +68,7 @@ extern u8 D_0040ABC0[];
 extern u8 D_0040ABB0[];
 extern dds3Basic_t *D_00438944;
 struct dds3Basic_t;
-extern void dds3CameraObjectBasicSetWorldEye(struct dds3Basic_t *camera, const u128 *worldEye);
+extern void dds3CameraObjectBasicGetCameraTM(struct dds3Basic_t *camera, const u128 *worldEye);
 
 /* Reload the camera vectors, invoke its update callback, then restore both copies
  * of the final vector in the camera data. */
@@ -77,7 +76,7 @@ void CalcCamera(void) {
     CameraData *cameraData;
     dds3Basic_t *camera;
 
-    dds3CameraObjectBasicSetWorldEye(D_00438944, (u128 *)D_0040ABD0);
+    dds3CameraObjectBasicGetCameraTM(D_00438944, (u128 *)D_0040ABD0);
     dds3SetPosPoseSet(D_00438944, (u128 *)D_0040ABC0);
     camera = D_00438944;
     camera->ops->update(camera);
@@ -182,7 +181,7 @@ s32 mnuApplyFrameKeyedModelMotion(MenuWorkEntry *work, MnuShootingWork *unusedCo
                 if (record != NULL) {
                     frame = work->elapsed;
                     if (frame == record->parameters[0]) {
-                        evtPrintDeveloperConsoleMessage("%d:%d:%d:%d\n", frame,
+                        datDebugPrintf("%d:%d:%d:%d\n", frame,
                             record->parameters[0], record->parameters[1],
                             record->parameters[2]);
                         node = work->object.modelNode;
@@ -212,7 +211,7 @@ MnuEffectWork *mnuCreateEffectWork(s32 listCount, s32 *recordCounts) {
     MnuEffectRecord *records;
 
     for (i = 0; i < listCount; i++) allocationSize += recordCounts[i] * 32;
-    evtPrintDeveloperConsoleMessage("EffectWork Object Size %d\n", allocationSize);
+    datDebugPrintf("EffectWork Object Size %d\n", allocationSize);
     allocation = sdfMemAllocDirect(allocationSize);
     work = (MnuEffectWork *)sdfMemGetPtr(allocation);
     memset(work, 0, allocationSize);
@@ -285,7 +284,7 @@ void mnuAssignEffectRecordQueues(MnuEffectList *list, s32 resourceIndex, FileQue
         if (source == NULL) {
             source = sources[resourceIndex];
             record->queue = source;
-            evtPrintDeveloperConsoleMessage(D_00438950, resourceIndex, D_0040AD50[resourceIndex]);
+            datDebugPrintf(D_00438950, resourceIndex, D_0040AD50[resourceIndex]);
         } else {
             record->queue = fileQueueClone(source);
         }
@@ -416,9 +415,9 @@ void mnuOrientPositionedEffectTowardViewTarget(MnuEffectRecord *record, f32 xAng
     f32 quaternion[4];
 
     fileQueueReadPosition(record->queue, position);
-    mnuSetBasisRow(vector, sdfViewTargetVector[0] - position[0],
-                   sdfViewTargetVector[1] - position[1],
-                   sdfViewTargetVector[2] - position[2], 0.0f);
+    mnuSetBasisRow(vector, aViewEye[0] - position[0],
+                   aViewEye[1] - position[1],
+                   aViewEye[2] - position[2], 0.0f);
     mnuSetBasisRow(left, -1.0f, 0.0f, 0.0f, 0.0f);
     VU0_NORMALIZE_PACKED_VECTOR(vector);
     SDF_VU0_LOADVECTOR(vector);
@@ -508,7 +507,7 @@ MnuSectionModelWork *mnuCreateSectionModelWork(s32 listCount, s32 *nodeCounts) {
     u8 *records;
 
     for (i = 0; i < listCount; i++) allocationSize += nodeCounts[i] * sizeof(MnuModelNode);
-    evtPrintDeveloperConsoleMessage(D_0042DAE8, allocationSize);
+    datDebugPrintf(D_0042DAE8, allocationSize);
     allocation = sdfMemAllocDirect(allocationSize);
     work = (MnuSectionModelWork *)sdfMemGetPtr(allocation);
     memset(work, 0, allocationSize);
@@ -720,9 +719,9 @@ void mnuSetViewFacingModelNodeRotation(MnuModelNode *node, f32 xAngle, f32 yAngl
     SdfMat4 basis;
     f32 quaternion[4];
 
-    mnuSetBasisRow(vector, sdfViewTargetVector[0] - node->primary[0],
-                   sdfViewTargetVector[1] - node->primary[1],
-                   sdfViewTargetVector[2] - node->primary[2], 0.0f);
+    mnuSetBasisRow(vector, aViewEye[0] - node->primary[0],
+                   aViewEye[1] - node->primary[1],
+                   aViewEye[2] - node->primary[2], 0.0f);
     mnuSetBasisRow(left, -1.0f, 0.0f, 0.0f, 0.0f);
     VU0_NORMALIZE_PACKED_VECTOR(vector);
     SDF_VU0_LOADVECTOR(vector);
@@ -769,3 +768,4 @@ void mnuSetModelNodeBroadcastAlpha(void) {
 INCLUDE_RODATA(const s32, "game/code_0031B188", D_0042DAE8);
 
 INCLUDE_SDATA(const s32, "game/code_0031B188", D_00438950);
+

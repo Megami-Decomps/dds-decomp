@@ -43,7 +43,7 @@ port   replaces the other version's INCLUDE_ASM with the source version's C for 
                           unit one at a time and keep only those that leave check_unit
                           clean. ee-gcc's CONTEXT effect makes a bulk port flip neighbours
                           (docs/idioms.md), so one bad function must not undo the rest.
-                          Adds #include "pcp_vu0.h" / "fpu.h" when a kept body needs them.
+                          Adds #include "ps2asm.h" / "fpu.h" when a kept body needs them.
        Callees and globals are translated through the function's own relocations first,
        then through every identical pair. Strings inside __asm__ statements (COP2/VU code)
        are kept verbatim.
@@ -789,7 +789,7 @@ def finish(dst, ported, skipped):
         print("run python3 configure.py --no-split && ninja")
 
 
-NEEDS_HEADER = {"PCP_COPY_VECTOR": "pcp_vu0.h", "fsqrtf": "fpu.h"}
+NEEDS_HEADER = {"SDF_VU0_COPYVECTOR": "ps2asm.h", "fsqrtf": "fpu.h"}
 CLEAN_LINE = re.compile(r"^(?:DIFF|OVER|CONTEXT|NOASM|SHARED|PAD|MERGED|DATA|MISSING|ORDER|TWICE|TRICK|STALE)\b", re.M)
 
 

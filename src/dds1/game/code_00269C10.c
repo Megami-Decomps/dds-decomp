@@ -10,8 +10,8 @@
 #include "dds3obj.h"
 #include "dds3_world_selection.h"
 #include "dds3_world_value.h"
-#include "sdf_resource.h"
-#include "kwln.h"
+#include "sdf_heap_api.h"
+#include "kernel.h"
 #include "mnu_title_effect.h"
 #include "file.h"
 #include "file_request_api.h"
@@ -245,7 +245,7 @@ void mnuRunTitleStreamThread(void) {
 
 extern u32 mnuTitleStreamSemaphore;
 
-extern SdfThreadNode mnuTitleStreamThread __attribute__((section(".sbss")));
+extern sdfThCB_t mnuTitleStreamThread __attribute__((section(".sbss")));
 
 extern u8 mnuTitleStreamThreadStack[];
 void mnuCreateTitleStreamThread(void) {
@@ -357,7 +357,7 @@ s32 mnuCompleteTitleStreamFileLoad(TitleAudioStreamState *destinationState) {
         s32 fileBytes = fileGetLoadSize(mnuTitleStreamFileRequest);
         struct sdfMemHandle_t *allocation;
 
-        fileRequestFreeIfComplete(mnuTitleStreamFileRequest);
+        fileHandleFree(mnuTitleStreamFileRequest);
         allocation = sdfMemAllocFromTailDirect(fileBytes);
         mnuTitleStreamStatus.compressedData = (u8 *)sdfMemGetPtr(allocation);
         mnuTitleStreamStatus.allocation = allocation;
@@ -446,6 +446,7 @@ extern void fileSyncAll(void);
 
 /* Wait/copy a pending file while locked, then prepare a commit for controls
  * other than 1. DDS1 also prints its retail BGM banner before unlocking. */
+
 INCLUDE_RODATA(const s32, "game/code_00269C10", D_003AFCF0);
 
 void mnuTitleStreamUpdateAndLogBgm(void) {

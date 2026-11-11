@@ -7,7 +7,7 @@
 #include "mnu_input.h"
 #include "mnu.h"
 #include "mnu_party_row_draw_state.h"
-#include "sdf_resource.h"
+#include "sdf_heap_api.h"
 #include "mnu_list.h"
 #include "eff.h"
 #include "mnu_shop.h"
@@ -79,9 +79,9 @@ extern s32 ptyGetCurrentProfileId(const datUnitWork_t *);
 
 extern s32 prfResolveMantraNameOrFallback(u16, u8 **);
 
-extern void frFontCenterGlyphChainAt(s32 x, s32 y, _FRQ *glyphChain);
+extern void frFontCenterGlyphChainAt(s32 x, s32 y, frFontHandle_t *glyphChain);
 
-extern s32 frFontDrawGlyphChain(struct _FRQ *, s8, u32);
+extern s32 frDrawFontOt(struct frFontHandle_t *, s8, u32);
 typedef struct MenuListNode MenuListNode;
 
 extern void qsort(MenuListNode **, s32, s32, s32 (*)(MenuListNode **, MenuListNode **));
@@ -193,7 +193,7 @@ void mnuDispatchEntryWords(EffectSlotSet *menu, s32 entryIndex, MenuListNode *en
     }
 }
 
-extern _FRQ *itfCreateFont2TextGlyph(s32, s32, s32, u32, char *, _FRQ *);
+extern frFontHandle_t *itfCreateFont2TextGlyph(s32, s32, s32, u32, char *, frFontHandle_t *);
 extern const char D_003BC718[];
 
 /* Draw visible rows, preserving each row's glyph chain and callback state. */
@@ -208,7 +208,7 @@ void mnuDrawWindowListEntries(s32 x, s32 y, s32 depth, s32 xOffset, s32 yOffset,
     mnuDecreaseListNodeFadeCounters(list);
     while (node != NULL && row < list->visibleCount) {
         u32 color = (node->flags48 & 1) ? 0xA09DC340 : 0xA09DC380;
-        _FRQ *glyph = NULL;
+        frFontHandle_t *glyph = NULL;
         s32 chainFlag = 0;
 
         color = mnuDispatchByFlag(color, node);
@@ -232,7 +232,7 @@ void mnuDrawWindowListEntries(s32 x, s32 y, s32 depth, s32 xOffset, s32 yOffset,
             }
         }
         if (glyph != NULL) {
-            frFontDrawGlyphChain(glyph, 1, (u32)drawArg);
+            frDrawFontOt(glyph, 1, (u32)drawArg);
             frDestroyFontRequestAfter(glyph);
         }
         if (list->drawCallback != NULL) {
@@ -276,7 +276,7 @@ extern MenuPanelPositionTable2 D_003B23A0;
 
 /* Allocate a zeroed window and its list; the last two arguments configure list rows. */
 MenuWindowContainer *mnuCreateWindowContainer(s32 id, s32 width, s32 height, s32 visibleCount, s32 rowSpacing) {
-    MenuWindowContainer *window = (MenuWindowContainer *)sdfAllocAndClearQuadwords(sizeof(MenuWindowContainer));
+    MenuWindowContainer *window = (MenuWindowContainer *)sdfChipAllocZeroDirect(sizeof(MenuWindowContainer));
     MenuList *list;
     window->width = width;
     window->height = height;
@@ -722,7 +722,7 @@ extern MenuPanelSlotIndices D_003B2368;
 MenuPanelHandles *mnuCreatePanelSpriteHandles(u32 panelKind, EffectSlotSet *resource,
                                              EffMappedResource *target) {
     MenuPanelSlotIndices indices = D_003B2368;
-    MenuPanelHandles *panel = (MenuPanelHandles *)sdfAllocAndClearQuadwords(sizeof(MenuPanelHandles));
+    MenuPanelHandles *panel = (MenuPanelHandles *)sdfChipAllocZeroDirect(sizeof(MenuPanelHandles));
     s32 i;
 
     panel->panelKind = panelKind;
@@ -1091,7 +1091,7 @@ void mnuSortItems(MenuList *menu, s32 keyIndex, s32 ascending) {
 void mnuAllocateListEntries(s32 *list) {
     u32 slotIndex;
     for (slotIndex = 0; slotIndex < MNU_FADING_SLOT_COUNT; slotIndex++) {
-        list[slotIndex + 1] = sdfAllocAndClearQuadwords(MNU_FADING_SLOT_BYTES);
+        list[slotIndex + 1] = sdfChipAllocZeroDirect(MNU_FADING_SLOT_BYTES);
     }
 }
 
@@ -1393,7 +1393,7 @@ extern char D_003BC720[];
  * leaving 73 of 144 words different. */
 void mnuDrawPartyPageContents(s32 x, s32 y, s32 z, s32 layout, MenuPageResources *page, s32 drawArg) {
     char text[0x10];
-    _FRQ *glyph;
+    frFontHandle_t *glyph;
 
     if (layout != 1) {
         goto compact;
@@ -1419,7 +1419,7 @@ void mnuDrawPartyPageContents(s32 x, s32 y, s32 z, s32 layout, MenuPageResources
         glyph = itfCreateFont2TextGlyph(x + 0x710, y + 0x90, z, 0xA09DC380, text, glyph);
     } while (0);
 draw:
-    frFontDrawGlyphChain(glyph, 1, drawArg);
+    frDrawFontOt(glyph, 1, drawArg);
     frDestroyFontRequestAfter(glyph);
 }
 
@@ -2284,7 +2284,7 @@ s32 mnuClearWindowPendingFlagAfterSelection(s32 unusedX, s32 unusedY, s32 unused
 
 extern u16 mnuGetPartyEntryMenuValue(datUnitWork_t *);
 extern DatCommandRecordIndex evtGetIndexedEventRecordId(s32);
-extern _FRQ *itfCreateFont2TextGlyph(s32, s32, s32, u32, char *, _FRQ *);
+extern frFontHandle_t *itfCreateFont2TextGlyph(s32, s32, s32, u32, char *, frFontHandle_t *);
 extern u8 *D_003BAA84;
 extern char D_003BC720[];
 extern u8 D_003BC730[];
@@ -2297,7 +2297,7 @@ void mnuDrawPartyPageEntry(s32 x, s32 y, s32 z, s32 partyIndex, MenuSprites *pag
     s32 value;
     s32 alpha;
     s32 color;
-    _FRQ *glyph;
+    frFontHandle_t *glyph;
 
     value = mnuGetPartyEntryMenuValue(&DDS3_GBWK->party[partyIndex]);
     alpha = page->drawAlpha;
@@ -2316,7 +2316,7 @@ void mnuDrawPartyPageEntry(s32 x, s32 y, s32 z, s32 partyIndex, MenuSprites *pag
         glyph = itfCreateConvertedTextGlyph(x + 0x6F0, y + 0x330, z, color, D_003BC730, 0);
         glyph = itfCreateFont2TextGlyph(x + 0xF70, y + 0x348, z, color, D_003BC738, glyph);
     }
-    frFontDrawGlyphChain(glyph, 1, surface);
+    frDrawFontOt(glyph, 1, surface);
     frDestroyFontRequestAfter(glyph);
     if (page->fadeOut == 0) {
         if (page->drawAlpha < 256) {
@@ -2348,19 +2348,19 @@ void mnuDrawPartyPageEntry(s32 x, s32 y, s32 z, s32 partyIndex, MenuSprites *pag
 
 extern void prfCopyMantraNamePart(u32 textId, s32 mode, char *destination);
 
-extern _FRQ * frFontBuildGlyphChain(const char *text, s8 fontIndex, s8 firstOption, s8 secondOption, _FRQ *existingGlyph);
+extern frFontHandle_t * frSetFontString(const char *text, s8 fontIndex, s8 firstOption, s8 secondOption, frFontHandle_t *existingGlyph);
 
 void mnuDrawCenteredLabel(s32 x, s32 y, s32 unused, s32 color, s32 textId, s32 surface) {
     char text[0x40];
-    struct _FRQ *glyph;
+    struct frFontHandle_t *glyph;
     s32 width;
 
     prfCopyMantraNamePart(textId & 0xFFFF, 1, text);
-    glyph = frFontBuildGlyphChain(text, 0, 0, 0, 0);
+    glyph = frSetFontString(text, 0, 0, 0, 0);
     frSetFontColor(glyph, color);
     width = frGetStrWidth(glyph) + 8;
     frSetDrawPosition(glyph, x - (width * 0x10 >> 1) + 0x5F0, y);
-    frFontDrawGlyphChain(glyph, 1, surface);
+    frDrawFontOt(glyph, 1, surface);
     frDestroyFontRequestAfter(glyph);
 }
 
@@ -2370,7 +2370,7 @@ void mnuDrawSelectedPartyProfileLabel(s32 unusedX, s32 unusedY, s32 depth, s32 f
     s32 profileId = ptyGetCurrentProfileId(&DDS3_GBWK->party[partyIndex]);
     s32 code;
     s32 color;
-    _FRQ *glyph;
+    frFontHandle_t *glyph;
 
     color = fclBlendColor(0xA09DC380, 0xA09DC300, fade);
     code = selectedCode != 0 ? selectedCode : profileId;
@@ -2381,7 +2381,7 @@ void mnuDrawSelectedPartyProfileLabel(s32 unusedX, s32 unusedY, s32 depth, s32 f
         }
         glyph = itfCreateConvertedTextGlyph(0, 0, depth, color, outValue, 0);
         frFontCenterGlyphChainAt(0x1710, 0x5F0, glyph);
-        frFontDrawGlyphChain(glyph, 1, surface);
+        frDrawFontOt(glyph, 1, surface);
         frDestroyFontRequestAfter(glyph);
     }
 }
@@ -2395,7 +2395,7 @@ void mnuDrawPartyProfileAndExpOverlay(s32 x, s32 y, s32 depth, MenuPageSlot *slo
     datUnitWork_t *unit = &DDS3_GBWK->party[partyIndex];
     s32 color;
     s32 remainingExp;
-    struct _FRQ *glyph;
+    struct frFontHandle_t *glyph;
 
     if (slot->iconBundle != NULL) {
         mnuDrawAndUpdateFadingSprites(x, y, depth, slot->kind,
@@ -2407,7 +2407,7 @@ void mnuDrawPartyProfileAndExpOverlay(s32 x, s32 y, s32 depth, MenuPageSlot *slo
             sprintf(text, D_003BC740, remainingExp);
             glyph = itfCreateFont2TextGlyph(x + 0xDF0,
                 0x160, depth, color, text, 0);
-            frFontDrawGlyphChain(glyph, 1, surface);
+            frDrawFontOt(glyph, 1, surface);
             frDestroyFontRequestAfter(glyph);
         }
     }

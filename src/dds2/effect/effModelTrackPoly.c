@@ -1,20 +1,22 @@
 #include "sdk_ps2.h"
 #include "common.h"
 #include "sdf_map_position_api.h"
-#include "sdf_vu0.h"
+#include "ps2asm.h"
+
+#define VEC3_SPLAT(v, x) ((v)[0] = (x), (v)[1] = (x), (v)[2] = (x))
+
 #include "sdf_asset_state.h"
 #include "sdf_asset_create.h"
 #include "sdf_chip.h"
 #include "sdf_packet_list.h"
 #include "sdf_packet_append.h"
-#include "sdf_resource.h"
+#include "sdf_heap_api.h"
 #include "eff.h"
 #include "eff_math.h"
 #include "eff_track_poly_list.h"
 #include "mdl.h"
 #include "sdf.h"
 #include "sdf_chunk.h"
-#include "pcp_vu0.h"
 #include "eff_track_poly_data.h"
 #include "eff_packet_params.h"
 
@@ -120,7 +122,7 @@ void Eff_ModelTrackPolyListReset(effMTPolyListHandle_t *list, s32 index) {
     effTrackPolyReset(list->items[index]);
 }
 
-void effTrackPolySetIndexedColor(effMTPolyListHandle_t *list, s32 index, u32 color) {
+void Eff_ModelTrackPolyListColorSet(effMTPolyListHandle_t *list, s32 index, u32 color) {
     effTrackPolySetColor(list->items[index], color);
 }
 
@@ -417,7 +419,8 @@ void dds3HermitianTrackPolySetVertex(dds3HermitianTrackPoly_tag *data, const u12
 
 
 extern sdfGrOt_t *effTrackPolyDrawSurfaces[];
-extern sdfGrOt_t D_00380248;
+extern sdfGrOt_t sdfGrOtTable[];
+SYMBOL_AT(sdfGrOt_t, effPolyOt, sdfGrOtTable, 0x700);
 #include "sdf_packet_alloc.h"
 extern void *effPkt3DPrimMakePoly(sdf3DPrimPolyParm_t *);
 
@@ -472,7 +475,7 @@ void dds3HermitianTrackPolyDraw(dds3HermitianTrackPoly_tag *data) {
         }
     }
     if (data->drawTarget < 4) {
-        effTrackPolyDrawSurfaces[data->drawTarget]->append(effTrackPolyDrawSurfaces[data->drawTarget], list);
+        effTrackPolyDrawSurfaces[data->drawTarget]->regFunc(effTrackPolyDrawSurfaces[data->drawTarget], list);
     } else {
         list2 = (sdfDrawTag_t *)sdfGrAllocPacketBuff(0x20);
         sdfDrawTagInit(list2);
@@ -484,7 +487,7 @@ void dds3HermitianTrackPolyDraw(dds3HermitianTrackPoly_tag *data) {
         packet[4] = 6;
         packet[5] = 0x42;
         sdfDrawTagLink(list2, (u32)packet);
-        D_00380248.append(&D_00380248, list2);
+        effPolyOt.regFunc(&effPolyOt, list2);
         packet = (u64 *)sdfGrAllocPacketBuff(0x30);
         packet[0] = 2;
         packet[1] = ((u64)0x50000002 << 16 | 0x1000) << 16;
@@ -493,6 +496,6 @@ void dds3HermitianTrackPolyDraw(dds3HermitianTrackPoly_tag *data) {
         packet[4] = 0x42;
         packet[5] = 0x42;
         sdfDrawTagLink(list, (u32)packet);
-        D_00380248.append(&D_00380248, list);
+        effPolyOt.regFunc(&effPolyOt, list);
     }
 }

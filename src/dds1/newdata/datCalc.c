@@ -2,7 +2,7 @@
 #include "common.h"
 #include "pty_experience_threshold_type.h"
 #include "scr_integer_parameter_api.h"
-#include "bf_flw0_header.h"
+#include "scr.h"
 #include "scr_procedure_start_api.h"
 #include "evt_script_context.h"
 #include "evt_solar.h"
@@ -1319,7 +1319,7 @@ ScrVmInteger evtRunContext(ScrProcedureIndex procedureIndex, s32 firstArgument, 
 }
 
 /* Create the script task and clear its separate 24-byte context. */
-void dds3WorkInit(const BfFlw0Header *header) {
+void dds3WorkInit(const scrHeader_t *header) {
     evtWorkScriptTask = scrCreateTaskWithDefaultOption(header);
     memset(&evtWorkScriptContext, 0, EVT_CONTEXT_BYTES);
 }
@@ -1329,7 +1329,7 @@ scrProcessWork_s *scrGetWorkTaskHandle(void) {
 }
 
 void scrDestroyWorkTask(void) {
-    scrProcDestroyTask(evtWorkScriptTask);
+    scrPrintProcedureEnd(evtWorkScriptTask);
     evtWorkScriptTask = 0;
 }
 
@@ -1807,7 +1807,7 @@ u8 evtTestSolarPhaseOrModelFlag(DatBattleAdjustmentCondition condition) {
     case DAT_BATTLE_ADJUSTMENT_CONDITION_NONE:
         break;
     case DAT_BATTLE_ADJUSTMENT_CONDITION_SOLAR_PHASE_MASK:
-        if (condition & (1 << evtGetMirroredSolarPhase()) & 0xFFFF) {
+        if (condition & (1 << evtGetAgeOfMoon()) & 0xFFFF) {
             return 1;
         }
         break;
@@ -2167,3 +2167,4 @@ INCLUDE_SDATA(const s32, "newdata/datCalc", btlSelectedConditionalEncounterIndex
 INCLUDE_SDATA(const s32, "newdata/datCalc", btlSelectedConditionalEncounterResult);
 
 INCLUDE_SDATA(const s32, "newdata/datCalc", D_003BAAC4);
+

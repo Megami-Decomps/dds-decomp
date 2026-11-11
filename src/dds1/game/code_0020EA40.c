@@ -1,5 +1,5 @@
 #include "sdk_ps2.h"
-#include "pcp_vu0.h"
+#include "ps2asm.h"
 #include "common.h"
 #include "btl_find_script_resource_api.h"
 #include "btl_status_motion_override.h"
@@ -17,8 +17,7 @@
 #include "btl_command.h"
 #include "btl_action.h"
 #include "dat_state.h"
-#include "ee_mmi.h"
-#include "sdf_resource.h"
+#include "sdf_heap_api.h"
 #include "btl_scene_initializer.h"
 
 
@@ -633,3 +632,4 @@ void btlReleaseBossData(void) {
 INCLUDE_RODATA(const s32, "game/code_0020EA40", D_003A66C0);
 
 INCLUDE_RODATA(const s32, "game/code_0020EA40", D_003A66D8);
+

@@ -11,10 +11,10 @@
 #include "eff_resource_slots.h"
 #include "eff_resource_records.h"
 #include "mnu_input.h"
-#include "kwln.h"
+#include "kernel.h"
 #include "pty_skill_menu_api.h"
 #include "mnu_list.h"
-#include "sdf_resource.h"
+#include "sdf_heap_api.h"
 #include "mnu_staff.h"
 #include "fpu.h"
 #include "dat_state.h"
@@ -131,7 +131,7 @@ extern void frDisableMode();
 
 extern char mnuCampPartySelectionReturnPopupEntry[];
 
-extern struct sdfGrOt_t *kwlnSceneSurfaceSets[13][4];
+extern struct sdfGrOt_t *sdfModelOtTable[13][4];
 
 extern s8 evtStageTestUpdate(struct sdfGrOt_t **);
 
@@ -786,7 +786,7 @@ void mnuDispatchEntryWords(EffectSlotSet *menu, s32 entryIndex, MenuListNode *en
     }
 }
 
-extern struct _FRQ *itfCreateFont2TextGlyph(s32, s32, s32, u32, char *, struct _FRQ *);
+extern struct frFontHandle_t *itfCreateFont2TextGlyph(s32, s32, s32, u32, char *, struct frFontHandle_t *);
 extern const char D_00437C28[];
 
 /* Draw visible rows, preserving each row's glyph chain and callback state. */
@@ -800,7 +800,7 @@ void mnuDrawWindowListEntries(s32 x, s32 y, s32 depth, s32 xOffset, s32 yOffset,
     mnuDecreaseListNodeFadeCounters(list);
     while (node != NULL && row < list->visibleCount) {
         u32 color;
-        struct _FRQ *glyph = NULL;
+        struct frFontHandle_t *glyph = NULL;
         s32 chainFlag;
 
         if (node->flags48 & 1) {
@@ -829,7 +829,7 @@ void mnuDrawWindowListEntries(s32 x, s32 y, s32 depth, s32 xOffset, s32 yOffset,
             }
         }
         if (glyph != NULL) {
-            frFontDrawGlyphChain(glyph, 1, drawArg);
+            frDrawFontOt(glyph, 1, drawArg);
             frDestroyFontRequestAfter(glyph);
         }
         if (list->drawCallback != NULL) {
@@ -854,7 +854,7 @@ void mnuCallInitWide(s32 x, s32 y, s32 depth, s32 menu, s32 drawArg) {
 /* Allocate a zeroed window and its list; the last two arguments configure list rows. */
 MenuWindowContainer *mnuCreateWindowContainer(s32 id, s32 width, s32 height,
                                                 s32 visibleCount, s32 rowSpacing) {
-    MenuWindowContainer *window = (MenuWindowContainer *)sdfAllocAndClearQuadwords(MNU_WINDOW_CONTAINER_BYTES);
+    MenuWindowContainer *window = (MenuWindowContainer *)sdfChipAllocZeroDirect(MNU_WINDOW_CONTAINER_BYTES);
     MenuList *list;
     window->width = width;
     window->height = height;
@@ -1170,6 +1170,7 @@ void mnuSpinForWindowListCount(MenuWindowContainer *window) {
 }
 
 /* Only kind 4 consumes the third resource word. */
+
 INCLUDE_RODATA(const s32, "game/code_002B8FC8", D_0042AE90);
 
 INCLUDE_RODATA(const s32, "game/code_002B8FC8", D_0042AEA0);
@@ -1186,7 +1187,7 @@ MenuIconState *mnuCreatePanelIconState(u32 mode, s32 resource, s32 material) {
     s32 index;
     s32 first;
 
-    panel = sdfAllocAndClearQuadwords(sizeof(MenuIconState));
+    panel = sdfChipAllocZeroDirect(sizeof(MenuIconState));
     panel->kind = mode;
     switch (mode) {
     case 0:
@@ -1558,7 +1559,7 @@ void mnuSortItems(MenuList *menu, s32 keyIndex, s32 ascending) {
 void mnuAllocateListEntries(s32 *list) {
     u32 slotIndex;
     for (slotIndex = 0; slotIndex < MNU_FADING_SLOT_COUNT; slotIndex++) {
-        list[slotIndex + 1] = sdfAllocAndClearQuadwords(MNU_FADING_SLOT_BYTES);
+        list[slotIndex + 1] = sdfChipAllocZeroDirect(MNU_FADING_SLOT_BYTES);
     }
 }
 

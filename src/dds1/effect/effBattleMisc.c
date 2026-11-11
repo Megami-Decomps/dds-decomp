@@ -1,10 +1,9 @@
 #include "sdf_projection.h"
 #include "common.h"
-#include "sdf_vu0.h"
+#include "ps2asm.h"
 #include "sdf_vu_rotation_axes.h"
 #include "dds3obj.h"
 #include "btl_effect_position.h"
-#include "pcp_vu0.h"
 #include "sdf_vu_transform_api.h"
 #include "sdf_vu_matrix.h"
 #include "sdf_vu_matrix_multiply_api.h"
@@ -15,20 +14,20 @@
 
 extern u32 effBTLFieldColorGetVariantSelector(void);
 
-extern u32 effBTLFieldColorGetOriginalSelector(void);
+extern u32 effBTLSkillGetInvokeFormation(void);
 
 
 extern void (*GetPositionPtrTable[])();
 
 #include "dds3_world_primary.h"
 struct dds3Basic_t;
-extern void dds3CameraObjectBasicLoadWorldEyeIntoVu(struct dds3Basic_t *object);
+extern void dds3CameraObjectBasicGetTargetPos(struct dds3Basic_t *object);
 
 extern f32 effBattleAnchorHeightFactors[];
 extern f32 effBTL_Ptr_D[];
 extern void SetRotateMatrixY(f32 angle);
 extern f32 aViewTarget[4];
-extern f32 sdfViewTargetVector[4];
+extern f32 aViewEye[4];
 extern f32 aViewDown[4];
 extern f32 btlMeasureEffectTargetGroupBounds(s32 mask, f32 *outMaxTop, f32 *outMinTop);
 /* The selected position provider leaves its vector in vf10. */
@@ -86,7 +85,7 @@ void effBattleComputeTargetPosition(BtlUnit *unit, EffectVectorRequest *request)
     if (unit->status.stateFlags & 0x8000) {
         btlUnitGetEffectPosVU(unit);
     } else {
-        btlUnitGetMuzzlePosVU(unit);
+        effBTLModelGetSphereCenter(unit);
     }
     SDF_VU0_STOREVECTOR(pos);
     if (anchorKind == 5) {
@@ -110,7 +109,7 @@ void effBattleComputeTargetPosition(BtlUnit *unit, EffectVectorRequest *request)
         dir[2] = halfHeight < length ? -length : -halfHeight;
         dir[0] = dir[1] = 0.0f;
         pos[1] = height;
-        LookAtMatrix(pos, sdfViewTargetVector, aViewDown);
+        LookAtMatrix(pos, aViewEye, aViewDown);
         ReverseMatrix();
         SDF_VU0_LOADVECTOR(dir);
         SDF_VU0_VECTOR_W_SET_ZERO();
@@ -127,9 +126,9 @@ void effBattleComputeTargetPosition(BtlUnit *unit, EffectVectorRequest *request)
             dir[2] = 1.0f;
             dir[1] = 0;
             SDF_VU0_LOADVECTOR(unit->orientation);
-            effMiscQuaternionToMatrixVU();
-            sdfVuLoadSecondaryRotationMatrixY(effBTL_Ptr_D[directionMode]);
-            sdfComposeVuMatrixFromRegisters();
+            ToMatrix();
+            SetRotateMatrixY_B(effBTL_Ptr_D[directionMode]);
+            MultMatrixNoArg();
             SDF_VU0_LOADVECTOR(dir);
             SDF_VU0_APPLYMATRIX_XYZ();
             SDF_VU0_STOREVECTOR(dir);
@@ -213,7 +212,7 @@ void effBattleMiscQueryMaskedTargetPosition(u32 actorFlagsMask, EffectVectorRequ
 }
 
 void effBattleMiscQueryOriginalTargetPosition(u32 unused, EffectVectorRequest *request) {
-    BtlUnit *ctx = (BtlUnit *)effBTLFieldColorGetOriginalSelector();
+    BtlUnit *ctx = (BtlUnit *)effBTLSkillGetInvokeFormation();
 
     (void)unused;
     effBattleMiscQueryMaskedTargetPosition(ctx->status.flags & 0xE00, request);
@@ -244,7 +243,7 @@ void effBattleMiscBuildUnitPartOffsetVU(BtlUnit *unit, EffectVectorRequest *requ
     if (directionMode == 9 || anchorKind == 4) {
         camera = dds3GetActiveCameraSceneBasic(dds3GetActiveScene());
         dir[0] = dir[1] = dir[2] = 750.0f;
-        dds3CameraObjectBasicLoadWorldEyeIntoVu(camera);
+        dds3CameraObjectBasicGetTargetPos(camera);
         SDF_VU0_COPYVECTOR_A_TO_B();
         dds3GetPosPoseSet(camera);
         SDF_VU0_SUBVECTOR();
@@ -297,7 +296,7 @@ f32 effBattleMiscQueryScalar(const BtlUnit *unit, const EffectVectorRequest *req
         result = unit->reach * unit->scale;
         break;
     case 1:
-        other = (BtlUnit *)effBTLFieldColorGetOriginalSelector();
+        other = (BtlUnit *)effBTLSkillGetInvokeFormation();
         result = btlMeasureEffectTargetGroupBounds(other->status.flags & 0x600, 0, 0);
         break;
     case 2:
@@ -327,7 +326,7 @@ void effBattleMiscDirectionTo(BtlUnit *unit, EffectVectorRequest *request, f32 *
     if (unit->status.stateFlags & 0x8000) {
         btlUnitGetEffectPosVU(unit);
     } else {
-        btlUnitGetMuzzlePosVU(unit);
+        effBTLModelGetSphereCenter(unit);
     }
     SDF_VU0_LOADVECTOR_B(origin);
     SDF_VU0_SUBVECTOR();
@@ -343,7 +342,7 @@ void effBTLPartGetRotateMatrixPtr(EffectVectorRequest *request, u128 *out) {
     f32 tilt = 0;
 
     if (request->count == 4 || request->directionMode == 9) {
-        LookAtMatrix(aViewTarget, sdfViewTargetVector, aViewDown);
+        LookAtMatrix(aViewTarget, aViewEye, aViewDown);
         ReverseMatrix();
         SDF_VU0_RESET_ROW3();
     } else {
@@ -354,10 +353,10 @@ void effBTLPartGetRotateMatrixPtr(EffectVectorRequest *request, u128 *out) {
             angle = effBTL_Ptr_D[request->directionMode];
         }
         SetRotateMatrixX(tilt);
-        sdfVuLoadSecondaryRotationMatrixY(angle);
+        SetRotateMatrixY_B(angle);
         MultMatrixRevNoArg();
     }
-    VU0_STORE_MATRIX(out);
+    SDF_VU0_STOREMATRIX(out);
 }
 
 EffBattleTransitionDuration effBattleMiscGetTableEntry(EffBattleTransitionDurationIndex durationIndex) {

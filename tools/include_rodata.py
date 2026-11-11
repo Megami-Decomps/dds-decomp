@@ -27,7 +27,7 @@ import re
 import sys
 from pathlib import Path
 
-from include_sdata import DATA_DEF
+from include_sdata import DATA_DEF, defined_name, macro_aliases, names_symbol
 from nonmatching import matching_source
 from c_aliases import function_aliases
 
@@ -74,9 +74,10 @@ def place(version):
         text = re.sub(r'^INCLUDE_RODATA\([^,]+,\s*"[^"]+",\s*(\w+)\);\n\n?', "", text, flags=re.M)
         active = matching_source(text)
         aliases = function_aliases(active)
+        macros = macro_aliases(active)
         defined_at = {
-            m.group(1): m.start() for m in DATA_DEF.finditer(active)
-            if m.group(1) in unit_rodata
+            defined_name(m.group(1), macros): m.start() for m in DATA_DEF.finditer(active)
+            if defined_name(m.group(1), macros) in unit_rodata
         }
         # Rodata a C function no longer names is compiled by that function itself
         # (a string literal): nothing to include.
@@ -93,7 +94,7 @@ def place(version):
             code = function_text(active, m.start())
             for sym in retail_refs.get(aliases.get(m.group(1), m.group(1)), ()):
                 # Named (renamed D_) rodata counts too: compiled &= unit_rodata below.
-                if (sym.startswith(("D_", "jtbl_")) or sym in unit_rodata) and not re.search(rf"\b{sym}\b", code):
+                if (sym.startswith(("D_", "jtbl_")) or sym in unit_rodata) and not names_symbol(code, sym, macros):
                     compiled.add(sym)
         # Only this unit's own rodata can be compiled here: other names a C
         # function writes differently (D_X[9] for retail's D_Y) are other data.
@@ -113,7 +114,7 @@ def place(version):
             for sym in unit_rodata - compiled - set(defined_at):
                 held = holders.get(sym)
                 if held and held <= compiled and sym not in asm_named \
-                        and not re.search(rf"\b{sym}\b", active):
+                        and not names_symbol(active, sym, macros):
                     compiled.add(sym)
                     grown = True
         # The compiler emits each such literal with the first function using it.
@@ -177,7 +178,7 @@ def place(version):
             text = text[:pos] + ("\n" if pos == len(text) else "") + lines + text[pos:]
             added += len(inserts[pos])
         # One blank line before each included item, however often this reruns.
-        text = re.sub(r"\n{3,}(?=INCLUDE_(?:RODATA|SDATA)\()", "\n\n", text)
+        text = re.sub(r"(?<=.)\n+(?=INCLUDE_(?:RODATA|SDATA)\()", "\n\n", text)
         c.write_text(text)
     print(f"{version}: {added} INCLUDE_RODATA lines")
 

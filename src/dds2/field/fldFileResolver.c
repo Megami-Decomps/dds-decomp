@@ -17,9 +17,9 @@
 #include "fld_camera_model_motion_request.h"
 #include "fld_elv_camera_scene_api.h"
 #include "fld_placement_batch_mode.h"
-#include "sdf_vu0.h"
+#include "ps2asm.h"
 #include "sdf_resource_list_release_api.h"
-#include "kwln_background_fade_api.h"
+#include "dds3_background_fade_api.h"
 #include "fld_movement_hold_state_api.h"
 #include "fld_movement_gate_result.h"
 #include "fld_scene_ready_api.h"
@@ -34,8 +34,8 @@
 #include "fld_sky_buffer.h"
 #include "fld_sky_gradient_record.h"
 #include "fld_quad_state.h"
-#include "kwln_frame_draw_buffer.h"
-#include "kwln_draw_buffer.h"
+#include "dds3_frame_draw_buffer.h"
+#include "dds3_draw_buffer.h"
 #include "mnu_title_stream.h"
 #include "fld_bill_config.h"
 #include "sdf_trig.h"
@@ -70,7 +70,7 @@
 #include "sdf_model.h"
 #include "mdl_flag_api.h"
 #include "dds3_world_counter.h"
-#include "kwln_fade.h"
+#include "dds3_fade.h"
 #include "sdf_vu_matrix.h"
 #include "btl.h"
 #include "itf.h"
@@ -155,7 +155,11 @@ dds3Basic_t *fldGetModelRange_From_MatterName(const char *resourceEntryName) {
     return NULL;
 }
 
-#include "eff_light.h"
+typedef struct fldLightDataView_t {
+    u8 pad00[0x64];
+    u32 flags;
+} fldLightDataView_t;
+
 #include "fld_area_work.h"
 #include "fld_npc_palette.h"
 #include "fld_collision_geometry.h"
@@ -187,7 +191,7 @@ extern dds3Basic_t *dds3AddLightObjectBasic(s32);
 extern dds3Basic_t *dds3AddPathBasic(s32 key, Dds3PathCurveTable *work, const char *name);
 extern dds3Basic_t *dds3AddModelRangeBasicNew(s32, void *, const f32 *, const char *);
 extern void dds3GetRadiusPoseSet(dds3Basic_t *, f32);
-extern void dds3SetLightObjectResoruce(dds3Basic_t *, WorldTransformSetup *);
+extern void dds3SetLightObjectResoruce(dds3Basic_t *, fldResourceLight_t *);
 extern void fldMakePlane(const FldCollisionDescriptor *geometry, const f32 *translation,
                          u32 id, s32 sceneFlag,
                          FldMapSlotAuxiliaryFlagSelector auxiliaryFlagSelector);
@@ -329,10 +333,10 @@ void fldMakeResouceBasicFL1(FldSpawnBatch *batch, u32 batchCount) {
                 dds3SetUnitObjectId(spawnedObject, resource->name);
                 dds3SetPosPoseSet(spawnedObject, (u128 *)position);
                 /* Type-12 serialization uses this shared slot for outer radius. */
-                dds3GetRadiusPoseSet(spawnedObject, ((WorldTransformSetup *)resource->data)->transform.rotation[1]);
+                dds3GetRadiusPoseSet(spawnedObject, ((fldResourceLight_t *)resource->data)->OutsideR);
                 dds3SetLightObjectResoruce(spawnedObject, resource->data);
                 if ((u32)fldGlobalBase.area - 200U < 300U) {
-                    ((EffLightData *)spawnedObject->workdata)->flags |= 8;
+                    ((fldLightDataView_t *)spawnedObject->workdata)->flags |= 8;
                     dds3SetUnitObjectId(spawnedObject, "BTL_DEF_LIGHT");
                 }
             }
@@ -389,10 +393,10 @@ void fldMakeResouceBasicFL1(FldSpawnBatch *batch, u32 batchCount) {
 #include "fr_font.h"
 #include "sdf_packet_list.h"
 #include "sdf_dev_state.h"
-#include "sdf_resource.h"
-#include "kwln.h"
-#include "kwln_task_create.h"
-#include "kwln_task_runner.h"
+#include "sdf_heap_api.h"
+#include "kernel.h"
+#include "dds3_task_create.h"
+#include "dds3_task_runner.h"
 #include "fld_inf.h"
 #include "sdf_primitive_packet_api.h"
 #include "dds3obj.h"
@@ -405,14 +409,13 @@ void fldMakeResouceBasicFL1(FldSpawnBatch *batch, u32 batchCount) {
 #include "sdf_pac_work.h"
 
 #include "fpu.h"
-#include "pcp_vu0.h"
 #include "sdf.h"
 #include "sdf_sif_command.h"
 #include "evt_unit.h"
 #include "evt_unit_color_transition.h"
 #include "dat_state.h"
 #include "mdl.h"
-#include "kwln_task_lifecycle.h"
+#include "dds3_task_lifecycle.h"
 
 enum {
     FIELD_CAMERA_SETTING_COUNT = 8
@@ -595,12 +598,12 @@ extern s32 sdf2DGetPrimPacketSize(s32 registerCount, s32 loopCount);
 extern u8 *sdf2DGetPrimPtr(SdfDrawPacket *packet);
 
 
-extern KwlnFrameDrawBuffer kwlnFrameDrawPacketRecords[];
+extern dds3FrameDrawBuffer_t dds3FrameDrawPacketRecords[];
 
-extern void sdfBuildMaskedFrameRegisterReference(const u8 *, SdfDmaReferenceChainPacket *, s32);
+extern void sdfGrSetFrameMaskRGB(const u8 *, SdfDmaReferenceChainPacket *, s32);
 
 
-extern void sdfBuildFrameRegisterReference(const u8 *, SdfDmaReferenceChainPacket *, s32);
+extern void sdfGrSetFrameMaskReset(const u8 *, SdfDmaReferenceChainPacket *, s32);
 
 extern f32 D_0038A980[][4];
 
@@ -612,17 +615,17 @@ extern u32 D_0038A9A0[];
 
 
 
-extern sdfGrFrameSet_t D_0040B290;
+extern sdfGrFrameSet_t sdfGrFrameSet;
 
 
 
-extern sdfGrOt_t kwlnPositionedTextSurface;
+extern sdfGrOt_t sdfDebugGrOt;
 
 
 
 extern void InversMatrix(void);
 
-extern sdfGrOt_t D_00380708;
+SYMBOL_AT(sdfGrOt_t, D_00380708, sdfGrOtTable, 0xBC0);
 
 extern u8 D_00436070[];
 
@@ -1527,7 +1530,7 @@ extern void fldInitializeMenuResources(void);
 extern void fldUpdateSparkSlots(void);
 extern void fldMakeObjectBasic3(void);
 extern void fldInitializeActorMotionSlots(void);
-extern struct DevRequest *sndLoadNamedOffsetResourceList(const char *name);
+extern struct DevRequest *sdfDevLoadTexList(const char *name);
 extern char D_00436028[];
 extern char D_00436030[];
 extern char D_00436038[];
@@ -1648,7 +1651,7 @@ const struct sdfMemHandle_t *fldLoadAreaRoomResources(const char *resourceName) 
         fldCachedRoomResourceAllocation = fldCopyCachedRoomResourceIfLocationMatches(&roomOffsets, area, room);
         if (fldCachedRoomResourceAllocation == NULL) {
             sprintf(path, D_00436028, resourceName);
-            fldRoomSoundResources = sndLoadNamedOffsetResourceList(path);
+            fldRoomSoundResources = sdfDevLoadTexList(path);
         } else {
             fldRoomSoundResources = sdfTexSetTB(roomOffsets);
             sdfMemFreeDelayedDirect(fldCachedRoomResourceAllocation);
@@ -1722,16 +1725,16 @@ const struct sdfMemHandle_t *fldLoadAreaRoomResources(const char *resourceName) 
 #include "common.h"
 #include "fld_stop_entry.h"
 #include "sdf_resource_list_release_api.h"
-#include "kwln_background_fade_api.h"
+#include "dds3_background_fade_api.h"
 #include "fld_scene_ready_api.h"
 #include "fld_scene_record_api.h"
 #include "fld_light_set.h"
 #include "fld_sky_buffer.h"
 #include "fld_sky_gradient_record.h"
 #include "fld_quad_state.h"
-#include "kwln_frame_draw_buffer.h"
-#include "kwln_draw_buffer.h"
-#include "kwln_fade.h"
+#include "dds3_frame_draw_buffer.h"
+#include "dds3_draw_buffer.h"
+#include "dds3_fade.h"
 #include "mnu_title_stream.h"
 #include "fld_bill_config.h"
 #include "sdf_trig.h"
@@ -1752,7 +1755,7 @@ const struct sdfMemHandle_t *fldLoadAreaRoomResources(const char *resourceName) 
 #include "fld_collision_geometry.h"
 #include "fld_scene_request.h"
 #include "fld_spawn_event.h"
-#include "sdf_resource.h"
+#include "sdf_heap_api.h"
 #include "dds3obj.h"
 #include "dds3_world_value.h"
 #include "sdf_texture_file.h"
@@ -1765,7 +1768,6 @@ const struct sdfMemHandle_t *fldLoadAreaRoomResources(const char *resourceName) 
 #include "dds3_world_counter.h"
 #include "sdf_vu_matrix.h"
 #include "dds3_world_secondary.h"
-#include "eff_light.h"
 #include "fld_area_work.h"
 #include "fld_spawn_collision.h"
 #include "evt_world.h"
@@ -1779,7 +1781,7 @@ const struct sdfMemHandle_t *fldLoadAreaRoomResources(const char *resourceName) 
 #include "sdf_dev_state.h"
 #include "fld_waypoint.h"
 #include "fld_inf.h"
-#include "kwln_task_lifecycle.h"
+#include "dds3_task_lifecycle.h"
 #include "file_request_api.h"
 #include "file_pac.h"
 #include "fld_packed_resource_kind.h"
@@ -1790,13 +1792,12 @@ const struct sdfMemHandle_t *fldLoadAreaRoomResources(const char *resourceName) 
 #include "evt_unit.h"
 #include "evt_unit_color_transition.h"
 #include "fpu.h"
-#include "pcp_vu0.h"
 #include "sdf.h"
 #include "sdf_sif_command.h"
 #include "mdl.h"
 #include "scr.h"
-#include "kwln.h"
-#include "kwln_task_create.h"
+#include "kernel.h"
+#include "dds3_task_create.h"
 #include "dat_state.h"
 #include "dds3_world_primary.h"
 #include "sdf_packet_alloc.h"
@@ -2099,6 +2100,7 @@ extern u8 fldTestRoomObjectModeFlag(s32 mapId, u32 slotIndex, s32 bit);
 
 /* Same debug grid as fldHojiDebugView for the room mode (VIS) and room object
  * mode (ANM) flags. */
+
 INCLUDE_RODATA(const s32, "field/fldFileResolver", D_00413198);
 
 void fldHojiDebugView2(void) {
@@ -2154,7 +2156,7 @@ void fldDrawInit(void) {
         D_00436064 = 1;
         object = sdfMatNew();
         D_0043607C = (u32)object;
-        object->primaryStateFloat = 1.0f;
+        object->constant = 1.0f;
         D_00438EC8 = (u32)sdfMatNew();
         fldMarkerTexture = sdfTexSet((SdfTextureFileHeader *)(D_0038A700));
     }
@@ -2209,7 +2211,7 @@ void DrwSprite2D(s32 x, s32 y, s32 w, s32 h, s32 u, s32 v, s32 uw, s32 vh, s32 c
     sdf2DLinkTexPacket(command, texture, SDF_GS_CONTEXT_1);
     sdfDrawTagLink(command, (u32)handle);
     descriptor = &sdfGrOtTable[rsetFrameMaskOtOffset];
-    descriptor->append(descriptor, command);
+    descriptor->regFunc(descriptor, command);
 }
 
 void DrwSprite2DC(s32 x, s32 y, s32 width, s32 height,
@@ -2238,7 +2240,7 @@ void DrwSprite2DC(s32 x, s32 y, s32 width, s32 height,
         right, bottom, uRight, vBottom, color2,
         -1, NULL);
     surface = &sdfGrOtTable[rsetFrameMaskOtOffset];
-    surface->append(surface, list);
+    surface->regFunc(surface, list);
 }
 
 void DrwSprite2DF(f32 x, f32 y, f32 w, f32 h, s32 u, s32 v, s32 uw, s32 vh, s32 color, sdfTexHandle_t *texture) {
@@ -2276,15 +2278,15 @@ void DrwSprite2DF(f32 x, f32 y, f32 w, f32 h, s32 u, s32 v, s32 uw, s32 vh, s32 
     sdf2DLinkTexPacket(command, texture, SDF_GS_CONTEXT_1);
     sdfDrawTagLink(command, (u32)handle);
     descriptor = &sdfGrOtTable[rsetFrameMaskOtOffset];
-    descriptor->append(descriptor, command);
+    descriptor->regFunc(descriptor, command);
 }
 
 void fldPoint3To2(f32 *dstX, f32 *dstY, f32 x, f32 y, f32 z) {
     f32 vec[4] = { x, y, z, 1.0f };
     f32 result[4];
 
-    VU0_LOAD_MATRIX_MEMORY(sdfViewMatrix);
-    sdfPostmultiplyVuMatrixFromMemory((const struct Matrix4 *)sdfProjectionMatrix);
+    SDF_VU0_LOADMATRIX_BARRIER(sdfViewMatrix);
+    MultMatrixRev((const struct Matrix4 *)sdfProjectionMatrix);
     SDF_VU0_COPYMATRIX_A_TO_B();
     SDF_VU0_LOADVECTOR_BARRIER(vec);
     SDF_VU0_APPLYMATRIX_XYZ1();
@@ -2302,8 +2304,8 @@ void fldPoint3To2H(f32 *dstX, f32 *dstY, f32 x, f32 y, f32 z) {
     f32 vec[4] = { x, y, z, 1.0f };
     f32 result[4];
 
-    VU0_LOAD_MATRIX_MEMORY(D_00384790);
-    sdfPostmultiplyVuMatrixFromMemory((const struct Matrix4 *)D_0037F9B0);
+    SDF_VU0_LOADMATRIX_BARRIER(D_00384790);
+    MultMatrixRev((const struct Matrix4 *)D_0037F9B0);
     SDF_VU0_COPYMATRIX_A_TO_B();
     SDF_VU0_LOADVECTOR_BARRIER(vec);
     SDF_VU0_APPLYMATRIX_XYZ1();
@@ -2319,13 +2321,13 @@ void fldPoint3To2H(f32 *dstX, f32 *dstY, f32 x, f32 y, f32 z) {
 
 void fldPrepareProjectionMatrix(void) {
     u8 *matrix;
-    VU0_LOAD_MATRIX_MEMORY(sdfViewMatrix);
+    SDF_VU0_LOADMATRIX_BARRIER(sdfViewMatrix);
     matrix = sdfProjectionMatrix;
-    sdfPostmultiplyVuMatrixFromMemory((const struct Matrix4 *)matrix);
+    MultMatrixRev((const struct Matrix4 *)matrix);
     SDF_VU0_COPYMATRIX_A_TO_B();
     matrix += 0x40;
     SDF_VU0_LOADVECTOR_B_BARRIER(matrix);
-    VU0_LOAD_VF_MEMORY(vf12, D_0037F660);
+    SDF_VU0_LOADVECTOR_C_BARRIER(D_0037F660);
 }
 
 void fldProjectPointWithPreparedMatrix(f32 *dstX, f32 *dstY, f32 x, f32 y, f32 z) {
@@ -2359,7 +2361,7 @@ void rsetTexa(s32 lower, s32 bits, u64 upper) {
     entry[4] = (u64)(bits << 15) | (upper << 32) | lower;
     sdfDrawTagLink(command, (u32)packet);
     descriptor = &sdfGrOtTable[rsetFrameMaskOtOffset];
-    descriptor->append(descriptor, command);
+    descriptor->regFunc(descriptor, command);
 }
 
 void rsetTest(s32 flag0, s32 flag1, s32 field4, s32 field12, s32 flag14, s32 flag15, s32 unused, s32 field17) {
@@ -2375,7 +2377,7 @@ void rsetTest(s32 flag0, s32 flag1, s32 field4, s32 field12, s32 flag14, s32 fla
     data[5] = 0x47;
     sdfDrawTagLink(command, (u32)packet);
     descriptor = &sdfGrOtTable[rsetFrameMaskOtOffset];
-    descriptor->append(descriptor, command);
+    descriptor->regFunc(descriptor, command);
 }
 
 /* Write the selected blend equation to GS ALPHA_1, including DDS2's FIX mode. */
@@ -2423,7 +2425,7 @@ void rsetAlpha(s32 mode) {
     data[5] = 0x42;
     sdfDrawTagLink(command, (u32)packet);
     descriptor = &sdfGrOtTable[rsetFrameMaskOtOffset];
-    descriptor->append(descriptor, command);
+    descriptor->regFunc(descriptor, command);
 }
 
 void aDrawLineStripPrim(s32 x0, s32 y0, s32 x1, s32 y1, u32 gsWord0, u32 gsWord1, u32 gsWord2) {
@@ -2460,7 +2462,7 @@ void aDrawLineStripPrim(s32 x0, s32 y0, s32 x1, s32 y1, u32 gsWord0, u32 gsWord1
     }
     sdfDrawTagLink(command, (u32)packet);
     descriptor = &sdfGrOtTable[rsetFrameMaskOtOffset];
-    descriptor->append(descriptor, command);
+    descriptor->regFunc(descriptor, command);
 }
 
 void aDrawLineDirect(u32 x0, u32 y0, u32 x1, u32 y1, u32 gsWord0, u32 gsWord1, u32 gsWord2) {
@@ -2497,7 +2499,7 @@ void aDrawLineDirect(u32 x0, u32 y0, u32 x1, u32 y1, u32 gsWord0, u32 gsWord1, u
     }
     sdfDrawTagLink(command, (u32)packet);
     descriptor = &sdfGrOtTable[rsetFrameMaskOtOffset];
-    descriptor->append(descriptor, command);
+    descriptor->regFunc(descriptor, command);
 }
 
 void aDrawBoxF(s32 x, s32 y, s32 w, s32 h, u32 gsWord0, u32 gsWord1, u32 gsWord2, u32 gsWord3) {
@@ -2538,7 +2540,7 @@ void aDrawBoxF(s32 x, s32 y, s32 w, s32 h, u32 gsWord0, u32 gsWord1, u32 gsWord2
     }
     sdfDrawTagLink(command, (u32)packet);
     descriptor = &sdfGrOtTable[rsetFrameMaskOtOffset];
-    descriptor->append(descriptor, command);
+    descriptor->regFunc(descriptor, command);
 }
 
 void aDrawBoxFZ(s32 x, s32 y, s32 w, s32 h, u32 vertexTag, u32 gsWord0, u32 gsWord1, u32 gsWord2, u32 gsWord3) {
@@ -2581,7 +2583,7 @@ void aDrawBoxFZ(s32 x, s32 y, s32 w, s32 h, u32 vertexTag, u32 gsWord0, u32 gsWo
     }
     sdfDrawTagLink(command, (u32)packet);
     descriptor = &sdfGrOtTable[rsetFrameMaskOtOffset];
-    descriptor->append(descriptor, command);
+    descriptor->regFunc(descriptor, command);
 }
 
 void aDrawBoxF_Direct(s32 x0, s32 y0, s32 x1, s32 y1, u32 gsWord0, u32 gsWord1, u32 gsWord2, u32 gsWord3) {
@@ -2622,7 +2624,7 @@ void aDrawBoxF_Direct(s32 x0, s32 y0, s32 x1, s32 y1, u32 gsWord0, u32 gsWord1, 
     }
     sdfDrawTagLink(command, (u32)packet);
     descriptor = &sdfGrOtTable[rsetFrameMaskOtOffset];
-    descriptor->append(descriptor, command);
+    descriptor->regFunc(descriptor, command);
 }
 
 void aDrawTriG(s32 x0, s32 y0, s32 x1, s32 y1, s32 x2, s32 y2, u32 r0, u32 g0, u32 b0, u32 a0, u32 r1, u32 g1, u32 b1, u32 a1, u32 r2, u32 g2, u32 b2, u32 a2) {
@@ -2663,10 +2665,10 @@ void aDrawTriG(s32 x0, s32 y0, s32 x1, s32 y1, s32 x2, s32 y2, u32 r0, u32 g0, u
     }
     sdfDrawTagLink(command, (u32)packet);
     descriptor = &sdfGrOtTable[rsetFrameMaskOtOffset];
-    descriptor->append(descriptor, command);
+    descriptor->regFunc(descriptor, command);
 }
 
-void fldSubmitGsGradientQuad(s32 x, s32 y, s32 w, s32 h, u32 r0, u32 g0, u32 b0, u32 a0, u32 r1, u32 g1, u32 b1, u32 a1, u32 r2, u32 g2, u32 b2, u32 a2, u32 r3, u32 g3, u32 b3, u32 a3) {
+void aDrawBoxG(s32 x, s32 y, s32 w, s32 h, u32 r0, u32 g0, u32 b0, u32 a0, u32 r1, u32 g1, u32 b1, u32 a1, u32 r2, u32 g2, u32 b2, u32 a2, u32 r3, u32 g3, u32 b3, u32 a3) {
     s32 coords[8];
     sdfDrawTag_t *command;
     SdfDrawPacket *packet;
@@ -2711,7 +2713,7 @@ void fldSubmitGsGradientQuad(s32 x, s32 y, s32 w, s32 h, u32 r0, u32 g0, u32 b0,
     }
     sdfDrawTagLink(command, (u32)packet);
     descriptor = &sdfGrOtTable[rsetFrameMaskOtOffset];
-    descriptor->append(descriptor, command);
+    descriptor->regFunc(descriptor, command);
 }
 
 void aDrawBoxGF(u32 r0, u32 g0, u32 b0, u32 a0, u32 r1, u32 g1, u32 b1, u32 a1, u32 r2, u32 g2, u32 b2, u32 a2, u32 r3, u32 g3, u32 b3, u32 a3, f32 x, f32 y, f32 w, f32 h) {
@@ -2759,7 +2761,7 @@ void aDrawBoxGF(u32 r0, u32 g0, u32 b0, u32 a0, u32 r1, u32 g1, u32 b1, u32 a1, 
     }
     sdfDrawTagLink(command, (u32)packet);
     descriptor = &sdfGrOtTable[rsetFrameMaskOtOffset];
-    descriptor->append(descriptor, command);
+    descriptor->regFunc(descriptor, command);
 }
 
 void fldSubmitTaggedGsRectangle(s32 x, s32 y, s32 w, s32 h, u32 gsWord0, u32 gsWord1, u32 gsWord2, u32 gsWord3, u32 vertexTag) {
@@ -2802,7 +2804,7 @@ void fldSubmitTaggedGsRectangle(s32 x, s32 y, s32 w, s32 h, u32 gsWord0, u32 gsW
     }
     sdfDrawTagLink(command, (u32)packet);
     descriptor = &sdfGrOtTable[rsetFrameMaskOtOffset];
-    descriptor->append(descriptor, command);
+    descriptor->regFunc(descriptor, command);
 }
 
 void drawSprite3D(sdfTexHandle_t *texture, FldMarkerPacket *modelData) {
@@ -2815,9 +2817,9 @@ void drawSprite3D(sdfTexHandle_t *texture, FldMarkerPacket *modelData) {
     sdfDrawTagInit(command);
     header = (DmaPacketHeader *)sdfGrAllocPacketBuff(0x20);
     sdf3DMakeDirectRefPacket(header, (u32)sdfTexGetPacket(texture), sdfTexGetPacketLength(texture));
-    sdfAppendReferencePacket(command, (u32)header);
+    sdfDrawTagLinkRef(command, (u32)header);
     SetRotateMatrixZ(modelData->scale);
-    VU0_STORE_MATRIX(mat);
+    SDF_VU0_STOREMATRIX(mat);
     packet = (u8 *)sdfGrAllocPacketBuff(0x38);
     sdfBillBoardMakeTMPacket(packet, mat);
     sdfDrawTagLink(command, (u32)packet);
@@ -2825,7 +2827,7 @@ void drawSprite3D(sdfTexHandle_t *texture, FldMarkerPacket *modelData) {
     sdfBillBoardMake1(packet, modelData->pos, modelData->color, &modelData->uv, modelData->quad);
     sdfDrawTagLink(command, (u32)packet);
     descriptor = &sdfGrOtTable[rsetFrameMaskOtOffset];
-    descriptor->append(descriptor, command);
+    descriptor->regFunc(descriptor, command);
 }
 
 void fldSubmitPrimaryFramePacket(void) {
@@ -2834,10 +2836,10 @@ void fldSubmitPrimaryFramePacket(void) {
     sdfGrOt_t *descriptor;
     sdfDrawTagInit(command);
     texture = (SdfDmaReferenceChainPacket *)sdfGrAllocPacketBuff(0x40);
-    sdfBuildMaskedFrameRegisterReference(kwlnFrameDrawPacketRecords[dds3GetFrameID()].baseBytes, texture, 0);
+    sdfGrSetFrameMaskRGB(dds3FrameDrawPacketRecords[dds3GetFrameID()].baseBytes, texture, 0);
     sdfDrawTagLinkRefGif(command, (u32)texture);
     descriptor = &sdfGrOtTable[rsetFrameMaskOtOffset];
-    descriptor->append(descriptor, command);
+    descriptor->regFunc(descriptor, command);
 }
 
 void fldSubmitAlternateFramePacket(void) {
@@ -2846,10 +2848,10 @@ void fldSubmitAlternateFramePacket(void) {
     sdfGrOt_t *descriptor;
     sdfDrawTagInit(command);
     texture = (SdfDmaReferenceChainPacket *)sdfGrAllocPacketBuff(0x40);
-    sdfBuildFrameRegisterReference(kwlnFrameDrawPacketRecords[dds3GetFrameID()].baseBytes, texture, 0);
+    sdfGrSetFrameMaskReset(dds3FrameDrawPacketRecords[dds3GetFrameID()].baseBytes, texture, 0);
     sdfDrawTagLinkRefGif(command, (u32)texture);
     descriptor = &sdfGrOtTable[rsetFrameMaskOtOffset];
-    descriptor->append(descriptor, command);
+    descriptor->regFunc(descriptor, command);
 }
 
 void ooyTestLine3D(u32 first, u32 second, f32 x, f32 y, f32 z, f32 u, f32 v, f32 w) {
@@ -2869,7 +2871,7 @@ void ooyTestLine3D(u32 first, u32 second, f32 x, f32 y, f32 z, f32 u, f32 v, f32
     record = (s32)effDebugDrawWireModel((const f32 (*)[4])D_0038A980, D_0038A9A0, 2, 0x80);
     sdfDrawTagLink(list, record);
     descriptor = &sdfGrOtTable[rsetFrameMaskOtOffset];
-    descriptor->append(descriptor, list);
+    descriptor->regFunc(descriptor, list);
 }
 
 void fldDrawPoly3(s32 color0, s32 color1, s32 color2,
@@ -2906,10 +2908,10 @@ void fldDrawPoly3(s32 color0, s32 color1, s32 color2,
     indices[2] = color2;
     sdfDrawTagLink(command, (u32)sdf3DPrimMakePoly(&desc));
     descriptor = &sdfGrOtTable[rsetFrameMaskOtOffset];
-    descriptor->append(descriptor, command);
+    descriptor->regFunc(descriptor, command);
 }
 
-void fldSubmitTexturedOverlaySprite(void) {
+void fldDrawBokasi(void) {
     sdfDrawTag_t *packetList;
     sdfGrRefPacketHeader_t *dmaPacket;
     s32 drawBufferIndex;
@@ -2923,7 +2925,7 @@ void fldSubmitTexturedOverlaySprite(void) {
     dmaPacket = (sdfGrRefPacketHeader_t *)sdfGrAllocPacketBuff(0x20);
     drawBufferIndex = (s32)dds3GetFrameID();
     sdfGrLinkDispFrameTex(packetList,
-                        (u32)(kwlnFrameDrawPacketRecords[drawBufferIndex].baseBytes),
+                        (u32)(dds3FrameDrawPacketRecords[drawBufferIndex].baseBytes),
                         dmaPacket);
 
     /* Set texture alpha and flush the texture cache. */
@@ -2971,7 +2973,7 @@ void fldSubmitTexturedOverlaySprite(void) {
     sdfDrawTagLink(packetList, (u32)columnPacket);
 
     surface = &sdfGrOtTable[rsetFrameMaskOtOffset];
-    surface->append(surface, packetList);
+    surface->regFunc(surface, packetList);
 }
 
 void fldSubmitOverlaySpriteWithRenderState(s32 mode) {
@@ -2988,7 +2990,7 @@ void fldSubmitOverlaySpriteWithRenderState(s32 mode) {
     dmaPacket = (sdfGrRefPacketHeader_t *)sdfGrAllocPacketBuff(0x20);
     drawBufferIndex = (s32)dds3GetFrameID();
     sdfGrLinkDispFrameTex(packetList,
-                        (u32)(kwlnFrameDrawPacketRecords[drawBufferIndex].baseBytes),
+                        (u32)(dds3FrameDrawPacketRecords[drawBufferIndex].baseBytes),
                         dmaPacket);
 
     firstPacket = (SdfGsTextureAlphaFlushPacket *)sdfGrAllocPacketBuff(0x40);
@@ -3041,10 +3043,10 @@ void fldSubmitOverlaySpriteWithRenderState(s32 mode) {
     sdfDrawTagLink(packetList, (u32)columnPacket);
 
     surface = &sdfGrOtTable[rsetFrameMaskOtOffset];
-    surface->append(surface, packetList);
+    surface->regFunc(surface, packetList);
 }
 
-void fldSubmitOverlayStateAndSprite(s32 alpha) {
+void fldDrawFrameSpriteAlpha(s32 alpha) {
     sdfDrawTag_t *packetList;
     sdfGrRefPacketHeader_t *dmaPacket;
     s32 drawBufferIndex;
@@ -3058,7 +3060,7 @@ void fldSubmitOverlayStateAndSprite(s32 alpha) {
     dmaPacket = (sdfGrRefPacketHeader_t *)sdfGrAllocPacketBuff(0x20);
     drawBufferIndex = (s32)dds3GetFrameID();
     sdfGrLinkDispFrameTex(packetList,
-                        (u32)(kwlnFrameDrawPacketRecords[drawBufferIndex].baseBytes),
+                        (u32)(dds3FrameDrawPacketRecords[drawBufferIndex].baseBytes),
                         dmaPacket);
 
     texturePacket = (SdfGsTextureAlphaFlushPacket *)sdfGrAllocPacketBuff(0x40);
@@ -3104,7 +3106,7 @@ void fldSubmitOverlayStateAndSprite(s32 alpha) {
     sdfDrawTagLink(packetList, (u32)columnPacket);
 
     surface = &sdfGrOtTable[rsetFrameMaskOtOffset];
-    surface->append(surface, packetList);
+    surface->regFunc(surface, packetList);
 }
 
 void fldDrawPos(const f32 position[3]) {
@@ -3194,10 +3196,10 @@ void fldDrwZSave(void) {
     if (fldDrwZBuf != 0) {
         sdfDrawTag_t *packet = sdfPrimAllocDrawTag(0);
         sdfGrOt_t *descriptor;
-        sdfLinkStoreImage(packet, D_0040B290.buffers[2],
+        sdfLinkStoreImage(packet, sdfGrFrameSet.buffers[2],
                                 0, 0, 0x200, 0xE0, (s32)(u32)fldDrwZBuf, 0, 0, 0);
         descriptor = &sdfGrOtTable[rsetFrameMaskOtOffset];
-        descriptor->append(descriptor, packet);
+        descriptor->regFunc(descriptor, packet);
     }
 }
 
@@ -3205,18 +3207,18 @@ void fldDrwZLoad(void) {
     if (fldDrwZBuf != 0) {
         sdfDrawTag_t *packet = sdfPrimAllocDrawTag(0);
         sdfGrOt_t *descriptor;
-        sdfLinkLoadImage(packet, D_0040B290.buffers[2],
+        sdfLinkLoadImage(packet, sdfGrFrameSet.buffers[2],
                                   0, 0, 0x200, 0xE0, (s32)(u32)fldDrwZBuf, 0);
         descriptor = &sdfGrOtTable[rsetFrameMaskOtOffset];
-        descriptor->append(descriptor, packet);
+        descriptor->regFunc(descriptor, packet);
     }
 }
 
 void fldKanjiDraw(s32 x, s32 y, u32 colors, const u8 *text) {
-    struct _FRQ *object;
+    struct frFontHandle_t *object;
 
     object = itfCreateConvertedTextGlyph(x << 4, y << 4, 0, colors, text, 0);
-    frFontDrawGlyphInDefaultMode(object);
+    frDrawFont(object);
     frDestroyFontRequestAfter(object);
 }
 
@@ -3241,7 +3243,7 @@ void fldDbgPrint3D(f32 x, f32 y, f32 z, s32 drawValue) {
     f32 screenX;
     f32 screenY;
 
-    VU0_LOAD_MATRIX(sdfViewMatrix);
+    SDF_VU0_LOADMATRIX(sdfViewMatrix);
     InversMatrix();
     fldPoint3To2(&screenX, &screenY, x, y, z);
     if (screenX < -4000.0f || screenX > 4000.0f ||
@@ -3260,11 +3262,11 @@ void fldDbgPrint3D(f32 x, f32 y, f32 z, s32 drawValue) {
     quad.unk8 = 0x1A40;
     quad.unk10 = 0x0FFFFF7F;
     initDrawTag(&quad);
-    sdfPktInit(&packet, (s32)screenX * 16, (s32)screenY * 16, quad.drawDepth, 1);
+    sdfDevSetPrintCB(&packet, (s32)screenX * 16, (s32)screenY * 16, quad.drawDepth, 1);
     sdfDrawTagLink(quad.packetList,
                     (u32)sdfDevPrintfEx(&packet, D_00436070, drawValue));
     LF(&quad);
-    D_00380708.append(&D_00380708, quad.packetList);
+    D_00380708.regFunc(&D_00380708, quad.packetList);
 }
 
 void fldDbgPrint2D(s32 x, s32 y, const char *format) {
@@ -3282,10 +3284,10 @@ void fldDbgPrint2D(s32 x, s32 y, const char *format) {
     quad.unk8 = 0x1A40;
     quad.unk10 = 0x0FFFFF7D;
     initDrawTag(&quad);
-    sdfPktInit(&packet, quad.rowX + x, quad.rowY + y, quad.drawDepth, 0);
+    sdfDevSetPrintCB(&packet, quad.rowX + x, quad.rowY + y, quad.drawDepth, 0);
     sdfDrawTagLink(quad.packetList, (u32)sdfDevPrintfEx(&packet, format));
     LF(&quad);
-    kwlnPositionedTextSurface.append(&kwlnPositionedTextSurface, quad.packetList);
+    sdfDebugGrOt.regFunc(&sdfDebugGrOt, quad.packetList);
 }
 
 void fldDbgPrint2DC(s32 x, s32 y, s32 packetField, s32 drawValue) {
@@ -3303,10 +3305,10 @@ void fldDbgPrint2DC(s32 x, s32 y, s32 packetField, s32 drawValue) {
     quad.unk8 = 0x1A40;
     quad.unk10 = 0x0FFFFF7F;
     initDrawTag(&quad);
-    sdfPktInit(&packet, quad.rowX + x, quad.rowY + y, quad.drawDepth, packetField);
+    sdfDevSetPrintCB(&packet, quad.rowX + x, quad.rowY + y, quad.drawDepth, packetField);
     sdfDrawTagLink(quad.packetList, (u32)sdfDevPrintfEx(&packet, (const char *)drawValue));
     LF(&quad);
-    D_00380708.append(&D_00380708, quad.packetList);
+    D_00380708.regFunc(&D_00380708, quad.packetList);
 }
 
 void fldDbgPrintNum2D(s32 x, s32 y, s32 drawValue) {
@@ -3324,10 +3326,10 @@ void fldDbgPrintNum2D(s32 x, s32 y, s32 drawValue) {
     quad.unk8 = 0x1A40;
     quad.unk10 = 0x0FFFFF7F;
     initDrawTag(&quad);
-    sdfPktInit(&packet, quad.rowX + x * 16, quad.rowY + y * 8, quad.drawDepth, 0);
+    sdfDevSetPrintCB(&packet, quad.rowX + x * 16, quad.rowY + y * 8, quad.drawDepth, 0);
     sdfDrawTagLink(quad.packetList, (u32)sdfDevPrintfEx(&packet, D_00436070, drawValue));
     LF(&quad);
-    D_00380708.append(&D_00380708, quad.packetList);
+    D_00380708.regFunc(&D_00380708, quad.packetList);
 }
 
 void fldDbgPrintNum2DH(s32 x, s32 y, s32 drawValue) {
@@ -3345,10 +3347,10 @@ void fldDbgPrintNum2DH(s32 x, s32 y, s32 drawValue) {
     quad.unk8 = 0x1A40;
     quad.unk10 = 0x0FFFFF7F;
     initDrawTag(&quad);
-    sdfPktInit(&packet, quad.rowX + x * 16, quad.rowY + y * 8, quad.drawDepth, 0);
+    sdfDevSetPrintCB(&packet, quad.rowX + x * 16, quad.rowY + y * 8, quad.drawDepth, 0);
     sdfDrawTagLink(quad.packetList, (u32)sdfDevPrintfEx(&packet, D_00436078, drawValue));
     LF(&quad);
-    D_00380708.append(&D_00380708, quad.packetList);
+    D_00380708.regFunc(&D_00380708, quad.packetList);
 }
 
 void fldDbgPrintStr2D(s32 x, s32 y, s32 drawValue) {
@@ -3366,10 +3368,10 @@ void fldDbgPrintStr2D(s32 x, s32 y, s32 drawValue) {
     quad.unk8 = 0x1A40;
     quad.unk10 = 0x0FFFFF7F;
     initDrawTag(&quad);
-    sdfPktInit(&packet, quad.rowX + x * 16, quad.rowY + y * 8, quad.drawDepth, 0);
+    sdfDevSetPrintCB(&packet, quad.rowX + x * 16, quad.rowY + y * 8, quad.drawDepth, 0);
     sdfDrawTagLink(quad.packetList, (u32)sdfDevPrintfEx(&packet, (const char *)drawValue));
     LF(&quad);
-    D_00380708.append(&D_00380708, quad.packetList);
+    D_00380708.regFunc(&D_00380708, quad.packetList);
 }
 
 void fldDbgPrintStr2DC(s32 x, s32 y, s32 packetField, s32 drawValue) {
@@ -3387,10 +3389,10 @@ void fldDbgPrintStr2DC(s32 x, s32 y, s32 packetField, s32 drawValue) {
     quad.unk8 = 0x1A40;
     quad.unk10 = 0x0FFFFF7F;
     initDrawTag(&quad);
-    sdfPktInit(&packet, quad.rowX + x * 16, quad.rowY + y * 8, quad.drawDepth, packetField);
+    sdfDevSetPrintCB(&packet, quad.rowX + x * 16, quad.rowY + y * 8, quad.drawDepth, packetField);
     sdfDrawTagLink(quad.packetList, (u32)sdfDevPrintfEx(&packet, (const char *)drawValue));
     LF(&quad);
-    D_00380708.append(&D_00380708, quad.packetList);
+    D_00380708.regFunc(&D_00380708, quad.packetList);
 }
 
 void fldDbgPrintStr2DCF(s32 packetField, s32 drawValue, f32 x, f32 y) {
@@ -3408,10 +3410,10 @@ void fldDbgPrintStr2DCF(s32 packetField, s32 drawValue, f32 x, f32 y) {
     quad.unk8 = 0x1A40;
     quad.unk10 = 0x0FFFFF7F;
     initDrawTag(&quad);
-    sdfPktInit(&packet, quad.rowX + (s32)(x * 16.0f), quad.rowY + (s32)(y * 8.0f), quad.drawDepth, packetField);
+    sdfDevSetPrintCB(&packet, quad.rowX + (s32)(x * 16.0f), quad.rowY + (s32)(y * 8.0f), quad.drawDepth, packetField);
     sdfDrawTagLink(quad.packetList, (u32)sdfDevPrintfEx(&packet, (const char *)drawValue));
     LF(&quad);
-    D_00380708.append(&D_00380708, quad.packetList);
+    D_00380708.regFunc(&D_00380708, quad.packetList);
 }
 
 void fldDrawMaruKage(u32 fade, f32 x, f32 y, f32 z, f32 radius) {
@@ -3470,7 +3472,7 @@ void fldDrawExpandedSpriteStrip(s32 alpha, s32 offset) {
     sdfGrOt_t *descriptor;
 
     sdfGrLinkDispFrameTex(list,
-        (u32)(kwlnFrameDrawPacketRecords[dds3GetFrameID()].baseBytes), reference);
+        (u32)(dds3FrameDrawPacketRecords[dds3GetFrameID()].baseBytes), reference);
     texturePacket = (u64 *)sdfGrAllocPacketBuff(0x40);
     texturePacket[0] = 3;
     texturePacket[1] = 0x5000000310000000ULL;
@@ -3516,7 +3518,7 @@ void fldDrawExpandedSpriteStrip(s32 alpha, s32 offset) {
     vertex->corner[1].flag = 0;
     sdfDrawTagLink(list, (u32)handle);
     descriptor = &sdfGrOtTable[rsetFrameMaskOtOffset];
-    descriptor->append(descriptor, list);
+    descriptor->regFunc(descriptor, list);
 }
 
 FldEncounterRuntimeResult fldGetEncounterRuntimeResult(void) {
@@ -3539,7 +3541,7 @@ void fldSetEncounterPendingValue(u32 pendingValue) {
     D_00436088 = pendingValue;
 }
 
-KwlnTaskUpdateResult fldEncProc(dds3ProcessID_t *task) {
+dds3TaskUpdateResult_t fldEncProc(dds3ProcessID_t *task) {
     FldEncounterRuntimeMode state = fldEncounterRuntimeState;
 
     if (state < FLD_ENCOUNTER_MODE_BYPASS_BATTLE_RUNTIME) {
@@ -3547,7 +3549,7 @@ KwlnTaskUpdateResult fldEncProc(dds3ProcessID_t *task) {
             btlUpdateRuntimeFadeState();
         }
     }
-    return KWLN_TASK_UPDATE_RETAIN_CALLBACK;
+    return DDS3_TASK_UPDATE_RETAIN_CALLBACK;
 }
 
 extern void p2sdPlaySE(s32 sequence, s32 volume, s32 pan);
@@ -3556,7 +3558,7 @@ void fldRequestEncounterWithFade(FldEncounterRuntimeMode encounterMode,
                                  FldBattleSceneRecordIndex recordIndex) {
     if ((recordIndex < 0x400) && ((datBattleSceneRecords[recordIndex].flags & 0x8000) != 0))
     {
-        kwlnFadeBackgroundStartOut(0);
+        dds3FadeBackgroundStartOut(0);
         fldSetEncounterMode(FLD_ENCOUNTER_MODE_BYPASS_BATTLE_RUNTIME);
         return;
     }
@@ -3717,8 +3719,8 @@ void fldInitializeCameraViewFromPlayer(void) {
     rowDistance = fldCameraFollowRows[area->cameraFollowRowIndex].dist;
     positionZ = area->z;
     farPoint.f[2] = positionZ + trigResult * rowDistance;
-    PCP_COPY_VECTOR_UNCLOBBERED(fldLookAtNearPoint, &nearPoint);
-    PCP_COPY_VECTOR_UNCLOBBERED(fldCamTarget, &farPoint);
+    SDF_VU0_COPYVECTOR_NOMEM(fldLookAtNearPoint, &nearPoint);
+    SDF_VU0_COPYVECTOR_NOMEM(fldCamTarget, &farPoint);
 
     area->cameraSupportHeightOffset = 0.0f;
     area->overrideSupportRecordIndex = -1;
@@ -3778,7 +3780,7 @@ void func_0012F400(void) {
     dds3GetRotPoseSet((dds3Basic_t *)fldPlayerObject);
     fldGlobalBase.angle = EulerAngleAxisY() * 180.0f / 3.14f;
     dds3GetPosPoseSet((dds3Basic_t *)fldPlayerObject);
-    VU0_STORE_VF_UNCLOBBERED(vf10, &playerPosition);
+    SDF_VU0_STOREVECTOR_NOMEM(&playerPosition);
     camera = &fldGlobalBase;
     camera->previousX = camera->x;
     camera->previousY = camera->y;
@@ -3795,8 +3797,8 @@ void func_0012F400(void) {
     farPoint.f[1] = camera->y + fldCameraFollowRows[camera->cameraFollowRowIndex].targetY;
     farPoint.f[2] = camera->z + sdfCos(camera->negatedAngle * 3.14f / 180.0f) *
                                     fldCameraFollowRows[camera->cameraFollowRowIndex].dist;
-    PCP_COPY_VECTOR_UNCLOBBERED(fldLookAtNearPoint, nearPoint.f);
-    PCP_COPY_VECTOR_UNCLOBBERED(fldCamTarget, farPoint.f);
+    SDF_VU0_COPYVECTOR_NOMEM(fldLookAtNearPoint, nearPoint.f);
+    SDF_VU0_COPYVECTOR_NOMEM(fldCamTarget, farPoint.f);
 
     previousHeight = camera->unk60;
     heightOffset = previousHeight + (camera->cameraSupportHeightOffset - previousHeight) * 0.0625f;
@@ -3805,8 +3807,8 @@ void func_0012F400(void) {
     referencePoint.f[0] = camera->x;
     referencePoint.f[1] = camera->y + fldCameraFollowRows[camera->cameraFollowRowIndex].y;
     referencePoint.f[2] = camera->z;
-    PCP_COPY_VECTOR_UNCLOBBERED(referenceCopy.f, referencePoint.f);
-    PCP_COPY_VECTOR_UNCLOBBERED(farCopy.f, farPoint.f);
+    SDF_VU0_COPYVECTOR_NOMEM(referenceCopy.f, referencePoint.f);
+    SDF_VU0_COPYVECTOR_NOMEM(farCopy.f, farPoint.f);
     fldHitChkCamera(farCopy.f, referenceCopy.f, projectedPoint.f);
 
     ratio = D_004360A0 / D_004360A8;
@@ -3817,7 +3819,7 @@ void func_0012F400(void) {
     backZ = referencePoint.f[2] - projectedPoint.f[2];
     {
         /* Allocation aid on the real z delta, not a hardware register (see landing note). */
-        register f32 dz __asm__("$f1") = projectedPoint.f[2] - referencePoint.f[2];
+        FAKEMATCH_ASM_REG(f32, dz, "$f1") = projectedPoint.f[2] - referencePoint.f[2];
 
         distance = fsqrtf(dx * dx + dy * dy + dz * dz);
     }
@@ -3828,8 +3830,8 @@ void func_0012F400(void) {
     farPoint.f[2] = referencePoint.f[2] - backZ / distance * scale;
     farPoint.f[0] = referencePoint.f[0] - backX / distance * scale;
     dds3SetPosPoseSet(node, &farPoint.q);
-    PCP_COPY_VECTOR_UNCLOBBERED(fldLookAtNearPoint, nearPoint.f);
-    PCP_COPY_VECTOR_UNCLOBBERED(fldCamTarget, farPoint.f);
+    SDF_VU0_COPYVECTOR_NOMEM(fldLookAtNearPoint, nearPoint.f);
+    SDF_VU0_COPYVECTOR_NOMEM(fldCamTarget, farPoint.f);
     node = *world;
     node->ops->update(node);
     fldUpdateLookAtSegmentDistance();
@@ -3887,7 +3889,7 @@ extern s32 D_00435F30;
 
 extern s32 D_004360C0;
 
-extern void dds3CameraObjectBasicSetWorldEye(dds3Basic_t *camera, const u128 *worldEye);
+extern void dds3CameraObjectBasicGetCameraTM(dds3Basic_t *camera, const u128 *worldEye);
 
 void func_0012FA58(void) {
     FldLookAtVector nearPoint;
@@ -3929,7 +3931,7 @@ void func_0012FA58(void) {
         nearPoint.f[1] = fldLookAtNearPoint[1] + (nearPoint.f[1] - fldLookAtNearPoint[1]) * 0.125f;
         nearPoint.f[2] = fldLookAtNearPoint[2] + (nearPoint.f[2] - fldLookAtNearPoint[2]) * 0.5f;
     }
-    dds3CameraObjectBasicSetWorldEye(*sceneSlot, &nearPoint.q);
+    dds3CameraObjectBasicGetCameraTM(*sceneSlot, &nearPoint.q);
     referencePoint[0] = fldGlobalBase.x;
     referencePoint[1] = fldGlobalBase.y + fldCameraFollowRows[fldGlobalBase.cameraFollowRowIndex].y;
     referencePoint[2] = fldGlobalBase.z;
@@ -4028,7 +4030,7 @@ void func_0012FA58(void) {
     fldUpdateLookAtSegmentDistance();
 }
 
-extern void dds3CameraObjectBasicSetWorldEye(dds3Basic_t *camera, const u128 *worldEye);
+extern void dds3CameraObjectBasicGetCameraTM(dds3Basic_t *camera, const u128 *worldEye);
 extern f32 GetSphericalPosMove(f32 fromX, f32 fromZ, f32 toX, f32 toZ);
 extern f32 EulerAngleAxisY(void);
 extern void dds3GetTMPoseSet(dds3Basic_t *object);
@@ -4047,7 +4049,7 @@ void fldUpdateCameraViewFromPlayer(void) {
     nearPoint[2] = fldLookAtNearPoint[2] + (fldGlobalBase.z - fldLookAtNearPoint[2]);
     fldGlobalBase.angle = angle;
     fldGlobalBase.targetAngle = angle;
-    dds3CameraObjectBasicSetWorldEye(*world, (u128 *)nearPoint);
+    dds3CameraObjectBasicGetCameraTM(*world, (u128 *)nearPoint);
     dds3GetTMPoseSet(fldPlayerObject);
     farPoint[3] = 1.0f;
     farPoint[0] = fldGlobalBase.focusPos[0];
@@ -4081,16 +4083,16 @@ void fldUpdateCameraViewFromPlayer(void) {
 #include "common.h"
 #include "fld_stop_entry.h"
 #include "sdf_resource_list_release_api.h"
-#include "kwln_background_fade_api.h"
+#include "dds3_background_fade_api.h"
 #include "fld_scene_ready_api.h"
 #include "fld_scene_record_api.h"
 #include "fld_light_set.h"
 #include "fld_sky_buffer.h"
 #include "fld_sky_gradient_record.h"
 #include "fld_quad_state.h"
-#include "kwln_frame_draw_buffer.h"
-#include "kwln_draw_buffer.h"
-#include "kwln_fade.h"
+#include "dds3_frame_draw_buffer.h"
+#include "dds3_draw_buffer.h"
+#include "dds3_fade.h"
 #include "mnu_title_stream.h"
 #include "fld_bill_config.h"
 #include "sdf_trig.h"
@@ -4112,7 +4114,7 @@ void fldUpdateCameraViewFromPlayer(void) {
 #include "fld_collision_query_api.h"
 #include "fld_scene_request.h"
 #include "fld_spawn_event.h"
-#include "sdf_resource.h"
+#include "sdf_heap_api.h"
 #include "dds3obj.h"
 #include "dds3_world_value.h"
 #include "sdf_texture_file.h"
@@ -4125,7 +4127,6 @@ void fldUpdateCameraViewFromPlayer(void) {
 #include "dds3_world_counter.h"
 #include "sdf_vu_matrix.h"
 #include "dds3_world_secondary.h"
-#include "eff_light.h"
 #include "fld_area_work.h"
 #include "fld_spawn_collision.h"
 #include "evt_world.h"
@@ -4139,7 +4140,7 @@ void fldUpdateCameraViewFromPlayer(void) {
 #include "sdf_dev_state.h"
 #include "fld_waypoint.h"
 #include "fld_inf.h"
-#include "kwln_task_lifecycle.h"
+#include "dds3_task_lifecycle.h"
 #include "file_request_api.h"
 #include "file_pac.h"
 #include "fld_packed_resource_kind.h"
@@ -4150,13 +4151,12 @@ void fldUpdateCameraViewFromPlayer(void) {
 #include "evt_unit.h"
 #include "evt_unit_color_transition.h"
 #include "fpu.h"
-#include "pcp_vu0.h"
 #include "sdf.h"
 #include "sdf_sif_command.h"
 #include "mdl.h"
 #include "scr.h"
-#include "kwln.h"
-#include "kwln_task_create.h"
+#include "kernel.h"
+#include "dds3_task_create.h"
 #include "dat_state.h"
 #include "dds3_world_primary.h"
 #include "sdf_packet_alloc.h"
@@ -4243,7 +4243,7 @@ void func_001302A0(void) {
     nearPoint.f[0] = fldLookAtNearPoint[0] + (nearPoint.f[0] - fldLookAtNearPoint[0]) * 0.5f;
     nearPoint.f[1] = fldLookAtNearPoint[1] + (nearPoint.f[1] - fldLookAtNearPoint[1]) * 0.125f;
     nearPoint.f[2] = fldLookAtNearPoint[2] + (nearPoint.f[2] - fldLookAtNearPoint[2]) * 0.5f;
-    dds3CameraObjectBasicSetWorldEye((dds3Basic_t *)*world, &nearPoint.q);
+    dds3CameraObjectBasicGetCameraTM((dds3Basic_t *)*world, &nearPoint.q);
     dds3GetTMPoseSet((dds3Basic_t *)fldPlayerObject);
     farPoint.f[0] = area->focusPos[0];
     farPoint.f[1] = area->focusPos[1];
@@ -4476,7 +4476,7 @@ void fldUpdateCameraProximity(void) {
     if (slot >= 0) {
         model = *modelRef;
         matrices = ((FldModelMatrices *)model)->rows;
-        VU0_LOAD_MATRIX(matrices[slot] + 0xC0);
+        SDF_VU0_LOADMATRIX(matrices[slot] + 0xC0);
         SDF_VU0_LOADVECTOR(vec);
         SDF_VU0_APPLYMATRIX();
         SDF_VU0_STOREVECTOR(vec);
@@ -4877,7 +4877,7 @@ void fldUpdateCameraTarget(void) {
     }
 }
 
-extern const PcpVectorCopyF32 D_00413280;
+extern const ps2asm_float_vector4_t D_00413280;
 extern f32 fldAngleDifference(f32 fromAngle, f32 toAngle);
 extern void FromRotation(f32 angle);
 extern void fldRefreshAreaStateFromPosition(f32 *);
@@ -4889,7 +4889,7 @@ void fldUpdateModeOneCameraPose(void) {
     f32 position[4] __attribute__((aligned(16)));
     f32 smoothed[4] __attribute__((aligned(16)));
     f32 quaternion[4] __attribute__((aligned(16)));
-    PcpVectorCopyF32 axis;
+    ps2asm_float_vector4_t axis;
     f32 current[3];
     f32 difference;
     f32 distance;
@@ -4940,7 +4940,7 @@ void fldUpdateModeOneCameraPose(void) {
     dds3GetRotPoseSet(fldPlayerObject);
     SDF_VU0_STOREVECTOR_NOMEM(quaternion);
     EulerAngleAxisY();
-    VU0_LOAD_MATRIX(sdfViewMatrix);
+    SDF_VU0_LOADMATRIX(sdfViewMatrix);
     InversMatrix();
     motion = 23;
     difference = fldAngleDifference(fldGlobalBase.angle, fldGlobalBase.modeOneCameraHeadingTarget);
@@ -4973,7 +4973,7 @@ void fldUpdateModeOneCameraPose(void) {
         }
         dds3GetPosPoseSet(fldPlayerObject);
         SDF_VU0_STOREVECTOR_NOMEM(position);
-        PCP_COPY_VECTOR_F32(smoothed, fldPlayerObject->poseset->smoothedPosition);
+        SDF_VU0_COPYVECTOR_F32(smoothed, fldPlayerObject->poseset->smoothedPosition);
         if (ffabsf(smoothed[0] - position[0]) < 1.0f) {
             fldPlayerObject->poseset->smoothedPosition[0] = position[0];
         } else {
@@ -5181,13 +5181,14 @@ extern s32 fldIsCurrentGridGuideMarkerActive(void);
 extern void fldGetFieldFloatPair(f32 *, f32 *);
 
 /* Field movement, player pose and camera input controller. */
+
 INCLUDE_RODATA(const s32, "field/fldFileResolver", D_00413280);
 
 s32 fldUpdateFieldPlayerMovement(void) {
     f32 position[4] __attribute__((aligned(16)));
     f32 smoothed[4] __attribute__((aligned(16)));
     f32 quaternion[4] __attribute__((aligned(16)));
-    PcpVectorCopyF32 axis = {{0.0f, 1.0f, 0.0f, 1.0f}};
+    ps2asm_float_vector4_t axis = {{0.0f, 1.0f, 0.0f, 1.0f}};
     f32 directionAngles[16] = {
         0.0f, -22.5f, -45.0f, -67.5f, -90.0f, -112.5f, -135.0f, -157.5f,
         180.0f, 157.5f, 135.0f, 112.5f, 90.0f, 67.5f, 45.0f, 22.5f
@@ -5339,7 +5340,7 @@ s32 fldUpdateFieldPlayerMovement(void) {
     }
     dds3GetRotPoseSet(fldPlayerObject);
     SDF_VU0_STOREVECTOR_NOMEM(quaternion);
-    VU0_LOAD_MATRIX(sdfViewMatrix);
+    SDF_VU0_LOADMATRIX(sdfViewMatrix);
     InversMatrix();
     dds3OnPoseSetFlag(fldPlayerObject->poseset,
                       OBJECT_TRANSFORM_FLAG_USE_SMOOTHED_POSITION);
@@ -5464,7 +5465,7 @@ s32 fldUpdateFieldPlayerMovement(void) {
         }
         dds3GetPosPoseSet(fldPlayerObject);
         SDF_VU0_STOREVECTOR_NOMEM(position);
-        PCP_COPY_VECTOR_F32(smoothed, fldPlayerObject->poseset->smoothedPosition);
+        SDF_VU0_COPYVECTOR_F32(smoothed, fldPlayerObject->poseset->smoothedPosition);
         if (ffabsf(smoothed[0] - position[0]) < 1.0f) {
             fldPlayerObject->poseset->smoothedPosition[0] = position[0];
         } else {
@@ -5896,7 +5897,6 @@ void fldApplyPendingCameraHeading(void) {
 #include "eff_transform.h"
 #include "dds3obj.h"
 #include "fld_area_work.h"
-#include "pcp_vu0.h"
 #include "fpu.h"
 
 /* As field/fldFileResolver declares them. */
@@ -5917,7 +5917,7 @@ extern void dds3OnPoseSetFlag(dds3PoseSet_t *node, u32 flags);
  * transition flag. Vertical movement bypasses position damping. Upstream:
  * INCLUDE_ASM in field/fldFileResolver; written from the retail routine,
  * after its unit's fldUpdateFieldPlayerMovement. */
-extern const PcpVectorCopyF32 D_004132E0;
+extern const ps2asm_float_vector4_t D_004132E0;
 
 void fldUpdateCameraHeadingTransition(void) {
     f32 position[4] __attribute__((aligned(16)));
@@ -5933,7 +5933,7 @@ void fldUpdateCameraHeadingTransition(void) {
     memset(&quaternion, 0, sizeof(quaternion));
     quaternion.f[3] = 1.0f;
     {
-        PcpVectorCopyF32 axis;
+        ps2asm_float_vector4_t axis;
         /* Preserve the native owned-axis copy after quaternion setup. */
         axis = D_004132E0;
         if (fldPlayerObject == 0) {
@@ -5958,9 +5958,9 @@ void fldUpdateCameraHeadingTransition(void) {
                 difference = fldGlobalBase.angle + step;
             }
             fldGlobalBase.angle = difference;
-            VU0_LOAD_VF(vf10, axis.components);
+            SDF_VU0_LOADVECTOR(axis.components);
             FromRotation(fldGlobalBase.angle * 3.14f / 180.0f);
-            VU0_STORE_VF_UNCLOBBERED(vf10, quaternion.f);
+            SDF_VU0_STOREVECTOR_NOMEM(quaternion.f);
             dds3SetRotPoseSet((dds3Basic_t *)fldPlayerObject, &quaternion.q);
         } else {
             f32 angle;
@@ -5972,7 +5972,7 @@ void fldUpdateCameraHeadingTransition(void) {
         }
 
         dds3GetPosPoseSet((dds3Basic_t *)fldPlayerObject);
-        VU0_STORE_VF(vf10, position);
+        SDF_VU0_STOREVECTOR(position);
         fldGlobalBase.previousX = fldGlobalBase.x;
         fldGlobalBase.previousY = fldGlobalBase.y;
         fldGlobalBase.previousZ = fldGlobalBase.z;
@@ -5991,7 +5991,7 @@ void fldUpdateCameraHeadingTransition(void) {
             SDF_VU0_COPYVECTOR(((dds3Basic_t *)player)->poseset->smoothedPosition, ((dds3Basic_t *)player)->poseset->pos);
         } else {
             fldMarkPrimaryObjectByPeerPresence();
-            PCP_COPY_VECTOR_F32(smoothed, ((dds3Basic_t *)fldPlayerObject)->poseset->smoothedPosition);
+            SDF_VU0_COPYVECTOR_F32(smoothed, ((dds3Basic_t *)fldPlayerObject)->poseset->smoothedPosition);
             if (ffabsf(smoothed[0] - position[0]) < 1.0f) {
                 ((dds3Basic_t *)fldPlayerObject)->poseset->smoothedPosition[0] = position[0];
             } else {
@@ -6026,7 +6026,7 @@ void fldUpdateCameraHeadingTransition(void) {
                  * Compiler allocation reconstruction, not a hardware register
                  * requirement or recovered original-source spelling; see
                  * docs/compiler-trace-camera-heading-transfer.md. */
-                register f32 smoothedX __asm__("$f1") = source->smoothedPosition[0];
+                FAKEMATCH_ASM_REG(f32, smoothedX, "$f1") = source->smoothedPosition[0];
                 secondary->smoothedPosition[0] = smoothedX;
             }
             secondary->smoothedPosition[1] = source->smoothedPosition[1];
@@ -6139,7 +6139,7 @@ void fldLoadSkyResource(s32 area) {
 
 void fldReleaseSkyResources(void) {
     if (fldRainTextureReference != 0) {
-        sdfTexReleaseReferenceViaHandler(fldRainTextureReference);
+        sdfTexFreeDelayed(fldRainTextureReference);
         fldRainTextureReference = 0;
     }
     if (fldRainTextureResource != NULL) {
@@ -6363,7 +6363,7 @@ void fldSkyDrawFilter(void) {
                 b3 = b3 * (s32)gFilterAlpha / 128;
                 a3 = a3 * (s32)gFilterAlpha / 128;
             }
-            fldSubmitGsGradientQuad(column * 64, row * 32, 64, 32,
+            aDrawBoxG(column * 64, row * 32, 64, 32,
                 r0, g0, b0, a0, r1, g1, b1, a1,
                 r2, g2, b2, a2, r3, g3, b3, a3);
         }
@@ -6946,3 +6946,4 @@ INCLUDE_SDATA(const s32, "field/fldFileResolver", D_0043615C);
 INCLUDE_SDATA(const s32, "field/fldFileResolver", D_00436160);
 
 INCLUDE_SDATA(const s32, "field/fldFileResolver", D_00436164);
+

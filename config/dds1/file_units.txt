@@ -1,0 +1,3 @@
+# SMT3 file/ unit boundaries in dds1, input to tools/resplit.py (from sdf-decomp tools/twins.py runs --prefix file/).
+0x00288728 file/fileManager
+0x00289A08 -

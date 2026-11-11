@@ -12,7 +12,7 @@
 #include "dat_state.h"
 #include "dsp_name.h"
 #include "mdl_flag_api.h"
-#include "kwln_fade.h"
+#include "dds3_fade.h"
 
 extern void evtCopyEntryStringToActiveWindow(s32, const char *);
 extern s32 mnuBindMantraMenuSourceRecord(MnuStatusResource *object, MantraMenuSrc *src);
@@ -36,7 +36,7 @@ extern void mnuSpawnMantraShortLoopIconAtPosition(u32, u32, struct MantraDrawPoo
 extern void mnuSpawnMantraIconAtPosition(u32, u32, struct MantraDrawPool *pool);
 extern void mnuSetMantraFadeState(struct MantraDrawPool *pool, u16, u16);
 extern void mnuUpdateSelectedMantraLimitLineState(MnuStatusResource *);
-extern void evtPrintDeveloperConsoleMessage(const char *, ...);
+extern void datDebugPrintf(const char *, ...);
 
 /* Work block at object+0x240; the node IDs fill the eight slots before
    the selected index and count. */
@@ -82,7 +82,7 @@ s32 mnuMoveNodeCursorToTargetIndex(MnuStatusResource *resource, s8 targetIndex) 
     s32 current;
 
     current = resource->list->cursor->index;
-    evtPrintDeveloperConsoleMessage("Jump!! %d to %d\n", current, targetIndex);
+    datDebugPrintf("Jump!! %d to %d\n", current, targetIndex);
     diff = current - targetIndex;
     while (diff != 0) {
         if (diff > 0) {
@@ -126,7 +126,7 @@ void mnuSelectPreviousMantraUnit(MnuStatusResource *resource) {
     MantraMenuWork *work = &resource->menu;
     datUnitWork_t *value;
 
-    evtPrintDeveloperConsoleMessage("UnitIndex:%d\n", resource->list->cursor->index);
+    datDebugPrintf("UnitIndex:%d\n", resource->list->cursor->index);
     mnuAdvanceMantraUnitPanelListState(resource->selectionController);
     mnuRetreatNodeCursorAndClearListFlags(resource);
     value = mnuGetSelectedNodeValue(resource);
@@ -134,7 +134,7 @@ void mnuSelectPreviousMantraUnit(MnuStatusResource *resource) {
     mnuTransitionActivePanelAnimations((MantraPanelPool *)work->resource, 1);
     mnuSpawnMantraPanelsFromSelectedUnitFlags(resource, 2, 0);
     mnuRefreshNodeTransitionIcons(resource, work, value);
-    evtPrintDeveloperConsoleMessage("Next UnitIndex:%d\n", resource->list->cursor->index);
+    datDebugPrintf("Next UnitIndex:%d\n", resource->list->cursor->index);
 }
 
 void mnuSelectNextMantraUnit(MnuStatusResource *resource) {
@@ -312,10 +312,10 @@ void mnuInitializeMantraSelectionWork(MnuStatusResource *object) {
         record = node->partyRecord;
         if (scrGetEntryLowFlags(record, 1) == 0) {
             state->slots[i] = evtAllocateMantraSelectionWork(record, 0);
-            evtPrintDeveloperConsoleMessage(D_00426300);
+            datDebugPrintf(D_00426300);
         } else {
             state->slots[i] = evtAllocateMantraSelectionWork(NULL, 0);
-            evtPrintDeveloperConsoleMessage(D_00426340);
+            datDebugPrintf(D_00426340);
         }
         state->unitEntries[i].nodeId = mnuValidateProfileEntry(state->slots[i], record);
         if (state->unitEntries[i].nodeId != 0) {
@@ -375,7 +375,7 @@ void mnuOpenMantraSelectionAndLoadTitleStream(MnuStatusResource *object) {
     mnuSpawnMantraPanelsFromSelectedUnitFlags(object, 5, 0);
     evtStageTestInit(0);
     dds3FadeIn(0, 0, 0, 0);
-    evtPrintDeveloperConsoleMessage(D_00426360);
+    datDebugPrintf(D_00426360);
     mnuMarkTitleStreamResetPending();
     mnuResetTitleStreamLocked();
     mnuQueueTitleSoundStreamEntry(16);
@@ -433,15 +433,15 @@ s32 mtrChkMantraCompleteMaster(datUnitWork_t *unit) {
     u16 flagIds[6] = {0x9A0, 0x9A1, 0x9A2, 0x9A3, 0x9A4, 0x9A5};
     u8 flagIndices[9] = {0, 0, 1, 2, 3, 4, 5, 2, 1};
 
-    evtPrintDeveloperConsoleMessage("mtrChkMantraCompleteMaster!!\n");
+    datDebugPrintf("mtrChkMantraCompleteMaster!!\n");
     if (evtBitCheck(flagIds[flagIndices[unit->unitId]]) != 0) {
         return 0;
     }
-    evtPrintDeveloperConsoleMessage("Bit Check None ....\n");
+    datDebugPrintf("Bit Check None ....\n");
     if (prfAreAllRequiredProfileFlagsSet(unit) == 0) {
         return 0;
     }
-    evtPrintDeveloperConsoleMessage("Mantra All Master!!\n");
+    datDebugPrintf("Mantra All Master!!\n");
     return 1;
 }
 
@@ -478,7 +478,7 @@ s32 mnuFindFirstMatchingListItemIndex(MnuStatusResource *resource) {
 struct MantraDrawPool;
 struct MantraDrawItem;
 typedef struct MantraPanelPool MantraPanelPool;
-extern void evtPrintDeveloperConsoleMessage(const char *, ...);
+extern void datDebugPrintf(const char *, ...);
 extern s32 mnuBindMantraMenuSourceRecord(MnuStatusResource *object, MantraMenuSrc *src);
 extern s32 mtrChkMantraCompleteMaster(datUnitWork_t *);
 extern u32 scrGetSelectedScriptEntryId(datUnitWork_t *);
@@ -633,7 +633,7 @@ s32 mnuUpdateMantraSelectionState(MnuStatusResource *object) {
         result = 4;
         break;
     case 7:
-        evtPrintDeveloperConsoleMessage("MTR_MSL_CALC_MASTER\n");
+        datDebugPrintf("MTR_MSL_CALC_MASTER\n");
         state->drawBits.hasQueuedMastery = 0;
         for (i = 0; i < 5; i++) {
             entry = &state->unitEntries[i];
@@ -645,17 +645,17 @@ s32 mnuUpdateMantraSelectionState(MnuStatusResource *object) {
                 mnuSelectMantraUnitByIndex(object, i);
                 entryKind = entry->kind;
                 if (entryKind == 1) {
-                    evtPrintDeveloperConsoleMessage("Mantra Master!!!!!!!!!! [0x%x]\n", entry->nodeId);
+                    datDebugPrintf("Mantra Master!!!!!!!!!! [0x%x]\n", entry->nodeId);
                     state->nextMode = 8;
                     state->waitFrames = 0;
                     state->drawBits.mode = 18;
-                    evtPrintDeveloperConsoleMessage("MTR_MSL_CALC_MASTER  ...->MTR_MSL_CALC_MASTER_WAIT\n");
+                    datDebugPrintf("MTR_MSL_CALC_MASTER  ...->MTR_MSL_CALC_MASTER_WAIT\n");
                 } else if (entryKind == 2) {
-                    evtPrintDeveloperConsoleMessage("Complete Mantra !!!!!!!!!! [0x%x]\n", entry->nodeId);
+                    datDebugPrintf("Complete Mantra !!!!!!!!!! [0x%x]\n", entry->nodeId);
                     state->nextMode = 10;
                     state->waitFrames = 0;
                     state->drawBits.mode = 18;
-                    evtPrintDeveloperConsoleMessage("MTR_MSL_CALC_MASTER  ...->MTR_MSL_CALC_MASTER_EXIT\n");
+                    datDebugPrintf("MTR_MSL_CALC_MASTER  ...->MTR_MSL_CALC_MASTER_EXIT\n");
                 }
                 break;
             }
@@ -671,10 +671,10 @@ s32 mnuUpdateMantraSelectionState(MnuStatusResource *object) {
                 state->waitFrames = 20;
                 state->drawBits.mode = 18;
                 mnuRefreshMantraSelectionResources(object);
-                evtPrintDeveloperConsoleMessage("MTR_MSL_CALC_MASTER  ...->MTR_MSL_CALC_ROOT_CANCEL(EXIT)\n");
+                datDebugPrintf("MTR_MSL_CALC_MASTER  ...->MTR_MSL_CALC_ROOT_CANCEL(EXIT)\n");
             } else {
                 state->drawBits.mode = 13;
-                evtPrintDeveloperConsoleMessage("MTR_MSL_CALC_MASTER  ...->MTR_MSL_CALC_ROOT(EXIT)\n");
+                datDebugPrintf("MTR_MSL_CALC_MASTER  ...->MTR_MSL_CALC_ROOT(EXIT)\n");
             }
         }
         break;
@@ -691,7 +691,7 @@ s32 mnuUpdateMantraSelectionState(MnuStatusResource *object) {
             state->nextMode = 9;
             state->waitFrames = 5;
             state->drawBits.mode = 18;
-            evtPrintDeveloperConsoleMessage("MTR_MSL_CALC_MASTER_WAIT  ...->MTR_MSL_CALC_MASTER_RUN_WAIT\n");
+            datDebugPrintf("MTR_MSL_CALC_MASTER_WAIT  ...->MTR_MSL_CALC_MASTER_RUN_WAIT\n");
         }
         break;
     case 9:
@@ -708,11 +708,11 @@ s32 mnuUpdateMantraSelectionState(MnuStatusResource *object) {
             state->nextMode = 10;
             state->waitFrames = 10;
             state->drawBits.mode = 18;
-            evtPrintDeveloperConsoleMessage("MTR_MSL_CALC_MASTER_RUN_WAIT  ...->MTR_MSL_CALC_MASTER_EXIT\n");
+            datDebugPrintf("MTR_MSL_CALC_MASTER_RUN_WAIT  ...->MTR_MSL_CALC_MASTER_EXIT\n");
         }
         break;
     case 10:
-        evtPrintDeveloperConsoleMessage("MTR_MSL_CALC_MASTER_EXIT\n");
+        datDebugPrintf("MTR_MSL_CALC_MASTER_EXIT\n");
         party = mnuGetSelectedNodeValue(object);
         if (state->currentSlot->kind == 1) {
             mnuUpdateMantraNeighborNodeStates(state->slots[mnuGetSelectedMantraUnitIndex(object)], party,
@@ -723,7 +723,7 @@ s32 mnuUpdateMantraSelectionState(MnuStatusResource *object) {
             if (record != NULL && record->mantraId != 0 && record->fields.kind == 3) {
                 mnuBindMantraMenuSourceRecord(object, record);
                 state->drawBits.mode = 12;
-                evtPrintDeveloperConsoleMessage("MTR_MSL_CALC_MASTER_EXIT  ...->MTR_MSL_CALC_EFFECT\n");
+                datDebugPrintf("MTR_MSL_CALC_MASTER_EXIT  ...->MTR_MSL_CALC_EFFECT\n");
                 break;
             }
         }
@@ -738,12 +738,12 @@ s32 mnuUpdateMantraSelectionState(MnuStatusResource *object) {
             state->nextMode = 11;
             state->waitFrames = 10;
             state->drawBits.mode = 18;
-            evtPrintDeveloperConsoleMessage("MTR_MSL_CALC_MASTER_EXIT  ...->MTR_MSL_CALC_MASTER_COMPLETE\n");
+            datDebugPrintf("MTR_MSL_CALC_MASTER_EXIT  ...->MTR_MSL_CALC_MASTER_COMPLETE\n");
         } else {
             state->nextMode = 7;
             state->waitFrames = 10;
             state->drawBits.mode = 18;
-            evtPrintDeveloperConsoleMessage("MTR_MSL_CALC_MASTER_EXIT  ...->MTR_MSL_CALC_MASTER\n");
+            datDebugPrintf("MTR_MSL_CALC_MASTER_EXIT  ...->MTR_MSL_CALC_MASTER\n");
         }
         break;
     case 11:
@@ -777,7 +777,7 @@ s32 mnuUpdateMantraSelectionState(MnuStatusResource *object) {
             state->savedSelector = state->defaultSelector;
             state->selectionIndex = mnuGetSelectedMantraUnitIndex(object);
         } else if (state->drawBits.hasSource) {
-            evtPrintDeveloperConsoleMessage("MTR_MSL_CALC_ROOT    ...-> MTR_MSL_CALC_EFFECT\n");
+            datDebugPrintf("MTR_MSL_CALC_ROOT    ...-> MTR_MSL_CALC_EFFECT\n");
             if (mnuBindMantraMenuSourceRecord(object, NULL)) {
                 state->nextMode = 12;
                 state->waitFrames = 20;
@@ -1444,12 +1444,12 @@ s32 mnuAdvanceMantraSourceTransition(MnuStatusResource *object) {
             work->sourceNextState = 3;
             work->sourceWaitFrames = 10;
             work->drawBits.sourceKind = 18;
-            evtPrintDeveloperConsoleMessage(D_00426B90);
+            datDebugPrintf(D_00426B90);
         } else {
             work->sourceNextState = 7;
             work->sourceWaitFrames = 20;
             work->drawBits.sourceKind = 18;
-            evtPrintDeveloperConsoleMessage(D_00426BD8);
+            datDebugPrintf(D_00426BD8);
         }
         break;
     case 3:
@@ -1457,18 +1457,18 @@ s32 mnuAdvanceMantraSourceTransition(MnuStatusResource *object) {
             work->sourceNextState = 1;
             work->drawBits.sourceKind = 18;
             work->sourceWaitFrames = 30;
-            evtPrintDeveloperConsoleMessage(D_00426C10);
+            datDebugPrintf(D_00426C10);
             evtFinishMessageWindowAndNotify();
             work->sourcePartyIndex = mnuFindFirstMatchingListItemIndex(object);
         }
         break;
     case 4:
-        evtPrintDeveloperConsoleMessage(D_00426C58);
+        datDebugPrintf(D_00426C58);
         if (!work->drawBits.hasQueuedMastery && work->src == NULL) {
             mnuBindMantraMenuSourceRecord(object, NULL);
         }
         if (work->src != NULL) {
-            evtPrintDeveloperConsoleMessage(D_00426C70, work->src->bits >> 15,
+            datDebugPrintf(D_00426C70, work->src->bits >> 15,
                                            (work->src->bits >> 8) & 0xF);
             if (work->src->bits & 0x8000) {
                 mnuFindMantraSourceCandidate(object, work->src);
@@ -1479,47 +1479,47 @@ s32 mnuAdvanceMantraSourceTransition(MnuStatusResource *object) {
             } else if ((work->src->bits & 0xF00) == 0x400) {
                 work->src->selectedIndex = mnuGetSelectedMantraUnitIndex(object);
             } else {
-                evtPrintDeveloperConsoleMessage(D_00426C90);
+                datDebugPrintf(D_00426C90);
             }
             work->drawBits.sourceKind = 5;
-            evtPrintDeveloperConsoleMessage(D_00426CA0);
+            datDebugPrintf(D_00426CA0);
         } else {
             work->sourcePartyIndex = mnuFindFirstMatchingListItemIndex(object);
             if (work->sourcePartyIndex != -1) {
                 work->sourceNextState = 1;
                 work->sourceWaitFrames = 0;
                 work->drawBits.sourceKind = 18;
-                evtPrintDeveloperConsoleMessage(D_00426CC8);
+                datDebugPrintf(D_00426CC8);
             } else {
                 work->sourceNextState = 7;
                 work->sourceWaitFrames = 20;
                 work->drawBits.sourceKind = 18;
-                evtPrintDeveloperConsoleMessage(D_00426D00);
+                datDebugPrintf(D_00426D00);
             }
         }
         break;
     case 5:
-        evtPrintDeveloperConsoleMessage(D_00426D28);
+        datDebugPrintf(D_00426D28);
         mnuHideMantraScrollCursor(object->selectionController);
         mnuSelectMantraUnitByIndex(object, work->src->selectedIndex);
         work->sourceNextState = 6;
         work->sourceWaitFrames = 0;
         work->drawBits.sourceKind = 18;
-        evtPrintDeveloperConsoleMessage(D_00426D48);
+        datDebugPrintf(D_00426D48);
         break;
     case 6:
         if (mnuAdvanceMantraSelectionCursor(object, 1) == 0) {
             work->sourceNextState = 15;
             work->sourceWaitFrames = 0;
             work->drawBits.sourceKind = 18;
-            evtPrintDeveloperConsoleMessage(D_00426D78);
+            datDebugPrintf(D_00426D78);
         }
         break;
     case 7: {
         MantraNodePos *restoredPosition;
-        evtPrintDeveloperConsoleMessage(D_00426DB0);
+        datDebugPrintf(D_00426DB0);
         if (!work->drawBits.hasQueuedMastery) {
-            evtPrintDeveloperConsoleMessage(D_00426DD0);
+            datDebugPrintf(D_00426DD0);
             mnuRefreshMantraSelectionResources(object);
             if (mnuGetActiveMantraModelFlagState() >= MNU_MANTRA_MODEL_FLAG_STATE_LEVEL_2 ||
                 evtBitCheck(0x977) || evtBitCheck(0x978) ||
@@ -1538,11 +1538,11 @@ s32 mnuAdvanceMantraSourceTransition(MnuStatusResource *object) {
         }
         work->sourceFlag = work->sourceMode = 0;
         result = 1;
-        evtPrintDeveloperConsoleMessage(D_00426E00);
+        datDebugPrintf(D_00426E00);
         break;
     }
     case 8:
-        evtPrintDeveloperConsoleMessage(D_00426E30);
+        datDebugPrintf(D_00426E30);
         mnuHideMantraInfo(object->selectionController);
         mnuHideMantraUnitPanel(object->selectionController);
         mnuSetMantraBackgroundVariant(object->selectionController, 2);
@@ -1578,18 +1578,18 @@ s32 mnuAdvanceMantraSourceTransition(MnuStatusResource *object) {
             work->defaultSelector = position;
         }
         work->drawBits.sourceKind = 9;
-        evtPrintDeveloperConsoleMessage(D_00426E48);
+        datDebugPrintf(D_00426E48);
         break;
     case 9:
         if (mnuAdvanceMantraSelectionCursor(object, 1) == 0) {
             work->sourceNextState = 12;
             work->sourceWaitFrames = 0;
             work->drawBits.sourceKind = 18;
-            evtPrintDeveloperConsoleMessage(D_00426E80);
+            datDebugPrintf(D_00426E80);
         }
         break;
     case 10:
-        evtPrintDeveloperConsoleMessage(D_00426EB0);
+        datDebugPrintf(D_00426EB0);
         work->alternateSelector = NULL;
         mnuShowMantraInfo(object->selectionController);
         mnuShowMantraUnitPanel(object->selectionController);
@@ -1628,7 +1628,7 @@ s32 mnuAdvanceMantraSourceTransition(MnuStatusResource *object) {
                       (s32)((f32)position->y / 10.0f * 39.0f),
                       object->selectionController);
         work->drawBits.sourceKind = 11;
-        evtPrintDeveloperConsoleMessage(D_00426EC8);
+        datDebugPrintf(D_00426EC8);
         break;
     case 11:
         work->frame++;
@@ -1640,11 +1640,11 @@ s32 mnuAdvanceMantraSourceTransition(MnuStatusResource *object) {
             work->sourceNextState = 4;
             work->sourceWaitFrames = 0;
             work->drawBits.sourceKind = 18;
-            evtPrintDeveloperConsoleMessage(D_00426F00);
+            datDebugPrintf(D_00426F00);
         }
         break;
     case 12:
-        evtPrintDeveloperConsoleMessage(D_00426F38);
+        datDebugPrintf(D_00426F38);
         if (work->src->bits & 0x8000) {
             mtrDrawRankPass(object, work->src->fields.unitIndex);
             work->delayFrames = 60;
@@ -1666,14 +1666,14 @@ s32 mnuAdvanceMantraSourceTransition(MnuStatusResource *object) {
         work->sourceNextState = 13;
         work->sourceWaitFrames = 20;
         work->drawBits.sourceKind = 18;
-        evtPrintDeveloperConsoleMessage(D_00426F48);
+        datDebugPrintf(D_00426F48);
         break;
     case 13:
         if (work->delayFrames == 0) {
             work->sourceNextState = 15;
             work->sourceWaitFrames = 0;
             work->drawBits.sourceKind = 18;
-            evtPrintDeveloperConsoleMessage(D_00426F80);
+            datDebugPrintf(D_00426F80);
         }
         break;
     case 14:
@@ -1682,7 +1682,7 @@ s32 mnuAdvanceMantraSourceTransition(MnuStatusResource *object) {
     case 15:
         fclDestroyMessage();
         fclInitMessage(object->messageDefinition);
-        evtPrintDeveloperConsoleMessage(D_00426FB0, work->drawBits.sourceDialogVariant);
+        datDebugPrintf(D_00426FB0, work->drawBits.sourceDialogVariant);
         dialogResult = mnuHandleMantraSourceDialogResult(work->src, object);
         if (dialogResult == 0) {
             fclDestroyMessage();
@@ -1692,28 +1692,28 @@ s32 mnuAdvanceMantraSourceTransition(MnuStatusResource *object) {
                 mnuGetMantraNodePositionRecord((s16)dialogResult);
             }
             work->drawBits.sourceKind = 16;
-            evtPrintDeveloperConsoleMessage(D_00426FC8);
+            datDebugPrintf(D_00426FC8);
         }
         break;
     case 16:
         if (fclChkMessage() == EVT_MESSAGE_WINDOW_CONTROL_RESULT_NO_ACTIVE_CONTROL) {
             work->drawBits.sourceKind = 17;
             evtFinishMessageWindowAndNotify();
-            evtPrintDeveloperConsoleMessage(D_00426FF8);
+            datDebugPrintf(D_00426FF8);
         }
         break;
     case 17:
-        evtPrintDeveloperConsoleMessage(D_00427028);
+        datDebugPrintf(D_00427028);
         if (work->drawBits.sourceDialogVariant == 0) {
             work->sourceNextState = 8;
             work->sourceWaitFrames = 0;
             work->drawBits.sourceKind = 18;
-            evtPrintDeveloperConsoleMessage(D_00427040);
+            datDebugPrintf(D_00427040);
         } else if (work->drawBits.sourceDialogVariant == 1) {
             work->sourceNextState = 10;
             work->sourceWaitFrames = 0;
             work->drawBits.sourceKind = 18;
-            evtPrintDeveloperConsoleMessage(D_00427070);
+            datDebugPrintf(D_00427070);
         }
         work->drawBits.sourceDialogVariant ^= 1;
         work->frame = 0;
@@ -2046,7 +2046,7 @@ void mnuSpawnMantraPanelsFromSelectedUnitFlags(MnuStatusResource *object, s32 st
 
 struct MantraPanelAnimation;
 typedef struct MantraPanelPool MantraPanelPool;
-extern void evtPrintDeveloperConsoleMessage(const char *, ...);
+extern void datDebugPrintf(const char *, ...);
 extern u32 mnuGetSelectedMantraUnitIndex(MnuStatusResource *);
 extern struct MantraPanelAnimation *mnuFindPanelSlotById(MantraPanelPool *, s32, s8);
 extern struct MantraPanelAnimation *mnuSpawnPanelSlotA(MantraPanelPool *, s32, s8, s16, s16, u32);
@@ -2084,9 +2084,9 @@ void mnuDrawMantraMasteryPanels(MnuStatusResource *object, u16 nodeId) {
     }
     sounds |= 1 << tier;
     panel = mnuFindPanelSlotById(object->menu.resource, node->id, masteredKinds[tier]);
-    evtPrintDeveloperConsoleMessage("DrawSetMaster_A!!! Index[%d]\n", tier);
+    datDebugPrintf("DrawSetMaster_A!!! Index[%d]\n", tier);
     mnuQueuePanelAnimationTransition(panel, 1, 0);
-    evtPrintDeveloperConsoleMessage("DrawSetMaster_A!!!...OK\n");
+    datDebugPrintf("DrawSetMaster_A!!!...OK\n");
     if (tier < 2) {
         panel = mnuSpawnPanelSlotA(object->menu.resource, node->id, acquiredKinds[tier], 0x3D, 0, 0);
         mnuOffsetPanelAndSetVisualParams(panel, 0, 0, 0, 0x80, 0x53, 0, 0);
@@ -2104,31 +2104,31 @@ void mnuDrawMantraMasteryPanels(MnuStatusResource *object, u16 nodeId) {
             }
             if (node->neighbors[i]->kind == 1) {
                 sounds |= 0x10;
-                evtPrintDeveloperConsoleMessage("DrawSetMaster_B1!!!\n");
+                datDebugPrintf("DrawSetMaster_B1!!!\n");
                 panel = mnuFindPanelSlotById(object->menu.resource, node->neighbors[i]->id, 0);
                 mnuQueuePanelAnimationTransition(panel, 1, 10);
                 panel = mnuSpawnPanelSlotA(object->menu.resource, node->neighbors[i]->id, 1, 0x32, 0, 0);
                 mnuOffsetPanelAndSetVisualParams(panel, 0, 0, 0, 0x80, 0x53, 0, 0);
-                evtPrintDeveloperConsoleMessage("DrawSetMaster_B1!!!...OK\n");
+                datDebugPrintf("DrawSetMaster_B1!!!...OK\n");
             } else if (node->neighbors[i]->kind == 4) {
                 sounds |= 0x20;
-                evtPrintDeveloperConsoleMessage("DrawSetMaster_B2!!!\n");
+                datDebugPrintf("DrawSetMaster_B2!!!\n");
                 panel = mnuFindPanelSlotById(object->menu.resource, node->neighbors[i]->id, 10);
                 mnuQueuePanelAnimationTransition(panel, 3, 0x1E);
                 panel = mnuSpawnPanelSlotA(object->menu.resource, node->neighbors[i]->id, 11, 0x5A, 0, 0);
                 mnuOffsetPanelAndSetVisualParams(panel, 0, 0, 0, 0x80, 0x53, 0, 0);
                 mnuQueuePanelAnimationTransition(panel, 0, 0);
-                evtPrintDeveloperConsoleMessage("DrawSetMaster_B2!!!...OK\n");
+                datDebugPrintf("DrawSetMaster_B2!!!...OK\n");
             } else if (node->neighbors[i]->kind == 2) {
                 if (((flags >> 8) & 8) && !(node->neighbors[i]->selector.packed & 0x100)) {
                     sounds |= 0x40;
-                    evtPrintDeveloperConsoleMessage("DrawSetMaster_B3!!!\n");
+                    datDebugPrintf("DrawSetMaster_B3!!!\n");
                     panel = mnuFindPanelSlotById(object->menu.resource, node->neighbors[i]->id, 3);
                     mnuQueuePanelAnimationTransition(panel, 1, 0);
                     panel = mnuSpawnPanelSlotA(object->menu.resource, node->neighbors[i]->id, 4, 0x50, 0, 0);
                     mnuOffsetPanelAndSetVisualParams(panel, 0, 0, 0, 0x80, 0x53, 0, 0);
                     mnuQueuePanelAnimationTransition(panel, 0, 0);
-                    evtPrintDeveloperConsoleMessage("DrawSetMaster_B3!!!...OK\n");
+                    datDebugPrintf("DrawSetMaster_B3!!!...OK\n");
                 }
             }
         }
@@ -2318,7 +2318,7 @@ void mtrDrawRankPass(MnuStatusResource *object, u16 index) {
     MnuMantraModelFlagState modelFlagState = mnuGetActiveMantraModelFlagState();
     s32 selected;
 
-    evtPrintDeveloperConsoleMessage("DrawRank[%d]\n", modelFlagState);
+    datDebugPrintf("DrawRank[%d]\n", modelFlagState);
     memset(nodes, 0, sizeof(nodes));
     selected = mnuActivateMantraNeighborEdges(object, index, modelFlagState, 0);
     record = (MantraNodePos *)mnuGetMantraNodePositionRecord(index);
@@ -2413,11 +2413,11 @@ void mnuSpawnMantraMapPanels(MnuStatusResource *object, u16 nodeId, u16 panelX) 
         visibleIds[recordIndex] = position->neighbors[recordIndex]->id;
     }
 
-    evtPrintDeveloperConsoleMessage(D_004271E0, nodeId);
+    datDebugPrintf(D_004271E0, nodeId);
     panel = mnuSpawnPanelSlotA((MantraPanelPool *)object->menu.resource,
                                nodeId, 6, (s16)panelX, 0, 0);
     mnuOffsetPanelAndSetVisualParams(panel, 0, 0, 0, 0x80, 0x53, 0, 0);
-    evtPrintDeveloperConsoleMessage(D_004271F8);
+    datDebugPrintf(D_004271F8);
 
     for (i = 0; i < 6; i++) {
         mnuGetMantraNodePositionRecord((s16)visibleIds[i]);
@@ -2426,7 +2426,7 @@ void mnuSpawnMantraMapPanels(MnuStatusResource *object, u16 nodeId, u16 panelX) 
         mnuOffsetPanelAndSetVisualParams(panel, 0, 0, 0, 0x80, 0x53, 0, 0);
     }
 
-    evtPrintDeveloperConsoleMessage(D_00427208);
+    datDebugPrintf(D_00427208);
     position = (MantraNodePos *)mnuGetMantraNodePositionRecord(0);
     recordIndex = 175;
     do {

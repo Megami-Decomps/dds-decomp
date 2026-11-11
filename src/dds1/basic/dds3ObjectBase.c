@@ -1,6 +1,46 @@
-#include "sdk_ps2.h"
 #include "common.h"
-#include "sdf_vu0.h"
+#include "scr_integer_parameter_api.h"
+#include "scr_command_parameter_index.h"
+#include "dds3_basic_lifecycle.h"
+#include "ps2asm.h"
+#include "eff_inner_float_api.h"
+#include "sdf_sif_command.h"
+#include "scr_integer_return_value_api.h"
+#include "sdf_vu_matrix.h"
+#include "sdf_chip.h"
+#include "sdf_packet_list.h"
+#include "kernel.h"
+#include "eff_transform.h"
+#include "dds3obj.h"
+#include "sdf.h"
+#include "pty_read_roster_stat_api.h"
+#include "pty_event_penalty_api.h"
+#include "dds3_vu_transform.h"
+#include "sdf_heap_api.h"
+#include "basic.h"
+#include "dds3_world_scene_node_view.h"
+#include "dds3_world_value.h"
+#include "dds3_world_lifecycle.h"
+#include "fpu.h"
+#include "dds3_world_counter.h"
+#include "dds3_basic_array_cursor.h"
+#include "dds3_basic_array_search.h"
+#include "dds3_world_selection.h"
+#include "fld_area_room_resource_load_api.h"
+#include "evt_world_object_api.h"
+#include "evt_world.h"
+#include "sdf_texture_offset_list.h"
+#include "dds3_basic_array_visit.h"
+#include "scr.h"
+#include "dds3_task_lifecycle.h"
+#include "dds3_scene_membership.h"
+#include "dds3_area_callback.h"
+#include "dds3_object_control_slot.h"
+#include "dds3_path.h"
+#include "evt_action_object.h"
+#include "sdk_ps2.h"
+#include "dds3_camera_update_flags.h"
+#include "eff_object.h"
 #include "sdf_model_packet_callback.h"
 #include "dds3_object_flags.h"
 #include "sdf_model.h"
@@ -10,24 +50,38 @@
 #include "evt_gradient_rect.h"
 #include "sdf_motion.h"
 #include "sdf_motion_next_result.h"
-#include "sdf_chip.h"
-#include "dds3_path.h"
 #include "dds3_slot1_handler_api.h"
-#include "dds3obj.h"
-#include "dds3_object_control_slot.h"
 #include "dds3_object_resource_state.h"
 #include "dds3_object_base_resource_view.h"
 #include "dds3_object_mode.h"
-#include "eff_object.h"
-#include "pcp_vu0.h"
 #include "mdl.h"
 #include "evt_unit.h"
 #include "evt_script_model_api.h"
+#include "eff_dependency.h"
+#include "eff_event.h"
+
+/* Initialize a kind-3 slot state and its index node.
+ * Every slot and currentSlot start unused (-1). */
+dds3ObjectBaseControlWorkData_t *dds3ObjectBaseInitControlWorkData(dds3Basic_t *owner) {
+    dds3ObjectBaseControlWorkData_t *state = sdfChipAllocDirect(sizeof(dds3ObjectBaseControlWorkData_t));
+    s32 i;
+    WorldIndexNode *node;
+
+    memset(state, 0, sizeof(dds3ObjectBaseControlWorkData_t));
+    state->resourceState = DDS3_OBJECT_RESOURCE_RELEASED;
+    node = dds3GetBasicArrayHandle(0);
+    state->worldIndexNode = node;
+    state->slots[DDS3_OBJECT_OWNER_SLOT] = owner;
+    for (i = 0; i < DDS3_OBJECT_RESOURCE_SLOT_COUNT; i++) {
+        state->resourceSlots[i] = -1;
+    }
+    state->currentSlot = -1;
+    return state;
+}
 
 extern void Normalize(void);
 
 extern dds3Basic_t *dds3AddMoverBasic(dds3Basic_t *object);
-
 
 Dds3ObjectControlSlotIndex BasicTypeToItemType(u32 kind);
 void *dds3ObjectBaseGetUserValue(dds3Basic_t *object);
@@ -36,7 +90,6 @@ void dds3MoverBasicMakePath(dds3Basic_t *object);
 void dds3MoverBasicFreePath(dds3Basic_t *object);
 void dds3AreaBasicGetItemArray(dds3Basic_t *slot, dds3Basic_t *owner);
 void dds3ObjectBaseFreeModelHandle(dds3Basic_t *object);
-
 
 #define DDS3_OBJECT_SLOT_COUNT 8
 #define DDS3_OBJECT_WORLD_SLOT_LIMIT 3
@@ -259,7 +312,6 @@ void dds3ResolveModelChunkBindings(dds3ObjectBaseControlWorkData_t *base, dds3Mo
     }
 }
 
-
 /* Rebuild the model resource, synchronize object vectors and initialize
  * transition work only when no transition is already associated with it. */
 void dds3RebuildObjectModelContext(dds3Basic_t *object, s32 resourceGroup, s32 resourceId) {
@@ -309,7 +361,7 @@ void dds3ObjectBaseMakeMatter(dds3Basic_t *object) {
     model = dds3ModelBasicMakeModel(scriptModelObject);
     motion = dds3ModelBasicSetMotion(scriptModelObject, model);
     dds3GetTMPoseSet(object);
-    VU0_STORE_MATRIX(model->matrix);
+    SDF_VU0_STOREMATRIX(model->matrix);
     sdfModelEvalTm2(model, 0);
     sdfModelEvalTm2(model, 1);
     base->resourceState = DDS3_OBJECT_RESOURCE_DEV_MOTION;
@@ -319,7 +371,6 @@ void dds3ObjectBaseMakeMatter(dds3Basic_t *object) {
     base->mode = DDS3_OBJECT_MATTER_ANIME_MODE_FULL_SPEED;
     base->unk44 = 0;
 }
-
 
 /* Modes 0, 4 and 5 use weight 1; the other valid modes use 0.
  * Values outside 0..6 leave both the current mode and weight unchanged. */
@@ -378,8 +429,7 @@ extern void evtSubmitPrimaryAlphaBlendMode(s32 blendMode);
 extern void evtSubmitPrimaryFramePacket(void);
 extern void evtSubmitAlternateFramePacket(void);
 struct sdfGrOt_t;
-extern struct sdfGrOt_t *kwlnSceneSurfaceSets[13][4];
-
+extern struct sdfGrOt_t *sdfModelOtTable[13][4];
 
 void dds3DrawObjectWithGradientOverlay(dds3Basic_t *object) {
     dds3ObjectBaseControlWorkData_t *base;
@@ -403,7 +453,7 @@ void dds3DrawObjectWithGradientOverlay(dds3Basic_t *object) {
     context = dds3ObjectBaseBorrowModelContext(base);
     inner = context->inner;
     inner->flags |= 0x20;
-    mdlLink(context, kwlnSceneSurfaceSets[9]);
+    mdlLink(context, sdfModelOtTable[9]);
     inner->flags &= ~0x20;
     dds3ObjectBaseOnFlag(object, 0x10000);
 
@@ -423,7 +473,7 @@ extern void sdfModelEvalTm(sdfModelRootNode_t *);
 void effObjApplyTransformParameters(struct sdfGrOt_t **surfaces, dds3Basic_t *object) {
     dds3ObjectBaseControlWorkData_t *base;
     Dds3ObjectResourceState resourceState;
-    struct SdfDmaTagHeader *lighting;
+    struct sdf3DLightParallelPacket_t *lighting;
     sdfModelRootNode_t *model;
     s32 roomObjectIndex;
 
@@ -444,7 +494,7 @@ void effObjApplyTransformParameters(struct sdfGrOt_t **surfaces, dds3Basic_t *ob
             dds3DrawObjectWithGradientOverlay(object);
             return;
         }
-        lighting = (struct SdfDmaTagHeader *)((EffectObjectData *)object->workdata)->transitionWork->value;
+        lighting = (struct sdf3DLightParallelPacket_t *)((EffectObjectData *)object->workdata)->transitionWork->value;
         if (lighting != NULL) {
             dds3ObjectBaseBorrowModelContext(base)->inner->lighting = lighting;
         } else {
@@ -459,7 +509,7 @@ void effObjApplyTransformParameters(struct sdfGrOt_t **surfaces, dds3Basic_t *ob
         if (dds3ObjectBaseCheckFlag(object, 0x10000)) {
             model = dds3ObjectBaseBorrowModelContext(base)->inner;
             model->flags |= SDF_MODEL_FORCE_ASSET_TEXTURE_REFRESH;
-            mdlLink(dds3ObjectBaseBorrowModelContext(base), kwlnSceneSurfaceSets[9]);
+            mdlLink(dds3ObjectBaseBorrowModelContext(base), sdfModelOtTable[9]);
             model->flags &= ~SDF_MODEL_FORCE_ASSET_TEXTURE_REFRESH;
             dds3ObjectBaseOffFlag(object, 0x10000);
             return;
@@ -639,4 +689,31 @@ dds3PathBasicControl_t *dds3ObjectBaseGetPathControl(dds3Basic_t *object) {
     return dds3MoverBasicGetPathControl(dds3ObjectBaseGetControlBasic(object, DDS3_OBJECT_DATA_SLOT));
 }
 
+extern dds3ObjectBaseControlWorkData_t *dds3LightObjectBasicGetControlWorkData(dds3Basic_t *object);
+
+/* Each object kind keeps its handle in a different structure. */
+dds3ObjectBaseControlWorkData_t *dds3GetBaseControlWorkData(dds3Basic_t *worldNode) {
+    dds3ObjectBaseControlWorkData_t *handle;
+
+    handle = 0;
+    switch ((worldNode->kindTag >> 24) - 4) {
+    case 0: handle = dds3GetCameraObjectBaseControlWorkData(worldNode); break;
+    case 1: handle = dds3UnitObjectBasicGetControlWorkData(worldNode); break;
+    case 2: handle = dds3MatterObjectBasicGetControlWorkData(worldNode); break;
+    case 3: handle = dds3EffectObjectBasicGetControlWorkData(worldNode); break;
+    case 4: handle = dds3EventObjectBasicGetControlWorkData(worldNode); break;
+    case 5: handle = dds3LightObjectBasicGetControlWorkData(worldNode); break;
+    }
+    return handle;
+}
+
+/* Store the opaque auxiliary value in the shared object base. */
+void dds3ObjectBaseSetControlBasicSvs(dds3Basic_t *object, u32 value) {
+    dds3ObjectBaseControlWorkData_t *base;
+
+    base = dds3GetBaseControlWorkData(object);
+    base->unk44 = value;
+}
+
 INCLUDE_SDATA(const s32, "basic/dds3ObjectBase", D_003BA9C8);
+

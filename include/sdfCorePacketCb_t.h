@@ -2,11 +2,11 @@
 #define SDF_CORE_PACKET_CB_T_H
 
 #include "common.h"
-#include "sdf.h"
 #include "sdfCorePacketPointBuff_tag.h"
 
-/* The VU packet builders' work block, filled by
- * corePktInitCb from a command's parameter words. */
+struct sdfMatPacket_t;
+
+/* Native inline-matrix view through +0xAC. The generator allocation is larger. */
 typedef struct {
     f32 tmSave[4][4];      /* 0x00 */
     u16 faceCount;            /* 0x40 */
@@ -16,19 +16,19 @@ typedef struct {
     u32 orgAttrBits;             /* 0x4C */
     s16 drawFaceCount;         /* 0x50 */
     s16 backfaceCount; /* 0x52: rejected-triangle index count */
-    SdfAssetEntry *matPacketPtr;   /* 0x54 */
+    struct sdfMatPacket_t *matPacketPtr;   /* 0x54 */
     u32 color;       /* 0x58: packed RGBA word */
     f32 fdSoften;           /* 0x5C */
     f32 fdBias;           /* 0x60 */
     u32 pointBuff;           /* 0x64 */
-    sdfCorePacketPointBuff_tag *freePointBuff; /* 0x68: next free ring node */
-    sdfCorePacketPointBuff_tag *extPointBuff; /* 0x6C: ring wrap node */
+    sdfCorePacketPointBuff_tag *freePointBuff; /* 0x68: next free ring matPacketPtr */
+    sdfCorePacketPointBuff_tag *extPointBuff; /* 0x6C: ring wrap matPacketPtr */
     u32 freePointCount;         /* 0x70 */
     u32 extPointCount;         /* 0x74 */
     sdfCorePacketPointBuff_tag *extPointTop; /* 0x78 */
     sdfCorePacketPointBuff_tag **extPointLink;  /* 0x7C: list tail link */
     u32 packetOpenPtr;       /* 0x80 */
-    u32 packetTopPtr;            /* 0x84: aligned packet cursor + 0x30 */
+    u32 packetTopPtr;            /* 0x84: aligned packet packetPtr + 0x30 */
     u32 *packetStartPtr;        /* 0x88 */
     u32 *packetPtr;           /* 0x8C */
     u8 *dataPtr;           /* 0x90 */

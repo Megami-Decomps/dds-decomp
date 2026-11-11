@@ -18,8 +18,8 @@ typedef struct EffPCPCompactWork {
     s32 endExtent;
     s32 frame;
     union {
-        EffBlurScatterWork *scatter;
-        EffBlurScaleWork *scale;
+        effBlurScatterWork_t *scatter;
+        effBlurScaleWork_t *scale;
     } resource;
 } EffPCPCompactWork;
 

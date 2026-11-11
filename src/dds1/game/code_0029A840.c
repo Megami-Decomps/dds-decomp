@@ -2,7 +2,20 @@
 #include "common.h"
 #include "sdf_map_position_api.h"
 #include "eff_texture_table.h"
-#include "sdf_vu0.h"
+#include "ps2asm.h"
+
+static inline void UnpackRGBAWord(u32 color, u32 unitBits) {
+    u32 rgba[4];
+    rgba[0] = color;
+    EE_MMI_RGBA_UNPACK_READONLY(rgba, unitBits);
+}
+
+static inline u32 PackRGBAWord(f32 unit) {
+    u32 rgba[4];
+    MMI_RGBA_PACK_UNIT(rgba[0], unit);
+    return rgba[0];
+}
+
 #include "eff_object_node.h"
 #include "eff_model_owner.h"
 #include "sdf_motion.h"
@@ -10,11 +23,9 @@
 #include "sdf_packet_builders.h"
 #include "sdf_chip.h"
 #include "eff_ref_obj.h"
-#include "sdf_resource.h"
+#include "sdf_heap_api.h"
 #include "eff_anim.h"
 #include "file.h"
-#include "ee_mmi.h"
-#include "pcp_vu0.h"
 #include "sdf_projection.h"
 #include "mdl.h"
 #include "sdf.h"
@@ -98,8 +109,8 @@ void effDestroyModelContext(dds3ModelHandle_t *model) {
 }
 
 EffModelOwner *effCreateModelOwner(FileJobPayload *source) {
-    EffModelOwner *owner = sdfAllocAndClearQuadwords(sizeof(EffModelOwner));
-    owner->ownedBuffer = sdfAllocAndClearQuadwords(sizeof(*owner->ownedBuffer));
+    EffModelOwner *owner = sdfChipAllocZeroDirect(sizeof(EffModelOwner));
+    owner->ownedBuffer = sdfChipAllocZeroDirect(sizeof(*owner->ownedBuffer));
     if (source != NULL) {
         void *data;
         u32 scaleBits;
@@ -109,7 +120,7 @@ EffModelOwner *effCreateModelOwner(FileJobPayload *source) {
         if (data != 0) {
             owner->model = effLoadViewerModelWithVUState(data, source->secondary.size);
             SDF_VU0_SETSCALE1VECTOR();
-            VU0_SCALE_VF_MFC1(vf10, owner->scale);
+            SDF_VU0_SCALEVECTOR_V0_BARRIER(owner->scale);
             mdlSetScale(owner->model);
         }
     }
@@ -117,7 +128,7 @@ EffModelOwner *effCreateModelOwner(FileJobPayload *source) {
 }
 
 void effDestroyModelOwner(EffModelOwner *owner) {
-    SdfLightingPacketStorage *buffer = owner->ownedBuffer;
+    sdf3DLightParallelPacket_t *buffer = owner->ownedBuffer;
     if (buffer != NULL) {
         sdfChipFreeDirect(buffer);
     }
@@ -147,7 +158,7 @@ void effRecreateModelFromSource(EffModelOwner *work, EffModelOwner *source) {
     model = mdlLoad(mdlGetMajorNum(original->model), mdlGetMinorNum(original->model));
     effInitModelVUState(model);
     SDF_VU0_SETSCALE1VECTOR();
-    VU0_SCALE_VF_MFC1(vf10, owner->scale);
+    SDF_VU0_SCALEVECTOR_V0_BARRIER(owner->scale);
     mdlSetScale(model);
     owner->model = model;
 }
@@ -157,10 +168,10 @@ void effModelAnimationStop(EffModelOwner *owner) {
 }
 
 
-extern s32 effComputeLightDirectionVU(dds3ModelHandle_t *, SdfLightingPacketStorage *);
+extern s32 effComputeLightDirectionVU(dds3ModelHandle_t *, sdf3DLightParallelPacket_t *);
 
 #include "sdf_packet_alloc.h"
-extern sdfGrOt_t *kwlnSceneSurfaceSets[13][4];
+extern sdfGrOt_t *sdfModelOtTable[13][4];
 extern u64 D_0037E5B0[];
 
 /* Attach the owner's lighting buffer when the direction update succeeds. */
@@ -168,11 +179,11 @@ void effRefreshModelLighting(EffModelOwner *work) {
     dds3ModelHandle_t *model;
     if (effComputeLightDirectionVU(work->model, work->ownedBuffer) != 0) {
         model = work->model;
-        model->inner->lighting = &work->ownedBuffer->dmaTag;
+        model->inner->lighting = work->ownedBuffer;
     } else {
         model = work->model;
     }
-    mdlLink(model, kwlnSceneSurfaceSets[10]);
+    mdlLink(model, sdfModelOtTable[10]);
 }
 
 /* Pass a vector to the VU0 model helpers via vf10 (gcc cannot do this from plain C). */
@@ -213,7 +224,7 @@ void effUploadModelTextures(EffModelOwner *owner) {
         s16 height;
         u8 format;
 
-        switch (tex->battleTextureSlot) {
+        switch (tex->clutId) {
         case SDF_TEXTURE_BATTLE_SLOT_ONE:
             header = battle->slot1;
             break;
@@ -300,15 +311,15 @@ void effRenderModelOwnerWithGsTests(EffModelOwner *owner) {
         }
         packet[5] = 0x47;
         sdfDrawTagLink(list, (u32)packet);
-        surface = kwlnSceneSurfaceSets[1][index];
-        surface->append(surface, list);
+        surface = sdfModelOtTable[1][index];
+        surface->regFunc(surface, list);
     }
 
     if (effComputeLightDirectionVU(owner->model, owner->ownedBuffer)) {
-        owner->model->inner->lighting = &owner->ownedBuffer->dmaTag;
+        owner->model->inner->lighting = owner->ownedBuffer;
     }
 
-    mdlLink(owner->model, kwlnSceneSurfaceSets[1]);
+    mdlLink(owner->model, sdfModelOtTable[1]);
 
     for (index = 1; index != 4; index++) {
         list = (sdfDrawTag_t *)sdfGrAllocPacketBuff(0x20);
@@ -321,8 +332,8 @@ void effRenderModelOwnerWithGsTests(EffModelOwner *owner) {
         packet[4] = D_0037E5B0[index];
         packet[5] = 0x47;
         sdfDrawTagLink(list, (u32)packet);
-        surface = kwlnSceneSurfaceSets[1][index];
-        surface->append(surface, list);
+        surface = sdfModelOtTable[1][index];
+        surface->regFunc(surface, list);
     }
 }
 
@@ -345,7 +356,7 @@ void effMarkFloorModelForUpdate(EffModelOwner *work) {
 
 
 void effFloorModelListPush(EffModelOwner *obj) {
-    EffectObjectNode *entry = sdfAllocAndClearQuadwords(sizeof(EffectObjectNode));
+    EffectObjectNode *entry = sdfChipAllocZeroDirect(sizeof(EffectObjectNode));
 
     entry->object = obj;
     entry->prev = NULL;
@@ -630,14 +641,14 @@ void func_0029B818(EffResourceOwner *owner) {
         distanceScale = distance / 800.0f;
         distanceScale /= scale;
         SDF_VU0_SETSCALE1VECTOR();
-        VU0_SCALAR_OP(distanceScale, "vmulx.xyzw vf10, vf10, vf2x");
+        SDF_VU0_SCALEVECTOR_V0(distanceScale);
         SDF_VU0_SCALE_XYZ();
         SDF_VU0_STORE_ROW0_NOMEM(owner->model->inner->matrix[0]);
         SDF_VU0_STORE_ROW1_NOMEM(owner->model->inner->matrix[1]);
         SDF_VU0_STORE_ROW2_NOMEM(owner->model->inner->matrix[2]);
     }
     owner->model->first->frameStep = frameStep;
-    mdlLink(owner->model, kwlnSceneSurfaceSets[10]);
+    mdlLink(owner->model, sdfModelOtTable[10]);
     frame = owner->currentFrame;
     count = owner->count;
     limit = owner->plainEntry;
@@ -649,24 +660,24 @@ void func_0029B818(EffResourceOwner *owner) {
                 &owner->alphaTrack, owner->currentFrame, owner->plainEntry);
             broadcastColor = mdlGetColor(owner->model);
             byteUnit = 0x3C000000;
-            eeUnpackRGBAWord(broadcastColor, byteUnit);
+            UnpackRGBAWord(broadcastColor, byteUnit);
             SDF_VU0_COPYVECTOR_A_TO_B();
-            eeUnpackRGBAWord(sampledColor, byteUnit);
+            UnpackRGBAWord(sampledColor, byteUnit);
             SDF_VU0_MULVECTOR();
-            color = eePackRGBAWord(128.0f);
+            color = PackRGBAWord(128.0f);
             for (index = 0; index < count; index++, queue++) {
                 sdfModelGetMarkPosMatrix(model, index);
-                VU0_STORE_VF_UNCLOBBERED(vf31, position);
+                SDF_VU0_STORE_ROW3_NOMEM(position);
                 if (scale != 0.0f) {
                     SDF_VU0_SETSCALE1VECTOR();
-                    VU0_SCALE_VF(vf10, 1.0f / scale);
+                    SDF_VU0_SCALEVECTOR_BITS(1.0f / scale);
                     SDF_VU0_SCALE_XYZ();
                 }
-                VU0_STORE_MATRIX(matrix);
+                SDF_VU0_STOREMATRIX(matrix);
                 fileQueueSetPosition(*queue, position);
                 sdfVuMatrixToQuaternion(matrix);
                 SDF_VU0_LOADVECTOR_B(D_003B2AC0);
-                effMiscQuatMultiplyVU();
+                Mult();
                 SDF_VU0_STOREVECTOR_NOMEM(rotation);
                 fileQueueSetRotation(*queue, rotation);
                 fileQueueSetScale(*queue, scale * distanceScale);
@@ -676,22 +687,22 @@ void func_0029B818(EffResourceOwner *owner) {
         } else {
             for (index = 0; index < count; index++) {
                 sdfModelGetMarkPosMatrix(model, index);
-                VU0_STORE_VF_UNCLOBBERED(vf31, position);
-                VU0_STORE_MATRIX(matrix);
+                SDF_VU0_STORE_ROW3_NOMEM(position);
+                SDF_VU0_STOREMATRIX(matrix);
                 SDF_VU0_LOADVECTOR(D_0037E110);
-                VU0_SCALE_VF(vf10, 50.0f);
+                SDF_VU0_SCALEVECTOR_BITS(50.0f);
                 SDF_VU0_APPLYMATRIX_XYZ1();
                 SDF_VU0_STOREVECTOR_NOMEM(endpoint);
                 btlDebugDrawSegment(position, endpoint, 0x80006000);
-                VU0_LOAD_MATRIX_MEMORY(matrix);
+                SDF_VU0_LOADMATRIX_BARRIER(matrix);
                 SDF_VU0_LOADVECTOR(effWorldUpVector);
-                VU0_SCALE_VF(vf10, 50.0f);
+                SDF_VU0_SCALEVECTOR_BITS(50.0f);
                 SDF_VU0_APPLYMATRIX_XYZ1();
                 SDF_VU0_STOREVECTOR_NOMEM(endpoint);
                 btlDebugDrawSegment(position, endpoint, 0x80600000);
-                VU0_LOAD_MATRIX_MEMORY(matrix);
+                SDF_VU0_LOADMATRIX_BARRIER(matrix);
                 SDF_VU0_LOADVECTOR(D_0037E100);
-                VU0_SCALE_VF(vf10, 50.0f);
+                SDF_VU0_SCALEVECTOR_BITS(50.0f);
                 SDF_VU0_APPLYMATRIX_XYZ1();
                 SDF_VU0_STOREVECTOR_NOMEM(endpoint);
                 btlDebugDrawSegment(position, endpoint, 0x80000060);
@@ -721,7 +732,7 @@ void effScaleModelVec(EffResourceOwner *work, float scale) {
     u32 bits;
 
     SDF_VU0_SETSCALE1VECTOR();
-    VU0_SCALAR_OP_TMP(bits, scale, "vmulx.xyzw vf10, vf10, vf2x");
+    SDF_VU0_SCALEVECTOR(scale);
     mdlSetScale(work->model);
 }
 
@@ -834,24 +845,24 @@ sdfTexHandle_t *sdfGetOrCreateTextureForReference(sdfGrOt_t *surface, RefObj *so
     D_003BC954 = (u32)surface;
     list = (sdfDrawTag_t *)sdfGrAllocPacketBuff(0x20);
     sdfDrawTagInit(list);
-    sdfLinkLoadImage(list, D_003BC958->secondaryResource, 0, 0, source->paletteWidth, source->paletteHeight, (s32)source->palette, 0);
-    sdfLinkLoadImage(list, D_003BC958->primaryResource, 0, 0, ((SdfTextureFileHeader *)source->base)->width, ((SdfTextureFileHeader *)source->base)->height, (s32)source->pixels, 0);
-    surface->append(surface, list);
+    sdfLinkLoadImage(list, D_003BC958->clutGsHandle, 0, 0, source->paletteWidth, source->paletteHeight, (s32)source->palette, 0);
+    sdfLinkLoadImage(list, D_003BC958->pixelGsHandle, 0, 0, ((SdfTextureFileHeader *)source->base)->width, ((SdfTextureFileHeader *)source->base)->height, (s32)source->pixels, 0);
+    surface->regFunc(surface, list);
     texture = D_003BC958;
     width = ((SdfTextureFileHeader *)source->base)->width;
     texture->width = width;
     widthLog2 = (s16)width - 1;
-    primary = texture->primaryResource->word >> 6;
+    primary = texture->pixelGsHandle->addr >> 6;
     height = ((SdfTextureFileHeader *)source->base)->height;
     texture->height = height;
-    clutFormat = texture->clutFormat;
-    secondary = texture->secondaryResource->word;
+    clutFormat = texture->CLUTFormat;
+    secondary = texture->clutGsHandle->addr;
     pixelFormat = texture->pixelFormat;
     heightLog2 = (s16)height - 1;
-    EE_MMI_BIT_LENGTH(heightLog2);
-    EE_MMI_BIT_LENGTH(widthLog2);
+    heightLog2 = PS2_WORD_BIT_LENGTH(heightLog2);
+    widthLog2 = PS2_WORD_BIT_LENGTH(widthLog2);
     secondary >>= 6;
-    texture->primaryBuffer->textureState =
+    texture->packet->tex0.data =
         ((u64)2 << 61) |
         ((u64)clutFormat << 51) |
         ((u64)secondary << 37) |
@@ -997,3 +1008,4 @@ INCLUDE_SDATA(const s32, "game/code_0029A840", D_003BC950);
 INCLUDE_SDATA(const s32, "game/code_0029A840", D_003BC954);
 
 INCLUDE_SDATA(const s32, "game/code_0029A840", D_003BC958);
+

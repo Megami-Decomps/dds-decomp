@@ -6,7 +6,7 @@
 #include "dsp_active_api.h"
 #include "dsp_entry_api.h"
 #include "mnu_input.h"
-#include "kwln.h"
+#include "kernel.h"
 #include "mnu_reset_selection_widths_api.h"
 #include "mnu.h"
 #include "mnu_result.h"
@@ -15,7 +15,7 @@
 #include "brs_ui_update_allowed_api.h"
 #include "dsp_name.h"
 #include "mdl_flag_api.h"
-#include "kwln_fade.h"
+#include "dds3_fade.h"
 #include "prf_current_record_view.h"
 
 
@@ -487,3 +487,4 @@ s32 brsProcessNextPrimaryReward(dds3ProcessID_t *task) {
 }
 
 INCLUDE_SDATA(const s32, "game/code_00299D58", D_004379B0);
+

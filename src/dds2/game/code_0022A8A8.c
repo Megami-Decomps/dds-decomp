@@ -1,15 +1,15 @@
 #include "sdk_ps2.h"
 #include "common.h"
 #include "btl_script_resource_api.h"
-#include "kwln_task_add_child.h"
+#include "dds3_task_add_child.h"
 #include "btl_state.h"
 #include "btl_event_pack_id_api.h"
 #include "btl_command.h"
-#include "pcp_vu0.h"
-#include "kwln.h"
-#include "kwln_process_registration.h"
+#include "ps2asm.h"
+#include "kernel.h"
+#include "dds3_process_registration.h"
 #include "scr.h"
-#include "bf_flw0_header.h"
+#include "scr.h"
 extern void btlStartSkillEventTask(u32);
 
 
@@ -18,7 +18,6 @@ extern void btlStartSkillEventTask(u32);
 
 extern char btlPrimaryScriptResourceName[];
 
-extern dds3ProcessID_t *scrStartScript2(u32 priority, const BfFlw0Header *script, ScrProcedureIndex procedureIndex);
 
 extern char btlSecondaryScriptResourceName[];
 
@@ -29,7 +28,7 @@ ScrProcedureIndex btlFindScriptResource(const char *name) {
         return SCR_PROCEDURE_INDEX_NOT_FOUND;
     }
     sprintf(path, "e%03d_%s", battle->eventPackId, name);
-    return scrSearchProcedureName((const BfFlw0Header *)battle->scriptHandle, path);
+    return scrSearchProcedureName((const scrHeader_t *)battle->scriptHandle, path);
 }
 
 /* Start the requested skill script as a child of the battle owner task.
@@ -41,7 +40,7 @@ void btlStartSkillEventTask(u32 skill) {
         return;
     }
     taskId = scrStartScript2(battle->scriptOwner->priority - 1,
-                            (const BfFlw0Header *)battle->scriptHandle, skill);
+                            (const scrHeader_t *)battle->scriptHandle, skill);
     scrSetUserData(taskId, NULL);
     dds3LinkProcess(battle->scriptOwner, taskId);
     battle->scriptTask = taskId;
@@ -52,7 +51,7 @@ BtlScriptResourceReleaseReadiness btlReleaseScriptResource(void) {
     if (battle->eventPackId == BTL_EVENT_PACK_ID_NONE) {
         return BTL_SCRIPT_RESOURCE_RELEASE_READY;
     }
-    if (dds3ExistProcess(battle->scriptTask) == KWLN_PROCESS_NOT_REGISTERED) {
+    if (dds3ExistProcess(battle->scriptTask) == DDS3_PROCESS_NOT_REGISTERED) {
         battle->scriptTask = 0;
         return BTL_SCRIPT_RESOURCE_RELEASE_READY;
     }
@@ -88,7 +87,7 @@ void btlStartPrimaryScriptTask(void) {
         return;
     }
     taskId = scrStartScript2(battle->scriptOwner->priority - 1,
-                            (const BfFlw0Header *)battle->scriptHandle, scriptId);
+                            (const scrHeader_t *)battle->scriptHandle, scriptId);
     scrSetUserData(taskId, NULL);
     dds3LinkProcess(battle->scriptOwner, taskId);
     battle->scriptTask = taskId;
@@ -127,7 +126,7 @@ void btlStartSecondaryScriptTask(void) {
         return;
     }
     taskId = scrStartScript2(battle->scriptOwner->priority - 1,
-                            (const BfFlw0Header *)battle->scriptHandle, scriptId);
+                            (const scrHeader_t *)battle->scriptHandle, scriptId);
     scrSetUserData(taskId, NULL);
     dds3LinkProcess(battle->scriptOwner, taskId);
     battle->scriptTask = taskId;

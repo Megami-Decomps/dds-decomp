@@ -1,0 +1,51 @@
+# SMT3's sdf unit boundaries in dds2, input to tools/resplit.py.
+# From sdf-decomp's tools/twins.py runs; a function between two runs joins the unit
+# named after it, by the SMT3 function in the same slot (sdf-decomp docs/handoff-dds.md).
+0x00101AC0 sdf/sdfDefaultMain
+0x00101C50 -
+0x003282E8 sdf/sdfSystem
+0x00328C30 sdf/sdfChip
+0x00329170 sdf/sdfMemory
+0x00329C20 sdf/sdfIop  # sdfLoadModulesAndBindNamedResourceRpc, SMT3's SdfIopInit
+0x00329CE0 sdf/sdfGraph
+0x0032A5A0 sdf/sdfGsMemory
+0x0032ABD0 sdf/sdfImageSet
+0x0032B1B0 sdf/sdfTex
+0x0032C468 sdf/sdfGsMemIO
+0x0032CA90 sdf/sdfDelayedResrc
+0x0032CDE0 sdf/sdfPacketBuff
+0x0032CEC0 sdf/sdfDraw
+0x0032E3C0 sdf/sdfPrim
+0x003306C0 sdf/sdfModel
+0x00332E50 sdf/sdfMat  # starts at sdfSetForcedAssetTextureMode
+0x00334078 sdf/sdfMotion
+0x00336228 sdf/sdfVu0
+0x00336D30 sdf/sdfVu1
+0x003396D0 sdf/sdfCoreDraw
+0x0033A170 sdf/sdf2D
+0x0033A388 sdf/sdf3D
+0x0033AE28 sdf/sdf3DPrim
+0x0033B4B0 sdf/sdfBillBoard
+0x0033C478 sdf/sdf_PadManager
+0x0033CB90 sdf/sdfDevCons
+0x0033D8D8 sdf/sdfPrint
+0x0033DB58 sdf/sdfCd
+0x0033E6B0 sdf/sdfFile
+0x0033ED38 sdf/sdfFileIO
+0x00340048 sdf/sdfHdd  # starts at sdfPowerOffLoop
+0x00340218 sdf/sdfDev9
+0x00340498 sdf/sdfMisc
+0x003406A0 sdf/sdfMath
+0x00340AC8 sdf/sdfQuat
+0x003411E8 -  # starts at dds3GetRandA
+0x003412D8 sdf/sdfRand
+0x003414D0 sdf/sdfSound  # starts at sndReserveIopWorkMemory
+0x00343E18 sdf/sdfDevFile
+0x00344120 sdf/sdfAddrResolve
+0x00344208 sdf/sdfIpu
+0x003457F8 sdf/sdfMovie
+0x00346A80 sdf/sdfPacDecode
+0x00347988 sdf/sdf_Decomp
+0x003481E8 sdf/sdfTmx
+0x00348700 sdf/sdfSortOt
+0x00348BF8 -

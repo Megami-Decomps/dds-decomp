@@ -9,7 +9,10 @@
 #include "btl_camera_mode_index.h"
 #include "btl_command_target_policy.h"
 #include "btl_actor_category_flag_api.h"
-#include "sdf_vu0.h"
+#include "ps2asm.h"
+
+#define VEC3_SPLAT(v, x) ((v)[0] = (x), (v)[1] = (x), (v)[2] = (x))
+
 #include "btl_actor_resource_table_kind.h"
 #include "sdf_vu_rotation_axes.h"
 #include "btl_skill_max_api.h"
@@ -24,10 +27,8 @@
 #include "btl_command.h"
 #include "btl_command_affinity_api.h"
 #include "btl_camera_pose_api.h"
-#include "pcp_vu0.h"
 #include "sdf_vu_matrix.h"
 #include "sdf_vu_matrix_multiply_api.h"
-#include "ee_mmi.h"
 #include "btl_action.h"
 #include "btl_ai_table.h"
 #include "btl_ai_scratch.h"
@@ -525,22 +526,6 @@ BtlIndexList *btlBuildActorIndexListAndCount(ActionStateLink *actor, BtlCommandT
     return indexList;
 }
 
-INCLUDE_RODATA(const s32, "game/code_00214948", D_00419C80);
-
-INCLUDE_RODATA(const s32, "game/code_00214948", D_00419CB0);
-
-INCLUDE_RODATA(const s32, "game/code_00214948", D_00419CD8);
-
-INCLUDE_RODATA(const s32, "game/code_00214948", D_00419D00);
-
-INCLUDE_RODATA(const s32, "game/code_00214948", D_00419D20);
-
-INCLUDE_RODATA(const s32, "game/code_00214948", D_00419DA0);
-
-INCLUDE_RODATA(const s32, "game/code_00214948", D_00419E20);
-
-INCLUDE_RODATA(const s32, "game/code_00214948", D_00419EA0);
-
 #ifdef NON_MATCHING
 #include "btl_motion_transform.h"
 #include "common.h"
@@ -558,10 +543,8 @@ INCLUDE_RODATA(const s32, "game/code_00214948", D_00419EA0);
 #include "btl_command.h"
 #include "btl_command_affinity_api.h"
 #include "btl_camera_pose_api.h"
-#include "pcp_vu0.h"
 #include "sdf_vu_matrix.h"
 #include "sdf_vu_matrix_multiply_api.h"
-#include "ee_mmi.h"
 #include "btl_action.h"
 #include "btl_ai_table.h"
 #include "btl_ai_scratch.h"
@@ -581,7 +564,7 @@ INCLUDE_RODATA(const s32, "game/code_00214948", D_00419EA0);
 #include "dds3_object_payload.h"
 
 
-extern EffRandState effSharedRandomState[];
+extern EffRandState dds3RandCB[];
 extern s32 btlDoesEnabledStatusMatchCurrentId(datUnitWork_t *, u32);
 extern char D_00419EA0[]; /* "%d 災いリング所持!!!!!!!!!!!\n" (EUC-JP): "%d holds a calamity ring" */
 extern s32 btlRollAiBucket(void);
@@ -753,7 +736,7 @@ s32 func_002152D8(ActionStateLink *actor, s32 unused) {
             }
         }
     } else if (datCommandSelectors[commandId].stat == 17) {
-        selectedIndex = dds3GetRandA(effSharedRandomState) % count;
+        selectedIndex = dds3GetRandA(dds3RandCB) % count;
     } else {
         priority = 0;
         if (command->options & 2) {
@@ -783,7 +766,7 @@ s32 func_002152D8(ActionStateLink *actor, s32 unused) {
             }
         }
         if (priority == 0) {
-            selectedIndex = dds3GetRandA(effSharedRandomState) % count;
+            selectedIndex = dds3GetRandA(dds3RandCB) % count;
         } else if (count != 1) {
             s32 hpInserted = 0;
             s16 hpEligible = 0;
@@ -809,6 +792,23 @@ s32 func_002152D8(ActionStateLink *actor, s32 unused) {
     return 1;
 }
 #else
+
+INCLUDE_RODATA(const s32, "game/code_00214948", D_00419C80);
+
+INCLUDE_RODATA(const s32, "game/code_00214948", D_00419CB0);
+
+INCLUDE_RODATA(const s32, "game/code_00214948", D_00419CD8);
+
+INCLUDE_RODATA(const s32, "game/code_00214948", D_00419D00);
+
+INCLUDE_RODATA(const s32, "game/code_00214948", D_00419D20);
+
+INCLUDE_RODATA(const s32, "game/code_00214948", D_00419DA0);
+
+INCLUDE_RODATA(const s32, "game/code_00214948", D_00419E20);
+
+INCLUDE_RODATA(const s32, "game/code_00214948", D_00419EA0);
+
 INCLUDE_ASM(const s32, "game/code_00214948", func_002152D8);
 #endif
 
@@ -1547,9 +1547,9 @@ void btlFaceLinkedTargetAndFlagDirection(BtlLinkedCommand *command, void *unused
         btlFlagUnitDefeatCandidate(user);
         btlFlagUnitDefeatCandidate(target);
     }
-    btlUnitGetMuzzlePosVU(user);
+    effBTLModelGetSphereCenter(user);
     SDF_VU0_STOREVECTOR(userPos);
-    btlUnitGetMuzzlePosVU(target);
+    effBTLModelGetSphereCenter(target);
     SDF_VU0_STOREVECTOR(targetPos);
     btlUnitFaceTarget(target, user);
     if (userPos[0] < targetPos[0]) {
@@ -1586,10 +1586,10 @@ void btlBuildAngledApproachCameraPose(BtlLinkedCommand *command, BtlCamState *ou
     target = (BtlUnit *)btlGetIndexListEntry(command->targetList, 0);
     extent = user->reach * user->scale;
     out->fov = command->camera.fov;
-    btlUnitGetMuzzlePosVU(user);
+    effBTLModelGetSphereCenter(user);
     SDF_VU0_STOREVECTOR(userPos);
     userPos[1] += user->height * user->scale * frontLift;
-    btlUnitGetMuzzlePosVU(target);
+    effBTLModelGetSphereCenter(target);
     SDF_VU0_STOREVECTOR_NOMEM(targetPos);
     targetPos[1] += target->height * target->scale * backLift;
     SDF_VU0_LOADVECTOR(targetPos);
@@ -1599,7 +1599,7 @@ void btlBuildAngledApproachCameraPose(BtlLinkedCommand *command, BtlCamState *ou
     length *= 0.6f;
     SDF_VU0_NORMALIZE();
     SDF_VU0_STOREVECTOR(dir);
-    VU0_SCALE_VF_MFC1(vf10, length);
+    SDF_VU0_SCALEVECTOR_V0_BARRIER(length);
     SDF_VU0_ADDVECTOR();
     SDF_VU0_STOREVECTOR(out->position);
     angle *= 0.017453293f;
@@ -1634,10 +1634,10 @@ void btlBuildTargetFocusedCameraPair(BtlLinkedCommand *command, BtlCamState *fro
     target = (BtlUnit *)btlGetIndexListEntry(command->targetList, 0);
     userExtent = user->reach * user->scale;
     targetExtent = target->reach * target->scale;
-    btlUnitGetMuzzlePosVU(user);
+    effBTLModelGetSphereCenter(user);
     SDF_VU0_STOREVECTOR(userPos);
     userPos[1] = -btlUnitGetTopY(user);
-    btlUnitGetMuzzlePosVU(target);
+    effBTLModelGetSphereCenter(target);
     SDF_VU0_STOREVECTOR(targetPos);
     targetPos[1] += target->height * target->scale * backLift;
     if (targetPos[0] <= userPos[0]) {
@@ -1694,10 +1694,10 @@ void btlBuildLinkedCommandCameraPair(BtlLinkedCommand *command, BtlCamState *fro
     }
     userExtent = user->reach * user->scale;
     targetExtent = target->reach * target->scale;
-    btlUnitGetMuzzlePosVU(user);
+    effBTLModelGetSphereCenter(user);
     SDF_VU0_STOREVECTOR(userPos);
     userPos[1] += user->height * user->scale * frontLift;
-    btlUnitGetMuzzlePosVU(target);
+    effBTLModelGetSphereCenter(target);
     SDF_VU0_STOREVECTOR(targetPos);
     targetPos[1] += target->height * target->scale * backLift;
     if (targetPos[0] <= userPos[0]) {
@@ -1752,10 +1752,10 @@ void btlBuildInsetExchangeCameraPair(BtlLinkedCommand *command, BtlCamState *fro
     }
     userExtent = user->reach * user->scale;
     targetExtent = target->reach * target->scale;
-    btlUnitGetMuzzlePosVU(user);
+    effBTLModelGetSphereCenter(user);
     SDF_VU0_STOREVECTOR(userPos);
     userPos[1] += user->height * user->scale * frontLift;
-    btlUnitGetMuzzlePosVU(target);
+    effBTLModelGetSphereCenter(target);
     SDF_VU0_STOREVECTOR(targetPos);
     targetPos[1] += target->height * target->scale * backLift;
     if (targetPos[0] <= userPos[0]) {
@@ -3094,7 +3094,7 @@ void btlFadeAndTintNamedChunkTree(sdfModelNode_t *node, s32 color) {
     tint[0] = node->color | 0x808080;
     EE_MMI_RGBA_UNPACK(tint, 1.0f / 128.0f);
     SDF_VU0_MULVECTOR();
-    EE_MMI_RGBA_PACK(packed[0]);
+    SDF_VU0_dds3ColorFtoI(packed[0], 128.0f);
     child = node->children;
     node->color = packed[0];
     if (child != NULL) {
@@ -3350,10 +3350,8 @@ void btlReturnUnitToGroup(ActionStateLink *task) {
 #include "btl_command.h"
 #include "btl_command_affinity_api.h"
 #include "btl_camera_pose_api.h"
-#include "pcp_vu0.h"
 #include "sdf_vu_matrix.h"
 #include "sdf_vu_matrix_multiply_api.h"
-#include "ee_mmi.h"
 #include "btl_action.h"
 #include "btl_ai_table.h"
 #include "btl_ai_scratch.h"
@@ -4261,8 +4259,8 @@ u8 btlSetLinkedDefeatCameraPresetA(BtlLinkedCommand *command, BtlCamState *camer
         switch (kind) {
         case 0:
             SetRotateMatrixX(-0.13089969f);
-            sdfVuLoadSecondaryRotationMatrixY(0.13089969f);
-            sdfComposeVuMatrixFromRegisters();
+            SetRotateMatrixY_B(0.13089969f);
+            MultMatrixNoArg();
             break;
         case 1:
             SetRotateMatrixX(-0.13089969f);
@@ -4270,8 +4268,8 @@ u8 btlSetLinkedDefeatCameraPresetA(BtlLinkedCommand *command, BtlCamState *camer
         case 2:
             angle = -0.13089969f;
             SetRotateMatrixX(angle);
-            sdfVuLoadSecondaryRotationMatrixY(angle);
-            sdfComposeVuMatrixFromRegisters();
+            SetRotateMatrixY_B(angle);
+            MultMatrixNoArg();
             break;
         }
         /* vu0 routine: rotate the camera direction by the prepared matrix. */
@@ -4448,11 +4446,12 @@ extern void btlBuildTargetGroupFramingCameraPose(BtlLinkedCommand *, BtlCamState
 extern void btlBuildRandomizedActionCameraPosePair(BtlLinkedCommand *, BtlCamState *, BtlCamState *);
 extern s32 btlHasSingleLinkedResource(BtlLinkedCommand *);
 extern void btlApplyCombinedActorFlags(BtlLinkedCommand *);
-extern EffRandState effSharedRandomState[];
+extern EffRandState dds3RandCB[];
 extern char D_0041A5E0[], D_0041A5F8[];
 
 /* VURI camera selection retains the command link and mode payload across
  * camera-provider calls; actor/status and form reads remain callback-fresh. */
+
 INCLUDE_RODATA(const s32, "game/code_00214948", D_0041A5E0);
 
 INCLUDE_RODATA(const s32, "game/code_00214948", D_0041A5F8);
@@ -4718,7 +4717,7 @@ s32 btlSelectVritraActorCategoryCamera(BtlLinkedCommand *command, s8 side, s8 ta
             if (link->unit->partyRecord.unitId == 0x111) {
                 switch (targetSlot) {
                 case 0:
-                    if (dds3GetRandA((EffRandState *)effSharedRandomState) & 1) {
+                    if (dds3GetRandA((EffRandState *)dds3RandCB) & 1) {
                         btlBossDebugPrintf("VURI_A:ATTACK-0-down ++++\n");
                         btlSetEffectCameraKeys((s32)command,
                             -523.6f, -141.7f, -1094.1f, -0.041f, -0.102f, -0.005f, 0.985f, -568.6f,
@@ -4731,7 +4730,7 @@ s32 btlSelectVritraActorCategoryCamera(BtlLinkedCommand *command, s8 side, s8 ta
                     }
                     return 1;
                 case 1:
-                    if (dds3GetRandA((EffRandState *)effSharedRandomState) & 1) {
+                    if (dds3GetRandA((EffRandState *)dds3RandCB) & 1) {
                         btlBossDebugPrintf("VURI_A:ATTACK-1-down ++++\n");
                         btlSetEffectCameraKeys((s32)command,
                             -300.6f, -113.2f, -1052.8f, -0.053f, -0.154f, 0.0f, 0.978f, -329.1f,
@@ -4744,7 +4743,7 @@ s32 btlSelectVritraActorCategoryCamera(BtlLinkedCommand *command, s8 side, s8 ta
                     }
                     return 1;
                 case 2:
-                    if (dds3GetRandA((EffRandState *)effSharedRandomState) & 1) {
+                    if (dds3GetRandA((EffRandState *)dds3RandCB) & 1) {
                         btlBossDebugPrintf("VURI_A:ATTACK-2-down ++++\n");
                         btlSetEffectCameraKeys((s32)command,
                             -13.6f, -225.4f, -1001.0f, 0.029f, -0.156f, -0.01f, 0.978f, -47.7f,
@@ -4760,7 +4759,7 @@ s32 btlSelectVritraActorCategoryCamera(BtlLinkedCommand *command, s8 side, s8 ta
             } else {
                 switch (targetSlot) {
                 case 0:
-                    if (dds3GetRandA((EffRandState *)effSharedRandomState) & 1) {
+                    if (dds3GetRandA((EffRandState *)dds3RandCB) & 1) {
                         btlBossDebugPrintf("VURI_B:ATTACK-0-down ++++\n");
                         btlSetEffectCameraKeys((s32)command,
                             129.6f, -149.0f, -921.7f, -0.014f, 0.231f, -0.008f, 0.963f, 179.3f,
@@ -4773,7 +4772,7 @@ s32 btlSelectVritraActorCategoryCamera(BtlLinkedCommand *command, s8 side, s8 ta
                     }
                     return 1;
                 case 1:
-                    if (dds3GetRandA((EffRandState *)effSharedRandomState) & 1) {
+                    if (dds3GetRandA((EffRandState *)dds3RandCB) & 1) {
                         btlBossDebugPrintf("VURI_B:ATTACK-1-down ++++\n");
                         btlSetEffectCameraKeys((s32)command,
                             256.7f, -83.8f, -943.7f, -0.084f, 0.146f, -0.017f, 0.976f, 317.2f,
@@ -4786,7 +4785,7 @@ s32 btlSelectVritraActorCategoryCamera(BtlLinkedCommand *command, s8 side, s8 ta
                     }
                     return 1;
                 case 2:
-                    if (dds3GetRandA((EffRandState *)effSharedRandomState) & 1) {
+                    if (dds3GetRandA((EffRandState *)dds3RandCB) & 1) {
                         btlBossDebugPrintf("VURI_B:ATTACK-2-down ++++\n");
                         btlSetEffectCameraKeys((s32)command,
                             400.8f, -282.1f, -874.3f, 0.128f, 0.121f, 0.014f, 0.975f, 438.3f,
@@ -5417,6 +5416,7 @@ s32 btlIsSpecialMotion(BtlUnit *actor) {
 }
 
 /* Pick a permitted shadow skill from the corresponding party member's list. */
+
 INCLUDE_RODATA(const s32, "game/code_00214948", D_0041AAC8);
 
 void btlChoosePartyDerivedShadowSkill(ActionStateLink *actor) {
@@ -6487,7 +6487,7 @@ u64 btlCreateLinkedActorTransformTasks(u64 prerequisiteHandle) {
     return load->handle;
 }
 
-extern f32 *D_0037F770[];
+extern f32 *dds3LightParam[];
 
 void btlRestoreLinkedActorSceneColor(void) {
     BattleEffectPayload *effect = ((BtlState *)btlGetRuntime())->effect;
@@ -6497,8 +6497,8 @@ void btlRestoreLinkedActorSceneColor(void) {
     if (effect != NULL) {
         actor = effect->action.actor;
         if (actor != NULL && (actor->status.flags & 2)) {
-            SDF_VU0_LOADVECTOR(D_0037F770[0]);
-            EE_MMI_RGBA_PACK(packed[0]);
+            SDF_VU0_LOADVECTOR(dds3LightParam[0]);
+            SDF_VU0_dds3ColorFtoI(packed[0], 128.0f);
             evtSetUnitColorRGB(actor->ext, 0, packed[0]);
         }
     }
@@ -7000,8 +7000,8 @@ u8 btlSetBrahmanPartyCameraPreset(BtlLinkedCommand *command, BtlCamState *camera
             switch (cameraPreset) {
             case 0:
                 SetRotateMatrixX(-0.13089969f);
-                sdfVuLoadSecondaryRotationMatrixY(0.13089969f);
-                sdfComposeVuMatrixFromRegisters();
+                SetRotateMatrixY_B(0.13089969f);
+                MultMatrixNoArg();
                 break;
             case 1:
                 SetRotateMatrixX(-0.13089969f);
@@ -7009,8 +7009,8 @@ u8 btlSetBrahmanPartyCameraPreset(BtlLinkedCommand *command, BtlCamState *camera
             case 2: {
                 f32 angle = -0.13089969f;
                 SetRotateMatrixX(angle);
-                sdfVuLoadSecondaryRotationMatrixY(angle);
-                sdfComposeVuMatrixFromRegisters();
+                SetRotateMatrixY_B(angle);
+                MultMatrixNoArg();
                 break;
             }
             }
@@ -7838,8 +7838,8 @@ u8 btlSetLinkedDefeatCameraPresetB(BtlLinkedCommand *command, BtlCamState *camer
         switch (kind) {
         case 0:
             SetRotateMatrixX(-0.13089969f);
-            sdfVuLoadSecondaryRotationMatrixY(0.13089969f);
-            sdfComposeVuMatrixFromRegisters();
+            SetRotateMatrixY_B(0.13089969f);
+            MultMatrixNoArg();
             break;
         case 1:
             SetRotateMatrixX(-0.13089969f);
@@ -7847,8 +7847,8 @@ u8 btlSetLinkedDefeatCameraPresetB(BtlLinkedCommand *command, BtlCamState *camer
         case 2:
             angle = -0.13089969f;
             SetRotateMatrixX(angle);
-            sdfVuLoadSecondaryRotationMatrixY(angle);
-            sdfComposeVuMatrixFromRegisters();
+            SetRotateMatrixY_B(angle);
+            MultMatrixNoArg();
             break;
         }
         /* vu0 routine: rotate the camera direction by the prepared matrix. */
@@ -8110,6 +8110,7 @@ extern void btlFlagLinkedGroupDefeatCandidatesTask(BtlLinkedCommand *);
 extern char D_0041B3B8[];
 
 /* Choose one of three SATAN:ATTACK camera key pairs after marking all defeat candidates. */
+
 INCLUDE_RODATA(const s32, "game/code_00214948", D_0041B3B8);
 
 void btlChooseSatanAttackCamera(BtlLinkedCommand *command) {
@@ -8252,8 +8253,8 @@ u8 btlSetSpecialDefeatCameraPreset(BtlLinkedCommand *command, BtlCamState *camer
         switch (kind) {
         case 0:
             SetRotateMatrixX(-0.13089969f);
-            sdfVuLoadSecondaryRotationMatrixY(0.13089969f);
-            sdfComposeVuMatrixFromRegisters();
+            SetRotateMatrixY_B(0.13089969f);
+            MultMatrixNoArg();
             break;
         case 1:
             SetRotateMatrixX(-0.13089969f);
@@ -8261,8 +8262,8 @@ u8 btlSetSpecialDefeatCameraPreset(BtlLinkedCommand *command, BtlCamState *camer
         case 2:
             angle = -0.13089969f;
             SetRotateMatrixX(angle);
-            sdfVuLoadSecondaryRotationMatrixY(angle);
-            sdfComposeVuMatrixFromRegisters();
+            SetRotateMatrixY_B(angle);
+            MultMatrixNoArg();
             break;
         }
         /* vu0 routine: rotate the camera direction by the prepared matrix. */
@@ -8971,7 +8972,7 @@ void btlRestoreLinkedEffectUnitPose(BtlUnit *source) {
 
         SDF_VU0_LOADVECTOR(source->rotation);
         SDF_VU0_LOADVECTOR_B(D_0041B4D0);
-        effMiscQuatMultiplyVU();
+        Mult();
         SDF_VU0_STOREVECTOR_NOMEM(rotation);
         dds3SetRotPoseSet(effect->linked.actor->effectObject, (u128 *)rotation);
     }
@@ -9010,6 +9011,7 @@ void btlResetEffectState(void) {
 }
 
 /* Apply Rahu head/body operand damage, binding/fading and coordinated recovery. */
+
 INCLUDE_RODATA(const s32, "game/code_00214948", D_0041B4D0);
 
 void btlApplyRahuOperandEffects(BtlUnit *unit, BtlOperandEntry *entry) {
@@ -9228,3 +9230,4 @@ INCLUDE_SDATA(const s32, "game/code_00214948", D_00436CE0);
 INCLUDE_SDATA(const s32, "game/code_00214948", D_00436CE8);
 
 INCLUDE_SDATA(const s32, "game/code_00214948", D_00436CF0);
+

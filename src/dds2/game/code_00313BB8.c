@@ -9,9 +9,9 @@
 #include "dsp_name.h"
 #include "common.h"
 #include "pty_profile_record_value.h"
-#include "sdf_vu0.h"
+#include "ps2asm.h"
 #include "eff_random.h"
-#include "sdf_resource.h"
+#include "sdf_heap_api.h"
 #include "sdf_vu_matrix.h"
 #include "file.h"
 #include "sdf.h"
@@ -24,7 +24,6 @@ extern u16 mnuPickPairedTableValue(s32 boundWordIndex, s32 alternate);
 extern void *memset(void *dst, s32 value, u32 size);
 
 #include "fpu.h"
-#include "pcp_vu0.h"
 #include "itf.h"
 #include "fr_font.h"
 #include "dat_state.h"
@@ -93,7 +92,7 @@ typedef struct Entry24W {
 
 extern Entry24W D_00404AA4[];
 
-extern FrFontTextBank frFontColoredGlyphResource;
+extern frTextBank_t frFontColoredGlyphResource;
 
 
 extern s32 ptyTestPrimaryProfileFlag(datUnitWork_t *, u16);
@@ -150,10 +149,10 @@ extern char sdfDebugLogPairFormat[];
 
 void ptyRebuildProfileSkills(s32 useCurrentProfile, datUnitWork_t *unit);
 
-extern _FRQ *itfDrawBankTextWithLayoutFlags(s32, s32, s32, u16, FrFontTextBank *, s32);
+extern frFontHandle_t *itfDrawBankTextWithLayoutFlags(s32, s32, s32, u16, frTextBank_t *, s32);
 
 
-extern s32 frFontDrawGlyphChain(_FRQ *, s8, u32);
+extern s32 frDrawFontOt(frFontHandle_t *, s8, u32);
 
 
 void sdfAppendFormattedDebugLogPair(s32 left, s32 right) {
@@ -1401,13 +1400,13 @@ u16 scrGetEntryLowFlags(datUnitWork_t *context, u16 entryId) {
 }
 
 void frFontQueueColoredGlyph(s32 x, s32 y, u32 first, u16 width, u32 second, s32 option) {
-    _FRQ *handle = itfDrawBankTextWithLayoutFlags(x, y, first, width, &frFontColoredGlyphResource, 0);
+    frFontHandle_t *handle = itfDrawBankTextWithLayoutFlags(x, y, first, width, &frFontColoredGlyphResource, 0);
     frSetFontColor(handle, second);
-    frFontDrawGlyphChain(handle, 1, option);
+    frDrawFontOt(handle, 1, option);
     frDestroyFontRequestAfter(handle);
 }
 
-FrFontTextBank *frFontGetColoredGlyphResource(void) {
+frTextBank_t *frFontGetColoredGlyphResource(void) {
     return &frFontColoredGlyphResource;
 }
 
@@ -1465,10 +1464,10 @@ void sdfReleaseFlagListResource(SdfFlagListWork *work) {
     sdfMemFreeDirect(work->allocation);
 }
 
-extern f32 sdfViewTargetVector[4];
+extern f32 aViewEye[4];
 extern u32 D_00438918;
 extern f32 sdfAtan(f32 ratio);
-extern EffRandState effSharedRandomState[];
+extern EffRandState dds3RandCB[];
 
 /* Advance the drop list: respawn a random number of free drops around the camera, move live drops along their
  * own direction, and fade them over their last ten frames. */
@@ -1517,43 +1516,43 @@ void sdfUpdateFlagListEntries(SdfFlagListWork *work) {
     sdfAtan(dds3ScreenParam.camera.fov);
     sdfAtan(3.14159265f / 4.0f);
     if (spawnRange != 0) {
-        spawn = dds3GetRandA((EffRandState *)effSharedRandomState) % spawnRange + 1;
+        spawn = dds3GetRandA((EffRandState *)dds3RandCB) % spawnRange + 1;
     }
     for (i = 0; i < count; i++, mark++, vertices += 2, colors += 2) {
         timer = mark->timer;
         if (timer == -1) {
             if (spawn != 0) {
                 spawn--;
-                near = dds3GetRandFloatA(effSharedRandomState);
-                lateral = (dds3GetRandFloatA(effSharedRandomState) - 0.5f) * 2.0f;
-                if (dds3GetRandFloatA(effSharedRandomState) > 0.5f) {
+                near = dds3GetRandFloatA(dds3RandCB);
+                lateral = (dds3GetRandFloatA(dds3RandCB) - 0.5f) * 2.0f;
+                if (dds3GetRandFloatA(dds3RandCB) > 0.5f) {
                     depth = near * 2000.0f + 1000.0f;
-                    pos[0] = depth * spreadX * ((dds3GetRandFloatA(effSharedRandomState) - 0.5f) * 2.0f);
+                    pos[0] = depth * spreadX * ((dds3GetRandFloatA(dds3RandCB) - 0.5f) * 2.0f);
                     pos[1] = depth * spreadY * lateral;
                     pos[2] = depth;
                     SDF_VU0_LOADVECTOR(pos);
                     SDF_VU0_APPLYMATRIX_XYZ1();
                     SDF_VU0_STOREVECTOR(vertices[0]);
                     vertices[0][1] -= depth * spreadY * 1.7f;
-                    if (sdfViewTargetVector[1] + 500.0f < vertices[0][1]) {
-                        vertices[0][1] -= vertices[0][1] - sdfViewTargetVector[1];
+                    if (aViewEye[1] + 500.0f < vertices[0][1]) {
+                        vertices[0][1] -= vertices[0][1] - aViewEye[1];
                     }
                     if (D_00438918 != 0) {
                         SDF_VU0_LOADVECTOR(vertices[0]);
-                        SDF_VU0_LOADVECTOR_B(sdfViewTargetVector);
+                        SDF_VU0_LOADVECTOR_B(aViewEye);
                         SDF_VU0_SUBVECTOR();
                         SDF_VU0_STOREVECTOR(vertices[0]);
                     }
                 } else {
                     depth = 0.0f;
-                    pos[0] = (dds3GetRandFloatA(effSharedRandomState) - 0.5f) * 2.0f * 1000.0f;
-                    pos[2] = (dds3GetRandFloatA(effSharedRandomState) - 0.5f) * 2.0f * 1000.0f;
+                    pos[0] = (dds3GetRandFloatA(dds3RandCB) - 0.5f) * 2.0f * 1000.0f;
+                    pos[2] = (dds3GetRandFloatA(dds3RandCB) - 0.5f) * 2.0f * 1000.0f;
                     pos[1] = lateral * 100.0f + -200.0f;
                     SDF_VU0_LOADVECTOR(pos);
-                    SDF_VU0_LOADVECTOR_B(sdfViewTargetVector);
+                    SDF_VU0_LOADVECTOR_B(aViewEye);
                     SDF_VU0_ADDVECTOR();
                     if (D_00438918 != 0) {
-                        SDF_VU0_LOADVECTOR_B(sdfViewTargetVector);
+                        SDF_VU0_LOADVECTOR_B(aViewEye);
                         SDF_VU0_SUBVECTOR();
                     }
                     SDF_VU0_STOREVECTOR(vertices[0]);
@@ -1580,7 +1579,7 @@ void sdfUpdateFlagListEntries(SdfFlagListWork *work) {
             SDF_VU0_NORMALIZE();
             SDF_VU0_COPYVECTOR_A_TO_B();
             SDF_VU0_SETSCALE1VECTOR();
-            VU0_SCALAR_OP_R3(step, "vmulx.xyzw vf10, vf10, vf2x");
+            SDF_VU0_SCALEVECTOR_V1(step);
             SDF_VU0_MULVECTOR();
             SDF_VU0_COPYVECTOR_A_TO_C();
             SDF_VU0_LOADVECTOR(vertices[0]);
@@ -1635,7 +1634,7 @@ void sdfDrawFlagListVertices(SdfFlagListWork *work) {
     for (vertexIndex = 0; vertexIndex < count; vertexIndex++) {
         SDF_VU0_LOADVECTOR(&sourceVertices[vertexIndex]);
         if (D_00438918 != 0) {
-            SDF_VU0_LOADVECTOR_B(sdfViewTargetVector);
+            SDF_VU0_LOADVECTOR_B(aViewEye);
             SDF_VU0_ADDVECTOR();
         }
         SDF_VU0_STOREVECTOR_NOMEM(&copiedVertices[vertexIndex]);
@@ -1644,7 +1643,7 @@ void sdfDrawFlagListVertices(SdfFlagListWork *work) {
     sdfDrawTagInit(packetList);
     sdfDrawTagLink(packetList, (u32)effDebugDrawWireModel(copiedVertices, work->colors, work->params.count * SDF_FLAG_LIST_VERTICES_PER_ENTRY, 0x40));
     surface = D_0040A958[work->params.alpha.surfaceIndex];
-    surface->append(surface, packetList);
+    surface->regFunc(surface, packetList);
     sdfMemFreeDirect(vertexAllocation);
 }
 
@@ -1668,3 +1667,4 @@ INCLUDE_SDATA(const s32, "game/code_00313BB8", sdfDebugLogAppendMode);
 INCLUDE_SDATA(const s32, "game/code_00313BB8", sdfDebugLogPairFormat);
 
 INCLUDE_SDATA(const s32, "game/code_00313BB8", D_00438918);
+

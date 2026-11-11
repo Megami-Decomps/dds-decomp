@@ -51,131 +51,6 @@ typedef struct itfpanel_t {
     u8 pad3D[3];
 } itfpanel_t;
 
-/* Font items use their own 0x2C-byte pool, separate from parent chains. */
-typedef struct _TEXT {
-    union {
-        u16 glyphCode;
-        struct {
-            u8 encodedContextByte;
-            s8 spacing;
-        } byteRoles;
-    } glyphCodeOrContext;
-    /* Child draw count: setup clears it; nonzero-fade draws increment it, and
-     * the fade helper also uses it to select the jitter phase. */
-    u16 drawCount;
-    s32 x;
-    s32 y;
-    s32 advance;
-    /* The same render-state word is also accessed by its low fade byte. */
-    union {
-        struct {
-            u16 cellAdvance;
-            u16 cellHeight;
-        } parentDimensions;
-        u32 renderWord;
-        struct {
-            u8 value;
-            u8 opaque[3];
-        } fadeByte;
-    } parentDimensionsOrRenderWord;
-    /* Rendering, glyph setup, and message shade paths use distinct byte views. */
-    union {
-        u32 renderValue;
-        struct {
-            u8 firstOption;
-            u8 fontIndex;
-            u8 secondOption;
-            u8 sharedFlags;
-        } setupBytes;
-        struct {
-            u8 green;
-            u8 red;
-            u8 blue;
-            u8 opaque;
-        } shadeColor;
-    } renderValueOrSetupOrShade;
-    struct {
-        u8 cellWidth;
-        u8 cellHeight;
-        u8 opaque[2];
-    } cellDimensions;
-    GsFont_t *cachedItem;
-    GsFont_t *sourceItem;
-    struct _TEXT *previous;
-    struct _TEXT *next;
-} _TEXT;
-
-typedef char FrFontChildGlyph_size_must_be_0x2C[
-    sizeof(_TEXT) == 0x2C ? 1 : -1];
-typedef char FrFontChildGlyph_owner_offsets[
-    ((u32)&((_TEXT *)0)->cellDimensions == 0x18 &&
-     (u32)&((_TEXT *)0)->cachedItem == 0x1C &&
-     (u32)&((_TEXT *)0)->sourceItem == 0x20 &&
-     (u32)&((_TEXT *)0)->next == 0x28) ? 1 : -1];
-
-/* Parent chain heads use the 0x44-byte glyph pool and own child-item links. */
-typedef struct _FRQ {
-    union {
-        u16 glyphCode;
-        struct {
-            u8 encodedContextByte;
-            s8 spacing;
-        } byteRoles;
-    } glyphCodeOrContext;
-    /* Preserved by parent-chain initialization. */
-    u16 drawCount;
-    s32 x;
-    s32 y;
-    s32 advance;
-    /* Parent glyphs store dimensions; render words also carry a fade byte. */
-    union {
-        struct {
-            u16 cellAdvance;
-            u16 cellHeight;
-        } parentDimensions;
-        u32 renderWord;
-        struct {
-            u8 value;
-            u8 opaque[3];
-        } fadeByte;
-    } parentDimensionsOrRenderWord;
-    /* Rendering, glyph setup, and message shade paths use distinct byte views. */
-    union {
-        u32 renderValue;
-        struct {
-            u8 firstOption;
-            u8 fontIndex;
-            u8 secondOption;
-            u8 sharedFlags;
-        } setupBytes;
-        struct {
-            u8 green;
-            u8 red;
-            u8 blue;
-            u8 opaque;
-        } shadeColor;
-    } renderValueOrSetupOrShade;
-    u32 childCount;
-    _TEXT *firstChild;
-    _TEXT *lastChild;
-    struct _FRQ *previous;
-    struct _FRQ *next;
-    struct _FRQ *chainHead;
-    u32 timedControlCode; /* F214/F215 terminal timing control. */
-    u32 pendingLipsStopCode; /* F117 until evtLipsStopFunction runs. */
-    u32 skipLipsStopWait; /* Set when a timing control follows F117. */
-    s32 remainingWaitFrames; /* F215 uses 0xFFFF for title-sound completion. */
-    s32 contextModeEnabled;
-} _FRQ;
-
-typedef char FrFontGlyph_size_must_be_0x44[
-    sizeof(_FRQ) == 0x44 ? 1 : -1];
-typedef char FrFontGlyph_owner_offsets[
-    ((u32)&((_FRQ *)0)->childCount == 0x18 &&
-     (u32)&((_FRQ *)0)->firstChild == 0x1C &&
-     (u32)&((_FRQ *)0)->lastChild == 0x20 &&
-     (u32)&((_FRQ *)0)->chainHead == 0x2C) ? 1 : -1];
-
 /* Encoded message controls consumed by the glyph timing/lipsync state. */
 typedef enum ItfGlyphControlCode {
     ITF_GLYPH_CONTROL_WAIT_FRAMES = 0xF214,
@@ -186,48 +61,48 @@ typedef enum ItfGlyphControlCode {
 #define ITF_GLYPH_WAIT_FOR_SOUND_SENTINEL 0xFFFF
 
 /* Encoded text cursor and pending glyph updates; distinct from a glyph (0x20). */
-typedef struct FrFontCtx {
-    s32 x;
-    s32 y;
-    s32 z;
-    s8 fontIndex;
-    s8 firstOption;
-    s8 secondOption;
-    u8 contextEncodedByte;
-    const u8 *encodedText; /* Borrowed source bytes; parsing advances the offset, not this data. */
-    _FRQ *glyphChain;
-    s32 encodedTextOffset;
-    s8 pendingCreate;
-    s8 pendingPosition;
+typedef struct frMsgInfo_t {
+    s32 X;
+    s32 Y;
+    s32 Z;
+    s8 Style;
+    s8 ColNo;
+    s8 Tp;
+    u8 Spd;
+    u8 *pMsg;
+    frFontHandle_t *pFRQ;
+    s32 Ofs;
+    s8 FrqFlag;
+    s8 RetFlag;
     u8 pad1E[2];
-} FrFontCtx;
+} frMsgInfo_t;
 
 /* Serialized font-bank entries use byte offsets relative to their bank. */
-typedef struct FrFontTextIndex {
+typedef struct frTextIndex_t {
     u32 unk00;
     u32 offset;
-} FrFontTextIndex;
+} frTextIndex_t;
 
-typedef struct FrFontTextBank {
+typedef struct frTextBank_t {
     u8 pad00[0x18];
     s32 count;
     u8 pad1C[4];
-    FrFontTextIndex entries[1];
-} FrFontTextBank;
+    frTextIndex_t entries[1];
+} frTextBank_t;
 
-void frSetDrawSpeed(_FRQ *glyph, s32 inputValue);
-void frFontEnableContextMode(_FRQ *glyph);
-void frSetFontSpace(_FRQ *glyph, s32 spacing);
-void frSetDrawPosition(_FRQ *glyph, s32 x, s32 y);
-void frSetPriority(_FRQ *glyph, u32 unshiftedValue);
-void frSetFontColor(_FRQ *parentGlyph, u32 colorWord);
-void frSetFontColorNo(_FRQ *glyph, u8 firstOption);
-void frSetFontSize(_FRQ *glyph, s32 cellAdvance, s32 cellHeight);
+void frSetDrawSpeed(frFontHandle_t *glyph, s32 inputValue);
+void frFontEnableContextMode(frFontHandle_t *glyph);
+void frSetFontSpace(frFontHandle_t *glyph, s32 spacing);
+void frSetDrawPosition(frFontHandle_t *glyph, s32 x, s32 y);
+void frSetPriority(frFontHandle_t *glyph, u32 unshiftedValue);
+void frSetFontColor(frFontHandle_t *parentGlyph, u32 colorWord);
+void frSetFontColorNo(frFontHandle_t *glyph, u8 firstOption);
+void frSetFontSize(frFontHandle_t *glyph, s32 cellAdvance, s32 cellHeight);
 
 typedef struct ItfMesBlk14 {
     u32 x;
     u32 y;
-    _FRQ *glyphChain;
+    frFontHandle_t *glyphChain;
     u16 selectedIndex;
     u8 pad0E[2];
 } ItfMesBlk14;
@@ -236,7 +111,7 @@ typedef struct ItfMesEntryBlock {
     u32 x;
     s32 y;
     ItfMesTable *table;
-    _FRQ *glyphChain;
+    frFontHandle_t *glyphChain;
     s8 textState;
     u8 textInterfaceMask; /* 0x11: result of frGetMessageResult(3). */
     u8 color[4];
@@ -269,7 +144,7 @@ enum {
 typedef struct ItfMesBlk40 {
     u32 x;
     u32 y;
-    _FRQ *glyphChain;
+    frFontHandle_t *glyphChain;
     u32 panelValue;
     ItfSoundSelectionState selectionState;
     s16 selectedIndex;
@@ -327,30 +202,30 @@ typedef struct ItfMesSlot {
 void InitializeSpeaker(ItfMesBlk14 *cursor, s32 resetPosition);
 void InitializeMessage(ItfMesEntryBlock *cursor, s32 resetPosition);
 
-_FRQ *itfMesBuildNodeRows(const u32 *items, s32 itemCount, u32 mask,
+frFontHandle_t *itfMesBuildNodeRows(const u32 *items, s32 itemCount, u32 mask,
     s32 x, s32 y, s32 renderValue);
-_FRQ *UnchainFontHandleUnit(_FRQ *glyph, s32 from, s32 to);
-_FRQ *GetLastLinkFontHandle(_FRQ *glyph);
-void ChangeZBuffer(_FRQ *glyph, s32 renderValue);
-void ChangeFontAlpha(_FRQ *glyph, u32 color);
-s32 CountLineMessage(_FRQ *last, _FRQ *first);
-void GetLastMessagePara(_FRQ *glyph, ItfMesEntryBlock *entryBlock);
-void itfMesEnableUnflaggedNodeContexts(_FRQ *glyph);
+frFontHandle_t *UnchainFontHandleUnit(frFontHandle_t *glyph, s32 from, s32 to);
+frFontHandle_t *GetLastLinkFontHandle(frFontHandle_t *glyph);
+void ChangeZBuffer(frFontHandle_t *glyph, s32 renderValue);
+void ChangeFontAlpha(frFontHandle_t *glyph, u32 color);
+s32 CountLineMessage(frFontHandle_t *last, frFontHandle_t *first);
+void GetLastMessagePara(frFontHandle_t *glyph, ItfMesEntryBlock *entryBlock);
+void itfMesEnableUnflaggedNodeContexts(frFontHandle_t *glyph);
 
 void itfPnlRelease(itfpanel_t *sprite);
 /* Decode from borrowed encoded bytes; request helpers do not mutate or retain the source. */
-_FRQ *MessageRequest(s32 x, s32 y, const u8 *encodedText, _FRQ *sub);
-_FRQ *MessageRequestEx(s32 x, s32 y, s32 channel0, s32 channel1,
-    s32 channel2, s32 channel3, const u8 *encodedText, _FRQ *sub);
-_FRQ *MessageRequestEx2(s32 x, s32 y, s32 depth, s32 channel0,
-    s32 channel1, s32 channel2, s32 channel3, const u8 *encodedText, _FRQ *sub);
-_FRQ *itfDrawColor(s32 x, s32 y, s32 depth, s32 channel0, s32 channel1,
-    s32 channel2, s32 channel3, const u8 *encodedText, _FRQ *unusedSub);
-_FRQ *itfDrawPlainEncodedTextWithByteColors(s32 x, s32 y, s32 depth,
+frFontHandle_t *MessageRequest(s32 x, s32 y, const u8 *encodedText, frFontHandle_t *sub);
+frFontHandle_t *MessageRequestEx(s32 x, s32 y, s32 channel0, s32 channel1,
+    s32 channel2, s32 channel3, const u8 *encodedText, frFontHandle_t *sub);
+frFontHandle_t *MessageRequestEx2(s32 x, s32 y, s32 depth, s32 channel0,
+    s32 channel1, s32 channel2, s32 channel3, const u8 *encodedText, frFontHandle_t *sub);
+frFontHandle_t *MessageRequestNS(s32 x, s32 y, s32 depth, s32 channel0, s32 channel1,
+    s32 channel2, s32 channel3, const u8 *encodedText, frFontHandle_t *unusedSub);
+frFontHandle_t *MessageRequestNS(s32 x, s32 y, s32 depth,
     s32 channel0, s32 channel1, s32 channel2, s32 channel3,
-    const u8 *encodedText, _FRQ *unusedSub);
-s32 frFontDrawGlyphInDefaultMode(_FRQ *glyph);
-s32 frFontDrawGlyphWithSharedFlags(_FRQ *glyph, s8 mode);
+    const u8 *encodedText, frFontHandle_t *unusedSub);
+s32 frDrawFont(frFontHandle_t *glyph);
+s32 frDrawFontEx(frFontHandle_t *glyph, s8 mode);
 
 /* The message manager owns a fixed pool of 64 windows in this 0x520-byte bank. */
 typedef struct mesflow_tag {

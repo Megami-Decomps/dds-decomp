@@ -57,7 +57,7 @@ typedef char DevState_callbackContext_offset_must_be_0x3C[
 
 /* Stable state APIs. Callback factories keep caller-specific callback types. */
 sdfFileCmdHandle_t *sdfFileOpen(const char *path);
-SdfFileCommandQueueResult sdfFileCmdRequestFileSize(sdfFileCmdHandle_t *state);
+SdfFileCommandQueueResult sdfFileCmdFileSize(sdfFileCmdHandle_t *state);
 /* The worker borrows the read destination until the operation completes. */
 SdfFileCommandQueueResult sdfFileCmdRead(sdfFileCmdHandle_t *state, void *destination, s32 byteCount);
 /* The worker borrows the write source until the operation completes. */

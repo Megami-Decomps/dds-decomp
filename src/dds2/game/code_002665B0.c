@@ -4,7 +4,7 @@
 #include "dsp_entry_api.h"
 #include "dsp_channel.h"
 #include "dsp_active_api.h"
-#include "kwln_task_add_child.h"
+#include "dds3_task_add_child.h"
 #include "evt_message_window_api.h"
 #include "evt_start_event_api.h"
 #include "evt_active_entry_flag_api.h"
@@ -22,17 +22,17 @@
 #include "eff_resource_list.h"
 #include "mnu.h"
 #include "mnu_party_panel_api.h"
-#include "sdf_resource.h"
+#include "sdf_heap_api.h"
 #include "mnu_staff.h"
 #include "mnu_party_entry_lookup.h"
-#include "kwln.h"
-#include "kwln_task_create.h"
-#include "kwln_fade.h"
+#include "kernel.h"
+#include "dds3_task_create.h"
+#include "dds3_fade.h"
 #include "evt_world.h"
 #include "mnu_list.h"
 #include "eff.h"
 #include "dat_state.h"
-#include "kwln_task_lifecycle.h"
+#include "dds3_task_lifecycle.h"
 #include "sdf_chip.h"
 #include "mdl_flag_api.h"
 #include "mnu_effect_pair.h"
@@ -149,8 +149,8 @@ extern void mnuSnapshotCampTextureHandles(EffectSlotSet **);
 extern void mnuBuildEligibleSlotList();
 extern void mnuResetGradientFadeColor(MenuGradientFade *, s32);
 
-typedef struct _FRQ _FRQ;
-extern _FRQ *itfCreateFont2TextGlyph(s32, s32, s32, u32, char *, _FRQ *);
+typedef struct frFontHandle_t frFontHandle_t;
+extern frFontHandle_t *itfCreateFont2TextGlyph(s32, s32, s32, u32, char *, frFontHandle_t *);
 extern char mnuNumberSpriteFormat[];
 
 extern EffectPair D_00437878[];
@@ -344,7 +344,7 @@ extern MenuTextEntry D_003A47E8[];
  * The signed-byte slot is not bounds checked; DDS2 subtracts 0x120 from gridX. */
 void mnuQueueFontGlyphFromSelectedAtlasSlot(s32 gridX, s32 gridY, s32 depth, s32 colors, s8 slot, s8 alternate) {
     u8 *text;
-    _FRQ *handle;
+    frFontHandle_t *handle;
 
     if (alternate == 0) {
         text = D_003A41A8[slot].encodedText;
@@ -352,7 +352,7 @@ void mnuQueueFontGlyphFromSelectedAtlasSlot(s32 gridX, s32 gridY, s32 depth, s32
         text = D_003A47E8[slot].encodedText;
     }
     handle = itfCreateConvertedTextGlyph(gridX - 0x120, gridY, depth, colors, text, 0);
-    frFontDrawGlyphChain(handle, 1, MNU_TEXT_DRAW_PRIORITY);
+    frDrawFontOt(handle, 1, MNU_TEXT_DRAW_PRIORITY);
     frDestroyFontRequestAfter(handle);
 }
 
@@ -402,11 +402,11 @@ void mnuRefreshThresholdNodeFlags(MenuList *list) {
 /* Draw formatted numeric text using a blend toward the color with its low byte clear. */
 void mnuCreateNumberSprite(s32 x, s32 y, s32 layer, s32 blendWeight, s32 number, u32 color, s32 priority) {
     char text[16];
-    _FRQ *sprite;
+    frFontHandle_t *sprite;
 
     sprintf(text, mnuNumberSpriteFormat, number);
     sprite = itfCreateFont2TextGlyph(x, y, layer, fclBlendColor(color, color & ~MNU_COLOR_LOW_BYTE_MASK, blendWeight), text, 0);
-    frFontDrawGlyphChain(sprite, 1, priority);
+    frDrawFontOt(sprite, 1, priority);
     frDestroyFontRequestAfter(sprite);
 }
 
@@ -424,7 +424,7 @@ void mnuDrawTerminalRecoveryListEntry(s32 unused, s32 rowY, s32 depth, MenuList 
     MenuThresholdEntry *entry = &node->terminal;
     datUnitWork_t *record = &DDS3_GBWK->party[entry->entryId];
     s32 selected = 0;
-    _FRQ *glyph;
+    frFontHandle_t *glyph;
     MenuTerminalPercentPanelPair *panels;
     s32 fade;
     MnuPartyStatusIconIndex status;
@@ -436,7 +436,7 @@ void mnuDrawTerminalRecoveryListEntry(s32 unused, s32 rowY, s32 depth, MenuList 
         glyph = itfCreateFont3TextGlyph(0x1810, 0x268, depth,
             fclBlendColor(0xA09DC380, 0xA09DC300, scale), text, 0);
         frSetFontColorNo(glyph, 4);
-        frFontDrawGlyphChain(glyph, 1, priority);
+        frDrawFontOt(glyph, 1, priority);
         frDestroyFontRequestAfter(glyph);
         selected = 1;
     }
@@ -562,7 +562,7 @@ void mnuDrawEligibleTerminalSlotEntry(s32 x, s32 y, s32 unused, MenuList *list, 
     s32 isCurrent = node == list->cursor;
     u32 chainFlags = 0;
     u32 color;
-    _FRQ *glyph;
+    frFontHandle_t *glyph;
 
     if (node->flags48 & 1) {
         width /= 2;
@@ -576,7 +576,7 @@ void mnuDrawEligibleTerminalSlotEntry(s32 x, s32 y, s32 unused, MenuList *list, 
     color = fclBlendColor(color, color & ~0xFF, width);
     glyph = itfCreateConvertedTextGlyph(x + 0xF0, y, 0, color, (const u8 *)node->title, 0);
     frSetFontColorNo(glyph, chainFlags);
-    frFontDrawGlyphChain(glyph, 1, priority);
+    frDrawFontOt(glyph, 1, priority);
     frDestroyFontRequestAfter(glyph);
 }
 
@@ -1103,6 +1103,7 @@ s32 mnuUpdateTerminalMessageWindowIndicator(dds3ProcessID_t *task) {
 }
 
 /* Create terminal update/draw/exit tasks plus DDS2's parented term_fade task. */
+
 INCLUDE_RODATA(const s32, "game/code_002665B0", D_00424F00);
 
 INCLUDE_RODATA(const s32, "game/code_002665B0", D_00424F10);
@@ -2014,7 +2015,7 @@ s32 evtBeginSelectionExitFade(dds3ProcessID_t *task) {
     dds3FadeIn(0, 0, 0, 15);
     return 1;
 }
-extern s32 fileMenuTaskExists(void);
+extern s32 fmProcessChk(void);
 extern void fileStartMemoryCardMenuForMode(FileMenuStartMode mode);
 extern void slSetTmnlID(s32 x, s32 y);
 
@@ -2036,7 +2037,7 @@ s32 mnuOpenFileMenuFromTerminal(dds3ProcessID_t *request) {
         fileStartMemoryCardMenuForMode(FILE_MENU_START_MODE_LOAD);
         state->fileTaskActive = 1;
     }
-    if (state->popupState == 0 && fileMenuTaskExists() == 0 &&
+    if (state->popupState == 0 && fmProcessChk() == 0 &&
         sdfDelayedResrcCheck() == 0) {
         state->fileTaskActive = 0;
         mnuSetPopupEntryFlagged(dispatch, mnuTerminalPopupEntries);
@@ -2215,7 +2216,7 @@ extern char D_00437868[];
 void mnuQueueTerminalCurrencyLabel(s32 fading, s32 state) {
     MenuSlotState *work = (MenuSlotState *)state;
     s32 index;
-    _FRQ *font;
+    frFontHandle_t *font;
     u32 color;
     char text[16];
 
@@ -2228,7 +2229,7 @@ void mnuQueueTerminalCurrencyLabel(s32 fading, s32 state) {
         color = fclBlendColor(0xA09DC380, 0xA09DC300, work->progressList->scale);
     }
     font = itfCreateFont3TextGlyph(0x1810, 0x1C8, 0, color, text, 0);
-    frFontDrawGlyphChain(font, 1, 0x52);
+    frDrawFontOt(font, 1, 0x52);
     frDestroyFontRequestAfter(font);
 }
 
@@ -2706,3 +2707,4 @@ INCLUDE_SDATA(const s32, "game/code_002665B0", D_00437868);
 INCLUDE_SDATA(const s32, "game/code_002665B0", D_00437870);
 
 INCLUDE_SDATA(const s32, "game/code_002665B0", D_00437878);
+

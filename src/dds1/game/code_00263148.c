@@ -6,7 +6,7 @@
 #include "dsp_entry_api.h"
 #include "fr_font.h"
 #include "ui_color.h"
-#include "kwln.h"
+#include "kernel.h"
 #include "mnu_result.h"
 #include "pty_accumulate_stat_gains_api.h"
 #include "mdl_flag_api.h"
@@ -14,7 +14,7 @@
 #include "mnu.h"
 #include "prf_profile_cap.h"
 #include "dsp_name.h"
-#include "kwln_fade.h"
+#include "dds3_fade.h"
 #include "prf_current_record_view.h"
 
 extern void ptyRecomputeMaxVitals(datUnitWork_t *, const s32 *);
@@ -36,7 +36,7 @@ extern void dspRequestMessageWindowModeOne(void);
 
 
 /* Apply a capped selected profile and record whether the selection was applied. */
-void kwlnItemApplySelection(BrsSkillPackageWork *scene) {
+void mnuItemApplySelection(BrsSkillPackageWork *scene) {
     datUnitWork_t *item = scene->selectedRewardRow->unit;
     const DatProfileRecord *profile = ptyGetCurrentProfileRecord(item);
     s8 selection = item->profileId;
@@ -59,7 +59,7 @@ u32 mnuProcessItemSelection(BrsSkillPackageWork *scene) {
     skillCount = ptyBuildProfileCapSkillList(
         scene->selectedRewardRow->unit, &scene->skillList);
     scene->pendingSkillCount = skillCount;
-    kwlnItemApplySelection(scene);
+    mnuItemApplySelection(scene);
     return 1;
 }
 
@@ -96,7 +96,7 @@ void prfCapPresentMessages(BrsSkillPackageWork *scene) {
     }
 }
 
-s32 kwlnItemDismissOverlay(BrsSkillPackageWork *scene) {
+s32 mnuItemDismissOverlay(BrsSkillPackageWork *scene) {
     if (scene->overlayFlags & 1) {
         dspSetActive(1);
         fclStartMessage(1);
@@ -147,7 +147,7 @@ s32 prfCapTaskStep(dds3ProcessID_t *request) {
             if (mnuMarkItemSelectionSceneVisited(scene) != 0) {
                 return 0;
             }
-            if (kwlnItemDismissOverlay(scene) != 0) {
+            if (mnuItemDismissOverlay(scene) != 0) {
                 return 0;
             }
             if (scene->primaryRewards.count == 0) {
@@ -328,14 +328,14 @@ void mnuDrawItemPanelBackdrop(BrsSkillPackageWork *scene) {
 }
 
 extern void effDrawSpriteWithCornerFade(s32, s32, s32, s32, s32, u32, s32, s32);
-extern s32 frFontDrawGlyphChain(struct _FRQ *, s8, u32);
+extern s32 frDrawFontOt(struct frFontHandle_t *, s8, u32);
 void mnuDrawRemainingSelectionExtent(BrsSkillPackageWork *scene) {
     char text[16];
     datUnitWork_t *item = scene->selectedRewardRow->unit;
     s32 fade = scene->iconFade;
     s32 delta;
     s32 x;
-    struct _FRQ *glyph;
+    struct frFontHandle_t *glyph;
     u32 color;
 
     effDrawSpriteWithCornerFade(0x9A0, 0x348, 0, fade, 1, (u32)scene->unitResource, 8, 0x53);
@@ -351,7 +351,7 @@ void mnuDrawRemainingSelectionExtent(BrsSkillPackageWork *scene) {
     color = fclBlendColor(0xFFF06480, 0xFFF06400, fade);
     sprintf(text, D_003BC550, delta);
     glyph = itfCreateFont3TextGlyph(x, 0x408, 0, color, text, 0);
-    frFontDrawGlyphChain(glyph, 1, 0x53);
+    frDrawFontOt(glyph, 1, 0x53);
     frDestroyFontRequestAfter(glyph);
 
     if (item->unitId == 1) {
@@ -370,7 +370,7 @@ extern void uiDrawUniformColorRect(s32, s32, s32, s32, s32, s32, s32);
 extern void mnuDrawRemainingSelectionExtent(BrsSkillPackageWork *);
 struct sdfGrOt_t;
 extern s8 evtStageTestUpdate(struct sdfGrOt_t **);
-extern struct sdfGrOt_t *kwlnSceneSurfaceSets[13][4];
+extern struct sdfGrOt_t *sdfModelOtTable[13][4];
 
 void mnuDrawStatAssignmentPanel(BrsSkillPackageWork *scene, s32 copyOptions) {
     datUnitWork_t *item = scene->selectedRewardRow->unit;
@@ -391,7 +391,7 @@ void mnuDrawStatAssignmentPanel(BrsSkillPackageWork *scene, s32 copyOptions) {
     mnuDrawAndAdvancePanelGroup(0xEB0, 0x518, 0, item, scene->panelHandle, 0x53);
     mnuDrawPartyInfoSprites(0, 0, 0, item, scene->spriteHandle, 0x53);
     mnuDrawRemainingSelectionExtent(scene);
-    evtStageTestUpdate(kwlnSceneSurfaceSets[0]);
+    evtStageTestUpdate(sdfModelOtTable[0]);
 }
 
 
@@ -480,3 +480,4 @@ void mnuRefreshPartyUnitVitalsPanels(datUnitWork_t *unit, BrsSkillPackageWork *m
 }
 
 INCLUDE_SDATA(const s32, "game/code_00263148", D_003BC550);
+

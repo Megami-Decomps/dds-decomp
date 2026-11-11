@@ -17,7 +17,7 @@
 #include "sdf.h"
 #include "sdf_draw.h"
 #include "sdf_projection.h"
-#include "pcp_vu0.h"
+#include "ps2asm.h"
 
 extern GridTextListItem *itfFindGridNodeByKey(u32, GridTextWidget *);
 
@@ -649,3 +649,4 @@ SdfGridSeekResult sdfGridSeekLastNode(GridTextWidget *widget) {
 }
 
 INCLUDE_RODATA(const s32, "game/code_002C1588", fldLocalMapTaskName);
+

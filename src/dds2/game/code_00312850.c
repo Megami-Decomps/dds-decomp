@@ -5,9 +5,9 @@
 #include "sdf_chip.h"
 #include "fr_font_context.h"
 #include "fr_font.h"
-#include "kwln.h"
-#include "kwln_task_create.h"
-#include "sdf_resource.h"
+#include "kernel.h"
+#include "dds3_task_create.h"
+#include "sdf_heap_api.h"
 
 #include "fpu.h"
 #include "sdf.h"
@@ -227,7 +227,7 @@ SdfTaskWorkStepResult sdfTaskWorkStep(TaskWork *work) {
     return SDF_TASK_WORK_STEP_RESULT_NODE_VISITED;
 }
 
-KwlnTaskUpdateResult sdfTaskWorkRunAllEntries(dds3ProcessID_t *task) {
+dds3TaskUpdateResult_t sdfTaskWorkRunAllEntries(dds3ProcessID_t *task) {
     TaskWork *work = (TaskWork *)dds3GetProcessData(task);
 
     if (work->currentNode == NULL) {
@@ -238,7 +238,7 @@ KwlnTaskUpdateResult sdfTaskWorkRunAllEntries(dds3ProcessID_t *task) {
     return 0;
 }
 
-KwlnTaskUpdateResult sdfTaskWorkRunAll(dds3ProcessID_t *task) {
+dds3TaskUpdateResult_t sdfTaskWorkRunAll(dds3ProcessID_t *task) {
     TaskWork *work = (TaskWork *)dds3GetProcessData(task);
 
     if (work->currentNode == NULL) {

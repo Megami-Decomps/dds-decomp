@@ -2,7 +2,7 @@
 #define BTL_PANEL_TRANSITION_WORK_H
 
 #include "btl_ui.h"
-#include "kwln.h"
+#include "kernel.h"
 
 #define BTL_PANEL_TRANSITION_STATE_FADE_IN 0
 #define BTL_PANEL_TRANSITION_STATE_HOLD 1

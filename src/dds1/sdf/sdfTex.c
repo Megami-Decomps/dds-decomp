@@ -1,370 +1,778 @@
 #include "common.h"
-#include "sdf_chip.h"
-#include "sdf_resource.h"
+#include "libsdf.h"
 
-#include "sdf_texture_file.h"
-#include "sdf.h"
-#include "sdf_texture_submit.h"
-#include "sdf_texture_registry.h"
-#include "sdf_tex_lifetime.h"
-#include "sdf_tex_create.h"
-#include "sdf_tex_packet.h"
-#include "sdf_pending.h"
-#include "sdf_tex_copy_image_data_api.h"
-#include "ee_mmi.h"
-#include "btl.h"
-/* Declared before first use (were implicit int). */
-extern sdfGsMemSlice_t * sdfTexAllocClut(s32 type, s32 kind, s32 unused);
-extern sdfGsMemSlice_t * sdfGsMemAllocFromTail(s32 size, s32 allocationMode);
-extern sdfTexHandle_t * sdfTexCreateResourceWithReference(s32 x, s32 y, s32 pixelFormat, s32 maxMipLevel, sdfGsMemSlice_t *primary, s32 paletteFormat, s32 paletteCount, sdfGsMemSlice_t *secondary);
+#include "ps2asm.h"
 
-sdfTexPacket_t *sdfTexMakeGIFPacketSub(sdfTexHandle_t *texture, SdfGsContext context);
+extern sdfTexHandle_t *sdfTexHandleLink;
+extern sdfDelayedResrcCB_t sdfTexDelayedResrcCB;
 
-extern SdfPendingRequest sdfTexDelayedResrcCB;
+extern void sdfDelayedResrcInitCB(sdfDelayedResrcCB_t *aCB, sdfDelayedResrcFreeFunc aFreeFunc);
+extern void sdfDelayedResrcEntry(sdfDelayedResrcCB_t *aCB, void *aItem);
 
+extern void *sdfChipAllocDirect(s32 aSize);
+extern void *sdfChipAllocZeroDirect(s32 aSize);
+extern void sdfChipFreeDirect(void *aPtr);
+extern void *sdfAllocAuto(s32 size);
+extern void sdfFreeAuto(void *ptr);
+extern void sdfGsMemFree(sdfGsMemSlice_t *aHandle);
+extern sdfGsMemSlice_t *sdfGsMemAllocFromTail(s32 aSize, s32 aType);
+extern void *memcpy(void *a, const void *b, size_t c);
 
-/* Return palette bytes: 8-bit indices use 256 colors, other indices 16. */
-s32 __attribute__((const)) sdfTexGetClutDataSize(s32 textureFormat, s32 paletteFormat, s32 paletteCount) {
-    s32 bytesPerColor = (paletteFormat == SDF_PSMCT32) ? 4 : 2;
-    s32 colorsPerPalette;
+extern sdfTexHandle_t *sdfTexSetEx(TMX_HEADER_t *aTex, s32 aMemMode);
 
-    if ((textureFormat == SDF_PSMT8) || (textureFormat == SDF_PSMT8H)) {
-        colorsPerPalette = 0x100;
-    } else {
-        colorsPerPalette = 0x10;
+extern void *sdfTexTransData(s32 aGsAddr, s32 aWidth, s32 aHeight, s32 aPixelFormat, void *aSrcData,
+                             s32 aMemMode);
+extern void sdfTexSetPacket(sdfTexPacket_t *aPacket, s32 aWidth, s32 aHeight, s32 aGsAddr,
+                            s32 aPixelFormat, s32 aClutAddr, s32 aClutFormat, s32 aColorComp,
+                            s32 aNumOfMipmap, s32 aMipmapParm, s32 aWrapMode, s32 aContext);
+
+sdfGsMemSlice_t *sdfTexAllocClut(s32 aPixelFormat, s32 aCLUTFormat, s32 aNumOfCLUT);
+void sdfTexAllocClutBuff(sdfTexHandle_t *aHandle);
+void sdfTexCopyClutData(sdfTexHandle_t *aHandle, void *aData);
+void sdfTexMakeGIFPacket(sdfTexHandle_t *aHandle);
+void sdfTexMakeGIFPacketCtx2(sdfTexHandle_t *aHandle);
+void sdfTexRebuildPacket(sdfTexHandle_t *aHandle);
+
+/* One image transfer request; dimensions and source rectangle are halfwords. */
+typedef struct
+{
+    void *pixels;
+    sdfMemHandle_t *allocation;
+    u8 allocationMode;
+    u8 format;
+    s16 bufferWidth;
+    u32 destination;
+    s16 x;
+    s16 y;
+    s16 width;
+    s16 height;
+} sdfImageUploadRequest_t;
+
+extern s32 sdfImageDataSize(s32 format, s32 width, s32 height);
+extern void sdfImageSetReq(sdfImageUploadRequest_t *parm);
+extern sdfMemHandle_t *sdfMemAllocDirect(s32 aSize);
+extern void *sdfMemLock(sdfMemHandle_t *aHandle);
+
+sdfTexPacket_t *sdfTexGetPacket(sdfTexHandle_t *aHandle)
+{
+    return aHandle->packet;
+}
+
+s32 sdfTexGetPacketLength(sdfTexHandle_t *aHandle)
+{
+    sdfTexPacket_t *packet;
+
+    packet = aHandle->packet;
+    if (packet == NULL) {
+        return 0;
     }
-    return colorsPerPalette * bytesPerColor * paletteCount;
+    return (((u32)packet->giftag.parm & 0x7FFF) + 1) << 4;
 }
 
-void sdfTexAllocClutBuff(sdfTexHandle_t *texture) {
-    s32 size = sdfTexGetClutDataSize(texture->pixelFormat, texture->clutFormat,
-                                      texture->paletteCount);
-    texture->paletteDataSize = size;
-    texture->paletteData = sdfAllocAuto(size);
+sdfTexPacket_t *sdfTexGetPacketCtx2(sdfTexHandle_t *aHandle)
+{
+    sdfTexPacket_t *packet;
+
+    packet = aHandle->packetCtx2;
+    if (packet == NULL) {
+        sdfTexMakeGIFPacketCtx2(aHandle);
+        packet = aHandle->packetCtx2;
+    }
+    return packet;
 }
 
-/* Copy retained palette bytes without changing the texture resource metadata. */
-void sdfTexCopyClutData(sdfTexHandle_t *texture, const u8 *source) {
-    memcpy(texture->paletteData, source, texture->paletteDataSize);
+s32 sdfTexGetPacketCtx2Length(sdfTexHandle_t *aHandle)
+{
+    sdfTexPacket_t *packet;
+
+    packet = aHandle->packetCtx2;
+    if (packet == NULL) {
+        return 0;
+    }
+    return (((u32)packet->giftag.parm & 0x7FFF) + 1) << 4;
 }
 
-sdfTexHandle_t *sdfTexAlloc(s32 width, s32 height,
-    SdfGsPixelStorageFormat format, u32 maxMipLevel,
-    SdfGsPixelStorageFormat paletteFormat, u32 paletteCount) {
-    s32 indexed = 0;
+s32 sdfTexGetCLUTCount(sdfTexHandle_t *aHandle)
+{
+    return aHandle->numOfCLUT;
+}
+
+u32 sdfTexGetCLUTAddr(sdfTexHandle_t *aHandle)
+{
+    sdfGsMemSlice_t *slice;
+
+    slice = aHandle->clutGsHandle;
+    if (slice == NULL) {
+        return 0;
+    }
+    return slice->addr;
+}
+
+u32 sdfTexGetPixelAddr(sdfTexHandle_t *aHandle)
+{
+    return aHandle->pixelGsHandle->addr;
+}
+
+s32 sdfTexGetPixelBitCount(s32 aFormat)
+{
+    switch (aFormat) {
+    case 0:
+        return 32;
+    case 1:
+        return 24;
+    case 2:
+    case 10:
+        return 16;
+    case 19:
+    case 27:
+        return 8;
+    default:
+        return 4;
+    }
+}
+
+s32 sdfTexGetTexelBitCount(s32 aFormat)
+{
+    s32 bitCount;
+
+    switch (aFormat) {
+    case 19:
+        bitCount = 8;
+        break;
+    case 20:
+        bitCount = 4;
+        break;
+    case 2:
+    case 10:
+        bitCount = 16;
+        break;
+    default:
+        bitCount = 32;
+        break;
+    }
+    return bitCount;
+}
+
+u64 sdfTexGetTex0Reg(sdfTexHandle_t *aHandle)
+{
+    return aHandle->packet->tex0.data;
+}
+
+u64 sdfTexGetTex1Reg(sdfTexHandle_t *aHandle)
+{
+    return aHandle->packet->tex1.data;
+}
+
+u64 sdfTexGetClampReg(sdfTexHandle_t *aHandle)
+{
+    return aHandle->packet->clamp.data;
+}
+
+void sdfTexSetFilter(sdfTexHandle_t *aHandle, s32 aMagMode, s32 aMinMode)
+{
+    sdfTexPacket_t *packet;
+
+    packet = aHandle->packet;
+    packet->tex1.data = (packet->tex1.data & ~0x1E0) | (aMagMode << 5) | (aMinMode << 6);
+}
+
+void sdfTexSetFilterCtx2(sdfTexHandle_t *aHandle, s32 aMagMode, s32 aMinMode)
+{
+    sdfTexPacket_t *packet;
+
+    packet = aHandle->packetCtx2;
+    if (packet == NULL) {
+        sdfTexMakeGIFPacketCtx2(aHandle);
+        packet = aHandle->packetCtx2;
+    }
+    packet->tex1.data = (packet->tex1.data & ~0x1E0) | (aMagMode << 5) | (aMinMode << 6);
+}
+
+void sdfTexSetWrapMode(sdfTexHandle_t *aHandle, s32 aMode)
+{
+    aHandle->texWrapMode = aMode;
+    sdfTexRebuildPacket(aHandle);
+}
+
+void *sdfTexTransData(s32 aGsAddr, s32 aWidth, s32 aHeight, s32 aPixelFormat, void *aSrcData, s32 aMemMode) {
+    sdfImageUploadRequest_t request;
+    s32 imageBytes = sdfImageDataSize(aPixelFormat, aWidth, aHeight) * 16;
+
+    if (aMemMode == 0) {
+        if (imageBytes > 0x400) {
+            request.allocation = sdfMemAllocDirect(imageBytes);
+            request.pixels = (void *)sdfMemLock(request.allocation);
+            request.allocationMode = 1;
+        } else {
+            request.pixels = sdfChipAllocDirect(imageBytes);
+            request.allocationMode = 2;
+        }
+        memcpy(request.pixels, aSrcData, imageBytes);
+    } else {
+        request.pixels = aSrcData;
+        request.allocationMode = 0;
+    }
+    request.format = aPixelFormat;
+    request.destination = aGsAddr;
+    request.bufferWidth = aWidth;
+    request.width = aWidth;
+    request.height = aHeight;
+    request.x = 0;
+    request.y = 0;
+    sdfImageSetReq(&request);
+    return (u8 *)aSrcData + imageBytes;
+}
+
+void *sdfTexTransCLUT(sdfTexHandle_t *aHandle, s32 aGsAddr, void *aDataPtr, s32 aMemMode)
+{
+    s32 width;
+    s32 height;
+
+    if (aHandle->pixelFormat == 19 || aHandle->pixelFormat == 27) {
+        width = 16;
+        height = 16;
+    } else {
+        width = 8;
+        height = 2;
+    }
+    return sdfTexTransData(aGsAddr, width, height, aHandle->CLUTFormat, aDataPtr, aMemMode);
+}
+
+void sdfTexClutToGs(sdfTexHandle_t *aHandle)
+{
+    if (aHandle->clutGsHandle != NULL) {
+        sdfTexTransCLUT(aHandle, sdfTexGetCLUTAddr(aHandle), aHandle->clutData, 0);
+    }
+}
+
+void sdfTexLink(sdfTexHandle_t *handle)
+{
+    handle->prev = NULL;
+    if (sdfTexHandleLink != NULL) {
+        handle->next = sdfTexHandleLink;
+        sdfTexHandleLink->prev = handle;
+    } else {
+        handle->next = NULL;
+    }
+    sdfTexHandleLink = handle;
+}
+
+sdfTexHandle_t *sdfTexNew(s32 aWidth, s32 aHeight, s32 aPixelFormat, s32 aNumOfMipmap,
+                          sdfGsMemSlice_t *aPixelGsHandle, s32 aCLUTFormat, s32 aNumOfCLUT,
+                          sdfGsMemSlice_t *aCLUTGsHandle)
+{
+    sdfTexHandle_t *handle = sdfChipAllocZeroDirect(sizeof(sdfTexHandle_t));
+    sdfTexRef_t *ref = sdfChipAllocZeroDirect(sizeof(sdfTexRef_t));
+
+    ref->refCount = 1;
+    handle->numOfCLUT = aNumOfCLUT;
+    handle->CLUTFormat = aCLUTFormat;
+    handle->width = aWidth;
+    handle->height = aHeight;
+    handle->pixelFormat = aPixelFormat;
+    handle->numOfMipmap = aNumOfMipmap;
+    handle->clutGsHandle = aCLUTGsHandle;
+    handle->pixelGsHandle = aPixelGsHandle;
+    handle->ref = ref;
+    sdfTexLink(handle);
+    handle->clutColor = 0x80808080;
+    return handle;
+}
+
+sdfTexHandle_t *sdfTexDup(sdfTexHandle_t *aHandle)
+{
+    sdfTexHandle_t *dup;
+    sdfTexRef_t *ref;
+    sdfTexHandle_t *origin;
+
+    dup = sdfChipAllocDirect(64);
+    *dup = *aHandle;
+    ref = sdfChipAllocZeroDirect(sizeof(*ref));
+    origin = ref->origin;
+    ref->refCount = 1;
+    dup->ref = ref;
+    if (origin == NULL) {
+        origin = aHandle;
+        ref->origin = origin;
+    }
+    dup->packet = NULL;
+    dup->packetCtx2 = NULL;
+    dup->clutData = NULL;
+    dup->monoClutData = NULL;
+    sdfTexLink(dup);
+    if (dup->clutGsHandle != NULL) {
+        dup->clutGsHandle = sdfTexAllocClut(dup->pixelFormat, dup->CLUTFormat, dup->numOfCLUT);
+        sdfTexAllocClutBuff(dup);
+        sdfTexCopyClutData(dup, origin->clutData);
+        dup->clutColor = 0x80808080;
+    }
+    sdfTexMakeGIFPacket(dup);
+    sdfTexClutToGs(dup);
+    return dup;
+}
+
+sdfGsMemSlice_t *sdfTexAllocClut(s32 aPixelFormat, s32 aCLUTFormat, s32 aNumOfCLUT)
+{
+    sdfGsMemSlice_t *slice;
+    s32 bitsPerEntry;
+    s32 size;
+    s16 height;
+
+    slice = NULL;
+    switch (aCLUTFormat) {
+    case 0:
+        bitsPerEntry = 32;
+        break;
+    case 2:
+    case 10:
+        bitsPerEntry = 16;
+        break;
+    default:
+        return NULL;
+    }
+
+    switch (aPixelFormat) {
+    case 19:
+    case 27:
+        size = bitsPerEntry * 8;
+        height = 32;
+        break;
+    case 20:
+    case 36:
+    case 44:
+        size = 64;
+        height = 8;
+        break;
+    default:
+        return slice;
+    }
+
+    slice = sdfGsMemAllocFromTail(size, 3);
+    slice->w = 8;
+    slice->h = height;
+    slice->pixelFormat = aCLUTFormat;
+    return slice;
+}
+
+s32 __attribute__((const)) sdfTexGetClutDataSize(s32 aPixelFormat, s32 aCLUTFormat, s32 aNumOfCLUT)
+{
+    s32 entries;
+    s32 bytesPerEntry;
+
+    bytesPerEntry = (aCLUTFormat == 0) ? 4 : 2;
+    entries = (aPixelFormat == 19 || aPixelFormat == 27) ? 256 : 16;
+    return entries * bytesPerEntry * aNumOfCLUT;
+}
+
+void sdfTexAllocClutBuff(sdfTexHandle_t *aHandle)
+{
+    s32 size;
+
+    size = sdfTexGetClutDataSize(aHandle->pixelFormat, aHandle->CLUTFormat, aHandle->numOfCLUT);
+    aHandle->clutDataSize = size;
+    aHandle->clutData = sdfAllocAuto(size);
+}
+
+void sdfTexCopyClutData(sdfTexHandle_t *aHandle, void *aData)
+{
+    memcpy(aHandle->clutData, aData, aHandle->clutDataSize);
+}
+
+sdfTexHandle_t *sdfTexAlloc(s32 aWidth, s32 aHeight, s32 aPixelFormat, s32 aNumOfMipmap,
+                            s32 aCLUTFormat, s32 aNumOfCLUT)
+{
+    s32 indexed;
     s32 bitsPerPixel;
-    sdfGsMemSlice_t *secondary;
-    sdfGsMemSlice_t *primary;
+    sdfGsMemSlice_t *clutSlice;
+    sdfGsMemSlice_t *pixelSlice;
     s32 mipWidth;
     s32 mipHeight;
     s32 words;
-    u32 mipLevel;
+    s32 mipLevel;
 
-    switch (format) {
-    case SDF_PSMCT32:
-    case SDF_PSMCT24:
+    indexed = 0;
+    switch (aPixelFormat) {
+    case 0:
+    case 1:
         bitsPerPixel = 32;
         break;
-    case SDF_PSMCT16:
+    case 2:
         bitsPerPixel = 16;
         break;
-    case SDF_PSMCT16S:
+    case 10:
         bitsPerPixel = 16;
         break;
-    case SDF_PSMT8:
+    case 19:
         indexed = 1;
         bitsPerPixel = 8;
         break;
-    case SDF_PSMT4:
+    case 20:
         indexed = 1;
         bitsPerPixel = 4;
         break;
     default:
         return NULL;
     }
-    secondary = NULL;
+
+    clutSlice = NULL;
     if (indexed) {
-        secondary = sdfTexAllocClut(format, paletteFormat, paletteCount);
+        clutSlice = sdfTexAllocClut(aPixelFormat, aCLUTFormat, aNumOfCLUT);
     }
-    mipWidth = width;
-    mipHeight = height;
+
+    mipWidth = aWidth;
+    mipHeight = aHeight;
     words = 0;
     mipLevel = 0;
     do {
         words += (mipWidth * mipHeight * bitsPerPixel) >> 5;
         mipWidth >>= 1;
         mipHeight >>= 1;
-    } while (mipLevel++ != maxMipLevel);
-    primary = sdfGsMemAllocFromTail(words, 2);
-    primary->width = width;
-    primary->height = height;
-    primary->format = format;
-    return sdfTexCreateResourceWithReference(width, height, format, maxMipLevel,
-        primary, paletteFormat, paletteCount, secondary);
+    } while (mipLevel++ != aNumOfMipmap);
+
+    pixelSlice = sdfGsMemAllocFromTail(words, 2);
+    pixelSlice->w = aWidth;
+    pixelSlice->h = aHeight;
+    pixelSlice->pixelFormat = aPixelFormat;
+    return sdfTexNew(aWidth, aHeight, aPixelFormat, aNumOfMipmap, pixelSlice, aCLUTFormat,
+                     aNumOfCLUT, clutSlice);
 }
 
-/* Destroy both GPU resources and unlink the texture from the active list. */
-void sdfTexDestroy(sdfTexHandle_t *texture) {
+void sdfTexFree(sdfTexHandle_t *aHandle)
+{
     sdfTexHandle_t *next;
     sdfTexHandle_t *prev;
 
-    if (texture->reference->cloneSource == NULL) {
-        sdfGsMemFree(texture->primaryResource);
+    if (aHandle->ref->origin == NULL) {
+        sdfGsMemFree(aHandle->pixelGsHandle);
     }
-    sdfGsMemFree(texture->secondaryResource);
-    sdfChipFreeDirect(texture->primaryBuffer);
-    sdfChipFreeDirect(texture->secondaryBuffer);
-    next = texture->next;
-    prev = texture->prev;
-    if (prev != NULL) {
-        prev->next = next;
-    }
+    sdfGsMemFree(aHandle->clutGsHandle);
+    sdfChipFreeDirect(aHandle->packet);
+    sdfChipFreeDirect(aHandle->packetCtx2);
+    prev = aHandle->prev;
+    next = aHandle->next;
     if (next != NULL) {
         next->prev = prev;
+    }
+    if (prev != NULL) {
+        prev->next = next;
     } else {
-        sdfTexHandleLink = prev;
+        sdfTexHandleLink = next;
     }
-    sdfFreeAuto(texture->paletteData);
-    sdfFreeAuto(texture->intensityMap);
-    sdfChipFreeDirect(texture->reference);
-    sdfChipFreeDirect(texture);
+    sdfFreeAuto(aHandle->clutData);
+    sdfFreeAuto(aHandle->monoClutData);
+    sdfChipFreeDirect(aHandle->ref);
+    sdfChipFreeDirect(aHandle);
 }
 
-/* Release a texture when the final ordinary reference is dropped. */
-void sdfTexReleaseReference(sdfTexHandle_t *texture) {
-    SdfTexRef *ref;
-    s32 remainingReferenceCount;
+void sdfTexReleaseReference(sdfTexHandle_t *aHandle)
+{
+    sdfTexRef_t *ref;
+    s32 count;
 
-    if (texture != NULL) {
-        ref = texture->reference;
-        remainingReferenceCount = ref->refCount - 1;
-        ref->refCount = remainingReferenceCount;
-        if (remainingReferenceCount == 0) {
-            texture->resourceKey = 0;
-            sdfTexDestroy(texture);
+    if (aHandle != NULL) {
+        ref = aHandle->ref;
+        count = ref->refCount - 1;
+        ref->refCount = count;
+        if (count == 0) {
+            aHandle->texId = 0;
+            sdfTexFree(aHandle);
         }
     }
 }
 
-/* Hand the last reference to sdfDelayedResrcEntry rather than releasing it here. */
-void sdfTexReleaseReferenceViaHandler(sdfTexHandle_t *texture) {
-    SdfTexRef *ref;
-    s32 remainingReferenceCount;
+void sdfTexFreeDelayed(sdfTexHandle_t *aHandle)
+{
+    sdfTexRef_t *ref;
+    s32 count;
 
-    if (texture != NULL) {
-        ref = texture->reference;
-        remainingReferenceCount = ref->refCount - 1;
-        ref->refCount = remainingReferenceCount;
-        if (remainingReferenceCount == 0) {
-            texture->resourceKey = 0;
-            sdfDelayedResrcEntry(&sdfTexDelayedResrcCB, texture);
+    if (aHandle != NULL) {
+        ref = aHandle->ref;
+        count = ref->refCount - 1;
+        ref->refCount = count;
+        if (count == 0) {
+            aHandle->texId = 0;
+            sdfDelayedResrcEntry(&sdfTexDelayedResrcCB, aHandle);
         }
     }
 }
 
+/* NON_MATCHING: reference draft. 15 of 90 words, first differing at +0x0;
+ * same 360 bytes, same instruction mix, and every GS field and both OR trees
+ * are exact. What is left is the schedule of the first fifty instructions:
+ * cc1 models the four-instruction bit-length asm block as one unit-latency
+ * insn, so the ready list around it differs from the hand-written order, and
+ * swapping the two bit-length statements leaves the output byte-identical.
+ * Behaviour checked against retail: 4 of 4 PCSX2 call vectors give the same
+ * packet bytes, battle savestate (sdfport a1f0fdd, tools/funcvec, tests/funcvec.sh). */
 #ifdef NON_MATCHING
-#include "common.h"
-#include "ee_mmi.h"
-#include "sdf.h"
-#include "sdf_tex_packet.h"
+void sdfTexSetPacket(sdfTexPacket_t *aPacket, s32 aWidth, s32 aHeight, s32 aGsAddr,
+                     s32 aPixelFormat, s32 aClutAddr, s32 aClutFormat, s32 aColorComp,
+                     s32 aNumOfMipmap, s32 aMipmapParm, s32 aWrapMode, s32 aContext)
+{
+    s64 cpsm = (s64)aClutFormat << 51;
+    s64 cbp = (s64)(aClutAddr >> 6) << 37;
+    s64 tcc = (s64)aColorComp << 34;
+    s64 th = (s64)PS2_WORD_BIT_LENGTH(aHeight - 1) << 30;
+    s32 tw = PS2_WORD_BIT_LENGTH(aWidth - 1) << 26;
+    s32 psm = aPixelFormat << 20;
+    s32 tbw = (aWidth >> 6) << 14;
+    s32 tbp0 = aGsAddr >> 6;
+    s64 k = (s64)(aMipmapParm & 0xFFF) << 32;
+    s64 l = (s64)((aMipmapParm >> 12) & 3) << 19;
+    s64 mxl = aNumOfMipmap << 2;
+    s64 tex0;
+    s64 tex1;
 
-/* log2 of the next power of two at or above size (GS TW/TH): 31 minus
- * plzcw of size - 1, as retail computes it. */
-static s32 sdfTexSizeLog2(s32 size) {
-    s32 bits;
-
-    size--;
-    EE_MMI_PLZCW(bits, size);
-    return 0x1F - (bits & 0xFF);
-}
-
-/* A three-register A+D packet: TEX1 (filtering and LOD), TEX0 (buffer,
- * size, format, CLUT) and CLAMP, for GS context 1 or 2. Upstream:
- * INCLUDE_ASM in both games. */
-void sdfTexSetPacket(struct sdfTexPacket_t *packet, s32 width, s32 height, u32 primaryResourceWord,
-                                s32 pixelFormat, u32 secondaryResourceWord, s32 clutFormat,
-                                s32 textureColorComponents, s32 maxMipLevel, s32 lodParameters, s32 clampMode,
-                                SdfGsContext context) {
-    u64 tbw = (u64)(u32)((width >> 6) << 14);
-    u64 tw = (u64)(u32)(sdfTexSizeLog2(width) << 26);
-    u64 th = (u64)sdfTexSizeLog2(height) << 30;
-    u64 psm = (u64)(u32)(pixelFormat << 20);
-    u64 cbp = (u64)((s32)secondaryResourceWord >> 6) << 37;
-    u64 cpsm = (u64)clutFormat << 51;
-    u64 tcc = (u64)textureColorComponents << 34;
-    u64 tbp = (u64)(s64)((s32)primaryResourceWord >> 6);
-    u64 textureState = cpsm | tbp | th | psm | cbp | tcc | tw | tbw;
-
-    *(u64 *)packet = 0x1000000000008003ULL; /* NLOOP 3, EOP, NREG 1 */
-    packet->gifTagRegisters = 0xE;          /* A+D */
-    if (maxMipLevel != 0) {
-        packet->samplingState = ((u64)(maxMipLevel << 2) | ((u64)(lodParameters & 0xFFF) << 32) |
-                                 ((u64)((lodParameters >> 12) & 3) << 19)) |
-                                0x360;
+    aPacket->giftag.regs = 0xE;
+    aPacket->giftag.parm = 0x1000000000008003;
+    tex0 = cpsm | cbp | tcc | th | tw | psm | tbw | tbp0;
+    if (aNumOfMipmap == 0) {
+        tex1 = 0x61;
     } else {
-        packet->samplingState = 0x61;
+        tex1 = k | l | 0x360 | mxl;
     }
-    packet->samplingRegister = context != SDF_GS_CONTEXT_1 ? 0x15 : 0x14; /* TEX1_2 / TEX1_1 */
-    if (secondaryResourceWord != 0) {
-        textureState |= 1ULL << 63; /* CLD 4 */
+    aPacket->tex1.data = tex1;
+    aPacket->tex1.reg = aContext == 0 ? 0x14 : 0x15;
+    if (aClutAddr != 0) {
+        tex0 = cpsm | cbp | ((s64)4 << 61) | tcc | th | tw | psm | tbw | tbp0;
     }
-    packet->textureState = textureState;
-    packet->textureRegister = context != SDF_GS_CONTEXT_1 ? 7 : 6; /* TEX0_2 / TEX0_1 */
-    packet->clampState = (clampMode & 0xFF) == 0xFF ? 0 : (u64)(clampMode & 0xF);
-    packet->clampRegister = context != SDF_GS_CONTEXT_1 ? 9 : 8; /* CLAMP_2 / CLAMP_1 */
+    aPacket->tex0.data = tex0;
+    aPacket->tex0.reg = aContext == 0 ? 6 : 7;
+    if ((aWrapMode & 0xFF) == 0xFF) {
+        aPacket->clamp.data = 0;
+    } else {
+        aPacket->clamp.data = aWrapMode & 0xF;
+    }
+    aPacket->clamp.reg = aContext == 0 ? 8 : 9;
 }
 #else
 INCLUDE_ASM(const s32, "sdf/sdfTex", sdfTexSetPacket);
 #endif
 
-/* Allocate and populate one of the two GS-context resource packets. */
-sdfTexPacket_t *sdfTexMakeGIFPacketSub(sdfTexHandle_t *texture, SdfGsContext context) {
+sdfTexPacket_t *sdfTexMakeGIFPacketSub(sdfTexHandle_t *aHandle, s32 aContext)
+{
     sdfTexPacket_t *packet;
-    u32 primary;
-    u32 secondary;
+    u32 pixelAddr;
+    u32 clutAddr;
 
-    packet = sdfChipAllocDirect(0x40);
-    primary = sdfTexGetPixelAddr(texture);
-    secondary = sdfTexGetCLUTAddr(texture);
-    sdfTexSetPacket(packet, texture->width, texture->height, primary, texture->pixelFormat, secondary, texture->clutFormat, 1, texture->maxMipLevel, texture->lodParameters, texture->clampMode, context);
+    packet = sdfChipAllocDirect(64);
+    pixelAddr = sdfTexGetPixelAddr(aHandle);
+    clutAddr = sdfTexGetCLUTAddr(aHandle);
+    sdfTexSetPacket(packet, aHandle->width, aHandle->height, pixelAddr, aHandle->pixelFormat,
+                    clutAddr, aHandle->CLUTFormat, 1, aHandle->numOfMipmap, aHandle->mipmapParam,
+                    aHandle->texWrapMode, aContext);
     return packet;
 }
 
-/* Store the first packet on the texture. */
-void sdfTexMakeGIFPacket(sdfTexHandle_t *texture) {
-    texture->primaryBuffer = sdfTexMakeGIFPacketSub(texture, SDF_GS_CONTEXT_1);
+void sdfTexMakeGIFPacket(sdfTexHandle_t *aHandle)
+{
+    aHandle->packet = sdfTexMakeGIFPacketSub(aHandle, 0);
 }
 
-/* Store the second packet on the texture. */
-void sdfTexMakeGIFPacketCtx2(sdfTexHandle_t *texture) {
-    texture->secondaryBuffer = sdfTexMakeGIFPacketSub(texture, SDF_GS_CONTEXT_2);
+void sdfTexMakeGIFPacketCtx2(sdfTexHandle_t *aHandle)
+{
+    aHandle->packetCtx2 = sdfTexMakeGIFPacketSub(aHandle, 1);
 }
 
-/* Rebuild existing texture packets while preserving each packet's TEX0 TCC bit. */
-void sdfTexRebuildPacket(sdfTexHandle_t *texture) {
-    sdfTexPacket_t *buffer;
+void sdfTexRebuildPacket(sdfTexHandle_t *aHandle)
+{
+    sdfTexPacket_t *packet;
 
-    buffer = texture->primaryBuffer;
-    if (buffer != NULL) {
-        sdfTexSetPacket(buffer, texture->width, texture->height,
-                     sdfTexGetPixelAddr(texture), texture->pixelFormat,
-                     sdfTexGetCLUTAddr(texture), texture->clutFormat,
-                     (buffer->textureState >> 34) & 1,
-                     texture->maxMipLevel, texture->lodParameters,
-                     texture->clampMode, SDF_GS_CONTEXT_1);
+    packet = aHandle->packet;
+    if (packet != NULL) {
+        sdfTexSetPacket(packet, aHandle->width, aHandle->height, sdfTexGetPixelAddr(aHandle),
+                        aHandle->pixelFormat, sdfTexGetCLUTAddr(aHandle), aHandle->CLUTFormat,
+                        (packet->tex0.data >> 34) & 1, aHandle->numOfMipmap, aHandle->mipmapParam,
+                        aHandle->texWrapMode, 0);
     }
 
-    buffer = texture->secondaryBuffer;
-    if (buffer != NULL) {
-        sdfTexSetPacket(buffer, texture->width, texture->height,
-                     sdfTexGetPixelAddr(texture), texture->pixelFormat,
-                     sdfTexGetCLUTAddr(texture), texture->clutFormat,
-                     (buffer->textureState >> 34) & 1,
-                     texture->maxMipLevel, texture->lodParameters,
-                     texture->clampMode, SDF_GS_CONTEXT_2);
+    packet = aHandle->packetCtx2;
+    if (packet != NULL) {
+        sdfTexSetPacket(packet, aHandle->width, aHandle->height, sdfTexGetPixelAddr(aHandle),
+                        aHandle->pixelFormat, sdfTexGetCLUTAddr(aHandle), aHandle->CLUTFormat,
+                        (packet->tex0.data >> 34) & 1, aHandle->numOfMipmap, aHandle->mipmapParam,
+                        aHandle->texWrapMode, 1);
     }
 }
 
-sdfTexHandle_t *sdfTexCreateFromFileHeader(const SdfTextureFileHeader *header,
-                                           SdfTextureUploadOwnership uploadOwnership) {
-    sdfTexHandle_t *texture;
-    const u8 *pixels;
-    s32 format;
+sdfTexHandle_t *sdfTexSetEx(TMX_HEADER_t *aTex, s32 aMemMode)
+{
+    sdfTexHandle_t *handle;
+    void *data;
+    s32 gsAddr;
     s32 width;
     s32 height;
-    s32 levels;
-    u32 destination;
-    s32 bits;
-    s32 key = header->resourceKey;
+    s32 level;
+    s32 pixelFormat;
+    s32 bitCount;
+    s32 key = aTex->resourceKey;
 
     if (key != 0) {
         sdfTexHandle_t *existing = sdfTexHandleLink;
         while (existing != NULL) {
-            if (existing->resourceKey == key) {
-                existing->reference->refCount++;
+            if (existing->texId == key) {
+                existing->ref->refCount++;
                 return existing;
             }
-            existing = existing->prev;
+            existing = existing->next;
         }
     }
-    texture = sdfTexAlloc(header->width, header->height, header->pixelFormat, header->maxMipLevel, header->clutFormat, header->paletteCount);
-    texture->lodParameters = header->lodParameters;
-    texture->unk1E = header->unk1A;
-    texture->clampMode = header->clampMode;
-    texture->resourceKey = header->resourceKey;
-    texture->battleTextureSlot = header->battleTextureSlot;
-    pixels = (const u8 *)header + (header->payloadOffsetFlags & SDF_TEXTURE_PAYLOAD_EXTRA_OFFSET_MASK) + sizeof(*header);
-    if (sdfTexGetCLUTCount(texture) != 0) {
-        sdfTexAllocClutBuff(texture);
-        sdfTexCopyClutData(texture, pixels);
-        pixels = sdfTexTransCLUT(texture, sdfTexGetCLUTAddr(texture), pixels, uploadOwnership);
+
+    handle = sdfTexAlloc(aTex->width, aTex->height, aTex->pixelFormat, aTex->numOfMipmap,
+                         aTex->CLUTFormat, aTex->numOfCLUT);
+    handle->mipmapParam = aTex->mipmapParam;
+    handle->flags = aTex->flags;
+    handle->texWrapMode = aTex->texWrapMode;
+    handle->texId = aTex->resourceKey;
+    handle->clutId = aTex->battleTextureSlot;
+    data = (u8 *)aTex + (aTex->compression & 0xF0) + sizeof(TMX_HEADER_t);
+    if (sdfTexGetCLUTCount(handle) != 0) {
+        sdfTexAllocClutBuff(handle);
+        sdfTexCopyClutData(handle, data);
+        data = sdfTexTransCLUT(handle, sdfTexGetCLUTAddr(handle), data, aMemMode);
     }
-    format = texture->pixelFormat;
-    width = texture->width;
-    height = texture->height;
-    levels = texture->maxMipLevel;
-    destination = sdfTexGetPixelAddr(texture);
-    bits = sdfTexGetTexelBitCount(format);
+    pixelFormat = handle->pixelFormat;
+    width = handle->width;
+    height = handle->height;
+    level = handle->numOfMipmap;
+    gsAddr = sdfTexGetPixelAddr(handle);
+    bitCount = sdfTexGetTexelBitCount(pixelFormat);
     do {
-        pixels = sdfTexTransData(destination, width, height, format, pixels, uploadOwnership);
-        levels--;
-        destination += (bits * width * height) >> 5;
+        data = sdfTexTransData(gsAddr, width, height, pixelFormat, data, aMemMode);
+        level--;
+        gsAddr += (bitCount * width * height) >> 5;
         width >>= 1;
         height >>= 1;
-    } while (levels != -1);
-    sdfTexMakeGIFPacket(texture);
-    return texture;
+    } while (level != -1);
+    sdfTexMakeGIFPacket(handle);
+    return handle;
 }
 
-/* Build the texture and packet using queue-owned copies of the input pixels. */
-sdfTexHandle_t *sdfTexSet(const SdfTextureFileHeader *header) {
-    return sdfTexCreateFromFileHeader(header, SDF_TEXTURE_UPLOAD_COPY);
+sdfTexHandle_t *sdfTexSet(TMX_HEADER_t *aTex)
+{
+    return sdfTexSetEx(aTex, 0);
 }
 
-/* Build the texture and packet while borrowing input pixels through transfer. */
-sdfTexHandle_t *sdfTexSetDirect(const SdfTextureFileHeader *header) {
-    return sdfTexCreateFromFileHeader(header, SDF_TEXTURE_UPLOAD_BORROW);
+sdfTexHandle_t *sdfTexSetDirect(TMX_HEADER_t *aTex)
+{
+    return sdfTexSetEx(aTex, 1);
 }
 
-/* Build weighted-RGB intensity bytes from retained palette color data. */
-void sdfTexSetMonoClut(sdfTexHandle_t *texture) {
-    s32 stride;
-    s32 paletteColorCount;
-    u8 *output;
-    u8 *source;
+void sdfTexSetMonoClut(sdfTexHandle_t *aHandle)
+{
+    s32 bytesPerEntry;
+    s32 entryCount;
+    u8 *out;
+    u8 *src;
     u32 color;
-    u32 first;
-    u32 second;
-    u32 third;
+    u32 r;
+    u32 g;
+    u32 b;
 
-    if (texture->clutFormat == 0) {
-        stride = 4;
-        paletteColorCount = (u32)texture->paletteDataSize >> 2;
+    if (aHandle->CLUTFormat == 0) {
+        bytesPerEntry = 4;
+        entryCount = (u32)aHandle->clutDataSize >> 2;
     } else {
-        stride = 2;
-        paletteColorCount = (u32)texture->paletteDataSize >> 1;
+        bytesPerEntry = 2;
+        entryCount = (u32)aHandle->clutDataSize >> 1;
     }
-    output = texture->intensityMap;
-    if (output == NULL) {
-        output = sdfAllocAuto(paletteColorCount);
-        texture->intensityMap = output;
+    out = aHandle->monoClutData;
+    if (out == NULL) {
+        out = sdfAllocAuto(entryCount);
+        aHandle->monoClutData = out;
     }
-    source = texture->paletteData;
+    src = aHandle->clutData;
     do {
-        if (stride == 4) {
-            color = *(u32 *)source;
-            source += 4;
+        if (bytesPerEntry == 4) {
+            color = *(u32 *)src;
+            src += 4;
         } else {
-            u16 packed = *(u16 *)source;
-            source += 2;
-            EE_MMI_PEXT5(color, packed);
+            u16 packed = *(u16 *)src;
+
+            src += 2;
+            /* 1555 to 8888: pext5 spreads the five-bit fields, then the top
+             * three bits of each are copied down into the low bits. */
+            MMI_PEXT5(color, packed);
             color |= (color >> 5) & 0x070707;
         }
-        second = (color >> 8) & 0xFF;
-        first = color & 0xFF;
-        third = (color >> 16) & 0xFF;
-        paletteColorCount--;
-        *output = ((first * 77) >> 8) + ((second * 150) >> 8) + ((third * 29) >> 8);
-        output++;
-    } while (paletteColorCount != 0);
+        g = (color >> 8) & 0xFF;
+        r = color & 0xFF;
+        b = (color >> 16) & 0xFF;
+        entryCount--;
+        *out = ((r * 77) >> 8) + ((g * 150) >> 8) + ((b * 29) >> 8);
+        out++;
+    } while (entryCount != 0);
 }
+
+void sdfTexSetClutColor(sdfTexHandle_t *texture, s32 tint, f32 amount)
+{
+    sdfTexHandle_t *source = texture->ref->origin;
+    u32 count;
+    u8 *intensity;
+
+    intensity = source->monoClutData;
+    if (intensity == NULL) {
+        sdfTexSetMonoClut(source);
+        intensity = source->monoClutData;
+    }
+
+    MMI_PALETTE_TINT_SETUP(amount, tint, 1.0f / 255.0f);
+
+    if (texture->CLUTFormat == 0) {
+        u32 *sourcePalette = (u32 *)source->clutData;
+        u32 *destinationPalette = (u32 *)texture->clutData;
+        count = (u32)texture->clutDataSize >> 2;
+        do {
+            u32 value = *intensity;
+            u32 color = *sourcePalette;
+
+            MMI_PALETTE_TINT_RGBA(value, color);
+            count--;
+            *destinationPalette = value;
+            sourcePalette++;
+            intensity++;
+            destinationPalette++;
+        } while (count != 0);
+    } else {
+        u16 *sourcePalette;
+        u16 *destinationPalette;
+        u32 fiveBitExpandMask = 0x070707;
+
+        count = (u32)texture->clutDataSize >> 1;
+        sourcePalette = (u16 *)source->clutData;
+        destinationPalette = (u16 *)texture->clutData;
+        do {
+            u32 value = *intensity;
+            u16 color = *sourcePalette;
+
+            MMI_PALETTE_TINT_RGB5(color, value, fiveBitExpandMask);
+            count--;
+            *destinationPalette = color;
+            sourcePalette++;
+            intensity++;
+            destinationPalette++;
+        } while (count != 0);
+    }
+
+    sdfTexClutToGs(texture);
+}
+
+sdfTexHandle_t *sdfTexSearch(u32 id)
+{
+    sdfTexHandle_t *handle;
+
+    for (handle = sdfTexHandleLink; handle != NULL; handle = handle->next) {
+        if (handle->texId == id) {
+            return handle;
+        }
+    }
+    return NULL;
+}
+
+void sdfTexInit(void)
+{
+    sdfDelayedResrcInitCB(&sdfTexDelayedResrcCB, (sdfDelayedResrcFreeFunc)sdfTexFree);
+}
+
+INCLUDE_SDATA(const s32, "sdf/sdfTex", sdfTexHandleLink);
+

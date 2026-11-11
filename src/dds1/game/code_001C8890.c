@@ -11,7 +11,7 @@
 #include "btl_horizontal_aim_api.h"
 #include "btl_action_reaction_motion.h"
 #include "btl_action_eligibility.h"
-#include "sdf_vu0.h"
+#include "ps2asm.h"
 #include "btl_actor_resource_bank_api.h"
 #include "btl_special_ability.h"
 #include "btl_scene_light_params.h"
@@ -26,11 +26,11 @@
 #include "sdf_chip.h"
 #include "snd_slot.h"
 #include "active_sound_node.h"
-#include "kwln.h"
-#include "kwln_process_registration.h"
+#include "kernel.h"
+#include "dds3_process_registration.h"
 #include "btl_task_state.h"
 #include "btl_task_condition.h"
-#include "sdf_resource.h"
+#include "sdf_heap_api.h"
 #include "sdf_model.h"
 #include "btl.h"
 #include "btl_skill_name_index.h"
@@ -54,8 +54,6 @@
 #include "btl_sound_release_task.h"
 #include "eff_field_color.h"
 #include "dds3obj.h"
-#include "pcp_vu0.h"
-#include "ee_mmi.h"
 #include "fpu.h"
 #include "dat_state.h"
 #include "evt_unit.h"
@@ -800,7 +798,7 @@ s32 btlAiTaskUpdate(BtlTask *task) {
                     } else {
                         btlDispatchStateHandler(task, 0xC);
                     }
-                } else if (dds3ExistProcess(scene->boundTask) == KWLN_PROCESS_NOT_REGISTERED) {
+                } else if (dds3ExistProcess(scene->boundTask) == DDS3_PROCESS_NOT_REGISTERED) {
                     if (task->indexWork.phase == -1) {
                         btlBossDebugPrintf("btl:AI script return NULL[%p]\n", task);
                         btlDebugPrintf("AI script return NULL\n");
@@ -1415,12 +1413,6 @@ void btlScheduleAttackActionTasks(BtlTask *action) {
 void btlEnterSkillActionState(void) {
 }
 
-INCLUDE_RODATA(const s32, "game/code_001C8890", D_003A3648);
-
-INCLUDE_RODATA(const s32, "game/code_001C8890", D_003A3658);
-
-INCLUDE_RODATA(const s32, "game/code_001C8890", D_003A3670);
-
 #include "btl_motion_transform.h"
 #include "common.h"
 #include "btl_actor_resource_bank_api.h"
@@ -1434,10 +1426,10 @@ INCLUDE_RODATA(const s32, "game/code_001C8890", D_003A3670);
 #include "btl_effect_position.h"
 #include "sdf_chip.h"
 #include "snd_slot.h"
-#include "kwln.h"
+#include "kernel.h"
 #include "btl_task_state.h"
 #include "btl_task_condition.h"
-#include "sdf_resource.h"
+#include "sdf_heap_api.h"
 #include "sdf_model.h"
 #include "btl.h"
 #include "btl_actor_work.h"
@@ -1450,8 +1442,6 @@ INCLUDE_RODATA(const s32, "game/code_001C8890", D_003A3670);
 #include "btl_sound_release_task.h"
 #include "eff_field_color.h"
 #include "dds3obj.h"
-#include "pcp_vu0.h"
-#include "ee_mmi.h"
 #include "fpu.h"
 #include "dat_state.h"
 #include "evt_unit.h"
@@ -1539,6 +1529,13 @@ extern BtlRuntimeTask *btlCreateLinkedEffectTask(BtlUnit *, s32, u8);
  * state handler (state 0x15 for kind 2 commands, 0x18 when stunned or dead,
  * otherwise 0x1A). Reconstructed from the retail routine while preserving
  * its call order and the existing shared task, unit and operand owners. */
+
+INCLUDE_RODATA(const s32, "game/code_001C8890", D_003A3648);
+
+INCLUDE_RODATA(const s32, "game/code_001C8890", D_003A3658);
+
+INCLUDE_RODATA(const s32, "game/code_001C8890", D_003A3670);
+
 void func_001CB410(BtlTask *actor) {
     extern BtlRuntimeTask *btlCreateCategoryStatDamageTask(BtlUnit *, s32, s32);
     extern BtlRuntimeTask *btlCreateEffectTaskWithSourceParams(const void *, u32);
@@ -2336,6 +2333,7 @@ extern BtlRuntimeTask *btlCreateQueuedActorEntrySelectionTask(BtlUnit *, BtlOper
 
 
 /* Schedule the LINKAGE action task chain (inferred role). */
+
 INCLUDE_RODATA(const s32, "game/code_001C8890", D_003A36A8);
 
 void btlScheduleLinkageActionTasks(BtlTask *action) {
@@ -4012,7 +4010,7 @@ void btlDispatchStateHandler(void *object, BtlActionStateIndex index) {
 extern char D_003A3788[]; /* "btl:action seq create[%p]\n" */
 
 BtlTask *btlCreateActionSeq(void) {
-    BtlTask *sequence = sdfAllocAndClearQuadwords(sizeof(*sequence));
+    BtlTask *sequence = sdfChipAllocZeroDirect(sizeof(*sequence));
     BtlState *context;
     BtlTask *head;
 
@@ -4174,3 +4172,4 @@ INCLUDE_SDATA(const s32, "game/code_001C8890", D_003BB5E0);
 INCLUDE_SDATA(const s32, "game/code_001C8890", D_003BB5E8);
 
 INCLUDE_SDATA(const s32, "game/code_001C8890", btlDeferredTaskTail);
+

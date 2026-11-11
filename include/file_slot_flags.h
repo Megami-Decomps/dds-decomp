@@ -26,8 +26,8 @@ enum FileSlotDisplayState {
 
 extern FileSlotDisplayState fileSlotDisplayStates[16];
 
-void fileReqClearSlotFlags(s32 request, s32 slot);
-void fileReqSetSlotFlags(s32 request, s32 slot, s32 mask);
-u32 fileReqGetSlotFlags(s32 request, s32 slot);
+void sdfMcClearSlotFlags(s32 request, s32 slot);
+void sdfMcSetSlotFlags(s32 request, s32 slot, s32 mask);
+u32 sdfMcGetSlotFlags(s32 request, s32 slot);
 
 #endif

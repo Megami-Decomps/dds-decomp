@@ -5,7 +5,7 @@
 #include "sdf_packet_builders.h"
 #include "dds3_owned_node.h"
 
-extern sdfGrOt_t D_003805A8;
+SYMBOL_AT(sdfGrOt_t, D_003805A8, sdfGrOtTable, 0xA60);
 
 /* Emit one filled rectangle into a fresh packet list. */
 void dds3FontReqDrawBoxLine(const Dds3IntrusiveNode *owner)
@@ -17,14 +17,14 @@ void dds3FontReqDrawBoxLine(const Dds3IntrusiveNode *owner)
     sdfPrimLinkBoxLine(list, rect->color, 0, rect->left, rect->top,
                   rect->left + rect->width, rect->top + rect->height,
                   rect->depth, 0);
-    D_003805A8.append(&D_003805A8, list);
+    D_003805A8.regFunc(&D_003805A8, list);
 }
 
 extern Dds3IntrusiveNodeCallbacks D_00435EB0;
 
 /* Allocate a rectangle record and register it with its owner list. */
 Dds3L2dRectangle *dds3FontReqAddBox(s32 left, s32 top, s32 depth, s32 width, s32 height, s32 color) {
-    Dds3L2dRectangle *rect = sdfAllocAndClearQuadwords(0x28);
+    Dds3L2dRectangle *rect = sdfChipAllocZeroDirect(0x28);
 
     rect->left = left;
     rect->top = top;

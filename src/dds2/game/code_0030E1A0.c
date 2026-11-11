@@ -1,6 +1,6 @@
 #include "common.h"
 #include "fpu.h"
-#include "pcp_vu0.h"
+#include "ps2asm.h"
 #include "fld_lmap_task.h"
 
 extern u32 sdfCounterAnimationValue;

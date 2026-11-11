@@ -3,7 +3,7 @@
 #include "common.h"
 #include "btl_stage_task_cleanup.h"
 #include "sdf_chip.h"
-#include "sdf_resource.h"
+#include "sdf_heap_api.h"
 #include "sdf_texture_file.h"
 #include "eff.h"
 #include "eff_node.h"
@@ -168,7 +168,7 @@ BillChildPayload *BillboardLoadTex(SdfTextureFileHeader *resource) {
 void effReleaseSharedTextureRecord(BillChildPayload *entry) {
     entry->refCount--;
     if (entry->refCount == 0) {
-        sdfTexReleaseReferenceViaHandler(entry->texture);
+        sdfTexFreeDelayed(entry->texture);
         sdfMemFreeDirect(entry->allocation);
     }
 }
@@ -206,3 +206,4 @@ INCLUDE_RODATA(const s32, "game/code_00157A50", D_00414298);
 INCLUDE_RODATA(const s32, "game/code_00157A50", D_004142B0);
 
 INCLUDE_RODATA(const s32, "game/code_00157A50", D_004142C0);
+

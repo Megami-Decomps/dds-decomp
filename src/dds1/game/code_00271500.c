@@ -7,15 +7,15 @@
 #include "fr_font.h"
 #include "itf_draw_grid.h"
 #include "mnu_staff.h"
-#include "kwln.h"
-#include "sdf_resource.h"
+#include "kernel.h"
+#include "sdf_heap_api.h"
 #include "dat_state.h"
 #include "mnu.h"
 #include "eff.h"
 #include "mnu_shop.h"
 #include "mnu_camp_work.h"
 #include "mnu_list.h"
-#include "kwln_task_lifecycle.h"
+#include "dds3_task_lifecycle.h"
 #include "mdl_flag_api.h"
 
 extern u32 mnuCampMainResourceNamePairs[][2];
@@ -156,15 +156,15 @@ s64 mnuReleaseStaffResourceSlotGroups(StaffMenuWork *menu) {
 #include "fr_font.h"
 #include "itf_draw_grid.h"
 #include "mnu_staff.h"
-#include "kwln.h"
-#include "sdf_resource.h"
+#include "kernel.h"
+#include "sdf_heap_api.h"
 #include "dat_state.h"
 #include "mnu.h"
 #include "eff.h"
 #include "mnu_shop.h"
 #include "mnu_camp_work.h"
 #include "mnu_list.h"
-#include "kwln_task_lifecycle.h"
+#include "dds3_task_lifecycle.h"
 #include "mdl_flag_api.h"
 extern void mnuCreateStaffPanelSet(StaffMenuWork *menu);
 extern void mnuInitializeStaffPageWindows(MenuPageWindow *container, StaffSlots *resources, u32 unused, PartyPanel *partyPanel);
@@ -311,3 +311,4 @@ MenuWindowContainer *mnuCreateFilteredStaffEntryWindow(void *const *entries, s32
 INCLUDE_RODATA(const s32, "game/code_00271500", mnuCampDrawTaskName);
 
 INCLUDE_RODATA(const s32, "game/code_00271500", mnuCampOwnerTaskName);
+

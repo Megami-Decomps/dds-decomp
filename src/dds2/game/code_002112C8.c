@@ -4,8 +4,7 @@
 #include "sdf.h"
 #include "sdf_draw.h"
 #include "btl_command.h"
-#include "pcp_vu0.h"
-#include "ee_mmi.h"
+#include "ps2asm.h"
 #include "btl_action.h"
 #include "btl_ai_action_api.h"
 #include "btl_ai_table.h"
@@ -29,7 +28,7 @@ void btlRunWeightedAiAction(ActionStateLink *task, s32 rowIndex) {
     u16 speciesId;
     s32 slotIndex;
 
-    btlActionScratchWork = sdfAllocAndClearQuadwords(sizeof(BtlAiScratchWork));
+    btlActionScratchWork = sdfChipAllocZeroDirect(sizeof(BtlAiScratchWork));
     speciesId = task->unit->partyRecord.unitId;
     slotIndex = btlPickWeightedAiSlot(task->unit, speciesId, rowIndex);
     btlExecuteAiTableAction(task, datEnemyAiRecords[speciesId].slot[rowIndex][slotIndex].actionId, datEnemyAiRecords[speciesId].slot[rowIndex][slotIndex].packedAction);

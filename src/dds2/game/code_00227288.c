@@ -4,7 +4,7 @@
 #include "common.h"
 #include "btl_quarter_health_result.h"
 #include "btl_camera_mode_index.h"
-#include "sdf_vu0.h"
+#include "ps2asm.h"
 #include "btl_boss_data_api.h"
 #include "btl_effect_active_api.h"
 #include "eff_random_mod.h"
@@ -19,19 +19,18 @@
 #include "btl_action.h"
 #include "btl_find_actor_for_owner_api.h"
 #include "btl_unit_tasks.h"
-#include "pcp_vu0.h"
 #include "evt_unit.h"
 #include "mdl.h"
 #include "eff_transform.h"
 #include "dat_state.h"
-#include "sdf_resource.h"
+#include "sdf_heap_api.h"
 #include "mdl_flag_api.h"
 #include "btl_scene_initializer.h"
 #include "pty_frontline_promotion_api.h"
 
 extern void btlInterpolateVectorStep(BtlCamState *camera);
 
-extern struct EffRandState effSharedRandomState;
+extern struct EffRandState dds3RandCB;
 extern void btlBuildLinkedCommandCameraPair(BtlLinkedCommand *, BtlCamState *, BtlCamState *, f32, f32, f32, s8, s8);
 extern void btlClearAllUnitDefeatCandidatesTask(void);
 extern void btlFlagLinkedGroupDefeatCandidatesTask(BtlLinkedCommand *);
@@ -1057,7 +1056,7 @@ s32 btlSetLinkedPairActionCamera(BtlLinkedCommand *command) {
         } else {
             btlClearAllUnitDefeatCandidatesTask();
             btlFlagLinkedGroupDefeatCandidatesTask(command);
-            if (dds3GetRandA(&effSharedRandomState) & 1) {
+            if (dds3GetRandA(&dds3RandCB) & 1) {
                 btlSetEffectCameraKeys((s32)command, 237.1f, -287.8f, -460.5f, 0.021f, -0.127f, -0.022f, -0.982f, 841.4f,
                                        -406.5f, -442.7f, 0.108f, 0.293f, 0.013f, 0.94f, 40.0f, 30.0f);
             } else {
@@ -2393,3 +2392,4 @@ INCLUDE_SDATA(const s32, "game/code_00227288", D_00436F90);
 INCLUDE_SDATA(const s32, "game/code_00227288", D_00436F96);
 
 INCLUDE_SDATA(const s32, "game/code_00227288", D_00436F98);
+

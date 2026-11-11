@@ -1,22 +1,40 @@
 #include "common.h"
-#include "dds3_camera_update_flags.h"
-#include "sdf_vu0.h"
-#include "sdf_chip.h"
+#include "dds3_basic_lifecycle.h"
+#include "dds3_object_flags.h"
 #include "dds3obj.h"
-#include "pcp_vu0.h"
+#include "sdf_chip.h"
+#include "eff_object.h"
+#include "eff_dependency.h"
+#include "eff_event.h"
+#include "dds3_camera_update_flags.h"
+#include "ps2asm.h"
 #include "sdf_projection.h"
 #include "sdf_vu_matrix.h"
+#include "dds3_object_control_slot.h"
+
+Dds3BasicCreateResult dds3CameraObjectBasicConstructor(dds3Basic_t *object) {
+    CameraData *inner;
+    dds3ObjectBaseControlWorkData_t *objectBase;
+
+    dds3InitPoseSet(object);
+    inner = sdfChipAllocDirect(0x90);
+    object->workdata = inner;
+    objectBase = dds3ObjectBaseInitControlWorkData(object);
+    inner->handle = objectBase;
+    dds3ObjectBaseOnFlag(object, 0x62);
+    inner->fovUpdatePending = 0;
+    return 1;
+}
 
 typedef struct {
     f32 components[4];
 } CameraVector;
 
-
 extern void dds3FreePoseSet(dds3Basic_t *node);
 extern void dds3ObjectBaseFreeControlWorkData(dds3ObjectBaseControlWorkData_t *base);
 
 /* Release the camera's inner node, base handle, and owned data block. */
-void dds3DestroyCameraData(dds3Basic_t *camera) {
+void dds3CameraObjectBasicDestructor(dds3Basic_t *camera) {
     CameraData *cameraData;
 
     dds3FreePoseSet(camera);
@@ -24,18 +42,19 @@ void dds3DestroyCameraData(dds3Basic_t *camera) {
     dds3ObjectBaseFreeControlWorkData(cameraData->handle);
     sdfChipFreeDirect(cameraData);
 }
+
 #include "dds3_world_secondary.h"
 u8 dds3CheckPoseSetFlag(dds3PoseSet_t *node, u32 flags);
 void dds3OffPoseSetFlag(dds3PoseSet_t *node, u32 flags);
 extern void dds3SetRadiusPoseSet(dds3PoseSet_t *inner);
 extern void MakeCamera(dds3Basic_t *camera);
 extern f32 aViewTarget[4];
-extern f32 sdfViewTargetVector[4];
+extern f32 aViewEye[4];
 extern f32 aViewDown[4];
 
 /* Rebuild dirty vectors and publish only the active world's camera; return 1.
  * A pending field-of-view update is consumed only while this camera is active. */
-s32 dds3UpdateCameraObject(dds3Basic_t *camera) {
+s32 dds3CameraObjectBasicMainProcedure(dds3Basic_t *camera) {
     dds3PoseSet_t *inner;
     CameraData *data;
 
@@ -47,7 +66,7 @@ s32 dds3UpdateCameraObject(dds3Basic_t *camera) {
         dds3SetRadiusPoseSet(inner);
     }
     if (dds3GetActiveCameraSceneBasic(dds3GetControlScene()) == camera) {
-        SDF_VU0_COPYVECTOR(sdfViewTargetVector, &inner->pos);
+        SDF_VU0_COPYVECTOR(aViewEye, &inner->pos);
         SDF_VU0_COPYVECTOR(aViewTarget, &data->worldEye);
         SDF_VU0_COPYVECTOR(aViewDown, &data->worldUp);
         if (data->fovUpdatePending & DDS3_CAMERA_UPDATE_FOV_BIT) {
@@ -59,10 +78,9 @@ s32 dds3UpdateCameraObject(dds3Basic_t *camera) {
 }
 
 /* The camera draw callback has no geometry to submit. */
-s32 dds3DrawCameraObject(dds3Basic_t *camera) {
+s32 dds3CameraObjectBasicDrawProcedure(dds3Basic_t *camera) {
     return 1;
 }
-
 
 /* Transform the local eye/up vectors through the inner node and rebuild the
  * world-space look-at basis. */
@@ -71,7 +89,7 @@ void MakeCamera(dds3Basic_t *camera) {
     dds3PoseSet_t *inner = camera->poseset;
 
     SDF_VU0_LOADVECTOR(&inner->rotation);
-    effMiscQuaternionToMatrixVU();
+    ToMatrix();
     SDF_VU0_LOADVECTOR(&data->localUp);
     SDF_VU0_APPLYMATRIX();
     SDF_VU0_VECTOR_W_SET_ONE();
@@ -85,7 +103,7 @@ void MakeCamera(dds3Basic_t *camera) {
         SDF_VU0_STOREVECTOR(&data->worldEye);
     }
     LookAtMatrix((const f32 *)&data->worldEye, inner->pos, (const f32 *)&data->worldUp);
-    VU0_STORE_MATRIX(data->matrix);
+    SDF_VU0_STOREMATRIX(data->matrix);
 }
 
 /* Return the base handle owned by the camera data. */
@@ -93,12 +111,10 @@ dds3ObjectBaseControlWorkData_t *dds3GetCameraObjectBaseControlWorkData(dds3Basi
     return ((CameraData *)camera->workdata)->handle;
 }
 
-
 extern void dds3SetRadiusPoseSet(dds3PoseSet_t *inner);
 extern void MakeCamera(dds3Basic_t *camera);
 extern CameraVector D_00412878;
 extern CameraVector D_00412888;
-
 
 /* Append a camera-kind node, set its key, and ensure slot data. */
 dds3Basic_t *dds3AllocCameraObjectBasic(s32 key) {
@@ -170,17 +186,17 @@ void dds3DeleteCameraObjectBasic(dds3Basic_t *node) {
 }
 
 /* Load the owned look-at matrix into vf28-vf31. */
-void dds3LoadObjectMatrixPointerIntoVu(dds3Basic_t *camera) {
-    VU0_LOAD_MATRIX(((CameraData *)camera->workdata)->matrix);
+void dds3CameraObjectBasicLoadCameraTM(dds3Basic_t *camera) {
+    SDF_VU0_LOADMATRIX(((CameraData *)camera->workdata)->matrix);
 }
 
 /* Copy the supplied vector to the camera's world-space eye position. */
-void dds3CameraObjectBasicSetWorldEye(dds3Basic_t *camera, const u128 *worldEye) {
+void dds3CameraObjectBasicGetCameraTM(dds3Basic_t *camera, const u128 *worldEye) {
     SDF_VU0_COPYVECTOR(&((CameraData *)camera->workdata)->worldEye, worldEye);
 }
 
 /* Load the camera's world-space eye vector into vf10. */
-void dds3CameraObjectBasicLoadWorldEyeIntoVu(dds3Basic_t *camera) {
+void dds3CameraObjectBasicGetTargetPos(dds3Basic_t *camera) {
     u128 *eye = &((CameraData *)camera->workdata)->worldEye;
 
     SDF_VU0_LOADVECTOR_BARRIER(eye);
@@ -200,7 +216,6 @@ f32 dds3CameraObjectBasicGetFovy(const dds3Basic_t *camera) {
     return data->fieldOfView;
 }
 
-
 /* vu0 routine: update world up and the relative eye, then copy world eye and
  * target position into the four-component output buffers. */
 void dds3CameraObjectBasicGetTgtCam(dds3Basic_t *obj, f32 *worldEyeOut, f32 *targetPositionOut) {
@@ -208,7 +223,7 @@ void dds3CameraObjectBasicGetTgtCam(dds3Basic_t *obj, f32 *worldEyeOut, f32 *tar
     dds3PoseSet_t *inner = obj->poseset;
 
     SDF_VU0_LOADVECTOR(&inner->rotation);
-    effMiscQuaternionToMatrixVU();
+    ToMatrix();
     SDF_VU0_LOADVECTOR(&data->localUp);
     SDF_VU0_APPLYMATRIX();
     SDF_VU0_VECTOR_W_SET_ONE();
@@ -231,6 +246,23 @@ void dds3CameraObjectBasicGetTgtCam(dds3Basic_t *obj, f32 *worldEyeOut, f32 *tar
     targetPositionOut[3] = inner->pos[3];
 }
 
+extern void dds3SetRadiusPoseSet(dds3PoseSet_t *node);
+
+extern dds3Basic_t *dds3GetFirstWorldObjectNodeOfKind2(void);
+
+extern s32 dds3ObjectBaseRegistArea(dds3Basic_t *object);
+
+CameraEyePositionMode dds3CameraObjectBasicGetMode(dds3Basic_t *object) {
+    return ((CameraData *)object->workdata)->eyeIsRelative;
+}
+
+void dds3CameraObjectBasicSetMode(dds3Basic_t *camera, CameraEyePositionMode mode) {
+    if (((CameraData *)camera->workdata)->eyeIsRelative != mode) {
+        ((CameraData *)camera->workdata)->eyeIsRelative = mode;
+    }
+}
+
 INCLUDE_RODATA(const s32, "basic/dds3CameraObjectBasic", D_00412878);
 
 INCLUDE_RODATA(const s32, "basic/dds3CameraObjectBasic", D_00412888);
+

@@ -1,7 +1,7 @@
 #include "sdk_ps2.h"
 #include "scr_integer_parameter_api.h"
 #include "scr.h"
-#include "bf_flw0_header.h"
+#include "scr.h"
 #include "dsp_entry_api.h"
 #include "dsp_message_window_api.h"
 #include "dsp_channel.h"
@@ -10,18 +10,18 @@
 #include "evt_message_window_api.h"
 #include "evt_world_object_api.h"
 #include "evt_active_entry_flag_api.h"
-#include "kwln.h"
+#include "kernel.h"
 #include "mnu_list.h"
-#include "kwln_task_state.h"
-#include "kwln_task_state_query.h"
+#include "dds3_task_state.h"
+#include "dds3_task_state_query.h"
 #include "itf_mes_window.h"
 #include "itf_mes_panel_mode.h"
 #include "itf_mes_entry_start_api.h"
 #include "itf_mes_select_def_key_result.h"
 #include "evt_world.h"
-#include "sdf_resource.h"
+#include "sdf_heap_api.h"
 #include "dat_state.h"
-#include "kwln_task_lifecycle.h"
+#include "dds3_task_lifecycle.h"
 #include "sdf_texture_file.h"
 #include "eff_random.h"
 #include "eff_event_draw.h"
@@ -126,19 +126,18 @@ void fclInitPanelPos(u32 firstWord, u32 secondWord, u32 thirdWord, s16 firstHalf
 /* Destroy a nonzero, registered task. The declared return value is not set. */
 s32 fclScriptForcedEnd(dds3ProcessID_t *task) {
     if (task != 0) {
-        if (dds3GetProcessStat(task) != KWLN_TASK_DETACHED) {
+        if (dds3GetProcessStat(task) != DDS3_TASK_DETACHED) {
             dds3KillProcess(task, 0);
         }
     }
 }
 
-extern dds3ProcessID_t *scrStartScript2(u32 priority, const BfFlw0Header *script, ScrProcedureIndex procedureIndex);
 
 void evtClearActiveFlag(s32 flagIndex);
 
 /* Replace an optional task slot, clear active flag zero, and return the new task.
  * Creation is still attempted if no slot is supplied. */
-dds3ProcessID_t *fclScriptStart(BfFlw0Header *script, ScrProcedureIndex procedureIndex, dds3ProcessID_t **taskSlot) {
+dds3ProcessID_t *fclScriptStart(scrHeader_t *script, ScrProcedureIndex procedureIndex, dds3ProcessID_t **taskSlot) {
     dds3ProcessID_t *task;
 
     if (taskSlot != NULL) {
@@ -465,13 +464,13 @@ void evtMoveMessageWindowWithPanelOffset(s32 x, s32 y) {
 
 /* Recognize all three scheduler queues. Preserve the repeated queries. */
 s32 fclChkMessageDraw(dds3ProcessID_t *task) {
-    if (dds3GetProcessStat(task) == KWLN_TASK_DELAYED_START) {
+    if (dds3GetProcessStat(task) == DDS3_TASK_DELAYED_START) {
         return 1;
     }
-    if (dds3GetProcessStat(task) == KWLN_TASK_ACTIVE) {
+    if (dds3GetProcessStat(task) == DDS3_TASK_ACTIVE) {
         return 1;
     }
-    return dds3GetProcessStat(task) == KWLN_TASK_DESTROY_PENDING;
+    return dds3GetProcessStat(task) == DDS3_TASK_DESTROY_PENDING;
 }
 
 extern s8 evtActiveEntryFlags[8];
@@ -583,6 +582,7 @@ void evtDrawListViewportPanel(s32 x, s32 y, s32 width, EvtPanelRecord *record) {
 void evtDrawPlainPanel(u32 x, u32 y, u32 width, u32 height) {
     uiDrawUniformColorRect(x, y, 0, width, height, EVT_PANEL_BACKGROUND_COLOR, EVT_PANEL_DRAW_COMMAND);
 }
+
 INCLUDE_SDATA(const s32, "game/code_0026C1D0", gMsgID);
 
 INCLUDE_SDATA(const s32, "game/code_0026C1D0", gMsgFlag);
@@ -600,3 +600,4 @@ INCLUDE_SDATA(const s32, "game/code_0026C1D0", D_00437890);
 INCLUDE_SDATA(const s32, "game/code_0026C1D0", mnuMantraNodePositionTable);
 
 INCLUDE_SDATA(const s32, "game/code_0026C1D0", mnuMantraPanelPositionTable);
+

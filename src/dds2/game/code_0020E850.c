@@ -3,7 +3,7 @@
 #include "sdf_map_position_api.h"
 #include "scr_integer_parameter_api.h"
 #include "scr_command_parameter_index.h"
-#include "sdf_vu0.h"
+#include "ps2asm.h"
 #include "btl_indexed_ui_resource_api.h"
 #include "btl_set_actor_effect_parameter_api.h"
 #include "btl_actor_resource_bank_api.h"
@@ -34,7 +34,6 @@
 #include "mdl.h"
 #include "eff_transform.h"
 #include "btl_model_record.h"
-#include "pcp_vu0.h"
 #include "dat_command.h"
 #include "dat_unit_id.h"
 #include "btl_boss_debug_api.h"
@@ -184,7 +183,6 @@ void btlSetResourceNameLengthLimit(struct BtlResourceNameRecord *record, u32 max
 #include "mdl.h"
 #include "eff_transform.h"
 #include "btl_model_record.h"
-#include "pcp_vu0.h"
 #include "dat_command.h"
 #include "btl_boss_debug_api.h"
 #include "eff.h"
@@ -379,6 +377,7 @@ BtlActionEligibilityResult btlAiCheckStatusRollEligibility(ActionStateLink *task
 extern f32 btlUnitGetTopY(BtlUnit *unit);
 extern s32 nbClipEffectNum(s32 screen[4]);
 /* vu0 routine: choose an on-screen HP/MP label anchor, leaving it in vf10. */
+
 INCLUDE_RODATA(const s32, "game/code_0020E850", D_00419910);
 
 INCLUDE_RODATA(const s32, "game/code_0020E850", D_00419920);
@@ -398,7 +397,7 @@ void btlSelectHpMpDisplayPositionVU(BtlUnit *unit) {
         }
         SDF_VU0_STOREVECTOR_NOMEM(baseline);
     } else {
-        btlUnitGetMuzzlePosVU(unit);
+        effBTLModelGetSphereCenter(unit);
         SDF_VU0_STOREVECTOR_NOMEM(baseline);
         baseline[1] = -btlUnitGetTopY(unit);
     }
@@ -423,7 +422,7 @@ void btlSelectHpMpDisplayPositionVU(BtlUnit *unit) {
                 return;
             }
         }
-        btlUnitGetMuzzlePosVU(unit);
+        effBTLModelGetSphereCenter(unit);
         SDF_VU0_STOREVECTOR_NOMEM(candidate);
         SDF_VU0_LOADVECTOR_B(baseline);
         SDF_VU0_SUBVECTOR();
@@ -442,7 +441,7 @@ void btlSelectHpMpDisplayPositionVU(BtlUnit *unit) {
                 return;
             }
         }
-        btlUnitGetMuzzlePosVU(unit);
+        effBTLModelGetSphereCenter(unit);
         SDF_VU0_STOREVECTOR_NOMEM(candidate);
         visible = nbClipEffectNum(screen);
         x = screen[0] >> 4;
@@ -462,7 +461,7 @@ void btlSelectHpMpDisplayPositionVU(BtlUnit *unit) {
             SDF_VU0_LOADVECTOR(candidate);
             return;
         }
-        btlUnitGetMuzzlePosVU(unit);
+        effBTLModelGetSphereCenter(unit);
         SDF_VU0_STOREVECTOR_NOMEM(candidate);
         candidate[1] -= unit->height * unit->scale * 0.5f;
         SDF_VU0_LOADVECTOR(candidate);
@@ -674,7 +673,7 @@ s32 btlUpdateLinkedNumberDisplay(BtlLinkedEffectArgs *args) {
         unit->linkedNumberCount++;
         btlSelectHpMpDisplayPositionVU(args->unit);
         SDF_VU0_STOREVECTOR_NOMEM(args->anchorOffset);
-        btlUnitGetMuzzlePosVU(args->unit);
+        effBTLModelGetSphereCenter(args->unit);
         SDF_VU0_STOREVECTOR_NOMEM(args->referencePosition);
         SDF_VU0_COPYVECTOR_A_TO_B();
         SDF_VU0_LOADVECTOR(args->anchorOffset);
@@ -740,7 +739,7 @@ s32 btlUpdateLinkedNumberDisplay(BtlLinkedEffectArgs *args) {
     rise += 128;
     if (status & 0x08000004) {
         if ((status & 0x21) == 1) {
-            btlUnitGetMuzzlePosVU(args->unit);
+            effBTLModelGetSphereCenter(args->unit);
         } else {
             SDF_VU0_LOADVECTOR(args->referencePosition);
         }
@@ -848,7 +847,7 @@ s32 func_0020FA98(BtlLinkedEffectArgs *args) {
 
         btlSelectHpMpDisplayPositionVU(args->unit);
         SDF_VU0_STOREVECTOR_NOMEM(args->anchorOffset);
-        btlUnitGetMuzzlePosVU(args->unit);
+        effBTLModelGetSphereCenter(args->unit);
         SDF_VU0_STOREVECTOR_NOMEM(args->referencePosition);
         SDF_VU0_COPYVECTOR_A_TO_B();
         SDF_VU0_LOADVECTOR(args->anchorOffset);
@@ -887,7 +886,7 @@ s32 func_0020FA98(BtlLinkedEffectArgs *args) {
     status = btlUnitStatusPair(args->unit);
     if (status & 0x08000004) {
         if ((status & 0x21) == 1) {
-            btlUnitGetMuzzlePosVU(args->unit);
+            effBTLModelGetSphereCenter(args->unit);
         } else {
             SDF_VU0_LOADVECTOR(args->referencePosition);
         }
@@ -1378,7 +1377,7 @@ s32 btlRandomInclusiveRange(s32 lower, s32 upper) {
 }
 
 s32 btlAllocAndCheck(ActionStateLink *task) {
-    BtlAiScratchWork *work = sdfAllocAndClearQuadwords(sizeof(BtlAiScratchWork));
+    BtlAiScratchWork *work = sdfChipAllocZeroDirect(sizeof(BtlAiScratchWork));
     BtlUnit *actor = task->unit;
 
     btlActionScratchWork = work;
@@ -1421,7 +1420,7 @@ void btlResetBattleHistoryCounters(void) {
 }
 
 s32 btlDispatchPackedActionWithScratch(BtlAiScratchActor actorTask, BtlUnit *owner, s32 mask) {
-    BtlAiScratchWork *work = sdfAllocAndClearQuadwords(sizeof(BtlAiScratchWork));
+    BtlAiScratchWork *work = sdfChipAllocZeroDirect(sizeof(BtlAiScratchWork));
     s32 result;
 
     btlActionScratchWork = work;
@@ -1449,7 +1448,7 @@ extern void btlSelectTierMatrixAiRoute(BtlUnit *unit, s32 species, s32 *row, s32
 
 /* Choose a row and a weighted slot of the unit's species AI table and run that action. */
 s32 btlRunRandomWeightedAiTableAction(ActionStateLink *task) {
-    BtlAiScratchWork *work = sdfAllocAndClearQuadwords(sizeof(BtlAiScratchWork));
+    BtlAiScratchWork *work = sdfChipAllocZeroDirect(sizeof(BtlAiScratchWork));
     BtlUnit *unit;
     u16 species;
     s32 row;
@@ -1604,3 +1603,4 @@ INCLUDE_SDATA(const s32, "game/code_0020E850", btlRandomState);
 INCLUDE_SDATA(const s32, "game/code_0020E850", btlPreviousAiCandidateBucket);
 
 INCLUDE_SDATA(const s32, "game/code_0020E850", btlActionScratchWork);
+

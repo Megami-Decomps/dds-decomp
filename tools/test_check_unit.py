@@ -598,25 +598,25 @@ segments:
 
     def test_sbss_uses_the_same_exact_symbol_contract(self):
         sbss = self.YAML.replace(".bss", ".sbss", 1).replace(
-            "file/fileManager", "sdf/sdfThread"
+            "file/fileManager", "sdf/sdfSystem"
         )
         self.assertEqual(
-            owned_nobits_range(sbss, "sdf/sdfThread", ".sbss"),
+            owned_nobits_range(sbss, "sdf/sdfSystem", ".sbss"),
             (0x003DC658, 0x40),
         )
         self.assertEqual(
-            owned_nobits_size(sbss, "sdf/sdfThread", ".sbss"), 0x40
+            owned_nobits_size(sbss, "sdf/sdfSystem", ".sbss"), 0x40
         )
         emitted = [(0x00, 0x40, "sdfTrackedThreadState", True)]
         self.assertEqual(
             nobits_ownership_problems(
-                sbss, "sdf/sdfThread", ".sbss", 0x40, emitted,
+                sbss, "sdf/sdfSystem", ".sbss", 0x40, emitted,
                 {"sdfTrackedThreadState": 0x003DC658},
             ),
             [],
         )
         self.assertIsNone(
-            owned_nobits_size(sbss, "sdf/sdfThread", ".bss")
+            owned_nobits_size(sbss, "sdf/sdfSystem", ".bss")
         )
 
     def test_rejects_non_nobits_section(self):
@@ -860,7 +860,7 @@ segments:
             with self.subTest(version=version, section=".bss"):
                 syms = symbols(version)
                 start = syms["fileQueueHead"]
-                end = syms["fileRequestEntries"]
+                end = syms["sdfMcCb"]
                 yaml_text = self.YAML.replace("0x003DC658", hex(start)).replace(
                     "0x003DC698", hex(end)
                 )
@@ -881,7 +881,7 @@ segments:
                 start = syms["sdfThreadSema"]
                 end = syms["sdfVblankSema"]
                 yaml_text = self.YAML.replace(".bss", ".sbss", 1).replace(
-                    "file/fileManager", "sdf/sdfThread"
+                    "file/fileManager", "sdf/sdfSystem"
                 ).replace("0x003DC658", hex(start)).replace(
                     "0x003DC698", hex(end)
                 )
@@ -889,7 +889,7 @@ segments:
                 self.assertEqual(
                     nobits_ownership_problems(
                         yaml_text,
-                        "sdf/sdfThread",
+                        "sdf/sdfSystem",
                         ".sbss",
                         8,
                         [

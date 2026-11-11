@@ -13,9 +13,9 @@
 #include "fr_font.h"
 #include "eff_resource_slots.h"
 #include "eff_resource_source_lifetime.h"
-#include "sdf_resource.h"
-#include "kwln.h"
-#include "kwln_task_create.h"
+#include "sdf_heap_api.h"
+#include "kernel.h"
+#include "dds3_task_create.h"
 #include "sdf_movie_api.h"
 #include "mnu_movie_playback_api.h"
 #include "mnu.h"
@@ -23,11 +23,11 @@
 #include "mnu_list.h"
 #include "mnu_movie_resource.h"
 #include "mnu_slide_bar_pair.h"
-#include "kwln_task_lifecycle.h"
-#include "kwln_fade.h"
+#include "dds3_task_lifecycle.h"
+#include "dds3_fade.h"
 #include "sdf_packet_alloc.h"
 #include "sdf_packet_list.h"
-#include "ee_mmi.h"
+#include "ps2asm.h"
 /* Declared before first use (were implicit int). */
 extern void dds3AdminiCallSequence(s32 requestedMode, const void *requestData, u32 dataBytes, s32 markHistory);
 extern void frFontUploadClearedTexture(void);
@@ -114,7 +114,7 @@ extern movieStream_t mnuMovieDrawContext;
 void mnuRequestIndexedMovieResource(s32 index);
 void movieStop(void);
 
-extern sdfGrOt_t D_003803C8;
+SYMBOL_AT(sdfGrOt_t, D_003803C8, sdfGrOtTable, 0x880);
 
 extern dds3ProcessID_t *PlayingNo;
 
@@ -137,7 +137,7 @@ extern void mnuSetMovieWorkFlag(MnuSlideBarPair *, s32, u8);
 
 extern void mnuCallInitWide(s32, s32, s32, s32, s32);
 
-extern void sdfMovieDrawFrame(movieStream_t *, sdfGrOt_t *);
+extern void release_movieobj2(movieStream_t *, sdfGrOt_t *);
 extern void mnuSubmitMovieDrawPacket(movieStream_t *, sdfGrOt_t *);
 extern u8 mnuIsAnyMenuInputPressed(void);
 extern void mnuDrawSprite(s32 x, s32 y, s32 depth, s32 alpha, s32 drawMode, s32 spriteIndex,
@@ -1006,15 +1006,15 @@ void mnuReleaseStaffRollText(void) {
     frwFreeStaffFont();
 }
 
-struct _FRQ;
+struct frFontHandle_t;
 /* This legacy call supplies an unused ninth word to the eight-word builder. */
-extern struct _FRQ *frwGetStaffFontFRQ();
-extern s32 frFontDrawGlyphWithSharedFlags(struct _FRQ *, s8);
+extern struct frFontHandle_t *frwGetStaffFontFRQ();
+extern s32 frDrawFontEx(struct frFontHandle_t *, s8);
 s32 mnuDrawStaffRollText(f32 x, f32 y, s32 font, u32 color, const char *text) {
     s32 byteAlpha = color & 0xFF;
     f32 alpha = byteAlpha;
     f32 opacity = 1.0f;
-    struct _FRQ *glyph;
+    struct frFontHandle_t *glyph;
 
     if (y < 192.0f) {
         opacity = (y + 48.0f) / 240.0f;
@@ -1031,7 +1031,7 @@ s32 mnuDrawStaffRollText(f32 x, f32 y, s32 font, u32 color, const char *text) {
             (s32)(y * 8.0f), 0, 0, 1, 8, color, text, 0);
     }
     frGetStrWidth2(glyph);
-    frFontDrawGlyphWithSharedFlags(glyph, 1);
+    frDrawFontEx(glyph, 1);
     return frDestroyFontRequestAfter(glyph);
 }
 
@@ -1233,6 +1233,7 @@ s32 mnuUpdateStaffRoll(dds3ProcessID_t *task) {
 
 extern MnuStaffImageRecord mnuStaffRollImageRecords[19];
 extern s32 D_00437AB4;
+
 INCLUDE_RODATA(const s32, "game/code_002A5260", D_00429938);
 
 void mnuAdvanceStaffImageSequence(void) {
@@ -1693,7 +1694,7 @@ s32 mnuStopStaffTasks(void) {
 }
 
 s32 movieDrawProc(dds3ProcessID_t *task) {
-    sdfMovieDrawFrame(&mnuMovieDrawContext, &D_003803C8);
+    release_movieobj2(&mnuMovieDrawContext, &D_003803C8);
     return 0;
 }
 
@@ -1752,8 +1753,8 @@ void mnuSubmitMovieDrawPacket(movieStream_t *movie, sdfGrOt_t *pool) {
     heightLog2 = height - 1;
     widthLog2 = width - 1;
     bufferWidth = width >> 6;
-    EE_MMI_BIT_LENGTH(heightLog2);
-    EE_MMI_BIT_LENGTH(widthLog2);
+    heightLog2 = PS2_WORD_BIT_LENGTH(heightLog2);
+    widthLog2 = PS2_WORD_BIT_LENGTH(widthLog2);
     basePointer = (u32)movie->soundNode.resourceWord >> 6;
     if (bufferWidth == 0) {
         bufferWidth = 1;
@@ -1781,7 +1782,7 @@ void mnuSubmitMovieDrawPacket(movieStream_t *movie, sdfGrOt_t *pool) {
     packet->vertexExtent.registerId = SDF_GS_XYZ2;
     list = sdfPrimAllocDrawTag(0);
     sdfDrawTagLink(list, (u32)packet);
-    pool->append(pool, list);
+    pool->regFunc(pool, list);
 }
 
 extern char D_0042A348[];
@@ -1789,7 +1790,7 @@ extern char D_0042A348[];
 extern char D_0042A380[];
 
 extern u32 D_00437AD0;
-extern u32 sdfSoundGetCommandStatus(void);
+extern u32 sdfSndGetCommandStatus(void);
 extern SdfMovieDescriptor mnuMoviePlaybackDescriptor;
 extern char mnuMovieRestartFileNameBuffer[];
 extern char D_0042A3B0[];
@@ -1821,7 +1822,7 @@ s32 mnuRestartMovieStreamAfterStop(dds3ProcessID_t *task) {
         }
         return -1;
     }
-    if (sdfSoundGetCommandStatus() == 0) {
+    if (sdfSndGetCommandStatus() == 0) {
         movie = &mnuMovieDrawContext;
         movieOpenStream(movie, &mnuMoviePlaybackDescriptor, mnuMovieRestartFileNameBuffer);
         movie->soundNode.textureHead = D_00437AD8;
@@ -1852,7 +1853,7 @@ dds3ProcessID_t *mnuRequestMoviePlayback(const char *file, const SdfMovieDescrip
         strcpy(mnuMovieRestartFileNameBuffer, file);
         context->soundNode.textureHead = 0;
         movieCloseStream(context);
-        mnuMoviePlaybackDescriptor.source = D_00437AD8->word;
+        mnuMoviePlaybackDescriptor.source = D_00437AD8->addr;
         D_00437AD0 = 0;
         return dds3StartProcess(D_0042A3B0, 0x2AFB, 0, 0, mnuRestartMovieStreamAfterStop, 0, 0);
     } else {
@@ -2056,3 +2057,4 @@ INCLUDE_RODATA(const s32, "game/code_002A5260", D_0042A348);
 INCLUDE_RODATA(const s32, "game/code_002A5260", D_0042A380);
 
 INCLUDE_RODATA(const s32, "game/code_002A5260", D_0042A3B0);
+

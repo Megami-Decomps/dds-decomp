@@ -1,7 +1,7 @@
 #include "common.h"
 #include "dds_nested_resource.h"
 #include "mnu_callback_list.h"
-#include "sdf_resource.h"
+#include "sdf_heap_api.h"
 #include "sdf_handler_node.h"
 
 extern void (*sdfTickCallback)(void);
@@ -46,7 +46,7 @@ void func_00324F38(MnuCallbackList **list, u32 id) {
 SdfHandlerNode *sdfDmacHandlerTable __attribute__((section(".sdata"))) = NULL;
 
 /* Workspace bytes passed to the console DMA setup allocation. */
-s32 D_004389C0 __attribute__((section(".sdata"))) = 0x100000;
+s32 sdfCoreDrawBuffSize __attribute__((section(".sdata"))) = 0x100000;
 
 void (*sdfTickCallback)(void) __attribute__((section(".sdata"))) = NULL;
 

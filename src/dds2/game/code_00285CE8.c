@@ -2,12 +2,12 @@
 #include "common.h"
 #include "sdf_trig.h"
 #include "eff_random.h"
-#include "sdf_resource.h"
+#include "sdf_heap_api.h"
 #include "dat_state.h"
 #include "mdl_flag_api.h"
 
 
-extern void evtPrintDeveloperConsoleMessage(const char *format, ...);
+extern void datDebugPrintf(const char *format, ...);
 
 
 
@@ -242,7 +242,7 @@ struct sdfMemHandle_t *mtrMantraEventBitPush(void) {
         }
         data++;
     }
-    evtPrintDeveloperConsoleMessage("*****************[mtrMantraEventBitPush()]*****************\n");
+    datDebugPrintf("*****************[mtrMantraEventBitPush()]*****************\n");
     return allocation;
 }
 
@@ -268,7 +268,7 @@ void mtrMantraEventBitPop(struct sdfMemHandle_t *allocation) {
         data++;
     }
     sdfMemFreeDirect(allocation);
-    evtPrintDeveloperConsoleMessage("*****************[mtrMantraEventBitPop()]*****************\n");
+    datDebugPrintf("*****************[mtrMantraEventBitPop()]*****************\n");
 }
 
 extern void scrSetEntryLowFlags(datUnitWork_t *context, u16 entryId, u16 lowFlags);
@@ -278,7 +278,7 @@ void mtrMantraBitResetUnit(datUnitWork_t *record) {
     for (i = 0; i < 0xB0; i++) {
         scrSetEntryLowFlags(record, i, 0);
     }
-    evtPrintDeveloperConsoleMessage(
+    datDebugPrintf(
         "*****************[mtrMantraBitReset_Unit():[0x%x]]*****************\n", record->unitId);
 }
 
@@ -290,7 +290,7 @@ void mtrMantraBitReset(void) {
             mtrMantraBitResetUnit(&DDS3_GBWK->party[i]);
         }
     }
-    evtPrintDeveloperConsoleMessage("*****************[mtrMantraBitReset()]*****************\n");
+    datDebugPrintf("*****************[mtrMantraBitReset()]*****************\n");
 }
 
 void mtrMantraEventBitReset(void) {
@@ -303,7 +303,7 @@ void mtrMantraEventBitReset(void) {
         evtBitOff(i + 0x9A0);
     }
     mnuClearCampResourceFlagEntries();
-    evtPrintDeveloperConsoleMessage("*****************[mtrMantraEventBitReset()]*****************\n");
+    datDebugPrintf("*****************[mtrMantraEventBitReset()]*****************\n");
 }
 
 void mtrRefreshMantraStateForUnit2(void) {

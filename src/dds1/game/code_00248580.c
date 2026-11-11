@@ -25,14 +25,14 @@
 #include "itf_draw_grid.h"
 #include "mnu_staff.h"
 #include "mnu_party_entry_lookup.h"
-#include "sdf_resource.h"
+#include "sdf_heap_api.h"
 #include "mnu.h"
 #include "mnu_list.h"
-#include "kwln.h"
-#include "kwln_task_create.h"
-#include "kwln_fade.h"
+#include "kernel.h"
+#include "dds3_task_create.h"
+#include "dds3_fade.h"
 #include "dat_state.h"
-#include "kwln_task_lifecycle.h"
+#include "dds3_task_lifecycle.h"
 #include "mdl_flag_api.h"
 #include "mnu_effect_pair.h"
 #include "btl.h"
@@ -116,11 +116,11 @@ extern void mnuDrawStaffPageMarkerIcons(MenuPageWindow *window, StaffSlots *work
 extern void mnuDrawStaffPanelGridBackdrop(s32 flag, StaffSlots *work);
 extern void mnuDrawStageTestList(s32 x, s32 y, s32 z, s32 overrideValue, MenuPageWindow *menu, s32 surface);
 extern void mnuDrawPartyProfilePanelContents(s32, s32, s32, datUnitWork_t *, s32, MenuSimpleSpriteState *, s32);
-extern struct _FRQ *itfCreateFont2TextGlyph(s32, s32, s32, u32, char *, struct _FRQ *);
+extern struct frFontHandle_t *itfCreateFont2TextGlyph(s32, s32, s32, u32, char *, struct frFontHandle_t *);
 
 extern char mnuNumberSpriteFormat[];
 
-extern s32 frFontDrawGlyphChain(struct _FRQ *, s8, u32);
+extern s32 frDrawFontOt(struct frFontHandle_t *, s8, u32);
 extern EffectPair D_003BC400[];
 extern void mnuDrawTerminalAmountText(s32, s32);
 extern char D_003BC3F0[];
@@ -144,7 +144,7 @@ extern MenuTextEntry D_003482A8[];
  * The signed-byte slot is not bounds checked; DDS1 has no DDS2 x-origin adjustment. */
 void mnuQueueFontGlyphFromAtlasSlot(s32 gridX, s32 gridY, s32 depth, s32 colors, s8 slot, s8 alternate) {
     u8 *text;
-    struct _FRQ *handle;
+    struct frFontHandle_t *handle;
 
     if (alternate == 0) {
         text = D_00347C68[slot].encodedText;
@@ -152,7 +152,7 @@ void mnuQueueFontGlyphFromAtlasSlot(s32 gridX, s32 gridY, s32 depth, s32 colors,
         text = D_003482A8[slot].encodedText;
     }
     handle = itfCreateConvertedTextGlyph(gridX, gridY, depth, colors, text, 0);
-    frFontDrawGlyphChain(handle, 1, MNU_TEXT_DRAW_PRIORITY);
+    frDrawFontOt(handle, 1, MNU_TEXT_DRAW_PRIORITY);
     frDestroyFontRequestAfter(handle);
 }
 
@@ -202,11 +202,11 @@ void mnuRefreshThresholdNodeFlags(struct MenuList *owner) {
 /* Draw formatted numeric text using a blend toward the color with its low byte clear. */
 void mnuCreateNumberSprite(s32 x, s32 y, s32 layer, s32 blendWeight, s32 number, u32 color, s32 priority) {
     char text[16];
-    struct _FRQ *sprite;
+    struct frFontHandle_t *sprite;
 
     sprintf(text, mnuNumberSpriteFormat, number);
     sprite = itfCreateFont2TextGlyph(x, y, layer, fclBlendColor(color, color & ~MNU_COLOR_LOW_BYTE_MASK, blendWeight), text, 0);
-    frFontDrawGlyphChain(sprite, 1, priority);
+    frDrawFontOt(sprite, 1, priority);
     frDestroyFontRequestAfter(sprite);
 }
 
@@ -223,7 +223,7 @@ void mnuDrawTerminalRecoveryListEntry(s32 unused, s32 rowY, s32 depth, struct Me
     MenuThresholdEntry *entry = &node->terminal;
     datUnitWork_t *record = &DDS3_GBWK->party[entry->entryId];
     s32 selected = 0;
-    struct _FRQ *glyph;
+    struct frFontHandle_t *glyph;
     MenuEffectPair *panels;
     s32 fade;
     MnuPartyStatusIconIndex status;
@@ -236,7 +236,7 @@ void mnuDrawTerminalRecoveryListEntry(s32 unused, s32 rowY, s32 depth, struct Me
         glyph = itfCreateFont3TextGlyph(0x1740, 0x2D8, depth,
             fclBlendColor(0xA09DC380, 0xA09DC300, scale), text, 0);
         frSetFontColorNo(glyph, 4);
-        frFontDrawGlyphChain(glyph, 1, priority);
+        frDrawFontOt(glyph, 1, priority);
         frDestroyFontRequestAfter(glyph);
         selected = 1;
     }
@@ -375,7 +375,7 @@ void mnuDrawTerminalListEntry(s32 x, s32 y, s32 unused, struct MenuList *list,
     s32 isCurrent = node == list->cursor;
     u32 chainFlags = 0;
     u32 color;
-    struct _FRQ *glyph;
+    struct frFontHandle_t *glyph;
 
     if (node->flags48 & 1) {
         width /= 2;
@@ -392,7 +392,7 @@ void mnuDrawTerminalListEntry(s32 x, s32 y, s32 unused, struct MenuList *list,
     color = fclBlendColor(color, color & ~0xFF, list->scale);
     glyph = itfCreateConvertedTextGlyph(x + 0x1C0, y + 0xD0, 0, color, node->title, 0);
     frSetFontColorNo(glyph, chainFlags);
-    frFontDrawGlyphChain(glyph, 1, priority);
+    frDrawFontOt(glyph, 1, priority);
     frDestroyFontRequestAfter(glyph);
 }
 
@@ -896,6 +896,7 @@ extern void evtLoadResourcePair(const char *, EvtResourcePair *);
 
 /* Allocate the terminal scene and its lists/effects/message resource.
  * Keep the K&R definition and native calls; both cursor slots start at -1. */
+
 INCLUDE_RODATA(const s32, "game/code_00248580", mnuTerminalMenuTemplate);
 
 INCLUDE_RODATA(const s32, "game/code_00248580", D_003AF620);
@@ -1196,6 +1197,7 @@ void mnuTerminalConfigureEffects(u32 mode, MenuTerminalWork *state) {
 /* Map a command index to the native four-slot table, then configure its effect.
  * Mode-one index one remaps to three; -2 clears only the previous slot.
  * Other negative indices retain both slots. Nonnegative indices require caller bounds. */
+
 INCLUDE_RODATA(const s32, "game/code_00248580", D_003AF658);
 
 INCLUDE_RODATA(const s32, "game/code_00248580", D_003AF668);
@@ -1808,7 +1810,7 @@ u32 evtBeginSelectionExitFade(dds3ProcessID_t *task) {
     dds3FadeIn(0, 0, 0, 15);
     return 1;
 }
-extern s32 fileMenuTaskExists(void);
+extern s32 fmProcessChk(void);
 extern void fileEnterMcPackScene(FileMenuStartMode mode);
 extern void slSetTmnlID(s32 x, s32 y);
 
@@ -1831,7 +1833,7 @@ s32 mnuOpenFileMenuFromTerminal(dds3ProcessID_t *request) {
         fileEnterMcPackScene(FILE_MENU_START_MODE_LOAD);
         *(s32 *)(context + 0x94) = 1;
     }
-    if (work->popupState == 0 && fileMenuTaskExists() == 0 &&
+    if (work->popupState == 0 && fmProcessChk() == 0 &&
         sdfDelayedResrcCheck() == 0) {
         *(s32 *)(context + 0x94) = 0;
         mnuSetPopupEntryFlagged(dispatch, mnuTerminalPopupEntries);
@@ -2023,7 +2025,7 @@ void mnuDrawTerminalAmountText(s32 fading, s32 state) {
     char text[16];
     s32 index;
     s32 color;
-    struct _FRQ *sprite;
+    struct frFontHandle_t *sprite;
 
     index = fldGetModeFrameRecordIndex(work);
     sprintf(text, D_003BC3F0, DDS3_GBWK->header.currency);
@@ -2033,7 +2035,7 @@ void mnuDrawTerminalAmountText(s32 fading, s32 state) {
         color = fclBlendColor(0xA09DC380, 0xA09DC300, work->list->scale);
     }
     sprite = itfCreateFont3TextGlyph(0x1740, 0x210, 0, color, text, 0);
-    frFontDrawGlyphChain(sprite, 1, 0x53);
+    frDrawFontOt(sprite, 1, 0x53);
     frDestroyFontRequestAfter(sprite);
 }
 
@@ -2538,3 +2540,4 @@ INCLUDE_SDATA(const s32, "game/code_00248580", D_003BC3F0);
 INCLUDE_SDATA(const s32, "game/code_00248580", D_003BC3F8);
 
 INCLUDE_SDATA(const s32, "game/code_00248580", D_003BC400);
+

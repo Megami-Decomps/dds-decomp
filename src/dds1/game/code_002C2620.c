@@ -9,18 +9,18 @@
 #include "dds3_world_selection.h"
 #include "evt_world_object_api.h"
 #include "sdf_packet_list.h"
-#include "kwln.h"
-#include "kwln_task_runner.h"
-#include "kwln_task_create.h"
-#include "sdf_resource.h"
+#include "kernel.h"
+#include "dds3_task_runner.h"
+#include "dds3_task_create.h"
+#include "sdf_heap_api.h"
 #include "sdf.h"
 #include "itf_grid_text.h"
 #include "itf_grid_text_color_api.h"
 #include "sdf_grid_seek_api.h"
 #include "sdf_sif_command.h"
-#include "kwln_task_lifecycle.h"
+#include "dds3_task_lifecycle.h"
 #include "mdl_flag_api.h"
-#include "kwln_fade.h"
+#include "dds3_fade.h"
 #include "sdf_counter_display.h"
 #include "fld_lmap_task.h"
 #include "fld_lmap_task_presence.h"
@@ -50,7 +50,7 @@ extern void evtDisableMoonDraw(void);
 extern void evtFreeStage(void);
 extern sdfMemHandle_t *D_003BD254;
 extern s32 fldLocalMapTrackSlotFromMode(s32 mode);
-extern KwlnTaskUpdateResult fldLmapTaskUpdate(dds3ProcessID_t *task);
+extern dds3TaskUpdateResult_t fldLmapTaskUpdate(dds3ProcessID_t *task);
 extern s32 D_003BD23C;
 extern s32 D_003BD96C;
 extern void fldInitializeLmapState(void);
@@ -58,7 +58,7 @@ extern s32 fldStartAndPollLocalMapTrack(void);
 extern void fldInitializeLocalMapScene(void);
 extern s32 fldUpdateLocalMapController(void);
 extern void fldDrawLocalMapOverlay(void);
-extern SndPackedTrackLoadStatus sndFindPackedTrackLoadStatus(s32);
+extern SndPackedTrackLoadStatus p2sdLoadCheckMidi(s32);
 extern void p2sdLoadSMGFile(s32);
 extern s32 fldLocalMapTrackState;
 
@@ -314,10 +314,10 @@ void fldLmapSubmitPositionedCommandPacket(s32 x, s32 y, s32 z,
     SifCommand packetHeader;
 
     sdfDrawTagInit(packetList);
-    sdfPktInit(&packetHeader, x + 0x7000, y + 0x7900, z, colorTableIndex);
+    sdfDevSetPrintCB(&packetHeader, x + 0x7000, y + 0x7900, z, colorTableIndex);
     sdfDrawTagLink(packetList, (u32)sdfDevPrintfEx(&packetHeader, command));
     drawSurface = &sdfGrOtTable[surfaceIndex];
-    drawSurface->append(drawSurface, packetList);
+    drawSurface->regFunc(drawSurface, packetList);
 }
 
 /* Build an untextured rectangle with a separate outline color. */
@@ -328,10 +328,10 @@ void fldLmapSubmitScaledSpritePacket(s32 x, s32 y, s32 z, s32 width, s32 height,
     sdfDrawTagInit(packetList);
     sdfDrawTagLink(packetList, (u32)dds3PrimFrameRect(x + 0x7000, y + 0x7900, z, width * 16, height * 8, fillColor, borderColor));
     drawSurface = &sdfGrOtTable[surfaceIndex];
-    drawSurface->append(drawSurface, packetList);
+    drawSurface->regFunc(drawSurface, packetList);
 }
 
-KwlnTaskUpdateResult fldLmapTaskUpdate(dds3ProcessID_t *task) {
+dds3TaskUpdateResult_t fldLmapTaskUpdate(dds3ProcessID_t *task) {
     s32 state = D_003BD96C;
     s32 result;
 
@@ -449,14 +449,14 @@ void fldShutdownLmapResources(void) {
 
 s32 fldStartAndPollLocalMapTrack(void) {
     if (fldLocalMapTrackState == 1) {
-        if (sndFindPackedTrackLoadStatus(0x400000) == SND_PACKED_TRACK_LOAD_NOT_PRESENT) {
+        if (p2sdLoadCheckMidi(0x400000) == SND_PACKED_TRACK_LOAD_NOT_PRESENT) {
             p2sdLoadSMGFile(0x400000);
             fldLocalMapTrackState = 2;
         } else {
             fldLocalMapTrackState = 0xFF;
         }
     } else if (fldLocalMapTrackState == 2) {
-        if (sndFindPackedTrackLoadStatus(0x400000) == SND_PACKED_TRACK_LOAD_RESIDENT) {
+        if (p2sdLoadCheckMidi(0x400000) == SND_PACKED_TRACK_LOAD_RESIDENT) {
             fldLocalMapTrackState = 0xFF;
         }
     }
@@ -467,7 +467,7 @@ s32 fldStartAndPollLocalMapTrack(void) {
     return 0;
 }
 
-extern void evtSetSolarOverlayFullyVisible(void);
+extern void evtEnableMoonDraw(void);
 
 void fldInitializeLocalMapScene(void) {
     s32 mask;
@@ -497,7 +497,7 @@ void fldInitializeLocalMapScene(void) {
     fclDestroyMessage();
     D_003BD254 = sdfDevLoadFileEx("/lmap/lmpmsg.bmd", &D_003BD258, NULL);
     fclInitMessage((struct ItfMesSub *)D_003BD258);
-    evtSetSolarOverlayFullyVisible();
+    evtEnableMoonDraw();
     fldApplyLightSetIndex(1);
     fldInitializeCameraColorResource();
     sdfEnableFlagListViewTargetRelativeMode();
@@ -740,3 +740,4 @@ INCLUDE_SDATA(const s32, "game/code_002C2620", D_003BD258);
 INCLUDE_SDATA(const s32, "game/code_002C2620", D_003BD25C);
 
 INCLUDE_SDATA(const s32, "game/code_002C2620", D_003BD260);
+

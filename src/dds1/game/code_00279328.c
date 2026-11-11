@@ -2,7 +2,7 @@
 #include "mnu_input.h"
 #include "snd_sequence_volume_pan.h"
 #include "itf_draw_grid.h"
-#include "kwln.h"
+#include "kernel.h"
 #include "pty_skill_menu_api.h"
 #include "mnu.h"
 #include "mnu_panel_state.h"

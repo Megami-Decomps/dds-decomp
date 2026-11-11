@@ -6,9 +6,9 @@
 #include "mnu_mantra.h"
 #include "mnu_mantra_position_api.h"
 #include "snd_sequence_volume_pan.h"
-#include "kwln.h"
-#include "kwln_process_registration.h"
-#include "sdf_resource.h"
+#include "kernel.h"
+#include "dds3_process_registration.h"
+#include "sdf_heap_api.h"
 #include "mnu.h"
 #include "mnu_staff.h"
 #include "dat_state.h"
@@ -17,7 +17,7 @@
 #include "dsp_name.h"
 #include "sdf_task_work.h"
 #include "mdl_flag_api.h"
-#include "kwln_fade.h"
+#include "dds3_fade.h"
 #include "btl.h"
 #include "mnu.h"
 /* Original-style implicit int, kept: matched code depends on it: mnuDrawMantraPhaseOpacity. */
@@ -112,7 +112,7 @@ extern void mnuReleaseMantraMenuDrawResources(MnuStatusResource *);
 extern SdfTaskItemDesc D_003CFCD4;
 extern void mnuReleaseFirstMantraSpriteSlots(void);
 extern void mnuReleaseStaffAndTitleVisualResources(MenuProgressHost *);
-extern void evtPrintDeveloperConsoleMessage(const char *, ...);
+extern void datDebugPrintf(const char *, ...);
 extern void mnuReleasePanelEntryPool(void);
 const char D_00425F70[] = "*****************[mtrMantraUpdate():[0x%x]]*****************\n";
 
@@ -135,7 +135,7 @@ void mtrRecomputeMantraFlagsForPartyUnit(datUnitWork_t *record) {
     s32 j;
     u16 oldFlags;
 
-    evtPrintDeveloperConsoleMessage(D_00425F70, record->unitId);
+    datDebugPrintf(D_00425F70, record->unitId);
     modelFlagState = mnuGetActiveMantraModelFlagState();
     current = evtAllocateMantraSelectionWork(NULL, 1);
     mnuValidateProfileEntry(current, record);
@@ -190,7 +190,7 @@ void mtrMantraSetBitAll(void) {
             mtrMantraSetBit(&DDS3_GBWK->party[recordIndex]);
         }
     }
-    evtPrintDeveloperConsoleMessage("*****************[mtrMantraSetBitAll()]*****************\n");
+    datDebugPrintf("*****************[mtrMantraSetBitAll()]*****************\n");
 }
 
 extern MenuProgressHost *mnuCreateProgressHost(void);
@@ -214,8 +214,8 @@ MnuStatusResource *mnuAllocateMantraResourceWork(void) {
     memset(resourceWork, 0, MTR_STATUS_RESOURCE_BYTES);
     resourceWork->allocation = allocation;
     resourceWork->progressHost = mnuCreateProgressHost();
-    evtPrintDeveloperConsoleMessage("trmLoadStartStatusResource()!!!! \n");
-    evtPrintDeveloperConsoleMessage("mtrInit\n");
+    datDebugPrintf("trmLoadStartStatusResource()!!!! \n");
+    datDebugPrintf("mtrInit\n");
     mnuInitPanelSoundEntries();
     return resourceWork;
 }
@@ -229,11 +229,11 @@ void mnuReleaseMantraResourceWork(s32 unused, MnuStatusResource *resourceWork) {
         sdfMemFreeDelayedDirect(resourceWork->resourceAllocationB);
         mnuReleaseFirstMantraSpriteSlots();
         mnuReleaseStaffAndTitleVisualResources(resourceWork->progressHost);
-        evtPrintDeveloperConsoleMessage("trmDestroyStatusResource()!!!! \n");
+        datDebugPrintf("trmDestroyStatusResource()!!!! \n");
         sdfMemFreeDirect(resourceWork->allocation);
         mnuReleasePanelEntryPool();
     }
-    evtPrintDeveloperConsoleMessage("mtrRelease\n");
+    datDebugPrintf("mtrRelease\n");
 }
 
 /* Store the task handle so the existence probe and explicit stop can
@@ -245,7 +245,7 @@ void mnuCreateResourceTask(void) {
 
 /* Return whether the named resource task exists; invalidate the cached handle when it does not. */
 s32 mnuCheckResourceTask(void) {
-    if (kwlnTaskExists(mnuResourceTaskName) != KWLN_PROCESS_NOT_REGISTERED) {
+    if (sdfTaskExists(mnuResourceTaskName) != DDS3_PROCESS_NOT_REGISTERED) {
         return 1;
     }
     mnuMantraSelectionResource = 0;
@@ -273,19 +273,19 @@ s32 mtrPollResourceLoadTask(void) {
 #include "mnu_mantra.h"
 #include "mtr_resource_file.h"
 #include "dat_state.h"
-#include "sdf_resource.h"
+#include "sdf_heap_api.h"
 #include "sdf_task_work.h"
 #include "file_request_api.h"
 #include "btl_stage_task_cleanup.h"
 
 extern TaskWork *mnuMantraSelectionResource;
 extern MtrResourceFile mtrMantraResourceFiles[7];
-extern void evtPrintDeveloperConsoleMessage(const char *, ...);
+extern void datDebugPrintf(const char *, ...);
 extern void effRequestResourceByMode(const char *prefix, const char *name, s32 mode, u32 *outInstance);
 extern void mnuStartMantraSpriteLoad(void);
 extern s32 mnuHasMantraSpriteTaskFinished(void);
 extern void mnuMergeMantraSpriteSlots(u32 *values);
-extern s32 sndFindPackedTrackLoadStatus(s32 packed);
+extern s32 p2sdLoadCheckMidi(s32 packed);
 extern void p2sdLoadSMGFile(s32 packed);
 extern void mnuLoadMantraPanelPositionTable(u32 resourceId);
 
@@ -311,15 +311,15 @@ s32 mtrAdvanceMantraResourceLoadState(MtrResourceLoadState *load, u16 mode) {
                 load->partyMask |= 1 << (DDS3_GBWK->party[i].unitId - 1);
             }
         }
-        evtPrintDeveloperConsoleMessage("fileload ...Start!!\n");
+        datDebugPrintf("fileload ...Start!!\n");
         return 0;
     case 1:
         load->state = 0;
-        evtPrintDeveloperConsoleMessage("fileload ...OK!!\n");
+        datDebugPrintf("fileload ...OK!!\n");
         return 1;
     case 2:
         if (files[load->entryIndex].mode != mode) {
-            evtPrintDeveloperConsoleMessage("File Check NotHit!! UnLoad [%s]\n", files[load->entryIndex].name);
+            datDebugPrintf("File Check NotHit!! UnLoad [%s]\n", files[load->entryIndex].name);
             load->entryIndex++;
             if (load->entryIndex >= 7) {
                 load->state = 1;
@@ -331,7 +331,7 @@ s32 mtrAdvanceMantraResourceLoadState(MtrResourceLoadState *load, u16 mode) {
         case 1:
             if (files[load->entryIndex].argument >= 4 && files[load->entryIndex].argument < 12 &&
                 !((load->partyMask >> (load->entryIndex - 3)) & 1)) {
-                evtPrintDeveloperConsoleMessage("Party Check NotHit!! UnLoad [%s]\n", files[load->entryIndex].name);
+                datDebugPrintf("Party Check NotHit!! UnLoad [%s]\n", files[load->entryIndex].name);
                 load->entryIndex++;
                 if (load->entryIndex >= 7) {
                     load->state = 1;
@@ -345,11 +345,11 @@ s32 mtrAdvanceMantraResourceLoadState(MtrResourceLoadState *load, u16 mode) {
             mnuStartMantraSpriteLoad();
             break;
         case 4:
-            if (sndFindPackedTrackLoadStatus(files[load->entryIndex].argument) == 0) {
+            if (p2sdLoadCheckMidi(files[load->entryIndex].argument) == 0) {
                 p2sdLoadSMGFile(files[load->entryIndex].argument);
             } else {
                 load->state = 4;
-                evtPrintDeveloperConsoleMessage("SMG already Read[%s]\n", files[load->entryIndex].name);
+                datDebugPrintf("SMG already Read[%s]\n", files[load->entryIndex].name);
             }
             break;
         case 3:
@@ -378,7 +378,7 @@ s32 mtrAdvanceMantraResourceLoadState(MtrResourceLoadState *load, u16 mode) {
             }
             break;
         case 4:
-            if (sndFindPackedTrackLoadStatus(files[load->entryIndex].argument) == 1) {
+            if (p2sdLoadCheckMidi(files[load->entryIndex].argument) == 1) {
                 load->state = 4;
             }
             break;
@@ -392,7 +392,7 @@ s32 mtrAdvanceMantraResourceLoadState(MtrResourceLoadState *load, u16 mode) {
     case 4:
         if (load->fileEntry != NULL) {
             data = fileGetLoadPtr(load->fileEntry);
-            evtPrintDeveloperConsoleMessage("FileSize %d\n", fileGetLoadSize(load->fileEntry));
+            datDebugPrintf("FileSize %d\n", fileGetLoadSize(load->fileEntry));
         }
         switch (files[load->entryIndex].kind) {
         case 3:
@@ -408,13 +408,13 @@ s32 mtrAdvanceMantraResourceLoadState(MtrResourceLoadState *load, u16 mode) {
             }
             break;
         }
-        evtPrintDeveloperConsoleMessage("%s ... OK!! \n", files[load->entryIndex].name);
+        datDebugPrintf("%s ... OK!! \n", files[load->entryIndex].name);
         if (load->fileEntry != NULL) {
             if (files[load->entryIndex].kind == 3) {
                 sdfMemFreeDirect(fileGetMemHandle(load->fileEntry));
             }
-            fileRequestFreeIfComplete(load->fileEntry);
-            evtPrintDeveloperConsoleMessage("FileHandle Free... OK!! \n");
+            fileHandleFree(load->fileEntry);
+            datDebugPrintf("FileHandle Free... OK!! \n");
         }
         if (load->archive != NULL) {
             pacFileHandleFree_(load->archive);
@@ -431,6 +431,7 @@ s32 mtrAdvanceMantraResourceLoadState(MtrResourceLoadState *load, u16 mode) {
     return 0;
 }
 #else
+
 INCLUDE_RODATA(const s32, "game/code_00286BA8", mnuResourceTaskName);
 
 INCLUDE_ASM(const s32, "game/code_00286BA8", mtrAdvanceMantraResourceLoadState);
@@ -441,7 +442,7 @@ s32 mtrUnitSelectInit(void) {
     MnuStatusResource *resourceWork = (MnuStatusResource *)sdfGetTaskValueByKey(mnuMantraSelectionResource, SDF_TASK_VALUE_USER_DATA_KEY);
 
     mtrInitUnitSelectionWork(resourceWork);
-    evtPrintDeveloperConsoleMessage("mtrUnitSelectInit\n");
+    datDebugPrintf("mtrUnitSelectInit\n");
     return 0;
 }
 
@@ -450,7 +451,7 @@ void mtrUnitSelectRelease(void) {
     MnuStatusResource *resourceWork = (MnuStatusResource *)sdfGetTaskValueByKey(mnuMantraSelectionResource, SDF_TASK_VALUE_USER_DATA_KEY);
 
     mnuReleaseSelectionWorkResources(resourceWork);
-    evtPrintDeveloperConsoleMessage("mtrUnitSelectRelease\n");
+    datDebugPrintf("mtrUnitSelectRelease\n");
 }
 
 /* Status 3 continues this selection task; only status 4 ends it. */
@@ -500,7 +501,7 @@ s32 mtrMantraSelectInit(void) {
 
     mnuEnableTerminalTrackMode(0);
     mnuOpenMantraSelectionAndLoadTitleStream(resourceAddress);
-    evtPrintDeveloperConsoleMessage("mtrMantraSelectInit\n");
+    datDebugPrintf("mtrMantraSelectInit\n");
     return 0;
 }
 
@@ -513,7 +514,7 @@ void mtrMantraSelectRelease(void) {
     mnuCleanupMantraVisualsAndResetTitleStream(resourceWork);
     resourceWork->flags.visible = 0;
     mnuEnableTerminalTrackMode(1);
-    evtPrintDeveloperConsoleMessage("mtrMantraSelectRelease\n");
+    datDebugPrintf("mtrMantraSelectRelease\n");
 }
 
 extern SdfTaskItemDesc D_003CFCFC;
@@ -572,7 +573,7 @@ s32 mtrMantraEquipInit(void) {
     mnuCloseCurrentProfilePanel(work->progressHost);
     memcpy(snapshot, work->list->cursor->items, sizeof(*snapshot));
     work->snapshot.profileId = ((u8 *)selector)[2];
-    evtPrintDeveloperConsoleMessage(D_00426208, work->snapshot.maxhp, work->snapshot.maxMp);
+    datDebugPrintf(D_00426208, work->snapshot.maxhp, work->snapshot.maxMp);
     mnuSetupStaffMenuProfilePage(snapshot, work->progressHost);
     mnuEnsureProfilePanelEffect(snapshot, work->progressHost);
     mnuInitPartyPanelSlots(&work->progressHost->partyPanel);
@@ -581,7 +582,7 @@ s32 mtrMantraEquipInit(void) {
     work->flags.profileReady = 0;
     equip->state = MTR_MANTRA_EQUIP_STATE_WAIT_MENU_INPUT;
     equip->timer = 0;
-    evtPrintDeveloperConsoleMessage(D_00426218);
+    datDebugPrintf(D_00426218);
     return 0;
 }
 
@@ -623,7 +624,7 @@ void mtrMantraEquipRelease(s32 key, s32 initResult) {
         mnuSpawnMantraIconFadeIn(resource->selectionController);
         mnuSpawnMantraShortLoopIconFadeIn(resource->selectionController);
     }
-    evtPrintDeveloperConsoleMessage("mtrMantraEquipRelease\n");
+    datDebugPrintf("mtrMantraEquipRelease\n");
 }
 
 extern DspUnitName *datUnitNames;
@@ -838,7 +839,7 @@ extern s32 mnuDrawLoadedProgressPanels(datUnitWork_t *resource, MenuProgressHost
 extern void mnuDrawCurrentProfilePanel(s32, s32, s32, MenuProgressHost *, s32);
 struct sdfGrOt_t;
 extern s8 evtStageTestUpdate(struct sdfGrOt_t **);
-extern struct sdfGrOt_t *kwlnSceneSurfaceSets[13][4];
+extern struct sdfGrOt_t *sdfModelOtTable[13][4];
 
 s32 mtrMantraEquipDraw(void) {
     MnuStatusResource *work = (MnuStatusResource *)sdfGetTaskValueByKey(mnuMantraSelectionResource, SDF_TASK_VALUE_USER_DATA_KEY);
@@ -865,7 +866,7 @@ s32 mtrMantraEquipDraw(void) {
         work->flags.profileReady = 1;
     }
     mnuDrawCurrentProfilePanel(0xE80, 0x5B8, 1, work->progressHost, 0x53);
-    if (evtStageTestUpdate(kwlnSceneSurfaceSets[9]) >= 2) {
+    if (evtStageTestUpdate(sdfModelOtTable[9]) >= 2) {
         work->flags.fadeProgress = 1;
     }
     return 0;
@@ -1217,3 +1218,4 @@ char mnuMantraUnitLevelTextFormat[] __attribute__((section(".sdata"))) = "%2d";
 MenuMantraRecord *mnuMantraPublishedSourceRecords __attribute__((section(".sdata"))) = NULL;
 
 INCLUDE_RODATA(const s32, "game/code_00286BA8", D_004262B0);
+

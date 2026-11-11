@@ -7,21 +7,13 @@
 #include "sdf_mat4.h"
 #include "dds_nested_resource.h"
 #include "mnu_callback_list.h"
-#include "sdf_resource.h"
+#include "sdf_heap_api.h"
 
 extern f32 sdfVec3Normalize(f32 *);
-
-extern s32 CreateThreadSimple(void (*entryAddress)(), void *workspace, s32 stackBytes, s32 priority);
-
 
 extern void (*sdfTickCallback)(void);
 
 extern f32 sdfVec3DotNormalized(const SdfVec4 *, const SdfVec4 *);
-
-
-
-
-
 
 f32 sdfVec3AngleBetween(const SdfVec4 *a, const SdfVec4 *b) {
     return acosf(sdfVec3DotNormalized(a, b));
@@ -129,7 +121,6 @@ void sdfMat4Transpose(SdfMat4 *dst, SdfMat4 *src) {
     dst->m[14] = t.m[11];
     dst->m[15] = t.m[15];
 }
-
 
 f32 *sdfVectorTransformByMatrix(f32 *vec, f32 *mat) {
     f32 out[4];
@@ -239,46 +230,3 @@ void sdfConvertEulerAnglesToQuaternionScalar(f32 *out, f32 x, f32 y, f32 z) {
     out[2] = sz * cy * cx + cz * sy * sx;
     out[3] = cz * cy * cx - sz * sy * sx;
 }
-
-void sdfCreateSemaphoreFromOptions(u32 callbackArg) {
-}
-
-s32 sdfCreateSema(u32 initial, u32 option, u32 maximum) {
-    struct {
-        u32 attr;
-        u32 option;
-        u32 initial;
-        u32 reserved[2];
-        u32 maximum;
-    } sema;
-
-    sema.initial = initial;
-    sema.option = option;
-    sema.maximum = maximum;
-    return CreateSema(&sema);
-}
-
-extern void *_gp;
-
-
-/* Create a kernel thread from a zeroed descriptor that uses the caller's
- * workspace as its stack and the program's GP. */
-s32 CreateThreadSimple(void (*entryAddress)(), void *workspace, s32 stackBytes, s32 priority) {
-    SdfKernelThreadParam param;
-
-    memset(&param, 0, sizeof(param));
-    param.entry = (void (*)(void))entryAddress;
-    param.stack = workspace;
-    param.stackSize = stackBytes;
-    param.priority = priority;
-    param.gp = &_gp;
-    return CreateThread(&param);
-}
-
-s32 sdfCreateThreadWithStack(void (*entryAddress)(), s32 stackBytes, s32 priority) {
-    void *workspace;
-
-    workspace = sdfAllocAuto(stackBytes);
-    return CreateThreadSimple(entryAddress, workspace, stackBytes, priority);
-}
-

@@ -12,7 +12,7 @@ typedef enum SdfHandlerKind {
 /* Interrupt/DMA handler kinds supply different argument lists. */
 typedef s32 (*SdfHandlerCallback)();
 
-/* Shared interrupt/DMA/SBUS handler-list node. The paired sdfAddHandler
+/* Shared interrupt/DMA/SBUS handler-list node. The paired DmacAddHandler
  * providers allocate 0x10 bytes and write these four words at +0, +4, +8,
  * and +0xC; removal dispatch reads the three payload words. */
 typedef struct SdfHandlerNode {

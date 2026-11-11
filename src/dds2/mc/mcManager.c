@@ -1,13 +1,4 @@
-#define SDK_SKIP_sceMcSync
-#include "sdk_ps2.h"
-#undef SDK_SKIP_sceMcSync
 #include "common.h"
-#include "mc_poll.h"
-#include "mc_sync_api.h"
-#include "mc_path_api.h"
-#include "mc_file_api.h"
-#include "mc_read_api.h"
-#include "mc_write_api.h"
 
 #define MC_CARD_SLOT 0
 #define MC_SYNC_POLL_MODE 1
@@ -16,12 +7,172 @@
 #define MC_SDK_SPECIAL_ERROR (-4)
 #define MC_SDK_EXTENDED_ERROR_LIMIT (-10)
 
-/* Return 1 only for completed status zero, -1 for other completed statuses.
- * Every SDK poll return other than 1 maps to 0, including SDK-level failures. */
-McPollResult sdfMcPollFormat(void) {
-    s32 commandId;
-    McSyncCommandResult commandResult;
-    McSyncPollStatus pollResult = sceMcSync(MC_SYNC_POLL_MODE, &commandId, &commandResult);
+/* One poll attempt's result. PENDING means no terminal result yet; the SDK
+ * poll values 0 and -1 both map to it. */
+typedef enum McPollResult {
+    MC_POLL_PENDING = 0,
+    MC_POLL_SUCCESS = 1,
+    MC_POLL_ERROR = -1,
+    MC_POLL_SPECIAL_ERROR = -2
+} McPollResult;
+
+extern s32 sceMcSync(s32 a, void *b, s32 *c);
+extern s32 sceMcGetInfo(s32 a, s32 b, s32 *c, s32 *d, s32 *e);
+extern s32 sceMcChdir(s32 a, s32 b, const char *c, char *d);
+extern s32 sceMcGetDir(s32 a, s32 b, const char *c, u32 d, s32 e, void *f);
+extern s32 sceMcOpen(s32 a, s32 b, const char *c, s32 d);
+extern s32 sceMcFormat(u32 port, s32 slot);
+extern s32 sceMcMkdir(u32 a, s32 b, const char *c);
+extern s32 sceMcDelete(u32 port, s32 slot, const char *path);
+extern s32 sceMcClose(s32 a);
+extern s32 sceMcRead(s32 a, void *b, s32 c);
+extern s32 sceMcWrite(s32 a, const void *b, s32 c);
+
+/* One control block per port. */
+typedef struct
+{
+    s32 syncResult;
+    s32 type;
+    s32 free;
+    s32 format;
+    u8 retry;
+    u8 fileInfoReady;
+    u8 cardStat;
+    s8 slotIndex;
+    u32 slotFlags[20];
+} sdfMcCb_tag;
+
+extern sdfMcCb_tag sdfMcCb[];
+extern s32 sdfMcInfo;
+
+void sdfMcFuncGetInfo(s32 port)
+{
+    sdfMcCb_tag *cb = &sdfMcCb[port];
+    s32 dummy;
+    s32 *p = &dummy;
+
+    sceMcGetInfo(port, MC_CARD_SLOT, &cb->type, &cb->free, &cb->format);
+}
+
+void sdfMcRegetInfo(s32 port)
+{
+    sdfMcInfo = port;
+    sdfMcFuncGetInfo(port);
+    sdfMcCb[port].retry = 0;
+}
+
+McPollResult sdfMcFuncGetInfo1(void)
+{
+    sdfMcCb_tag *cb = &sdfMcCb[sdfMcInfo];
+    u32 commandId;
+    s32 commandResult;
+    s32 pollResult = sceMcSync(MC_SYNC_POLL_MODE, &commandId, &commandResult);
+
+    if (pollResult == MC_SYNC_COMPLETE) {
+        cb->syncResult = commandResult;
+        if (commandResult == -1) {
+            cb->cardStat = 1;
+            cb->slotIndex = 0;
+        }
+        switch (cb->type) {
+        case 0:
+            cb->cardStat = 1;
+            cb->fileInfoReady = 0;
+            cb->slotIndex = 0;
+            break;
+        case 2:
+            if (cb->format == 0) {
+                s32 retry = cb->retry;
+
+                if (retry < 5) {
+                    cb->retry = retry + 1;
+                    sdfMcFuncGetInfo(sdfMcInfo);
+                    return MC_POLL_PENDING;
+                }
+                cb->fileInfoReady = 2;
+                cb->cardStat = 1;
+                cb->slotIndex = 0;
+            } else {
+                cb->fileInfoReady = 1;
+            }
+            break;
+        default:
+            cb->fileInfoReady = 3;
+            cb->cardStat = 1;
+            cb->slotIndex = 0;
+            break;
+        }
+        return MC_POLL_SUCCESS;
+    }
+    return MC_POLL_PENDING;
+}
+
+s32 sdfMcGetFileInfoReady(s32 port)
+{
+    return sdfMcCb[port].fileInfoReady;
+}
+
+s32 sdfMcGetFreeBytes(s32 port)
+{
+    return sdfMcCb[port].free << 10;
+}
+
+s32 sdfMcGetStatus(s32 port)
+{
+    return sdfMcCb[port].cardStat;
+}
+
+void sdfMcClearCardStat(s32 port)
+{
+    sdfMcCb[port].cardStat = 0;
+}
+
+void sdfMcSetCardStat(s32 port)
+{
+    sdfMcCb[port].cardStat = 1;
+}
+
+void sdfMcClearSlotFlags(s32 port, s32 slot)
+{
+    sdfMcCb_tag *cb = &sdfMcCb[port];
+
+    cb->slotFlags[slot] = 0;
+}
+
+void sdfMcSetSlotFlags(s32 port, s32 slot, u32 flags)
+{
+    sdfMcCb_tag *cb = &sdfMcCb[port];
+
+    cb->slotFlags[slot] |= flags;
+}
+
+u32 sdfMcGetSlotFlags(s32 port, s32 slot)
+{
+    sdfMcCb_tag *cb = &sdfMcCb[port];
+
+    return cb->slotFlags[slot];
+}
+
+s32 sdfMcGetSlotIndex(s32 port)
+{
+    return sdfMcCb[port].slotIndex;
+}
+
+void sdfMcSetSlotIndex(s32 port, s32 slot)
+{
+    sdfMcCb[port].slotIndex = slot;
+}
+
+void sdfMcFuncFormat(u32 port)
+{
+    sceMcFormat(port, MC_CARD_SLOT);
+}
+
+McPollResult sdfMcFuncFormat1(void)
+{
+    u32 commandId;
+    s32 commandResult;
+    s32 pollResult = sceMcSync(MC_SYNC_POLL_MODE, &commandId, &commandResult);
 
     if (pollResult != MC_SYNC_COMPLETE) {
         return MC_POLL_PENDING;
@@ -32,17 +183,15 @@ McPollResult sdfMcPollFormat(void) {
     return MC_POLL_ERROR;
 }
 
-
-/* Start a directory change on slot zero using the supplied path. */
-void sdfMcFuncChdir(McPort port, const char *path) {
+void sdfMcFuncChdir(u32 port, const char *path)
+{
     sceMcChdir(port, MC_CARD_SLOT, path, 0);
 }
 
-/* Accept only completed status zero; translate -4 to -2 and other statuses
- * to -1. Any SDK poll return other than 1 maps to 0; this does not wait. */
-McPollResult sdfMcPollChdir(void) {
+McPollResult sdfMcFuncChdir1(void)
+{
     s32 commandId;
-    McSyncCommandResult commandResult;
+    s32 commandResult;
 
     if (sceMcSync(MC_SYNC_POLL_MODE, &commandId, &commandResult) == MC_SYNC_COMPLETE) {
         if (commandResult == MC_SDK_COMMAND_SUCCESS) {
@@ -53,18 +202,16 @@ McPollResult sdfMcPollChdir(void) {
     return MC_POLL_PENDING;
 }
 
-
-/* Start directory creation on slot zero using the supplied path. */
-void sdfMcFuncMkdir(McPort port, const char *path) {
-    sceMcMkdir(port, MC_CARD_SLOT, path);
+void sdfMcFuncMkdir(u32 mccb, const char *cb)
+{
+    sceMcMkdir(mccb, MC_CARD_SLOT, cb);
 }
 
-/* Accept only completed status zero. Completed statuses below -10 map to
- * -2, all other nonzero statuses to -1; non-complete SDK polls map to 0. */
-McPollResult sdfMcPollMkdir(void) {
-    s32 commandId;
-    McSyncCommandResult commandResult;
-    McSyncPollStatus pollResult = sceMcSync(MC_SYNC_POLL_MODE, &commandId, &commandResult);
+McPollResult sdfMcFuncMkdir1(void)
+{
+    u32 commandId;
+    s32 commandResult;
+    s32 pollResult = sceMcSync(MC_SYNC_POLL_MODE, &commandId, &commandResult);
 
     if (pollResult == MC_SYNC_COMPLETE) {
         if (commandResult == MC_SDK_COMMAND_SUCCESS) {
@@ -78,23 +225,20 @@ McPollResult sdfMcPollMkdir(void) {
     return MC_POLL_PENDING;
 }
 
-/* Request directory entries on slot zero with SDK mode zero. The output table
- * is SDK argument six; its entry limit is argument five. */
-void sdfMcFuncGetDir(McPort port, const char *path, sceMcTblGetDir *directoryEntries, s32 entryLimit) {
+void sdfMcFuncGetDir(u32 port, const char *path, void *directoryEntries, s32 entryLimit)
+{
     sceMcGetDir(port, MC_CARD_SLOT, path, 0, entryLimit, directoryEntries);
 }
 
-/* Accept any completed nonnegative entry count and write it to entryCountOut,
- * which must be valid on success and stays untouched otherwise. Translate
- * -4 to -2, other negatives to -1; non-complete SDK polls map to 0. */
-McPollResult sdfMcPollGetDir(McDirectoryEntryCount *entryCountOut) {
-    s32 commandId;
-    McSyncCommandResult commandResult;
-    McSyncPollStatus pollResult = sceMcSync(MC_SYNC_POLL_MODE, &commandId, &commandResult);
+McPollResult sdfMcFuncGetDir1(s32 *commandResultOut)
+{
+    u32 commandId;
+    s32 commandResult;
+    s32 pollResult = sceMcSync(MC_SYNC_POLL_MODE, &commandId, &commandResult);
 
     if (pollResult == MC_SYNC_COMPLETE) {
         if (commandResult >= MC_SDK_COMMAND_SUCCESS) {
-            *entryCountOut = commandResult;
+            *commandResultOut = commandResult;
             return pollResult;
         }
         if (commandResult == MC_SDK_SPECIAL_ERROR) {
@@ -105,16 +249,15 @@ McPollResult sdfMcPollGetDir(McDirectoryEntryCount *entryCountOut) {
     return MC_POLL_PENDING;
 }
 
-
-/* Start removal of the supplied path on slot zero; no completion wait here. */
-void sdfMcFuncDelete(McPort port, const char *path) {
+void sdfMcFuncDelete(u32 port, const char *path)
+{
     sceMcDelete(port, MC_CARD_SLOT, path);
 }
 
-/* Same zero-only completion policy as sdfMcPollChdir; no blocking loop. */
-McPollResult sdfMcPollDelete(void) {
+McPollResult sdfMcFuncDelete1(void)
+{
     s32 commandId;
-    McSyncCommandResult commandResult;
+    s32 commandResult;
 
     if (sceMcSync(MC_SYNC_POLL_MODE, &commandId, &commandResult) == MC_SYNC_COMPLETE) {
         if (commandResult == MC_SDK_COMMAND_SUCCESS) {
@@ -125,22 +268,20 @@ McPollResult sdfMcPollDelete(void) {
     return MC_POLL_PENDING;
 }
 
-
-/* Start opening a path on slot zero with the requested read/save mode. */
-void sdfMcFuncOpen(McPort port, const char *path, McOpenMode openMode) {
-    sceMcOpen(port, MC_CARD_SLOT, path, openMode);
+void sdfMcFuncOpen(u32 port, const char *path, s32 openFlags)
+{
+    sceMcOpen(port, MC_CARD_SLOT, path, openFlags);
 }
 
-/* Accept any completed nonnegative open result as a file descriptor and write
- * it to fileDescriptorOut only then. Preserve all poll/error translations. */
-McPollResult sdfMcPollOpen(McFileDescriptor *fileDescriptorOut) {
-    s32 commandId;
-    McSyncCommandResult commandResult;
-    McSyncPollStatus pollResult = sceMcSync(MC_SYNC_POLL_MODE, &commandId, &commandResult);
+McPollResult sdfMcFuncOpen1(s32 *commandResultOut)
+{
+    u32 commandId;
+    s32 commandResult;
+    s32 pollResult = sceMcSync(MC_SYNC_POLL_MODE, &commandId, &commandResult);
 
     if (pollResult == MC_SYNC_COMPLETE) {
         if (commandResult >= MC_SDK_COMMAND_SUCCESS) {
-            *fileDescriptorOut = commandResult;
+            *commandResultOut = commandResult;
             return pollResult;
         }
         if (commandResult == MC_SDK_SPECIAL_ERROR) {
@@ -151,16 +292,15 @@ McPollResult sdfMcPollOpen(McFileDescriptor *fileDescriptorOut) {
     return MC_POLL_PENDING;
 }
 
-/* Queue the SDK's close of an open file; do not poll it. */
-void sdfMcFuncClose(McFileDescriptor fileDescriptor) {
-    sceMcClose(fileDescriptor);
+void sdfMcFuncClose(s32 descriptor)
+{
+    sceMcClose(descriptor);
 }
 
-/* Despite its name, poll once rather than waiting; success requires status
- * zero, -4 maps to -2 and other completed statuses to -1. */
-McPollResult sdfMcPollClose(void) {
+McPollResult sdfMcFuncClose1(void)
+{
     s32 commandId;
-    McSyncCommandResult commandResult;
+    s32 commandResult;
 
     if (sceMcSync(MC_SYNC_POLL_MODE, &commandId, &commandResult) == MC_SYNC_COMPLETE) {
         if (commandResult == MC_SDK_COMMAND_SUCCESS) {
@@ -171,17 +311,16 @@ McPollResult sdfMcPollClose(void) {
     return MC_POLL_PENDING;
 }
 
-/* Queue the SDK's read of an open file into an EE buffer; do not poll it. */
-void sdfMcFuncRead(McFileDescriptor fileDescriptor, void *buffer, s32 size) {
-    sceMcRead(fileDescriptor, buffer, size);
+void sdfMcFuncRead(s32 descriptor, void *buffer, s32 size)
+{
+    sceMcRead(descriptor, buffer, size);
 }
 
-/* Any completed nonnegative status succeeds, but the SDK status is not
- * returned to a caller output. Non-complete SDK polls map to 0. */
-McPollResult sdfMcPollRead(void) {
-    s32 commandId;
-    McSyncCommandResult commandResult;
-    McSyncPollStatus pollResult = sceMcSync(MC_SYNC_POLL_MODE, &commandId, &commandResult);
+McPollResult sdfMcFuncRead1(void)
+{
+    u32 commandId;
+    s32 commandResult;
+    s32 pollResult = sceMcSync(MC_SYNC_POLL_MODE, &commandId, &commandResult);
 
     if (pollResult == MC_SYNC_COMPLETE) {
         if (commandResult >= MC_SDK_COMMAND_SUCCESS) {
@@ -195,18 +334,16 @@ McPollResult sdfMcPollRead(void) {
     return MC_POLL_PENDING;
 }
 
-/* Queue the SDK's write of an EE buffer to an open file; this entry does
- * not report completion. */
-void sdfMcFuncWrite(McFileDescriptor fileDescriptor, const void *data, s32 byteCount) {
-    sceMcWrite(fileDescriptor, data, byteCount);
+void sdfMcFuncWrite(s32 descriptor, const void *buffer, s32 size)
+{
+    sceMcWrite(descriptor, buffer, size);
 }
 
-/* Poll once: any completed nonnegative write status returns 1; -4 becomes
- * -2 and other negatives become -1. Non-complete SDK polls map to 0. */
-McPollResult sdfMcPollWrite(void) {
+McPollResult sdfMcFuncWrite1(void)
+{
     s32 commandId;
-    McSyncCommandResult commandResult;
-    McSyncPollStatus pollResult = sceMcSync(MC_SYNC_POLL_MODE, &commandId, &commandResult);
+    s32 commandResult;
+    s32 pollResult = sceMcSync(MC_SYNC_POLL_MODE, &commandId, &commandResult);
 
     if (pollResult == MC_SYNC_COMPLETE) {
         if (commandResult >= MC_SDK_COMMAND_SUCCESS) {

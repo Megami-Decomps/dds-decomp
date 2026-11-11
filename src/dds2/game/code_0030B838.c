@@ -1,6 +1,6 @@
 #include "sdk_ps2.h"
 #include "common.h"
-#include "sdf_vu0.h"
+#include "ps2asm.h"
 #include "fld_map_selection.h"
 #include "snd_sequence_volume_pan.h"
 #include "sdf_vector_latch.h"
@@ -123,7 +123,6 @@ void sdfInitInnerVectors(void) {
     fldLocalMapCameraObject->ops->update(fldLocalMapCameraObject);
 }
 
-#include "pcp_vu0.h"
 s32 sdfLoadMapCounterCameraVectorsForMask(s32 mask) {
     f32 position[4];
     f32 rotation[4];
@@ -811,7 +810,7 @@ void sdfCounterDrawSelectedTimerFade(s32 unused, s32 x, f32 fade) {
 }
 
 s32 frMeasureAndQueueCounterText(const char *text) {
-    struct _FRQ *glyph;
+    struct frFontHandle_t *glyph;
     s32 width;
 
     glyph = itfCreateMeasuredTextGlyph(0, 0, 0, 0, text, NULL);

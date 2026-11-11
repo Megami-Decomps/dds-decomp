@@ -1,7 +1,7 @@
 #include "dsp_entry_api.h"
 #include "scr_integer_parameter_api.h"
 #include "scr.h"
-#include "bf_flw0_header.h"
+#include "scr.h"
 #include "dsp_message_window_api.h"
 #include "dsp_channel.h"
 #include "scr_integer_return_value_api.h"
@@ -9,8 +9,8 @@
 #include "evt_message_window_api.h"
 #include "evt_world_object_api.h"
 #include "evt_active_entry_flag_api.h"
-#include "kwln_task_state.h"
-#include "kwln_task_state_query.h"
+#include "dds3_task_state.h"
+#include "dds3_task_state_query.h"
 #include "itf_mes_window.h"
 #include "itf_mes_panel_mode.h"
 #include "itf_mes_entry_start_api.h"
@@ -18,17 +18,16 @@
 #include "mnu.h"
 #include "mnu_list.h"
 #include "mnu_terminal_work.h"
-#include "sdf_resource.h"
-#include "kwln.h"
-#include "kwln_fade.h"
+#include "sdf_heap_api.h"
+#include "kernel.h"
+#include "dds3_fade.h"
 #include "dat_state.h"
 #include "evt_world.h"
-#include "kwln_task_lifecycle.h"
+#include "dds3_task_lifecycle.h"
 #include "dds3obj.h"
 #include "sdf_texture_file.h"
 #include "eff_random.h"
 #include "eff_transform.h"
-#include "eff_light.h"
 #include "mdl_flag_api.h"
 #include "mnu_event_flag_entries.h"
 #include "eff_event_draw.h"
@@ -325,6 +324,13 @@ u32 func_0024D608(void) {
     return 0xffffffff;
 }
 
+struct sdf3DLightParallelPacket_t;
+
+typedef struct evtLightDataView_t {
+    u8 pad00[0x78];
+    struct sdf3DLightParallelPacket_t *LightPacket;
+} evtLightDataView_t;
+
 /* Copy the source node's nested value only on a successful lookup.
  * The destination and both nested data pointers are caller-owned. */
 s32 evtCopyWorldObjectEntryValue(const char *objectName, s32 destination) {
@@ -336,7 +342,7 @@ s32 evtCopyWorldObjectEntryValue(const char *objectName, s32 destination) {
     if (source != NULL) {
         destinationNode = (dds3Basic_t *)destination;
         *(s32 *)((u8 *)destinationNode->workdata + 0x80) =
-            (s32)((EffLightData *)source->workdata)->buffer;
+            (s32)((evtLightDataView_t *)source->workdata)->LightPacket;
         return 1;
     }
     return 0;
@@ -399,17 +405,16 @@ void fclInitPanelPos(s32 firstWord, s32 secondWord, s32 thirdWord, s32 firstHalf
 /* Destroy a nonzero, registered task. The declared return value is not set. */
 s32 fclScriptForcedEnd(dds3ProcessID_t *task) {
     if (task != 0) {
-        if (dds3GetProcessStat(task) != KWLN_TASK_DETACHED) {
+        if (dds3GetProcessStat(task) != DDS3_TASK_DETACHED) {
             dds3KillProcess(task, 0);
         }
     }
 }
 
-extern dds3ProcessID_t *scrStartScript2(u32 priority, const BfFlw0Header *script, ScrProcedureIndex procedureIndex);
 
 /* Replace an optional task slot, clear active flag zero, and return the new task.
  * Creation is still attempted if no slot is supplied. */
-dds3ProcessID_t *fclScriptStart(BfFlw0Header *script, ScrProcedureIndex procedureIndex, dds3ProcessID_t **taskSlot) {
+dds3ProcessID_t *fclScriptStart(scrHeader_t *script, ScrProcedureIndex procedureIndex, dds3ProcessID_t **taskSlot) {
     dds3ProcessID_t *task;
 
     if (taskSlot != 0) {
@@ -712,13 +717,13 @@ void evtMoveMessageWindowWithPanelOffset(s32 x, s32 y) {
 
 /* Recognize all three scheduler queues. Preserve the repeated queries. */
 s32 fclChkMessageDraw(dds3ProcessID_t *task) {
-    if (dds3GetProcessStat(task) == KWLN_TASK_DELAYED_START) {
+    if (dds3GetProcessStat(task) == DDS3_TASK_DELAYED_START) {
         return 1;
     }
-    if (dds3GetProcessStat(task) == KWLN_TASK_ACTIVE) {
+    if (dds3GetProcessStat(task) == DDS3_TASK_ACTIVE) {
         return 1;
     }
-    return dds3GetProcessStat(task) == KWLN_TASK_DESTROY_PENDING;
+    return dds3GetProcessStat(task) == DDS3_TASK_DESTROY_PENDING;
 }
 
 /* Clear one active-entry flag; the caller supplies a valid index. */
@@ -788,6 +793,7 @@ extern void uiDrawUniformRgbRange(s32 *, s32 *, s32, u32, s32);
 
 /* Draw top/bottom viewport indicators; each flag selects its brighter color.
  * The two triangles retain their signed x-radius and y-offset calculations. */
+
 INCLUDE_SDATA(const s32, "game/code_0024CFB0", gMsgID);
 
 INCLUDE_SDATA(const s32, "game/code_0024CFB0", gMsgFlag);

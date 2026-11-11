@@ -5,9 +5,9 @@
 #include "sdf_quaternion.h"
 #include "sdf_mat4.h"
 #include "fr_font.h"
-#include "sdf_resource.h"
+#include "sdf_heap_api.h"
 #include "fpu.h"
-#include "pcp_vu0.h"
+#include "ps2asm.h"
 extern f32 sdfQuatDot(f32 *, f32 *);
 
 
@@ -18,14 +18,14 @@ extern f32 vecLength(f32 *);
 
 
 
-struct _FRQ;
-extern s32 frFontDrawGlyphWithSharedFlags(struct _FRQ *glyph, s8 mode);
+struct frFontHandle_t;
+extern s32 frDrawFontEx(struct frFontHandle_t *glyph, s8 mode);
 
 void sdfCounterDrawGlyphAtGridCell(s32 x, s32 y, u32 colors, const u8 *text) {
-    struct _FRQ *handle;
+    struct frFontHandle_t *handle;
 
     handle = itfCreateConvertedTextGlyph(x << 4, y << 3, 0, colors, text, 0);
-    frFontDrawGlyphWithSharedFlags(handle, 1);
+    frDrawFontEx(handle, 1);
     frDestroyFontRequestAfter(handle);
 }
 

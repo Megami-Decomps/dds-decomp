@@ -7,7 +7,7 @@
 #include "btl_referenced_battle_effect_task.h"
 #include "btl_actor_category_flag_api.h"
 #include "btl_linked_actor_eligibility.h"
-#include "sdf_vu0.h"
+#include "ps2asm.h"
 #include "sdf_vu_rotation_axes.h"
 #include "btl_effect_position.h"
 #include "eff_random_mod.h"
@@ -19,8 +19,6 @@
 #include "btl_command.h"
 #include "btl_action.h"
 #include "btl_task.h"
-#include "ee_mmi.h"
-#include "pcp_vu0.h"
 #include "sdf_vu_matrix.h"
 
 
@@ -231,7 +229,7 @@ void btlUpdateBossUnitScaleTransition(void) {
                             SDF_VU0_LOADVECTOR(unit->position);
                             SDF_VU0_LOADVECTOR_B(effectPosition);
                             SDF_VU0_SUBVECTOR();
-                            VU0_SCALE_VF(vf10, progress);
+                            SDF_VU0_SCALEVECTOR_BITS(progress);
                             SDF_VU0_ADDVECTOR();
                             SDF_VU0_STOREVECTOR(unit->currentPosition);
                             nextScale = transition->scale + (1.0f - transition->scale) * progress;
@@ -252,7 +250,7 @@ void btlUpdateBossUnitScaleTransition(void) {
                         }
                         btlSetUnitPosition(unit, position);
                         SDF_VU0_SETSCALE1VECTOR();
-                        VU0_SCALE_VF(vf10, unit->scale);
+                        SDF_VU0_SCALEVECTOR_BITS(unit->scale);
                         inner = unit->effectObject->poseset;
                         inner->flags = (inner->flags | 1) & ~2;
                         SDF_VU0_STOREVECTOR(inner->scale);
@@ -713,8 +711,8 @@ u8 btlSetLinkedDefeatCameraPresetB(BtlLinkedCommand *command, BtlCamState *camer
         switch (kind) {
         case 0:
             SetRotateMatrixX(-0.13089969f);
-            sdfVuLoadSecondaryRotationMatrixY(0.13089969f);
-            sdfComposeVuMatrixFromRegisters();
+            SetRotateMatrixY_B(0.13089969f);
+            MultMatrixNoArg();
             break;
         case 1:
             SetRotateMatrixX(-0.13089969f);
@@ -722,8 +720,8 @@ u8 btlSetLinkedDefeatCameraPresetB(BtlLinkedCommand *command, BtlCamState *camer
         case 2:
             angle = -0.13089969f;
             SetRotateMatrixX(angle);
-            sdfVuLoadSecondaryRotationMatrixY(angle);
-            sdfComposeVuMatrixFromRegisters();
+            SetRotateMatrixY_B(angle);
+            MultMatrixNoArg();
             break;
         }
         /* vu0 routine: rotate the camera direction by the prepared matrix. */
@@ -762,7 +760,7 @@ s32 btlFrameMarkedTargetDefeatCamera(BtlLinkedCommand *command) {
                 btlClearAllUnitDefeatCandidates();
                 btlFlagUnitDefeatCandidate(task->unit);
                 btlFlagUnitDefeatCandidate(target);
-                btlUnitGetMuzzlePosVU(task->unit);
+                effBTLModelGetSphereCenter(task->unit);
                 SDF_VU0_STOREVECTOR(position);
                 if (position[0] < 0.0f) {
                     btlSetEffectCameraKeys(command,
@@ -841,6 +839,7 @@ extern char D_003A63C0[];
 
 /* Select the linked-action boss camera from category, sides and target count.
  * The native result is not a general "camera changed" flag. */
+
 INCLUDE_SDATA(const s32, "game/code_0020CB38", D_003BB8A8);
 
 INCLUDE_SDATA(const s32, "game/code_0020CB38", D_003BB8B0);
@@ -1190,3 +1189,4 @@ INCLUDE_SDATA(const s32, "game/code_0020CB38", D_003BBB48);
 INCLUDE_SDATA(const s32, "game/code_0020CB38", D_003BBB50);
 
 INCLUDE_SDATA(const s32, "game/code_0020CB38", D_003BBB58);
+

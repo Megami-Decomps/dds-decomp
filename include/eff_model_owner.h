@@ -4,13 +4,13 @@
 #include "common.h"
 
 struct dds3ModelHandle_t;
-struct SdfLightingPacketStorage;
+struct sdf3DLightParallelPacket_t;
 
 /* Heap-owned model wrapper allocated as a 0x10-byte chip block. */
 typedef struct EffModelOwner {
     f32 scale;
     struct dds3ModelHandle_t *model;
-    struct SdfLightingPacketStorage *ownedBuffer;
+    struct sdf3DLightParallelPacket_t *ownedBuffer;
     u32 flags;
 } EffModelOwner;
 

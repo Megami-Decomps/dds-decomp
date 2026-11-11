@@ -12,7 +12,7 @@
 #include "btl_command_target_policy.h"
 #include "btl_actor_category_flag_api.h"
 #include "btl_linked_actor_eligibility.h"
-#include "sdf_vu0.h"
+#include "ps2asm.h"
 #include "btl_actor_resource_bank_api.h"
 #include "sdf_vu_rotation_axes.h"
 #include "btl_skill_max_api.h"
@@ -38,8 +38,6 @@
 #include "sdf_model_node_index_api.h"
 #include "evt_unit.h"
 #include "mdl.h"
-#include "ee_mmi.h"
-#include "pcp_vu0.h"
 #include "sdf_vu_matrix.h"
 #include "btl_action.h"
 #include "btl_find_actor_for_owner_api.h"
@@ -312,8 +310,6 @@ BtlIndexList *btlBuildActorIndexListAndCount(BtlTask *actor, BtlCommandTargetPol
 #include "sdf_draw.h"
 #include "evt_unit.h"
 #include "mdl.h"
-#include "ee_mmi.h"
-#include "pcp_vu0.h"
 #include "sdf_vu_matrix.h"
 #include "btl_action.h"
 #include "btl_ai_table.h"
@@ -326,7 +322,7 @@ BtlIndexList *btlBuildActorIndexListAndCount(BtlTask *actor, BtlCommandTargetPol
 #include "sdf_debug_api.h"
 
 
-extern EffRandState effSharedRandomState;
+extern EffRandState dds3RandCB;
 extern s32 btlRollAiBucket(void);
 
 typedef struct BtlSelectorRank {
@@ -489,7 +485,7 @@ s32 func_00202668(BtlTask *actor, s32 unused) {
             }
         }
     } else if (datCommandSelectors[commandId].stat == 17) {
-        selectedIndex = dds3GetRandA(&effSharedRandomState) % count;
+        selectedIndex = dds3GetRandA(&dds3RandCB) % count;
     } else {
         priority = 0;
         if (command->options & 2) {
@@ -519,7 +515,7 @@ s32 func_00202668(BtlTask *actor, s32 unused) {
             }
         }
         if (priority == 0) {
-            selectedIndex = dds3GetRandA(&effSharedRandomState) % count;
+            selectedIndex = dds3GetRandA(&dds3RandCB) % count;
         } else if (count != 1) {
             s32 hpInserted = 0;
             s16 hpEligible = 0;
@@ -537,6 +533,7 @@ s32 func_00202668(BtlTask *actor, s32 unused) {
     return 1;
 }
 #else
+
 INCLUDE_RODATA(const s32, "game/code_00202178", D_003A5AD0);
 
 INCLUDE_RODATA(const s32, "game/code_00202178", D_003A5B50);
@@ -1212,9 +1209,9 @@ void btlFaceLinkedTargetAndFlagDirection(BtlLinkedCommand *command, void *unused
         btlFlagUnitDefeatCandidate(user);
         btlFlagUnitDefeatCandidate(target);
     }
-    btlUnitGetMuzzlePosVU(user);
+    effBTLModelGetSphereCenter(user);
     SDF_VU0_STOREVECTOR(userPos);
-    btlUnitGetMuzzlePosVU(target);
+    effBTLModelGetSphereCenter(target);
     SDF_VU0_STOREVECTOR(targetPos);
     btlUnitFaceTarget(target, user);
     if (userPos[0] < targetPos[0]) {
@@ -1258,10 +1255,10 @@ void btlBuildProgressiveApproachCameraPose(BtlLinkedCommand *command, BtlCamStat
         ratio = 1.0f;
     }
     out->fov = command->camera.fov;
-    btlUnitGetMuzzlePosVU(user);
+    effBTLModelGetSphereCenter(user);
     SDF_VU0_STOREVECTOR(userPos);
     userPos[1] += user->height * user->scale * frontLift;
-    btlUnitGetMuzzlePosVU(target);
+    effBTLModelGetSphereCenter(target);
     SDF_VU0_STOREVECTOR_NOMEM(targetPos);
     targetPos[1] += target->height * target->scale * backLift;
     SDF_VU0_LOADVECTOR(targetPos);
@@ -1271,7 +1268,7 @@ void btlBuildProgressiveApproachCameraPose(BtlLinkedCommand *command, BtlCamStat
     length *= ratio * (0.6f - 0.55f) + 0.55f;
     SDF_VU0_NORMALIZE();
     SDF_VU0_STOREVECTOR(dir);
-    VU0_SCALE_VF_MFC1(vf10, length);
+    SDF_VU0_SCALEVECTOR_V0_BARRIER(length);
     SDF_VU0_ADDVECTOR();
     SDF_VU0_STOREVECTOR(out->position);
     angle = ratio * 0.0f;
@@ -1317,10 +1314,10 @@ void btlBuildLinkedCommandCameraPair(BtlLinkedCommand *command, BtlCamState *fro
     }
     userExtent = user->reach * user->scale;
     targetExtent = target->reach * target->scale;
-    btlUnitGetMuzzlePosVU(user);
+    effBTLModelGetSphereCenter(user);
     SDF_VU0_STOREVECTOR(userPos);
     userPos[1] += user->height * user->scale * frontLift;
-    btlUnitGetMuzzlePosVU(target);
+    effBTLModelGetSphereCenter(target);
     SDF_VU0_STOREVECTOR(targetPos);
     targetPos[1] += target->height * target->scale * backLift;
     if (targetPos[0] <= userPos[0]) {
@@ -1832,7 +1829,7 @@ void btlRestoreLinkedEffectUnitPose(BtlUnit *source) {
 
         SDF_VU0_LOADVECTOR(source->rotation);
         SDF_VU0_LOADVECTOR_B(D_003A5D50);
-        effMiscQuatMultiplyVU();
+        Mult();
         SDF_VU0_STOREVECTOR_NOMEM(rotation);
         dds3SetRotPoseSet(effect->header.actor->effectObject, (u128 *)rotation);
     }
@@ -1874,6 +1871,7 @@ void btlResetEffectState(void) {
 }
 
 extern void btlRestoreUnitMinimumValueAndClearStatus(BtlUnit *, BtlOperandEntry *);
+
 INCLUDE_RODATA(const s32, "game/code_00202178", D_003A5D50);
 
 const char D_003A5D60[] = "btl:RAHU damage = %d\n";
@@ -3036,7 +3034,7 @@ s32 btlTryScheduleMarkedUnitTask(BtlUnit *unit) {
 }
 
 extern void btlSetEffectCameraKeys(void *, f32, f32, f32, f32, f32, f32, f32, f32, f32, f32, f32, f32, f32, f32, f32, f32);
-extern struct EffRandState effSharedRandomState;
+extern struct EffRandState dds3RandCB;
 extern void btlClearAllUnitDefeatCandidatesTask(void);
 extern void btlFlagLinkedGroupDefeatCandidatesTask(BtlLinkedCommand *);
 extern void btlUpdateActionPoseForLinkedTarget(BtlLinkedCommand *);
@@ -3067,7 +3065,7 @@ u8 btlSetLinkedPairActionCamera(BtlLinkedCommand *command, s8 unused1, s8 unused
         } else {
             btlClearAllUnitDefeatCandidatesTask();
             btlFlagLinkedGroupDefeatCandidatesTask(command);
-            if (dds3GetRandA(&effSharedRandomState) & 1) {
+            if (dds3GetRandA(&dds3RandCB) & 1) {
                 btlSetEffectCameraKeys(command, 237.1f, -287.8f, -460.5f, 0.021f, -0.127f, -0.022f, -0.982f, 841.4f,
                                        -406.5f, -442.7f, 0.108f, 0.293f, 0.013f, 0.94f, 40.0f, 30.0f);
             } else {
@@ -3241,7 +3239,7 @@ void btlFadeAndTintNamedChunkTree(sdfModelNode_t *node, s32 color)
     tint[0] = node->color | 0x808080;
     EE_MMI_RGBA_UNPACK(tint, 1.0f / 128.0f);
     SDF_VU0_MULVECTOR();
-    EE_MMI_RGBA_PACK(packed[0]);
+    SDF_VU0_dds3ColorFtoI(packed[0], 128.0f);
     child = node->children;
     node->color = packed[0];
     if (child != NULL) {
@@ -3300,9 +3298,9 @@ void btlAlignCerberusPartTransforms(void) {
         if (unit->status.flags & 1) {
             if (unit->status.flags & 0x400) {
                 if (unit != selected) {
-                    PCP_COPY_VECTOR_F32(unit->position, selected->position);
+                    SDF_VU0_COPYVECTOR_F32(unit->position, selected->position);
                     btlSetUnitPosition(unit, selected->position);
-                    PCP_COPY_VECTOR_F32(unit->rotation, selected->rotation);
+                    SDF_VU0_COPYVECTOR_F32(unit->rotation, selected->rotation);
                     btlSetUnitRotation(unit, selected->rotation);
                 }
             }
@@ -3311,10 +3309,10 @@ void btlAlignCerberusPartTransforms(void) {
     effect = state->effect;
     actor = effect->actor;
     if (actor != NULL) {
-        PCP_COPY_VECTOR_F32(actor->position, selected->position);
+        SDF_VU0_COPYVECTOR_F32(actor->position, selected->position);
         btlSetUnitPosition(actor, selected->position);
         actor = effect->actor;
-        PCP_COPY_VECTOR_F32(actor->rotation, selected->rotation);
+        SDF_VU0_COPYVECTOR_F32(actor->rotation, selected->rotation);
         btlSetUnitRotation(actor, selected->rotation);
     }
 }
@@ -3825,7 +3823,7 @@ void btlUpdateNidhoggrScaleAndPosition(void) {
     }
 
     SDF_VU0_SETSCALE1VECTOR();
-    VU0_SCALAR_OP(currentScale, "vmulx.xyzw vf10, vf10, vf2x");
+    SDF_VU0_SCALEVECTOR_V0(currentScale);
     inner = selected->effectObject->poseset;
     inner->flags = (inner->flags | OBJECT_TRANSFORM_FLAG_UPDATE_PENDING) &
         ~OBJECT_TRANSFORM_FLAG_MATRIX_CACHE_VALID;
@@ -3900,14 +3898,14 @@ void btlTriggerSpecialUnitAction(void) {
 
 extern char D_003A5D98[];
 
-extern struct EffRandState effSharedRandomState;
+extern struct EffRandState dds3RandCB;
 
 
 void btlInitRandomBossSelection(void) {
     u8 *data = (u8 *)((BtlState *)btlGetRuntime())->effect;
     ((BtlBossEffectPayload *)data)->color = 0x80808080;
     ((BtlBossEffectPayload *)data)->options = 0;
-    ((BtlBossEffectPayload *)data)->selectedId = dds3GetRandA(&effSharedRandomState) % 6;
+    ((BtlBossEffectPayload *)data)->selectedId = dds3GetRandA(&dds3RandCB) % 6;
     btlBossDebugPrintf(D_003A5D98, ((BtlBossEffectPayload *)data)->selectedId);
 }
 
@@ -4122,7 +4120,7 @@ s32 btlSwapRandomBossSelection(void) {
         return -1;
     }
 
-    newId = dds3GetRandA(&effSharedRandomState) % 6;
+    newId = dds3GetRandA(&dds3RandCB) % 6;
     if (newId == effect->selectedId) {
         newId = (newId + 1) % 6;
     }
@@ -4800,7 +4798,7 @@ s32 btlSelectMissingHariSummon(void) {
     if (count == 0) {
         return -1;
     }
-    selected = dds3GetRandA(&effSharedRandomState) % count;
+    selected = dds3GetRandA(&dds3RandCB) % count;
     btlBossDebugPrintf("btl:HARI2 summon=%X\n", missing[selected]);
     return missing[selected];
 }
@@ -5150,6 +5148,7 @@ extern char D_003A6018[];
 /* Random battle camera shot (A-E:0..2). Must stay defined above its callers in this
    file: retail's btlChooseDefeatCameraByActionAndTargets sees it as nothrow (bnez vs bnel in the branch slot). */
 /* Select one of three fixed camera-key sets; keep K&R for the no-argument caller. */
+
 INCLUDE_RODATA(const s32, "game/code_00202178", D_003A5FF0);
 
 INCLUDE_RODATA(const s32, "game/code_00202178", D_003A6018);
@@ -5257,8 +5256,8 @@ u8 btlSetLinkedDefeatCameraPresetA(BtlLinkedCommand *command, BtlCamState *camer
         switch (kind) {
         case 0:
             SetRotateMatrixX(-0.13089969f);
-            sdfVuLoadSecondaryRotationMatrixY(0.13089969f);
-            sdfComposeVuMatrixFromRegisters();
+            SetRotateMatrixY_B(0.13089969f);
+            MultMatrixNoArg();
             break;
         case 1:
             SetRotateMatrixX(-0.13089969f);
@@ -5266,8 +5265,8 @@ u8 btlSetLinkedDefeatCameraPresetA(BtlLinkedCommand *command, BtlCamState *camer
         case 2:
             angle = -0.13089969f;
             SetRotateMatrixX(angle);
-            sdfVuLoadSecondaryRotationMatrixY(angle);
-            sdfComposeVuMatrixFromRegisters();
+            SetRotateMatrixY_B(angle);
+            MultMatrixNoArg();
             break;
         }
         /* vu0 routine: rotate the camera direction by the prepared matrix. */
@@ -5483,6 +5482,7 @@ extern char D_003A6338[];
 extern char D_003A6358[];
 
 /* Choose category-specific battle camera keys after the generic action policy. */
+
 INCLUDE_RODATA(const s32, "game/code_00202178", D_003A6338);
 
 INCLUDE_RODATA(const s32, "game/code_00202178", D_003A6358);
@@ -5751,3 +5751,4 @@ INCLUDE_SDATA(const s32, "game/code_00202178", D_003BB890);
 INCLUDE_SDATA(const s32, "game/code_00202178", D_003BB898);
 
 INCLUDE_SDATA(const s32, "game/code_00202178", D_003BB8A0);
+

@@ -136,21 +136,21 @@ void dds3FontReqDestroy(Dds3IntrusiveNode *owner) {
 void dds3FontReqDrawFont(const Dds3IntrusiveNode *owner) {
     const Dds3FontNode *node = (const Dds3FontNode *)owner;
 
-    frFontDrawGlyphInDefaultMode(node->glyph);
+    frDrawFont(node->glyph);
 }
 
-extern _FRQ * frFontBuildGlyphChain(const char *text, s8 fontIndex, s8 firstOption, s8 secondOption, _FRQ *existingGlyph);
+extern frFontHandle_t * frSetFontString(const char *text, s8 fontIndex, s8 firstOption, s8 secondOption, frFontHandle_t *existingGlyph);
 
 Dds3FontNode *dds3CreateFontNode(s32 x, s32 y, const char *text) {
-    struct _FRQ *glyph;
+    struct frFontHandle_t *glyph;
     Dds3FontNode *node;
 
-    glyph = frFontBuildGlyphChain(text, 0, 0, 0, NULL);
+    glyph = frSetFontString(text, 0, 0, 0, NULL);
     if (x == 0x800000) {
         x = (0x200 - glyph->advance) * 8;
     }
     frSetDrawPosition(glyph, x, y);
-    node = sdfAllocAndClearQuadwords(sizeof(*node));
+    node = sdfChipAllocZeroDirect(sizeof(*node));
     node->glyph = glyph;
     dds3FontReqListAdd(&node->owner, &dds3FontNodeVTable);
     return node;

@@ -6,7 +6,7 @@
 #include "btl_actor_category_flag_api.h"
 #include "btl_linked_actor_eligibility.h"
 #include "btl_marked_entry10_api.h"
-#include "sdf_vu0.h"
+#include "ps2asm.h"
 #include "btl_actor_resource_bank_api.h"
 #include "sdf_vu_rotation_axes.h"
 #include "eff_random_mod.h"
@@ -21,7 +21,7 @@
 #include "snd_slot.h"
 #include "btl_task_state.h"
 #include "btl_task_condition.h"
-#include "sdf_resource.h"
+#include "sdf_heap_api.h"
 #include "sdf_model.h"
 #include "btl.h"
 #include "sdf_texture_offset_list.h"
@@ -45,8 +45,6 @@
 #include "mdl.h"
 #include "mdl_asset_request.h"
 #include "file_request_api.h"
-#include "pcp_vu0.h"
-#include "ee_mmi.h"
 #include "fpu.h"
 #include "dat_state.h"
 #include "dat_command.h"
@@ -60,7 +58,7 @@ enum {
 
 extern void btlInitializeActorCameraPreset(BtlLinkedCommand *action);
 
-extern EffRandState effSharedRandomState[];
+extern EffRandState dds3RandCB[];
 
 extern void fldCamUpdateDefault();
 
@@ -69,7 +67,7 @@ extern struct BtlRuntimeTask *btlDeferredTaskHead;
 
 extern u8 *datActionAnimationRecords;
 
-extern f32 btlMeasureFilteredUnitGroupBounds(s32, f32 *, f32 *);
+extern f32 btlMeasureMaskedUnitBounds(s32, f32 *, f32 *);
 
 extern void btlClearRuntimeFlag2000(void);
 
@@ -229,7 +227,7 @@ s32 btlCheckActorDistanceLimit(void) {
 }
 
 BtlEntryHeightLimitResult btlIsEntryHeightWithinLimit(void) {
-    if (btlMeasureFilteredUnitGroupBounds(BTL_UNIT_STATUS_FLAG_ENEMY, 0, 0) > 600.0f) {
+    if (btlMeasureMaskedUnitBounds(BTL_UNIT_STATUS_FLAG_ENEMY, 0, 0) > 600.0f) {
         return BTL_ENTRY_HEIGHT_LIMIT_RESULT_EXCEEDS_LIMIT;
     }
     return BTL_ENTRY_HEIGHT_LIMIT_RESULT_WITHIN_LIMIT;
@@ -690,7 +688,7 @@ void btlChooseLinkedActionCameraPose(BtlLinkedCommand *action) {
         if (link->unit->status.flags & BTL_UNIT_STATUS_FLAG_ALLY) {
             if ((hasFlag200 == 1 || hasFlag400 != 1) && btlCanUseActorCategoryFlag4(action) == BTL_ACTOR_CATEGORY_FLAG_USE_UNAVAILABLE) {
                 if (btlHasSingleLinkedResource(action) == 0) {
-                    if (dds3GetRandA((EffRandState *)effSharedRandomState) & 1) {
+                    if (dds3GetRandA((EffRandState *)dds3RandCB) & 1) {
                         btlBuildGroupSizeActionCameraPair(action, &action->frontCamera, &action->backCamera);
                     } else {
                         btlBuildFilteredGroupCameraPair(action, &action->frontCamera, &action->backCamera);
@@ -732,7 +730,7 @@ void btlChooseLinkedActionCameraPose(BtlLinkedCommand *action) {
                            btlHasSingleLinkedResource(action) == 0) {
                     action->stepKind = BTL_LINKED_CAMERA_STEP_INITIAL_POSE_SELECTION;
                 } else {
-                    action->stepKind = (dds3GetRandA((EffRandState *)effSharedRandomState) & 1)
+                    action->stepKind = (dds3GetRandA((EffRandState *)dds3RandCB) & 1)
                         ? BTL_LINKED_CAMERA_STEP_INITIAL_POSE_SELECTION
                         : BTL_LINKED_CAMERA_STEP_SIDE_SELECTED_ACTOR_BLEND;
                 }
@@ -767,13 +765,13 @@ void btlChooseLinkedActionCameraPose(BtlLinkedCommand *action) {
                 action->flags |= 0x800;
             } else if ((hasFlag200 != 1 || hasFlag400 == hasFlag200) &&
                        (btlCanUseActorCategoryFlag2(action) != BTL_ACTOR_CATEGORY_FLAG_USE_UNAVAILABLE ||
-                        ((dds3GetRandA((EffRandState *)effSharedRandomState) & 1) && btlIsActorCategoryTypeTwo(action) == 0))) {
+                        ((dds3GetRandA((EffRandState *)dds3RandCB) & 1) && btlIsActorCategoryTypeTwo(action) == 0))) {
                 btlBuildGroupSizeActionCameraPair(action, &action->frontCamera, &action->backCamera);
                 action->flags |= 0x800;
             } else {
                 if (btlHasActorCategoryFlag100(action) == 0 && btlCanUseActorCategoryFlag2(action) == BTL_ACTOR_CATEGORY_FLAG_USE_UNAVAILABLE &&
                     btlCanUseActorCategoryFlag4(action) == BTL_ACTOR_CATEGORY_FLAG_USE_UNAVAILABLE && (hasFlag200 == 1 || hasFlag400 != 1)) {
-                    action->stepKind = (dds3GetRandA((EffRandState *)effSharedRandomState) & 1)
+                    action->stepKind = (dds3GetRandA((EffRandState *)dds3RandCB) & 1)
                         ? BTL_LINKED_CAMERA_STEP_AIM_EFFECT_POSE
                         : BTL_LINKED_CAMERA_STEP_ACTION_END_PULLBACK;
                 } else {
@@ -1002,7 +1000,7 @@ void btlInitializeActionCamera(BtlLinkedCommand *action) {
             if (btlCanUseActorCategoryFlag4(action) != BTL_ACTOR_CATEGORY_FLAG_USE_UNAVAILABLE) {
                 btlBuildRandomizedActionCameraPosePair(action, &action->frontCamera, &action->backCamera);
             } else if (btlCanUseLinkedActor(action) &&
-                       ((dds3GetRandA((EffRandState *)effSharedRandomState) & 1) ||
+                       ((dds3GetRandA((EffRandState *)dds3RandCB) & 1) ||
                         btlCanUseActorCategoryFlag2(action) != BTL_ACTOR_CATEGORY_FLAG_USE_UNAVAILABLE)) {
                 btlBuildRandomTargetCameraStates(action, &action->frontCamera, &action->backCamera);
                 action->motionParameter = 30.0f;
@@ -1021,7 +1019,7 @@ void btlInitializeActionCamera(BtlLinkedCommand *action) {
         } else if (btlCanUseActorCategoryFlag4(action) != BTL_ACTOR_CATEGORY_FLAG_USE_UNAVAILABLE) {
             btlBuildRandomizedActionCameraPosePair(action, &action->frontCamera, &action->backCamera);
         } else if (btlCanUseLinkedActor(action) &&
-                   ((dds3GetRandA((EffRandState *)effSharedRandomState) & 1) ||
+                   ((dds3GetRandA((EffRandState *)dds3RandCB) & 1) ||
                     btlCanUseActorCategoryFlag2(action) != BTL_ACTOR_CATEGORY_FLAG_USE_UNAVAILABLE)) {
             btlBuildFilteredGroupCameraPair(action, &action->frontCamera, &action->backCamera);
         } else {
@@ -1170,7 +1168,7 @@ void btlUpdateActionCameraFromTargetPolicy(BtlLinkedCommand *action) {
              * "Camera target dispatcher: two retained position samples". */
             f32 positions[2][4];
 
-            btlUnitGetMuzzlePosVU(link->unit);
+            effBTLModelGetSphereCenter(link->unit);
             /* Retail 001EBF84 keeps this SDK snapshot at SP+0x10. */
             SDF_VU0_STOREVECTOR(positions[1]);
             for (unit = runtime->units; unit != 0; unit = unit->next) {
@@ -1178,7 +1176,7 @@ void btlUpdateActionCameraFromTargetPolicy(BtlLinkedCommand *action) {
                     u32 flags = unit->status.flags;
                     if ((flags & BTL_UNIT_STATUS_FLAG_ACTIVE) != 0) {
                         if ((flags & BTL_UNIT_STATUS_FLAG_ALLY) != 0) {
-                            btlUnitGetMuzzlePosVU(unit);
+                            effBTLModelGetSphereCenter(unit);
                             /* Retail 001EBFCC keeps the ally snapshot at SP+0. */
                             SDF_VU0_STOREVECTOR(positions[0]);
                         }

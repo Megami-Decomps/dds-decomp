@@ -91,9 +91,8 @@ stands for several operations, so no single body can match it. Expanding each
 call site with its actual register argument and matching the result found 95
 such forms, and 11,500 call sites were rewritten to the concrete recovered
 macro: `VU0_ADD(vf10, vf10, vf11)` is `SDF_VU0_ADDVECTOR`, `VU0_LOAD_VF(vf11,
-p)` is `SDF_VU0_LOADVECTOR_B`. The definitions live in `include/sdf_vu0.h`,
-copied verbatim from smt3-decomp's `include/ps2asm.h`, and each rewritten unit
-includes it.
+p)` is `SDF_VU0_LOADVECTOR_B`. The definitions live in `include/ps2asm.h`, the
+same text as smt3-decomp's, and each rewritten unit includes it.
 
 Two things that pass had to respect. The operand constraints are part of the
 body: `"f"` and `"r"` bind the same expression to different register classes,

@@ -5,14 +5,13 @@
 #include "eff_resource_slots.h"
 #include "eff_resource_source_lifetime.h"
 #include "common.h"
-#include "sdf_vu0.h"
+#include "ps2asm.h"
 #include "snd_sequence_volume_pan.h"
 #include "sdf_trig.h"
 #include "eff_random.h"
 #include "btl_stage_task_cleanup.h"
 #include "sdf_chip.h"
-#include "pcp_vu0.h"
-#include "sdf_resource.h"
+#include "sdf_heap_api.h"
 #include "file_request_api.h"
 #include "mnu_mantra_position_api.h"
 #include "mnu_mantra_model_flag_state.h"
@@ -20,13 +19,13 @@
 #include "mdl_flag_api.h"
 #include "mnu_mantra_draw.h"
 /* Declared before first use (were implicit int). */
-extern void evtPrintDeveloperConsoleMessage(const char *format, ...);
+extern void datDebugPrintf(const char *format, ...);
 extern void prfCopyMantraNamePart(u16 scriptId, s32 namePartMode, char *destination);
 /* Original-style implicit int, kept: matched code depends on it: mnuUpdateAndDrawMantraBackgroundBursts. */
 
 extern void effRequestResourceByMode(const char *, const char *, s32, u32 *);
-#include "kwln.h"
-#include "kwln_task_create.h"
+#include "kernel.h"
+#include "dds3_task_create.h"
 #include "dat_state.h"
 #include "evt_world.h"
 #include "itf.h"
@@ -57,7 +56,7 @@ extern s32 mnuGetMantraSourceValue(u16);
 extern s32 frFontDrawTextVariantAAndMeasure(s32, s32, s32, u32, u8, char *, s32, s32);
 extern s32 frFontDrawTextVariantBAndMeasure(s32, s32, s32, u32, u8, char *, s32, s32);
 extern s32 frFontDrawStyledGlyphChainAndMeasure(s32, s32, s32, u32, u8, const u8 *, s32, s32);
-extern s32 frFontQueueTintedGlyphChainAndMeasure(s32, s32, s32, u32, u8, u16, FrFontTextBank *, s32, s32, s32);
+extern s32 frFontQueueTintedGlyphChainAndMeasure(s32, s32, s32, u32, u8, u16, frTextBank_t *, s32, s32, s32);
 /* GS TEST packets carry a full-width register value; kind selects the surface. */
 extern void sdfSubmitGsTestOneRegisterPacket(u64, u32);
 extern void uiDrawActiveSurfaceRegion(s32);
@@ -428,11 +427,11 @@ void mnuDrawOptionalMantraLabel(u32 x, u32 y, u32 depth, u32 fade, u16 entryId, 
     }
 }
 
-extern FrFontTextBank *frFontGetColoredGlyphResource(void);
+extern frTextBank_t *frFontGetColoredGlyphResource(void);
 
 /* Render a panel icon when it has an ID, or the corresponding empty art. */
 void mnuDrawMantraLabelA(u32 x, u32 y, u32 depth, s32 fade, u32 iconId, u32 drawArg) {
-    FrFontTextBank *handle = frFontGetColoredGlyphResource();
+    frTextBank_t *handle = frFontGetColoredGlyphResource();
     u32 flags = (u32)(fade * 0.6f) | 0xA09D7D00;
 
     mnuDrawMantraSprite(x, y, depth, fade, 0x4D, 0, drawArg);
@@ -739,6 +738,7 @@ typedef struct MantraCostRecord {
 } MantraCostRecord;
 
 /* Draw a button marker and a variable-width cost, shifting one-digit values right. */
+
 INCLUDE_RODATA(const s32, "game/code_0026DBF8", D_004250B0);
 
 INCLUDE_RODATA(const s32, "game/code_0026DBF8", mnuMantraSpriteTaskName);
@@ -891,7 +891,7 @@ void mnuInitMantraListEntries(MantraListState *list, u32 *entries, s32 count, s3
     }
     list->count = n;
     list->index = index;
-    evtPrintDeveloperConsoleMessage("[MaxNum %d][CurrentIndex %d]\n", n, index);
+    datDebugPrintf("[MaxNum %d][CurrentIndex %d]\n", n, index);
 }
 
 /* Queue a display-list transition from the previous selection to the chosen one.
@@ -1051,7 +1051,7 @@ MantraDrawPool *mnuCreateMantraDrawPool(u32 itemCount) {
     pool->allocation = allocation;
     pool->count = itemCount;
     pool->items = (MantraDrawItem *)((u8 *)pool + MNU_MANTRA_DRAW_POOL_HEADER_BYTES);
-    evtPrintDeveloperConsoleMessage("mtrDrawProcessCreate!! num[%d]\n", itemCount);
+    datDebugPrintf("mtrDrawProcessCreate!! num[%d]\n", itemCount);
     return pool;
 }
 
@@ -1257,7 +1257,7 @@ void *mnuInitMantraBackgroundDraw(struct MantraDrawPool *pool, u32 createArg) {
     ((MantraBackgroundState *)data)->transitionWord &= ~0xf;
     ((MantraBackgroundState *)data)->timing.transitionDelay = 0;
     ((MantraBackgroundState *)data)->burstPool = mnuAllocateMantraBackgroundBurstPool();
-    evtPrintDeveloperConsoleMessage("BG Draw Init\n");
+    datDebugPrintf("BG Draw Init\n");
     return (void *)data;
 }
 
@@ -1265,7 +1265,7 @@ void mnuReleaseMantraBackgroundDraw(MantraDrawItem *item) {
     s32 data = (s32)item->data;
     mnuReleaseMantraBackgroundBurstPool(((MantraBackgroundState *)data)->burstPool);
     sdfChipFreeDirect(data);
-    evtPrintDeveloperConsoleMessage("BG Draw Release\n");
+    datDebugPrintf("BG Draw Release\n");
 }
 
 
@@ -1509,13 +1509,13 @@ void *mnuInitMantraBackgroundMaskDraw(struct MantraDrawPool *pool, u32 createArg
     u32 data = (u32)sdfChipAllocDirect(0xc);
     memset((void *)data, 0, 0xc);
     ((MantraPulseFade *)data)->state = 1;
-    evtPrintDeveloperConsoleMessage("BGMask Draw Init\n");
+    datDebugPrintf("BGMask Draw Init\n");
     return (void *)data;
 }
 
 void mnuReleaseMantraBackgroundMaskDraw(MantraDrawItem *item) {
     sdfChipFreeDirect(item->data);
-    evtPrintDeveloperConsoleMessage("BGMask Draw Release\n");
+    datDebugPrintf("BGMask Draw Release\n");
 }
 
 MnuMantraDrawUpdateResult mnuUpdateMantraBackgroundMaskFade(struct MantraDrawPool *pool, MantraDrawItem *item) {
@@ -1591,7 +1591,7 @@ void mnuShowMantraLimitLine(MantraDrawPool *pool) {
     MantraDrawItem *item = mnuFindMantraDrawItemByKind(pool, 1);
     if (item != 0) {
         ((MantraFadeState *)item->data)->state = 6;
-        evtPrintDeveloperConsoleMessage("LimitLine Draw Show\n");
+        datDebugPrintf("LimitLine Draw Show\n");
     }
 }
 
@@ -1599,7 +1599,7 @@ void mnuHideMantraLimitLine(MantraDrawPool *pool) {
     MantraDrawItem *item = mnuFindMantraDrawItemByKind(pool, 1);
     if (item != 0) {
         ((MantraFadeState *)item->data)->state = 5;
-        evtPrintDeveloperConsoleMessage("LimitLine Draw Hide\n");
+        datDebugPrintf("LimitLine Draw Hide\n");
     }
 }
 
@@ -2030,7 +2030,7 @@ void mnuHideMantraTitle(MantraDrawPool *pool) {
     MantraDrawItem *item = mnuFindMantraDrawItemByKind(pool, 6);
     if (item != 0) {
         *(u16 *)item->data = 5;
-        evtPrintDeveloperConsoleMessage("Title Draw Hide\n");
+        datDebugPrintf("Title Draw Hide\n");
     }
 }
 
@@ -2038,7 +2038,7 @@ void mnuShowMantraTitle(MantraDrawPool *pool) {
     MantraDrawItem *item = mnuFindMantraDrawItemByKind(pool, 6);
     if (item != 0) {
         *(u16 *)item->data = 6;
-        evtPrintDeveloperConsoleMessage("Title Draw Show\n");
+        datDebugPrintf("Title Draw Show\n");
     }
 }
 
@@ -2063,13 +2063,13 @@ void *mnuInitMantraTitleDraw(struct MantraDrawPool *pool, u32 createArg) {
     ((MantraBlinkState *)data)->timer = 0;
     *(u16 *)data = 1;
     ((MantraBlinkState *)data)->clock = 0;
-    evtPrintDeveloperConsoleMessage("Title Draw Init\n");
+    datDebugPrintf("Title Draw Init\n");
     return (void *)data;
 }
 
 void mnuReleaseMantraTitleDraw(MantraDrawItem *item) {
     sdfChipFreeDirect(item->data);
-    evtPrintDeveloperConsoleMessage("Title Draw Release\n");
+    datDebugPrintf("Title Draw Release\n");
 }
 
 
@@ -2218,7 +2218,7 @@ void mnuHideMantraInfo(MantraDrawPool *ctx) {
         } else {
             *(u16 *)data = 5;
         }
-        evtPrintDeveloperConsoleMessage("Info Draw Hide\n");
+        datDebugPrintf("Info Draw Hide\n");
     }
 }
 
@@ -2231,7 +2231,7 @@ void mnuShowMantraInfo(MantraDrawPool *ctx) {
         } else {
             *(u16 *)data = 6;
         }
-        evtPrintDeveloperConsoleMessage("Info Draw Show\n");
+        datDebugPrintf("Info Draw Show\n");
     }
 }
 
@@ -2259,13 +2259,13 @@ void *mnuInitMantraInfoDraw(struct MantraDrawPool *pool, u32 createArg) {
     u32 data = (u32)sdfChipAllocDirect(0x10);
     memset((void *)data, 0, 0x10);
     *(u16 *)data = 1;
-    evtPrintDeveloperConsoleMessage("Info Draw Init\n");
+    datDebugPrintf("Info Draw Init\n");
     return (void *)data;
 }
 
 void mnuReleaseMantraInfoDraw(MantraDrawItem *item) {
     sdfChipFreeDirect(item->data);
-    evtPrintDeveloperConsoleMessage("Info Draw Release\n");
+    datDebugPrintf("Info Draw Release\n");
 }
 
 
@@ -2522,7 +2522,7 @@ void mnuHideMantraScrollCursor(MantraDrawPool *ctx) {
         } else if (state != 4) {
             data->state = 5;
         }
-        evtPrintDeveloperConsoleMessage("ScrollCursor Draw Hide\n");
+        datDebugPrintf("ScrollCursor Draw Hide\n");
     }
 }
 
@@ -2537,7 +2537,7 @@ void mnuShowMantraScrollCursor(MantraDrawPool *ctx) {
         } else if (state != 2) {
             data->state = 6;
         }
-        evtPrintDeveloperConsoleMessage("ScrollCursor Draw Show\n");
+        datDebugPrintf("ScrollCursor Draw Show\n");
     }
 }
 
@@ -2560,13 +2560,13 @@ void *mnuInitMantraGaugeData(struct MantraDrawPool *pool, u32 createArg) {
     u32 data = (u32)sdfChipAllocDirect(0x18);
     memset((void *)data, 0, 0x18);
     ((MantraGaugeState *)data)->state = 4;
-    evtPrintDeveloperConsoleMessage("ScrollCursor Draw Init\n");
+    datDebugPrintf("ScrollCursor Draw Init\n");
     return (void *)data;
 }
 
 void mnuReleaseMantraGaugeData(MantraDrawItem *item) {
     sdfChipFreeDirect(item->data);
-    evtPrintDeveloperConsoleMessage("ScrollCursor Draw Release\n");
+    datDebugPrintf("ScrollCursor Draw Release\n");
 }
 
 
@@ -2698,7 +2698,7 @@ void mnuHideMantraUnitPanel(MantraDrawPool *ctx) {
         } else {
             ((MantraLampState *)data)->state = 5;
         }
-        evtPrintDeveloperConsoleMessage("UnitPanel Draw Hide\n");
+        datDebugPrintf("UnitPanel Draw Hide\n");
     }
 }
 
@@ -2712,7 +2712,7 @@ void mnuShowMantraUnitPanel(MantraDrawPool *ctx) {
         } else {
             ((MantraLampState *)data)->state = 6;
         }
-        evtPrintDeveloperConsoleMessage("UnitPanel Draw Show\n");
+        datDebugPrintf("UnitPanel Draw Show\n");
     }
 }
 
@@ -2746,7 +2746,7 @@ void *mnuInitMantraUnitPanelDraw(struct MantraDrawPool *pool, u32 createArg) {
     data->state = 1;
     mnuInitMantraListEntries(&data->list, resources->entries,
                   resources->count, resources->selectedIndex);
-    evtPrintDeveloperConsoleMessage("UnitPanel Draw Init\n");
+    datDebugPrintf("UnitPanel Draw Init\n");
     return data;
 }
 
@@ -2754,7 +2754,7 @@ void mnuReleaseMantraUnitPanelDraw(MantraDrawItem *item) {
     MantraLampState *data = item->data;
     mnuReleaseDisplayListNodes(&data->list);
     sdfChipFreeDirect(data);
-    evtPrintDeveloperConsoleMessage("UnitPanel Draw Release\n");
+    datDebugPrintf("UnitPanel Draw Release\n");
 }
 
 
@@ -3383,6 +3383,7 @@ typedef struct MantraIconOffsets {
     s8 points[6][2];
 } MantraIconOffsets;
 extern const MantraIconOffsets D_00425828;
+
 INCLUDE_RODATA(const s32, "game/code_0026DBF8", D_00425828);
 
 u32 mnuDrawMantraStandardIcon(s32 x, s32 y, s32 depth, s32 amount, MantraIconPool *pool, MantraIconEntry *icon) {
@@ -4673,7 +4674,7 @@ s32 mnuDrawMantraPanelOrbitingEffect(s32 x, s32 y, s32 z, s32 alpha, MantraPanel
     }
     for (i = 0; i < 2; i++) {
         SDF_VU0_LOADVECTOR(directions[i]);
-        VU0_SCALE_VF(vf10, 150.0f);
+        SDF_VU0_SCALEVECTOR_BITS(150.0f);
         SDF_VU0_STOREVECTOR(scaled);
         drawX = (s32)((f32)(x + offsets[i][0]) + scaled[0] * phases[i]);
         drawY = (s32)((f32)(y + offsets[i][1]) + scaled[1] * phases[i]);

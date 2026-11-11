@@ -15,6 +15,8 @@ import sys
 import tempfile
 
 ROOT = Path(__file__).resolve().parent.parent
+# src/irx is IOP code with its own check, tools/check_irx_nonmatching.py.
+VERSIONS = ("dds1", "dds2")
 GUARD = re.compile(r"^\s*#\s*ifdef\s+NON_MATCHING\s*$", re.M)
 
 
@@ -30,7 +32,8 @@ def compile_unit(path: Path, output: Path, version: str):
 
 def main():
     paths = [Path(a).resolve() for a in sys.argv[1:]] if sys.argv[1:] else [
-        p for p in sorted((ROOT / "src").rglob("*.c")) if GUARD.search(p.read_text())]
+        p for version in VERSIONS for p in sorted((ROOT / "src" / version).rglob("*.c"))
+        if GUARD.search(p.read_text())]
     failed = 0
     with tempfile.TemporaryDirectory() as directory:
         for path in paths:

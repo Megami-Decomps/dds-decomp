@@ -6,9 +6,9 @@
 #include "sdf_chip.h"
 #include "eff_resource_slots.h"
 #include "eff_resource_source_lifetime.h"
-#include "kwln.h"
-#include "kwln_process_registration.h"
-#include "sdf_resource.h"
+#include "kernel.h"
+#include "dds3_process_registration.h"
+#include "sdf_heap_api.h"
 #include "eff.h"
 #include "mnu_list.h"
 #include "mnu_profile_progress.h"
@@ -109,8 +109,8 @@ void mnuDrawScaledVariantSpriteByIndex(s32 x, s32 y, s32 z, s32 alpha, s32 place
 #include "mnu_title_stream.h"
 #include "sdf_chip.h"
 #include "eff_resource_slots.h"
-#include "kwln.h"
-#include "sdf_resource.h"
+#include "kernel.h"
+#include "sdf_heap_api.h"
 #include "eff.h"
 #include "mnu_list.h"
 #include "mnu_profile_progress.h"
@@ -315,7 +315,7 @@ void mnuCreateResourceTask(void) {
 
 /* Return whether the named resource task exists; invalidate the cached handle when it does not. */
 s32 mnuCheckResourceTask(void) {
-    if (kwlnTaskExists(mnuResourceTaskName) != KWLN_PROCESS_NOT_REGISTERED) {
+    if (sdfTaskExists(mnuResourceTaskName) != DDS3_PROCESS_NOT_REGISTERED) {
         return 1;
     }
     mnuSceneResourceContext = 0;
@@ -1037,7 +1037,7 @@ void mnuScrollSceneViewportToEntry(s32 *xCoordinate, s32 *yCoordinate, u16 index
 #include "dsp_channel.h"
 #include "evt_message_window_api.h"
 #include "dsp_name.h"
-#include "sdf_resource.h"
+#include "sdf_heap_api.h"
 #include "mnu.h"
 #include "dat_state.h"
 #include "mnu_profile_progress.h"
@@ -2260,7 +2260,7 @@ extern void mnuDrawAnimatedCurrencyCounter(s32, s32, s32, s32, MenuSceneMetadata
 extern s32 mnuDrawLoadedProgressPanels(datUnitWork_t *partyRecord, MenuProgressHost *work, s32 context);
 struct sdfGrOt_t;
 extern s8 evtStageTestUpdate(struct sdfGrOt_t **);
-extern struct sdfGrOt_t *kwlnSceneSurfaceSets[13][4];
+extern struct sdfGrOt_t *sdfModelOtTable[13][4];
 extern void uiDrawGradientColorRect(u32, u32, u32, u32, u32, const u32 *, u32);
 
 /* Update attached visuals and stage completion, then ramp the message-window shade over ten frames.
@@ -2282,7 +2282,7 @@ s32 mnuUpdateMantraSceneDisplay(void) {
         sceneMetadata->stageStarted = 1;
     }
     effUpdateAttached(0x1200, 0x730, 1, sceneMetadata->attachedEffect, MNU_SCENE_DRAW_CONTEXT);
-    if (evtStageTestUpdate(kwlnSceneSurfaceSets[9]) >= 2) {
+    if (evtStageTestUpdate(sdfModelOtTable[9]) >= 2) {
         sceneMetadata->stageFinished = 1;
     }
     if (fclChkMessage() != EVT_MESSAGE_WINDOW_CONTROL_RESULT_NO_ACTIVE_CONTROL) {
@@ -2956,10 +2956,10 @@ void mnuDrawMantraPanelSprite(s32 x, s32 y, s32 z, s32 alpha,
 }
 
 extern const u8 mnuMantraDisplayParameterLabels[][0x18];
-extern struct FrFontTextBank *frFontGetColoredGlyphResource(void);
+extern struct frTextBank_t *frFontGetColoredGlyphResource(void);
 extern s32 prfGetMantraDisplayParameter(u16 profileId);
 extern s32 frFontDrawColoredGlyphChainAndMeasure(s32, s32, u32, u32, u8, u16,
-                                                  struct FrFontTextBank *, u32, s32, s32);
+                                                  struct frTextBank_t *, u32, s32, s32);
 extern s32 mnuGetMantraSourceValue(u16);
 
 /* Draw the selected mantra's label and remaining source cost. */
@@ -2976,7 +2976,7 @@ static inline void mnuDrawCostPlaceholderWith(
 }
 
 void mnuDrawMantraCostCounter(s32 x, s32 y, s32 z, s32 alpha, s32 sceneId, s32 drawContext) {
-    struct FrFontTextBank *glyphResource = frFontGetColoredGlyphResource();
+    struct frTextBank_t *glyphResource = frFontGetColoredGlyphResource();
     u32 textColor = alpha | MNU_DISPLAY_TEXT_RGB;
     u32 dimColor = (u32)((f32)alpha * 0.599999964237213134765625f) | MNU_DISPLAY_DIM_TEXT_RGB;
     u8 label;
@@ -2995,7 +2995,7 @@ void mnuDrawMantraCostCounter(s32 x, s32 y, s32 z, s32 alpha, s32 sceneId, s32 d
 
 /* Draw the profile label and placeholder for an unavailable mantra cost. */
 void mnuDrawMantraCostPlaceholder(s32 x, s32 y, s32 z, s32 alpha, s32 sceneId, s32 drawContext) {
-    struct FrFontTextBank *glyphResource = frFontGetColoredGlyphResource();
+    struct frTextBank_t *glyphResource = frFontGetColoredGlyphResource();
     u32 textColor = (u32)alpha | MNU_DISPLAY_TEXT_RGB;
     u32 dimColor = (u32)((f32)alpha * 0.599999964237213134765625f) | MNU_DISPLAY_DIM_TEXT_RGB;
     u8 label;
@@ -4545,7 +4545,7 @@ void mnuUpdateMantraGridEntry(MnuProfileProgress *target, SdfGrid *grid, SdfGrid
 #include "sdf_trig.h"
 #include "eff_random.h"
 #include "sdf_task_work.h"
-#include "sdf_resource.h"
+#include "sdf_heap_api.h"
 #include "dat_state.h"
 #include "mnu_scene.h"
 #include "mnu_profile_progress.h"
@@ -4931,3 +4931,4 @@ void mnuDrawMantraGridEntryIndicators(s32 x, s32 y, s32 depth, s32 alpha,
 }
 
 INCLUDE_RODATA(const s32, "game/code_0024F0D0", D_003AF9B8);
+

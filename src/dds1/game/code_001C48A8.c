@@ -8,12 +8,12 @@
 #include "btl_event_sequence_api.h"
 #include "btl_active_units_ready_api.h"
 #include "fld_scene_ready_api.h"
-#include "kwln_background_fade_api.h"
+#include "dds3_background_fade_api.h"
 #include "brs_primary_panel_update_api.h"
 #include "brs_ui_update_allowed_api.h"
 #include "btl_unit_base_light_task.h"
 #include "btl_special_ability.h"
-#include "kwln_fade.h"
+#include "dds3_fade.h"
 #include "btl_sound.h"
 #include "btl_sound_release_task.h"
 #include "btl_task_condition.h"
@@ -28,7 +28,7 @@
 extern u8 sndIsStreamStatusTwoOrThree(void);
 extern s8 btlChooseStartVoice(void);
 extern BtlRuntimeTask *btlCreateSoundUpdateTask(u32);
-#include "pcp_vu0.h"
+#include "ps2asm.h"
 #include "dat_state.h"
 #include "sdf.h"
 #include "btl_scene_initializer.h"
@@ -197,7 +197,7 @@ void fldBattleSceneEnterInit(u8 *scene) {
     btlRequestSceneEventResources();
     btlInitializeBossCallbacks(work->sceneId);
     sndStartBattleSceneStream(work->streamAdjustmentIndex, work->sceneId);
-    VU0_STORE_VF($vf0, scene);
+    SDF_VU0_STOREIDENTITYVECTOR(scene);
 }
 
 extern s32 btlIsFadeInPhaseOrIdle(void);
@@ -393,7 +393,7 @@ extern void dds3RipBlurOff(s32);
 extern void btlMarkRuntimeUpdatePending(void);
 
 
-extern void evtSetSolarOverlayFullyVisible(void);
+extern void evtEnableMoonDraw(void);
 
 extern s64 btlArrangeOpponentFormationSlots(void);
 
@@ -413,7 +413,7 @@ s32 fldSceneStateRestoreDisplay(u8 *scene) {
             state->commandRestrictFlags &= ~0x80;
         }
         if (!(state->battleFlags & 0x4000)) {
-            kwlnFadeBackgroundStartOut(0);
+            dds3FadeBackgroundStartOut(0);
             dds3SetBlur(0, 0, 1);
             dds3Blur2Off(0);
             dds3Filter2Off(0);
@@ -428,7 +428,7 @@ s32 fldSceneStateRestoreDisplay(u8 *scene) {
             if (fldGetEncounterRuntimeResult() != FLD_ENCOUNTER_RESULT_NONE) {
                 fldSetEncounterPendingValue(1);
             }
-            evtSetSolarOverlayFullyVisible();
+            evtEnableMoonDraw();
         }
         if (state->cleanupTask == 0) {
             fldCreateSceneCleanupTask();
@@ -1202,7 +1202,7 @@ extern void btlResetActorEntryState(void);
 extern void mnuQueueTitleSoundStreamEntry(s32 soundEntryIndex);
 extern void mnuResetTitleStreamLocked(void);
 extern void p2sdStopAllBgm(void);
-extern void sndQueueNoPayloadCommand210(void);
+extern void sdfSndQueueNoPayloadCommand210(void);
 
 s32 btlUpdateBattleEnd(BtlState *scene) {
     s32 state;
@@ -1286,13 +1286,13 @@ s32 btlUpdateBattleEnd(BtlState *scene) {
         if (scene->terminalOutcome != BTL_TERMINAL_OUTCOME_SERIAL) btlAdvanceTitleState();
         if (scene->terminalOutcome == BTL_TERMINAL_OUTCOME_WIN) {
             if (!(scene->endFlags & 1)) {
-                sndQueueNoPayloadCommand210();
+                sdfSndQueueNoPayloadCommand210();
                 p2sdStopAllBgm();
                 sndLoadAndPlayStationedSe(0x1C);
                 scene->endFlags |= 1;
             }
         } else {
-            sndQueueNoPayloadCommand210();
+            sdfSndQueueNoPayloadCommand210();
             p2sdStopAllBgm();
         }
         if (scene->terminalOutcome == BTL_TERMINAL_OUTCOME_SERIAL) {
@@ -2260,3 +2260,4 @@ void btlBindActorTaskAndSelectActionNumber(BtlTask *task, BtlUnit *actorAddress)
 INCLUDE_RODATA(const s32, "game/code_001C48A8", D_003A35A8);
 
 INCLUDE_RODATA(const s32, "game/code_001C48A8", D_003A35B8);
+

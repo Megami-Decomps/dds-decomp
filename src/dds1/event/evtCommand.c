@@ -7,36 +7,49 @@
 #include "scr_integer_parameter_api.h"
 #include "dds3_camera_update_flags.h"
 #include "sdf_delayed_resource_check_api.h"
-#include "sdf_vu0.h"
+#include "ps2asm.h"
 #include "scr_integer_return_value_api.h"
-#include "kwln_task_add_child.h"
+#include "dds3_task_add_child.h"
 #include "sdf_vu_matrix.h"
 #include "evt_world_object_api.h"
 #include "evt_polygon_movie_flags_api.h"
 #include "fld_resource_resolver.h"
 #include "dds3_path.h"
 #include "evt_stage_anime_control_api.h"
-#include "dds3obj.h"
 #include "dds3_object_control_slot.h"
 #include "dds3_world_selection.h"
 #include "eff_dependency.h"
 #include "eff_object.h"
 #include "fld_player_scene_state.h"
 #include "eff_inner_float_api.h"
-#include "pcp_vu0.h"
-#include "kwln.h"
 #include "evt_task.h"
-#include "evt_world.h"
 #include "evt_path_direction.h"
-#include "evt_event_pack.h"
 #include "scr.h"
-#include "scr_command_result.h"
 #include "scr_command_timer_api.h"
 #include "scr_process_handle_api.h"
 #include "scr_string_parameter_api.h"
 #include "scr_arg_read.h"
 #include "evt_solar.h"
 #include "dds3_world_counter.h"
+#include "sdf_debug_api.h"
+#include "dds3_process_registration.h"
+#include "evt_picture.h"
+#include "evt_event_bgm_readiness.h"
+#include "evt_sound_variation.h"
+
+extern char D_003ACAE0[];
+
+extern void rsetTest(s32 bit0, s32 bit1, s32 bit4, s32 bit12,
+                               s32 bit14, s32 bit15, s32 unused, s32 bit17);
+extern u32 dds3DrawFlag;
+EvtPackedSoundTrackId evtLoadEventBgm(s32 id);
+EvtEventBgmReadiness evtCheckEventBgmLoaded(s32 id);
+
+extern void fldSetFadeTarget(s32 area, s32 targetMode, s32 duration);
+extern void evtSetSkyAlpha(s32 duration, s32 target);
+
+extern struct dds3Basic_t *evtSearchBasic(s32 worldKind, s32 worldObjectKey);
+extern EvtPathStatus evtCheckPathStat(struct dds3Basic_t *object);
 
 /* Fixed dispatch payload sizes used by admin-sequence requests. */
 enum {
@@ -66,19 +79,13 @@ void evtEnableMoonCalc(void);
 
 void evtDisableMoonCalc(void);
 
-
-
 void evtSetAgeOfMoon(s32 phase);
 
-void evtPrintDeveloperConsoleMessage(const char *fmt, ...);
+void datDebugPrintf(const char *fmt, ...);
 
-#include "sdf_debug_api.h"
-
-void scrDestroyAllNamedProcesses(void);
+void scrAllReleaseScript(void);
 
 void evtFreeAllUnit(void);
-
-
 
 void dds3RefreshStoredVec3(dds3Basic_t *object);
 
@@ -87,7 +94,6 @@ void fldPauseBgm(void);
 void fldBgmStop(void);
 
 void fldBgmFadeOut(void);
-
 
 void fldSetSceneParam2(fldSceneParam_t *record, s32 stage, s32 kind, const char *name);
 
@@ -102,10 +108,7 @@ s32 fldCommand_GetHojiID(const char *name);
 
 void fldSetMapSlotValueFlag(s32 mapId, u32 slotIndex, s32 bit, s32 enabled);
 
-
-
 extern u32 dds3DrawFlag;
-
 
 void evtPathStop(dds3Basic_t *unit);
 
@@ -114,7 +117,6 @@ void evtPathStart(dds3Basic_t *unit);
 void evtPathDir(dds3Basic_t *worldNode, EvtPathDirection direction);
 
 void evtPathLoop(dds3Basic_t *unit, s32 enabled);
-
 
 extern char D_003AC968[]; /* "BE ok! (%d)\n" */
 
@@ -132,19 +134,9 @@ s32 evtRegistBEField(EvtPackEventId eventId, EvtPackFieldResourceId resourceId);
 
 extern s32 D_0032E3C0[];
 
-
-
-
-
-
-
-
 extern void fldSetDeferredFieldCommand(s32 a, s32 b);
 
-
-
 extern dds3Basic_t *dds3AddCameraObjectBasicTypeFree(s32 world, u128 *pos, u128 *rot);
-
 
 /* Copy two source points into the primary effect object. */
 ScrCommandResult evtCommand_EFFMG1_POS(void) {
@@ -154,18 +146,18 @@ ScrCommandResult evtCommand_EFFMG1_POS(void) {
 
     primaryEffect = evtSearchBasic(EFF_WORLD_KIND_EFFECT_OBJECT, scrGetIntPara(0));
     if (primaryEffect == NULL) {
-        evtPrintDeveloperConsoleMessage("EFFMG1_POS mg1 ID error!\n");
+        datDebugPrintf("EFFMG1_POS mg1 ID error!\n");
         return 1;
     }
 
     sourcePoint0 = evtSearchBasic(EFF_WORLD_KIND_EFFECT_OBJECT, scrGetIntPara(1));
     sourcePoint1 = evtSearchBasic(EFF_WORLD_KIND_EFFECT_OBJECT, scrGetIntPara(2));
     if (sourcePoint0 == NULL || sourcePoint1 == NULL) {
-        evtPrintDeveloperConsoleMessage("EFFMG1_POS point ID not found!\n");
+        datDebugPrintf("EFFMG1_POS point ID not found!\n");
         return 1;
     }
     if (dds3EffectObjectSetMG12Pos(primaryEffect, sourcePoint0, sourcePoint1, NULL, NULL) == 0) {
-        evtPrintDeveloperConsoleMessage("EFFMG1_POS set error!\n");
+        datDebugPrintf("EFFMG1_POS set error!\n");
         return 1;
     }
     return 1;
@@ -193,7 +185,7 @@ ScrCommandResult evtCommand_EFFMG2_POS(void) {
 
     primaryEffect = evtSearchBasic(EFF_WORLD_KIND_EFFECT_OBJECT, scrGetIntPara(0));
     if (primaryEffect == NULL) {
-        evtPrintDeveloperConsoleMessage("EFFMG2_POS mg2 ID error!\n");
+        datDebugPrintf("EFFMG2_POS mg2 ID error!\n");
         return 1;
     }
 
@@ -203,11 +195,11 @@ ScrCommandResult evtCommand_EFFMG2_POS(void) {
     sourcePoint3 = evtSearchBasic(EFF_WORLD_KIND_EFFECT_OBJECT, scrGetIntPara(4));
 
     if (sourcePoint0 == NULL || sourcePoint1 == NULL || sourcePoint2 == NULL || sourcePoint3 == NULL) {
-        evtPrintDeveloperConsoleMessage("EFFMG2_POS point ID not found!\n");
+        datDebugPrintf("EFFMG2_POS point ID not found!\n");
         return 1;
     }
     if (dds3EffectObjectSetMG12Pos(primaryEffect, sourcePoint0, sourcePoint1, sourcePoint2, sourcePoint3) == 0) {
-        evtPrintDeveloperConsoleMessage("EFFMG2_POS set error!\n");
+        datDebugPrintf("EFFMG2_POS set error!\n");
         return 1;
     }
     return 1;
@@ -303,19 +295,17 @@ ScrCommandResult evtCommand_EFFECT_PATH_MOVE(void) {
 
     effect = evtSearchBasic(EFF_WORLD_KIND_EFFECT_OBJECT, scrGetIntPara(0));
     if (effect == NULL) {
-        evtPrintDeveloperConsoleMessage(D_003AC700);
+        datDebugPrintf(D_003AC700);
         return 1;
     }
     path = evtSearchBasic(EFF_WORLD_KIND_ACTION_10, scrGetIntPara(1));
     if (path == NULL) {
-        evtPrintDeveloperConsoleMessage(D_003AC728);
+        datDebugPrintf(D_003AC728);
         return 1;
     }
     evtPathLinkAndMake(path, effect);
     return 1;
 }
-
-extern char D_003AC750[];
 
 extern EvtPathStatus evtCheckPathStat(dds3Basic_t *object);
 
@@ -329,7 +319,7 @@ ScrCommandResult evtCommand_EFFECT_PATH_WAIT(void) {
     EvtPathStatus scaleStatus;
 
     if (effectObject == NULL) {
-        evtPrintDeveloperConsoleMessage("EFFECT_PATH_WAIT not found eff!\n");
+        datDebugPrintf("EFFECT_PATH_WAIT not found eff!\n");
         return 1;
     }
     scaleStatus = evtCheckPathStat(effectObject);
@@ -354,7 +344,7 @@ ScrCommandResult evtCommand_SEARCH_ID(void) {
                                               (const u8 *)scrGetStrPara(0));
     if (worldNode == NULL) {
         printf("ID : id not found!! <%s>\n", scrGetStrPara(0));
-        evtPrintDeveloperConsoleMessage("WARNING: ID not found! <%s>\n", scrGetStrPara(0));
+        datDebugPrintf("WARNING: ID not found! <%s>\n", scrGetStrPara(0));
         scrSetIntReturnValue(0);
     } else {
         scrSetIntReturnValue(worldNode->key);
@@ -413,7 +403,7 @@ ScrCommandResult evtCommand_CALL_EVENT(void)
     eventId = scrGetIntPara(0);
     printf("call_event:%d\n", eventId);
     dds3AdminiCallSequence(6, &eventId, EVT_SCALAR_REQUEST_SIZE, 0);
-    scrDestroyAllNamedProcesses();
+    scrAllReleaseScript();
     return 1;
 }
 
@@ -437,7 +427,7 @@ void evtSubmitEventRequest(FldBattleSceneRecordIndex sceneRecordIndex,
     payload[0] = 0;
     payload[1] = sceneRecordIndex;
     dds3AdminiCallSequence(0xe, payload, EVT_PAIRED_REQUEST_SIZE, followupEventId > 0);
-    scrDestroyAllNamedProcesses();
+    scrAllReleaseScript();
 }
 
 ScrCommandResult evtCommandSubmitEvent(void)
@@ -460,7 +450,7 @@ void evtSubmitEventRequestImmediate(FldBattleSceneRecordIndex sceneRecordIndex)
     payload[0] = 0;
     payload[1] = sceneRecordIndex;
     dds3AdminiCallSequence(0xe, payload, EVT_PAIRED_REQUEST_SIZE, 1);
-    scrDestroyAllNamedProcesses();
+    scrAllReleaseScript();
 }
 
 ScrCommandResult evtCommand_CALL_BATTLE2(void)
@@ -497,7 +487,7 @@ ScrCommandResult evtCommand_CALL_FIELD(void)
     sequenceName = scrGetStrPara(2);
     fldSetSceneParam2(&requestBuffer, stage, kind, sequenceName);
     dds3AdminiCallSequence(5, &requestBuffer, EVT_FIELD_SEQUENCE_REQUEST_SIZE, 0);
-    scrDestroyAllNamedProcesses();
+    scrAllReleaseScript();
     return 1;
 }
 
@@ -512,7 +502,7 @@ ScrCommandResult evtCommand_CALL_FIELD2(void)
     sequenceName = scrGetStrPara(1);
     fldSetSceneParam2(&requestBuffer, D_0032E3C0[0], kind, sequenceName);
     dds3AdminiCallSequence(5, &requestBuffer, EVT_FIELD_SEQUENCE_REQUEST_SIZE, 0);
-    scrDestroyAllNamedProcesses();
+    scrAllReleaseScript();
     return 1;
 }
 
@@ -537,7 +527,7 @@ ScrCommandResult evtCommand_CALL_FIELD3(void)
     sequenceName = scrGetStrPara(1);
     fldSetSceneParam3(&requestBuffer, D_0032E3C0[0], kind, sequenceName);
     dds3AdminiCallSequence(5, &requestBuffer, EVT_FIELD_SEQUENCE_REQUEST_SIZE, 0);
-    scrDestroyAllNamedProcesses();
+    scrAllReleaseScript();
     return 1;
 }
 
@@ -599,7 +589,7 @@ ScrCommandResult evtCommand_FIELD_CLS(void)
     }
     dds3DrawFlag |= 0x2000000;
     printf("event stage shutdown !!\n");
-    evtPrintDeveloperConsoleMessage("field shutdown.\n");
+    datDebugPrintf("field shutdown.\n");
     return 1;
 }
 
@@ -613,7 +603,7 @@ ScrCommandResult evtCommand_FIELD_CLS_STOP(void)
     }
     dds3DrawFlag |= 0x2000000;
     printf("event stage shutdown2 !!\n");
-    evtPrintDeveloperConsoleMessage("field shutdown2.\n");
+    datDebugPrintf("field shutdown2.\n");
     return 1;
 }
 
@@ -621,7 +611,7 @@ ScrCommandResult evtCommand_UNIT_CLS(void)
 {
     evtFreeAllUnit();
     printf("unit all clear !!\n");
-    evtPrintDeveloperConsoleMessage("unit all clear.\n");
+    datDebugPrintf("unit all clear.\n");
     return 1;
 }
 
@@ -631,7 +621,7 @@ ScrCommandResult evtCommand_UNIT_CLS_STOP(void)
     while (sdfDelayedResrcCheck()) {
     }
     printf("unit all clear2 !!\n");
-    evtPrintDeveloperConsoleMessage("unit all clear2.\n");
+    datDebugPrintf("unit all clear2.\n");
     return 1;
 }
 
@@ -785,10 +775,10 @@ ScrCommandResult evtCommand_CAM_ROT_XYZ(void) {
     }
     degreesToRadians = 0.017453293f;
     pitch = scrGetFloatPara(1) * degreesToRadians;
-    sdfConvertEulerAnglesToQuaternionVU(pitch, scrGetFloatPara(2) * degreesToRadians, 0.0f);
+    FromEuler(pitch, scrGetFloatPara(2) * degreesToRadians, 0.0f);
     SDF_VU0_COPYVECTOR_A_TO_B();
-    sdfConvertEulerAnglesToQuaternionVU(0.0f, 0.0f, scrGetFloatPara(3) * degreesToRadians);
-    effMiscQuatMultiplyVU();
+    FromEuler(0.0f, 0.0f, scrGetFloatPara(3) * degreesToRadians);
+    Mult();
     SDF_VU0_STOREVECTOR(quaternion);
     dds3SetRotPoseSet(cameraObject, (u128 *)quaternion);
     return 1;
@@ -813,7 +803,6 @@ ScrCommandResult evtCommand_CAM_ROT_Q(void) {
     dds3SetRotPoseSet(cameraObject, (u128 *)quaternion);
     return 1;
 }
-
 
 extern void dds3MoverBasicMakePath(dds3Basic_t *object);
 extern char D_003AC8E8[], D_003AC8F8[], D_003AC908[];
@@ -984,7 +973,7 @@ ScrCommandResult evtCommand_MOON_STOP(void)
 
 ScrCommandResult evtCommand_GET_MOON(void)
 {
-    scrSetIntReturnValue(evtGetMirroredSolarPhase());
+    scrSetIntReturnValue(evtGetAgeOfMoon());
     return SCR_COMMAND_RESULT_COMPLETE;
 }
 
@@ -1012,14 +1001,14 @@ ScrCommandResult evtCommand_LOAD_BE(void) {
     }
     if (evtSearchEventPack(eventId) == 0) {
         message = D_003AC958;
-        evtPrintDeveloperConsoleMessage(message, eventId);
+        datDebugPrintf(message, eventId);
         sdfPrintf(message, eventId);
-        dds3LinkProcess(commandWork->task, evtLoadEventPack(eventId));
+        dds3LinkProcess(commandWork->ProcessID, evtLoadEventPack(eventId));
         return SCR_COMMAND_RESULT_PENDING;
     }
     if (evtGetEventPackStat(eventId) == EVT_PACK_LOAD_COMPLETE) {
         message = D_003AC968;
-        evtPrintDeveloperConsoleMessage(message, eventId);
+        datDebugPrintf(message, eventId);
         sdfPrintf(message, eventId);
         return SCR_COMMAND_RESULT_COMPLETE;
     }
@@ -1038,8 +1027,8 @@ ScrCommandResult evtCommand_READ_BE(void) {
     if (evtSearchEventPack(eventId) != 0) {
         return SCR_COMMAND_RESULT_COMPLETE;
     }
-    evtPrintDeveloperConsoleMessage(D_003AC978, eventId);
-    dds3LinkProcess(commandWork->task, evtLoadEventPack(eventId));
+    datDebugPrintf(D_003AC978, eventId);
+    dds3LinkProcess(commandWork->ProcessID, evtLoadEventPack(eventId));
     return SCR_COMMAND_RESULT_COMPLETE;
 }
 
@@ -1049,7 +1038,7 @@ ScrCommandResult evtCommand_CHK_BE(void) {
     EvtPackLoadQueryResult result;
 
     if (scrGetScriptHandle() != 0 && evtSearchEventPack(eventId) != 0 && evtGetEventPackStat(eventId) == EVT_PACK_LOAD_COMPLETE) {
-        evtPrintDeveloperConsoleMessage(D_003AC968, eventId);
+        datDebugPrintf(D_003AC968, eventId);
         result = EVT_PACK_LOAD_QUERY_READY;
     } else {
         result = EVT_PACK_LOAD_QUERY_NOT_READY;
@@ -1068,7 +1057,7 @@ ScrCommandResult evtCommand_DEL_BE(void) {
     if (evtSearchEventPack(eventId) == 0) {
         return SCR_COMMAND_RESULT_COMPLETE;
     }
-    evtPrintDeveloperConsoleMessage(D_003AC988, eventId);
+    datDebugPrintf(D_003AC988, eventId);
     evtKillEventPack(eventId);
     return SCR_COMMAND_RESULT_COMPLETE;
 }
@@ -1087,15 +1076,15 @@ ScrCommandResult evtCommandStartPolygonMovie(void) {
     if (commandWork == NULL) {
         return 1;
     }
-    if (commandWork->task == 0) {
+    if (commandWork->ProcessID == 0) {
         printf(D_003AC998);
         return 1;
     }
     eventId = scrGetIntPara(0);
     sceneId = scrGetIntPara(1);
-    movieTask = evtViewerCreateTask(commandWork->task->priority, eventId, sceneId);
-    evtPrintDeveloperConsoleMessage(D_003AC9E0, scrGetIntPara(0), scrGetIntPara(1));
-    dds3LinkProcess(commandWork->task, movieTask);
+    movieTask = evtViewerCreateTask(commandWork->ProcessID->priority, eventId, sceneId);
+    datDebugPrintf(D_003AC9E0, scrGetIntPara(0), scrGetIntPara(1));
+    dds3LinkProcess(commandWork->ProcessID, movieTask);
     evtPolygonMovieSetFlagBits(movieTask, EVT_POLY_MOVIE_SCRIPT_STARTUP_HOLD);
     scrSetIntReturnValue(scrProcessHandleToVmInteger(movieTask));
     return 1;
@@ -1123,14 +1112,14 @@ ScrCommandResult evtCommand_PMV_RUN(void) {
     if (commandWork == NULL) {
         return 1;
     }
-    if (commandWork->task == 0) {
+    if (commandWork->ProcessID == 0) {
         printf(D_003AC9F8);
         return 1;
     }
     eventId = scrGetIntPara(0);
     sceneId = scrGetIntPara(1);
-    movieTask = evtViewerCreateTask(commandWork->task->priority, eventId, sceneId);
-    dds3LinkProcess(commandWork->task, movieTask);
+    movieTask = evtViewerCreateTask(commandWork->ProcessID->priority, eventId, sceneId);
+    dds3LinkProcess(commandWork->ProcessID, movieTask);
     scrSetIntReturnValue(scrProcessHandleToVmInteger(movieTask));
     return 1;
 }
@@ -1291,9 +1280,28 @@ ScrCommandResult evtCommand_LIGHT_PATH_MOVE(void) {
         return 1;
     }
     printf(D_003ACA40);
-    evtPrintDeveloperConsoleMessage(D_003ACA58);
+    datDebugPrintf(D_003ACA58);
     return 1;
 }
+
+ScrCommandResult evtCommand_LIGHT_PATH_WAIT(void) {
+    EvtPathStatus status = evtCheckPathStat(
+        evtSearchBasic(EFF_WORLD_KIND_LIGHT, scrGetIntPara(0)));
+
+    switch (status) {
+    case EVT_PATH_STATUS_AT_ENDPOINT:
+        return SCR_COMMAND_RESULT_COMPLETE;
+    case EVT_PATH_STATUS_IN_PROGRESS:
+        return SCR_COMMAND_RESULT_PENDING;
+    case EVT_PATH_STATUS_INVALID:
+        return SCR_COMMAND_RESULT_COMPLETE;
+    default:
+        return SCR_COMMAND_RESULT_PENDING;
+    }
+}
+
+extern char D_003ACA78[];
+void datDebugPrintf(const char *fmt, ...);
 
 INCLUDE_RODATA(const s32, "event/evtCommand", D_003AC958);
 
@@ -1312,3 +1320,259 @@ INCLUDE_RODATA(const s32, "event/evtCommand", D_003AC9F8);
 INCLUDE_RODATA(const s32, "event/evtCommand", D_003ACA40);
 
 INCLUDE_RODATA(const s32, "event/evtCommand", D_003ACA58);
+
+INCLUDE_RODATA(const s32, "event/evtCommand", D_003ACA78);
+
+u32 evtCommand_TEX_BE(void) {
+    scrProcessWork_s *work;
+    EvtPackEventId eventId;
+    struct sdfTexHandle_t *entry;
+    dds3ProcessID_t *task;
+
+    work = scrGetScriptHandle();
+    if (work == NULL) {
+        return 1;
+    }
+    if (work->ProcessID == NULL) {
+        printf(D_003ACA78);
+        return 1;
+    }
+    eventId = scrGetIntPara(0);
+    entry = evtGetResorceData(eventId, scrGetIntPara(1));
+    if (entry == 0) {
+        datDebugPrintf("TEX_BE not fount RID = %d\n", scrGetIntPara(1));
+        return 1;
+    }
+    task = evtStartPictureProcess(0x2AFE, entry);
+    dds3LinkProcess(work->ProcessID, task);
+    scrSetIntReturnValue(scrProcessHandleToVmInteger(task));
+    return 1;
+}
+
+u32 evtCommand_TEX_LOAD(void) {
+    scrProcessWork_s *work;
+    dds3ProcessID_t *task;
+
+    work = scrGetScriptHandle();
+    if (work == NULL) {
+        return 1;
+    }
+    if (work->ProcessID == NULL) {
+        printf(D_003ACAE0);
+        return 1;
+    }
+    task = evtStartPictureProcess2(0x2afe, scrGetStrPara(0));
+    dds3LinkProcess(work->ProcessID, task);
+    scrSetIntReturnValue(scrProcessHandleToVmInteger(task));
+    return 1;
+}
+
+u32 evtCommand_TEX_ON(void) {
+    dds3ProcessID_t *task;
+    dds3ProcessRegistrationResult_t registered;
+
+    task = scrVmIntegerToProcessHandle(scrGetIntPara(0));
+    registered = dds3ExistProcess(task);
+    if (registered != DDS3_PROCESS_NOT_REGISTERED) {
+        evtPictureDrawOn(task);
+    }
+    return 1;
+}
+
+u32 evtCommand_TEX_OFF(void) {
+    dds3ProcessID_t *task;
+    dds3ProcessRegistrationResult_t registered;
+
+    task = scrVmIntegerToProcessHandle(scrGetIntPara(0));
+    registered = dds3ExistProcess(task);
+    if (registered != DDS3_PROCESS_NOT_REGISTERED) {
+        evtPictureDrawOff(task);
+    }
+    return 1;
+}
+
+extern void evtKillPictureProcess(dds3ProcessID_t *task);
+
+u32 evtCommand_TEX_CLS(void) {
+    dds3ProcessID_t *task;
+    dds3ProcessRegistrationResult_t registered;
+
+    task = scrVmIntegerToProcessHandle(scrGetIntPara(0));
+    registered = dds3ExistProcess(task);
+    if (registered != DDS3_PROCESS_NOT_REGISTERED) {
+        evtKillPictureProcess(task);
+    }
+    return 1;
+}
+
+extern void fldSkySetAlpha(u32 drawState);
+extern void fldSetFilterAnime(u32 mode);
+
+u32 evtCommand_SET_SKY(void) {
+    s32 area;
+    s32 target;
+    s32 duration;
+
+    fldSetFilterAnime(0);
+    fldSkySetAlpha(0x80);
+    area = scrGetIntPara(0);
+    target = scrGetIntPara(1);
+    duration = scrGetIntPara(2);
+    fldSetFadeTarget(area, target, duration);
+    return 1;
+}
+
+INCLUDE_RODATA(const s32, "event/evtCommand", D_003ACAE0);
+
+u32 evtCommand_SET_SKY_A(void) {
+    s32 alpha;
+
+    alpha = scrGetIntPara(1);
+    if (alpha < -255) {
+        datDebugPrintf("warning : SET_SKY_A alpha < -255\n");
+        alpha = -255;
+    }
+    if (alpha > 255) {
+        datDebugPrintf("warning : SET_SKY_A alpha > 255\n");
+        alpha = 255;
+    }
+    evtSetSkyAlpha(scrGetIntPara(0), alpha);
+    return 1;
+}
+
+extern void evtSetBokasi(u32 enabled);
+
+u32 evtCommand_BOKASI_ON(void) {
+    evtSetBokasi(1);
+    return 1;
+}
+
+u32 evtCommand_BOKASI_OFF(void) {
+    evtSetBokasi(0);
+    return 1;
+}
+
+u32 evtCommand_LOAD_SOUND_E(void) {
+    s32 eventId;
+
+    /* One parameter call per arm; retail has two call sites and sharing one changes the code. */
+    if (scrGetCommandTimer() == 0) {
+        evtLoadEventBgm(scrGetIntPara(0));
+    } else {
+        eventId = scrGetIntPara(0);
+        if (evtCheckEventBgmLoaded(eventId) != EVT_EVENT_BGM_NOT_READY) {
+            return 1;
+        }
+    }
+    return 0;
+}
+
+extern EvtPackedSoundTrackId evtPlayEventBgm(s32 eventId, EvtSoundVariation variation);
+
+u32 evtCommand_BGM_PLAY_E(void) {
+    s32 eventId;
+    EvtSoundVariation variation;
+
+    eventId = scrGetIntPara(0);
+    variation = scrGetIntPara(1);
+    evtPlayEventBgm(eventId, variation);
+    return 1;
+}
+
+extern void evtTransEventBgm(s32 eventId, EvtSoundVariation variation);
+
+u32 evtCommand_BGM_TRANS_E(void) {
+    s32 eventId;
+    EvtSoundVariation variation;
+
+    eventId = scrGetIntPara(0);
+    variation = scrGetIntPara(1);
+    evtTransEventBgm(eventId, variation);
+    return 1;
+}
+
+extern EvtPackedSoundTrackId evtStopEventBgm(s32 eventId, EvtSoundVariation variation);
+
+u32 evtCommand_FADEOUT_E(void) {
+    s32 eventId;
+    EvtSoundVariation variation;
+
+    eventId = scrGetIntPara(0);
+    variation = scrGetIntPara(1);
+    evtStopEventBgm(eventId, variation);
+    return 1;
+}
+
+extern void btlAdvanceTitleStateWithAudioCleanupTask(void);
+extern void p2sdBgmVolDown(void);
+
+u32 evtCommand_BGM_VOL_DOWN(void) {
+    p2sdBgmVolDown();
+    btlAdvanceTitleStateWithAudioCleanupTask();
+    return 1;
+}
+
+extern void p2sdBgmVolUp(void);
+
+u32 evtCommand_BGM_VOL_UP(void) {
+    p2sdBgmVolUp();
+    btlAdvanceTitleStateWithAudioCleanupTask();
+    return 1;
+}
+
+extern EvtPackedSoundTrackId evtPlaySe(s32 eventId, EvtSoundVariation variation);
+
+u32 evtCommand_SE_PLAY_E(void) {
+    s32 id;
+    EvtSoundVariation variation;
+
+    id = scrGetIntPara(0);
+    variation = scrGetIntPara(1);
+    evtPlaySe(id, variation);
+    return 1;
+}
+
+extern EvtPackedSoundTrackId evtStartBgmBySoundIdAndFade(
+    s32 eventId, EvtSoundVariation variation);
+
+u32 evtCommandStartBgmWithFade(void) {
+    s32 eventId;
+    EvtSoundVariation variation;
+
+    eventId = scrGetIntPara(0);
+    variation = scrGetIntPara(1);
+    evtStartBgmBySoundIdAndFade(eventId, variation);
+    return 1;
+}
+
+extern void evtRefreshTaskEffectTexture(EvtPackEventId eventId, EvtPackSecondaryResourceId key);
+
+u32 evtOpcodeRefreshTaskData(void) {
+    EvtPackEventId eventId;
+    EvtPackSecondaryResourceId key;
+
+    eventId = scrGetIntPara(0);
+    key = scrGetIntPara(1);
+    evtRefreshTaskEffectTexture(eventId, key);
+    return 1;
+}
+
+extern void Eve_DistortionBlurSetDefTex(void);
+
+u32 evtOpcodeInitializeEffectSoundChannel(void) {
+    Eve_DistortionBlurSetDefTex();
+    return 1;
+}
+
+u32 evtCommandSetDrawFlagWhileWaiting(void) {
+    if (scrGetIntPara(0) <= 0) {
+        dds3DrawFlag |= 0x2000000;
+        return 1;
+    }
+    if ((s32)scrGetCommandTimer() < scrGetIntPara(0)) {
+        dds3DrawFlag |= 0x2000000;
+        return 0;
+    }
+    return 1;
+}
+

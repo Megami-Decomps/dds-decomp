@@ -30,7 +30,7 @@ typedef struct PanelRecSub {
 typedef struct PanelOptionBlock {
     u32 x;
     u32 y;
-    _FRQ *glyphChain;
+    frFontHandle_t *glyphChain;
     u32 panelValue;
     s16 status;
     s16 clearBitCount;

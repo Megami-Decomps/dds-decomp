@@ -17,7 +17,7 @@
 #include "btl_command_availability_override.h"
 #include "btl_command_hit_count_override.h"
 #include "pty_active_roster_index_api.h"
-#include "sdf_vu0.h"
+#include "ps2asm.h"
 #include "btl_actor_resource_bank_api.h"
 #include "btl_special_ability.h"
 #include "dat_unit_has_skill_api.h"
@@ -33,10 +33,9 @@
 #include "fr_font.h"
 #include "eff_resource_slots.h"
 #include "sdf_chip.h"
-#include "sdf_resource.h"
+#include "sdf_heap_api.h"
 #include "btl_scene_fade.h"
 #include "btl_resource.h"
-#include "pcp_vu0.h"
 #include "btl_ui.h"
 #include "sdf.h"
 #include "btl.h"
@@ -45,14 +44,14 @@
 #include "btl_state.h"
 #include "eff.h"
 #include "btl_action.h"
-#include "kwln.h"
+#include "kernel.h"
 #include "dat_state.h"
 #include "dat_calculated_stat_value_api.h"
 #include "dat_calculate_command_base_value_api.h"
 #include "btl_resolve_unit_value_api.h"
 #include "btl_select_transform_parameters_api.h"
 #include "dat_command.h"
-#include "kwln_task_lifecycle.h"
+#include "dds3_task_lifecycle.h"
 #include "mdl_flag_api.h"
 
 extern void btlBossDebugPrintf(const char *format, ...);
@@ -108,7 +107,7 @@ extern char D_003A1A40[];
 
 extern datUnitWork_t *btlGetIndexedPartyEntryRecord(s32);
 
-extern EffRandState effSharedRandomState[];
+extern EffRandState dds3RandCB[];
 
 extern s32 sdfCalculateCommandVitalDelta(s32, datUnitWork_t *, datUnitWork_t *, u32, u8);
 
@@ -590,9 +589,9 @@ void btlSortActorMuzzleDirections(BtlUnit *unit, BtlIndexList *targets, s32 acti
             for (i = 0; i < last; i++) {
                 pair[0] = btlGetIndexListEntry(targets, i);
                 pair[1] = btlGetIndexListEntry(targets, i + 1);
-                btlUnitGetMuzzlePosVU(pair[0]);
+                effBTLModelGetSphereCenter(pair[0]);
                 SDF_VU0_STOREVECTOR(muzzle[0]);
-                btlUnitGetMuzzlePosVU(pair[1]);
+                effBTLModelGetSphereCenter(pair[1]);
                 SDF_VU0_STOREVECTOR(muzzle[1]);
                 if ((pair[0]->status.flags & 0x400) && (pair[1]->status.flags & 0x400)) {
                     if (mode == 1) {
@@ -713,3 +712,4 @@ INCLUDE_RODATA(const s32, "game/code_001A5C40", D_003A1A78);
 INCLUDE_RODATA(const s32, "game/code_001A5C40", D_003A1A88);
 
 INCLUDE_RODATA(const s32, "game/code_001A5C40", D_003A1A98);
+

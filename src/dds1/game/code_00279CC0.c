@@ -4,7 +4,7 @@
 #include "eff_resource_slots.h"
 #include "eff_resource_source_lifetime.h"
 #include "mnu_input.h"
-#include "kwln.h"
+#include "kernel.h"
 #include "mnu.h"
 #include "mnu_list.h"
 #include "mnu_shop.h"
@@ -37,8 +37,8 @@ extern void itfSetGridEntryQuantizedAndRefresh(EffectSlotSet *, s32, s32, s32, s
 
 extern u8 *datSkillMessages;
 
-extern s32 frFontDrawGlyphChain(struct _FRQ *, s8, u32);
-extern _FRQ *itfDrawTextWithSelectedFontMode(s32, s32, s32, s8, u16, s32);
+extern s32 frDrawFontOt(struct frFontHandle_t *, s8, u32);
+extern frFontHandle_t *itfDrawTextWithSelectedFontMode(s32, s32, s32, s8, u16, s32);
 
 
 typedef struct MenuListNode MenuListNode;
@@ -227,9 +227,9 @@ s32 mnuStepSkillDetailControl(dds3ProcessID_t *callback) {
 }
 
 void mnuDrawSelectionLabel(s32 selection) {
-    _FRQ *item = itfDrawTextWithSelectedFontMode(0xCB0, 0xA80, 0, 0, selection & 0xFFFF, 1);
+    frFontHandle_t *item = itfDrawTextWithSelectedFontMode(0xCB0, 0xA80, 0, 0, selection & 0xFFFF, 1);
     frSetFontColor(item, 0xA09DC366);
-    frFontDrawGlyphChain(item, 1, 0x53);
+    frDrawFontOt(item, 1, 0x53);
     frDestroyFontRequestAfter(item);
 }
 
@@ -246,7 +246,7 @@ void mnuDrawAffinityParticipantLabels(u16 affinityId, s32 placeholderResource, s
 
     for (slot = 0; slot < 3; slot++, y += 0xC8) {
         s32 kind = ptyGetAffinityKind((s32)affinityId, slot);
-        _FRQ *glyph = 0;
+        frFontHandle_t *glyph = 0;
 
         if (kind < 0) {
             if (kind == -1) {
@@ -277,7 +277,7 @@ void mnuDrawAffinityParticipantLabels(u16 affinityId, s32 placeholderResource, s
         }
 
         if (glyph != 0) {
-            frFontDrawGlyphChain(glyph, 1, 0x53);
+            frDrawFontOt(glyph, 1, 0x53);
             frDestroyFontRequestAfter(glyph);
         }
     }
@@ -711,7 +711,7 @@ void mnuDrawBackdrop(MenuAssets *assets, s32 option) {
 
 
 MenuList *mnuCreateListState(s32 id, s32 visibleCount, s32 rowSpacing) {
-    MenuList *item = (MenuList *)sdfAllocAndClearQuadwords(sizeof(MenuList));
+    MenuList *item = (MenuList *)sdfChipAllocZeroDirect(sizeof(MenuList));
     item->id = id;
     item->visibleCount = visibleCount;
     item->rowStep = rowSpacing * 8;
@@ -762,7 +762,7 @@ MenuListNode *mnuListAppendNode(list, text)
     MenuList *list;
     const void *text;
 {
-    MenuListNode *node = sdfAllocAndClearQuadwords(sizeof(MenuListNode));
+    MenuListNode *node = sdfChipAllocZeroDirect(sizeof(MenuListNode));
     s32 index = list->count;
     MenuListNode *last;
 
@@ -832,7 +832,7 @@ MenuListNode *mnuInsertListNodeRelativeToAnchor(MenuList *list, MenuListNode *an
         return node;
     }
 
-    node = sdfAllocAndClearQuadwords(sizeof(MenuListNode));
+    node = sdfChipAllocZeroDirect(sizeof(MenuListNode));
     node->text = text;
     if (options & MNU_LIST_INSERT_AFTER_ANCHOR) {
         node->prev = anchor;
@@ -1215,3 +1215,4 @@ u32 mnuTestListFlagTwo(u32 *flags) {
 INCLUDE_RODATA(const s32, "game/code_00279CC0", D_003B2330);
 
 INCLUDE_RODATA(const s32, "game/code_00279CC0", D_003B2348);
+

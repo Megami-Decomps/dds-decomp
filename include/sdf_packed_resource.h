@@ -20,11 +20,11 @@ typedef char SdfPackedRelocationHeader_offset_offset_must_be_0x10[
 typedef char SdfPackedRelocationHeader_byteCount_offset_must_be_0x14[
     ((u32)&((SdfPackedRelocationHeader *)0)->relocationByteCount == 0x14) ? 1 : -1];
 
-u8 *sdfRelocatePackedResourcePayload(SdfPackedRelocationHeader *resource);
-u8 *sdfRelocatePackedResourceWordsFromHeader(SdfPackedRelocationHeader *resource);
+u8 *sdfFixupModelBinary(SdfPackedRelocationHeader *resource);
+u8 *sdfFixupMotionBinary(SdfPackedRelocationHeader *resource);
 
 struct sdfMemHandle_t;
-struct sdfMemHandle_t *sdfLoadPackedResourceWithRelocatedPayload(const char *name, u8 **outPayloadAddress);
-struct sdfMemHandle_t *sdfReadPackedResourceAndRelocateHeader(const char *name, u8 **outPayloadAddress);
+struct sdfMemHandle_t *sdfDevLoadModel(const char *name, u8 **outPayloadAddress);
+struct sdfMemHandle_t *sdfDevLoadMotion(const char *name, u8 **outPayloadAddress);
 
 #endif /* SDF_PACKED_RESOURCE_H */

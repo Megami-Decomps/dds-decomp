@@ -3,7 +3,7 @@
 #include "ui_color.h"
 #include "fr_font.h"
 #include "itf_draw_grid.h"
-#include "kwln.h"
+#include "kernel.h"
 #include "mnu_reset_selection_widths_api.h"
 #include "mnu_result.h"
 #include "mnu_party_panel_api.h"
@@ -22,11 +22,11 @@ void mnuDrawItemPanelBackdrop(BrsSkillPackageWork *context) {
     mnuDrawCampIconBackdrop(&context->campEffect, 0x20);
 }
 
-struct _FRQ;
+struct frFontHandle_t;
 
 extern void effDrawTextureSlotWithBlendedCornerColors(s32, s32, s32, u32, s32,
                                                       struct EffectSlotSet *, s32, s32);
-extern s32 frFontDrawGlyphChain(struct _FRQ *, s8, u32);
+extern s32 frDrawFontOt(struct frFontHandle_t *, s8, u32);
 extern u32 mnuKindIsSelectable(u32);
 extern char D_004379B0[];
 
@@ -36,7 +36,7 @@ void mnuDrawRemainingSelectionExtent(BrsSkillPackageWork *context) {
     datUnitWork_t *item = context->selectedRewardRow->unit;
     s32 delta;
     s32 x;
-    struct _FRQ *glyph;
+    struct frFontHandle_t *glyph;
     u32 color;
 
     effDrawTextureSlotWithBlendedCornerColors(0x1710, 0x8C0, 0, iconFade, 1,
@@ -54,7 +54,7 @@ void mnuDrawRemainingSelectionExtent(BrsSkillPackageWork *context) {
     sprintf(text, D_004379B0, delta);
     glyph = itfCreateFont3TextGlyph(x, 0x8E8, 0, color, text, 0);
     frSetFontColorNo(glyph, 3);
-    frFontDrawGlyphChain(glyph, 1, 0x53);
+    frDrawFontOt(glyph, 1, 0x53);
     frDestroyFontRequestAfter(glyph);
     if (mnuKindIsSelectable(item->unitId) != 0) {
         if (context->iconFade < 0x100) {
@@ -71,7 +71,7 @@ void mnuDrawRemainingSelectionExtent(BrsSkillPackageWork *context) {
 extern void uiDrawUniformColorRect(u32, u32, u32, u32, u32, u32, u32);
 struct sdfGrOt_t;
 extern s8 evtStageTestUpdate(struct sdfGrOt_t **);
-extern struct sdfGrOt_t *kwlnSceneSurfaceSets[13][4];
+extern struct sdfGrOt_t *sdfModelOtTable[13][4];
 
 void mnuDrawStatAssignmentPanel(BrsSkillPackageWork *context, s32 copyOptions) {
     datUnitWork_t *unit = context->selectedRewardRow->unit;
@@ -94,7 +94,7 @@ void mnuDrawStatAssignmentPanel(BrsSkillPackageWork *context, s32 copyOptions) {
     mnuDrawAndAdvancePanelGroup(0xEB0, 0x518, 0, unit, context->panelHandle, 0, 0x53);
     mnuDrawPartySkillListPanel(0, 0, 0, unit, context->spriteHandle, 0x53);
     mnuDrawRemainingSelectionExtent(context);
-    evtStageTestUpdate(kwlnSceneSurfaceSets[0]);
+    evtStageTestUpdate(sdfModelOtTable[0]);
 }
 
 s32 mnuAdvanceSkillPackageToItemPanel(dds3ProcessID_t *request) {

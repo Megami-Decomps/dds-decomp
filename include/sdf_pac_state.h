@@ -85,7 +85,7 @@ void sdfPacInit(PacState *state, void *callbackAddress);
 SdfPacPhase sdfPacDecode(PacState *state, const u8 *input, s32 inputByteCount);
 void sdfPacUseSrc(PacState *state, s32 consumedBytes);
 void sdfPacTexListDecoder0(PacState *state);
-void sdfPacSkipAllocationEntryBytes(PacState *state);
+void sdfPacTexListDecoder1(PacState *state);
 void sdfPacTexListDecoderInit(PacState *state,
                                 SdfPacStreamPacketHeader *packet);
 void sdfPacSetStay(PacState *state);

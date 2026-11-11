@@ -1,5 +1,5 @@
 #include "mnu_input.h"
-#include "kwln.h"
+#include "kernel.h"
 #include "mnu.h"
 #include "mnu_staff.h"
 #include "mnu_list.h"
@@ -291,7 +291,7 @@ s32 mtrMantraFindIndex(s32 mantraId) {
     return 0;
 }
 
-extern struct _FRQ *itfCreateFont2TextGlyph(s32, s32, s32, u32, char *, struct _FRQ *);
+extern struct frFontHandle_t *itfCreateFont2TextGlyph(s32, s32, s32, u32, char *, struct frFontHandle_t *);
 extern void mnuDrawCampGridResourceSlot(s32, s32, s32, struct MenuList *,
                                         struct MenuListNode *, s32);
 extern void mnuDispatchEntryWords(EffectSlotSet *, s32, struct MenuListNode *);
@@ -316,7 +316,7 @@ void mnuDrawCampGridEntry(s32 x, s32 y, s32 depth, s32 offset, struct MenuList *
     mnuDrawCampGridResourceSlot(x, y, depth, list, node, texture);
     markerY = y + 0x40;
     if (DDS3_GBWK->inventory.counts[node->sortKeySecondary] != 0) {
-        struct _FRQ *glyph;
+        struct frFontHandle_t *glyph;
 
         if (node->flags48 & 1) {
             color = 0xA09DC320;
@@ -325,7 +325,7 @@ void mnuDrawCampGridEntry(s32 x, s32 y, s32 depth, s32 offset, struct MenuList *
         frSetFontColorNo(glyph, 0);
         sprintf(buffer, D_00437BC0, DDS3_GBWK->inventory.counts[node->sortKeySecondary]);
         glyph = itfCreateFont2TextGlyph(x + offset + 0x910, y + 0x20, depth, color, buffer, glyph);
-        frFontDrawGlyphChain(glyph, 1, texture);
+        frDrawFontOt(glyph, 1, texture);
         frDestroyFontRequestAfter(glyph);
     } else {
         EffectSlotSet *resource = context->resources.baseResources[1];
@@ -363,3 +363,4 @@ INCLUDE_SDATA(const s32, "game/code_002AAEA0", D_00437BB8);
 INCLUDE_SDATA(const s32, "game/code_002AAEA0", D_00437BC0);
 
 INCLUDE_SDATA(const s32, "game/code_002AAEA0", D_00437BC8);
+

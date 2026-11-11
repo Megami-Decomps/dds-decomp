@@ -5,7 +5,7 @@
 #include "btl_horizontal_aim_api.h"
 #include "mnu_title_sound.h"
 #include "mnu_title_sound_buffer_status.h"
-#include "sdf_vu0.h"
+#include "ps2asm.h"
 #include "btl_actor_resource_bank_api.h"
 #include "sdf_trig.h"
 #include "sdf_packet_list.h"
@@ -18,7 +18,7 @@
 #include "btl_task_state.h"
 #include "btl_task_condition.h"
 #include "btl_task_poll_result.h"
-#include "sdf_resource.h"
+#include "sdf_heap_api.h"
 #include "sdf_model.h"
 #include "btl.h"
 #include "sdf_texture_offset_list.h"
@@ -41,8 +41,6 @@
 #include "eff_object.h"
 #include "mdl.h"
 #include "file_request_api.h"
-#include "pcp_vu0.h"
-#include "ee_mmi.h"
 #include "fpu.h"
 #include "dat_state.h"
 #include "dat_command.h"
@@ -64,7 +62,7 @@ extern BtlAt3Entry D_003E0F60[];
 extern u32 D_00436AD4;
 extern struct BtlRuntimeTask *btlDeferredTaskHead;
 
-extern f32 btlMeasureFilteredUnitGroupBounds(s32, f32 *, f32 *);
+extern f32 btlMeasureMaskedUnitBounds(s32, f32 *, f32 *);
 
 
 extern char D_00436AE8[];
@@ -103,7 +101,7 @@ extern s32 D_00436AA0;
 
 extern void btlFlagMatchingUnitsDefeatCandidate(s32);
 
-extern f32 btlMeasureUnitIndexListBounds(BtlIndexList *, f32 *, f32 *);
+extern f32 btlMeasureIndexListBounds(BtlIndexList *, f32 *, f32 *);
 
 extern s16 D_00436AB0[];
 
@@ -202,7 +200,7 @@ BtlTaskPollResult sndPollAtrac3SELoadTask(Atrac3LoadTaskArgs *args) {
         resource = fileGetMemHandle(args->request);
         data = sdfMemLock(resource);
         size = fileGetLoadSize(args->request);
-        fileRequestFreeIfComplete(args->request);
+        fileHandleFree(args->request);
         mnuInstallTitleSoundBufferFromData(data, size, D_003E0F60[args->entryIndex].format);
         sdfMemFreeDirect(resource);
         btlBossDebugPrintf("btl:atrac3 SE load end\n");
@@ -266,7 +264,7 @@ SndEarringPlaybackTaskResult sndDeadAtracPlaybackTask(BtlDeadLoadArgs *args) {
                 fileGetMemHandle(args->request);
             data = sdfMemLock(args->resourceAllocation);
             size = fileGetLoadSize(args->request);
-            fileRequestFreeIfComplete(args->request);
+            fileHandleFree(args->request);
             mnuInstallTitleSoundBufferFromData(data, size,
                                                MNU_TITLE_SOUND_FORMAT_MEDIUM_FRAME);
             mnuClearInactiveSoundBufferState();
@@ -365,7 +363,7 @@ s32 btlExpandPartyFormationAroundCenter(f32 *center) {
             }
         }
     }
-    btlMeasureFilteredUnitGroupBounds(0x400, 0, 0);
+    btlMeasureMaskedUnitBounds(0x400, 0, 0);
     SDF_VU0_STOREVECTOR_NOMEM(target);
     for (i = count - 1; i >= 0; i--) {
         unit = actors[i];
@@ -374,7 +372,7 @@ s32 btlExpandPartyFormationAroundCenter(f32 *center) {
         } else if (unit->status.flags & 0xE0) {
             SDF_VU0_COPYVECTOR(unit->rotation, D_003BE070);
         } else {
-            btlUnitGetMuzzlePosVU(unit);
+            effBTLModelGetSphereCenter(unit);
             SDF_VU0_STOREVECTOR_NOMEM(position);
             if (btlAimHorizontalDirectionVU(position, target) != 0) {
                 SDF_VU0_STOREVECTOR_NOMEM(direction);
@@ -576,7 +574,7 @@ void btlPlaceTripleFormationAroundCenter(ActionStateLink *link, BtlUnit *first, 
     slot[link->unit->battleSideSlotIndex] = link->unit;
     slot[first->battleSideSlotIndex] = first;
     slot[second->battleSideSlotIndex] = second;
-    radius = btlMeasureFilteredUnitGroupBounds(0x400, 0, 0) + 200.0f;
+    radius = btlMeasureMaskedUnitBounds(0x400, 0, 0) + 200.0f;
     SDF_VU0_STOREVECTOR_NOMEM(center);
     pos[0] = center[0];
     pos[1] = 0.0f;
@@ -625,7 +623,7 @@ void btlPlaceTripleFormationAroundTarget(ActionStateLink *link, BtlUnit *first, 
         slot[link->unit->battleSideSlotIndex] = link->unit;
         slot[first->battleSideSlotIndex] = first;
         slot[second->battleSideSlotIndex] = second;
-        btlUnitGetMuzzlePosVU(target);
+        effBTLModelGetSphereCenter(target);
         SDF_VU0_STOREVECTOR(center);
         center[1] = 0.0f;
         radius = target->bodyRadius * target->scale;
@@ -634,10 +632,10 @@ void btlPlaceTripleFormationAroundTarget(ActionStateLink *link, BtlUnit *first, 
             radius = 500.0f;
         }
         SDF_VU0_LOADVECTOR(target->orientation);
-        effMiscQuaternionToMatrixVU();
+        ToMatrix();
         SDF_VU0_LOADVECTOR(D_003E9130);
         SDF_VU0_APPLYMATRIX_XYZ();
-        VU0_SCALAR_OP(radius, "vmulx.xyzw vf10, vf10, vf2x");
+        SDF_VU0_SCALEVECTOR_V0(radius);
         SDF_VU0_LOADVECTOR_B(center);
         SDF_VU0_ADDVECTOR();
         SDF_VU0_STOREVECTOR_NOMEM(pos);
@@ -645,7 +643,7 @@ void btlPlaceTripleFormationAroundTarget(ActionStateLink *link, BtlUnit *first, 
         btlUnitFaceTarget(slot[1], target);
         SDF_VU0_LOADVECTOR(D_003E9120);
         SDF_VU0_APPLYMATRIX_XYZ();
-        VU0_SCALAR_OP(radius, "vmulx.xyzw vf10, vf10, vf2x");
+        SDF_VU0_SCALEVECTOR_V0(radius);
         SDF_VU0_LOADVECTOR_B(center);
         SDF_VU0_ADDVECTOR();
         SDF_VU0_STOREVECTOR_NOMEM(pos);
@@ -654,7 +652,7 @@ void btlPlaceTripleFormationAroundTarget(ActionStateLink *link, BtlUnit *first, 
         SDF_VU0_LOADVECTOR(D_003E9120);
         SDF_VU0_NEGVECTOR_XYZ();
         SDF_VU0_APPLYMATRIX_XYZ();
-        VU0_SCALAR_OP(radius, "vmulx.xyzw vf10, vf10, vf2x");
+        SDF_VU0_SCALEVECTOR_V0(radius);
         SDF_VU0_LOADVECTOR_B(center);
         SDF_VU0_ADDVECTOR();
         SDF_VU0_STOREVECTOR_NOMEM(pos);
@@ -695,17 +693,17 @@ void btlPlaceTripleFormationAroundMiddleActor(ActionStateLink *link, BtlUnit *fi
     }
     if (slot[1] != 0) {
         SDF_VU0_LOADVECTOR((u8 *)slot[1] + 0x70);
-        effMiscQuaternionToMatrixVU();
+        ToMatrix();
         SDF_VU0_LOADVECTOR(D_003E9130);
         SDF_VU0_APPLYMATRIX_XYZ();
         SDF_VU0_COPYVECTOR_A_TO_B();
-        VU0_NEGATE_XYZ(vf11);
+        SDF_VU0_NEGVECTOR_B_XYZ();
         SDF_VU0_STOREVECTOR_B(dir);
         radius = slot[1]->bodyRadius * slot[1]->scale;
         radius += 100.0f;
-        VU0_SCALAR_OP(radius, "vmulx.xyzw vf10, vf10, vf2x");
+        SDF_VU0_SCALEVECTOR_V0(radius);
         SDF_VU0_STOREVECTOR_NOMEM(center);
-        btlUnitGetMuzzlePosVU(slot[1]);
+        effBTLModelGetSphereCenter(slot[1]);
         SDF_VU0_LOADVECTOR_B(center);
         SDF_VU0_ADDVECTOR();
         SDF_VU0_STOREVECTOR_NOMEM(center);
@@ -733,7 +731,7 @@ void btlPlaceTripleFormationAroundMiddleActor(ActionStateLink *link, BtlUnit *fi
             } else {
                 SDF_VU0_LOADVECTOR(dir);
             }
-            VU0_SCALAR_OP(radius, "vmulx.xyzw vf10, vf10, vf2x");
+            SDF_VU0_SCALEVECTOR_V0(radius);
             SDF_VU0_LOADVECTOR_B(center);
             SDF_VU0_ADDVECTOR();
             SDF_VU0_STOREVECTOR_NOMEM(pos);
@@ -777,9 +775,9 @@ void btlOrientFrontAndBackUnitsTowardTargets(ActionStateLink *link, BtlUnit *a, 
     if (count == 1) {
         btlUnitFaceTarget(front, target);
     } else {
-        btlUnitGetMuzzlePosVU(front);
+        effBTLModelGetSphereCenter(front);
         SDF_VU0_STOREVECTOR(vec[0]);
-        btlMeasureFilteredUnitGroupBounds(target->status.flags & 0x600, 0, 0);
+        btlMeasureMaskedUnitBounds(target->status.flags & 0x600, 0, 0);
         SDF_VU0_STOREVECTOR_NOMEM(vec[1]);
         if (btlAimHorizontalDirectionVU(vec[0], vec[1]) != 0) {
             SDF_VU0_STOREVECTOR_NOMEM(&rot);
@@ -855,9 +853,9 @@ void btlAlignTripleFormationWithTarget(ActionStateLink *link, BtlUnit *first, Bt
                 return;
             }
         }
-        btlUnitGetMuzzlePosVU(slot[1]);
+        effBTLModelGetSphereCenter(slot[1]);
         SDF_VU0_STOREVECTOR_NOMEM(position);
-        btlUnitGetMuzzlePosVU(target);
+        effBTLModelGetSphereCenter(target);
         SDF_VU0_STOREVECTOR_NOMEM(targetPosition);
         SDF_VU0_LOADVECTOR_B(position);
         SDF_VU0_SUBVECTOR();
@@ -918,12 +916,12 @@ void btlPlacePairedFormationAtFixedCenter(ActionStateLink *link, BtlUnit *other)
         }
     }
     if (btlGetIndexListCount(link->indexWork.indices) == 1) {
-        btlUnitGetMuzzlePosVU((BtlUnit *)btlGetIndexListEntry(link->indexWork.indices, 0));
+        effBTLModelGetSphereCenter((BtlUnit *)btlGetIndexListEntry(link->indexWork.indices, 0));
     } else {
-        btlMeasureUnitIndexListBounds(link->indexWork.indices, 0, 0);
+        btlMeasureIndexListBounds(link->indexWork.indices, 0, 0);
     }
     SDF_VU0_STOREVECTOR(muzzle);
-    VU0_SCALAR_OP_CLOBBER(0.0f, "vaddx.y vf10, vf0, vf2x");
+    SDF_VU0_SETVECTOR_Y(0.0f);
     SDF_VU0_LOADVECTOR_B(&D_003BE0A0);
     SDF_VU0_SUBVECTOR();
     SDF_VU0_NORMALIZE();
@@ -939,7 +937,7 @@ void btlPlacePairedFormationAtFixedCenter(ActionStateLink *link, BtlUnit *other)
         }
         SDF_VU0_LOADVECTOR(dir);
         SDF_VU0_APPLYMATRIX_XYZ();
-        VU0_SCALAR_OP(radius, "vmulx.xyzw vf10, vf10, vf2x");
+        SDF_VU0_SCALEVECTOR_V0(radius);
         SDF_VU0_LOADVECTOR_B(&D_003BE0A0);
         SDF_VU0_ADDVECTOR();
         SDF_VU0_STOREVECTOR_NOMEM(pos);
@@ -1013,14 +1011,14 @@ void btlPlacePairedFormationNearTarget(ActionStateLink *link, BtlUnit *other) {
     if (!special) {
         if (btlGetIndexListCount(link->indexWork.indices) == 1) {
             unit = (BtlUnit *)btlGetIndexListEntry(link->indexWork.indices, 0);
-            btlUnitGetMuzzlePosVU(unit);
+            effBTLModelGetSphereCenter(unit);
             reach = unit->reach * unit->scale;
         } else {
-            btlMeasureUnitIndexListBounds(link->indexWork.indices, 0, 0);
+            btlMeasureIndexListBounds(link->indexWork.indices, 0, 0);
             reach = 0.0f;
         }
         SDF_VU0_STOREVECTOR(muzzle);
-        VU0_SCALAR_OP_CLOBBER(0.0f, "vaddx.y vf10, vf0, vf2x");
+        SDF_VU0_SETVECTOR_Y(0.0f);
         SDF_VU0_LOADVECTOR_B(&D_003BE0B0);
         SDF_VU0_ADDVECTOR();
         SDF_VU0_STOREVECTOR(center);
@@ -1063,7 +1061,7 @@ void btlPlacePairedFormationNearTarget(ActionStateLink *link, BtlUnit *other) {
             }
             SDF_VU0_LOADVECTOR(&D_003BE0C0);
             SDF_VU0_APPLYMATRIX_XYZ();
-            VU0_SCALAR_OP_CLOBBER(radius, "vmulx.xyzw vf10, vf10, vf2x");
+            SDF_VU0_SCALEVECTOR_V0_CLOBBER(radius);
             SDF_VU0_LOADVECTOR_B(center);
             SDF_VU0_ADDVECTOR();
             SDF_VU0_STOREVECTOR(position);
@@ -1098,7 +1096,7 @@ void btlApplyRadialLinkageFormation(BtlLinkedCommand *command) {
         return;
     }
     target = btlGetIndexListEntry(command->targetList, 0);
-    btlUnitGetMuzzlePosVU(target);
+    effBTLModelGetSphereCenter(target);
     /* Audited SDK store: this vector is read only by the VU load below. */
     SDF_VU0_STOREVECTOR_NOMEM(targetPosition);
     participants[0] = command->linkedA;
@@ -1122,12 +1120,12 @@ void btlApplyRadialLinkageFormation(BtlLinkedCommand *command) {
         spacing = (const BtlFormationSpacingCell *)(selector * sizeof(BtlFormationSpacingCell) + (s32)(u32)actorStatusAddress + 0x38);
         distance = spacing->spacing * participants[i]->scale + target->reach * target->scale;
         btlCopyUnitCurrentPosition(participants[i], oldPosition);
-        btlUnitGetMuzzlePosVU(participants[i]);
+        effBTLModelGetSphereCenter(participants[i]);
         SDF_VU0_LOADVECTOR_B(targetPosition);
         SDF_VU0_SUBVECTOR();
-        VU0_SET_VF10_COMPONENT(y, flatY);
+        SDF_VU0_SETVECTOR_Y(flatY);
         SDF_VU0_NORMALIZE();
-        VU0_SCALAR_OP_CLOBBER(distance, "vmulx.xyzw vf10, vf10, vf2x");
+        SDF_VU0_SCALEVECTOR_V0_CLOBBER(distance);
         SDF_VU0_LOADVECTOR_B(targetPosition);
         SDF_VU0_ADDVECTOR();
         /* The vector is complete here; Y is replaced, then the callee consumes it. */
@@ -1185,7 +1183,7 @@ void btlPlaceBothSidesInRadialFormation(ActionStateLink *link, BtlUnit *firstAct
             radius = second[slot]->bodyRadius * second[slot]->scale;
             radius += 500.0f;
             SDF_VU0_LOADVECTOR(secondDirection);
-            VU0_SCALE_VF(vf10, radius);
+            SDF_VU0_SCALEVECTOR_BITS(radius);
             SDF_VU0_LOADVECTOR_B(effZeroVector);
             SDF_VU0_ADDVECTOR();
             SDF_VU0_STOREVECTOR_NOMEM(position);
@@ -1200,9 +1198,9 @@ void btlPlaceBothSidesInRadialFormation(ActionStateLink *link, BtlUnit *firstAct
             radius += 100.0f;
             SDF_VU0_LOADVECTOR(firstDirection);
             SDF_VU0_COPYVECTOR_A_TO_B();
-            VU0_SCALE_VF(vf10, radius);
-            VU0_SCALE_VF(vf11, 200.0f);
-            VU0_ADD(vf11, vf11, vf10);
+            SDF_VU0_SCALEVECTOR_BITS(radius);
+            SDF_VU0_SCALEVECTOR_B_BITS(200.0f);
+            SDF_VU0_ADDVECTOR_B_A();
             SDF_VU0_STOREVECTOR_B_NOMEM(target);
             SDF_VU0_LOADVECTOR_B(effZeroVector);
             SDF_VU0_ADDVECTOR();
@@ -1360,3 +1358,4 @@ BtlRuntimeTask *btlCreateLinkageFormationTask(ActionStateLink *link, BtlUnit *fi
 }
 
 INCLUDE_RODATA(const s32, "game/code_002053C0", D_00419540);
+

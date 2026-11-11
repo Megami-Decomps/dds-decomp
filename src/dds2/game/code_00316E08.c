@@ -1,7 +1,7 @@
 #include "sdk_ps2.h"
 #include "snd_packed_track_load_status.h"
 #include "common.h"
-#include "sdf_vu0.h"
+#include "ps2asm.h"
 #include "mnu_sprite_placement.h"
 #include "sdf_chip.h"
 #include "mnu_title_stream.h"
@@ -12,19 +12,18 @@
 #include "file.h"
 #include "eff_resource_slots.h"
 #include "eff_resource_source_lifetime.h"
-#include "kwln.h"
-#include "kwln_task_create.h"
-#include "sdf_resource.h"
+#include "kernel.h"
+#include "dds3_task_create.h"
+#include "sdf_heap_api.h"
 #include "mnu_work.h"
 #include "sdf.h"
 #include "mdl.h"
 #include "itf.h"
 #include "mnu_shooting.h"
 #include "mnu_shooting_round_phase_api.h"
-#include "kwln_task_lifecycle.h"
+#include "dds3_task_lifecycle.h"
 #include "file_pac.h"
 #include "file_request_api.h"
-#include "pcp_vu0.h"
 #include "eff_random.h"
 #include "sdf_trig.h"
 #include "sdf_gs_register_submit_api.h"
@@ -202,14 +201,14 @@ s32 mdlAdvanceViewerPackageTask(dds3ProcessID_t *task) {
 }
 
 extern char D_0042D4E0[];
-extern void evtPrintDeveloperConsoleMessage(const char *fmt, ...);
+extern void datDebugPrintf(const char *fmt, ...);
 extern void dds3AdminiCallSequence(s32 requestedMode, const void *requestData, u32 dataBytes, s32 markHistory);
-extern void scrDestroyAllNamedProcesses(void);
+extern void scrAllReleaseScript(void);
 
 s32 evtCallShooting(void) {
-    evtPrintDeveloperConsoleMessage(D_0042D4E0, 0);
+    datDebugPrintf(D_0042D4E0, 0);
     dds3AdminiCallSequence(0x1D, 0, 0, 0);
-    scrDestroyAllNamedProcesses();
+    scrAllReleaseScript();
     return 1;
 }
 
@@ -226,6 +225,7 @@ typedef char MnuPackageDescriptor_size_is_0x2C[
 
 extern MnuPackageDescriptor D_0040A970[13];
 extern char D_00438920[];
+
 INCLUDE_RODATA(const s32, "game/code_00316E08", D_0042D4D0);
 
 INCLUDE_RODATA(const s32, "game/code_00316E08", D_0042D4E0);
@@ -249,7 +249,7 @@ const char D_0042D6B8[] __attribute__((aligned(8))) = "%s ... OK!! \n";
 const char D_0042D6C8[] __attribute__((aligned(8))) = "FileHandle Free... OK!! \n";
 
 /* The native wrapper tail-forwards the request through its legacy ABI. */
-extern SndPackedTrackLoadStatus sndFindPackedTrackLoadStatus(s32 sound);
+extern SndPackedTrackLoadStatus p2sdLoadCheckMidi(s32 sound);
 extern void p2sdLoadSMGFile(s32 sound);
 extern void effRequestResourceByMode(const char *prefix, const char *name,
                                      s32 mode, u32 *outInstance);
@@ -271,7 +271,7 @@ s32 mnuAdvanceShootingPackageLoad(u8 *workBytes) {
     case MNU_SHOOTING_PACKAGE_LOAD_FINISHED:
         work->packageLoadState = MNU_SHOOTING_PACKAGE_LOAD_INITIALIZE;
         work->state = 1;
-        evtPrintDeveloperConsoleMessage(D_0042D500);
+        datDebugPrintf(D_0042D500);
         return 1;
 
     case MNU_SHOOTING_PACKAGE_LOAD_REQUEST_ENTRY:
@@ -300,13 +300,13 @@ s32 mnuAdvanceShootingPackageLoad(u8 *workBytes) {
             }
             break;
         case 2: {
-            SndPackedTrackLoadStatus status = sndFindPackedTrackLoadStatus(
+            SndPackedTrackLoadStatus status = p2sdLoadCheckMidi(
                 D_0040A970[work->packageEntryIndex].value);
             if (status == SND_PACKED_TRACK_LOAD_NOT_PRESENT) {
                 p2sdLoadSMGFile(D_0040A970[work->packageEntryIndex].value);
             } else {
                 work->packageLoadState = MNU_SHOOTING_PACKAGE_LOAD_PROCESS_ENTRY;
-                evtPrintDeveloperConsoleMessage(D_0042D518,
+                datDebugPrintf(D_0042D518,
                     D_0040A970[work->packageEntryIndex].name);
             }
             break;
@@ -357,7 +357,7 @@ s32 mnuAdvanceShootingPackageLoad(u8 *workBytes) {
             }
             break;
         case 2:
-            if (sndFindPackedTrackLoadStatus(D_0040A970[work->packageEntryIndex].value) == SND_PACKED_TRACK_LOAD_RESIDENT) {
+            if (p2sdLoadCheckMidi(D_0040A970[work->packageEntryIndex].value) == SND_PACKED_TRACK_LOAD_RESIDENT) {
                 work->packageLoadState = MNU_SHOOTING_PACKAGE_LOAD_PROCESS_ENTRY;
             }
             break;
@@ -365,7 +365,7 @@ s32 mnuAdvanceShootingPackageLoad(u8 *workBytes) {
         case 4:
         case 5:
             if (pacCheckEnd(work->packageDataRequest) != 0) {
-                evtPrintDeveloperConsoleMessage(D_0042D530);
+                datDebugPrintf(D_0042D530);
                 work->packageLoadState = MNU_SHOOTING_PACKAGE_LOAD_PROCESS_ENTRY;
             }
             break;
@@ -378,7 +378,7 @@ s32 mnuAdvanceShootingPackageLoad(u8 *workBytes) {
         if (request != NULL) {
             data = (void *)fileGetLoadPtr(request);
             request = work->packageRequest;
-            evtPrintDeveloperConsoleMessage(D_0042D548,
+            datDebugPrintf(D_0042D548,
                                             fileGetLoadSize(request));
         }
 
@@ -388,7 +388,7 @@ s32 mnuAdvanceShootingPackageLoad(u8 *workBytes) {
             case 6:
             case 10:
             case 14:
-                evtPrintDeveloperConsoleMessage(D_0042D558, D_0040A970[work->packageEntryIndex].name);
+                datDebugPrintf(D_0042D558, D_0040A970[work->packageEntryIndex].name);
                 work->objects = mnuLoadSectionObjectListWithRelocations(data);
                 printf(D_0042D578);
                 break;
@@ -459,28 +459,28 @@ s32 mnuAdvanceShootingPackageLoad(u8 *workBytes) {
                 if (entry->packet[0] == 1) {
                     switch (entryIndex) {
                     case 0:
-                        evtPrintDeveloperConsoleMessage(D_0042D618, D_0040A970[work->packageEntryIndex].name, 0);
+                        datDebugPrintf(D_0042D618, D_0040A970[work->packageEntryIndex].name, 0);
                         work->drawObjects = mnuLoadSectionObjectListWithRelocations(entry->dataCursor);
                         sdfMemFreeDirect(PAC_WORK_ALLOCATION(entry));
-                        evtPrintDeveloperConsoleMessage(D_0042D578);
+                        datDebugPrintf(D_0042D578);
                         break;
                     case 1:
-                        evtPrintDeveloperConsoleMessage(D_0042D640, D_0040A970[work->packageEntryIndex].name, 1);
+                        datDebugPrintf(D_0042D640, D_0040A970[work->packageEntryIndex].name, 1);
                         work->playerObjects = mnuLoadSectionObjectListWithRelocations(entry->dataCursor);
                         sdfMemFreeDirect(PAC_WORK_ALLOCATION(entry));
-                        evtPrintDeveloperConsoleMessage(D_0042D578);
+                        datDebugPrintf(D_0042D578);
                         break;
                     case 2:
-                        evtPrintDeveloperConsoleMessage(D_0042D668, D_0040A970[work->packageEntryIndex].name, 2);
+                        datDebugPrintf(D_0042D668, D_0040A970[work->packageEntryIndex].name, 2);
                         work->objects = mnuLoadSectionObjectListWithRelocations(entry->dataCursor);
                         sdfMemFreeDirect(PAC_WORK_ALLOCATION(entry));
-                        evtPrintDeveloperConsoleMessage(D_0042D578);
+                        datDebugPrintf(D_0042D578);
                         break;
                     case 3:
-                        evtPrintDeveloperConsoleMessage(D_0042D690, D_0040A970[work->packageEntryIndex].name, 3);
+                        datDebugPrintf(D_0042D690, D_0040A970[work->packageEntryIndex].name, 3);
                         work->mapObjects = mnuLoadSectionObjectListWithRelocations(entry->dataCursor);
                         sdfMemFreeDirect(PAC_WORK_ALLOCATION(entry));
-                        evtPrintDeveloperConsoleMessage(D_0042D578);
+                        datDebugPrintf(D_0042D578);
                         break;
                     default:
                         break;
@@ -515,13 +515,13 @@ s32 mnuAdvanceShootingPackageLoad(u8 *workBytes) {
             break;
         }
 
-        evtPrintDeveloperConsoleMessage(D_0042D6B8, D_0040A970[work->packageEntryIndex].name);
+        datDebugPrintf(D_0042D6B8, D_0040A970[work->packageEntryIndex].name);
 
         if (D_0040A970[work->packageEntryIndex].kind == 0) {
             sdfMemFreeDirect(
                 fileGetMemHandle(work->packageRequest));
-            fileRequestFreeIfComplete(work->packageRequest);
-            evtPrintDeveloperConsoleMessage(D_0042D6C8);
+            fileHandleFree(work->packageRequest);
+            datDebugPrintf(D_0042D6C8);
         }
 
         work->packageEntryIndex++;
@@ -617,6 +617,7 @@ extern s32 D_004390B4;
 /* Build the shooting scene: world node, camera and area actor, the three
  * lights and background, sprite/hit pools, the work-entry pool and the two
  * runtime record lists, then the progress parameters and callbacks. */
+
 INCLUDE_RODATA(const s32, "game/code_00316E08", D_0042D7A0);
 
 void mnuInitializeShootingScene(MnuShootingWork *handle) {
@@ -870,7 +871,7 @@ s32 mnuInitializeShootingWorkResources(MnuShootingWork *work) {
             mnuPopulateModelNodeList(&groups[i], 5, records[i].minor, 0, 1.0f, 1.0f, 1.0f);
         }
         mnuDeactivateAllModelNodes(&groups[i]);
-        evtPrintDeveloperConsoleMessage("Major:0x%x Minor:0x%x Num:%d\n", records[i].major, records[i].minor, records[i].instanceCount);
+        datDebugPrintf("Major:0x%x Minor:0x%x Num:%d\n", records[i].major, records[i].minor, records[i].instanceCount);
     }
     if (work->effectWork == NULL) {
         counts = sdfChipAllocDirect(12);
@@ -886,7 +887,7 @@ s32 mnuInitializeShootingWorkResources(MnuShootingWork *work) {
             mnuClearNodeRecords(list);
             mnuAssignEffectRecordQueues(list, i, work->queueCopies);
             mnuClearAllNodeBroadcastFlags(list);
-            evtPrintDeveloperConsoleMessage("Effect Load!!\n");
+            datDebugPrintf("Effect Load!!\n");
         }
     }
     if (work->work24 == NULL) {
@@ -929,7 +930,7 @@ s32 mnuInitializeShootingWorkResources(MnuShootingWork *work) {
     work->result = 0;
     work->phaseTicks = 0;
     work->playerResetState = 0;
-    evtPrintDeveloperConsoleMessage("stgInit_Section\n");
+    datDebugPrintf("stgInit_Section\n");
     return 1;
 }
 
@@ -961,7 +962,7 @@ void mnuReleaseShootingSectionResources(MnuShootingWork *work) {
         sdfMemFreeDirect(work->modelWork->allocation);
         work->modelWork = NULL;
     }
-    evtPrintDeveloperConsoleMessage("stgRelease_Section !!\n");
+    datDebugPrintf("stgRelease_Section !!\n");
 }
 
 extern u8 dds3PadButtonState[2][2][16];
@@ -1150,7 +1151,7 @@ extern void itfDrawFullExtentWorkPanels(MnuShootingWork *work);
 extern void itfDispatchObjectFadeSequenceMode(MnuShootingWork *work);
 extern void mnuUpdateAndDrawPauseChoiceFade(MnuShootingWork *work);
 extern MnuModelNode *D_00438928;
-extern struct sdfGrOt_t *kwlnSceneSurfaceSets[13][4];
+extern struct sdfGrOt_t *sdfModelOtTable[13][4];
 
 s32 mnuDrawAndUpdateShootingScene(MnuShootingWork *work) {
     MenuProgressParameters *origin = mnuGetResourceProgressParameters();
@@ -1278,7 +1279,7 @@ s32 mnuDrawAndUpdateShootingScene(MnuShootingWork *work) {
             mnuBroadcastNodeModelState(D_00438928, 0x80664C4C);
             break;
         }
-        mdlLink(D_00438928->model, kwlnSceneSurfaceSets[0]);
+        mdlLink(D_00438928->model, sdfModelOtTable[0]);
     }
 
     itfDrawFullExtentWorkPanels(work);
@@ -1310,7 +1311,7 @@ void mnuCreateShootingEntryObject(MenuWorkEntry *entry, MnuShootingWork *work) {
         mnuClearInactiveSoundBufferState();
         parameterIndex = mnuGetMovementRecordByIndex(entry->tag)->parameterTag;
         D_00438928 = mnuAcquireUnusedModelNode(&groups[8]);
-        evtPrintDeveloperConsoleMessage("---------------------BG create!!\n");
+        datDebugPrintf("---------------------BG create!!\n");
         break;
     case MNU_WORK_TAG_REGISTRY_TABLE: {
         MenuRegistry *record = mnuGetMenuRecordRegistryEntry(entry->tag);
@@ -1330,7 +1331,7 @@ void mnuCreateShootingEntryObject(MenuWorkEntry *entry, MnuShootingWork *work) {
                 if (tagClass == MNU_WORK_TAG_MOVEMENT_TABLE) node->flags |= 2;
                 mnuPlaceShootingEntryObject(entry, work);
             } else {
-                evtPrintDeveloperConsoleMessage("model none\n");
+                datDebugPrintf("model none\n");
             }
         }
     } else {
@@ -1344,7 +1345,7 @@ void mnuCreateShootingEntryObject(MenuWorkEntry *entry, MnuShootingWork *work) {
             printf("sprite none\n");
         }
     }
-    evtPrintDeveloperConsoleMessage("---------------------create!!\n");
+    datDebugPrintf("---------------------create!!\n");
 }
 
 
@@ -1423,13 +1424,13 @@ void mnuFinishOrDeactivateShootingEntry(MenuWorkEntry *entry, MnuShootingWork *w
                          entry->currentAngleRadians + 1.5707963f) -
                      sdfSin(entry->currentAngleRadians + 1.5707963f) * 0.0f;
             SDF_VU0_LOADVECTOR(&step);
-            VU0_SCALE_VF(vf10, (f32)entry->movementEffectScale / 3.5f);
+            SDF_VU0_SCALEVECTOR_BITS((f32)entry->movementEffectScale / 3.5f);
             SDF_VU0_STOREVECTOR(&step);
         } else {
             step.x = 0.0f;
             step.y = 1.0f;
             SDF_VU0_LOADVECTOR(&step);
-            VU0_SCALE_VF(vf10, 4.0f);
+            SDF_VU0_SCALEVECTOR_BITS(4.0f);
             SDF_VU0_STOREVECTOR(&step);
         }
         if ((entry->tag & MNU_WORK_TAG_CLASS_MASK) == MNU_WORK_TAG_REGISTRY_TABLE) {
@@ -1440,7 +1441,7 @@ void mnuFinishOrDeactivateShootingEntry(MenuWorkEntry *entry, MnuShootingWork *w
                                            position[0], position[1], position[2]);
         }
         if (entry->tag == 0x0201000F || entry->tag == 0x02010010) {
-            evtPrintDeveloperConsoleMessage("======================================= ADD ITEM !!!!!!!!!!\n");
+            datDebugPrintf("======================================= ADD ITEM !!!!!!!!!!\n");
             runtime = mnuGetRuntimeHitTargetList();
             angle = ((dds3GetRandFloatA(NULL) * 90.0f + 135.0f) *
                      3.141592503f) / 180.0f;
@@ -1509,7 +1510,7 @@ void mnuFinishOrDeactivateShootingEntry(MenuWorkEntry *entry, MnuShootingWork *w
         work->targets--;
     }
     if (object == NULL) {
-        evtPrintDeveloperConsoleMessage("---------------------delete!! OBJECT INDEX %d\n",
+        datDebugPrintf("---------------------delete!! OBJECT INDEX %d\n",
                                          (u16)entry->tag);
     }
 }
@@ -1581,11 +1582,11 @@ void mnuPlaceShootingEntryObject(MenuWorkEntry *entry, MnuShootingWork *work) {
                 sdfSubmitGsTestOneRegisterPacket(0x30000, 0x4A);
                 uiDrawUniformColorRect(0, 0, 0, 0x2000, 0xE00, 0, 0x4A);
                 sdfSubmitGsTestOneRegisterPacket(0x5100D, 0x4A);
-                mdlLink(node->model, kwlnSceneSurfaceSets[9]);
+                mdlLink(node->model, sdfModelOtTable[9]);
             } else if (registry->parameterIndex == 0x22) {
-                mdlLink(node->model, kwlnSceneSurfaceSets[0]);
+                mdlLink(node->model, sdfModelOtTable[0]);
             } else {
-                mdlLink(node->model, kwlnSceneSurfaceSets[7]);
+                mdlLink(node->model, sdfModelOtTable[7]);
             }
             break;
         }
@@ -1628,7 +1629,7 @@ void mnuApplyPlayerRuntimeRecordFeedback(MenuRuntimeRecord *record) {
         mdlSmoothLoopMotion(node->model, 0, 2, 0.0f, 0.0f);
         sdfMotionSeek(node->model->first, 20.0f);
         D_00438934 = node->model->first->frameCount - 20;
-        evtPrintDeveloperConsoleMessage("ModelFrame [%d]\n", D_00438934);
+        datDebugPrintf("ModelFrame [%d]\n", D_00438934);
         mnuClaimTimedEntryEffectRecord();
     }
 }
@@ -1749,3 +1750,4 @@ INCLUDE_SDATA(const s32, "game/code_00316E08", D_00438944);
 INCLUDE_SDATA(const s32, "game/code_00316E08", D_00438948);
 
 INCLUDE_SDATA(const s32, "game/code_00316E08", D_0043894C);
+

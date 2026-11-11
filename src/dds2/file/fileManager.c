@@ -1,103 +1,203 @@
-#include "sdk_ps2.h"
-#include "sdf_chip.h"
-#include "file.h"
-#include "file_pac.h"
-#include "sdf_pac_state.h"
-#include "file_pac_load_api.h"
-#include "file_request_cleanup_api.h"
-#include "file_pac_cleanup_api.h"
-#include "file_pac_completion_api.h"
-#include "file_request_end_check_api.h"
-#include "file_request_allocation_mode.h"
-#include "sdf_dev_state.h"
-#include "file_manager_api.h"
-#include "file_request.h"
-#include "file_request_lifecycle.h"
-#include "file_request_kind.h"
-#include "file_transfer_job.h"
+#include "common.h"
+#include "libsdf.h"
+#include "kernel.h"
+#include "kernel.h"
 
-FileManWork fileQueueHead __attribute__((section(".bss")));
+#include "fileManager.h"
 
-#include "sdf_debug_api.h"
-#define FILE_READ_SLOT_COUNT 4
-#define FILE_LAST_READ_SLOT 3
-#define FILE_READ_SLOT_BYTES 0x10000
-#define FILE_READ_SLOT_SHIFT 16
+/* All three views share the 0x30-byte request header. Their differently
+ * typed links distinguish transfer work from the queue and PAC callbacks. */
+typedef void (*fileTransferCallback_t)(void *request, u32 arg);
 
-/* PAC requests delegate cleanup. Other kinds remain pending until the device
- * request closes, then release its state, duplicated name and entry. */
-FileRequestCleanupResult fileRequestFreeIfComplete(struct FileRequest *request) {
-    if (request->kind == FILE_REQUEST_KIND_PAC_LOAD) {
-        return pacFileHandleFree((struct FilePacRequest *)request);
-    }
-    if (request->state == FILE_REQUEST_LIFECYCLE_CLOSED) {
-        if (request->deviceRequest != NULL) {
-            sdfFileCmdFree(request->deviceRequest);
+#define FILE_REQUEST_FIELDS(Link, Callback) \
+    u8 kind; \
+    u8 state; \
+    u8 retry; \
+    u8 mode; \
+    Link *next; \
+    char *name; \
+    void *dev; \
+    s32 rest; \
+    s32 size; \
+    Callback callback; \
+    void *arg; \
+    sdfMemHandle_t *handle; \
+    addr_t top; \
+    addr_t ptr; \
+    Link *donenext; \
+    sdfPacDecodeCb_t pac; \
+    u16 pacrest; \
+    u16 slot; \
+    Link *cbnext;
+
+
+typedef struct fileTransferJob {
+    FILE_REQUEST_FIELDS(struct fileTransferJob, fileTransferCallback_t)
+} fileCb_t;
+
+typedef struct pacFileRequest {
+    FILE_REQUEST_FIELDS(struct pacFileRequest, void *)
+} pacFileRequest_t;
+
+#undef FILE_REQUEST_FIELDS
+
+typedef struct fileSlot {
+    /* 0x0 */ u32 size;
+    /* 0x4 */ fileRequest_t *req;
+} fileSlot_t;
+
+typedef struct fileQueue {
+    /* 0x00 */ s32 semaId;
+    /* 0x04 */ u8 index;
+    /* 0x05 */ u8 readIndex;
+    /* 0x06 */ u8 activeCount;
+    /* 0x07 */ u8 freeCount;
+    /* 0x08 */ fileRequest_t *queue;
+    /* 0x0C */ fileRequest_t *queueTail;
+    /* 0x10 */ fileCb_t *endCallbackLink;
+    /* 0x14 */ pacFileRequest_t *pacEndCallbackLink;
+    /* 0x18 */ fileRequest_t *closeLink;
+    /* 0x1C */ u8 *buffer;
+    /* 0x20 */ fileSlot_t data[4];
+} fileMngCb_tag;
+
+
+extern fileMngCb_tag fileQueueHead;
+extern u32 fileCallbackStatus;
+extern s32 (*p2sdSmgBuf)(void);
+extern char fileManagerProcName[];
+
+void fileLinkQueue(fileRequest_t *req, s32 kind, const char *name, void *callback, void *arg);
+void fileLinkCloseWait(fileMngCb_tag *cb, fileRequest_t *fileHandle);
+void fileUnlinkCloseWait(fileMngCb_tag *cb, fileRequest_t *fileHandle);
+fileRequest_t *pacLoadEx(const char *filename, u32 headOrTail, u32 callback, u32 pendCallback, u32 callbackParm);
+s32 pacFileCheckEnd(const fileRequest_t *pacFileHandle);
+void pacRead(fileRequest_t *pacHandle);
+s32 pacLoadCallback(void *fileHandle, s32 cause, s32 buffer, s32 length, fileCb_t *data);
+s32 fileLoadCallback(void *fileHandle, s32 cause, s32 buffer, s32 length, fileCb_t *data);
+s32 fileSaveCallback(void *fileHandle, s32 cause, s32 buffer, s32 length, fileCb_t *data);
+void fileRead(fileCb_t *fileHandle);
+void fileExecQueue(void);
+s32 fileManager(void);
+s32 fileManagerProc(dds3ProcessID_t *procId);
+
+dds3ProcessID_t *dds3StartProcess(char *v1, s32 dDS3_PRIORITY_DRAW_PB, s32 v2, s32 v3,
+                                s32 (*drawExit)(dds3ProcessID_t *),
+                                void (*deleteExit)(dds3ProcessID_t *), void *p);
+s32 sdfCreateSema(s32 initCount, s32 maxCount, s32 option);
+s32 WaitSema(s32 sema);
+s32 SignalSema(s32 sema);
+void *sdfChipAllocZeroDirect(u32 aSize);
+char *sdfStrdupChip(const char *str);
+void *sdfMemAllocDirect(u32 aSize);
+void *sdfMemAlloc2Direct(u32 aSize);
+u32 sdfMemLock(void *aHandle);
+void sdfPacInit(void *cb, void *callback);
+void sdfPacSetFromTail(void *cb);
+void *sdfFileCmdReadOpen(const char *aFileName, void *aCallback, void *aUserData);
+void *sdfFileCmdWriteOpen(const char *aFileName, void *aCallback, void *aUserData, u32 aMode);
+s32 sdfFileCmdFileSize(void *aHandle);
+s32 sdfFileCmdRead(void *aHandle, void *aBuffer, s32 aLength);
+s32 sdfFileCmdWrite(void *aHandle, void *aBuffer, s32 aLength);
+s32 sdfFileCmdClose(void *aHandle);
+s32 sdfFileCmdFree(void *aHandle);
+void sdfFileCmdThreadSetHiPrio(void);
+#ifdef FIX_BUGS
+s32 DIntr(void);
+s32 EIntr(void);
+#endif
+s32 sdfPrintf(const char *str, ...);
+s32 printf(const char *str, ...);
+void *memset(void *a, s32 b, size_t c);
+void sdfChipFreeDirect(void *aPtr);
+void sdfPacFree(sdfPacDecodeCb_t *cb);
+s32 sdfPacDecode(sdfPacDecodeCb_t *cb, const u8 *data, s32 length);
+void *sdfMemAllocFromTailDirect(u32 aSize);
+void fileWrite(fileCb_t *fileHandle);
+void fileExecCallback(void);
+
+s32 pacFileHandleFree(fileRequest_t *pacHandle)
+{
+    if (pacHandle->state == 6) {
+        void *deviceRequest = pacHandle->dev;
+        if (deviceRequest != NULL) {
+            sdfFileCmdFree(deviceRequest);
         }
-        sdfChipFreeDirect(request->name);
-        sdfChipFreeDirect(request);
-        return FILE_REQUEST_CLEANUP_FREED;
+        sdfPacFree(&pacHandle->pac);
+        sdfChipFreeDirect(pacHandle->name);
+        sdfChipFreeDirect(pacHandle);
+        return 0;
     }
-    return FILE_REQUEST_CLEANUP_PENDING;
+    return 1;
 }
 
-extern char *sdfStrdupChip(const char *text);
+s32 pacFileHandleFree_(void *pacHandle) {
+    return pacFileHandleFree(pacHandle);
+}
 
-/* Duplicate the request name, store its kind in the byte field, and append
- * under the semaphore. Start processing only after an empty-to-nonempty transition.
- * The caller supplies initialized next linkage; this function does not clear it. */
-void fileLinkQueue(FileRequest *request, FileRequestKind kind, const char *requestName,
-                   void *callback, void *userData) {
-    FileManWork *work;
-    char *duplicatedName;
-    s32 startsQueue;
-
-    work = &fileQueueHead;
-    request->kind = kind;
-    duplicatedName = sdfStrdupChip(requestName);
-    request->completionCallback = callback;
-    request->name = duplicatedName;
-    request->completionArg = userData;
-
-    WaitSema(work->sema);
-    if (work->tail == NULL) {
-        work->head = request;
-        startsQueue = 1;
-    } else {
-        work->tail->next = request;
-        startsQueue = 0;
+s32 fileHandleFree(fileRequest_t *fileHandle) {
+    if (fileHandle->kind == 1) {
+        return pacFileHandleFree(fileHandle);
     }
-    work->tail = request;
-    SignalSema(work->sema);
+    if (fileHandle->state == 6) {
+        if (fileHandle->dev != NULL) {
+            sdfFileCmdFree((sdfFileCmd_t *)fileHandle->dev);
+        }
+        sdfChipFreeDirect(fileHandle->name);
+        sdfChipFreeDirect(fileHandle);
+        return 0;
+    }
+    return 1;
+}
 
-    if (startsQueue != 0) {
+void fileLinkQueue(fileRequest_t *req, s32 kind, const char *name, void *callback, void *arg) {
+    fileMngCb_tag *q = &fileQueueHead;
+    char *dup;
+    s32 first;
+
+    req->kind = kind;
+    dup = sdfStrdupChip(name);
+    req->callback = (void (*)(fileRequest_t *, u32))callback;
+    req->name = dup;
+    req->arg = arg;
+
+    WaitSema(q->semaId);
+    if (q->queueTail == NULL) {
+        q->queue = req;
+        first = 1;
+    } else {
+        q->queueTail->next = req;
+        first = 0;
+    }
+    q->queueTail = req;
+    SignalSema(q->semaId);
+
+    if (first != 0) {
         fileExecQueue();
     }
 }
 
-/* Clear every matching read slot and unlink the first queued occurrence under
- * the semaphore. No request/name memory is freed; absence from the queue is OK. */
-void fileUnlinkQueue(FileRequest *node) {
-    FileManWork *work = &fileQueueHead;
-    FileRequest *previousNode;
-    FileRequest *currentNode;
+void fileUnlinkQueue(fileRequest_t *fileHandle) {
+    fileMngCb_tag *work = &fileQueueHead;
+    fileRequest_t *previousNode;
+    fileRequest_t *currentNode;
     s32 slotIndex;
 
-    WaitSema(work->sema);
-    for (slotIndex = 0; slotIndex != FILE_READ_SLOT_COUNT; slotIndex++) {
-        if (work->slots[slotIndex].request == node) {
-            work->slots[slotIndex].request = NULL;
+    WaitSema(work->semaId);
+    for (slotIndex = 0; slotIndex != 4; slotIndex++) {
+        if (work->data[slotIndex].req == fileHandle) {
+            work->data[slotIndex].req = NULL;
         }
     }
     previousNode = NULL;
-    currentNode = work->head;
+    currentNode = work->queue;
     while (currentNode != NULL) {
-        if (currentNode == node) {
+        if (currentNode == fileHandle) {
             if (currentNode->next == NULL) {
-                work->tail = previousNode;
+                work->queueTail = previousNode;
             }
             if (previousNode == NULL) {
-                work->head = currentNode->next;
+                work->queue = currentNode->next;
             } else {
                 previousNode->next = currentNode->next;
             }
@@ -106,211 +206,573 @@ void fileUnlinkQueue(FileRequest *node) {
         previousNode = currentNode;
         currentNode = currentNode->next;
     }
-    SignalSema(work->sema);
+    SignalSema(work->semaId);
 }
 
-/* Add a finished job to the jobs whose device state is still open, without
- * locking or allocation. */
-void fileLinkCloseWait(FileManWork *work, FileTransferJob *job) {
-    job->next = work->closingJobs;
-    work->closingJobs = job;
+void fileLinkCloseWait(fileMngCb_tag *cb, fileRequest_t *fileHandle) {
+    fileHandle->next = cb->closeLink;
+    cb->closeLink = fileHandle;
 }
 
-/* Remove a closed job without locking or freeing. The job must be in the
- * list: unlike fileUnlinkQueue, this walk has no end-of-list guard. */
-void fileUnlinkCloseWait(FileManWork *work, FileTransferJob *job) {
-    FileTransferJob **incomingLink = &work->closingJobs;
-    FileTransferJob *currentJob;
+void fileUnlinkCloseWait(fileMngCb_tag *cb, fileRequest_t *fileHandle) {
+    fileRequest_t **link = &cb->closeLink;
+    fileRequest_t *p;
 
-    while ((currentJob = *incomingLink) != job) {
-        incomingLink = &currentJob->next;
+    while ((p = *link) != fileHandle) {
+        link = &p->next;
     }
-    *incomingLink = job->next;
+    *link = fileHandle->next;
 }
 
-/* Clear a PAC request, select its custom or standard packet callback, and
- * choose the PAC payload allocator. Queue its copied name and completion
- * context as kind one, returning the allocated work. No failure guard. */
-struct FilePacRequest *fileCreatePacLoadWork(
-    const char *requestName, FilePacResourceAllocationMode allocationMode,
-    void *packetCallbackAddress, s32 onComplete, s32 userData) {
-    FilePacRequest *request;
+fileRequest_t *pacLoadEx(const char *filename, u32 headOrTail, u32 callback, u32 pendCallback, u32 callbackParm) {
+    fileRequest_t *req;
 
-    printf("pac load %s\n", requestName);
-    request = sdfAllocAndClearQuadwords(sizeof(FilePacRequest));
-    sdfPacInit(&request->packet, packetCallbackAddress);
-    if (allocationMode != FILE_PAC_RESOURCE_ALLOCATION_DEFAULT) {
-        sdfPacSetFromTail(&request->packet);
+    printf("pac load %s\n", filename);
+    req = sdfChipAllocZeroDirect(sizeof(fileRequest_t));
+    sdfPacInit(&req->pac, EE_ADDR_AS(void *, callback));
+    if (headOrTail != 0) {
+        sdfPacSetFromTail(&req->pac);
     }
-    fileLinkQueue((FileRequest *)request, FILE_REQUEST_KIND_PAC_LOAD, requestName,
-                             (void *)onComplete, (void *)userData);
-    return request;
+    fileLinkQueue(req, 1, filename, EE_ADDR_AS(void *, pendCallback), EE_ADDR_AS(void *, callbackParm));
+    return req;
 }
 
-/* Queue PAC work with the default payload allocator and no completion context. */
-struct FileRequest *pacLoad(const char *requestName) {
-    return (struct FileRequest *)fileCreatePacLoadWork(
-        requestName, FILE_PAC_RESOURCE_ALLOCATION_DEFAULT, 0, 0, 0);
+fileRequest_t *pacLoad(const char *filename) {
+    return pacLoadEx(filename, 0, 0, 0, 0);
 }
 
-/* Queue PAC work with the high-address payload allocator and no completion context. */
-void pacLoadUseTail(const char *requestName) {
-    fileCreatePacLoadWork(requestName, FILE_PAC_RESOURCE_ALLOCATION_FROM_TAIL,
-                          0, 0, 0);
+fileRequest_t *pacLoadUseTail(const char *filename) {
+    return pacLoadEx(filename, 1, 0, 0, 0);
 }
 
-/* Queue an ordinary file load and narrow allocationMode into byte three.
- * callbackAddress is the queue callback; userData is its context, not another
- * callback. Keep the raw byte store and existing provider parameter types. */
-struct FileRequest *fileLoadEx(const char *requestName, s32 allocationMode, s32 callbackAddress, s32 userData) {
-    FileRequest *request;
+fileRequest_t *fileLoadEx(const char *filename, u32 headOrTail, addr_t endCallback, addr_t callbackParm) {
+    fileRequest_t *req;
 
-    printf("file load %s\n", requestName);
-    request = sdfAllocAndClearQuadwords(FILE_REQUEST_HEADER_BYTES);
-    request->allocationMode = allocationMode;
-    fileLinkQueue(request, FILE_REQUEST_KIND_FILE_LOAD, requestName,
-                             (void *)callbackAddress, (void *)userData);
-    return request;
+    printf("file load %s\n", filename);
+    req = sdfChipAllocZeroDirect(0x30);
+    req->mode = headOrTail;
+    fileLinkQueue(req, 0, filename, EE_ADDR_AS(void *, endCallback), EE_ADDR_AS(void *, callbackParm));
+    return req;
 }
 
-/* Queue an ordinary file load with retryable direct allocation and no callback/context. */
-struct FileRequest *fileLoad(const char *requestName) {
-    return fileLoadEx(requestName, FILE_REQUEST_ALLOCATION_MODE_DIRECT, 0, 0);
+fileRequest_t *fileLoad(const char *filename) {
+    return fileLoadEx(filename, 0, 0, 0);
 }
 
-/* Queue an ordinary file load with tail allocation and no callback/context. */
-struct FileRequest *fileLoadUseTail(const char *requestName) {
-    return fileLoadEx(requestName, FILE_REQUEST_ALLOCATION_MODE_FROM_TAIL, 0, 0);
+fileRequest_t *fileLoadUseTail(const char *filename) {
+    return fileLoadEx(filename, 1, 0, 0);
 }
 
-/* Return the stored allocation descriptor without changing ownership; work is required. */
-struct sdfMemHandle_t *fileGetMemHandle(const struct FileRequest *request) {
-    return request->allocationHandle;
+sdfMemHandle_t *fileGetMemHandle(const fileRequest_t *fileHandle) {
+    return fileHandle->handle;
 }
 
-/* Return the loaded payload's retained byte address. */
-u8 *fileGetLoadPtr(const struct FileRequest *request) {
-    return request->retainedAddress;
+u8 *fileGetLoadPtr(const fileRequest_t *fileHandle) {
+    return EE_ADDR_AS(u8 *, fileHandle->top);
 }
 
-/* Return the signed byte count recorded by the file transfer request. */
-s32 fileGetLoadSize(const struct FileRequest *request) {
-    return request->totalBytes;
+u32 fileGetLoadSize(const fileRequest_t *fileHandle) {
+    return fileHandle->size;
 }
 
-/* Return the request's remaining transfer byte count. */
-u32 fileGetLoadRemain(FileRequest *request) {
-    return request->transferBytes;
+u32 fileGetLoadRemain(fileRequest_t *fileHandle) {
+    return fileHandle->rest;
 }
 
-/* PAC requests additionally require a decoded end marker; other kinds only
- * require a closed device request. */
-FileRequestEndCheckResult pacFileCheckEnd(const FileRequest *request) {
-    FileRequestEndCheckResult result;
+s32 pacFileCheckEnd(const fileRequest_t *pacFileHandle) {
+    s32 end;
 
-    if (request->kind == FILE_REQUEST_KIND_PAC_LOAD) {
-        result = FILE_REQUEST_END_CHECK_PENDING;
-        if (request->pacDecodeComplete != 0) {
-            result = request->state == FILE_REQUEST_LIFECYCLE_CLOSED
-                ? FILE_REQUEST_END_CHECK_REACHED : FILE_REQUEST_END_CHECK_PENDING;
+    if (pacFileHandle->kind == 1) {
+        end = 0;
+        if (pacFileHandle->pacrest != 0) {
+            end = pacFileHandle->state == 6;
         }
-        return result;
+        return end;
     }
-    return request->state == FILE_REQUEST_LIFECYCLE_CLOSED
-        ? FILE_REQUEST_END_CHECK_REACHED : FILE_REQUEST_END_CHECK_PENDING;
+    return pacFileHandle->state == 6;
 }
 
-/* Require PAC decode completion and a closed device request. */
-FilePacRequestCompletionResult pacCheckEnd(const FileRequest *request) {
-    FilePacRequestCompletionResult result = FILE_PAC_REQUEST_COMPLETION_INCOMPLETE;
-    if (request->pacDecodeComplete != 0) {
-        result = request->state == FILE_REQUEST_LIFECYCLE_CLOSED;
+s32 pacCheckEnd(const fileRequest_t *pacHandle) {
+    s32 end = 0;
+
+    if (pacHandle->pacrest != 0) {
+        end = pacHandle->state == 6;
     }
-    return result;
+    return end;
 }
 
-extern void sdfFileCmdThreadSetHiPrio(void);
-
-/* Pump the device scheduler and file manager while the request-specific end
- * condition is pending. No timeout or NULL-request guard is introduced. */
-void fileSync(FileRequest *request) {
-    s32 readyResult;
-
-    while (readyResult = pacFileCheckEnd(request),
-           readyResult == FILE_REQUEST_END_CHECK_PENDING) {
+void fileSync(fileRequest_t *fileHandle) {
+    while (pacFileCheckEnd(fileHandle) == 0) {
         sdfFileCmdThreadSetHiPrio();
         fileManager();
     }
 }
 
-/* Forward the opaque request pointer to the readiness wait, without cleanup. */
-void pacSync(FileRequest *request) {
-    fileSync(request);
+void pacSync(fileRequest_t *pacFileHandle) {
+    fileSync(pacFileHandle);
 }
 
-/* Pump updates while the queued head or unknown manager word is nonzero.
- * This function does not directly test the callback list or individual slots. */
 void fileSyncAll(void) {
-    FileManWork *work = &fileQueueHead;
-
-    while (work->head != 0 || work->closingJobs != 0) {
+    fileMngCb_tag *work = &fileQueueHead;
+    while (work->queue != 0 || work->closeLink != 0) {
         fileManager();
     }
 }
 
-/* Create a file-save request with the caller's source buffer and byte count.
- * Its address is stored in the existing value word at +0x24. */
-FileRequest *fileSaveEx(const char *requestName, const void *sourceData, s32 sourceByteCount, s32 callbackAddress, s32 userDataAddress) {
-    FileRequest *request = sdfAllocAndClearQuadwords(FILE_REQUEST_HEADER_BYTES);
+fileRequest_t *fileSaveEx(const char *filename, const void *buff, s32 size, s32 endCallback, s32 callbackParm) {
+    fileRequest_t *req = sdfChipAllocZeroDirect(0x30);
 
-    request->retainedAddress = (u8 *)sourceData;
-    request->transferAddress = (u8 *)sourceData;
-    request->totalBytes = sourceByteCount;
-    request->transferBytes = sourceByteCount;
-    fileLinkQueue(request, FILE_REQUEST_KIND_FILE_SAVE, requestName, (void *)callbackAddress,
-                             (void *)userDataAddress);
-    return request;
+    req->top = EE_ADDR(buff);
+    req->ptr = EE_ADDR(buff);
+    req->size = size;
+    req->rest = size;
+    fileLinkQueue(req, 2, filename, EE_ADDR_AS(void *, endCallback), EE_ADDR_AS(void *, callbackParm));
+    return req;
 }
 
-/* Queue the file-save request and expose its opaque request handle. */
-struct FileRequest *fileSave(const char *requestName, const void *sourceData, s32 sourceByteCount) {
-    return fileSaveEx(requestName, sourceData, sourceByteCount, 0, 0);
+fileRequest_t *fileSave(const char *filename, const void *buff, s32 size) {
+    return fileSaveEx(filename, buff, size, 0, 0);
 }
 
-
-/* If capacity exists and state is ready, claim nextSlot and advance its
- * four-slot cursor; this does not search for an empty slot. Mark transferring
- * under the semaphore, then start the read after unlocking. Cap at 64 KiB but
- * preserve the absence of a lower size bound and the original request size. */
-void pacRead(FileTransferJob *job) {
-    FileManWork *work = &fileQueueHead;
+void pacRead(fileRequest_t *pacHandle) {
+    fileMngCb_tag *work = &fileQueueHead;
     u8 slotIndex;
     s32 chunkBytes;
 
-    WaitSema(work->sema);
-    if (work->freeSlots == 0) {
-        SignalSema(work->sema);
+    WaitSema(work->semaId);
+    if (work->freeCount == 0) {
+        SignalSema(work->semaId);
         return;
     }
-    if (job->state != FILE_REQUEST_LIFECYCLE_READY) {
-        SignalSema(work->sema);
+    if (pacHandle->state != 3) {
+        SignalSema(work->semaId);
         return;
     }
-    job->state = FILE_REQUEST_LIFECYCLE_TRANSFERRING;
-    slotIndex = work->nextSlot;
-    if (slotIndex == FILE_LAST_READ_SLOT) {
-        work->nextSlot = 0;
+    pacHandle->state = 4;
+    slotIndex = work->readIndex;
+    if (slotIndex == 3) {
+        work->readIndex = 0;
     } else {
-        work->nextSlot = slotIndex + 1;
+        work->readIndex = slotIndex + 1;
     }
-    job->slot = slotIndex;
-    work->freeSlots--;
-    work->slots[slotIndex].request = (FileRequest *)job;
-    chunkBytes = job->transferBytes;
-    if (chunkBytes > FILE_READ_SLOT_BYTES) {
-        chunkBytes = FILE_READ_SLOT_BYTES;
+    pacHandle->slot = slotIndex;
+    work->freeCount--;
+    work->data[slotIndex].req = pacHandle;
+    chunkBytes = pacHandle->rest;
+    if (chunkBytes > 0x10000) {
+        chunkBytes = 0x10000;
     }
-    SignalSema(work->sema);
-    sdfFileCmdRead(job->deviceRequest,
-                    work->buffer + (slotIndex << FILE_READ_SLOT_SHIFT), chunkBytes);
+    SignalSema(work->semaId);
+    sdfFileCmdRead((sdfFileCmd_t *)pacHandle->dev,
+                    work->buffer + (slotIndex << 16), chunkBytes);
 }
+
+s32 pacLoadCallback(void *fileHandle, s32 cause, s32 buffer, s32 length, fileCb_t *data) {
+    fileMngCb_tag *work = &fileQueueHead;
+    s32 saved;
+
+    switch (cause) {
+    case 2:
+        data->dev = fileHandle;
+        data->state = 2;
+        sdfFileCmdFileSize(fileHandle);
+        break;
+    case 4:
+        data->rest = length;
+        data->state = 3;
+        data->size = length;
+        pacRead((fileRequest_t *)data);
+        break;
+    case 5:
+        WaitSema(work->semaId);
+        if (data->pacrest != 0) {
+            data->state = 5;
+        } else {
+            work->data[data->slot].size = length;
+            data->rest -= length;
+            if (data->rest == 0) {
+                data->state = 5;
+                work->queue = (fileRequest_t *)data->next;
+                if (data->next == NULL) {
+                    work->queueTail = NULL;
+                }
+            } else {
+                data->state = 3;
+            }
+        }
+        work->activeCount++;
+        if (data->state == 5) {
+            fileLinkCloseWait(work, (fileRequest_t *)data);
+            SignalSema(work->semaId);
+            sdfFileCmdClose(fileHandle);
+        } else {
+            SignalSema(work->semaId);
+        }
+        saved = fileCallbackStatus;
+        fileCallbackStatus = 1;
+        fileExecQueue();
+        fileCallbackStatus = saved;
+        break;
+    case 7:
+        WaitSema(work->semaId);
+        fileUnlinkCloseWait(work, (fileRequest_t *)data);
+        SignalSema(work->semaId);
+        sdfFileCmdFree(fileHandle);
+        data->dev = NULL;
+        data->state = 6;
+        break;
+    }
+    return 0;
+}
+
+void fileRead(fileCb_t *fileHandle) {
+    fileMngCb_tag *q = &fileQueueHead;
+
+    WaitSema(q->semaId);
+    if (fileHandle->state != 3) {
+        SignalSema(q->semaId);
+        return;
+    }
+    fileHandle->state = 4;
+    SignalSema(q->semaId);
+    sdfFileCmdRead(fileHandle->dev, EE_ADDR_AS(void *, fileHandle->ptr), fileHandle->rest <= 0x8000 ? fileHandle->rest : 0x8000);
+}
+
+s32 fileLoadCallback(void *fileHandle, s32 cause, s32 buffer, s32 length, fileCb_t *data) {
+    fileMngCb_tag *work = &fileQueueHead;
+    s32 saved;
+
+    switch (cause) {
+    case 2:
+        data->dev = fileHandle;
+        data->state = cause;
+        sdfFileCmdFileSize(fileHandle);
+        break;
+    case 4: {
+        sdfMemHandle_t *handle;
+
+        data->rest = length;
+        data->size = length;
+        if (data->mode == 0) {
+            handle = sdfMemAlloc2Direct(length);
+            data->handle = handle;
+            if (handle == NULL) {
+                data->retry = 10;
+                data->state = 7;
+                break;
+            }
+        } else {
+            handle = sdfMemAllocFromTailDirect(length);
+            data->handle = handle;
+        }
+        {
+            u32 address = sdfMemLock(handle);
+
+            data->ptr = address;
+            data->top = address;
+            data->state = 3;
+        }
+        fileRead(data);
+        break;
+    }
+    case 5:
+        WaitSema(work->semaId);
+        data->rest -= length;
+        if (data->rest == 0) {
+            data->state = 5;
+            if (work->queue == (fileRequest_t *)data) {
+                work->queue = (fileRequest_t *)data->next;
+                if (data->next == NULL) {
+                    work->queueTail = NULL;
+                }
+            }
+        } else {
+            data->state = 3;
+            data->ptr += length;
+        }
+        if (data->state == 5) {
+            fileLinkCloseWait(work, (fileRequest_t *)data);
+            SignalSema(work->semaId);
+            sdfFileCmdClose(fileHandle);
+            saved = fileCallbackStatus;
+            fileCallbackStatus = 2;
+            fileExecQueue();
+            fileCallbackStatus = saved;
+        } else {
+            SignalSema(work->semaId);
+            fileRead(data);
+        }
+        break;
+    case 7:
+        sdfFileCmdFree(fileHandle);
+        data->dev = NULL;
+        data->state = 6;
+        WaitSema(work->semaId);
+        fileUnlinkCloseWait(work, (fileRequest_t *)data);
+        if (data->callback != NULL) {
+            fileCb_t **link = &work->endCallbackLink;
+            fileCb_t *next;
+
+            while ((next = *link) != NULL) {
+                link = &next->donenext;
+            }
+            *link = data;
+        }
+        SignalSema(work->semaId);
+        break;
+    }
+    return 0;
+}
+
+void fileWrite(fileCb_t *fileHandle) {
+    fileMngCb_tag *q = &fileQueueHead;
+
+    WaitSema(q->semaId);
+    if (fileHandle->state != 3) {
+        SignalSema(q->semaId);
+        return;
+    }
+    fileHandle->state = 4;
+    SignalSema(q->semaId);
+    sdfFileCmdWrite(fileHandle->dev, EE_ADDR_AS(void *, fileHandle->ptr), fileHandle->rest <= 0x8000 ? fileHandle->rest : 0x8000);
+}
+
+s32 fileSaveCallback(void *fileHandle, s32 cause, s32 buffer, s32 length, fileCb_t *data) {
+    fileMngCb_tag *work = &fileQueueHead;
+    s32 saved;
+
+    switch (cause) {
+    case 2:
+        data->state = 3;
+        fileWrite(data);
+        break;
+    case 6:
+        WaitSema(work->semaId);
+        data->ptr += length;
+        data->rest -= length;
+        if (data->rest == 0) {
+            data->state = 5;
+            if (work->queue == (fileRequest_t *)data) {
+                work->queue = (fileRequest_t *)data->next;
+                if (data->next == NULL) {
+                    work->queueTail = NULL;
+                }
+            }
+        } else {
+            data->state = 3;
+        }
+        if (data->state == 5) {
+            fileLinkCloseWait(work, (fileRequest_t *)data);
+            SignalSema(work->semaId);
+            sdfFileCmdClose(fileHandle);
+            saved = fileCallbackStatus;
+            fileCallbackStatus = 3;
+            fileExecQueue();
+            fileCallbackStatus = saved;
+        } else {
+            SignalSema(work->semaId);
+            fileWrite(data);
+        }
+        break;
+    case 7:
+        sdfFileCmdFree(fileHandle);
+        data->dev = NULL;
+        data->state = 6;
+        WaitSema(work->semaId);
+        fileUnlinkCloseWait(work, (fileRequest_t *)data);
+        if (data->callback != NULL) {
+            fileCb_t **link = &work->endCallbackLink;
+            fileCb_t *next;
+
+            while ((next = *link) != NULL) {
+                link = &next->donenext;
+            }
+            *link = data;
+        }
+        SignalSema(work->semaId);
+        break;
+    }
+    return 0;
+}
+
+void fileExecQueue(void) {
+    fileMngCb_tag *work = &fileQueueHead;
+    fileCb_t *job;
+    s32 locked;
+
+    WaitSema(work->semaId);
+    job = (fileCb_t *)work->queue;
+    if (job == NULL) {
+        SignalSema(work->semaId);
+        return;
+    }
+    locked = 1;
+    switch (job->kind) {
+    case 0:
+        switch (job->state) {
+        case 0:
+            job->state = 1;
+            locked = 0;
+            SignalSema(work->semaId);
+            job->dev = sdfFileCmdReadOpen(job->name, fileLoadCallback, job);
+            break;
+        case 7:
+            job->handle = sdfMemAlloc2Direct(job->size);
+            if (job->handle == NULL) {
+                sdfPrintf("alloc retry for %s\n",
+                                            ((sdfFileCmd_t *)job->dev)->path);
+                job->retry--;
+            } else {
+                u32 address = sdfMemLock(job->handle);
+
+                job->ptr = address;
+                job->top = address;
+                job->state = 3;
+                fileRead(job);
+            }
+            break;
+        }
+        break;
+    case 1:
+        switch (job->state) {
+        case 0:
+            job->state = 1;
+            locked = 0;
+            SignalSema(work->semaId);
+#ifdef FIX_BUGS
+            /* Retail's file thread runs at lower priority, so the callback that frees
+             * the request cannot run before dev is stored. Hold it off here. */
+            {
+                s32 intrEnabled = DIntr();
+
+                job->dev = sdfFileCmdReadOpen(job->name, pacLoadCallback, job);
+                if (intrEnabled != 0) {
+                    EIntr();
+                }
+            }
+#else
+            job->dev = sdfFileCmdReadOpen(job->name, pacLoadCallback, job);
+#endif
+            break;
+        case 3:
+            locked = 0;
+            SignalSema(work->semaId);
+            pacRead((fileRequest_t *)job);
+            break;
+        }
+        break;
+    case 2:
+        if (job->state == 0) {
+            job->state = 1;
+            locked = 0;
+            SignalSema(work->semaId);
+#ifdef FIX_BUGS
+            /* Retail's file thread runs at lower priority, so the callback that frees
+             * the request cannot run before dev is stored. Hold it off here. */
+            {
+                s32 intrEnabled = DIntr();
+
+                job->dev = sdfFileCmdWriteOpen(job->name, fileSaveCallback, job, 0x180);
+                if (intrEnabled != 0) {
+                    EIntr();
+                }
+            }
+#else
+            job->dev = sdfFileCmdWriteOpen(job->name, fileSaveCallback, job, 0x180);
+#endif
+        }
+        break;
+    }
+    if (locked != 0) {
+        SignalSema(work->semaId);
+    }
+}
+
+void fileExecCallback(void) {
+    fileMngCb_tag *work = &fileQueueHead;
+    fileCb_t *node;
+
+    WaitSema(work->semaId);
+    while ((node = work->endCallbackLink) != NULL) {
+        work->endCallbackLink = node->donenext;
+        SignalSema(work->semaId);
+        node->callback(node, EE_ADDR(node->arg));
+        WaitSema(work->semaId);
+    }
+    SignalSema(work->semaId);
+}
+
+s32 fileManager(void) {
+    fileMngCb_tag *work = &fileQueueHead;
+    u32 fullcnt;
+    pacFileRequest_t **link;
+    pacFileRequest_t *req;
+
+    fileExecCallback();
+    fullcnt = work->activeCount;
+    while (fullcnt != 0) {
+        u32 slot = work->index;
+        const u8 *input = work->buffer + (slot << 16);
+        fileCb_t *job = (fileCb_t *)work->data[slot].req;
+        u8 kind = job->kind;
+
+        if (kind == 1) {
+            pacFileRequest_t *req = (pacFileRequest_t *)job;
+            if (req != NULL &&
+                sdfPacDecode(&req->pac, input, work->data[slot].size) == -1) {
+                fileUnlinkQueue((fileRequest_t *)req);
+                req->pacrest = kind;
+                if (req->callback != NULL) {
+                    pacFileRequest_t **append = &work->pacEndCallbackLink;
+                    pacFileRequest_t *next;
+
+                    while ((next = *append) != NULL) {
+                        append = &next->cbnext;
+                    }
+                    *append = req;
+                }
+            }
+            WaitSema(work->semaId);
+            slot++;
+            if (slot == 4) {
+                slot = 0;
+            }
+            work->index = slot;
+            work->freeCount++;
+            work->activeCount--;
+            SignalSema(work->semaId);
+            fullcnt = work->activeCount;
+        }
+    }
+    fileExecQueue();
+    link = &work->pacEndCallbackLink;
+    while ((req = *link) != NULL) {
+        if (req->state == 6) {
+            *link = req->cbnext;
+            ((void (*)(pacFileRequest_t *, void *))req->callback)(req, req->arg);
+        } else {
+            link = &req->cbnext;
+        }
+    }
+    return work->queue != NULL;
+}
+
+s32 fileManagerProc(dds3ProcessID_t *procId) {
+    fileManager();
+    return 0;
+}
+
+void fileSysInit(void) {
+    memset(&fileQueueHead, 0, 0x40);
+    fileQueueHead.freeCount = 4;
+    fileQueueHead.semaId = sdfCreateSema(1, 0x7F, 0);
+    fileQueueHead.buffer = EE_ADDR_AS(u8 *, sdfMemLock(sdfMemAllocDirect(0x40000)));
+    dds3StartProcess(fileManagerProcName, 0x384, 1, 0, fileManagerProc, 0, 0);
+    p2sdSmgBuf = fileManager;
+}
+
+fileMngCb_tag fileQueueHead __attribute__((section(".bss")));
+
+u32 fileCallbackStatus __attribute__((section(".sdata"))) = 0;
+
+char fileManagerProcName[8] __attribute__((section(".sdata"))) = "fileMan";

@@ -1,5 +1,5 @@
 #include "common.h"
-#include "sdf_resource.h"
+#include "sdf_heap_api.h"
 
 void mnuReleaseOptionalResourceSlot(u32 *resourceSlot) {
     if (resourceSlot != NULL) {

@@ -10,7 +10,7 @@
 #include "btl_event_sequence_api.h"
 #include "btl_active_units_ready_api.h"
 #include "fld_scene_ready_api.h"
-#include "kwln_background_fade_api.h"
+#include "dds3_background_fade_api.h"
 #include "brs_primary_panel_update_api.h"
 #include "brs_ui_update_allowed_api.h"
 #include "btl_special_ability.h"
@@ -19,7 +19,7 @@
 #include "btl_sound.h"
 #include "btl_sound_release_task.h"
 #include "btl_task_condition.h"
-#include "pcp_vu0.h"
+#include "ps2asm.h"
 #include "btl_state.h"
 #include "btl_floor_resource_readiness_api.h"
 #include "btl_terminal_outcome.h"
@@ -33,7 +33,7 @@
 #include "btl_scene_initializer.h"
 #include "fld_encounter_runtime_api.h"
 #include "mdl_flag_api.h"
-#include "kwln_fade.h"
+#include "dds3_fade.h"
 #include "evt_solar.h"
 
 void btlSetSceneTaskActiveFlag(ActionStateLink *task);
@@ -109,7 +109,7 @@ typedef struct BattleEffectParams {
 
 
 
-extern f32 *D_0037F770[];
+extern f32 *dds3LightParam[];
 
 extern BtlRuntimeTask *btlCreateEffectTaskWithSourceParams(const void *sourceParams, u32 value);
 
@@ -154,7 +154,7 @@ extern s32 btlSelectSerialEncounter(void);
 extern void btlAddItemDrop(u16);
 
 
-extern void evtSetSolarOverlayFullyVisible();
+extern void evtEnableMoonDraw();
 
 extern void btlSyncModelFlagFromEventThresholds();
 
@@ -214,7 +214,7 @@ void fldBattleSceneEnterInit(u8 *scene) {
     btlRequestSceneEventResources();
     btlInitializeBossCallbacks(((BtlState *)scene)->battleMode);
     btlSelectSceneAudioTrack(((BtlState *)scene)->encounterPack, ((BtlState *)scene)->battleMode);
-    VU0_STORE_VF($vf0, scene);
+    SDF_VU0_STOREIDENTITYVECTOR(scene);
 }
 
 extern s32 btlIsFadeInPhaseOrIdle(void);
@@ -259,7 +259,7 @@ s32 fldSceneStateStartTileEffect(BtlState *scene) {
             params.scale[0] = 0.19607843f;
             params.scale[1] = 0.19607843f;
             params.scale[2] = 0.19607843f;
-            origin = D_0037F770[0];
+            origin = dds3LightParam[0];
             params.position[0] = origin[4];
             params.position[1] = origin[5];
             params.position[2] = origin[6];
@@ -427,7 +427,7 @@ s32 fldSceneStateRestoreDisplay(BtlState *scene) {
             scene->commandRestrictFlags &= ~0x80;
         }
         if (!(scene->battleFlags & 0x4000)) {
-            kwlnFadeBackgroundStartOut(0);
+            dds3FadeBackgroundStartOut(0);
             dds3SetBlur(0, 0, 1);
             dds3Blur2Off(0);
             dds3Filter2Off(0);
@@ -444,7 +444,7 @@ s32 fldSceneStateRestoreDisplay(BtlState *scene) {
             if (fldGetEncounterRuntimeResult() != FLD_ENCOUNTER_RESULT_NONE) {
                 fldSetEncounterPendingValue(1);
             }
-            evtSetSolarOverlayFullyVisible();
+            evtEnableMoonDraw();
         }
         if (scene->sceneStatus == 0) {
             fldCreateSceneCleanupTask();
@@ -1242,7 +1242,7 @@ extern void btlResetActorEntryState(void);
 extern void mnuQueueTitleSoundStreamEntry(s32 soundEntryIndex);
 extern void mnuResetTitleStreamLocked(void);
 extern void p2sdStopAllBgm(void);
-extern void sndQueueNoPayloadCommand210(void);
+extern void sdfSndQueueNoPayloadCommand210(void);
 
 s32 btlUpdateBattleEnd(BtlState *scene) {
     s32 state;
@@ -1326,13 +1326,13 @@ s32 btlUpdateBattleEnd(BtlState *scene) {
         if (scene->terminalOutcome != BTL_TERMINAL_OUTCOME_SERIAL) btlAdvanceTitleState();
         if (scene->terminalOutcome == BTL_TERMINAL_OUTCOME_WIN) {
             if (!(scene->endFlags & 1)) {
-                sndQueueNoPayloadCommand210();
+                sdfSndQueueNoPayloadCommand210();
                 p2sdStopAllBgm();
                 sndLoadAndPlayStationedSe(0x1C);
                 scene->endFlags |= 1;
             }
         } else {
-            sndQueueNoPayloadCommand210();
+            sdfSndQueueNoPayloadCommand210();
             p2sdStopAllBgm();
         }
         if (scene->terminalOutcome == BTL_TERMINAL_OUTCOME_SERIAL) {
@@ -1716,7 +1716,7 @@ s32 fldGetSceneGroupIndexByActorFlags(u8 *task) {
     return groupId;
 }
 
-extern struct EffRandState effSharedRandomState;
+extern struct EffRandState dds3RandCB;
 extern void fldInitSceneFadeRecords(void);
 
 /* Initialize scene slots from selected actors and mode-specific modifiers. */
@@ -1788,7 +1788,7 @@ void fldInitializeSceneSlots(void) {
                     bonus++;
                 }
                 if (btlDoesEnabledStatusMatchCurrentId(&task->unit->partyRecord, 0xEA) != 0) {
-                    if (dds3GetRandA(&effSharedRandomState) & 1) {
+                    if (dds3GetRandA(&dds3RandCB) & 1) {
                         actionTotal += dds3GetRandIntA(NULL, 2);
                     } else {
                         actionTotal -= dds3GetRandIntA(NULL, 2);
@@ -2352,3 +2352,4 @@ INCLUDE_SDATA(const s32, "game/code_001CFEF8", D_00436908);
 INCLUDE_SDATA(const s32, "game/code_001CFEF8", D_00436910);
 
 INCLUDE_SDATA(const s32, "game/code_001CFEF8", D_00436918);
+

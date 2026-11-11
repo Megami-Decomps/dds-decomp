@@ -3,7 +3,7 @@
 
 #include "eff.h"
 #include "eff_param.h"
-#include "sdf_resource.h"
+#include "sdf_heap_api.h"
 
 struct SdfTextureFileHeader;
 

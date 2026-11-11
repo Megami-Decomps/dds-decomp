@@ -1,7 +1,7 @@
 #include "sdk_ps2.h"
 #include "eff.h"
 #include "common.h"
-#include "sdf_resource.h"
+#include "sdf_heap_api.h"
 #include "mnu_shooting.h"
 #include "mdl.h"
 #include "mdl_motion_controller_lookup_api.h"
@@ -14,7 +14,7 @@ extern f32 D_0037F5EC[];
 
 extern f32 aViewTarget[4];
 
-extern f32 sdfViewTargetVector[4];
+extern f32 aViewEye[4];
 
 /* Replace only the high byte of the model's broadcast word. */
 void mnuSetNodeModelBroadcastByte(MnuModelNode *node, u8 highByte) {
@@ -57,7 +57,7 @@ void itfProjectScreenPointToViewPlane(f32 *position, s32 screenX, s32 screenY) {
     f32 eyeTargetDepth;
 
     halfViewAngle = D_0037F5EC[0] * 0.5f;
-    eyeTargetDepth = aViewTarget[2] - sdfViewTargetVector[2];
+    eyeTargetDepth = aViewTarget[2] - aViewEye[2];
     position[0] = eyeTargetDepth * tanf(halfViewAngle * 1.3f) *
         ((f32)(screenX - 256) * 0.00390625f);
     position[1] = eyeTargetDepth * tanf(halfViewAngle) *
@@ -71,7 +71,7 @@ void itfProjectScreenPointToFixedDepth(f32 *position, s32 screenX, s32 screenY) 
     f32 depth;
 
     halfViewAngle = D_0037F5EC[0] * 0.5f;
-    depth = -300.0f - sdfViewTargetVector[2];
+    depth = -300.0f - aViewEye[2];
     position[0] = depth * tanf(halfViewAngle * 1.3f) *
         ((f32)(screenX - 256) * 0.00390625f);
     position[1] = depth * tanf(halfViewAngle) *
@@ -79,7 +79,7 @@ void itfProjectScreenPointToFixedDepth(f32 *position, s32 screenX, s32 screenY) 
     position[2] = -300.0f;
 }
 
-extern struct sdfGrOt_t *kwlnSceneSurfaceSets[13][4];
+extern struct sdfGrOt_t *sdfModelOtTable[13][4];
 extern void mnuDeactivateModelNode(MnuModelNode *);
 extern void mnuTranslateNodePrimaryVector(MnuModelNode *, f32, f32, f32);
 
@@ -104,10 +104,10 @@ void mnuUpdateSectionModelWork(MnuSectionModelWork *work, u32 flags) {
                     alpha = ratio * 128.0f;
                     mnuSetNodeModelBroadcastByte(node, alpha);
                 }
-                mdlLink(node->model, kwlnSceneSurfaceSets[0]);
+                mdlLink(node->model, sdfModelOtTable[0]);
             } else {
                 mnuTranslateNodePrimaryVector(node, node->x, node->y, node->z);
-                mdlLink(node->model, kwlnSceneSurfaceSets[0]);
+                mdlLink(node->model, sdfModelOtTable[0]);
                 if (node->value48 != 0 && --node->value48 != 0) {
                     ratio = (f32)node->value48 / (f32)node->value4A;
                     alpha = ratio * 128.0f;

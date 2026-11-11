@@ -5,21 +5,21 @@
 #include "common.h"
 #include "mnu_movie_menu_selection_index.h"
 #include "snd_track_callback.h"
-#include "kwln_background_fade_api.h"
+#include "dds3_background_fade_api.h"
 #include "mnu_result.h"
 #include "sdf_chip.h"
-#include "sdf_resource.h"
+#include "sdf_heap_api.h"
 #include "sdf.h"
 #include "mnu_movie_playback_api.h"
 #include "sdf_semaphore_api.h"
-#include "kwln.h"
-#include "kwln_task_runner.h"
-#include "kwln_task_create.h"
-#include "kwln_fade.h"
+#include "kernel.h"
+#include "dds3_task_runner.h"
+#include "dds3_task_create.h"
+#include "dds3_fade.h"
 #include "mnu_title_effect.h"
 #include "mnu.h"
 #include "file.h"
-#include "kwln_task_lifecycle.h"
+#include "dds3_task_lifecycle.h"
 #include "file_request_api.h"
 #include "file_request_end_check_api.h"
 #include "file_slot_flags_change_api.h"
@@ -271,7 +271,7 @@ void mnuRunTitleStreamThread(void) {
     }
 }
 
-extern SdfThreadNode mnuTitleStreamThread __attribute__((section(".sbss")));
+extern sdfThCB_t mnuTitleStreamThread __attribute__((section(".sbss")));
 
 extern u8 mnuTitleStreamThreadStack[];
 void mnuCreateTitleStreamThread(void) {
@@ -372,7 +372,7 @@ s32 mnuCompleteTitleStreamFileLoad(TitleAudioStreamState *destinationState) {
         s32 fileBytes = fileGetLoadSize(mnuTitleStreamFileRequest);
         struct sdfMemHandle_t *allocation;
 
-        fileRequestFreeIfComplete(mnuTitleStreamFileRequest);
+        fileHandleFree(mnuTitleStreamFileRequest);
         allocation = sdfMemAllocFromTailDirect(fileBytes);
         mnuTitleStreamStatus.compressedData = (u8 *)sdfMemGetPtr(allocation);
         mnuTitleStreamStatus.allocation = allocation;
@@ -389,6 +389,7 @@ s32 mnuCompleteTitleStreamFileLoad(TitleAudioStreamState *destinationState) {
 
 
 /* Install the fixed title track and queue its compressed frames under the lock. */
+
 INCLUDE_RODATA(const s32, "game/code_002A1820", D_004285B0);
 
 INCLUDE_RODATA(const s32, "game/code_002A1820", D_004285C0);
@@ -547,6 +548,7 @@ void mnuResetTitleStreamLocked(void) {
 
 
 /* Install the default medium-frame buffer and stream under the shared lock. */
+
 INCLUDE_RODATA(const s32, "game/code_002A1820", D_00428650);
 
 void mnuInitializeTitleSoundBuffer(void) {
@@ -725,13 +727,13 @@ void mnuLoadTitleMenuAssets(void) {
 extern void mnuStopTitleMovieDraw(void);
 extern void mnuRecreateMenuSelectionList(void);
 extern void mnuSelectMenuListCursorByAdvance(s32);
-extern KwlnTaskUpdateResult mnuUpdateTitleMenuTask(dds3ProcessID_t *);
+extern dds3TaskUpdateResult_t mnuUpdateTitleMenuTask(dds3ProcessID_t *);
 extern u32 D_00435CBC;
 
 dds3ProcessID_t *mnuCreateTitleMenuTask(s32 mode) {
     struct sdfMemHandle_t *allocation;
 
-    kwlnFadeBackgroundStartOut(0);
+    dds3FadeBackgroundStartOut(0);
     mnuStopTitleMovieDraw();
     allocation = sdfMemAllocDirect(sizeof(MovieMenuState));
     titleWork = (void *)sdfMemLock((struct sdfMemHandle_t *)(allocation));
@@ -789,6 +791,7 @@ extern void mnuResetMovieWorkState(MnuSlideBarPair *work);
 
 /* Title-menu event handler (proposed mnuHandleTitleMenuEvent): drives the menu's slide bars, the background
  * movie and its fade for menu events 2..32; returns 1 once the movie has stopped after event 32. */
+
 INCLUDE_RODATA(const s32, "game/code_002A1820", D_00428680);
 
 s32 mnuHandleTitleMenuEvent(s32 event) {
@@ -914,7 +917,7 @@ extern s32 mnuUpdateMovieMenuInputState(void);
 extern void mnuResetTitleMovieMenuStateAndStartTrack(void);
 extern void mnuStartTitleMovieDraw(void);
 extern void p2sdStopBGM(u32);
-extern void sdfSoundSetChannelCount(u32);
+extern void sdfSndSetChannelCount(u32);
 extern void p2sdPlayBGMFade(s32);
 extern void dds3AdminiCallSequence(s32, const void *, u32, s32);
 extern void mnuRestartRuntimeAfterViewer(s32);
@@ -930,7 +933,7 @@ extern void mnuDrawAndAdvanceMovieMenuBar(SlideBar *, s32);
 extern void fileCacheSlotFlagsFromState(void);
 extern void fileRestoreSlotFlagsToState(void);
 
-KwlnTaskUpdateResult mnuUpdateTitleMenuTask(dds3ProcessID_t *task) {
+dds3TaskUpdateResult_t mnuUpdateTitleMenuTask(dds3ProcessID_t *task) {
     s32 volume;
     MnuMovieMenuPollResult menuAction;
     MnuMovieMenuSelectionIndex selectedItem;
@@ -1116,7 +1119,7 @@ KwlnTaskUpdateResult mnuUpdateTitleMenuTask(dds3ProcessID_t *task) {
             titleWork->state = 18;
             titleWork->cursor = 0;
             dds3FadeOut(0, 0, 0, 0x16);
-            sdfSoundSetChannelCount(0x2D);
+            sdfSndSetChannelCount(0x2D);
             titleWork->movieOpened = 1;
         }
         if (mnuIsMoviePlaybackFinished() != SDF_MOVIE_COMPLETION_INCOMPLETE) {
@@ -1291,7 +1294,7 @@ KwlnTaskUpdateResult mnuUpdateTitleMenuTask(dds3ProcessID_t *task) {
     mnuAdvanceSlideBarValue(&titleWork->barB, 0x52);
     mnuAdvanceSlideBar(&titleWork->paired, 0x53);
     mnuDrawAndAdvanceMovieMenuBar(&titleWork->bar, 0x53);
-    return KWLN_TASK_UPDATE_RETAIN_CALLBACK;
+    return DDS3_TASK_UPDATE_RETAIN_CALLBACK;
 }
 
 u32 mnuOpenTitleMenuForMode(s32 mode) {
@@ -1380,3 +1383,4 @@ INCLUDE_SDATA(const s32, "game/code_002A1820", D_00437ADC);
 INCLUDE_SDATA(const s32, "game/code_002A1820", D_00437AE0);
 
 INCLUDE_SDATA(const s32, "game/code_002A1820", D_00437AE4);
+

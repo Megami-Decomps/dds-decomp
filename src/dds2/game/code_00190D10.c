@@ -1,6 +1,6 @@
 #include "sdk_ps2.h"
 #include "bill_object_api.h"
-#include "sdf_resource.h"
+#include "sdf_heap_api.h"
 #include "eff.h"
 #include "sdf_chip.h"
 

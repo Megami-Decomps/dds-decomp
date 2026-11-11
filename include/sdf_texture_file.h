@@ -70,7 +70,7 @@ struct sdfTexHandle_t;
 /* Both entry points return one caller-owned texture reference. A nonzero
  * resourceKey reuses a live matching texture and increments its count; a new
  * texture starts at one. Release the returned reference once with
- * sdfTexReleaseReference or sdfTexReleaseReferenceViaHandler. */
+ * sdfTexReleaseReference or sdfTexFreeDelayed. */
 /* For a new texture, copy payload bytes into queue-owned storage before return. */
 struct sdfTexHandle_t *sdfTexSet(const SdfTextureFileHeader *header);
 /* For a new texture, queue transfers directly from the serialized payload

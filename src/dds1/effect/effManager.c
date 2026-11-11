@@ -1,8 +1,8 @@
 #include "common.h"
 #include "sdf_chip.h"
 #include "par_cell_api.h"
-#include "sdf_resource.h"
-#include "ee_mmi.h"
+#include "sdf_heap_api.h"
+#include "ps2asm.h"
 #include "eff.h"
 #include "eff_node.h"
 #include "eff_create_node_from_parameter.h"
@@ -10,7 +10,7 @@
 #include "sdf_packet_list.h"
 #include "sdf_gs_packet.h"
 #include "eff_manager_task.h"
-#include "kwln_task_runner.h"
+#include "dds3_task_runner.h"
 #include "eff_legacy_node_instance.h"
 
 extern sdfGrOt_t sdfGrOtTable[];
@@ -30,7 +30,7 @@ void effManagerInitializeSubsystems(dds3ProcessID_t *task) {
 }
 
 /* Submit the test and alpha state packets to both field draw buffers. */
-KwlnTaskUpdateResult effSubmitFieldBlendStateTask(dds3ProcessID_t *task) {
+dds3TaskUpdateResult_t effSubmitFieldBlendStateTask(dds3ProcessID_t *task) {
     sdfDrawTag_t *list;
     sdfPrimTransPacket_t *state;
     sdfGrOt_t *surface;
@@ -49,7 +49,7 @@ KwlnTaskUpdateResult effSubmitFieldBlendStateTask(dds3ProcessID_t *task) {
     state->registers.alpha.registerId = 0x42;
     sdfDrawTagLink(list, (u32)state);
     surface = &sdfGrOtTable[51];
-    surface->append(surface, list);
+    surface->regFunc(surface, list);
 
     list = (sdfDrawTag_t *)sdfGrAllocPacketBuff(0x20);
     sdfDrawTagInit(list);
@@ -64,26 +64,26 @@ KwlnTaskUpdateResult effSubmitFieldBlendStateTask(dds3ProcessID_t *task) {
     state->registers.alpha.registerId = 0x42;
     sdfDrawTagLink(list, (u32)state);
     surface++;
-    surface->append(surface, list);
+    surface->regFunc(surface, list);
 
     effObjectListCountersReset();
-    return KWLN_TASK_UPDATE_RETAIN_CALLBACK;
+    return DDS3_TASK_UPDATE_RETAIN_CALLBACK;
 }
 
 extern void billFlushPendingChildPackets(void);
 extern void billFlushPendingRenderPairs(void);
 extern void dds3CrossfadeRun(void);
-extern void effDispatchActive(void);
+extern void Eve_EffectDraw(void);
 
-KwlnTaskUpdateResult dds3EffectManagerRun(dds3ProcessID_t *task) {
+dds3TaskUpdateResult_t dds3EffectManagerRun(dds3ProcessID_t *task) {
     (void)task;
     dds3PolygonLinkOt();
     dds3TrackPolyLinkOt();
     billFlushPendingChildPackets();
     billFlushPendingRenderPairs();
     dds3CrossfadeRun();
-    effDispatchActive();
-    return KWLN_TASK_UPDATE_RETAIN_CALLBACK;
+    Eve_EffectDraw();
+    return DDS3_TASK_UPDATE_RETAIN_CALLBACK;
 }
 
 /* Parameter-node optional flag callback; the retail implementation is empty. */
@@ -179,11 +179,11 @@ EffNode *dds3EffectLoad(EffNodeDescriptor *descriptor) {
         case 0:
         case 1:
             instance = (EffLegacyNodeInstanceView *)node->instanceWord;
-            EE_MMI_UNIT_MATRIX(&instance->matrixAtB0);
+            SDF_VU0_STOREIDENTITY(&instance->matrixAtB0);
             break;
         case 2:
             instance = (EffLegacyNodeInstanceView *)node->instanceWord;
-            EE_MMI_UNIT_MATRIX(&instance->matrixAt20);
+            SDF_VU0_STOREIDENTITY(&instance->matrixAt20);
             break;
         }
         printf("effManager:set Identity matrix\n");

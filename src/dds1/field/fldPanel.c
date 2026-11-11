@@ -2,9 +2,9 @@
 #include "fld_title_banner_menu.h"
 #include "sdf_chip.h"
 
-#include "kwln.h"
-#include "kwln_task_create.h"
-#include "kwln_task_lifecycle.h"
+#include "kernel.h"
+#include "dds3_task_create.h"
+#include "dds3_task_lifecycle.h"
 extern dds3ProcessID_t *inputpanel_id;
 
 
@@ -42,3 +42,4 @@ void fldInputPanelSetMessage(s32 choice) {
 }
 
 INCLUDE_SDATA(const s32, "field/fldPanel", inputpanel_id);
+

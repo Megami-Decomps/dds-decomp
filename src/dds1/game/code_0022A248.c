@@ -2,8 +2,8 @@
 #include "mnu_camp_display.h"
 #include "common.h"
 #include "mdl_flag_api.h"
-#include "kwln.h"
-#include "kwln_task_create.h"
+#include "kernel.h"
+#include "dds3_task_create.h"
 #include "sdf_chip.h"
 #include "sdf_packet_list.h"
 #include "evt_viewer.h"
@@ -14,7 +14,7 @@
 #include "eff_blur.h"
 #include "eff_event_draw.h"
 #include "eff_event_work_api.h"
-#include "kwln_task_lifecycle.h"
+#include "dds3_task_lifecycle.h"
 #include "btl.h"
 
 #define SOLAR_FADE_DRAW_ENABLED 1
@@ -211,7 +211,7 @@ void evtUpdateSolarPhaseTransition(SolarOverlayWork *overlay) {
         state->transitionTimer = 20;
         state->solarPhase = solarPhase;
         state->flags = flags | 1;
-        evtSetSolarPointActiveCount(overlay, evtGetMirroredSolarPhase());
+        evtSetSolarPointActiveCount(overlay, evtGetAgeOfMoon());
     }
     remaining = state->transitionTimer;
     if (remaining != 0) {
@@ -227,7 +227,7 @@ void evtUpdateSolarPhaseTransition(SolarOverlayWork *overlay) {
 void evtAdvanceSolarOverlayFadeAndDraw(s32 x, s32 y, s32 z, s32 alpha, SolarOverlayWork *overlay, s32 renderContext) {
     s32 mirroredPhase;
     /* Preserve signed-byte narrowing before forwarding the mirrored phase. */
-    mirroredPhase = (s8)evtGetMirroredSolarPhase();
+    mirroredPhase = (s8)evtGetAgeOfMoon();
     evtUpdateSolarPhaseTransition(overlay);
     if ((evtSolarOverlayFadeFlags & SOLAR_FADE_DRAW_ENABLED) != 0) {
         if ((evtSolarOverlayFadeFlags & SOLAR_FADE_IN) != 0) {

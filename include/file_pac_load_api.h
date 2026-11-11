@@ -27,7 +27,7 @@ struct FileRequest *pacLoadEx(const char *requestName,
                               void *packetCallbackAddress, u32 onComplete,
                               u32 userData);
 #else
-struct FilePacRequest *fileCreatePacLoadWork(
+struct FilePacRequest *pacLoadEx(
     const char *requestName, FilePacResourceAllocationMode allocationMode,
     void *packetCallbackAddress, s32 onComplete, s32 userData);
 #endif

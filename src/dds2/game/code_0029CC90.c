@@ -5,7 +5,7 @@
 #include "pty_profile_record_value.h"
 #include "eff_random.h"
 #include "ui_color.h"
-#include "kwln.h"
+#include "kernel.h"
 #include "mnu.h"
 #include "brs_level_progress_api.h"
 #include "dat_state.h"
@@ -582,3 +582,4 @@ void mnuDrawUnitProgressRows(s32 x, s32 y, s32 z, s32 alpha, BrsActiveProgressLi
 }
 
 INCLUDE_RODATA(const s32, "game/code_0029CC90", D_00428550);
+

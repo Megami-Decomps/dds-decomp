@@ -39,3 +39,5 @@ dds2 0x00340DC8  # FromEuler, which tips btlInitializeRandomCameraCursor (game/c
 dds1 0x002E7F20  # FromEuler twin
 dds2 0x00159BD8  # dds3BillboardSetPosition, which joined the set when main's field and effect names landed
 dds1 0x00151FE8  # dds3BillboardSetPosition twin
+dds1 0x002D4070  # sdfDrawTagLink2: tips full-unit sdfDrawTexturedQuad (game/code_002BC8F0) to CONTEXT
+dds2 0x0032CF20  # sdfDrawTagLink2: keeps the DDS2 twin on the same name as DDS1

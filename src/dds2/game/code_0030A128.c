@@ -17,10 +17,10 @@
 #include "eff_resource_source_lifetime.h"
 #include "sdf_pac_packet.h"
 #include "sdf_packet_list.h"
-#include "kwln.h"
-#include "kwln_task_runner.h"
-#include "kwln_task_create.h"
-#include "sdf_resource.h"
+#include "kernel.h"
+#include "dds3_task_runner.h"
+#include "dds3_task_create.h"
+#include "sdf_heap_api.h"
 #include "sdf.h"
 #include "itf_grid_text.h"
 #include "itf_grid_text_color_api.h"
@@ -28,9 +28,9 @@
 #include "fld_lmap_task.h"
 #include "fld_lmap_task_presence.h"
 #include "sdf_sif_command.h"
-#include "kwln_task_lifecycle.h"
+#include "dds3_task_lifecycle.h"
 #include "mdl_flag_api.h"
-#include "kwln_fade.h"
+#include "dds3_fade.h"
 #include "sdf_counter_display.h"
 
 typedef struct SdfSlotSet SdfSlotSet;
@@ -65,7 +65,7 @@ extern u32 itfGetGridListLinkFlags(LmapList *);
 extern void uiDrawUniformRgbRange(s32 *, s32 *, s32, u32, s32);
 extern LmapNode *fldLmapExpandWindowBackward(LmapList *);
 extern s32 fldLocalMapTrackSlotFromMode(s32);
-extern KwlnTaskUpdateResult fldLmapTaskUpdate(dds3ProcessID_t *);
+extern dds3TaskUpdateResult_t fldLmapTaskUpdate(dds3ProcessID_t *);
 extern s32 D_00438890;
 extern void p2sdStopBGM(u32);
 extern void sdfReleaseAllSpriteSlots(void);
@@ -305,10 +305,10 @@ void fldLmapSubmitPositionedCommandPacket(s32 x, s32 y, s32 z,
     SifCommand packetHeader;
 
     sdfDrawTagInit(packetList);
-    sdfPktInit(&packetHeader, x + 0x7000, y + 0x7900, z, colorTableIndex);
+    sdfDevSetPrintCB(&packetHeader, x + 0x7000, y + 0x7900, z, colorTableIndex);
     sdfDrawTagLink(packetList, (u32)sdfDevPrintfEx(&packetHeader, command));
     drawSurface = &sdfGrOtTable[surfaceIndex];
-    drawSurface->append(drawSurface, packetList);
+    drawSurface->regFunc(drawSurface, packetList);
 }
 
 /* Build an untextured rectangle with a separate outline color. */
@@ -319,7 +319,7 @@ void fldLmapSubmitScaledSpritePacket(s32 x, s32 y, s32 z, s32 width, s32 height,
     sdfDrawTagInit(packetList);
     sdfDrawTagLink(packetList, (u32)dds3PrimFrameRect(x + 0x7000, y + 0x7900, z, width * 16, height * 8, fillColor, borderColor));
     drawSurface = &sdfGrOtTable[surfaceIndex];
-    drawSurface->append(drawSurface, packetList);
+    drawSurface->regFunc(drawSurface, packetList);
 }
 
 extern u8 fldUpdateLmapResourceLoad(LmapTaskState *);
@@ -327,7 +327,7 @@ extern void fldInitializeLocalMapScene(void);
 extern s32 fldUpdateLocalMapCounterSelection(void);
 extern void fldDrawLocalMapOverlay(void);
 
-KwlnTaskUpdateResult fldLmapTaskUpdate(dds3ProcessID_t *task) {
+dds3TaskUpdateResult_t fldLmapTaskUpdate(dds3ProcessID_t *task) {
     LmapTaskState *state = (LmapTaskState *)dds3GetProcessData(task);
     LmapTaskPhase phase = state->phase;
     s32 result;
@@ -387,6 +387,7 @@ void fldLocalMapDebugPrintfNoop(const char *fmt, ...) {
 }
 
 /* Map a local-map mode to its track-selection ordinal; unmapped modes use 1. */
+
 INCLUDE_RODATA(const s32, "game/code_0030A128", fldLocalMapTaskName);
 
 s32 fldLocalMapTrackSlotFromMode(s32 mode) {
@@ -474,9 +475,9 @@ extern char D_0042D2A8[];
 extern char D_0042D2B8[];
 extern void sdfInstallNonzeroSpriteSlots(SdfSlotSet *);
 extern void effRequestResourceByMode(const char *, const char *, s32, u32 *);
-extern SndPackedTrackLoadStatus sndFindPackedTrackLoadStatus(s32);
+extern SndPackedTrackLoadStatus p2sdLoadCheckMidi(s32);
 extern void p2sdLoadSMGFile(s32);
-extern void evtPrintDeveloperConsoleMessage(const char *, ...);
+extern void datDebugPrintf(const char *, ...);
 
 INCLUDE_RODATA(const s32, "game/code_0030A128", D_0042D280);
 
@@ -501,7 +502,7 @@ LmapResourceLoadResult fldAdvanceLmapResourceLoad(LmapTaskState *task)
         break;
     case LMAP_RESOURCE_LOAD_PHASE_INSTALL_SLOTS:
         sdfInstallNonzeroSpriteSlots((SdfSlotSet *)task);
-        evtPrintDeveloperConsoleMessage(D_0042D280);
+        datDebugPrintf(D_0042D280);
         return LMAP_RESOURCE_LOAD_COMPLETE;
     case LMAP_RESOURCE_LOAD_PHASE_REQUEST_ENTRY:
         load->file = NULL;
@@ -523,7 +524,7 @@ LmapResourceLoadResult fldAdvanceLmapResourceLoad(LmapTaskState *task)
             load->archive = pacLoad(files[load->entry].name);
             break;
         case 4:
-            if (sndFindPackedTrackLoadStatus(files[load->entry].argument) == SND_PACKED_TRACK_LOAD_NOT_PRESENT) {
+            if (p2sdLoadCheckMidi(files[load->entry].argument) == SND_PACKED_TRACK_LOAD_NOT_PRESENT) {
                 p2sdLoadSMGFile(files[load->entry].argument);
             } else {
                 /* Native 0x0030AD7C stores 4 before the common phase-3 store. */
@@ -557,7 +558,7 @@ LmapResourceLoadResult fldAdvanceLmapResourceLoad(LmapTaskState *task)
             }
             break;
         case 4:
-            if (sndFindPackedTrackLoadStatus(files[load->entry].argument) == SND_PACKED_TRACK_LOAD_RESIDENT) {
+            if (p2sdLoadCheckMidi(files[load->entry].argument) == SND_PACKED_TRACK_LOAD_RESIDENT) {
                 load->phase = LMAP_RESOURCE_LOAD_PHASE_CONSUME_ENTRY;
             }
             break;
@@ -566,7 +567,7 @@ LmapResourceLoadResult fldAdvanceLmapResourceLoad(LmapTaskState *task)
     case LMAP_RESOURCE_LOAD_PHASE_CONSUME_ENTRY:
         if (load->file != NULL) {
             fileGetLoadPtr(load->file);
-            evtPrintDeveloperConsoleMessage(D_0042D298, fileGetLoadSize(load->file));
+            datDebugPrintf(D_0042D298, fileGetLoadSize(load->file));
         }
         if (files[load->entry].kind == 2) {
             node = ((FilePacRequest *)load->archive)->packet.queueHead;
@@ -576,7 +577,7 @@ LmapResourceLoadResult fldAdvanceLmapResourceLoad(LmapTaskState *task)
                 slotIndex = 0;
                 do {
                     if (node->packet[0] == 1) {
-                        evtPrintDeveloperConsoleMessage(D_0042D2A8, sdfPacGetResrcFileName(node));
+                        datDebugPrintf(D_0042D2A8, sdfPacGetResrcFileName(node));
                         if (task->variant == 1) {
                             task->spriteSlots[slotIndex + 1] =
                                 effCreateResourceSlotSetFromAllocation(PAC_WORK_ALLOCATION(node), EFF_RESOURCE_SOURCE_TRANSIENT);
@@ -594,11 +595,11 @@ LmapResourceLoadResult fldAdvanceLmapResourceLoad(LmapTaskState *task)
                 } while (node != NULL);
             }
         }
-        evtPrintDeveloperConsoleMessage(D_0042D2A8, files[load->entry].name);
+        datDebugPrintf(D_0042D2A8, files[load->entry].name);
         if (load->file != NULL) {
             sdfMemFreeDirect(fileGetMemHandle(load->file));
-            fileRequestFreeIfComplete(load->file);
-            evtPrintDeveloperConsoleMessage(D_0042D2B8);
+            fileHandleFree(load->file);
+            datDebugPrintf(D_0042D2B8);
         }
         if (load->archive != NULL) {
             pacFileHandleFree_(load->archive);
@@ -647,7 +648,7 @@ void fldInitializeLocalMapScene(void) {
     fclDestroyMessage();
     D_004388A4 = sdfDevLoadFileEx("/lmap/lmpmsg.bmd", &D_004388A8, NULL);
     fclInitMessage((struct ItfMesSub *)D_004388A8);
-    evtSetSolarOverlayFullyVisible();
+    evtEnableMoonDraw();
     fldInitializeCameraColorResource();
     sdfEnableFlagListViewTargetRelativeMode();
     p2sdPlayBGM(0x400001);
@@ -904,3 +905,4 @@ INCLUDE_SDATA(const s32, "game/code_0030A128", D_004388A8);
 INCLUDE_SDATA(const s32, "game/code_0030A128", D_004388AC);
 
 INCLUDE_SDATA(const s32, "game/code_0030A128", D_004388B0);
+
