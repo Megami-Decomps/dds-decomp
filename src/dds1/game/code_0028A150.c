@@ -213,11 +213,11 @@ extern char D_003BC940[];
 
 extern char D_003B2688[]; /* "base.ico"; retail record includes padding */
 
-extern u32 fileSaveIconData;
+extern void *fileSaveIconData;
 
 extern u32 fileSaveIconDataSize;
 
-extern const u32 *fileWriteDataAddressSlot;
+extern void **fileWriteDataAddressSlot;
 
 extern const u32 *fileWriteDataSizeSlot;
 
@@ -227,7 +227,7 @@ extern struct FileRequest * const *fileWritePendingRequestSlot;
 
 extern u32 D_003BC824;
 
-extern s32 slSaveWriteFile(const char *fileName, const u32 *dataAddressSlot, const u32 *dataSizeSlot, FileMenuContinuationCallback continuation, struct FileRequest * const *pendingRequestStatus);
+extern s32 slSaveWriteFile(const char *fileName, void **dataAddressSlot, const u32 *dataSizeSlot, FileMenuContinuationCallback continuation, struct FileRequest * const *pendingRequestStatus);
 
 extern s32 slSaveProc_openFile(void);
 
@@ -263,7 +263,7 @@ typedef struct LoadMirror {
     u32 previous;
 } LoadMirror;
 
-extern u32 fileMainSaveBlobAddress;
+extern void *fileMainSaveBlobAddress;
 extern u32 fileMainSaveBlobSize;
 
 extern LoadMirror fileSlotFlagMirror;
@@ -1723,7 +1723,7 @@ s32 fileWriteIconSysComplete(void) {
 }
 
 extern u8 fileSaveIconSysData[];
-extern u32 fileSaveIconSysAddress;
+extern void *fileSaveIconSysAddress;
 extern u32 fileSaveIconSysSize;
 
 s32 fileBeginLabeledSlotWrite(void) {
@@ -2050,7 +2050,7 @@ s32 fileBuildMainBlobAndWrite(void) {
     fileSavePreviewRecords[slot].saveWords.words[0] = DDS3_GBWK->header.saveFlags;
     fileSavePreviewRecords[slot].saveWords.words[1] = DDS3_GBWK->header.saveFlags1;
     fileSavePreviewRecords[slot].saveWords.words[2] = DDS3_GBWK->header.saveFlags2;
-    fileMainSaveBlobAddress = (u32)DDS3_GBWK;
+    fileMainSaveBlobAddress = DDS3_GBWK;
     fileMainSaveBlobSize = 0x33600;
     if (D_003BC820 == 0 || D_003BC820 == 2) {
         return slSaveWriteFile(filename, &fileMainSaveBlobAddress, &fileMainSaveBlobSize, slSaveWriteEnd_saveData, NULL);
@@ -2071,7 +2071,7 @@ s32 slSaveData_deleteIconSys(void) {
 
 /* Later save callbacks read these borrowed slots without changing them; callers
  * keep the slots alive until the asynchronous save completes. */
-s32 slSaveWriteFile(const char *fileName, const u32 *dataAddressSlot, const u32 *dataSizeSlot, FileMenuContinuationCallback continuation, struct FileRequest * const *pendingRequestStatus) {
+s32 slSaveWriteFile(const char *fileName, void **dataAddressSlot, const u32 *dataSizeSlot, FileMenuContinuationCallback continuation, struct FileRequest * const *pendingRequestStatus) {
     fileWriteDataAddressSlot = dataAddressSlot;
     fileWriteDataSizeSlot = dataSizeSlot;
     fileWriteContinuation = continuation;
@@ -2092,7 +2092,7 @@ s32 slSaveProc_openFile(void) {
         if (fileWritePendingRequestSlot != NULL && *fileWritePendingRequestSlot != 0) {
             return (s32)slSaveProc_waitDataReady;
         }
-        sdfMcFuncWrite(fileSaveFileDescriptor, (const void *)*fileWriteDataAddressSlot, *fileWriteDataSizeSlot);
+        sdfMcFuncWrite(fileSaveFileDescriptor, *fileWriteDataAddressSlot, *fileWriteDataSizeSlot);
         return (s32)slSaveProc_writeFile;
     }
     if (status == MC_POLL_ERROR) {
@@ -2141,7 +2141,7 @@ s32 slSaveProc_waitDataReady(void) {
     if (fileSaveIconRequest != 0) {
         return 0;
     }
-    sdfMcFuncWrite(fileSaveFileDescriptor, (const void *)*fileWriteDataAddressSlot, *fileWriteDataSizeSlot);
+    sdfMcFuncWrite(fileSaveFileDescriptor, *fileWriteDataAddressSlot, *fileWriteDataSizeSlot);
     return (s32)slSaveProc_writeFile;
 }
 
@@ -2649,7 +2649,7 @@ s32 slCalc(dds3ProcessID_t *task) {
     if (job != 0 && pacFileCheckEnd(job) != 0) {
         fileSaveIconRequest = 0;
         fileSaveIconResourceHandle = fileGetMemHandle(job);
-        fileSaveIconData = (u32)fileGetLoadPtr(job);
+        fileSaveIconData = fileGetLoadPtr(job);
         fileSaveIconDataSize = fileGetLoadSize(job);
         fileHandleFree(job);
     }

@@ -11036,7 +11036,7 @@
 0x0039DAD0	tlbTable	inferred	kernelTlbTable_t read by InitTLB32MB (counts 13/18/8 and the three entry tables). SMT3 0x0052D920; was D_0039DAD0
 0x0034E030	dds3BillboardOtTable	inferred	SMT3 name (0x00317050): sdfGrOt_t *[4] the billboard tag lists register into; DDS2 twin 0x003AA960; was D_0034E030
 0x003306B0	fldDisplayLightSources	inferred	sdf3DLight_t *[4] {&D_00330670, NULL, NULL, NULL}, ambient D_003306C0 follows; entry 0 of the display pointer table. DDS2 twin 0x0038BB50; was D_003306B0
-0x003BC890	fileSaveIconSysAddress	inferred	u32 address slot holding &fileSaveIconSysData for slSaveWriteFile; size slot fileSaveIconSysSize follows. DDS2 twin 0x00437D90; was D_003BC890
+0x003BC890	fileSaveIconSysAddress	inferred	pointer slot holding &fileSaveIconSysData for slSaveWriteFile (SMT3 slIconSysSaveBuff); size slot fileSaveIconSysSize follows. DDS2 twin 0x00437D90; was D_003BC890
 0x003BC894	fileSaveIconSysSize	inferred	u32 size slot (0x3C4) for slSaveWriteFile. DDS2 twin 0x00437D94; was D_003BC894
 0x0037CDF8	prfMantraFallbackNames	inferred	const char *[2] {"???", "Mantra"}; prfResolveMantraNameOrFallback returns entry 0, entry 1 has no reader; was D_0037CDF8
 0x003ACD78	evtSceneDispRows	inferred	NodeDiagnosticRow[17] evtSceneDispProcess copies to its stack (AREA, MOVER, ... POINT, end row). DDS2 twin 0x00422238; was D_003ACD78
