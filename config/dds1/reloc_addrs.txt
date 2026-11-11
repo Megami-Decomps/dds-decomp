@@ -250,3 +250,11 @@ rom:0x278050 reloc:MIPS_NONE symbol:none // 00377050 D_00376630: string "_08", n
 rom:0x2780F0 reloc:MIPS_NONE symbol:none // 003770F0 D_00376630: string "_18", not D_00383110 + 0x4F
 rom:0x278190 reloc:MIPS_NONE symbol:none // 00377190 D_00376630: string "_28", not D_00383110 + 0x14F
 rom:0x27EFE0 reloc:MIPS_NONE symbol:none // 0037DFE0 D_0037DE10: odd scalar 0x00402C16, not D_00402C16
+rom:0x2539F8 reloc:MIPS_NONE symbol:none // 003529F8 D_003529B0: packed colour word 0x003A0200, not D_003A0200 (which split "%sF%03d.INF")
+rom:0x253C90 reloc:MIPS_NONE symbol:none // 00352C90 D_00352C40: packed colour word 0x003A0200, not D_003A0200 (which split "%sF%03d.INF")
+rom:0x253F30 reloc:MIPS_NONE symbol:none // 00352F30 D_00352EE0: packed colour word 0x003A0200, not D_003A0200 (which split "%sF%03d.INF")
+rom:0x253F90 reloc:MIPS_NONE symbol:none // 00352F90 D_00352F40: packed colour word 0x003A0200, not D_003A0200 (which split "%sF%03d.INF")
+rom:0x253FF0 reloc:MIPS_NONE symbol:none // 00352FF0 D_00352FA0: packed colour word 0x003A0200, not D_003A0200 (which split "%sF%03d.INF")
+rom:0x254050 reloc:MIPS_NONE symbol:none // 00353050 D_00353000: packed colour word 0x003A0200, not D_003A0200 (which split "%sF%03d.INF")
+rom:0x256050 reloc:MIPS_NONE symbol:none // 00355050 effPCP_ShockWave01_ThunderSpherePoly_Param: packed colour word 0x003A0200, not D_003A0200 (which split "%sF%03d.INF")
+rom:0x2560B0 reloc:MIPS_NONE symbol:none // 003550B0 effPCPShockWave02Param: packed colour word 0x003A0200, not D_003A0200 (which split "%sF%03d.INF")

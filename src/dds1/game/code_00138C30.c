@@ -2478,7 +2478,7 @@ s32 fldGetActorSlotAttribute(s32 actorId, FldInfMessageAttribute attribute) {
 }
 
 
-extern char D_003A01F8[]; /* "%sF%03d.INF": one string split at +8 from the separately included D_003A0200 */
+extern char D_003A01F8[]; /* "%sF%03d.INF" */
 
 void fldInfLoad(s32 field) {
     char path[64];

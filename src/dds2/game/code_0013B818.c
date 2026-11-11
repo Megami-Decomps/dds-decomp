@@ -245,7 +245,7 @@ extern f32 fldVecDot(const f32 *, const f32 *);
 
 extern FldRoomState fldEveHitTable[];
 
-extern char D_00413448[]; /* "%sF%03d.INF": one string split at +8 from the separately included D_003A0200 */
+extern char D_00413448[]; /* "%sF%03d.INF" */
 
 extern FldNpcMotion D_00391FA0[];
 
