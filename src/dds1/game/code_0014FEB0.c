@@ -75,7 +75,7 @@ void effInitializeBillResourceOwners(void) {
     billboardIndex = 0;
     do {
         billboard = billCreateFromResource(effBillResourceInitTable[billboardIndex].billboardKind,
-                                           (const char *)(u32)effBillResourceInitTable[billboardIndex].word00);
+                                           effBillResourceInitTable[billboardIndex].texturePath);
         payload = billboard->child;
         hGeneralBillboard[billboardIndex] = billboard;
         payload->halfWidth *= effBillResourceInitTable[billboardIndex].scale;

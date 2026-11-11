@@ -3,10 +3,9 @@
 
 #include "common.h"
 
-/* Shared 0x0C billboard-resource row. The first word has title-specific use;
- * only the following kind and scale fields are named in this common view. */
+/* Shared 0x0C billboard-resource row: texture, billboard kind and scale. */
 typedef struct EffBillResourceInit {
-    u32 word00;         /* 0x00, title-specific */
+    const char *texturePath; /* 0x00 */
     s16 billboardKind;  /* 0x04 */
     u16 pad06;          /* 0x06 */
     f32 scale;          /* 0x08 */
