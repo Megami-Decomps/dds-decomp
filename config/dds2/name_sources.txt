@@ -11789,3 +11789,10 @@
 0x00436AF0	btlButtonIconTexturePath	inferred	const char * "/battle/panel/b_bupbst.tmx". DDS1 twin 0x003BB6B8; was D_00436AF0
 0x004368B0	btlScenePanelTaskName	inferred	const char * "btl_panel__". DDS1 twin 0x003BB488; was D_004368B0
 0x00436330	fldIndexedResourcePaths	inferred	const char *[2] {SUN-FD.D3P, SUN-FU.D3P} fldLoadResourceByIndex copies and loads; was D_00436330
+0x003C3428	mdlHumanFiles	inferred	dds3ModelFileTable_t[48], modelFileTable slot 0 (first model human/pc000.PB); was D_003C3428; was D_003C3428
+0x003C3668	mdlDevilFiles	inferred	dds3ModelFileTable_t[352], modelFileTable slot 1 (first model devil/000.PB); was D_003C3668; was D_003C3668
+0x003C46E8	mdlHumanOnFiles	inferred	dds3ModelFileTable_t[32], modelFileTable slot 7 (first model human/pc000_on.PB); was D_003C46E8; was D_003C46E8
+0x003C4868	mdlOnFiles	inferred	dds3ModelFileTable_t[352], modelFileTable slot 6 (first model on/000_on.PB); was D_003C4868; was D_003C4868
+0x003C58E8	mdlFieldFiles	inferred	dds3ModelFileTable_t[64], modelFileTable slot 2 (first model field/player_a.PB); was D_003C58E8; was D_003C58E8
+0x003C5BE8	mdlEventFiles	inferred	dds3ModelFileTable_t[192], modelFileTable slot 3 (first model event/test/tool.PB); was D_003C5BE8; was D_003C5BE8
+0x003C64E8	mdlMiscFiles	inferred	dds3ModelFileTable_t[13], modelFileTable slot 4 (first model misc/colorbar.TB); was D_003C64E8; was D_003C64E8
