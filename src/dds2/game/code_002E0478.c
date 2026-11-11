@@ -17581,9 +17581,7 @@ s32 effPollOMaterialPbFile(void) {
     return effPollFileRecord(D_0042D140, BTL_RESOURCE_SCAN_PB);
 }
 
-extern EffFileJobRequest D_003FB948;
 
-extern EffFileJobRequest D_003F01D0;
 
 u32 fileLoadEffectSlotA(void) {
     EffResourceBankSlot fileInfo;
@@ -17697,7 +17695,6 @@ u32 effQueueGeneratedFileJob(void) {
     return result;
 }
 
-extern EffFileJobRequest D_003F9060;
 
 u32 effPollAndQueueCopiedFileResource(void) {
     EffResourceBankSlot fileInfo;
@@ -17799,7 +17796,6 @@ u32 effLoadFileSlotF2(void) {
     return result;
 }
 
-extern EffFileJobRequest D_003FD988;
 
 u32 effLoadMaterialFile(void) {
     EffResourceBankSlot fileInfo;
@@ -17842,7 +17838,6 @@ u32 effLoadMaterialFile(void) {
     return result;
 }
 
-extern EffFileJobRequest D_003FE040;
 
 u32 effPollAndQueueFileResourceWithUnitFloats(void) {
     EffResourceBankSlot fileInfo;

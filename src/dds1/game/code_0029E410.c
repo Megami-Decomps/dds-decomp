@@ -14879,21 +14879,10 @@ s32 effPollHlpPbResourceFile(void) {
     return effPollFileRecord(D_003B3BA0, BTL_RESOURCE_SCAN_PB);
 }
 
-typedef struct EffectFileHeader {
-    u8 unk_00[8];
-    u16 mode;
-    u8 unk_0A[2];
-    u32 start;
-    u32 length;
-} EffectFileHeader;
-
 extern void effResetFileResourceManager(void);
 
-extern EffectFileHeader D_0038DC08;
 
-extern EffectFileHeader D_00383F18;
 
-extern EffectFileHeader D_0038C758;
 
 u32 fileLoadEffectSlotA(void) {
     EffResourceBankSlot fileInfo;
@@ -14911,8 +14900,8 @@ u32 fileLoadEffectSlotA(void) {
         result = 0x400000;
     } else if (status == BTL_RESOURCE_SELECTION_ACCEPTED) {
         job = fileCreateJob(3);
-        fileJobSetPrimaryData(job, D_00383F18.start, D_00383F18.length,
-                      D_00383F18.mode);
+        fileJobSetPrimaryData(job, D_00383F18.outputBuffer, D_00383F18.size,
+                      D_00383F18.transferMode);
         fileJobCopyCommandIntoSecondaryData(job, (const char *)&fileInfo,
                       effClassifyResourceMask(fileInfo.type));
         entry = fileAppendJob(effFileQueue, (u32)job);
@@ -15015,8 +15004,8 @@ u32 fileLoadEffectSlotB(void) {
         result = 0x400000;
     } else if (status == BTL_RESOURCE_SELECTION_ACCEPTED) {
         job = fileCreateJob(18);
-        fileJobSetPrimaryData(job, D_0038C758.start, D_0038C758.length,
-                      D_0038C758.mode);
+        fileJobSetPrimaryData(job, D_0038C758.outputBuffer, D_0038C758.size,
+                      D_0038C758.transferMode);
         fileJobCopyCommandIntoSecondaryData(job, (const char *)&fileInfo,
                       effClassifyResourceMask(fileInfo.type));
         entry = fileAppendJob(effFileQueue, (u32)job);
@@ -15039,8 +15028,6 @@ u32 fileLoadEffectSlotB(void) {
     }
     return result;
 }
-
-extern EffectFileHeader D_0038D470;
 
 INCLUDE_RODATA(const s32, "game/code_0029E410", D_003B3B18);
 
@@ -15076,8 +15063,8 @@ u32 effLoadFileSlotF2(void) {
         result = 0x400000;
     } else if (status == BTL_RESOURCE_SELECTION_ACCEPTED) {
         job = fileCreateJob(0x14);
-        fileJobSetPrimaryData(job, D_0038D470.start, D_0038D470.length,
-                      D_0038D470.mode);
+        fileJobSetPrimaryData(job, D_0038D470.outputBuffer, D_0038D470.size,
+                      D_0038D470.transferMode);
         fileJobCopyCommandIntoSecondaryData(job, (const char *)&fileInfo,
                       effClassifyResourceMask(fileInfo.type));
         entry = fileAppendJob(effFileQueue, (u32)job);
@@ -15117,8 +15104,8 @@ u32 effLoadMaterialFile(void) {
         result = 0x400000;
     } else if (status == BTL_RESOURCE_SELECTION_ACCEPTED) {
         job = fileCreateJob(0x16);
-        fileJobSetPrimaryData(job, D_0038DC08.start, D_0038DC08.length,
-                      D_0038DC08.mode);
+        fileJobSetPrimaryData(job, D_0038DC08.outputBuffer, D_0038DC08.size,
+                      D_0038DC08.transferMode);
         fileJobCopyCommandIntoSecondaryData(job, (const char *)&fileInfo,
                       effClassifyResourceMask(fileInfo.type));
         entry = fileAppendJob(effFileQueue, (u32)job);
