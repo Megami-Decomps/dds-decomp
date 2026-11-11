@@ -100,6 +100,8 @@
 #include "effect_asset_link.h"
 #include "sdk_libc.h"
 
+extern EffQueuedFileObject effPartsListMenu, effResetConfirmMenu, effInstanceConfirmMenu, effDeleteConfirmMenu;
+
 #define VEC3_SPLAT(v, x) ((v)[0] = (x), (v)[1] = (x), (v)[2] = (x))
 
 static inline void UnpackRGBAWord(u32 color, u32 unitBits) {
@@ -273,7 +275,6 @@ void effDrawThreePointGroups(EffPointSet *, Matrix4 *);
 
 extern u32 effPartsListScroll;
 
-extern u32 D_0038F2FC[];
 
 extern s32 D_003BC970[2];
 
@@ -11784,7 +11785,7 @@ EffQueuedFileObject *effFindAssetObject(FileJob *entry) {
 
 /* Return the selected queue row plus the offset of its visible window. */
 u32 effGetSelectedFileQueueIndex(void) {
-    return D_0038F2FC[0] + effPartsListScroll;
+    return effPartsListMenu.cursor + effPartsListScroll;
 }
 
 extern EffectBlock128 effEditedQueueHeader;
@@ -11855,9 +11856,7 @@ extern void effQueueNamedResourceRequest(void);
 
 extern void effQueueAttachedResourceRequest(void);
 
-extern EffQueuedFileObject effPartsListMenu;
 
-extern EffQueuedFileObject effResetConfirmMenu;
 
 extern EffQueuedFileObject effExitConfirmMenu;
 
@@ -12463,7 +12462,6 @@ extern FileJob *effCurrentFileQueueEntry;
 
 extern u32 D_003BD064;
 
-extern EffQueuedFileObject effPartsListMenu;
 
 u32 effAppendPositionedCameraFileJob(const EffCameraCreateRequest *request) {
     FileJob *entry;
@@ -12552,7 +12550,6 @@ u32 effLoadSelectedFileJob(void) {
     return 0x800000;
 }
 
-extern u32 D_0038EA6C[];
 
 u32 effReinitializeFileQueue(void) {
     if (effTemporaryFileJob != 0) {
@@ -12567,7 +12564,7 @@ u32 effReinitializeFileQueue(void) {
         fileQueueDestroy(effFileQueue);
     }
     effFileQueue = fileQueueCreate();
-    D_0038EA6C[0] = 0;
+    effResetConfirmMenu.cursor = 0;
     D_003DF8D0[0] = 0;
     effPartsListScroll = 0;
     effPartsListMenu.cursor = 0;
@@ -12575,24 +12572,22 @@ u32 effReinitializeFileQueue(void) {
     return 0;
 }
 
-extern u32 D_0038EB3C[];
 
 u32 effResetFileQueueState(void) {
     fileQueueRemoveAndDestroyJob(effFileQueue, fileQueueGetAt(effFileQueue, effGetSelectedFileQueueIndex()));
-    D_0038EB3C[0] = 0;
+    effDeleteConfirmMenu.cursor = 0;
     effPartsListScroll = 0;
     effPartsListMenu.cursor = 0;
     effQueuedFileObject = &effPartsListMenu;
     return 0;
 }
 
-extern u32 D_0038EAD4[];
 
 u32 effFinalizeQueuedFile(void) {
     s32 index = effGetSelectedFileQueueIndex();
     FileJob *record = fileQueueGetAt(effFileQueue, index);
     FileJob *copy = fileJobDuplicateAfter(effFileQueue, record);
-    D_0038EAD4[0] = 0;
+    effInstanceConfirmMenu.cursor = 0;
     fileJobCopyHeader(copy, record);
     effQueuedFileObject = &effPartsListMenu;
     return 0;
@@ -12961,7 +12956,7 @@ u32 effPollNamedFileJob(void) {
         effFileQueue = fileQueueCreateFromCommandState((const char *)&record);
         effEditedQueueHeader = *(EffectBlock128 *)effFileQueue;
         effPartsListScroll = 0;
-        D_0038F2FC[0] = 0;
+        effPartsListMenu.cursor = 0;
         result = 0x400002;
     }
     return result;
@@ -13497,7 +13492,7 @@ u32 effProcessQueuedFileRecordAndPersistChanges(void) {
 extern u8 effPartsPreviewReload;
 
 void effResetFileResources(void) {
-    D_0038F2FC[0] = 0;
+    effPartsListMenu.cursor = 0;
     effPartsPreviewReload = 0;
     effPartsListScroll = 0;
     if (effFileQueue != 0) {

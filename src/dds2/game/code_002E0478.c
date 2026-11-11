@@ -115,6 +115,8 @@
 #include "eff_camera_path_parameters.h"
 #include "sdk_libc.h"
 
+extern EffQueuedFileObject effPartsListMenu, effResetConfirmMenu, effInstanceConfirmMenu, effDeleteConfirmMenu;
+
 #define VEC3_SPLAT(v, x) ((v)[0] = (x), (v)[1] = (x), (v)[2] = (x))
 
 static inline void UnpackRGBAWord(u32 color, u32 unitBits) {
@@ -213,11 +215,8 @@ extern EffEditorRow D_003FFE98[];
 
 extern void camFollowOffsetVec(u8 *, void *);
 
-extern EffQueuedFileObject effPartsListMenu;
 
-extern u32 D_003FF1C4[];
 
-extern u32 D_003FF294[];
 
 extern EffectAssetLink *D_003FF128[24];
 
@@ -502,7 +501,6 @@ extern sdfMemHandle_t *D_00437E7C;
 
 extern u32 effPartsListScroll;
 
-extern u32 D_003FFA84[];
 
 extern u8 D_0045C110[];
 
@@ -14246,12 +14244,11 @@ EffQueuedFileObject *effFindAssetObject(FileJob *entry) {
 
 /* Return the selected queue row plus the offset of its visible window. */
 u32 effGetSelectedFileQueueIndex(void) {
-    return D_003FFA84[0] + effPartsListScroll;
+    return effPartsListMenu.cursor + effPartsListScroll;
 }
 
 #ifdef NON_MATCHING
 
-extern EffQueuedFileObject effResetConfirmMenu;
 
 extern EffQueuedFileObject effExitConfirmMenu;
 
@@ -14261,7 +14258,6 @@ extern EffQueuedFileObject effAttachedPartEntryMenu;
 
 extern EffQueuedFileObject effNewPartsMenu;
 
-extern EffQueuedFileObject effPartsListMenu;
 
 extern EffQueuedFileObject effQueuePostureMenu;
 
@@ -15120,7 +15116,7 @@ u32 effReinitializeFileQueue(void) {
         fileQueueDestroy(effFileQueue);
     }
     effFileQueue = fileQueueCreate();
-    D_003FF1C4[0] = 0;
+    effResetConfirmMenu.cursor = 0;
     D_0045C1A0[0] = 0;
     effPartsListScroll = 0;
     effPartsListMenu.cursor = 0;
@@ -15128,11 +15124,10 @@ u32 effReinitializeFileQueue(void) {
     return 0;
 }
 
-extern u32 D_003FF22C[11];
 
 u32 effResetFileQueueState(void) {
     fileQueueRemoveAndDestroyJob(effFileQueue, fileQueueGetAt(effFileQueue, effGetSelectedFileQueueIndex()));
-    D_003FF294[0] = 0;
+    effDeleteConfirmMenu.cursor = 0;
     effPartsListScroll = 0;
     effPartsListMenu.cursor = 0;
     effQueuedFileObject = &effPartsListMenu;
@@ -15144,7 +15139,7 @@ u32 effFinalizeQueuedFile(void) {
     FileJob *entry;
     entry = fileQueueGetAt(effFileQueue, effGetSelectedFileQueueIndex());
     resource = fileJobDuplicateAfter(effFileQueue, entry);
-    D_003FF22C[0] = 0;
+    effInstanceConfirmMenu.cursor = 0;
     fileJobCopyHeader(resource, entry);
     effQueuedFileObject = &effPartsListMenu;
     return 0;
@@ -15599,7 +15594,7 @@ u32 effPollNamedFileJob(void) {
         effFileQueue = fileQueueCreateFromCommandState((const char *)&record);
         effEditedQueueHeader = *(EffectBlock128 *)effFileQueue;
         effPartsListScroll = 0;
-        D_003FFA84[0] = 0;
+        effPartsListMenu.cursor = 0;
         result = 0x400002;
     }
     return result;
@@ -16089,7 +16084,7 @@ u32 effProcessQueuedFileRecordAndPersistChanges(void) {
 extern s8 effPartsPreviewReload;
 
 void effResetFileResources(void) {
-    D_003FFA84[0] = 0;
+    effPartsListMenu.cursor = 0;
     effPartsPreviewReload = 0;
     effPartsListScroll = 0;
     if (effFileQueue != 0) {
