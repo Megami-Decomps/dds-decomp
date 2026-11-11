@@ -1,4 +1,5 @@
 #include "common.h"
+#include "kernel_draw.h"
 #include "ps2asm.h"
 #include "dds3_path.h"
 #include "evt_world.h"
@@ -36,8 +37,8 @@ struct EffNodeDescriptor;
 #include "mdl.h"
 #include "eff_quaternion_nlerp.h"
 
-extern f32 *dds3LightParam[];
-extern u8 dds3AmbientColor[];
+extern dds3LightState_t dds3LightParam;
+SYMBOL_AT_REGION(u8, dds3AmbientColor, dds3LightParam, 0x10);
 
 extern void evtGetUnitDirVector(evtUnitHandle_t *unit);
 
@@ -345,7 +346,7 @@ void evtAdvanceUnitVisualTransitions(evtUnitHandle_t *unit) {
         } else if (ownVector) {
             SDF_VU0_LOADVECTOR_B(target->direction);
         } else {
-            SDF_VU0_LOADVECTOR_B(dds3LightParam[0] + 4);
+            SDF_VU0_LOADVECTOR_B(&dds3LightParam.parallel[0]->v);
         }
         dds3RotationArc();
         SDF_VU0_COPYVECTOR_A_TO_B();
@@ -370,7 +371,7 @@ void evtAdvanceUnitVisualTransitions(evtUnitHandle_t *unit) {
         if (ownVector) {
             SDF_VU0_LOADVECTOR(target->direction);
         } else {
-            SDF_VU0_LOADVECTOR(dds3LightParam[0] + 4);
+            SDF_VU0_LOADVECTOR(&dds3LightParam.parallel[0]->v);
         }
         SDF_VU0_STOREVECTOR_NOMEM(unit->vec40);
     }
@@ -433,7 +434,7 @@ void evtAdvanceUnitVisualTransitions(evtUnitHandle_t *unit) {
         } else if (ownVector) {
             SDF_VU0_LOADVECTOR(target);
         } else {
-            SDF_VU0_LOADVECTOR(dds3LightParam[0]);
+            SDF_VU0_LOADVECTOR(&dds3LightParam.parallel[0]->color);
         }
         SDF_VU0_SCALEVECTOR_BITS(factor);
         SDF_VU0_ADDVECTOR();
@@ -476,7 +477,7 @@ void evtAdvanceUnitVisualTransitions(evtUnitHandle_t *unit) {
             if (ownVector) {
                 SDF_VU0_LOADVECTOR(target);
             } else {
-                SDF_VU0_LOADVECTOR(dds3LightParam[0]);
+                SDF_VU0_LOADVECTOR(&dds3LightParam.parallel[0]->color);
             }
             MMI_RGBA_PACK_UNIT(firstPacked, 128.0f);
             defaultFirst[0] = firstPacked;
@@ -602,7 +603,7 @@ void GetBaseLightRGB(evtUnitHandle_t *unit) {
     } else if (ownVector) {
                 SDF_VU0_LOADVECTOR(info);
     } else {
-                SDF_VU0_LOADVECTOR(dds3LightParam[0]);
+                SDF_VU0_LOADVECTOR(&dds3LightParam.parallel[0]->color);
     }
 }
 
@@ -644,7 +645,7 @@ void GetBaseLightDir(evtUnitHandle_t *unit) {
     } else if (ownVector) {
                 SDF_VU0_LOADVECTOR(unit->vec10);
     } else {
-                SDF_VU0_LOADVECTOR(dds3LightParam[0] + 4);
+                SDF_VU0_LOADVECTOR(&dds3LightParam.parallel[0]->v);
     }
 }
 

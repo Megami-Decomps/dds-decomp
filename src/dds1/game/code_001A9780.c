@@ -2639,6 +2639,7 @@ extern void btlDrawIndexedBattleEntryGlyphs(s32, s32, s32, s32, u16);
 extern void btlDrawThreePanelSpriteStrips(s32, s32, s32, s32);
 
 /* Advance and draw the seven analysis rows while the panel fades. */
+
 s32 btlUpdateAndDrawAnalysisPanel(dds3ProcessID_t *task) {
     char text[128];
     s32 offsets[8] = {52, 95, 157, 132, 132, 53, 53, 48};
@@ -3300,6 +3301,7 @@ void btlDrawThreePanelSpriteStrips(s32 unused, s32 x, s32 y, s32 delta) {
 
 
 /* Draw the fixed panel composition at x/y using the requested corner opacity. */
+
 void btlDrawCompositePanelSprites(void *unused, s32 x, s32 y, u32 alpha) {
     s32 strips[37][3] = {
         { 0, -16, 0x5E },
@@ -5104,21 +5106,25 @@ extern void btlReleaseRegisteredTaskBuffer(dds3ProcessID_t *);
 extern void btlDrawWindowHelpLine(s32,s32,u32,u32,u16,s16);
 extern u8 D_00358FE0[];
 
+extern const char *btlHelpLineAttackNames[3];
+extern const char *btlHelpLineRevertedNames[3];
+extern const char *btlHelpLineNormalNames[3];
+
 INCLUDE_RODATA(const s32, "game/code_001A9780", D_003A2A70);
 
 INCLUDE_RODATA(const s32, "game/code_001A9780", D_003A2A80);
 
 INCLUDE_RODATA(const s32, "game/code_001A9780", D_003A2A90);
 
-INCLUDE_RODATA(const s32, "game/code_001A9780", D_003A2AA0);
+INCLUDE_RODATA(const s32, "game/code_001A9780", btlHelpLineAttackNames);
 
 INCLUDE_RODATA(const s32, "game/code_001A9780", D_003A2AB0);
 
-INCLUDE_RODATA(const s32, "game/code_001A9780", D_003A2AC0);
+INCLUDE_RODATA(const s32, "game/code_001A9780", btlHelpLineRevertedNames);
 
 INCLUDE_RODATA(const s32, "game/code_001A9780", D_003A2AD0);
 
-INCLUDE_RODATA(const s32, "game/code_001A9780", D_003A2AE0);
+INCLUDE_RODATA(const s32, "game/code_001A9780", btlHelpLineNormalNames);
 
 INCLUDE_RODATA(const s32, "game/code_001A9780", D_003A2AF0);
 
@@ -8882,8 +8888,8 @@ void btlDrawActorCommandRows(BattleSceneObject *ctx, u16 kind, u16 page, u16 col
 }
 
 extern u16 btlReadUnitStatusMask(datUnitWork_t *);
-extern const u32 D_003A2E70[3];
-extern const u32 D_003A2E80[3];
+extern const u8 *const D_003A2E70[3];
+extern const u8 *const D_003A2E80[3];
 
 void func_001BE590(BattleSceneObject *object) {
     typedef struct CommandLabelBank { const u8 *text[3]; } CommandLabelBank;
@@ -9706,6 +9712,7 @@ extern s16 D_003BB496;
 extern s16 D_003BB498;
 
 /* Process target confirm/cancel and mode-selected directional input. */
+
 void btlUpdateTargetSelectionInput(BtlState *battle, SceneAiWork *work, s32 mode) {
     BattleSceneObject *object;
     dds3ProcessID_t *task;
@@ -11117,19 +11124,19 @@ u32 fldGetSceneIndexedValue(s32 index) {
 void func_001C4540(void) {
 }
 
-extern const char *D_003BB488;
+extern const char *btlScenePanelTaskName;
 
 extern s32 btlUpdateScenePanelTask(dds3ProcessID_t *);
 
 void fldCreateSceneCleanupTask(void) {
-    dds3ProcessID_t *oldTask = dds3SearchProcessName(D_003BB488);
+    dds3ProcessID_t *oldTask = dds3SearchProcessName(btlScenePanelTaskName);
     BtlState *context;
     dds3ProcessID_t *task;
     if (oldTask == 0) {
         btlGetRuntime();
     }
     context = (BtlState *)btlGetRuntime();
-    task = dds3StartProcess(D_003BB488, 0x2B0E, 1, 1, btlUpdateScenePanelTask, btlClearScenePanelTaskHandle, 0);
+    task = dds3StartProcess(btlScenePanelTaskName, 0x2B0E, 1, 1, btlUpdateScenePanelTask, btlClearScenePanelTaskHandle, 0);
     dds3LinkProcess(context->scriptOwner, task);
     context->cleanupTask = task;
     btlLoadResourceBlock();
@@ -11210,7 +11217,9 @@ INCLUDE_RODATA(const s32, "game/code_001A9780", D_003A32F0);
 
 INCLUDE_RODATA(const s32, "game/code_001A9780", D_003A3368);
 
-INCLUDE_SDATA(const s32, "game/code_001A9780", D_003BB488);
+INCLUDE_SDATA(const s32, "game/code_001A9780", btlScenePanelTaskName);
+
+INCLUDE_SDATA(const s32, "game/code_001A9780", D_003BB48C);
 
 INCLUDE_SDATA(const s32, "game/code_001A9780", D_003BB494);
 

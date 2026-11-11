@@ -306,8 +306,8 @@ segments:
       # Sony SDK / C runtime, one file per library (boundaries = first romwright signature hit)
       - [0x1F0D50, asm, sdk/libgraph]  # first signature hit 0x002EFD50
       - [0x1F2448, asm, sdk/libdma]  # first signature hit 0x002F1448
-      - [0x1F2EB0, asm, sdk/libpad]  # first signature hit 0x002F1EB0
-      - [0x1F3FC0, asm, sdk/libcdvd]  # first signature hit 0x002F2FC0
+      - [0x1F2B38, c, sdk/libpad]  # starts at _send_to_iop like SMT3
+      - [0x1F3ED0, asm, sdk/libcdvd]  # starts at SMT3's gcc2_compiled__6 twin
       - [0x1F5CE0, asm, sdk/libmrpc]  # first signature hit 0x002F4CE0
       - [0x1F6310, asm, sdk/libipu]  # first signature hit 0x002F5310
       - [0x1F68F8, asm, sdk/libsdr]  # first signature hit 0x002F58F8
@@ -315,8 +315,9 @@ segments:
       - [0x1F8628, c, hand/at3dec]
       - [0x1FACD0, asm, sdk/libm]
       - [0x1FCF58, asm, sdk/libgcc]
-      - [0x1FF248, asm, sdk/libc]
-      - [0x20B600, asm, sdk/libkernl]  # first signature hit 0x0030A600
+      - [0x1FF248, c, sdk/libc]
+      - [0x20B600, c, sdk/libkernl]  # first signature hit 0x0030A600
+      - [0x214E7C, asm, sdk/libgcc_longlong]
       # .vutext: VU1 microcode (no VU disassembler in splat yet).
       - [0x216BA0, textbin, vutext]
       # .ctors, .dtors, .reginfo
@@ -466,8 +467,13 @@ segments:
       - [0x2B6030, .rodata, sdf/sdf_Decomp]
       - [0x2B6060, .rodata, sdf/sdfTmx]
       - [0x2B6100, rodata, rodata_003B5100]
+      - [0x2B6680, .rodata, sdk/libpad]
+      - [0x2B67D8, rodata, rodata_003B57D8]
       - [0x2B6C80, .rodata, hand/at3dec]
       - [0x2B82E8, rodata, rodata_003B72E8]
+      - [0x2B8960, .rodata, sdk/libc]
+      - [0x2B9660, .rodata, sdk/libkernl]
+      - [0x2B98F8, rodata, rodata_003B88F8]
       - [0x2B9D00, .lit4, kernel/dds3PadManager]
       - [0x2B9D08, .lit4, kernel/dds3KernelDraw]
       - [0x2B9D18, .lit4, script/scrCommonCommand]

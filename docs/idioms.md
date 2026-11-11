@@ -3757,10 +3757,10 @@ The source payload is borrowed as float vectors, not another short
 world header. Its final VU0 store addresses the destination's separate
 transform vector at `+0x70` through `dds3PoseSet_t`.
 
-The kind directory `D_003299C0` points at complete six-word (`0x18`-byte)
+The kind directory `dds3BasicFuncTablePtr` points at complete six-word (`0x18`-byte)
 `EffWorldOps` tables. Their first four entries are create, destroy, update
 and draw callbacks; both remaining words are zero. Kind 1 selects
-`D_00329A20` and its initializer at DDS1 `0x00110578`, which allocates a
+`sceneBasicTable` and its initializer at DDS1 `0x00110578`, which allocates a
 `0x40`-byte `EvtWorldTable` and eighteen `0x0C`-byte slots. Each slot's
 endpoints are borrowed `dds3Basic_t *` values.
 
@@ -9215,8 +9215,8 @@ slot-emitter engine, despite sharing their translation units with file
 and menu functions. The native descriptor array establishes the update
 and scale callback pairs: its four words are update callback, scale
 callback, per-instance work bytes, and serialized parameter bytes.
-`effEmitterTypeDescriptors` names the native array in both games; the
-existing `dds3IndexedCallbacks` label addresses its scaler-callback field.
+`effEmitterTypeDescriptors` names the native array in both games and its
+symbol_addrs size covers every descriptor, so no field has its own label.
 The initial descriptor is empty.
 
 | Type | Update callback | Paired parameter scaler | Observed trajectory |
@@ -13926,7 +13926,6 @@ contents, without importing or redefining their storage:
 | `mnuTerminalActionTable` | `0x0036AC80` | `0x003CE7D0` | Action selection indexed by exclusion flag, terminal mode and entry kind. |
 | `mnuMovieViewerDrawDescriptor` | `0x0037B938` | `0x003E56B8` | Debug movie-viewer descriptor passed with the selected movie path to the draw task. |
 | `fileNewCycleLabel` | `0x0037DB20` | `0x003E8658` | Native `"New Cycle"` text displayed when the save preview's new-cycle flag is set. |
-| `fileJobTypeCallbacks` | `0x0037E14C` | `0x003E916C` | Shifted, type-indexed job callback view with a `0x28` stride. |
 | `effEmitterTypeDescriptors` | `0x0037E550` | `0x003E95C0` | Emitter update/scaler pairs and instance/parameter byte counts, as described above. |
 | `fileConfigSpriteResourceNames` | Not paired | `0x003E9000` | Mode-specific configuration sprite filenames; DDS1 uses a local four-name initializer instead. |
 | `fileMenuFlowStateEntries` | Not paired | `0x003E7FC8` | Four `{state, mask}` entries select states 20--23 using condition bits 1, 2, 4 and 8. |
@@ -13934,11 +13933,16 @@ contents, without importing or redefining their storage:
 | `mnuMantraSceneSpritePlacements` | `0x0036C268` | Not paired | Separate scene-helper resource/sprite/X/Y bank with the existing `s16[4]` view. |
 | `mnuMantraSpritePlacements` | Not paired | `0x003CE9D0` | DDS2 ordinary, centered, scaled and rotated draw-helper bank with the existing `s32[4]` view. |
 
-The callback view starts four bytes after `fileJobTypeOperations`; keep
-that constructor-root symbol and the existing shifted private declaration.
-Likewise, retain `dds3IndexedCallbacks`, the emitter scaler-field alias.
-The legacy private callback/record type and field names are not a license
-to reinterpret these two tables or merge their distinct views.
+`fileJobTypeOperations` and `effEmitterTypeDescriptors` are sized in
+symbol_addrs over all their records. A field of a record is the table plus an
+offset, never a label of its own: an interior label cuts the table and leaves
+its pointer words with an untyped owner.
+
+The effect editor and battle debug menus are `EffQueuedFileObject` records
+and `EffEditorRow` arrays (`include/eff_editor_menu.h`). Each has
+`type:EffQueuedFileObject` or `type:EffEditorRow` in symbol_addrs: splat
+accepts a capitalized type name, and any declared type stops the data string
+guesser, which otherwise wrote a row's first text pointer as `.asciz`.
 
 The Mantra banks have different contents and element widths, so this pass
 does not invent a cross-game identity between them. Preserve every existing
@@ -14479,12 +14483,9 @@ array bound. `sdfMcInfo` selects the request entry
 used by the manager's card synchronization/type/format polling and retry;
 it is distinct from the file-menu request index.
 
-DDS2's `fileJobTypePositionCallbackView`, `fileJobTypeRotationCallbackView`,
-`fileJobTypeScaleCallbackView` and `fileJobTypeColorCallbackView` are interior
-views of `fileJobTypeCallbacks`, not four independent registries. Their
-callback words are at offsets 0x14/0x18/0x1C/0x20 in each 0x28-byte record;
-DDS1 accesses the corresponding named fields directly. Keep the existing
-per-view types, stride and overlapping storage.
+The position, rotation, scale and color callbacks are fields at offsets
+0x14/0x18/0x1C/0x20 of each 0x28-byte `fileJobTypeOperations` record, read
+through the table in both games.
 
 The DDS2 flag-driven transfer notices read `fileRareItemNoticeFlagRows`;
 only the tested flag is established, not an item-ID meaning for its other

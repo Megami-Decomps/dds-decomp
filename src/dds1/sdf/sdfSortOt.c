@@ -23,7 +23,6 @@ struct sdfGrOt_t;
 
 #define SDF_POOL_FREE_KIND 0xFFFF
 
-#define SDK_SKIP_SleepThread
 #include "sdk_libkernl.h"
 
 extern void SleepThread(void);
@@ -235,7 +234,6 @@ extern s32 raise(s32 sig);
 
 extern void _exit(s32 code) __attribute__((noreturn));
 
-extern u8 localeconvData[] __attribute__((section(".data")));
 
 extern s32 libcErrno __attribute__((section(".data")));
 

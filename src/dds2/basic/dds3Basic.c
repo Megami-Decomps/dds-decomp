@@ -58,16 +58,17 @@
 #include "mdl.h"
 #include "evt_unit.h"
 #include "evt_script_model_api.h"
+#include "dds3_basic_tables.h"
 
 extern void Normalize(void);
 void dds3BackupPoseSet(dds3PoseSet_t *node);
-extern EffWorldOps *D_003849D8[EFF_WORLD_KIND_COUNT];
+extern dds3BasicFunction_t *dds3BasicFuncTablePtr[EFF_WORLD_KIND_COUNT];
 void dds3DeleteBasic(dds3Basic_t *node);
 
 /* Allocate a node of `kind`, link its owner and run the owner's create hook. */
 dds3Basic_t *dds3AllocBasic(u32 kind) {
     dds3Basic_t *node;
-    EffWorldOps *ops;
+    dds3BasicFunction_t *ops;
     Dds3BasicCreateResult createResult;
 
     if (kind >= EFF_WORLD_KIND_COUNT) {
@@ -82,7 +83,7 @@ dds3Basic_t *dds3AllocBasic(u32 kind) {
     node->word0 = 0;
     node->key = 0;
     node->name = 0;
-    ops = D_003849D8[kind];
+    ops = dds3BasicFuncTablePtr[kind];
     node->ops = ops;
     node->word14 = 0;
     node->workdata = NULL;
@@ -92,8 +93,8 @@ dds3Basic_t *dds3AllocBasic(u32 kind) {
     node->word28 = 0;
     node->word2C = 0;
     node->owner = NULL;
-    if (ops != NULL && ops->create != NULL) {
-        createResult = ops->create(node);
+    if (ops != NULL && ops->constructor != NULL) {
+        createResult = ops->constructor(node);
         if (createResult != DDS3_BASIC_CREATE_ACCEPTED) {
             dds3DeleteBasic(node);
             return NULL;
@@ -104,15 +105,15 @@ dds3Basic_t *dds3AllocBasic(u32 kind) {
 
 /* Notify the owner before unlinking and freeing this transform node. */
 void dds3DeleteBasic(dds3Basic_t *node) {
-    EffWorldOps *owner;
+    dds3BasicFunction_t *owner;
     dds3Basic_t *next;
     dds3Basic_t *prev;
 
     if (node != NULL) {
         owner = node->ops;
         if (owner != NULL) {
-            if (owner->destroy != NULL) {
-                owner->destroy(node);
+            if (owner->destructor != NULL) {
+                owner->destructor(node);
             }
         }
         next = node->previous;
@@ -349,10 +350,10 @@ s32 dds3CallBasicMainProc(dds3Basic_t *holder) {
     s32 result = 1;
 
     if (holder != NULL) {
-        EffWorldOps *table = holder->ops;
+        dds3BasicFunction_t *table = holder->ops;
 
-        if (table != NULL && table->update != NULL) {
-            result = table->update(holder);
+        if (table != NULL && table->mainprocuder != NULL) {
+            result = table->mainprocuder(holder);
         }
     }
     return result;
@@ -362,10 +363,10 @@ s32 dds3CallBasicDrawProc(dds3Basic_t *holder) {
     s32 result = 1;
 
     if (holder != NULL) {
-        EffWorldOps *table = holder->ops;
+        dds3BasicFunction_t *table = holder->ops;
 
-        if (table != NULL && table->draw != NULL) {
-            result = table->draw(holder);
+        if (table != NULL && table->drawprocuder != NULL) {
+            result = table->drawprocuder(holder);
         }
     }
     return result;

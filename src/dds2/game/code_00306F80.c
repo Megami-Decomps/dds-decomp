@@ -1,3 +1,4 @@
+#include "kernel_draw.h"
 #include "sdk_ps2.h"
 #include "sdf_gs_header.h"
 #include "sdf_gs_alpha_register_api.h"
@@ -633,8 +634,8 @@ extern DmaPacketHeader D_0045C3C0[2];
 extern sdfDrawTag_t D_0045C400[2];
 extern sdf3DLightParallelPacket_t D_0045C440[2];
 extern ConsMatrixPacket D_0045C600[2];
-extern sdf3DLight_t *dds3LightParam[3];
-extern sdfVector4_t dds3AmbientColor;
+extern dds3LightState_t dds3LightParam;
+SYMBOL_AT(sdfVector4_t, dds3AmbientColor, dds3LightParam, 0x10);
 extern Matrix4 sdfViewMatrix;
 extern f32 aViewTarget[4];
 extern f32 aViewEye[4];
@@ -654,7 +655,7 @@ void cmpDrawSetup3DView(void) {
         sdf3DMakeViewportPacket((struct ConsMatrixPacket *)&D_0045C600[i], &dds3ScreenParam, &sdfViewMatrix);
         sdfDrawTagLink(&D_0045C380[i], (u32)&D_0045C600[i]);
         sdfDrawTagInit(&D_0045C400[i]);
-        sdf3DMakeLightParallelPacket(&D_0045C440[i], dds3LightParam, &dds3AmbientColor);
+        sdf3DMakeLightParallelPacket(&D_0045C440[i], dds3LightParam.parallel, &dds3AmbientColor);
         sdfDrawTagLink(&D_0045C400[i], (u32)&D_0045C440[i]);
     }
 }

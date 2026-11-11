@@ -111,11 +111,11 @@ extern s32 itfCreateTightFont3TextGlyph(s32, s32, s32, s32, char *, s32);
 
 extern char D_00437B80[];
 
-extern u32 mnuCampMainResourceNamePairs[][2];
+extern const char *mnuCampMainResourceNamePairs[][2];
 
-extern u32 mnuCampExtraResourceNamePairs[][2];
+extern const char *mnuCampExtraResourceNamePairs[][2];
 
-extern u32 mnuCampPairedResourceNamePairs[][2];
+extern const char *mnuCampPairedResourceNamePairs[][2];
 
 void ptyResetPartyRecordsAndProfiles(void) {
     s32 partyIndex = 0;
@@ -144,7 +144,7 @@ void ptyResetPartyRecordsAndProfiles(void) {
 
 extern struct EffectSlotSet *mnuCampResourceHandles[2];
 
-extern u32 mnuCampBaseResourceNameRows[];
+extern const char *mnuCampBaseResourceNameRows[][2];
 
 extern const char D_0042A950[];
 
@@ -168,7 +168,7 @@ void mnuLoadCampResources(void) {
     s32 resourceIndex;
     for (resourceIndex = 0; resourceIndex < MNU_STAFF_BASE_RESOURCE_COUNT; resourceIndex++) {
         mnuCampResourceHandles[resourceIndex] = effLoadIndexedResource(
-            (const char *)D_0042A950, (const char *)mnuCampBaseResourceNameRows[resourceIndex * 2], EFF_RESOURCE_SOURCE_RETAINED);
+            (const char *)D_0042A950, mnuCampBaseResourceNameRows[resourceIndex][0], EFF_RESOURCE_SOURCE_RETAINED);
     }
 }
 
@@ -423,7 +423,7 @@ void mnuSwitchCampVisualCategory(MnuStaffVisualCategory nextCategory, MenuStaffC
     menu->categoryKind = nextCategory;
 }
 
-extern u32 mnuCampMotionResourceNames[];
+extern const char *mnuCampMotionResourceNames[];
 
 /* Load the mapped motion resource and initialize both status batches' words.
  * Batch categories and the initial 0xF word remain opaque. */
@@ -485,13 +485,13 @@ void mnuAppendCampSpriteRequests(struct EffectList *resourceList, StaffSlots *re
     mnuSnapshotCampTextureHandles(resourceSlots->baseResources);
     tableColumn = mnuGetValueRecordOwner(resourceList) == 1;
     for (resourceIndex = 0; resourceIndex < MNU_STAFF_MAIN_RESOURCE_COUNT; resourceIndex++) {
-        effAppendListEntry(resourceList, (u32)D_0042A950, mnuCampMainResourceNamePairs[resourceIndex][tableColumn], EFF_RESOURCE_SOURCE_RETAINED, (u32)&resourceSlots->mainResources[resourceIndex]);
+        effAppendListEntry(resourceList, (u32)D_0042A950, (u32)mnuCampMainResourceNamePairs[resourceIndex][tableColumn], EFF_RESOURCE_SOURCE_RETAINED, (u32)&resourceSlots->mainResources[resourceIndex]);
     }
     for (resourceIndex = 0; resourceIndex < MNU_STAFF_EXTRA_RESOURCE_COUNT; resourceIndex++) {
-        effAppendListEntry(resourceList, (u32)D_0042A950, mnuCampExtraResourceNamePairs[resourceIndex][tableColumn], EFF_RESOURCE_SOURCE_RETAINED, (u32)&resourceSlots->extraResources[resourceIndex]);
+        effAppendListEntry(resourceList, (u32)D_0042A950, (u32)mnuCampExtraResourceNamePairs[resourceIndex][tableColumn], EFF_RESOURCE_SOURCE_RETAINED, (u32)&resourceSlots->extraResources[resourceIndex]);
     }
     for (resourceIndex = 0; resourceIndex < MNU_STAFF_PAIR_RESOURCE_COUNT; resourceIndex++) {
-        effAppendListEntry(resourceList, (u32)"/camp/spr/n_sta/", mnuCampPairedResourceNamePairs[resourceIndex][tableColumn], EFF_RESOURCE_SOURCE_RETAINED, (u32)&resourceSlots->pairResources[resourceIndex]);
+        effAppendListEntry(resourceList, (u32)"/camp/spr/n_sta/", (u32)mnuCampPairedResourceNamePairs[resourceIndex][tableColumn], EFF_RESOURCE_SOURCE_RETAINED, (u32)&resourceSlots->pairResources[resourceIndex]);
     }
 }
 
@@ -558,10 +558,10 @@ s32 movAreTitleEffectsReady(struct EffectList *resourceList, StaffSlots *resourc
 const char D_0042A9B0[] = "/camp/spr/";
 const char D_0042A9C0[] = "/camp/spr/n_pty/";
 const char D_0042A9D8[] = "/camp/spr/n_con/";
-extern u32 mnuStaffItemResourceNamePairs[][2];
-extern u32 mnuStaffSkillResourceNamePairs[][2];
-extern u32 mnuStaffPartyResourceNamePairs[][2];
-extern u32 mnuStaffCategory5ResourceNamePairs[][2];
+extern const char *mnuStaffItemResourceNamePairs[][2];
+extern const char *mnuStaffSkillResourceNamePairs[][2];
+extern const char *mnuStaffPartyResourceNamePairs[][2];
+extern const char *mnuStaffCategory5ResourceNamePairs[][2];
 /* Queue the category, party and context title resources after the base banks. */
 /* Entries in each camp title resource-name table. */
 #define MNU_CAMP_ITEM_TITLE_COUNT 1
@@ -578,16 +578,16 @@ void mnuBuildCampTitleEffectResourceList(u8 *menuBytes) {
     mnuAppendCampSpriteRequests(list, &work->resources);
     column = mnuGetValueRecordOwner(list) == 1;
     for (index = 0; index < MNU_CAMP_ITEM_TITLE_COUNT; index++) {
-        effAppendListEntry(list, (u32)D_0042A9B0, mnuStaffItemResourceNamePairs[index][column], 1, (u32)&work->titleFrames[index]);
+        effAppendListEntry(list, (u32)D_0042A9B0, (u32)mnuStaffItemResourceNamePairs[index][column], 1, (u32)&work->titleFrames[index]);
     }
     for (index = 0; index < MNU_CAMP_SKILL_TITLE_COUNT; index++) {
-        effAppendListEntry(list, (u32)D_0042A9B0, mnuStaffSkillResourceNamePairs[index][column], 1, (u32)&work->titleFrames[1 + index]);
+        effAppendListEntry(list, (u32)D_0042A9B0, (u32)mnuStaffSkillResourceNamePairs[index][column], 1, (u32)&work->titleFrames[1 + index]);
     }
     for (index = 0; index < MNU_CAMP_PARTY_TITLE_COUNT; index++) {
-        effAppendListEntry(list, (u32)D_0042A9C0, mnuStaffPartyResourceNamePairs[index][column], 1, (u32)&work->partyTitles[index]);
+        effAppendListEntry(list, (u32)D_0042A9C0, (u32)mnuStaffPartyResourceNamePairs[index][column], 1, (u32)&work->partyTitles[index]);
     }
     for (index = 0; index < MNU_CAMP_CONTEXT_TITLE_COUNT; index++) {
-        effAppendListEntry(list, (u32)D_0042A9D8, mnuStaffCategory5ResourceNamePairs[index][column], 1, (u32)&work->contextTitle);
+        effAppendListEntry(list, (u32)D_0042A9D8, (u32)mnuStaffCategory5ResourceNamePairs[index][column], 1, (u32)&work->contextTitle);
     }
 }
 

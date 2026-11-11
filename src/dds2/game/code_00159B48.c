@@ -3,6 +3,7 @@
 #include "sdf_gs_header.h"
 #include "sdf_quaternion.h"
 #include "common.h"
+#include "eff_bill_resource_init.h"
 #include "ps2asm.h"
 #include "sdf_vu_matrix.h"
 #include "eff_generated_texture_descriptor.h"
@@ -60,12 +61,12 @@ void effDrawGeneratedTextureQuad(sdfDrawTag_t *packet, EffGeneratedTextureDescri
 
 void effDrawCompositeTextureQuad(sdfDrawTag_t *packet, EffCompositeGsDescriptor *source);
 
-extern EffectConfig D_003AA884[];
+extern EffBillResourceInit effBillResourceInitTable[];
 
 /* Create a billboard sharing the indexed entry's resource. Word two of the
  * resource stores the reference count; the billHandle_t payload is not an emitter. */
 billHandle_t *dds3BillboardGeneral(s32 index) {
-    billHandle_t *effect = dds3BillboardCreate(D_003AA884[index].billboardKind, 0);
+    billHandle_t *effect = dds3BillboardCreate(effBillResourceInitTable[index].billboardKind, 0);
     BillChildPayload *resource = hGeneralBillboard[index]->child;
     s32 references = resource->refCount;
 

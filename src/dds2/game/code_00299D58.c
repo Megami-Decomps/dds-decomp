@@ -55,7 +55,8 @@ extern MenuPopupEntry brsPrimaryRewardPopupEntry[];
 extern void brsNoOpMessageInputCallback(void *);
 extern void mnuClearTitleState(BrsSkillPackageWork *);
 extern u8 D_0037F530[];
-extern u8 D_003D643C[];
+extern MenuPopupEntry mnuResultMessagePopupEntry[];
+extern MenuPopupEntry mnuResultSelectionPopupEntry[];
 
 s32 brsMessageInputStep(dds3ProcessID_t *input) {
     BrsSkillPackageWork *context;
@@ -78,7 +79,7 @@ s32 brsMessageInputStep(dds3ProcessID_t *input) {
         if (brsPollResultCounterCompletion() != BRS_RESULT_COUNTER_COMPLETION_PENDING &&
             ((buttons & 1) != 0 || (D_0037F530[3] & 2) != 0)) {
             mnuClearTitleState(context);
-            mnuSetPopupEntry(transitionState, (MenuPopupEntry *)D_003D643C);
+            mnuSetPopupEntry(transitionState, mnuResultSelectionPopupEntry);
         }
     }
     return 0;

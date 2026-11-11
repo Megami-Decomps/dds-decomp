@@ -67,7 +67,7 @@ typedef struct MemBlock MemBlock;
 
 extern s32 dds3BillboardTag;
 extern billHandle_t *hGeneralBillboard[];
-extern EffBillResourceInit D_003AA880[];
+extern EffBillResourceInit effBillResourceInitTable[];
 extern char D_004142B0[];
 extern char D_004142C0[];
 
@@ -87,9 +87,9 @@ void effInitializeBillResourceOwners(void) {
     pacSync((struct FileRequest *)archive);
     node = archive->packet.queueHead;
     if (node != NULL) {
-        configTable = (u8 *)D_003AA880;
+        configTable = (u8 *)effBillResourceInitTable;
         owner = hGeneralBillboard;
-        scaleTable = (f32 *)((u8 *)D_003AA880 + 8);
+        scaleTable = (f32 *)((u8 *)effBillResourceInitTable + 8);
         configOffset = 0;
         do {
             billboard = dds3BillboardCreate(((EffBillResourceInit *)(configOffset + (u32)configTable))->billboardKind,

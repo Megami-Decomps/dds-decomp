@@ -52,7 +52,7 @@ s32 dds3GlobalWorkMainProc(dds3ProcessID_t *task);
 
 void evtResetWorldAndProfileRuntime(void);
 
-extern SdfChannel D_00385A90[8];
+extern SdfChannel sdfChannels[8];
 extern void sdfReloadChannelSegments(SdfChannel *channel);
 #include "sdf_debug_api.h"
 const char D_00412AB0[16] = "sys:[%s]\n";
@@ -384,7 +384,7 @@ void sdfResetChannels(void) {
 
     sdfFirePendingCallback();
     for (i = 0; i < 8; i++) {
-        sdfReloadChannelSegments(&D_00385A90[i]);
+        sdfReloadChannelSegments(&sdfChannels[i]);
     }
     evtInitializeWorkScriptTask();
 }

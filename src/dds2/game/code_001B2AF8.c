@@ -6030,13 +6030,16 @@ extern void btlReleaseRegisteredTaskBuffer(s32);
 extern void btlDrawWindowHelpLine(s32,s32,u32,u32,u16,s16);
 extern u8 D_003B5B10[];
 
+extern const char *btlHelpLineRevertedNames[3];
+extern const char *btlHelpLineNormalNames[3];
+
 INCLUDE_RODATA(const s32, "game/code_001B2AF8", D_004165E0);
 
-INCLUDE_RODATA(const s32, "game/code_001B2AF8", D_004165F0);
+INCLUDE_RODATA(const s32, "game/code_001B2AF8", btlHelpLineRevertedNames);
 
 INCLUDE_RODATA(const s32, "game/code_001B2AF8", D_00416600);
 
-INCLUDE_RODATA(const s32, "game/code_001B2AF8", D_00416610);
+INCLUDE_RODATA(const s32, "game/code_001B2AF8", btlHelpLineNormalNames);
 
 INCLUDE_RODATA(const s32, "game/code_001B2AF8", D_00416620);
 
@@ -12400,7 +12403,7 @@ u32 fldGetSceneIndexedValue(s32 index) {
 void func_001CFB90(void) {
 }
 
-extern char *D_004368B0;
+extern char *btlScenePanelTaskName;
 
 extern void btlLoadResourceBlock(void);
 
@@ -12411,11 +12414,11 @@ extern void btlInitializeStaffActorPanels(void);
 void fldCreateSceneCleanupTask(void) {
     BtlState *scene;
     dds3ProcessID_t *task;
-    if (dds3SearchProcessName(D_004368B0) == 0) {
+    if (dds3SearchProcessName(btlScenePanelTaskName) == 0) {
         btlGetRuntime();
     }
     scene = (BtlState *)btlGetRuntime();
-    task = dds3StartProcess(D_004368B0, 0x2B0E, 1, 1, btlUpdateScenePanelTask, btlClearScenePanelTaskHandle, 0);
+    task = dds3StartProcess(btlScenePanelTaskName, 0x2B0E, 1, 1, btlUpdateScenePanelTask, btlClearScenePanelTaskHandle, 0);
     dds3LinkProcess(scene->scriptOwner, task);
     scene->sceneStatus = task;
     btlLoadResourceBlock();
@@ -12510,7 +12513,9 @@ const s32 D_00416FA0[10][3] __attribute__((section(".rodata"), aligned(8))) = {
 
 const char D_00417018[] __attribute__((section(".rodata"), aligned(8))) = "btl_panel__";
 
-INCLUDE_SDATA(const s32, "game/code_001B2AF8", D_004368B0);
+INCLUDE_SDATA(const s32, "game/code_001B2AF8", btlScenePanelTaskName);
+
+INCLUDE_SDATA(const s32, "game/code_001B2AF8", D_004368B4);
 
 INCLUDE_SDATA(const s32, "game/code_001B2AF8", D_004368BC);
 

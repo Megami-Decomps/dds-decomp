@@ -17,7 +17,7 @@ typedef char Dds3ModelRangeDataView_size_must_be_0x08[
 typedef char Dds3ModelRangeNode_data_at_18[
     ((u32)&((dds3Basic_t *)0)->workdata == 0x18) ? 1 : -1];
 
-/* The kind-11 destroy hook is dispatched through EffWorldOps.destroy. */
+/* The kind-11 destroy hook is dispatched through dds3BasicFunction_t.destructor. */
 void dds3ModelBasicFreeModel(dds3Basic_t *object);
 
 #endif

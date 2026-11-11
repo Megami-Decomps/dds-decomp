@@ -174,6 +174,13 @@ typedef struct
     s32 count;
 } mdlFileKindSlot_t;
 
+extern dds3ModelFileTable_t mdlHumanFiles[32];
+extern dds3ModelFileTable_t mdlDevilFiles[352];
+extern dds3ModelFileTable_t mdlFieldFiles[64];
+extern dds3ModelFileTable_t mdlEventFiles[192];
+extern dds3ModelFileTable_t mdlMiscFiles[13];
+extern dds3ModelFileTable_t mdlOnFiles[352];
+extern dds3ModelFileTable_t mdlHumanOnFiles[32];
 extern mdlFileSlot_t modelFileTable[];
 extern mdlFileKindSlot_t modelFileKindTable[];
 extern dds3ModelFileIndex_t *mdlHddFileIndex;

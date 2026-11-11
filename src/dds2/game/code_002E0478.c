@@ -2,6 +2,7 @@
 #include "eff_block128.h"
 #include "sdf_model_packet_callback.h"
 #include "eff_editor_menu.h"
+#include "eff_editor_menus.h"
 #include "eff_surface_grid_node.h"
 #include "eff_surface_node.h"
 #include "eff_animation_state.h"
@@ -38,6 +39,9 @@
 #include "eff_point_set_table.h"
 #include "eff_span_work.h"
 #include "common.h"
+#include "kernel_draw.h"
+
+extern sdfGrOt_t *effLayerSurfaces[];
 #include "btl_horizontal_aim_result.h"
 #include "dds3_camera_update_flags.h"
 #include "sdf_vu_rotation_axes.h"
@@ -114,6 +118,8 @@
 #include "sdf_map_position_api.h"
 #include "eff_camera_path_parameters.h"
 #include "sdk_libc.h"
+
+extern EffQueuedFileObject effPartsListMenu, effResetConfirmMenu, effInstanceConfirmMenu, effDeleteConfirmMenu;
 
 #define VEC3_SPLAT(v, x) ((v)[0] = (x), (v)[1] = (x), (v)[2] = (x))
 
@@ -213,12 +219,15 @@ extern EffEditorRow D_003FFE98[];
 
 extern void camFollowOffsetVec(u8 *, void *);
 
-extern EffQueuedFileObject effPartsListMenu;
 
-extern u32 D_003FF1C4[];
 
-extern u32 D_003FF294[];
 
+extern EffCameraCreateRow D_003FE5D0[2];
+extern EffCameraCreateRow D_003FE740[2];
+extern EffCameraCreateRow D_003FECE0[2];
+extern EffCameraCreateRow D_003FEF60[2];
+extern EffCameraCreateRow D_003FEFA0[2];
+extern EffCameraCreateRow D_003FF0F0[2];
 extern EffectAssetLink *D_003FF128[24];
 
 typedef struct EffSurfaceEndpoints {
@@ -401,7 +410,7 @@ extern FileQueue *effAuxiliaryFileQueue;
 
 extern s8 effPartsListExitRequested;
 
-extern s32 effEditorCurrentMenu;
+extern struct EffQueuedFileObject *effEditorCurrentMenu;
 
 extern void *effQueuedFileObject;
 
@@ -502,7 +511,6 @@ extern sdfMemHandle_t *D_00437E7C;
 
 extern u32 effPartsListScroll;
 
-extern u32 D_003FFA84[];
 
 extern u8 D_0045C110[];
 
@@ -528,17 +536,11 @@ extern EffModelResourceOps effModelResourceOperations[];
 
 extern char D_0045C1A0[];
 
-extern u8 D_003FFA40[];
-
 extern u8 effBattleOffset[];
 
-extern u8 *D_004386CC;
+extern EffQueuedFileObject *D_004386CC;
 
 extern u8 D_0045C300[];
-
-extern u8 D_00400150[];
-
-extern u8 D_00400250[];
 
 extern EffClassResourceOps effClassResourceWorkOperations[];
 
@@ -560,13 +562,13 @@ extern void effReleaseResourceRefs(EffTrackSet *);
 
 extern EffTrackSet *effDuplicateResourceRefs(const EffTrackSet *);
 
-extern u128 *dds3LightParam[];
+extern dds3LightState_t dds3LightParam;
 
 extern u128 D_00458460[];
 
 extern u128 D_004584A0[];
 
-extern u128 dds3AmbientColor[];
+SYMBOL_AT_REGION(u128, dds3AmbientColor, dds3LightParam, 0x10);
 
 extern s8 D_00437E94;
 
@@ -5606,7 +5608,6 @@ extern void *effPkt3DPrimMakePoly(sdf3DPrimPolyParm_t *);
 
 extern sdf3DPrimPolyParm_t effQuadPacketParams;
 
-extern sdfGrOt_t *effLayerSurfaces[];
 
 extern u32 effModelUpdateControlFlags;
 
@@ -11257,7 +11258,7 @@ s32 effComputeLightDirectionVU(dds3ModelHandle_t *model, sdf3DLightParallelPacke
 
 void effResetDefaultColorTables(void) {
     u128 *dst = D_00458460;
-    u128 *src = dds3LightParam[0];
+    u128 *src = (u128 *)dds3LightParam.parallel[0];
     SDF_VU0_COPYVECTOR(dst, src);
     dst++;
     src++;
@@ -13915,7 +13916,7 @@ void effSetSharedEffectUniformScale(s32 *work, f32 value) {
 }
 
 void btlInitializeEffectWork(void) {
-    D_004386CC = D_003FFA40;
+    D_004386CC = &D_003FFA40;
     D_0045C1A0[0] = 0;
     effPartsListScroll = 0;
     effPartsListExitRequested = 0;
@@ -14003,20 +14004,6 @@ void effApplyBattleCameraToObject(work)
     fileDispatchJobTypeCallback(work, ((FileJob *)effSelectedJobHeader)->color);
 }
 
-/* Debug parameter table: each 0x18-byte row points at the variable it edits. */
-typedef struct EffTunableRow {
-    u8 pad00[8];
-    void *target; /* 0x08 */
-    u8 pad0C[0xC];
-} EffTunableRow;
-
-typedef struct EffTunableTable {
-    u8 pad00[0xC];
-    s32 selected; /* 0x0C */
-    u8 pad10[4];
-    EffTunableRow *rows; /* 0x14 */
-} EffTunableTable;
-
 typedef union EffTunableBuffer {
     u8 raw[0x74];
     struct {
@@ -14024,8 +14011,6 @@ typedef union EffTunableBuffer {
         f32 values[1]; /* 0x20 */
     };
 } EffTunableBuffer;
-
-extern EffTunableTable D_003FE240;
 
 extern u16 D_00438644;
 
@@ -14042,7 +14027,7 @@ FileJobPayload *effQueueEffectFileJob(EffFileJobRequest *request) {
             memcpy(request->outputBuffer, D_00459E30, 0x74);
         }
         if (request->fileKind == 0x19) {
-            void *target = D_003FE240.rows[D_003FE240.selected].target;
+            void *target = D_003FE240.rows[D_003FE240.cursor].payload.numeric.target;
 
             if (target == &D_00438644) {
                 D_00438648 = ((EffTunableBuffer *)request->outputBuffer)->values[D_00438644];
@@ -14237,12 +14222,11 @@ EffQueuedFileObject *effFindAssetObject(FileJob *entry) {
 
 /* Return the selected queue row plus the offset of its visible window. */
 u32 effGetSelectedFileQueueIndex(void) {
-    return D_003FFA84[0] + effPartsListScroll;
+    return effPartsListMenu.cursor + effPartsListScroll;
 }
 
 #ifdef NON_MATCHING
 
-extern EffQueuedFileObject effResetConfirmMenu;
 
 extern EffQueuedFileObject effExitConfirmMenu;
 
@@ -14252,11 +14236,10 @@ extern EffQueuedFileObject effAttachedPartEntryMenu;
 
 extern EffQueuedFileObject effNewPartsMenu;
 
-extern EffQueuedFileObject effPartsListMenu;
 
 extern EffQueuedFileObject effQueuePostureMenu;
 
-extern s32 effEditorCurrentMenu;
+extern struct EffQueuedFileObject *effEditorCurrentMenu;
 
 extern u32 effPartsListScroll;
 
@@ -14348,7 +14331,7 @@ s32 effUpdatePartsListEditor(s32 unused) {
     f32 previousScale;
 
     selectionChanged = 0;
-    if ((EffQueuedFileObject *)(u32)effEditorCurrentMenu == &effPartsListMenu) {
+    if (effEditorCurrentMenu == &effPartsListMenu) {
         effPartsListMenu.flags &= ~1;
     }
     if (effFileQueue == NULL) {
@@ -14356,14 +14339,14 @@ s32 effUpdatePartsListEditor(s32 unused) {
     }
     scrolled = 0;
     count = fileQueueCountLinkedJobs(effFileQueue);
-    if ((EffQueuedFileObject *)(u32)effEditorCurrentMenu == &effPartsListMenu) {
-        if (((EffQueuedFileObject *)(u32)effEditorCurrentMenu)->cursor == 0) {
+    if (effEditorCurrentMenu == &effPartsListMenu) {
+        if (effEditorCurrentMenu->cursor == 0) {
             if ((dds3PadBitTable[6] & 2) && effPartsListScroll != 0) {
                 scrolled = 1;
                 effPartsListScroll--;
                 selectionChanged = 1;
             }
-        } else if (((EffQueuedFileObject *)(u32)effEditorCurrentMenu)->cursor == 20 && (dds3PadBitTable[7] & 2) &&
+        } else if (effEditorCurrentMenu->cursor == 20 && (dds3PadBitTable[7] & 2) &&
                    effPartsListScroll + 21 < count) {
             scrolled = 1;
             effPartsListScroll++;
@@ -14507,9 +14490,9 @@ s32 effUpdatePartsListEditor(s32 unused) {
         previousCursor = capacity - 1;
     }
     previousScale = effFileQueue->scaleMultiplier;
-    effEditorCurrentMenu = (s32)btlReturnDebugMenuSetupWord((u32)effEditorCurrentMenu);
-    if ((EffQueuedFileObject *)(u32)effEditorCurrentMenu == &effQueuePostureMenu) {
-        if (((EffQueuedFileObject *)(u32)effEditorCurrentMenu)->flags & 8) {
+    effEditorCurrentMenu = (EffQueuedFileObject *)btlReturnDebugMenuSetupWord((u32)effEditorCurrentMenu);
+    if (effEditorCurrentMenu == &effQueuePostureMenu) {
+        if (effEditorCurrentMenu->flags & 8) {
             changed = 1;
         }
     }
@@ -14530,7 +14513,7 @@ s32 effUpdatePartsListEditor(s32 unused) {
         changed = 1;
     }
     if (effQueuedFileObject != NULL) {
-        effEditorCurrentMenu = (s32)(u32)effQueuedFileObject;
+        effEditorCurrentMenu = (EffQueuedFileObject *)effQueuedFileObject;
         effQueuedFileObject = NULL;
     }
     sdfMemFreeDirect(allocation);
@@ -14543,8 +14526,8 @@ s32 effUpdatePartsListEditor(s32 unused) {
         result = 0x800001;
     }
     memcpy(effFileQueue, &effEditedQueueHeader, sizeof(EffectBlock128));
-    if (effPartsPreviewReload || ((EffQueuedFileObject *)(u32)effEditorCurrentMenu == &effPartsListMenu &&
-                       (((EffQueuedFileObject *)(u32)effEditorCurrentMenu)->cursor != previousCursor || selectionChanged))) {
+    if (effPartsPreviewReload || (effEditorCurrentMenu == &effPartsListMenu &&
+                       (effEditorCurrentMenu->cursor != previousCursor || selectionChanged))) {
         if (effTemporaryFileJob != 0) {
             fileJobDestroy(effTemporaryFileJob);
             effTemporaryFileJob = 0;
@@ -15016,7 +14999,7 @@ u32 effAppendPositionedCameraFileJob(const EffCameraCreateRequest *request) {
     u32 count;
 
     fileQueueInitTransform(effSelectedJobHeader);
-    entry = fileAppendJob(effFileQueue, (u32)effLoadFileJobPayload(request->resource, request->existingJob));
+    entry = fileAppendJob(effFileQueue, (u32)effLoadFileJobPayload(request->resource, (s32)request->existingJobName));
     effCurrentFileQueueEntry = entry;
     strcpy(entry->name, request->resource->name);
     entry->offset[0] = request->position[0];
@@ -15111,7 +15094,7 @@ u32 effReinitializeFileQueue(void) {
         fileQueueDestroy(effFileQueue);
     }
     effFileQueue = fileQueueCreate();
-    D_003FF1C4[0] = 0;
+    effResetConfirmMenu.cursor = 0;
     D_0045C1A0[0] = 0;
     effPartsListScroll = 0;
     effPartsListMenu.cursor = 0;
@@ -15119,11 +15102,10 @@ u32 effReinitializeFileQueue(void) {
     return 0;
 }
 
-extern u32 D_003FF22C[11];
 
 u32 effResetFileQueueState(void) {
     fileQueueRemoveAndDestroyJob(effFileQueue, fileQueueGetAt(effFileQueue, effGetSelectedFileQueueIndex()));
-    D_003FF294[0] = 0;
+    effDeleteConfirmMenu.cursor = 0;
     effPartsListScroll = 0;
     effPartsListMenu.cursor = 0;
     effQueuedFileObject = &effPartsListMenu;
@@ -15135,7 +15117,7 @@ u32 effFinalizeQueuedFile(void) {
     FileJob *entry;
     entry = fileQueueGetAt(effFileQueue, effGetSelectedFileQueueIndex());
     resource = fileJobDuplicateAfter(effFileQueue, entry);
-    D_003FF22C[0] = 0;
+    effInstanceConfirmMenu.cursor = 0;
     fileJobCopyHeader(resource, entry);
     effQueuedFileObject = &effPartsListMenu;
     return 0;
@@ -15228,8 +15210,8 @@ u32 effFlagFileQueueActive(void) {
 
 /* Select the queued file object's linked state when present; return zero in either case. */
 u32 effSelectLinkedFileState(void) {
-    if (((EffQueuedFileObject *)effEditorCurrentMenu)->linkedState != NULL) {
-        effQueuedFileObject = ((EffQueuedFileObject *)effEditorCurrentMenu)->linkedState;
+    if (effEditorCurrentMenu->linkedState != NULL) {
+        effQueuedFileObject = effEditorCurrentMenu->linkedState;
     }
     return 0;
 }
@@ -15307,13 +15289,6 @@ extern void btlDebugMenuRecordNoOp(u32);
 
 extern void btlDebugMenuAfterRecordNoOp(void);
 
-typedef struct EffCameraCreateRow {
-    EffCameraCreateRequest request;
-    u32 sourceTail;
-} EffCameraCreateRow;
-
-typedef char EffCameraCreateRowSizeCheck[(sizeof(EffCameraCreateRow) == 0x1C) ? 1 : -1];
-
 /* Present named camera/file requests, maintaining a preview job and returning selection status. */
 u32 effSelectCameraFileJobFromRows(const char *nameKey, const EffCameraCreateRow *requests, u32 sourceCount) {
     EffQueuedFileObject *menuObject;
@@ -15346,7 +15321,7 @@ u32 effSelectCameraFileJobFromRows(const char *nameKey, const EffCameraCreateRow
         }
     }
 
-    menuObject = (EffQueuedFileObject *)effEditorCurrentMenu;
+    menuObject = effEditorCurrentMenu;
     state = &D_003FFBB0;
     state->count = count;
     oldIndex = state->cursor;
@@ -15397,7 +15372,7 @@ u32 effSelectCameraFileJobFromRows(const char *nameKey, const EffCameraCreateRow
                 effTemporaryFileJob = 0;
             }
             request = &((const EffCameraCreateRow *)(requestIndex * sizeof(EffCameraCreateRow) + (u32)requests))->request;
-            if (request->existingJob != 0) {
+            if (request->existingJobName != NULL) {
                 FileJobPayload *sourceJob;
                 if (effAuxiliaryFileQueue != 0) {
                     fileQueueDestroy(effAuxiliaryFileQueue);
@@ -15407,7 +15382,7 @@ u32 effSelectCameraFileJobFromRows(const char *nameKey, const EffCameraCreateRow
                 ((FileJob *)effSelectedJobHeader)->offset[0] = request->position[0];
                 ((FileJob *)effSelectedJobHeader)->offset[1] = request->position[1];
                 ((FileJob *)effSelectedJobHeader)->offset[2] = request->position[2];
-                sourceJob = fileJobCreateFromCommandState((const char *)request->existingJob);
+                sourceJob = fileJobCreateFromCommandState(request->existingJobName);
                 effTemporaryFileJob = fileJobCreateFromJob(sourceJob);
                 fileJobDestroy(sourceJob);
             }
@@ -15420,7 +15395,7 @@ extern u32 effSelectCameraFileJobFromRows(const char *, const EffCameraCreateRow
 
 extern char D_0042CEF8[];
 
-extern u8 D_003FE280[];
+extern EffCameraCreateRow D_003FE280[15];
 
 u32 effCreateParticleTask(void) {
     return effSelectCameraFileJobFromRows(D_0042CEF8, D_003FE280, 0xF);
@@ -15428,13 +15403,13 @@ u32 effCreateParticleTask(void) {
 
 extern char D_0042CED8[];
 
-extern u8 D_003FE430[];
+extern EffCameraCreateRow D_003FE430[7];
 
 u32 effCreatePolyTrackControlTask(void) {
     return effSelectCameraFileJobFromRows(D_0042CED8, D_003FE430, 7);
 }
 
-extern u8 D_003FE500[];
+extern EffCameraCreateRow D_003FE500[7];
 
 u32 effCreatePolyTrackTask(void) {
     return effSelectCameraFileJobFromRows("POLY TRACK S", D_003FE500, 7);
@@ -15442,7 +15417,7 @@ u32 effCreatePolyTrackTask(void) {
 
 extern char D_00437F30[];
 
-extern u8 D_003FE610[];
+extern EffCameraCreateRow D_003FE610[7];
 
 u32 effCreateBlurTask(void) {
     return effSelectCameraFileJobFromRows(D_00437F30, D_003FE610, 7);
@@ -15450,7 +15425,7 @@ u32 effCreateBlurTask(void) {
 
 extern char D_004386A8[];
 
-extern u8 D_003FE6E0[];
+extern EffCameraCreateRow D_003FE6E0[3];
 
 u32 effCreateFilterTask(void) {
     return effSelectCameraFileJobFromRows(D_004386A8, D_003FE6E0, 3);
@@ -15458,7 +15433,7 @@ u32 effCreateFilterTask(void) {
 
 extern char D_0042CE48[];
 
-extern u8 D_003FE7C0[];
+extern EffCameraCreateRow D_003FE7C0[5];
 
 u32 effCreateEnvironmentTask(void) {
     return effSelectCameraFileJobFromRows(D_0042CE48, D_003FE7C0, 5);
@@ -15466,7 +15441,7 @@ u32 effCreateEnvironmentTask(void) {
 
 extern char D_0042CEB8[];
 
-extern u8 D_003FE780[];
+extern EffCameraCreateRow D_003FE780[2];
 
 u32 effCreatePolyTextureTask(void) {
     return effSelectCameraFileJobFromRows(D_0042CEB8, D_003FE780, 2);
@@ -15474,7 +15449,7 @@ u32 effCreatePolyTextureTask(void) {
 
 extern char D_0042CEA8[];
 
-extern u8 D_003FE850[];
+extern EffCameraCreateRow D_003FE850[11];
 
 u32 effCreatePolyFlashTask(void) {
     return effSelectCameraFileJobFromRows(D_0042CEA8, D_003FE850, 0xB);
@@ -15482,7 +15457,7 @@ u32 effCreatePolyFlashTask(void) {
 
 extern char D_0042CE98[]; /* "POLY RING" */
 
-extern u8 D_003FE990[];
+extern EffCameraCreateRow D_003FE990[6];
 
 u32 effCreatePolyRingTask(void) {
     return effSelectCameraFileJobFromRows(D_0042CE98, D_003FE990, 6);
@@ -15490,13 +15465,13 @@ u32 effCreatePolyRingTask(void) {
 
 extern char D_0042CE88[];
 
-extern u8 D_003FEA40[];
+extern EffCameraCreateRow D_003FEA40[5];
 
 u32 effCreatePolyThunderTask(void) {
     return effSelectCameraFileJobFromRows(D_0042CE88, D_003FEA40, 5);
 }
 
-extern u8 D_003FEAD0[];
+extern EffCameraCreateRow D_003FEAD0[6];
 
 /* Present the six POLY TWINKLE requests through the shared camera/file selector. */
 u32 effCreatePolyTwinkleTask(void) {
@@ -15505,7 +15480,7 @@ u32 effCreatePolyTwinkleTask(void) {
 
 extern char D_0042CE78[];
 
-extern u8 D_003FEB80[];
+extern EffCameraCreateRow D_003FEB80[7];
 
 u32 effCreatePolyWindTask(void) {
     return effSelectCameraFileJobFromRows(D_0042CE78, D_003FEB80, 7);
@@ -15513,7 +15488,7 @@ u32 effCreatePolyWindTask(void) {
 
 extern char D_0042CE68[];
 
-extern u8 D_003FEC50[];
+extern EffCameraCreateRow D_003FEC50[5];
 
 u32 effCreatePolyScalyTask(void) {
     return effSelectCameraFileJobFromRows(D_0042CE68, D_003FEC50, 5);
@@ -15521,7 +15496,7 @@ u32 effCreatePolyScalyTask(void) {
 
 extern char D_0042CE58[];
 
-extern u8 D_003FED20[];
+extern EffCameraCreateRow D_003FED20[2];
 
 u32 effCreatePolyCrackTask(void) {
     return effSelectCameraFileJobFromRows(D_0042CE58, D_003FED20, 2);
@@ -15529,7 +15504,7 @@ u32 effCreatePolyCrackTask(void) {
 
 extern char D_0042CDF8[];
 
-extern u8 D_003FED60[];
+extern EffCameraCreateRow D_003FED60[18];
 
 u32 effCreateBattleOnlyTask(void) {
     return effSelectCameraFileJobFromRows(D_0042CDF8, D_003FED60, 0x12);
@@ -15537,7 +15512,7 @@ u32 effCreateBattleOnlyTask(void) {
 
 extern char D_00438640[]; /* "2D" */
 
-extern u8 D_003FEFE0[];
+extern EffCameraCreateRow D_003FEFE0[2];
 
 u32 effCreateTwoDimensionalTask(void) {
     return effSelectCameraFileJobFromRows(D_00438640, D_003FEFE0, 2);
@@ -15545,7 +15520,7 @@ u32 effCreateTwoDimensionalTask(void) {
 
 extern char D_0042CEE8[];
 
-extern u8 D_003FF020[];
+extern EffCameraCreateRow D_003FF020[7];
 
 u32 effCreateObjectParticleTask(void) {
     return effSelectCameraFileJobFromRows(D_0042CEE8, D_003FF020, 7);
@@ -15590,7 +15565,7 @@ u32 effPollNamedFileJob(void) {
         effFileQueue = fileQueueCreateFromCommandState((const char *)&record);
         effEditedQueueHeader = *(EffectBlock128 *)effFileQueue;
         effPartsListScroll = 0;
-        D_003FFA84[0] = 0;
+        effPartsListMenu.cursor = 0;
         result = 0x400002;
     }
     return result;
@@ -15700,8 +15675,6 @@ extern void btlDebugDrawPoint(f32 *);
 
 extern s8 D_0040B7DB[];
 
-extern u32 D_003FFC78[];
-
 /* Synchronize the diagnostic camera position and calculate its positional guides.
  * Return input flags; the native diagnostic drawing providers are retail stubs. */
 s32 effUpdateCameraDiagnostics(EffectStateSnapshot *state, s8 mode) {
@@ -15711,19 +15684,19 @@ s32 effUpdateCameraDiagnostics(EffectStateSnapshot *state, s8 mode) {
     s32 flags = 1;
     s32 selectedMode = mode;
 
-    if ((D_003FFC78[4] & 2) == 0) {
+    if ((D_003FFC78.flags & 2) == 0) {
         if (D_0040B7DB[0] < 0) {
             flags = 0;
         }
     }
 
     SDF_VU0_COPYVECTOR(D_0045C2F0, state->position);
-    btlReturnDebugMenuSetupWord((u32)D_003FFC78);
+    btlReturnDebugMenuSetupWord((u32)&D_003FFC78);
     btlDebugMenuBeforeRecordNoOp();
-    btlDebugMenuRecordNoOp((u32)D_003FFC78);
+    btlDebugMenuRecordNoOp((u32)&D_003FFC78);
     btlDebugMenuAfterRecordNoOp();
     SDF_VU0_COPYVECTOR(state->position, D_0045C2F0);
-    if (D_003FFC78[4] & 8) {
+    if (D_003FFC78.flags & 8) {
         flags |= 2;
     }
     if ((flags & 2) && (state->flags & 0x18)) {
@@ -16080,7 +16053,7 @@ u32 effProcessQueuedFileRecordAndPersistChanges(void) {
 extern s8 effPartsPreviewReload;
 
 void effResetFileResources(void) {
-    D_003FFA84[0] = 0;
+    effPartsListMenu.cursor = 0;
     effPartsPreviewReload = 0;
     effPartsListScroll = 0;
     if (effFileQueue != 0) {
@@ -16902,13 +16875,13 @@ s32 effEditOPlsclColorTrack(s32 request) {
 }
 
 void btlResetEffectWork(void) {
-    u8 *first = D_00400150;
-    u8 *second = D_00400250;
+    EffQueuedFileObject *first = &D_00400150;
+    EffQueuedFileObject *second = &D_00400250;
 
-    ((EffQueuedFileObject *)first)->flags |= 0x10;
-    ((EffQueuedFileObject *)first)->cursor = 0;
-    ((EffQueuedFileObject *)second)->flags |= 0x10;
-    ((EffQueuedFileObject *)second)->cursor = 0;
+    first->flags |= 0x10;
+    first->cursor = 0;
+    second->flags |= 0x10;
+    second->cursor = 0;
     D_004387A8 = 0;
     D_004387AC = 0;
     D_004387B0 = 0;
@@ -17181,140 +17154,132 @@ s32 effEditScalarTrack(EffScalarTrack *track, u32 frames, void *panelWork, void 
     return status;
 }
 
-extern u8 D_00400068[];
-
 extern s32 effEditScalarTrack(EffScalarTrack *, u32, void *, void *);
 
 /* Pass the requested P-family SCALE track and its frame bound to the editor. */
 s32 effEditPScaleTrack(s32 *work) {
     u8 *source = (u8 *)work[3];
-    return effEditScalarTrack((EffScalarTrack *)(source + 0x60), ((EffMappingObject *)source)->valueB8, D_00400150, D_00400068);
+    return effEditScalarTrack((EffScalarTrack *)(source + 0x60), ((EffMappingObject *)source)->valueB8, &D_00400150, &D_00400068);
 }
-
-extern u8 D_004001A0[];
 
 /* Edit the requested P-family ROTATE track with its independent editor state. */
 s32 effEditPRotationTrack(s32 *work) {
     u8 *source = (u8 *)work[3];
-    return effEditScalarTrack((EffScalarTrack *)(source + 0x8C), ((EffMappingObject *)source)->valueB8, D_00400250, D_004001A0);
+    return effEditScalarTrack((EffScalarTrack *)(source + 0x8C), ((EffMappingObject *)source)->valueB8, &D_00400250, &D_004001A0);
 }
 
 /* SCALE property callback shared by native G-/K-family descriptors. */
 s32 effEditGkScaleTrack(s32 *work) {
     u8 *source = (u8 *)work[3];
-    return effEditScalarTrack((EffScalarTrack *)(source + 0x7C), ((EffMappingObject *)source)->valueD4, D_00400150, D_00400068);
+    return effEditScalarTrack((EffScalarTrack *)(source + 0x7C), ((EffMappingObject *)source)->valueD4, &D_00400150, &D_00400068);
 }
-
-extern u8 D_00400250[];
 
 /* ROTATE property callback for native K-family descriptors. */
 s32 effEditKRotationTrack(s32 *work) {
     u8 *source = (u8 *)work[3];
-    return effEditScalarTrack((EffScalarTrack *)(source + 0xA8), ((EffMappingObject *)source)->valueD4, D_00400250, D_004001A0);
+    return effEditScalarTrack((EffScalarTrack *)(source + 0xA8), ((EffMappingObject *)source)->valueD4, &D_00400250, &D_004001A0);
 }
 
 /* SCALE property callback for native B-family descriptors. */
 s32 effEditBScaleTrack(s32 *work) {
     u8 *source = (u8 *)work[3];
-    return effEditScalarTrack((EffScalarTrack *)(source + 0x34), ((EffMappingObject *)source)->valueB8, D_00400150, D_00400068);
+    return effEditScalarTrack((EffScalarTrack *)(source + 0x34), ((EffMappingObject *)source)->valueB8, &D_00400150, &D_00400068);
 }
 
 /* B-family ROTATE callback; identical forwarding code does not imply P-family SCALE. */
 s32 effEditBRotationTrack(s32 *work) {
     u8 *source = (u8 *)work[3];
-    return effEditScalarTrack((EffScalarTrack *)(source + 0x60), ((EffMappingObject *)source)->valueB8, D_00400150, D_00400068);
+    return effEditScalarTrack((EffScalarTrack *)(source + 0x60), ((EffMappingObject *)source)->valueB8, &D_00400150, &D_00400068);
 }
 
 /* AREA property callback shared by B-/F-family descriptors. */
 s32 effEditBfAreaTrack(s32 *work) {
     u8 *source = (u8 *)work[3];
-    return effEditScalarTrack((EffScalarTrack *)(source + 0x8C), ((EffMappingObject *)source)->valueB8, D_00400150, D_00400068);
+    return effEditScalarTrack((EffScalarTrack *)(source + 0x8C), ((EffMappingObject *)source)->valueB8, &D_00400150, &D_00400068);
 }
 
 /* Pass the requested T-BOARD SCALE track and its frame bound to the editor. */
 s32 effEditTBoardScaleTrack(s32 *work) {
     u8 *source = (u8 *)work[3];
-    return effEditScalarTrack((EffScalarTrack *)(source + 0x34), ((EffMappingObject *)source)->value8C, D_00400150, D_00400068);
+    return effEditScalarTrack((EffScalarTrack *)(source + 0x34), ((EffMappingObject *)source)->value8C, &D_00400150, &D_00400068);
 }
 
 /* Pass the requested T-BOARD ROTATE track and its frame bound to the editor. */
 s32 effEditTBoardRotationTrack(s32 *work) {
     u8 *source = (u8 *)work[3];
-    return effEditScalarTrack((EffScalarTrack *)(source + 0x60), ((EffMappingObject *)source)->value8C, D_00400150, D_00400068);
+    return effEditScalarTrack((EffScalarTrack *)(source + 0x60), ((EffMappingObject *)source)->value8C, &D_00400150, &D_00400068);
 }
 
 /* SCALE property callback for native W-family descriptors. */
 s32 effEditWScaleTrack(s32 *work) {
     u8 *source = (u8 *)work[3];
-    return effEditScalarTrack((EffScalarTrack *)(source + 0x80), ((EffMappingObject *)source)->valueD8, D_00400150, D_00400068);
+    return effEditScalarTrack((EffScalarTrack *)(source + 0x80), ((EffMappingObject *)source)->valueD8, &D_00400150, &D_00400068);
 }
 
 /* ROTATE property callback for native W-family descriptors. */
 s32 effEditWRotationTrack(s32 *work) {
     u8 *source = (u8 *)work[3];
-    return effEditScalarTrack((EffScalarTrack *)(source + 0xAC), ((EffMappingObject *)source)->valueD8, D_00400250, D_004001A0);
+    return effEditScalarTrack((EffScalarTrack *)(source + 0xAC), ((EffMappingObject *)source)->valueD8, &D_00400250, &D_004001A0);
 }
-
-extern u8 D_004000B8[];
 
 /* Edit the SCALE_UV curve in U-CYLND's POLYGON child; native callback is void. */
 s32 effEditUCylinderPolygonUvScaleTrack(s32 *work) {
     u8 *source = (u8 *)work[3];
-    return effEditScalarTrack((EffScalarTrack *)(source + 0x90), ((EffMappingObject *)source)->value80, D_00400150, D_004000B8);
+    return effEditScalarTrack((EffScalarTrack *)(source + 0x90), ((EffMappingObject *)source)->value80, &D_00400150, &D_004000B8);
 }
 
 /* Edit the shared U-SMOKE/U-SPIRL root SCALE curve; native callback is void. */
 s32 effEditUSmokeSpiralScaleTrack(s32 *work) {
     u8 *source = (u8 *)work[3];
-    return effEditScalarTrack((EffScalarTrack *)(source + 0x9C), ((EffMappingObject *)source)->valueF4, D_00400150, D_00400068);
+    return effEditScalarTrack((EffScalarTrack *)(source + 0x9C), ((EffMappingObject *)source)->valueF4, &D_00400150, &D_00400068);
 }
 
 /* Edit the shared U-SMOKE/U-SPIRL root ROTATE curve; native callback is void. */
 s32 effEditUSmokeSpiralRotationTrack(s32 *work) {
     u8 *source = (u8 *)work[3];
-    return effEditScalarTrack((EffScalarTrack *)(source + 0xC8), ((EffMappingObject *)source)->valueF4, D_00400250, D_004001A0);
+    return effEditScalarTrack((EffScalarTrack *)(source + 0xC8), ((EffMappingObject *)source)->valueF4, &D_00400250, &D_004001A0);
 }
 
 /* Edit SCALE_UV in their POLYGON children; preserve the native void callback. */
 s32 effEditUSmokeSpiralPolygonUvScaleTrack(s32 *work) {
     u8 *source = (u8 *)work[3];
-    return effEditScalarTrack((EffScalarTrack *)source, ((EffMappingObject *)source)->valueF4, D_00400150, D_004000B8);
+    return effEditScalarTrack((EffScalarTrack *)source, ((EffMappingObject *)source)->valueF4, &D_00400150, &D_004000B8);
 }
 
 /* Edit the native U-SPHRE root SCALE curve; native callback is void. */
 s32 effEditUSphereScaleTrack(s32 *work) {
     u8 *source = (u8 *)work[3];
-    return effEditScalarTrack((EffScalarTrack *)(source + 0x34), ((EffMappingObject *)source)->value70, D_00400150, D_004000B8);
+    return effEditScalarTrack((EffScalarTrack *)(source + 0x34), ((EffMappingObject *)source)->value70, &D_00400150, &D_004000B8);
 }
 
 /* Edit the native 2D root SCALE curve; native callback is void. */
 s32 effEditTwoDimensionalScaleTrack(s32 *work) {
     u8 *source = (u8 *)work[3];
-    return effEditScalarTrack((EffScalarTrack *)(source + 0x34), ((EffMappingObject *)source)->value8C, D_00400150, D_00400068);
+    return effEditScalarTrack((EffScalarTrack *)(source + 0x34), ((EffMappingObject *)source)->value8C, &D_00400150, &D_00400068);
 }
 
 /* Edit the native 2D root ROTATE curve; native callback is void. */
 s32 effEditTwoDimensionalRotationTrack(s32 *work) {
     u8 *source = (u8 *)work[3];
-    return effEditScalarTrack((EffScalarTrack *)(source + 0x60), ((EffMappingObject *)source)->value8C, D_00400150, D_00400068);
+    return effEditScalarTrack((EffScalarTrack *)(source + 0x60), ((EffMappingObject *)source)->value8C, &D_00400150, &D_00400068);
 }
 
 /* SCALE editor for the native O-P2_TRK root descriptor. */
 s32 effEditOP2TrackScaleTrack(s32 *work) {
     u8 *source = (u8 *)work[3];
-    return effEditScalarTrack((EffScalarTrack *)(source + 0x7C), ((EffMappingObject *)source)->valueD4, D_00400150, D_00400068);
+    return effEditScalarTrack((EffScalarTrack *)(source + 0x7C), ((EffMappingObject *)source)->valueD4, &D_00400150, &D_00400068);
 }
 
 /* ROTATE editor for the native O-P2_TRK root descriptor. */
 s32 effEditOP2TrackRotationTrack(s32 *work) {
     u8 *source = (u8 *)work[3];
-    return effEditScalarTrack((EffScalarTrack *)(source + 0xA8), ((EffMappingObject *)source)->valueD4, D_00400250, D_004001A0);
+    return effEditScalarTrack((EffScalarTrack *)(source + 0xA8), ((EffMappingObject *)source)->valueD4, &D_00400250, &D_004001A0);
 }
 
 /* SCALE editor shared by the six native M-family descriptors. */
 s32 effEditMScaleTrack(s32 *work) {
     u8 *source = (u8 *)work[3];
-    return effEditScalarTrack((EffScalarTrack *)(source + 0xB0), ((EffMappingObject *)source)->value108, D_00400150, D_00400068);
+    return effEditScalarTrack((EffScalarTrack *)(source + 0xB0), ((EffMappingObject *)source)->value108, &D_00400150, &D_00400068);
 }
 
 /* Reset the color/alpha editor's selected curve key to one, not a pending flag. */
@@ -17323,8 +17288,6 @@ void effResetCurveEditorSelection(void) {
 }
 
 extern SdfAlphaTrack effColorEditAlphaTrack;
-
-extern u8 D_004002B8[];
 
 extern s32 effColorEditFadeInFrame;
 
@@ -17350,7 +17313,7 @@ s32 func_003025A8(SdfAlphaTrack *range, s32 frames) {
     u32 i;
 
     effColorEditAlphaTrack = *range;
-    btlReturnDebugMenuSetupWord((u32)D_004002B8);
+    btlReturnDebugMenuSetupWord((u32)&D_004002B8);
     if (dds3PadBitTable[0xB] & 2) {
         if (effColorEditSelectedAlphaKey == 1) {
             effColorEditAlphaTrack.fadeInFraction += step * 10.0f;
@@ -17409,7 +17372,7 @@ s32 func_003025A8(SdfAlphaTrack *range, s32 frames) {
     *range = effColorEditAlphaTrack;
     btlDebugDrawRectangle(8, 0x164, 0xDC, 0x4C);
     btlDebugMenuBeforeRecordNoOp();
-    btlDebugMenuRecordNoOp((u32)D_004002B8);
+    btlDebugMenuRecordNoOp((u32)&D_004002B8);
     btlDebugMenuAfterRecordNoOp();
     shades[0] = 0;
     marks[0] = 0.0f;
@@ -17610,9 +17573,7 @@ s32 effPollOMaterialPbFile(void) {
     return effPollFileRecord(D_0042D140, BTL_RESOURCE_SCAN_PB);
 }
 
-extern EffFileJobRequest D_003FB948;
 
-extern EffFileJobRequest D_003F01D0;
 
 u32 fileLoadEffectSlotA(void) {
     EffResourceBankSlot fileInfo;
@@ -17726,7 +17687,6 @@ u32 effQueueGeneratedFileJob(void) {
     return result;
 }
 
-extern EffFileJobRequest D_003F9060;
 
 u32 effPollAndQueueCopiedFileResource(void) {
     EffResourceBankSlot fileInfo;
@@ -17828,7 +17788,6 @@ u32 effLoadFileSlotF2(void) {
     return result;
 }
 
-extern EffFileJobRequest D_003FD988;
 
 u32 effLoadMaterialFile(void) {
     EffResourceBankSlot fileInfo;
@@ -17871,7 +17830,6 @@ u32 effLoadMaterialFile(void) {
     return result;
 }
 
-extern EffFileJobRequest D_003FE040;
 
 u32 effPollAndQueueFileResourceWithUnitFloats(void) {
     EffResourceBankSlot fileInfo;

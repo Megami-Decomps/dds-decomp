@@ -158,11 +158,6 @@ void mnuDrawMovieRollEntry(MnuMovieRollEntry *entry, EffectSlotSet *set, s32 tex
 extern u32 mnuStaffRollImageSpriteFrames[];
 
 
-extern u8 mnuCampCommandLabels[];
-
-extern u8 mnuCampItemCommandLabels[];
-
-extern u8 mnuCampSetCommandLabels[];
 
 extern u8 mnuCampCommandVisibilityFlagIds[];
 

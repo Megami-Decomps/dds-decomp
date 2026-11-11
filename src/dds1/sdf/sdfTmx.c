@@ -1,11 +1,6 @@
 #include "common.h"
 #include "ps2asm.h"
 #include "sdf_resource.h"
-#define SDK_SKIP_SleepThread
-#define SDK_SKIP_sceGetstat
-#define SDK_SKIP_sceSifSetRpcQueue
-#define SDK_SKIP_sceSifRpcLoop
-typedef void *(*sceSifRpcFunc)(s32 function, void *request, s32 size);
 #include "sif_rpc.h"
 
 enum {
@@ -417,7 +412,6 @@ extern s32 raise(s32 sig);
 
 extern void _exit(s32 code) __attribute__((noreturn));
 
-extern u8 localeconvData[] __attribute__((section(".data")));
 
 extern s32 libcErrno __attribute__((section(".data")));
 

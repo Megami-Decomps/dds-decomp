@@ -1,5 +1,6 @@
 #include "sdk_ps2.h"
 #include "common.h"
+#include "kernel_draw.h"
 #include "ps2asm.h"
 #include "sdf_column_packet_api.h"
 #include "dds3_draw_buffer.h"
@@ -137,19 +138,20 @@ extern sdf3DLight_t *dds3RenderLightParallel[3];
 
 extern sdf3DLight_t *dds3LightParam2[3];
 
-extern sdf3DLight_t *dds3LightParam[3];
+extern dds3LightState_t dds3LightParam;
 
 extern sdfVector4_t dds3RenderAmbientColor;
 
 extern sdfVector4_t dds3AmbientColor2;
 
-extern sdfVector4_t dds3AmbientColor;
+SYMBOL_AT(sdfVector4_t, dds3AmbientColor, dds3LightParam, 0x10);
 
 extern f32 dds3RenderTargetVector[4], dds3RenderEyeVector[4], effPCPBossTexRect[4];
 
 extern f32 D_0037FA20[4], fldAutoMapEye[4], fldAutoMapUp[4];
 
-extern sdf3DFogParam_t dds3RenderFogParam, dds3FogParam2, dds3FogState;
+extern sdf3DFogParam_t dds3RenderFogParam, dds3FogParam2;
+SYMBOL_AT(sdf3DFogParam_t, dds3FogState, dds3LightParam, 0x20);
 
 extern Matrix4 dds3RenderViewportMatrix;
 
@@ -236,7 +238,7 @@ s32 dds3DrawFirstProcess(dds3ProcessID_t *task) {
         sdfDrawTagLink(overlayList, (u32)overlayFrustum);
         overlayNode->regFunc(overlayNode, overlayList);
 
-        sdf3DMakeLightParallelPacket((sdf3DLightParallelPacket_t *)(dds3OverlayMatrixPackets - 0x440 + bufferIndex * DDS3_FRAME_BUFFER_BYTES), dds3LightParam, &dds3AmbientColor);
+        sdf3DMakeLightParallelPacket((sdf3DLightParallelPacket_t *)(dds3OverlayMatrixPackets - 0x440 + bufferIndex * DDS3_FRAME_BUFFER_BYTES), dds3LightParam.parallel, &dds3AmbientColor);
         *(u32 *)(dds3OverlayMatrixPackets - 0x620 + bufferIndex * DDS3_FRAME_BUFFER_BYTES) = D_00435CBC;
     }
     sdf3DMakeScreenParam(&dds3ScreenParam.camera);

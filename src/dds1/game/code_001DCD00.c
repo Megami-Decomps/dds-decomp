@@ -72,11 +72,11 @@ extern EffRandState dds3RandCB[];
 
 extern char D_003BB5F8[];
 
-extern u32 D_003BB660;
+extern const char *btlGameCameraName;
 
-extern s32 D_003BB668;
+extern const char *btlNonCameraName;
 
-extern s32 D_003BB664;
+extern const char *btlFreeCameraName;
 
 void btlAimLinkedUnitAtMuzzle(BtlLinkedCommand *action);
 

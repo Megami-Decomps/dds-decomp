@@ -1,6 +1,7 @@
 #include "sdk_ps2.h"
 #include "mnu_camp_display.h"
 #include "common.h"
+#include "kernel_draw.h"
 #include "draw3d.h"
 #include "dds3_task_create.h"
 #include "sdf_chip.h"
@@ -235,7 +236,7 @@ extern void mnuSampleCampPanelVisualTrack(evtViewerInfo_t *runtime, EvtRuntimeGr
 extern void mnuSampleCampDisplayTrack(evtViewerInfo_t *viewer, EvtRuntimeGroup *track, s32 value,
                                       CampDisplayDefaults *display);
 extern void mnuSampleCampListLayoutTrack(evtViewerInfo_t *viewer, EvtRuntimeGroup *track, EvtBlendKey *out);
-extern sdf3DFogParam_t dds3FogState;
+SYMBOL_AT(sdf3DFogParam_t, dds3FogState, dds3LightParam, 0x20);
 
 /* Capture kind-specific defaults before adding a new key to its track. */
 EvtRuntimeChild *evtAddFrameInfo(EvtRuntimeGroup *group, s32 frame, evtViewerInfo_t *viewer) {
@@ -1002,9 +1003,9 @@ void evtViewerApplyParameterKeyTracks(evtViewerInfo_t *viewer) {
     }
 }
 
-extern sdf3DFogParam_t dds3FogState;
-extern u128 *dds3LightParam[];
-extern u128 dds3AmbientColor[];
+SYMBOL_AT(sdf3DFogParam_t, dds3FogState, dds3LightParam, 0x20);
+extern dds3LightState_t dds3LightParam;
+SYMBOL_AT_REGION(u128, dds3AmbientColor, dds3LightParam, 0x10);
 extern f32 sdfFaceDivSoften;
 extern f32 sdfFaceDivBias;
 extern dds3Effect_PartialMultiBlurParam_t *mblurGetParam(void);
@@ -3254,6 +3255,9 @@ extern char *D_003684B8[];
 extern char *D_003684C0[];
 extern char *D_003684C8[];
 extern char *D_003684D0[];
+
+typedef s32 (*evtViewerCommandFunc_t)(s32, s32, evtViewerInfo_t *);
+extern evtViewerCommandFunc_t evtViewerCommandHandlers[24];
 extern char D_003BBF60[];
 extern char D_003BBF68[];
 extern char D_003BBF70[];
@@ -4296,7 +4300,7 @@ s32 evtEventViewerCopyEffectSetupPayload(s32 unused0, s32 unused1, evtViewerInfo
         switch (viewer->commandCategory) {
         case 13:
             destination = entry->payload;
-            source = dds3LightParam[0];
+            source = (u128 *)dds3LightParam.parallel[0];
             SDF_VU0_COPYVECTOR(destination, source);
             SDF_VU0_COPYVECTOR(destination + 1, source + 1);
             SDF_VU0_COPYVECTOR(destination + 2, dds3AmbientColor);

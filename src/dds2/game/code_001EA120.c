@@ -96,11 +96,11 @@ extern DatEnemyRecord *datEnemyRecords;
 
 extern char D_00436A28[];
 
-extern u32 D_00436A98;
+extern const char *btlGameCameraName;
 
-extern s32 D_00436A9C;
+extern const char *btlFreeCameraName;
 
-extern s32 D_00436AA0;
+extern const char *btlNonCameraName;
 
 /* Adjust the pose direction when projected camera height is above Y = -20. */ s32 btlAdjustCameraDirectionForDefaultPlane(BtlCamState *state);
 

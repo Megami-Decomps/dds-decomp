@@ -92,7 +92,7 @@ typedef s32 (*FileMenuContinuationCallback)(void);
 extern void effLoadFlashTextures(void);
 extern void effLoadScalyTexture(void);
 extern void effLoadWindTexture(void);
-extern s32 slSaveWriteFile(const char *fileName, const u32 *dataAddressSlot, const u32 *dataSizeSlot, FileMenuContinuationCallback continuation, struct FileRequest * const *pendingRequestStatus);
+extern s32 slSaveWriteFile(const char *fileName, void **dataAddressSlot, const u32 *dataSizeSlot, FileMenuContinuationCallback continuation, struct FileRequest * const *pendingRequestStatus);
 extern void dds3SoftResetOn(void);
 extern s32 slSaveData_chdir(void);
 extern void frEnableMode(s32 mask);
@@ -402,7 +402,7 @@ extern s32 slLoadProc_openFile(void);
 
 extern s32 fileDrawMenuFrame(s32);
 
-extern u32 fileSaveIconData;
+extern void *fileSaveIconData;
 
 extern u32 fileSaveIconDataSize;
 
@@ -1824,8 +1824,8 @@ s32 fileWriteIconSysComplete(void) {
 }
 
 extern u8 fileSaveIconSysData[];
-extern u32 D_00437D90;
-extern u32 D_00437D94;
+extern void *fileSaveIconSysAddress;
+extern u32 fileSaveIconSysSize;
 
 s32 fileBeginLabeledSlotWrite(void) {
     s32 v = fileSelectedSlotIndex + 1;
@@ -1836,10 +1836,10 @@ s32 fileBeginLabeledSlotWrite(void) {
     fileSaveIconSysData[0xFA] = -0x7E;
     fileSaveIconSysData[0xF9] = q + 0x4F;
     fileSaveIconSysData[0xFB] = r + 0x4F;
-    return slSaveWriteFile(D_0042B6B8, &D_00437D90, &D_00437D94, fileWriteIconSysComplete, 0);
+    return slSaveWriteFile(D_0042B6B8, &fileSaveIconSysAddress, &fileSaveIconSysSize, fileWriteIconSysComplete, 0);
 }
 
-extern s32 slSaveWriteFile(const char *fileName, const u32 *dataAddressSlot, const u32 *dataSizeSlot, FileMenuContinuationCallback continuation, struct FileRequest * const *pendingRequestStatus);
+extern s32 slSaveWriteFile(const char *fileName, void **dataAddressSlot, const u32 *dataSizeSlot, FileMenuContinuationCallback continuation, struct FileRequest * const *pendingRequestStatus);
 extern s32 fileBeginLabeledSlotWrite(void);
 
 INCLUDE_RODATA(const s32, "game/code_002C96D0", D_0042B698);
@@ -1852,7 +1852,7 @@ s32 slSaveWriteEnd_saveData(void) {
     return slSaveWriteFile("base.ico", &fileSaveIconData, &fileSaveIconDataSize, fileBeginLabeledSlotWrite, &fileSaveIconRequest);
 }
 
-extern dds3GlobalWork_t *fileMainSaveBlobAddress;
+extern void *fileMainSaveBlobAddress;
 extern u32 fileMainSaveBlobSize;
 
 s32 fileBuildMainBlobAndWrite(void) {
@@ -1923,7 +1923,7 @@ s32 slSaveData_deleteIconSys(void) {
     return (s32)fileBuildMainBlobAfterDelete;
 }
 
-extern const u32 *fileWriteDataAddressSlot;
+extern void **fileWriteDataAddressSlot;
 extern const u32 *fileWriteDataSizeSlot;
 extern FileMenuContinuationCallback fileWriteContinuation;
 extern struct FileRequest * const *fileWritePendingRequestSlot;
@@ -1931,7 +1931,7 @@ extern s32 slSaveProc_openFile(void);
 
 /* Later save callbacks read these borrowed slots without changing them; callers
  * keep the slots alive until the asynchronous save completes. */
-s32 slSaveWriteFile(const char *fileName, const u32 *dataAddressSlot, const u32 *dataSizeSlot, FileMenuContinuationCallback continuation, struct FileRequest * const *pendingRequestStatus) {
+s32 slSaveWriteFile(const char *fileName, void **dataAddressSlot, const u32 *dataSizeSlot, FileMenuContinuationCallback continuation, struct FileRequest * const *pendingRequestStatus) {
     fileWriteDataAddressSlot = dataAddressSlot;
     fileWriteDataSizeSlot = dataSizeSlot;
     fileWriteContinuation = continuation;
@@ -1953,7 +1953,7 @@ s32 slSaveProc_openFile(void) {
         if (fileWritePendingRequestSlot != 0 && *fileWritePendingRequestSlot != 0) {
             return (s32)slSaveProc_waitDataReady;
         }
-        sdfMcFuncWrite(fileSaveFileDescriptor, (const void *)*fileWriteDataAddressSlot, *fileWriteDataSizeSlot);
+        sdfMcFuncWrite(fileSaveFileDescriptor, *fileWriteDataAddressSlot, *fileWriteDataSizeSlot);
         return (s32)slSaveProc_writeFile;
     }
     if (status == MC_POLL_ERROR) {
@@ -2007,7 +2007,7 @@ s32 slSaveProc_waitDataReady(void) {
     if (fileSaveIconRequest != 0) {
         return 0;
     }
-    sdfMcFuncWrite(fileSaveFileDescriptor, (const void *)*fileWriteDataAddressSlot, *fileWriteDataSizeSlot);
+    sdfMcFuncWrite(fileSaveFileDescriptor, *fileWriteDataAddressSlot, *fileWriteDataSizeSlot);
     return (s32)slSaveProc_writeFile;
 }
 
@@ -2590,7 +2590,7 @@ s32 slCalc(dds3ProcessID_t *task) {
     if (job != 0 && pacFileCheckEnd(job) != 0) {
         fileSaveIconRequest = 0;
         fileSaveIconResourceHandle = fileGetMemHandle(job);
-        fileSaveIconData = (u32)fileGetLoadPtr(job);
+        fileSaveIconData = fileGetLoadPtr(job);
         fileSaveIconDataSize = fileGetLoadSize(job);
         fileHandleFree(job);
     }
@@ -3088,7 +3088,7 @@ extern u32 D_00437D1C;        /* the prompt shown; 0 for none. As DDS1's 1-9, an
                                * asks the difficulty) */
 extern s32 fileSelectedSlotIndex;
 extern s32 D_003E8008[];      /* highlight pulse: [2] its angle in degrees, [3] its alpha */
-extern char *D_0042B770[20];  /* each slot's prompt title (retail copies the table to its frame) */
+extern char *fileLoadingSlotTexts[20];  /* each slot's prompt title (retail copies the table to its frame) */
 extern char D_003E83F0[], D_003E8410[], D_003E8438[];
 extern char D_003E8100[], D_003E8130[], D_003E8250[];
 extern char D_003E8648[];
@@ -3149,7 +3149,7 @@ void fileShowPromptDialog(void) {
     f32 wave;
     u32 cursorColor;
 
-    memcpy(titles, D_0042B770, sizeof(titles));
+    memcpy(titles, fileLoadingSlotTexts, sizeof(titles));
     if (D_00437D18 == -1 || D_00437D1C == 0) {
         return;
     }
@@ -3326,7 +3326,7 @@ void fileFadeStepDown(void) {
     D_003E8008[0] = D_003E8008[0] <= 0 ? 0 : D_003E8008[0] > 0x80 ? 0x80 : D_003E8008[0];
 }
 
-INCLUDE_RODATA(const s32, "game/code_002C96D0", D_0042B770);
+INCLUDE_RODATA(const s32, "game/code_002C96D0", fileLoadingSlotTexts);
 
 void fileDrawSlotIcon(s32 index, s32 x, s32 y, s32 alpha) {
     s32 uv[21][2] = {
@@ -3928,6 +3928,13 @@ u8 fileToggleSlotFlagsBit(FileConfigOption option, u32 *flags) {
     }
 }
 
+/* Unreferenced {text, value} rows after an embedded message file; the text is in the font's glyph encoding. */
+typedef struct FileGlyphTextRow {
+    const char *text;
+    s32 value;
+} FileGlyphTextRow;
+extern FileGlyphTextRow fileGlyphTextRows[4];
+
 INCLUDE_RODATA(const s32, "game/code_002C96D0", D_0042B920);
 
 INCLUDE_RODATA(const s32, "game/code_002C96D0", D_0042B938);
@@ -4359,9 +4366,9 @@ INCLUDE_SDATA(const s32, "game/code_002C96D0", D_00437D88);
 
 INCLUDE_SDATA(const s32, "game/code_002C96D0", fileSaveHighlightPhase);
 
-INCLUDE_SDATA(const s32, "game/code_002C96D0", D_00437D90);
+INCLUDE_SDATA(const s32, "game/code_002C96D0", fileSaveIconSysAddress);
 
-INCLUDE_SDATA(const s32, "game/code_002C96D0", D_00437D94);
+INCLUDE_SDATA(const s32, "game/code_002C96D0", fileSaveIconSysSize);
 
 INCLUDE_SDATA(const s32, "game/code_002C96D0", D_00437D98);
 

@@ -3998,13 +3998,13 @@ void btlAdvanceUnitWhenActionGateClears(BtlTask *action) {
     }
 }
 
-extern BtlActionStateHandler D_00359B28[];
+extern BtlActionStateHandler btlActionStateHandlers[];
 
 void btlDispatchStateHandler(void *object, BtlActionStateIndex index) {
     BtlActionStateOwner *owner = object;
     owner->state = index;
     owner->stateTime = 0;
-    D_00359B28[index].start(owner);
+    btlActionStateHandlers[index].start(owner);
 }
 
 extern char D_003A3788[]; /* "btl:action seq create[%p]\n" */
@@ -4054,7 +4054,7 @@ void btlUpdateActionSeqs(void) {
         s32 flags = action->flags;
         BtlTask *next = action->next;
         if (flags & 1) {
-            D_00359B28[action->state].update(action);
+            btlActionStateHandlers[action->state].update(action);
             action->stateTime += 1;
         } else if (flags & 2) {
             btlDestroyActionSeq(action);
@@ -4143,10 +4143,10 @@ void btlDebugPrintActionOrder(s32 x, s32 y) {
         }
         if (controller->slots[i].remaining == 100) {
             btlBossDebugPrintfN(x, y + (i + 1) * 12, color, D_003BB5E0,
-                               D_00359B28[task->state].name);
+                               btlActionStateHandlers[task->state].name);
         } else {
             btlBossDebugPrintfN(x, y + (i + 1) * 12, color, D_003BB5E8,
-                               D_00359B28[task->state].name);
+                               btlActionStateHandlers[task->state].name);
         }
     }
 }

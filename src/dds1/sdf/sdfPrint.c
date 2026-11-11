@@ -122,9 +122,6 @@ SIZE_CHECK(sifPrintRpcServerData_size_must_be_0x44, sifPrintRpcServerData_t, 0x4
 extern void *sdfPrintRpcFunc(s32 unused, sifCommand_t *packet);
 extern s32 GetThreadId(void);
 extern s32 sceSifSetRpcQueue(sifRpcDataQueue_t *queue, s32 threadId);
-#define SDK_SKIP_sceSifSetRpcQueue
-#define SDK_SKIP_sceSifRpcLoop
-typedef void *(*sceSifRpcFunc)(s32 function, void *request, s32 size);
 #include "sdk_libkernl.h"
 
 extern void sceSifRpcLoop(sifRpcDataQueue_t *queue);

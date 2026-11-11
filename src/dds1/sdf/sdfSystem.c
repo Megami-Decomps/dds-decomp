@@ -45,8 +45,6 @@ extern s32 CreateThread(sdfKernelThreadParam_t *parameter);
 extern s32 AddIntcHandler2(s32 channel, s32 handler, s32 argument, s32 next);
 
 #define SDK_SKIP_ChangeThreadPriority
-#define SDK_SKIP_CreateSema
-#define SDK_SKIP_CreateThread
 #define SDK_SKIP_DeleteThread
 #define SDK_SKIP_RemoveDmacHandler
 #define SDK_SKIP_RemoveIntcHandler

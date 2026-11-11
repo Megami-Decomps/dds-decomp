@@ -32,7 +32,7 @@ extern void fldApplyLightSetIndex(s32);
 s32 mnuApplyInnerEffectVectorsAndTickObject(void) {
     dds3SetPosPoseSet(mnuTitleCameraObject, (u128 *)mnuTitleCameraPosition);
     dds3SetRotPoseSet(mnuTitleCameraObject, (u128 *)mnuTitleCameraRotation);
-    return mnuTitleCameraObject->ops->update(mnuTitleCameraObject);
+    return mnuTitleCameraObject->ops->mainprocuder(mnuTitleCameraObject);
 }
 
 void mnuInitializeTitleCameraScene(void) {

@@ -11,7 +11,7 @@
 
 extern u32 D_0038BBD8[];
 
-extern u32 D_0038BB50[];
+extern sdf3DLight_t *fldDisplayLightSources[4];
 
 extern u32 D_0038BB60[];
 
@@ -164,7 +164,7 @@ void fldInitializeDisplayPointerTable(void) {
     u32 *displayTable = D_0038BBD8;
 
     memset(displayTable, 0, 0x14);
-    displayTable[0] = (u32)D_0038BB50;
+    displayTable[0] = (u32)fldDisplayLightSources;
     displayTable[1] = (u32)D_0038BB60;
 }
 

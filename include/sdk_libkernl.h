@@ -18,12 +18,6 @@ s32 CancelWakeupThread(s32 threadId);
 #ifndef SDK_SKIP_ChangeThreadPriority
 s32 ChangeThreadPriority(s32 threadId, s32 priority);
 #endif
-#ifndef SDK_SKIP_CreateSema
-s32 CreateSema(void *param);
-#endif
-#ifndef SDK_SKIP_CreateThread
-s32 CreateThread(SdfKernelThreadParam *param);
-#endif
 #ifndef SDK_SKIP_DIntr
 s32 DIntr();
 #endif
@@ -66,9 +60,6 @@ s32 SetAlarm(u16 delay, void (*callback)(s32 alarmId, u16 time, void *common), v
 #ifndef SDK_SKIP_SignalSema
 s32 SignalSema(s32 semaphoreId);
 #endif
-#ifndef SDK_SKIP_SleepThread
-s32 SleepThread(void);
-#endif
 #ifndef SDK_SKIP_TerminateThread
 s32 TerminateThread(s32 threadId);
 #endif
@@ -99,12 +90,6 @@ s32 sceDopen(const char *path);
 #ifndef SDK_SKIP_sceDread
 s32 sceDread(s32 directory, void *entry);
 #endif
-#ifndef SDK_SKIP_sceFsReset
-void sceFsReset(void);
-#endif
-#ifndef SDK_SKIP_sceGetstat
-s32 sceGetstat(const char *path, SceIoStat *stat);
-#endif
 #ifndef SDK_SKIP_sceOpen
 s32 sceOpen(const char *path, s32 flags, ...);
 #endif
@@ -114,38 +99,28 @@ s32 sceSifAllocIopHeap(s32 size);
 #ifndef SDK_SKIP_sceSifDmaStat
 s32 sceSifDmaStat(s32 transferId);
 #endif
-#ifndef SDK_SKIP_sceSifGetSreg
-s32 sceSifGetSreg(s32 index);
-#endif
 #ifndef SDK_SKIP_sceSifInitIopHeap
 s32 sceSifInitIopHeap(void);
 #endif
 #ifndef SDK_SKIP_sceSifInitRpc
 void sceSifInitRpc(s32 mode);
 #endif
-#ifndef SDK_SKIP_sceSifLoadFileReset
-void sceSifLoadFileReset(void);
-#endif
-#ifndef SDK_SKIP_sceSifLoadModule
-s32 sceSifLoadModule(const char *path, s32 argLen, const char *args);
-#endif
 #ifndef SDK_SKIP_sceSifRebootIop
 s32 sceSifRebootIop(const char *iopImagePath);
 #endif
 #ifndef SDK_SKIP_sceSifRegisterRpc
-void sceSifRegisterRpc(void *serverData, s32 id, void *function, void *buffer, s32 bufferSize, s32 unk, void *queue);
-#endif
-#ifndef SDK_SKIP_sceSifRpcLoop
-void sceSifRpcLoop(void *queue);
+struct sifRpcServerData_t;
+struct sifRpcDataQueue_t;
+typedef void *(*sceSifRpcFunc)(s32 function, void *request, s32 size);
+void sceSifRegisterRpc(struct sifRpcServerData_t *server, u32 serviceId,
+                        sceSifRpcFunc handler, void *buffer, sceSifRpcFunc callback,
+                        void *callbackBuffer, struct sifRpcDataQueue_t *queue);
 #endif
 #ifndef SDK_SKIP_sceSifSendCmd
 s32 sceSifSendCmd(s32 command, void *packet, s32 size, void *source, void *destination, s32 extraSize);
 #endif
 #ifndef SDK_SKIP_sceSifSetDma
 s32 sceSifSetDma(void *transfer, s32 count);
-#endif
-#ifndef SDK_SKIP_sceSifSetRpcQueue
-void sceSifSetRpcQueue(void *queue, s32 threadId);
 #endif
 #ifndef SDK_SKIP_sceSync
 s32 sceSync(const char *device, s32 flag);

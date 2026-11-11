@@ -3,7 +3,7 @@
 
 #include "common.h"
 
-/* Row of the world-node diagnostic list table D_003ACD78 (17 rows of 12 bytes, ending in a row whose kind is 0).
+/* Row of the world-node diagnostic list table evtSceneDispRows (17 rows of 12 bytes, ending in a row whose kind is 0).
  * The task works on a stack copy and records, per row, how many entries it drew (count) and how many text rows
  * they took (rows). */
 typedef struct NodeDiagnosticRow {

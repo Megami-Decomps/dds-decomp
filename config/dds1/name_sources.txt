@@ -9407,8 +9407,6 @@
 0x00324690	aViewEye	inferred	SMT3HD name via SLUS_209.11 0x002F5A60, SMT3 name (was sdfViewTargetVector); was sdfViewTargetVector
 0x003246A0	aViewDown	inferred	SMT3HD data name via SLUS_209.11 0x002F5A70, 10 agreeing references; was aViewDown
 0x00324770	dds3LightParam	inferred	SMT3HD name via SLUS_209.11 0x002F5B40 (parallel lights, ambient +0x10, fog +0x20)
-0x00324780	dds3AmbientColor	inferred	confidence=high; matched_users=src/dds1/game/code_001A1960.c:btlInitializeSceneLightingAndTint, src/dds1/event/evtUnitManager.c:GetBaseAmbientRGB; Default color vector copied into battle lighting and selected for units without an explicit secondary color. [names_qp9.tsv]
-0x00324790	dds3FogState	inferred	SMT3HD name via SLUS_209.11 0x2F5B60, SMT3 kernel/dds3KernelDraw name (fog record at dds3LightParam + 0x20); was dds3FogParamMain
 0x00324850	dds3RenderTargetVector	inferred	SMT3HD name via SLUS_209.11 0x002F5C20, kwln rename; was kwlnHeldTextureTargetVector
 0x00324860	dds3RenderEyeVector	inferred	SMT3HD name via SLUS_209.11 0x002F5C30, kwln rename; was kwlnHeldTextureEyeVector
 0x00324870	effPCPBossTexRect	inferred	confidence=high; Existing f32[4] up vector, third argument of the held-texture LookAtMatrix call. All declarations and native payload unchanged. DDS2 twin 0x0037F870; root/interior/addend instruction readers all current matched C, no import/active ASM reader. [PurD readability data b12; identifier-only]; was effPCPBossTexRect
@@ -9435,6 +9433,11 @@
 0x00329750	dds3RenderViewportMatrix	inferred	SMT3HD name via SLUS_209.11 0x002FA2A0, kwln rename; was kwlnHeldTextureViewMatrix
 0x003297D0	ddsAdminModeCallbacks	inferred	confidence=high; src/dds1/kernel/dds3AdminiProcess.c:D_003297D0; type=AdminDispatch[]; refs=dds3AdminiEndCheck,dds3AdminiNeoShutdown; Administrative mode index selects the destruction callback during polling and task-work release. [names_qp9.tsv]
 0x00329930	codefunc	inferred	SMT3HD data name via SLUS_209.11 0x002FA528, 1 agreeing references; was codefunc
+0x003299C0	dds3BasicFuncTablePtr	inferred	Basic descriptor pointer per basic kind, indexed by dds3AllocBasic. SMT3HD name via SLUS_209.11 0x002FA5C8. DDS2 twin 0x003849D8.
+0x00329A08	worldBasicTable	inferred	Basic descriptor (constructor, destructor, main and draw procedures). Named after its procedures, as SMT3HD names its siblings; SMT3 0x002FA610. DDS2 twin 0x00384A20.
+0x00329A20	sceneBasicTable	inferred	Basic descriptor (constructor, destructor, main and draw procedures). Named after its procedures, as SMT3HD names its siblings; SMT3 0x002FA628. DDS2 twin 0x00384A38.
+0x00329A38	AreaBasicTable	inferred	Basic descriptor (constructor, destructor, main and draw procedures). SMT3HD name via SLUS_209.11 0x002FA640. DDS2 twin 0x00384A50.
+0x00329A50	MoverBasicTable	inferred	Basic descriptor (constructor, destructor, main and draw procedures). SMT3HD name via SLUS_209.11 0x002FA658. DDS2 twin 0x00384A68.
 0x00329A68	dds3SlotRingEntries	inferred	confidence=high; src/dds1/basic/dds3MoverBasic.c:dds3AddMoverBasic; Ring entries assigned to new slot objects by the rolling slot index. [names_qp9.tsv]
 0x00329B08	dds3BipedModelNames	inferred	confidence=high; Five model names heat/sera/gale/aljira_s/angel select the17-slot English Bip01 binding table. DDS2 twin 0x00384B20; existing const char[5][10], native 0x38-byte allocation and padding unchanged. No import or active ASM reader. [PurD readability data b6; native/matched-C twin; identifier-only]
 0x00329B40	dds3ExtendedBipedModelNames	inferred	confidence=high; Nine model names select the18-slot English Bip01 table whose final entry is Bip01 Spine4. DDS2 twin 0x00384B58; existing const char[9][8], native 0x48-byte allocation and padding unchanged. No import or active ASM reader. [PurD readability data b6; native/matched-C twin; identifier-only]
@@ -9442,10 +9445,20 @@
 0x00329CE0	dds3ExtendedBipedChunkNames	inferred	confidence=high; Same17 base chunks plus Bip01 Spine4 in the18th binding slot; selected families tagged0x1000. DDS2 twin 0x00384CF8; existing const char[18][20], native 0x168-byte allocation and padding unchanged. No import or active ASM reader. [PurD readability data b6; native/matched-C twin; identifier-only]
 0x00329E48	dds3PlayerChunkNames	inferred	confidence=high; 17 p_a-style chunk names selected only by the native player_a model selector; family tag0x2000. DDS2 twin 0x00384E60; existing const char[17][20], native 0x158-byte allocation and padding unchanged. No import or active ASM reader. [PurD readability data b6; native/matched-C twin; identifier-only]
 0x00329FA0	dds3Pc013ChunkNames	inferred	confidence=high; 17 Japanese-named chunks selected only by imported model selector pc013; family tag0x3000. Name preserves real native model identity, not an address. DDS2 twin 0x00384FB8; existing const char[17][20], native 0x158-byte allocation and padding unchanged. No import or active ASM reader. [PurD readability data b6; native/matched-C twin; identifier-only]
+0x0032A0F8	dds3CameraObjectBasicTable	inferred	Basic descriptor (constructor, destructor, main and draw procedures). Named after its procedures, as SMT3HD names its siblings; SMT3 0x002FA710. DDS2 twin 0x00385110.
+0x0032A110	dds3UnitObjectBasicTable	inferred	Basic descriptor (constructor, destructor, main and draw procedures). SMT3HD name via SLUS_209.11 0x002FA728. DDS2 twin 0x00385128.
+0x0032A128	dds3MatterObjectBasicTable	inferred	Basic descriptor (constructor, destructor, main and draw procedures). SMT3HD name via SLUS_209.11 0x002FA740. DDS2 twin 0x00385140.
+0x0032A140	dds3EffectObjectBasicTable	inferred	Basic descriptor (constructor, destructor, main and draw procedures). SMT3HD name via SLUS_209.11 0x002FA758. DDS2 twin 0x00385158.
+0x0032A158	EventObjectBasicTable	inferred	Basic descriptor (constructor, destructor, main and draw procedures). SMT3HD name via SLUS_209.11 0x002FA770. DDS2 twin 0x00385170.
+0x0032A170	lightBasicTable	inferred	Basic descriptor (constructor, destructor, main and draw procedures). Named after its procedures, as SMT3HD names its siblings; SMT3 0x002FA788. DDS2 twin 0x00385188.
+0x0032A188	dds3PathBasicTable	inferred	Basic descriptor (constructor, destructor, main and draw procedures). Named after its procedures, as SMT3HD names its siblings; SMT3 0x002FA7A0. DDS2 twin 0x003851A0.
+0x0032A1A0	dds3ModelBasicTable	inferred	Basic descriptor (constructor, destructor, main and draw procedures). Named after its procedures, as SMT3HD names its siblings; SMT3 0x002FA7B8. DDS2 twin 0x003851B8.
 0x0032AEA8	ptyRosterMenuValues	inferred	confidence=medium; Only leading u16 value of existing four-byte PtyRosterValueRecord is recovered; evtCopyRosterTableValue copies by entry.unitId into existing menuValue. Opaque second halfword untouched. No stronger gameplay meaning claimed. DDS2 twin 0x00386248; existing declarations/native bytes unchanged; actual native readers already C, no import/active ASM reader. [PurD readability data b10; identifier-only]
 0x0032AEE8	ptyItemQuantityUpdates	inferred	confidence=high; Two existing four-byte itemId/quantityDelta records passed to ptyAdjustItemQuantity when itemId nonzero; different native DDS1/DDS2 payload values preserved. DDS2 twin 0x003862C8; existing declarations/native bytes unchanged; actual native readers already C, no import/active ASM reader. [PurD readability data b10; identifier-only]
 0x0032AEF0	ptyRosterDefaultSkillIds	inferred	confidence=high; Existing u16[16][4] default presets reapplied after saved-template skill merge/secondary-flag clearing; nonzero IDs set both flags. DDS2 existing +0x60 interior label preserved. DDS2 twin 0x003862D0; existing declarations/native bytes unchanged; actual native readers already C, no import/active ASM reader. [PurD readability data b10; identifier-only]
 0x0032AF70	ptyAffinityPermutationOrders	inferred	confidence=high; All six 3-slot permutations, 18 consumed bytes within existing 32-byte labels. Unsized u8[] retained; no array extent inferred. DDS2 twin 0x00386350; existing declarations/native bytes unchanged; actual native readers already C, no import/active ASM reader. [PurD readability data b10; identifier-only]
+0x0032C880	fldSdwQuadIndices	inferred	SMT3 twin fldSdwQuadIndices (fldSdwDraw quad-pair byte indices); was D_0032C880
+0x0032C8C0	fldSdwTriIndices	inferred	SMT3 twin fldSdwTriIndices (fldSdwDraw triangle byte indices); was D_0032C8C0
 0x0032DDB0	fldStageCoordinateRecords	inferred	The 96 stage coordinate records (0x10 bytes each), filled by a 0x600-byte resource read and searched by fldFindStageCoordinateIndex, fldFindStageCoordinateRecord and the exploration cell marking. DDS2 twin 0x00389170.
 0x0032E3B0	fldGlobalBase	inferred	SMT3HD data name via SLUS_209.11 0x002FBF80, 66 agreeing references; was fldGlobalBase
 0x0032E3D8	fldCurrentBgmId	inferred	confidence=high; data D_0032E3D8; matched-C-users=4; src/dds1/game/code_0014F098.c:104:fldCmdStartSceneBgm; src/dds1/game/code_0014F098.c:110:fldCmdStartSceneBgmAlternate; src/dds1/game/code_001411F0.c:434:fldPlayFieldBgm; src/dds1/game/code_001411F0.c:484:fldBgmStop; Script commands store selected field BGM ID; sound-start paths read that ID; data-twin=D_00389798, supported by 3 independently paired matched functions.; retail-data-start=asm/dds1/data/data.data.s:13410.; seed-placeholder=D_0032E3D8; current asm label and source default identifier verified; source=names_reviewed36.tsv. [names_qp10_seed.tsv]
@@ -9509,12 +9522,10 @@
 0x003528D8	GetPositionPtrTable	inferred	SMT3HD data name via SLUS_209.11 0x0031B9D8, 1 agreeing references; was GetPositionPtrTable
 0x003536A0	effPartPCPDataTable	inferred	SMT3HD name via SLUS_209.11 0x0031DDD0, effect/effPart SMT3 rename; was effParameterPresetBanks
 0x00353710	dds3EffectFuncTable	inferred	SMT3HD data name via SLUS_209.11 0x0031DE40, 1 agreeing references; was dds3EffectFuncTable
-0x0035371C	effParamWorkDuplicators	inferred	confidence=high; src/dds1/game/code_001624D0.c:dds3EffectPartCopy; ID-indexed callbacks duplicating an existing parameter-work data payload. [names_qp9.tsv]
 0x00353850	effPartModelPosInit	inferred	SMT3HD name via SLUS_209.11 0x0031DF60, effect/effPart SMT3 rename; was effModelDefaultPosition
 0x00353860	effPartModelRotInit	inferred	SMT3HD name via SLUS_209.11 0x0031DF70, effect/effPart SMT3 rename; was effModelDefaultQuaternion
 0x00353870	effPartModelScaleInit	inferred	SMT3HD name via SLUS_209.11 0x0031DF80, effect/effPart SMT3 rename; was effModelDefaultScale
 0x00353880	EffectPCPFuncTable	inferred	SMT3HD data name via SLUS_209.11 0x0031DF90, 2 agreeing references; was EffectPCPFuncTable
-0x00353888	effParamWorkReleaseCallbacks	inferred	confidence=medium; src/dds1/game/code_001624D0.c:dds3EffectPCPDelete; ID-indexed callbacks invoked when releasing dispatched parameter work. [names_qp9.tsv]
 0x003547D0	effThunderHistoryIndices	inferred	confidence=high; Assigned to primitiveIndices of the history descriptor. Existing const u32[28] contains28packed triangle index words for the repeated three-point ribbon sections;112native bytes identical, no data redefinition. Same role in DDS2 at 0x003B1100. No source-owned import or native ASM root/interior reference. [PurC5 readability data b3; matched-C/native-twin evidence; identifier-only]
 0x00354840	effThunderEndCapIndices	inferred	confidence=high; Assigned to the cap descriptor with6primitives/8points. Existing const u32[8] holds six packed fan triangles and two trailing zero words;32native bytes identical, complete bound retained. Same role in DDS2 at 0x003B1170. No source-owned import or native ASM root/interior reference. [PurC5 readability data b3; matched-C/native-twin evidence; identifier-only]
 0x00354860	effThunderEndCapPoints	inferred	confidence=high; Matched fragment creation memcpy copies the complete const f32[8][4] table into endPoints; the cap renderer submits those points. All128native bytes identical between games; existing type and bound retained. Same role in DDS2 at 0x003B1190. No source-owned import or native ASM root/interior reference. [PurC5 readability data b3; matched-C/native-twin evidence; identifier-only]
@@ -9615,6 +9626,8 @@
 0x00358828	btlLinkageTutorialMessages	inferred	Native MSG1 NEWLKG_00/01/02 Combo and turn-icon tutorials are passed by matched btlOpenBattleCommandPanel to fclInitMessage; preserve DDS1/DDS2 760/768-byte physical spans and headers; identifier only.
 0x00359978	btlAnalysisTextScratch	inferred	Matched btlUpdateAndDrawAnalysisPanel clears 256 bytes, formats the enemy description, and splits underscore-delimited glyph lines; preserve native bytes and DDS1 [] versus DDS2 [0x100] views; identifier only.
 0x00359A78	btlPendingLinkageSkillFlags	inferred	confidence=high; Scratch bits for pending linkage-skill notices, separate from persistent DDS3_GBWK battleFlags. Matched mark/clear/query uses id-0x1AB. Both native owners retain four zero words (16 bytes); DDS1 reset clears three words and DDS2 reset clears four. Keep existing unsized u32[] and every per-title byte. DDS2 twin: 0x003B6928. [PurA5 readability battle b7; native/matched-C audit; identifier-only]
+0x00359A88	btlSceneInitializers	inferred	SceneInitializer rows indexed by the battle scene id: initializer, updater and scene name ("NON", "SCENE_SET", ...). DDS2 twin 0x003B6938.
+0x00359B28	btlActionStateHandlers	inferred	BtlActionStateHandler rows indexed by the battle action state. DDS2 twin 0x003B69D8.
 0x00359CC0	btlDefaultUnitBodyOffset	inferred	confidence=high; Matched btlInitUnitFxDefaults copies native (0,-110,0,0) into BtlUnit.bodyOffset. Preserve the existing u128/s128 declarations and the DDS2 unused extern in code_001D4438. DDS2 twin: 0x003B6B80. [PurA5 readability battle b6; native/matched-C audit; identifier-only]
 0x00359CD0	btlDefaultUnitPosition	inferred	confidence=high; Matched btlInitFxLights copies native (0,0,0,1) into position and currentPosition. This 16-byte object is separate from the equal-valued rotation object; preserve storage and existing views. DDS2 twin: 0x003B6B90. [PurA5 readability battle b6; native/matched-C audit; identifier-only]
 0x00359CE0	btlDefaultUnitRotation	inferred	confidence=high; Matched btlInitFxLights copies this distinct 16-byte (0,0,0,1) object into rotation and orientation. Name follows destination role without asserting quaternion representation. Preserve storage and existing views. DDS2 twin: 0x003B6BA0. [PurA5 readability battle b6; native/matched-C audit; identifier-only]
@@ -9665,6 +9678,7 @@
 0x00367960	mdlLoadingMajorList	inferred	SMT3HD data name via SLUS_209.11 0x0032C478, 4 agreeing references; was mdlLoadingMajorList
 0x00367EE0	evtSolarNoiseLayerPlacements	inferred	confidence=high; Paired configured/centered solar-noise draw functions index three s32 values per layer: X offset, Y offset and scale percentage; temporary sprite bounds are restored afterward. Same role in DDS2 at 0x003C8C90. Existing declarations, views, storage and data bytes retained; no source-owned data import or active INCLUDE_ASM consumer. [Namer1 readability b83; paired matched-C data consumers]
 0x00368310	evtSolarOverlayShapes	inferred	confidence=high; SolarOverlayShape array supplies positions and colors to the paired scaled-alpha and point-transition triangle-fan draw routines. Same role in DDS2 at 0x003C90C0. Existing declarations, views, storage and data bytes retained; no source-owned data import or active INCLUDE_ASM consumer. [Namer1 readability b83; paired matched-C data consumers]
+0x003684D8	evtViewerCommandHandlers	inferred	Event viewer command handlers (s32, s32, evtViewerInfo_t *) after the BISTA MODE item names; no code reference in retail. DDS2 twin 0x003C92B0.
 0x003685C0	evtMovieDefaultBlurTemplate	inferred	confidence=high; Null-input fallback dds3Effect_PartialMultiBlurParam_t: extent plus source quad color/control/angle/displacement/position/corners. Same role in DDS2 at 0x003C9390; native comparison spans byte-identical. Identifier-only: retain existing declarations, widths, bounds, casts, order, storage and bytes. No source-owned import or active ASM root/interior consumer. [PurC5 readability data b1; matched-C/native-twin evidence]
 0x003685F0	evtMovieDefaultSolidRect	inferred	confidence=high; Null-input fallback dds3Effect_Filter_t: 2x2 corner coordinates, packed color and blend control. Same role in DDS2 at 0x003C93C0; native comparison spans byte-identical. Identifier-only: retain existing declarations, widths, bounds, casts, order, storage and bytes. No source-owned import or active ASM root/interior consumer. [PurC5 readability data b1; matched-C/native-twin evidence]
 0x00368610	evtMovieDefaultResourceRect	inferred	confidence=high; Null-input fallback dds3Effect_PartialMultiFilterParam_t: extent, center and resource-rectangle draw color/control. Same role in DDS2 at 0x003C93E0; native comparison spans byte-identical. Identifier-only: retain existing declarations, widths, bounds, casts, order, storage and bytes. No source-owned import or active ASM root/interior consumer. [PurC5 readability data b1; matched-C/native-twin evidence]
@@ -9706,6 +9720,7 @@
 0x0036ADF4	mnuTerminalPreparationPopupEntry	inferred	confidence=high; mnuPrepareTerminalPopupAndDispatch seeds this record. Native enter closes/fades the previous state, clears active/display flags, and conditionally starts the game-specific resource load; its poll waits the mode-specific task/load/fade barrier before the terminal-panel record. No narrower action identity asserted. [Namer1 readability b101; identifier-only]
 0x0036AE10	mnuTerminalPanelPopupEntry	inferred	confidence=high; The preparation poll selects this record after the task/load/fade barrier. Native row registers mnuPrepareTerminalPanelState, terminal-panel leave, flag-event update and panel dispatch callbacks. Preserve the exact callback addresses and distinct per-title barrier conditions. [Namer1 readability b101; identifier-only]
 0x0036AE2C	mnuTerminalFollowupFadePopupEntry	inferred	confidence=high; evtOpenTerminalFollowupPopupWhenIdle selects this record when dispatch/message state is idle and remaining-frame classification is zero. Native enter/leave and draw callbacks handle the terminal follow-up fade/panel; preserve the different enter hooks and no-op/sentinel values. [Namer1 readability b101; identifier-only]
+0x0036AE48	mnuTerminalIdlePopupEntries	inferred	Two MenuPopupEntry records; the first is set by the terminal panel update once the terminal is idle, the second rebuilds the terminal menu. DDS2 twin 0x003CE998.
 0x0036AE80	mnuMantraPrerequisiteRecords	inferred	confidence=high; The existing89x16-byte MantraPrerequisiteRecord bank supplies kind,XY,IDs[4] and flags[4] to matched prerequisite/indicator geometry and selected graph-row lookups. No owner/layout change. Identifier-only; original types, widths, bounds, casts, storage and native interior aliases retained. No source-owned data import; only released/unheld ASM consumers, with regenerated references left to resplit. [Namer1 readability b86; matched-C/native-data evidence]
 0x0036B510	mnuMantraCommonSpritePlacements	inferred	confidence=high; The shared four-halfword table supplies resource index,sprite index,X and Y offsets to matched Mantra sprite helpers across multiple panels. Distinguishes the already named coordinate/scene tables without inventing a specific picture identity. Identifier-only; original types, widths, bounds, casts, storage and native interior aliases retained. No source-owned data import; only released/unheld ASM consumers, with regenerated references left to resplit. [Namer1 readability b86; matched-C/native-data evidence]
 0x0036B7F0	mnuMantraVariantSpritePlacements	inferred	confidence=high; Existing six-halfword MnuVariantSpritePlacement views supply resource/sprite selection,XY offsets and packed sprite-group masks to the variant draw helpers; the same positions guide scene scroll. Identifier-only; original types, widths, bounds, casts, storage and native interior aliases retained. No source-owned data import; only released/unheld ASM consumers, with regenerated references left to resplit. [Namer1 readability b86; matched-C/native-data evidence]
@@ -9721,6 +9736,8 @@
 0x0036C6D0	mnuFlagSnapshotIds	inferred	confidence=high; Exactly41 u16 IDs:0x920–927,930–937,940–947,950–957,960–967 plus908. mnuCollectFlagArray sets output bytes for enabled IDs; mnuApplyFlagArray sets IDs for nonzero saved bytes. Do not change their asymmetric no-clear behavior or infer a DDS2 bank. [Namer1 readability b96; matched/native resource and movie-data evidence; names_reviewed]
 0x0036C728	mnuCommonIconPlacements	inferred	confidence=high; Matched camp/shop/result/terminal draws read four-short sprite-placement rows. DDS2 additionally consumes the texture-slot column; DDS1 uses one shared effect set. Native38/59 rows end immediately before embedded MSG1 data; existing unsized declarations unchanged. Same role in DDS2 at0x003D03F0. Identifier-only; original types, widths, bounds, casts, arithmetic, storage and per-game layouts retained. No source-owned import or held ASM consumer; regenerated references left to resplit. [Namer1 readability b87; matched-C/native-data evidence]
 0x0036D3C0	mnuStaffRollThresholds	inferred	confidence=high; src/dds1/game/code_00260208.c:mnuStaffPickRoll; Four cumulative thresholds tested against an eight-bit random roll. [names_qp9.tsv]
+0x0036D3D0	mnuResultMessagePopupEntry	inferred	MenuPopupEntry of the result message (mnuResultMessageEnterNoOp, mnuResultMessageLeaveNoOp), after mnuStaffRollThresholds. DDS2 twin 0x003D6420.
+0x0036D3EC	mnuResultSelectionPopupEntry	inferred	MenuPopupEntry the result screen sets on confirm (mnuResultSelectionEnterNoOp, mnuResultSelectionLeaveNoOp). DDS2 twin 0x003D643C.
 0x0036D408	brsPrimaryRewardPopupEntry	inferred	confidence=high; The paired native row registers brsProcessNextPrimaryReward with reset/advance/display callbacks. Matched result controllers select it before iterating primary party rewards. Same role in dds2 at0x003D6458. Identifier-only; original types, widths, bounds, casts, storage and native interior aliases retained. No source-owned data import; only released/unheld ASM consumers, with regenerated references left to resplit. [Namer1 readability b86; matched-C/native-data evidence]
 0x0036D424	brsStatAssignmentPopupEntry	inferred	confidence=high; Paired native rows register stat-selection initialization plus mnuHandleStatPointAssignment. Matched primary-reward processing enters it only when assignable stat extent remains. Same role in dds2 at0x003D6474. Identifier-only; original types, widths, bounds, casts, storage and native interior aliases retained. No source-owned data import; only released/unheld ASM consumers, with regenerated references left to resplit. [Namer1 readability b86; matched-C/native-data evidence]
 0x0036D440	brsStatConfirmationPopupEntry	inferred	confidence=high; Native rows register the confirmation-message enter hook and mnuCommitAssignedStatPoints. Existing captured-message result either commits stats or restores the preview unit. Same role in dds2 at0x003D6490. Identifier-only; original types, widths, bounds, casts, storage and native interior aliases retained. No source-owned data import; only released/unheld ASM consumers, with regenerated references left to resplit. [Namer1 readability b86; matched-C/native-data evidence]
@@ -9833,13 +9850,11 @@
 0x0037E120	effWorldUpVector	inferred	{0, -1, 0, 1}: the world's up (the engine's Y grows downward: the view eye sits at y -100, its shake kept above y -11); effUpdateParticleSpanGeometry crosses each span with it and rotates it per element
 0x0037E130	effPacketSubmissionSurfaces	inferred	six native pointer entries alias sdfGrOtTable at indices51,51,55,56,52 followed by NULL
 0x0037E148	fileJobTypeOperations	inferred	confidence=high; src/dds1/game/code_0028A150.c:D_0037E148; type=FileTypeCallbacks[]; refs=fileJobCreateFromJob,fileJobDestroy; Job-type callbacks create job data, create child data and destroy owned data. [names_qp9.tsv]
-0x0037E14C	fileJobTypeCallbacks	inferred	confidence=high; Matched job notification/update/transform dispatch indexes this 0x28-stride callback view. Its base is fileJobTypeOperations+4; the existing constructor-root symbol and shifted private view are preserved. Same role in DDS2 at0x003E916C. Identifier-only: declarations, storage, bytes, extents and aliases retained; no source-owned data import or active INCLUDE_ASM consumer. [Namer1 readability b84; matched-C/native-data evidence]
 0x0037E508	fileJobZeroPadding	inferred	Sixteen zero bytes fileJobWriteSerializedPayload writes to pad a job file's primary buffer to sixteen bytes. DDS2 twin 0x003E9578.
 0x0037E518	fileQueueImagePaddingBytes	inferred	confidence=high; fileQueueSaveImage rounds its payload extent to16 bytes and writes the consumed0–15-byte padding from this native16-zero-byte bank. Keep the separate unversioned buffer and existing char[] declarations. [Namer1 readability b95; matched-consumer and native-data evidence; names_reviewed]
 0x0037E528	fileQueueVersionedImagePaddingBytes	inferred	confidence=high; fileQueueSaveVersionedImage similarly writes0–15 alignment bytes from its own native16-zero-byte bank after the versioned preamble; do not merge with the ordinary-image bank. [Namer1 readability b95; matched-consumer and native-data evidence; names_reviewed]
 0x0037E540	effWaveEmitterNegativeYAxis	inferred	confidence=high; effUpdateWaveEmitterSlots loads this native f32[4] vector(0,-1,0,0) into VF10 for quaternion-oriented axial sine sway. Both games retain the VU0 macro and exact values. [Namer1 readability b95; matched-consumer and native-data evidence; names_reviewed]
 0x0037E550	effEmitterTypeDescriptors	inferred	confidence=high; Native 16-byte descriptors pair emitter update and parameter-scale callbacks with per-instance and serialized-parameter byte counts; docs/idioms.md Emitter descriptor pairs establishes the trajectory families. Existing dds3IndexedCallbacks scaler-field alias and legacy FileRecordType view remain unchanged. Same role in DDS2 at0x003E95C0. Identifier-only: declarations, storage, bytes, extents and aliases retained; no source-owned data import or active INCLUDE_ASM consumer. [Namer1 readability b84; matched-C/native-data evidence]
-0x0037E554	dds3IndexedCallbacks	inferred	confidence=high; src/dds1/game/code_0029A810.c:dds3DispatchIndexedCallback; Indexed no-argument callback dispatch table. [names_qp9.tsv]
 0x0037E5D0	effLensFlareSets	inferred	Lens-flare elements, EffLensFlareElement[2][13]: per element its position and size scales, general-billboard texture index and colour (alpha 0 skips it); effDrawLensFlare picks a set by EffLensFlareParams.flareSet. DDS2 twin 0x003E9670.
 0x0037E830	billRingCosines	inferred	Cosines of twelve 30-degree steps around a ring, two zero floats after; the cell and particle updaters scale each fan vertex's lateral width by them. DDS2 0x003E98E0.
 0x0037E868	billRingSines	inferred	Sines of the same twelve 30-degree steps, two zero floats after; the cell and particle updaters scale each fan vertex's radial offset by them. DDS2 0x003E9918.
@@ -9851,12 +9866,14 @@
 0x0037ED90	effModelBlockOperations	inferred	Kind-indexed model-block operation table; paired effect source reads payloadSize and dispatches create, clone, initialize, destroy, update, and draw callbacks. Native code uses 0x1C-byte kind strides and accesses create at +4, clone at +0xC, and initialize at +0. Paired with DDS2 0x003E9E60.
 0x0037EE38	effModelResourceOperations	inferred	confidence=high; src/dds1/game/code_0029C530.c:D_0037EE38; type=model-resource operation record[]; refs=effCreateModelResource,effResetModelResourceUpdateCount; Per-kind records provide payload sizes, child-resource creation and effect initialization/reset callbacks. [names_qp9.tsv]
 0x0037EEE0	effRuntimeResourceOperations	inferred	Runtime-gated active-resource operation table used for per-kind payload size, create, clone, destroy, initialize, update, and draw dispatch. Native callers index records by kind with 0x1C-byte strides; paired with DDS2 0x003EA018. Callback argument forms are title-specific.
-0x0038EA60	effResetConfirmMenu	inferred	The parts list's "RESET OK?" menu (EffQueuedFileObject, 0x38 bytes), behind its NEW row. Unsized: its cursor is still a separate automatic symbol C reads. DDS2 twin 0x003FF1B8.
+0x0038EA60	effResetConfirmMenu	inferred	The parts list's "RESET OK?" menu (EffQueuedFileObject, 0x38 bytes), behind its NEW row. DDS2 twin 0x003FF1B8.
+0x0038EAC8	effInstanceConfirmMenu	inferred	The parts list's "INSTANCE OK?" menu (EffQueuedFileObject): NO, or YES (effFinalizeQueuedFile). DDS2 twin 0x003FF220.
+0x0038EB30	effDeleteConfirmMenu	inferred	The parts list's "DELETE OK?" menu (EffQueuedFileObject): NO, or YES (effResetFileQueueState). DDS2 twin 0x003FF288.
 0x0038EC00	effExitConfirmMenu	inferred	The parts list's "EXIT OK?" menu (EffQueuedFileObject), behind its EXIT row: NO, or YES (effFlagFileQueueActive). DDS2 twin 0x003FF358.
 0x0038EEC8	effPartEntryMenu	inferred	The menu behind a parts-list entry (EffQueuedFileObject): EDIT, POSETURE, INSTANCE, COPY, DELETE, POSITION, SIZE, OFFSET and NAME; opening and closing it load and store the battle camera snapshot. DDS2 twin 0x003FF620.
 0x0038EFF0	effAttachedPartEntryMenu	inferred	The menu behind an attached parts-list entry (FileJob.flags bit 0; EffQueuedFileObject): POSETURE, POSITION, SIZE, OFFSET, DELETE and NAME; opening and closing it load and store the battle camera snapshot. DDS2 twin 0x003FF748.
 0x0038F208	effNewPartsMenu	inferred	The parts list's NEW PARTS menu (EffQueuedFileObject): one row per part to add, from PARTICLE and the POLY tasks to MODEL, HELPER and BATTLE ONLY. DDS2 twin 0x003FF990.
-0x0038F2F0	effPartsListMenu	inferred	The effect editor's PARTS LIST menu (EffQueuedFileObject, 0x38 bytes): effUpdatePartsListEditor rebuilds its rows each frame; its cursor plus effPartsListScroll is the selected queue entry. Unsized: its cursor is still a separate automatic symbol C reads. DDS2 twin 0x003FFA78.
+0x0038F2F0	effPartsListMenu	inferred	The effect editor's PARTS LIST menu (EffQueuedFileObject, 0x38 bytes): effUpdatePartsListEditor rebuilds its rows each frame; its cursor plus effPartsListScroll is the selected queue entry. DDS2 twin 0x003FFA78.
 0x0038F3A0	effQueuePostureMenu	inferred	The parts list's POSETURE (posture) menu (EffQueuedFileObject): POSITION, CAMERA and CAMERA Y (transform flag bits 0x20 and 0x40) and SCALE (the scale multiplier) of effEditedQueueHeader; with its flag 8 set, effUpdatePartsListEditor rebuilds the all-parts view. DDS2 twin 0x003FFB28.
 0x0038F620	effColorEditRgbMenu	inferred	effEditColorTrack's RGB sub-menu, an EffQueuedFileObject whose rows edit effColorEditKeyColor's red, green and blue bytes. DDS2 0x003FFDA0.
 0x0038F898	effMappingState	inferred	confidence=high; src/dds1/game/code_0029C530.c:D_0038F898; type=EffectMapping; refs=effResetMappingFlags,effMapObjectWithTemporaryMappingTable; Stores active mapping table, table count and control flags; temporarily swaps tables during mapping. [names_qp9.tsv]
@@ -10855,5 +10872,213 @@
 0x00406BC0	ctorFrameObject	inferred	SMT3HD name via SLUS_209.11 0x0059AD40, __do_global_ctors static object; was D_00406BC0
 0x00406BD8	mainCtorsDone	inferred	SMT3HD name via SLUS_209.11 0x0059AD58, __main static flag; was D_00406BD8
 0x00406BE0	frameObjectList	inferred	SMT3HD name via SLUS_209.11 0x0059AD60, __register_frame_info object list head; was D_00406BE0
-0x0032C880	fldSdwQuadIndices	inferred	SMT3 twin fldSdwQuadIndices (fldSdwDraw quad-pair byte indices); was D_0032C880
-0x0032C8C0	fldSdwTriIndices	inferred	SMT3 twin fldSdwTriIndices (fldSdwDraw triangle byte indices); was D_0032C8C0
+0x00367AE0	mdlDebugProcessEntries	inferred	Model viewer debug process names and update functions, re-registered with fclEncycAllocEntry when the viewer closes. DDS2 twin 0x003C8890; was D_00367AE0
+0x0038FD88	effTimedRecordBuckets	inferred	EffRecordBucket[9] (name, step, count, records) indexed by record category in effUpdateTimedStates and effSumRecordStatuses. DDS2 twin 0x00400508; was D_0038FD88
+0x003535F0	effPCPThunderSpherePolyDataList	inferred	SMT3 name via SLUS_209.11 0x0031DD20, effPartPCPDataTable list; was D_003535F0
+0x00353618	effPCPThunderPolyDataList	inferred	SMT3 name via SLUS_209.11 0x0031DD48, effPartPCPDataTable list; was D_00353618
+0x00353670	effPCPThunderRadiatePolyDataList	inferred	SMT3 name via SLUS_209.11 0x0031DDA0, effPartPCPDataTable list; was D_00353670
+0x00353678	effPCPMultiBlurExpDataList	inferred	SMT3 name via SLUS_209.11 0x0031DDA8, effPartPCPDataTable list; was D_00353678
+0x00353680	effPCPSparkleSphereDataList	inferred	SMT3 name via SLUS_209.11 0x0031DDB0, effPartPCPDataTable list; was D_00353680
+0x00353688	effPCPFlashPolySphereDataList	inferred	SMT3 name via SLUS_209.11 0x0031DDB8, effPartPCPDataTable list; was D_00353688
+0x00353690	effPCPMultiFilterExpDataList	inferred	SMT3 name via SLUS_209.11 0x0031DDC0, effPartPCPDataTable list; was D_00353690
+0x00353698	effPCPBlinkMultiBlurDataList	inferred	SMT3 name via SLUS_209.11 0x0031DDC8, effPartPCPDataTable list; was D_00353698
+0x003559C8	effRectangleBlurSetupItems	inferred	effRectangleBlurSetupRecord items (10 effDebugMenuItem_t), named after SMT3 effBTLDebugMenuItems; was D_003559C8
+0x00355B28	mblurDebugMenuItems	inferred	mblurDebugMenu items (11 effDebugMenuItem_t), named after SMT3 effBTLDebugMenuItems; was D_00355B28
+0x00355CA0	dblurDebugMenuItems	inferred	dblurDebugMenu items (15 effDebugMenuItem_t), named after SMT3 effBTLDebugMenuItems; was D_00355CA0
+0x00355E48	effLoadDescD	inferred	Source block of effFramebufferQuadSetupRecord (copied to the effect on edit); was D_00355E48
+0x00355E70	effFramebufferQuadSetupItems	inferred	effFramebufferQuadSetupRecord items (9 effDebugMenuItem_t), named after SMT3 effBTLDebugMenuItems; was D_00355E70
+0x00355F88	dblurParam2	inferred	Source block of filterDebugMenu (copied to the effect on edit); was D_00355F88
+0x00355FA0	filterDebugMenuItems	inferred	filterDebugMenu items (7 effDebugMenuItem_t), named after SMT3 effBTLDebugMenuItems; was D_00355FA0
+0x003560B0	mfilterDebugMenuItems	inferred	mfilterDebugMenu items (9 effDebugMenuItem_t), named after SMT3 effBTLDebugMenuItems; was D_003560B0
+0x003561F8	rblurDebugMenuItems	inferred	rblurDebugMenu items (15 effDebugMenuItem_t), named after SMT3 effBTLDebugMenuItems; was D_003561F8
+0x00313898	GetTLBEntry	inferred	SMT3 twin GetTLBEntry (TLB syscall block); RFU087_PollEvnetFlag is the event flag stub at 0x0030AB90; was RFU087_PollEvnetFlag
+0x0030A630	RFU003	inferred	SMT3 twin RFU003 (sdk/libkernl, identical code); was func_0030A630
+0x0030A640	libc_2DBAC0	inferred	SMT3 twin libc_2DBAC0 (sdk/libkernl, identical code); was func_0030A640
+0x0030A650	RFU005	inferred	SMT3 twin RFU005 (sdk/libkernl, identical code); was func_0030A650
+0x0030A660	libc_2DBAE0	inferred	SMT3 twin libc_2DBAE0 (sdk/libkernl, identical code); was func_0030A660
+0x0030A700	AddIntcHandler	inferred	SMT3 twin AddIntcHandler (sdk/libkernl, identical code); was func_0030A700
+0x0030A730	AddDmacHandler	inferred	SMT3 twin AddDmacHandler (sdk/libkernl, identical code); was func_0030A730
+0x0030A9E0	RFU060	inferred	SMT3 twin RFU060 (sdk/libkernl, identical code); was func_0030A9E0
+0x0030A9F0	RFU061	inferred	SMT3 twin RFU061 (sdk/libkernl, identical code); was func_0030A9F0
+0x0030AAB0	RFU073	inferred	SMT3 twin RFU073 (sdk/libkernl, identical code); was func_0030AAB0
+0x0030AB10	SetGsVParam	inferred	SMT3 twin SetGsVParam (sdk/libkernl, identical code); was func_0030AB10
+0x0030AB20	RFU080_CreateEventFlag	inferred	SMT3 twin RFU080_CreateEventFlag (sdk/libkernl, identical code); was func_0030AB20
+0x0030AB30	RFU081_DeleteEventFlag	inferred	SMT3 twin RFU081_DeleteEventFlag (sdk/libkernl, identical code); was func_0030AB30
+0x0030AB40	RFU082_SetEventFlag	inferred	SMT3 twin RFU082_SetEventFlag (sdk/libkernl, identical code); was func_0030AB40
+0x0030AB50	RFU083_iSetEventFlag	inferred	SMT3 twin RFU083_iSetEventFlag (sdk/libkernl, identical code); was func_0030AB50
+0x0030AB60	RFU084_ClearEventFlag	inferred	SMT3 twin RFU084_ClearEventFlag (sdk/libkernl, identical code); was func_0030AB60
+0x0030AB70	RFU085_iClearEventFlag	inferred	SMT3 twin RFU085_iClearEventFlag (sdk/libkernl, identical code); was func_0030AB70
+0x0030AB80	RFU086_WaitEvnetFlag	inferred	SMT3 twin RFU086_WaitEvnetFlag (sdk/libkernl, identical code); was func_0030AB80
+0x0030AB90	RFU087_PollEvnetFlag	inferred	SMT3 twin RFU087_PollEvnetFlag (sdk/libkernl, identical code); was func_0030AB90
+0x0030ABA0	RFU088_iPollEvnetFlag	inferred	SMT3 twin RFU088_iPollEvnetFlag (sdk/libkernl, identical code); was func_0030ABA0
+0x0030ABB0	RFU089_ReferEventFlagStatus	inferred	SMT3 twin RFU089_ReferEventFlagStatus (sdk/libkernl, identical code); was func_0030ABB0
+0x0030ABC0	RFU090_iReferEventFlagStatus	inferred	SMT3 twin RFU090_iReferEventFlagStatus (sdk/libkernl, identical code); was func_0030ABC0
+0x0030ABD0	RFU091	inferred	SMT3 twin RFU091 (sdk/libkernl, identical code); was func_0030ABD0
+0x0030ABE0	EnableIntcHandler	inferred	SMT3 twin EnableIntcHandler (sdk/libkernl, identical code); was func_0030ABE0
+0x0030ABF0	iEnableIntcHandler	inferred	SMT3 twin iEnableIntcHandler (sdk/libkernl, identical code); was func_0030ABF0
+0x0030AC00	DisableIntcHandler	inferred	SMT3 twin DisableIntcHandler (sdk/libkernl, identical code); was func_0030AC00
+0x0030AC10	iDisableIntcHandler	inferred	SMT3 twin iDisableIntcHandler (sdk/libkernl, identical code); was func_0030AC10
+0x0030AC20	EnableDmacHandler	inferred	SMT3 twin EnableDmacHandler (sdk/libkernl, identical code); was func_0030AC20
+0x0030AC30	iEnableDmacHandler	inferred	SMT3 twin iEnableDmacHandler (sdk/libkernl, identical code); was func_0030AC30
+0x0030AC40	DisableDmacHandler	inferred	SMT3 twin DisableDmacHandler (sdk/libkernl, identical code); was func_0030AC40
+0x0030AC50	iDisableDmacHandler	inferred	SMT3 twin iDisableDmacHandler (sdk/libkernl, identical code); was func_0030AC50
+0x0030AC60	KSeg0	inferred	SMT3 twin KSeg0 (sdk/libkernl, identical code); was func_0030AC60
+0x0030AC70	EnableCache	inferred	SMT3 twin EnableCache (sdk/libkernl, identical code); was func_0030AC70
+0x0030AC80	DisableCache	inferred	SMT3 twin DisableCache (sdk/libkernl, identical code); was func_0030AC80
+0x0030AC90	GetCop0	inferred	SMT3 twin GetCop0 (sdk/libkernl, identical code); was func_0030AC90
+0x0030ACE0	iCpuConfig	inferred	SMT3 twin iCpuConfig (sdk/libkernl, identical code); was func_0030ACE0
+0x0030AD30	GetOsdConfigParam2	inferred	SMT3 twin GetOsdConfigParam2 (sdk/libkernl, identical code); was func_0030AD30
+0x0030ADA0	RFU116	inferred	SMT3 twin RFU116 (sdk/libkernl, identical code); was func_0030ADA0
+0x0030B1F0	libc_2DC670	inferred	SMT3 twin libc_2DC670 (sdk/libkernl, identical code); was func_0030B1F0
+0x0030BA80	gcc2_compiled__10	inferred	SMT3 twin gcc2_compiled__10 (sdk/libkernl, identical code); was func_0030BA80
+0x0030C940	gcc2_compiled__12	inferred	SMT3 twin gcc2_compiled__12 (sdk/libkernl, identical code); was func_0030C940
+0x0030DFE8	gcc2_compiled__13	inferred	SMT3 twin gcc2_compiled__13 (sdk/libkernl, identical code); was func_0030DFE8
+0x00312ED0	gcc2_compiled__15	inferred	SMT3 twin gcc2_compiled__15 (sdk/libkernl, identical code); was func_00312ED0
+0x00313050	gcc2_compiled__16	inferred	SMT3 twin gcc2_compiled__16 (sdk/libkernl, identical code); was func_00313050
+0x003132F0	gcc2_compiled__17	inferred	SMT3 twin gcc2_compiled__17 (sdk/libkernl, identical code); was func_003132F0
+0x003138B8	ProbeTLBEntry	inferred	SMT3 twin ProbeTLBEntry (sdk/libkernl, identical code); was func_003138B8
+0x003138C8	iProbeTLBEntry	inferred	SMT3 twin iProbeTLBEntry (sdk/libkernl, identical code); was func_003138C8
+0x003138D8	ExpandScratchPad	inferred	SMT3 twin ExpandScratchPad (sdk/libkernl, identical code); was func_003138D8
+0x0039C44C	ttyInitDone	inferred	SMT3 twin ttyInitDone (sdk/libkernl sceResetttyinit reads it at the same instruction); was D_0039C44C
+0x00315B80	__errno_8	inferred	SMT3 twin __errno_8 (sdk/libkernl open reads it at the same instruction); was func_00315B80
+0x00406FF0	threadMgrSema	inferred	SMT3 twin threadMgrSema (sdk/libkernl topThread reads it at the same instruction); was D_00406FF0
+0x003B85C8	kernlInternalErrorMsg	inferred	SMT3 twin kernlInternalErrorMsg (sdk/libkernl topThread reads it at the same instruction); was D_003B85C8
+0x0039C454	topThreadId	inferred	SMT3 twin topThreadId (sdk/libkernl InitThread reads it at the same instruction); was D_0039C454
+0x00406BF0	topThreadStack	inferred	SMT3 twin topThreadStack (sdk/libkernl InitThread reads it at the same instruction); was D_00406BF0
+0x00406FF8	threadCommandQueue	inferred	SMT3 twin threadCommandQueue (sdk/libkernl InitThread reads it at the same instruction); was D_00406FF8
+0x003B85F0	ttyMsgPacketTooLarge	inferred	SMT3 twin ttyMsgPacketTooLarge (sdk/libkernl sceTtyHandler reads it at the same instruction); was D_003B85F0
+0x003B8618	ttyMsgReceiveError	inferred	SMT3 twin ttyMsgReceiveError (sdk/libkernl sceTtyHandler reads it at the same instruction); was D_003B8618
+0x003B8630	ttyMsgSendError	inferred	SMT3 twin ttyMsgSendError (sdk/libkernl sceTtyHandler reads it at the same instruction); was D_003B8630
+0x003B8648	ttyMsgWlenError	inferred	SMT3 twin ttyMsgWlenError (sdk/libkernl sceTtyHandler reads it at the same instruction); was D_003B8648
+0x00407510	ttyState	inferred	SMT3 twin ttyState (sdk/libkernl sceTtyWrite reads it at the same instruction); was D_00407510
+0x00407540	ttySendPacket	inferred	SMT3 twin ttySendPacket (sdk/libkernl sceTtyWrite reads it at the same instruction); was D_00407540
+0x00407680	ttyReceivePacket	inferred	SMT3 twin ttyReceivePacket (sdk/libkernl sceTtyInit reads it at the same instruction); was D_00407680
+0x0039C458	deci2LineIndex	inferred	SMT3 twin deci2LineIndex (sdk/libkernl deci2Putchar reads it at the same instruction); was D_0039C458
+0x004077C0	deci2LineBuffer	inferred	SMT3 twin deci2LineBuffer (sdk/libkernl deci2Putchar reads it at the same instruction); was D_004077C0
+0x0039C45C	printfPutchar	inferred	SMT3 twin printfPutchar (sdk/libkernl printfloat reads it at the same instruction); was D_0039C45C
+0x003158E8	dpdiv	inferred	SMT3 twin dpdiv (sdk/libkernl printfloat reads it at the same instruction); was func_003158E8
+0x00407A40	sifSregs	inferred	SMT3 twin sifSregs (sdk/libkernl sceSifGetSreg reads it at the same instruction); was D_00407A40
+0x00407918	sifCommandContext	inferred	SMT3 twin sifCommandContext (sdk/libkernl sceSifGetDataTable reads it at the same instruction); was D_00407918
+0x00407914	sifDmacHandlerId	inferred	SMT3 twin sifDmacHandlerId (sdk/libkernl sceSifInitCmd reads it at the same instruction); was D_00407914
+0x0039C464	sifRpcInitialized	inferred	SMT3 twin sifRpcInitialized (sdk/libkernl sceSifInitRpc reads it at the same instruction); was D_0039C464
+0x00407AC0	rpcPackets	inferred	SMT3 twin rpcPackets (sdk/libkernl sceSifInitRpc reads it at the same instruction); was D_00407AC0
+0x004092C0	sifRpcQueue	inferred	SMT3 twin sifRpcQueue (sdk/libkernl sceSifInitRpc reads it at the same instruction); was D_004092C0
+0x004082C0	rpcForwardPackets	inferred	SMT3 twin rpcForwardPackets (sdk/libkernl sceSifInitRpc reads it at the same instruction); was D_004082C0
+0x00408AC0	rpcIndexedPackets	inferred	SMT3 twin rpcIndexedPackets (sdk/libkernl sceSifInitRpc reads it at the same instruction); was D_00408AC0
+0x0039C4F8	fsIobSema	inferred	SMT3 twin fsIobSema (sdk/libkernl new_iob reads it at the same instruction); was D_0039C4F8
+0x0040A840	fsIobTable	inferred	SMT3 twin fsIobTable (sdk/libkernl new_iob reads it at the same instruction); was D_0040A840
+0x0039C4F4	fsCommandSema	inferred	SMT3 twin fsCommandSema (sdk/libkernl _sceFsSemInit reads it at the same instruction); was D_0039C4F4
+0x0040AAC0	fsPowerOffState	inferred	SMT3 twin fsPowerOffState (sdk/libkernl scePowerOffHandler reads it at the same instruction); was D_0040AAC0
+0x0039C4EC	fsInitialized	inferred	SMT3 twin fsInitialized (sdk/libkernl scePowerOffHandler reads it at the same instruction); was D_0039C4EC
+0x0040AA68	fsDetectedVersion	inferred	SMT3 twin fsDetectedVersion (sdk/libkernl _fs_version reads it at the same instruction); was D_0040AA68
+0x0039C500	fsFallbackVersion	inferred	SMT3 twin fsFallbackVersion (sdk/libkernl _fs_version reads it at the same instruction); was D_0039C500
+0x00409340	fsRequest	inferred	SMT3 twin fsRequest (sdk/libkernl sceOpen reads it at the same instruction); was D_00409340
+0x0040AA40	fsRpcClient	inferred	SMT3 twin fsRpcClient (sdk/libkernl sceOpen reads it at the same instruction); was D_0040AA40
+0x00409F80	fsVersionRpcBuffer	inferred	SMT3 twin fsVersionRpcBuffer (sdk/libkernl sceOpen reads it at the same instruction); was D_00409F80
+0x0039C4FC	fsIoctlSema	inferred	SMT3 twin fsIoctlSema (sdk/libkernl sceLseek reads it at the same instruction); was D_0039C4FC
+0x0039C468	fsRequestSemas	inferred	SMT3 twin fsRequestSemas (sdk/libkernl sceLseek reads it at the same instruction); was D_0039C468
+0x0040AB00	iopHeapRpcClient	inferred	SMT3 twin iopHeapRpcClient (sdk/libkernl sceSifInitIopHeap reads it at the same instruction); was D_0040AB00
+0x0039C504	iopHeapStatus	inferred	SMT3 twin iopHeapStatus (sdk/libkernl sceSifInitIopHeap reads it at the same instruction); was D_0039C504
+0x0040AB80	iopHeapArgs	inferred	SMT3 twin iopHeapArgs (sdk/libkernl sceSifAllocIopHeap reads it at the same instruction); was D_0040AB80
+0x0040AB40	iopHeapResult	inferred	SMT3 twin iopHeapResult (sdk/libkernl sceSifAllocIopHeap reads it at the same instruction); was D_0040AB40
+0x0040ABC0	iopHeapLoadRequest	inferred	SMT3 twin iopHeapLoadRequest (sdk/libkernl sceSifLoadIopHeap reads it at the same instruction); was D_0040ABC0
+0x0039C508	lfBindStatus	inferred	SMT3 twin lfBindStatus (sdk/libkernl _lf_bind reads it at the same instruction); was D_0039C508
+0x0040AEC0	lfRpcClient	inferred	SMT3 twin lfRpcClient (sdk/libkernl _lf_bind reads it at the same instruction); was D_0040AEC0
+0x0040ACC0	lfRequest	inferred	SMT3 twin lfRequest (sdk/libkernl _lf_bind reads it at the same instruction); was D_0040ACC0
+0x0040AEE8	lfDetectedVersion	inferred	SMT3 twin lfDetectedVersion (sdk/libkernl _lf_bind reads it at the same instruction); was D_0040AEE8
+0x0039C50C	lfFallbackVersion	inferred	SMT3 twin lfFallbackVersion (sdk/libkernl _lf_version reads it at the same instruction); was D_0039C50C
+0x0040AF00	sifResetPacket	inferred	SMT3 twin sifResetPacket (sdk/libkernl sceSifResetIop reads it at the same instruction); was D_0040AF00
+0x0039C528	mallocSema	inferred	SMT3 twin mallocSema (sdk/libkernl supplement_crt0 reads it at the same instruction); was D_0039C528
+0x0039C510	systemCallTable	inferred	SMT3 twin systemCallTable (sdk/libkernl GetSystemCallEntry reads it at the same instruction); was D_0039C510
+0x0039C518	systemCallEntryPairs	inferred	SMT3 twin systemCallEntryPairs (sdk/libkernl GetSystemCallTableEntry reads it at the same instruction); was D_0039C518
+0x003B8870	execDefaultPath	inferred	SMT3 twin execDefaultPath (sdk/libkernl ExecPS2 reads it at the same instruction); was D_003B8870
+0x0040AF68	deci2PacketStorage	inferred	SMT3 twin deci2PacketStorage (sdk/libkernl sceDeci2Open reads it at the same instruction); was D_0040AF68
+0x0039D7D8	debugHandlers	inferred	SMT3 twin debugHandlers (sdk/libkernl SetDebugHandler reads it at the same instruction); was D_0039D7D8
+0x00313D80	_kDebugException	inferred	SMT3 twin _kDebugException (sdk/libkernl SetDebugHandler reads it at the same instruction); was func_00313D80
+0x0039C448	kernelBuiltinVersion	inferred	SMT3 twin kernelBuiltinVersion (_fs_version reads it); was fileioLibraryVersion
+0x00313B40	_kTLBException	inferred	SetTLBHandler installs it where SMT3 installs _kTLBException; was func_00313B40
+0x0030E140	_sceFs_Rcv_Intr	inferred	SMT3 _sceFs_Rcv_Intr at the same place in the fileio unit, newer code; was func_0030E140
+0x0030F450	sceIoctl	inferred	SMT3 sceIoctl at the same place between sceWrite and sceIoctl2, newer code; was func_0030F450
+0x00407400	ttyQueueStorage	inferred	SMT3 twin ttyQueueStorage (gcc2_compiled__10 returns it); was D_00407400
+0x002FF2E8	_fstat_r	inferred	SMT3 twin _fstat_r (identical code, calls fstat); was func_002FF2E8
+0x003078F0	_lseek_r	inferred	SMT3 twin _lseek_r (identical code, calls lseek); was func_003078F0
+0x00305BB8	_write_r	inferred	SMT3 twin _write_r (identical code, calls write); was func_00305BB8
+0x00308A80	_read_r	inferred	SMT3 twin _read_r (identical code, calls read); was func_00308A80
+0x00305D60	_close_r	inferred	SMT3 twin _close_r (identical code, calls close); was func_00305D60
+0x00300330	_open_r	inferred	DDS2 twin _open_r (newlib reent wrapper, calls open); was func_00300330
+0x002FE768	_cleanup	inferred	SMT3 twin _cleanup (identical code, tail calls _cleanup_r); was func_002FE768
+0x003078D0	localeconv	inferred	SMT3 twin localeconv (identical code, tail calls _localeconv_r); was func_003078D0
+0x00301450	_getpid_r	inferred	SMT3 twin _getpid_r (identical code, tail calls libc_2DC670); was func_00301450
+0x002FE578	std	inferred	SMT3 twin std (newlib findfp.c static, identical code); was func_002FE578
+0x003032F0	__sprint	inferred	SMT3 twin __sprint (newlib vfprintf.c static, identical code; the copy at 0x00302580 is vfiprintf.c's); was func_003032F0
+0x00305DB8	quorem	inferred	SMT3 twin quorem (newlib dtoa.c static, identical code); was func_00305DB8
+0x002FDDD0	__muldi3	inferred	SMT3 twin __muldi3 (called at the same instruction of _strtol_r); was func_002FDDD0
+0x00314BC8	__udivdi3	inferred	SMT3 twin __udivdi3 (called at the same instruction of _strtol_r); was func_00314BC8
+0x00315148	__umoddi3	inferred	SMT3 twin __umoddi3 (called at the same instruction of _strtol_r); was func_00315148
+0x0039C430	mallocLockOwner	inferred	SMT3 twin mallocLockOwner (sdk/libc __malloc_lock reads it at the same instruction); was D_0039C430
+0x0039C434	mallocLockCount	inferred	SMT3 twin mallocLockCount (sdk/libc __malloc_lock reads it at the same instruction); was D_0039C434
+0x003B7AA0	putsNewline	inferred	SMT3 twin putsNewline (sdk/libc _puts_r reads it at the same instruction); was D_003B7AA0
+0x003B83A8	localeEmptyStr	inferred	SMT3 twin localeEmptyStr (sdk/libc _setlocale_r reads it at the same instruction); was D_003B83A8
+0x003B83B8	localeCName	inferred	SMT3 twin localeCName (sdk/libc _setlocale_r reads it at the same instruction); was D_003B83B8
+0x003B83C0	pow5MultTable	inferred	SMT3 twin pow5MultTable (sdk/libc _pow5mult reads it at the same instruction); was D_003B83C0
+0x003B83D0	pow10Table	inferred	SMT3 twin pow10Table (sdk/libc _mprec_log10 reads it at the same instruction); was D_003B83D0
+0x0039BCE0	impure_data	inferred	SMT3 twin impure_data (newlib impure.c _reent, _impure_ptr points at it); was D_0039BCE0
+0x003A2AA0	btlHelpLineAttackNames	inferred	const char *[3] {Attack, Shoot, Attack} copied to the stack by btlDrawWindowHelpLine, never read; was D_003A2AA0
+0x003A2AC0	btlHelpLineRevertedNames	inferred	const char *[3] {Revert, Deploy, Withdraw} copied to the stack by btlDrawWindowHelpLine, never read. DDS2 twin 0x004165F0; was D_003A2AC0
+0x003A2AE0	btlHelpLineNormalNames	inferred	const char *[3] {Transform, Deploy, Withdraw} copied to the stack by btlDrawWindowHelpLine, never read. DDS2 twin 0x00416610; was D_003A2AE0
+0x003BB0B0	effRectangleBlurSetupCreateArgs	inferred	void *[2] {&evtUnityCalcArea, NULL}, effRectangleBlurSetupRecord.param. SMT3 D_0054F2B8, DDS2 0x004364A0; was D_003BB0B0
+0x003BB110	effFramebufferQuadSetupCreateArgs	inferred	void *[1] {&effLoadDescD}, effFramebufferQuadSetupRecord.param. DDS2 0x00436500; was D_003BB110
+0x003BB118	filterDebugCreateArgs	inferred	void *[2] {&dblurParam2, NULL}, filterDebugMenu.param. SMT3 D_0054F308, DDS2 0x00436508; was D_003BB118
+0x003BB7E8	btlDebugTopMenuList	inferred	void *[2] {&D_00360348 (the DEBUG MENU page), NULL}, after the row text WIDTH; no reader; was D_003BB7E8
+0x0039D860	tlbKernelEntries	inferred	kernelTlbEntry_t[13], tlbTable.kernelEntries. SMT3 0x0052D6B0; was D_0039D860
+0x0039D930	tlbDefaultEntries	inferred	kernelTlbEntry_t[18], tlbTable.defaultEntries. SMT3 0x0052D780; was D_0039D930
+0x0039DA50	tlbExtendedEntries	inferred	kernelTlbEntry_t[8], tlbTable.extendedEntries. SMT3 0x0052D8A0; was D_0039DA50
+0x0039DAD0	tlbTable	inferred	kernelTlbTable_t read by InitTLB32MB (counts 13/18/8 and the three entry tables). SMT3 0x0052D920; was D_0039DAD0
+0x0034E030	dds3BillboardOtTable	inferred	SMT3 name (0x00317050): sdfGrOt_t *[4] the billboard tag lists register into; DDS2 twin 0x003AA960; was D_0034E030
+0x003306B0	fldDisplayLightSources	inferred	sdf3DLight_t *[4] {&D_00330670, NULL, NULL, NULL}, ambient D_003306C0 follows; entry 0 of the display pointer table. DDS2 twin 0x0038BB50; was D_003306B0
+0x003BC890	fileSaveIconSysAddress	inferred	pointer slot holding &fileSaveIconSysData for slSaveWriteFile (SMT3 slIconSysSaveBuff); size slot fileSaveIconSysSize follows. DDS2 twin 0x00437D90; was D_003BC890
+0x003BC894	fileSaveIconSysSize	inferred	u32 size slot (0x3C4) for slSaveWriteFile. DDS2 twin 0x00437D94; was D_003BC894
+0x0037CDF8	prfMantraFallbackNames	inferred	const char *[2] {"???", "Mantra"}; prfResolveMantraNameOrFallback returns entry 0, entry 1 has no reader; was D_0037CDF8
+0x003ACD78	evtSceneDispRows	inferred	NodeDiagnosticRow[17] evtSceneDispProcess copies to its stack (AREA, MOVER, ... POINT, end row). DDS2 twin 0x00422238; was D_003ACD78
+0x0032A6F0	sdfChannels	inferred	SdfChannel[8] sdfResetChannels reloads. DDS2 twin 0x00385A90; was D_0032A6F0
+0x003BB660	btlGameCameraName	inferred	const char * "GAME CAMERA". DDS2 twin 0x00436A98; was D_003BB660
+0x003BB664	btlFreeCameraName	inferred	const char * "FREE CAMERA". DDS2 twin 0x00436A9C; was D_003BB664
+0x003BB668	btlNonCameraName	inferred	const char * "NON-CAMERA". DDS2 twin 0x00436AA0; was D_003BB668
+0x003BB6B8	btlButtonIconTexturePath	inferred	const char * "/battle/panel/b_bupbst.tmx". DDS2 twin 0x00436AF0; was D_003BB6B8
+0x003BB488	btlScenePanelTaskName	inferred	const char * "btl_panel__". DDS2 twin 0x004368B0; was D_003BB488
+0x003627B8	mdlHumanFiles	inferred	dds3ModelFileTable_t[32], modelFileTable slot 0 (first model human/pc000.PB); was D_003627B8; was D_003627B8
+0x00362938	mdlDevilFiles	inferred	dds3ModelFileTable_t[352], modelFileTable slot 1 (first model devil/000.PB); was D_00362938; was D_00362938
+0x003639B8	mdlHumanOnFiles	inferred	dds3ModelFileTable_t[32], modelFileTable slot 7 (first model human/pc000_on.PB); was D_003639B8; was D_003639B8
+0x00363B38	mdlOnFiles	inferred	dds3ModelFileTable_t[352], modelFileTable slot 6 (first model on/000_on.PB); was D_00363B38; was D_00363B38
+0x00364BB8	mdlFieldFiles	inferred	dds3ModelFileTable_t[64], modelFileTable slot 2 (first model field/player_a.PB); was D_00364BB8; was D_00364BB8
+0x00364EB8	mdlEventFiles	inferred	dds3ModelFileTable_t[192], modelFileTable slot 3 (first model event/test/tool.PB); was D_00364EB8; was D_00364EB8
+0x003657B8	mdlMiscFiles	inferred	dds3ModelFileTable_t[13], modelFileTable slot 4 (first model misc/colorbar.TB); was D_003657B8; was D_003657B8
+0x003B2718	fileLoadingSlotTexts	inferred	char *[20], fileLoadingSlot01Text..20Text, the save slot prompt titles; DDS2 0x0042B770; was D_003B2718; was D_003B2718
+0x0035F748	btlSoundArchiveEntries	inferred	BattleSoundArchiveEntry[49], SYSEFF .BED archive rows (/battle/bed/HOJYO.BED...); DDS2 0x003BDE18; was D_0035F748; was D_0035F748
+0x00398D30	padStateNames	inferred	libpad const char *[8] state names (DISCONNECT, FINDCTP1, EXECCMD, STABLE, ERROR); SMT3 padStateNames 0x00529FB0; was D_00398D30; was D_00398D30
+0x00398D50	padRequestNames	inferred	libpad const char *[4] request names (COMPLETE, FAILED, BUSY, NULL); SMT3 padRequestNames 0x00529FD0; was D_00398D50; was D_00398D50
+0x003BBDE0	evtDebugCameraLabels	inferred	const char *[2] {"FREE CAMERA" (D_003ACC58), NULL} in evtDebug's .sdata, no reader; DDS2 0x00437220; was D_003BBDE0, split off the "%s" string at D_003BBDE8
+0x002F2540	scePadInfoComb	inferred	libpad function, SMT3 scePadInfoComb 0x002CA998; was func_002F2540
+0x002F2660	scePadInfoMode	inferred	libpad function, SMT3 scePadInfoMode 0x002CAAB8; was func_002F2660
+0x00398D28	padInitialized	inferred	libpad data, SMT3 padInitialized 0x00529FA8; was D_00398D28
+0x00398D2C	padDebugPrint	inferred	libpad data, SMT3 padDebugPrint 0x00529FAC; was D_00398D2C
+0x00403500	padRpcClient	inferred	libpad data, SMT3 padRpcClient 0x00598980; was D_00403500
+0x00403550	padPortState	inferred	libpad data, SMT3 padPortState 0x005989D0; was D_00403550
+0x00403640	padCmdBlock	inferred	libpad data, SMT3 padCmdBlock 0x00598AC0; was D_00403640
+0x00403740	padRpcPacket	inferred	libpad data, SMT3 padRpcPacket 0x00598BC0; was D_00403740
+0x003B5680	padDmaFailMsg	inferred	libpad data, SMT3 padDmaFailMsg 0x0054A960; was D_003B5680
+0x003B5778	padStateNameError	inferred	libpad data, SMT3 padStateNameError 0x0054AA58; was D_003B5778
+0x003B5780	padStateNameStable	inferred	libpad data, SMT3 padStateNameStable 0x0054AA60; was D_003B5780
+0x003B5788	padStateNameExecCmd	inferred	libpad data, SMT3 padStateNameExecCmd 0x0054AA68; was D_003B5788
+0x003B5790	padStateNameFindCtp1	inferred	libpad data, SMT3 padStateNameFindCtp1 0x0054AA70; was D_003B5790
+0x003B57A8	padStateNameDisconnect	inferred	libpad data, SMT3 padStateNameDisconnect 0x0054AA88; was D_003B57A8
+0x003B57B8	padRequestNameBusy	inferred	libpad data, SMT3 padRequestNameBusy 0x0054AA98; was D_003B57B8
+0x003B57C0	padRequestNameFailed	inferred	libpad data, SMT3 padRequestNameFailed 0x0054AAA0; was D_003B57C0
+0x003B57C8	padRequestNameComplete	inferred	libpad data, SMT3 padRequestNameComplete 0x0054AAA8; was D_003B57C8
+0x0037DE28	D_0037DE28	inferred	"(Press SELECT to access debug message)", no reader; split off D_0037DE10 ("Start the game anyway?", SMT3 slNoSpaceStartMsg6 text)
+0x0037DE50	itfMesEmbedded_37DE50	inferred	embedded MSG1 message file (msg_02..msg_04, 0x193 bytes), no reader; SMT3 itfMesEmbedded_<addr> convention; DDS2 0x003E8E48; was inside D_0037DE10
+0x0037DFE8	fileGlyphTextRows	inferred	{glyph-coded text, s32} rows after the embedded message file; no reader in retail, text in the game's font encoding (not decoded); DDS2 0x003E8FE0; was inside D_0037DE10
+0x003BAE64	scriptlabel	inferred	SMT3 name (scriptlabel 0x0054EE04, fldWap.c door table index); was fldSelectedActorEntryIndex; was fldSelectedActorEntryIndex
+0x00359EF0	btlCameraPathPresetsBank0	inferred	battle camera path presets for bank 0 of btlInitializeCameraCursorFromPreset (BtlCameraPathPreset[18]); DDS2 0x003B7680; was D_00359EF0
+0x0035A5B0	btlCameraPathPresetsBank2	inferred	battle camera path presets for bank 2 of btlInitializeCameraCursorFromPreset (BtlCameraPathPreset[2]); DDS2 0x003B7E00; was D_0035A5B0
+0x0035A670	btlCameraPathPresetsBank4	inferred	battle camera path presets for bank 4 of btlInitializeCameraCursorFromPreset (BtlCameraPathPreset[2]); DDS2 0x003B7F20; was D_0035A670

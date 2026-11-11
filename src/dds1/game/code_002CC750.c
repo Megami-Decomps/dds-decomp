@@ -445,7 +445,7 @@ void prfCopyMantraNamePart(u16 scriptId, s32 namePartMode, char *destination) {
     }
 }
 
-extern u8 *D_0037CDF8 __attribute__((section(".data")));
+extern u8 *prfMantraFallbackNames[2] __attribute__((section(".data")));
 
 s32 prfResolveMantraNameOrFallback(u16 profileId, u8 **out) {
     u8 *text;
@@ -455,7 +455,7 @@ s32 prfResolveMantraNameOrFallback(u16 profileId, u8 **out) {
         *out = text;
         return 1;
     }
-    *out = D_0037CDF8;
+    *out = prfMantraFallbackNames[0];
     return 0;
 }
 

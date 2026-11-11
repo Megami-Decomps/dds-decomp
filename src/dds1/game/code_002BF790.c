@@ -3,6 +3,7 @@
 #include "sdf_gs_alpha_register_api.h"
 #include "sdf_gs_register_submit_api.h"
 #include "common.h"
+#include "kernel_draw.h"
 #include "dds3_draw_buffer.h"
 #include "dds3_frame_draw_buffer.h"
 #include "sdf_cons_matrix_packet.h"
@@ -523,9 +524,9 @@ extern sdf3DLightParallelPacket_t D_003DFB70[2];
 
 extern ConsMatrixPacket D_003DFD30[2];
 
-extern sdf3DLight_t *dds3LightParam[3];
+extern dds3LightState_t dds3LightParam;
 
-extern sdfVector4_t dds3AmbientColor;
+SYMBOL_AT(sdfVector4_t, dds3AmbientColor, dds3LightParam, 0x10);
 
 extern Matrix4 sdfViewMatrix;
 
@@ -552,7 +553,7 @@ void cmpDrawSetup3DView(void) {
         sdf3DMakeViewportPacket((struct ConsMatrixPacket *)&D_003DFD30[i], &dds3ScreenParam, &sdfViewMatrix);
         sdfDrawTagLink(&D_003DFAB0[i], (u32)&D_003DFD30[i]);
         sdfDrawTagInit(&D_003DFB30[i]);
-        sdf3DMakeLightParallelPacket(&D_003DFB70[i], dds3LightParam, &dds3AmbientColor);
+        sdf3DMakeLightParallelPacket(&D_003DFB70[i], dds3LightParam.parallel, &dds3AmbientColor);
         sdfDrawTagLink(&D_003DFB30[i], (u32)&D_003DFB70[i]);
     }
 }

@@ -39,7 +39,7 @@ extern u32 effColorEditSelectedAlphaKey;
 
 
 
-extern s32 effEditorCurrentMenu;
+extern struct EffQueuedFileObject *effEditorCurrentMenu;
 
 
 
@@ -82,7 +82,15 @@ extern RefObj *D_003BC978[2];
 
 
 
-extern EffRecordBucket D_0038FD88[];
+extern EffTimedParamRecord D_0038FB78[2];
+extern EffTimedParamRecord D_0038FBA8[3];
+extern EffTimedParamRecord D_0038FBF0[3];
+extern EffTimedParamRecord D_0038FC38[2];
+extern EffTimedParamRecord D_0038FC68[2];
+extern EffTimedParamRecord D_0038FC98[5];
+extern EffTimedParamRecord D_0038FD10[3];
+extern EffTimedParamRecord D_0038FD58[2];
+extern EffRecordBucket effTimedRecordBuckets[];
 
 
 extern u32 effSharedTextureReferenceCount;
@@ -98,8 +106,6 @@ extern u8 D_003BC9C8[2];
 extern u8 D_003BD088[];
 
 extern u8 D_003BD090[];
-
-extern u8 *D_003BD074;
 
 extern u8 D_003BCA40[];
 
@@ -166,8 +172,6 @@ extern char D_003BD198[];
 #define EFF_RECORD_LAST_BUCKET 15
 #define EFF_STATUS_RECORD_BYTES 0x24
 #define EFF_PACKED_STATUS_HEADER_BYTES 0x20
-#define EFF_STATUS_PARAM_STRIDE 0x18
-#define EFF_STATUS_PARAM_HEADER_BYTES 4
 #define EFF_SLOT_WORK_BYTES 0xA0
 #define EFF_SLOT_PHASE_ZERO 0
 #define EFF_SLOT_PHASE_ONE 0x10000
@@ -424,12 +428,12 @@ extern u32 effConvertParamValue(u32 *, void *, void *, void *);
 
 /* Sum the status-storage byte requirements for the selected record category. */
 u32 effSumRecordStatuses(const EffMappedRecord *record) {
-    EffRecordBucket *group = &D_0038FD88[record->category];
+    EffRecordBucket *group = &effTimedRecordBuckets[record->category];
     u32 statusBytes = 0;
     u32 recordIndex;
 
     for (recordIndex = 0; recordIndex < group->count; recordIndex++) {
-        statusBytes += effConvertParamValue((u32 *)(group->records + recordIndex * EFF_STATUS_PARAM_STRIDE + EFF_STATUS_PARAM_HEADER_BYTES), 0, 0, 0);
+        statusBytes += effConvertParamValue(&group->records[recordIndex].kind, 0, 0, 0);
     }
     return statusBytes;
 }
@@ -877,7 +881,7 @@ EffectSlotSet *effUpdateTimedStates(EffectSlotSet *effect, u32 slot, void *entry
         EffMappedRecord *source = state->source;
 
         if (source != 0 && source->category != 0) {
-            EffRecordBucket *group = &D_0038FD88[source->category];
+            EffRecordBucket *group = &effTimedRecordBuckets[source->category];
             s32 phaseStep = group->step(record, entry, state);
 
             if (state->delay > 0) {

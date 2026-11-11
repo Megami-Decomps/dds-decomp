@@ -16,7 +16,6 @@ extern void sdfDrawColoredTriangleFan(s32 *points, u32 tail, u32 *colors, s32 co
                                       s32 useFirstColor, s32 surfaceIndex);
 extern void effDrawSpriteWithCornerFade(s32 x, s32 y, s32 depth, u32 blend, s32 flags,
                                         s32 textureSetHandle, s32 slotIndex, s32 layer);
-extern s32 D_0036832C[];
 extern s32 evtSolarNoiseLayerPlacements[][3];
 extern SolarOverlayShape evtSolarOverlayShapes[];
 
@@ -167,7 +166,7 @@ void evtDrawIndexedSolarOverlayLayers(s32 x, s32 y, s32 unused2, s32 alpha, s32 
     evtInitializeSolarOverlay(renderHandle);
     zeroColor = 0;
     if (n < 8) {
-        p = (s32 *)D_0036832C + entryCount * 8;
+        p = &evtSolarOverlayShapes[entryCount].clearCount;
         while (n < 8) {
             sdfDrawColoredTriangleFan((s32 *)(u32)p[-1], 0xFF, &zeroColor, p[0], 1, renderHandle);
             n++;
@@ -192,7 +191,7 @@ void evtDrawPartialSolarOverlay(s32 x, s32 y, s32 unused2, s32 alpha, s32 entryC
     evtInitializeSolarOverlay(renderHandle);
     zeroColor = 0;
     if (n < 8) {
-        p = (s32 *)D_0036832C + entryCount * 8;
+        p = &evtSolarOverlayShapes[entryCount].clearCount;
         while (n < 8) {
             sdfDrawColoredTriangleFan((s32 *)(u32)p[-1], 0xFF, &zeroColor, p[0], 1, renderHandle);
             n++;

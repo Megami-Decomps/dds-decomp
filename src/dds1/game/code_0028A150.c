@@ -211,11 +211,11 @@ extern char D_003BC940[];
 
 extern char D_003B2688[]; /* "base.ico"; retail record includes padding */
 
-extern u32 fileSaveIconData;
+extern void *fileSaveIconData;
 
 extern u32 fileSaveIconDataSize;
 
-extern const u32 *fileWriteDataAddressSlot;
+extern void **fileWriteDataAddressSlot;
 
 extern const u32 *fileWriteDataSizeSlot;
 
@@ -225,7 +225,7 @@ extern struct FileRequest * const *fileWritePendingRequestSlot;
 
 extern u32 D_003BC824;
 
-extern s32 slSaveWriteFile(const char *fileName, const u32 *dataAddressSlot, const u32 *dataSizeSlot, FileMenuContinuationCallback continuation, struct FileRequest * const *pendingRequestStatus);
+extern s32 slSaveWriteFile(const char *fileName, void **dataAddressSlot, const u32 *dataSizeSlot, FileMenuContinuationCallback continuation, struct FileRequest * const *pendingRequestStatus);
 
 extern s32 slSaveProc_openFile(void);
 
@@ -261,7 +261,7 @@ typedef struct LoadMirror {
     u32 previous;
 } LoadMirror;
 
-extern u32 fileMainSaveBlobAddress;
+extern void *fileMainSaveBlobAddress;
 extern u32 fileMainSaveBlobSize;
 
 extern LoadMirror fileSlotFlagMirror;
@@ -1721,8 +1721,8 @@ s32 fileWriteIconSysComplete(void) {
 }
 
 extern u8 fileSaveIconSysData[];
-extern u32 D_003BC890;
-extern u32 D_003BC894;
+extern void *fileSaveIconSysAddress;
+extern u32 fileSaveIconSysSize;
 
 s32 fileBeginLabeledSlotWrite(void) {
     s32 slot = fileSelectedSlotIndex + 1;
@@ -1733,7 +1733,7 @@ s32 fileBeginLabeledSlotWrite(void) {
     fileSaveIconSysData[0xD1] = tens;
     fileSaveIconSysData[0xD2] = 0x82;
     fileSaveIconSysData[0xD3] = ones;
-    return slSaveWriteFile(D_003B2678, &D_003BC890, &D_003BC894, fileWriteIconSysComplete, 0);
+    return slSaveWriteFile(D_003B2678, &fileSaveIconSysAddress, &fileSaveIconSysSize, fileWriteIconSysComplete, 0);
 }
 
 s32 slSaveWriteEnd_saveData(void) {
@@ -2048,7 +2048,7 @@ s32 fileBuildMainBlobAndWrite(void) {
     fileSavePreviewRecords[slot].saveWords.words[0] = DDS3_GBWK->header.saveFlags;
     fileSavePreviewRecords[slot].saveWords.words[1] = DDS3_GBWK->header.saveFlags1;
     fileSavePreviewRecords[slot].saveWords.words[2] = DDS3_GBWK->header.saveFlags2;
-    fileMainSaveBlobAddress = (u32)DDS3_GBWK;
+    fileMainSaveBlobAddress = DDS3_GBWK;
     fileMainSaveBlobSize = 0x33600;
     if (D_003BC820 == 0 || D_003BC820 == 2) {
         return slSaveWriteFile(filename, &fileMainSaveBlobAddress, &fileMainSaveBlobSize, slSaveWriteEnd_saveData, NULL);
@@ -2069,7 +2069,7 @@ s32 slSaveData_deleteIconSys(void) {
 
 /* Later save callbacks read these borrowed slots without changing them; callers
  * keep the slots alive until the asynchronous save completes. */
-s32 slSaveWriteFile(const char *fileName, const u32 *dataAddressSlot, const u32 *dataSizeSlot, FileMenuContinuationCallback continuation, struct FileRequest * const *pendingRequestStatus) {
+s32 slSaveWriteFile(const char *fileName, void **dataAddressSlot, const u32 *dataSizeSlot, FileMenuContinuationCallback continuation, struct FileRequest * const *pendingRequestStatus) {
     fileWriteDataAddressSlot = dataAddressSlot;
     fileWriteDataSizeSlot = dataSizeSlot;
     fileWriteContinuation = continuation;
@@ -2090,7 +2090,7 @@ s32 slSaveProc_openFile(void) {
         if (fileWritePendingRequestSlot != NULL && *fileWritePendingRequestSlot != 0) {
             return (s32)slSaveProc_waitDataReady;
         }
-        sdfMcFuncWrite(fileSaveFileDescriptor, (const void *)*fileWriteDataAddressSlot, *fileWriteDataSizeSlot);
+        sdfMcFuncWrite(fileSaveFileDescriptor, *fileWriteDataAddressSlot, *fileWriteDataSizeSlot);
         return (s32)slSaveProc_writeFile;
     }
     if (status == MC_POLL_ERROR) {
@@ -2139,7 +2139,7 @@ s32 slSaveProc_waitDataReady(void) {
     if (fileSaveIconRequest != 0) {
         return 0;
     }
-    sdfMcFuncWrite(fileSaveFileDescriptor, (const void *)*fileWriteDataAddressSlot, *fileWriteDataSizeSlot);
+    sdfMcFuncWrite(fileSaveFileDescriptor, *fileWriteDataAddressSlot, *fileWriteDataSizeSlot);
     return (s32)slSaveProc_writeFile;
 }
 
@@ -2647,7 +2647,7 @@ s32 slCalc(dds3ProcessID_t *task) {
     if (job != 0 && pacFileCheckEnd(job) != 0) {
         fileSaveIconRequest = 0;
         fileSaveIconResourceHandle = fileGetMemHandle(job);
-        fileSaveIconData = (u32)fileGetLoadPtr(job);
+        fileSaveIconData = fileGetLoadPtr(job);
         fileSaveIconDataSize = fileGetLoadSize(job);
         fileHandleFree(job);
     }
@@ -3085,7 +3085,6 @@ extern u32 D_003BC834;        /* the prompt shown; 0 for none. 1 overwrite the s
                               * title screen, 9 overwrite data */
 extern s32 fileSelectedSlotIndex;
 extern s32 D_0037D4D0[];      /* highlight pulse: [2] its angle in degrees, [3] its alpha */
-extern char *D_003B2718[20];  /* each slot's prompt title */
 extern char D_0037D8B8[], D_0037D8D8[], D_0037D900[];
 extern char D_0037D5C8[], D_0037D5F8[], D_0037D718[];
 extern char D_0037DB10[];
@@ -3116,6 +3115,8 @@ extern s32 slChkWindowOpenDone(void);
 #define FILE_PROMPT_LINE_HEIGHT 24
 #define FILE_PROMPT_ANSWER_X 86
 
+extern char *fileLoadingSlotTexts[20]; /* each slot's prompt title */
+
 /* Snapshot the twenty prompt titles before callbacks and draw each native
  * prompt/answer branch directly. highlightRgb retains one real RGB value
  * across the second selected-answer gradient and cursor OR; it has no other
@@ -3130,7 +3131,7 @@ void fileShowPromptDialog(void) {
     f32 wave;
     u32 cursorColor;
     u32 highlightRgb;
-    memcpy(titles, D_003B2718, sizeof(titles));
+    memcpy(titles, fileLoadingSlotTexts, sizeof(titles));
     if (D_003BC830 == -1 || D_003BC834 == 0) {
         return;
     }
@@ -3286,7 +3287,7 @@ void fileFadeStepDown(void) {
     D_0037D4D0[0] = D_0037D4D0[0] <= 0 ? 0 : D_0037D4D0[0] > 0x80 ? 0x80 : D_0037D4D0[0];
 }
 
-INCLUDE_RODATA(const s32, "game/code_0028A150", D_003B2718);
+INCLUDE_RODATA(const s32, "game/code_0028A150", fileLoadingSlotTexts);
 
 void fileDrawSlotIcon(s32 index, s32 x, s32 y, s32 alpha) {
     s32 uv[21][2] = {
@@ -3475,6 +3476,13 @@ u8 fileToggleSlotFlagsBit(FileConfigOption option, u32 *flags) {
         return 0;
     }
 }
+
+/* Unreferenced {text, value} rows after an embedded message file; the text is in the font's glyph encoding. */
+typedef struct FileGlyphTextRow {
+    const char *text;
+    s32 value;
+} FileGlyphTextRow;
+extern FileGlyphTextRow fileGlyphTextRows[4];
 
 INCLUDE_RODATA(const s32, "game/code_0028A150", D_003B28A0);
 
@@ -3884,9 +3892,9 @@ INCLUDE_SDATA(const s32, "game/code_0028A150", D_003BC888);
 
 INCLUDE_SDATA(const s32, "game/code_0028A150", fileSaveHighlightPhase);
 
-INCLUDE_SDATA(const s32, "game/code_0028A150", D_003BC890);
+INCLUDE_SDATA(const s32, "game/code_0028A150", fileSaveIconSysAddress);
 
-INCLUDE_SDATA(const s32, "game/code_0028A150", D_003BC894);
+INCLUDE_SDATA(const s32, "game/code_0028A150", fileSaveIconSysSize);
 
 INCLUDE_SDATA(const s32, "game/code_0028A150", D_003BC898);
 

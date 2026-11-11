@@ -1,6 +1,7 @@
 #include "sdk_ps2.h"
 #include "scr.h"
 #include "common.h"
+#include "dds3_node_diagnostic_row.h"
 #include "sdf_file_existence_api.h"
 #include "mdl_flag_api.h"
 #include "dds3_task_create.h"
@@ -120,7 +121,6 @@ void evtChkEndProcess(void) {
 #include "common.h"
 #include "evt_world.h"
 #include "dds3_world_primary.h"
-#include "dds3_node_diagnostic_row.h"
 
 extern sdfGrOt_t sdfGrOtTable[];
 extern s8 dds3PadBitTable[32];
@@ -332,6 +332,8 @@ s32 evtSceneDispProcess(void *task) {
 }
 #else
 
+extern const NodeDiagnosticRow evtSceneDispRows[17];
+
 INCLUDE_RODATA(const s32, "event/evtDebug", D_003ACD38);
 
 INCLUDE_RODATA(const s32, "event/evtDebug", D_003ACD48);
@@ -340,7 +342,7 @@ INCLUDE_RODATA(const s32, "event/evtDebug", D_003ACD58);
 
 INCLUDE_RODATA(const s32, "event/evtDebug", D_003ACD68);
 
-INCLUDE_RODATA(const s32, "event/evtDebug", D_003ACD78);
+INCLUDE_RODATA(const s32, "event/evtDebug", evtSceneDispRows);
 
 INCLUDE_ASM(const s32, "event/evtDebug", evtSceneDispProcess);
 #endif
@@ -349,7 +351,11 @@ void func_0022B618(void) {
     dpy = 0;
 }
 
-INCLUDE_SDATA(const s32, "event/evtDebug", D_003BBDE0);
+extern const char *evtDebugCameraLabels[2];
+
+INCLUDE_SDATA(const s32, "event/evtDebug", evtDebugCameraLabels);
+
+INCLUDE_SDATA(const s32, "event/evtDebug", D_003BBDE8);
 
 INCLUDE_SDATA(const s32, "event/evtDebug", D_003BBDEC);
 

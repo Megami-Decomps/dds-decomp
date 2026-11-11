@@ -48,6 +48,7 @@
 #include "evt_task.h"
 #include "btl_task_args.h"
 #include "btl_command.h"
+#include "eff_editor_menus.h"
 #include "btl_command_block_reason.h"
 #include "btl_command_target_eligibility.h"
 #include "btl_party_command_use_result.h"
@@ -2285,7 +2286,7 @@ s32 mnuQueueColoredGlyphAtPosition(s32 x, s32 y, s32 text) {
 }
 
 /* Draw the visible text interval, highlighting the selected absolute index. */
-s32 btlDrawSelectableListRows(s32 x, s32 y, s32 unusedMode, BtlDebugMenuCursor *selectionState, s32 *rowTexts) {
+s32 btlDrawSelectableListRows(s32 x, s32 y, s32 unusedMode, BtlDebugMenuCursor *selectionState, const char **rowTexts) {
     u32 firstIndex;
     u32 visibleRowCount;
     u32 itemIndex;
@@ -2302,7 +2303,7 @@ s32 btlDrawSelectableListRows(s32 x, s32 y, s32 unusedMode, BtlDebugMenuCursor *
         struct frFontHandle_t *textGlyph = itfCreateMeasuredTextGlyph(x << 4, rowY << 3,
             MNU_LIST_TEXT_DEPTH,
             itemIndex == selectedIndex ? MNU_LIST_SELECTED_COLOR : MNU_LIST_NORMAL_COLOR,
-            (const char *)(u32)rowTexts[itemIndex], NULL);
+            rowTexts[itemIndex], NULL);
         frDrawFontOt(textGlyph, 0, 0x60);
         frDestroyFontRequestAfter(textGlyph);
         rowY += MNU_LIST_ROW_HEIGHT;
@@ -2312,7 +2313,7 @@ s32 btlDrawSelectableListRows(s32 x, s32 y, s32 unusedMode, BtlDebugMenuCursor *
 extern void btlDebugDrawTwoColorRectangle(s32 x, s32 y, s32 width, s32 height, u32 color0, u32 color1);
 
 /* Size the frame from the visible rows, then forward the row-draw result. */
-s32 mnuDrawMenuFrameSizedToRows(s32 x, s32 y, s32 frameWidth, BtlDebugMenuCursor *selectionState, s32 *rowTexts) {
+s32 mnuDrawMenuFrameSizedToRows(s32 x, s32 y, s32 frameWidth, BtlDebugMenuCursor *selectionState, const char **rowTexts) {
     s32 frameHeight = selectionState->rows * MNU_LIST_ROW_HEIGHT + MNU_LIST_FRAME_INSET;
     btlDebugDrawTwoColorRectangle(x - MNU_LIST_FRAME_INSET, y - MNU_LIST_FRAME_INSET, frameWidth, frameHeight, 0x80806020, 0x30000000);
     return btlDrawSelectableListRows(x, y, frameWidth, selectionState, rowTexts);
@@ -2326,7 +2327,7 @@ extern sdfGrOt_t sdfDebugGrOt;
 
 /* Submit formatted indices in one packet list, then draw the text column.
  * Preserve the separate fixed-point and pixel-coordinate arithmetic. */
-s32 mnuDrawSelectableMenuRows(s32 x, s32 y, s32 frameWidth, BtlDebugMenuCursor *selectionState, s32 *rowTexts) {
+s32 mnuDrawSelectableMenuRows(s32 x, s32 y, s32 frameWidth, BtlDebugMenuCursor *selectionState, const char **rowTexts) {
     void *indexPackets;
     u32 firstIndex;
     u32 visibleRowCount;
@@ -2357,11 +2358,11 @@ s32 mnuDrawSelectableMenuRows(s32 x, s32 y, s32 frameWidth, BtlDebugMenuCursor *
     return btlDrawSelectableListRows(x + MNU_LIST_LABEL_OFFSET, y, frameWidth, selectionState, rowTexts);
 }
 
-extern u8 *D_003BAA70;
+extern const char *D_003BAA70;
 
 extern const u8 *D_003BAA74;
 
-extern u8 *D_003BAA84;
+extern const char *D_003BAA84;
 
 void btlInitializeBattleDebugMenu(void) {
     BtlState *state = (BtlState *)btlGetRuntime();
@@ -2384,7 +2385,7 @@ void btlInitializeBattleDebugMenu(void) {
     }
     for (i = 0; i < 0x180; i++) {
         /* Debug row tables carry string addresses in EE words. */
-        state->debug.enemyModelNames[i] = (s32)(D_003BAA74 + i * 0x11);
+        state->debug.enemyModelNames[i] = (const char *)(D_003BAA74 + i * 0x11);
     }
     for (i = 0; i < 0x20; i++) {
         state->debug.gunNames[i] = D_003BAA84 + 0xFA0 + i * 0x19;
@@ -2397,29 +2398,9 @@ typedef struct BtlDebugPosition {
     f32 value[4];
 } __attribute__((aligned(16))) BtlDebugPosition;
 
-typedef struct BtlParameterEditorRow {
-    u8 pad00[8];
-    void *target;
-    u8 pad0C[0xC];
-} BtlParameterEditorRow;
-
-typedef struct BtlParameterEditor {
-    u32 unk00;
-    s32 x;
-    s32 y;
-    u32 selected;
-    u32 flags;
-    BtlParameterEditorRow *rows;
-    s32 rowCount;
-} BtlParameterEditor;
-
-typedef char BtlParameterEditorRowSize[sizeof(BtlParameterEditorRow) == 0x18 ? 1 : -1];
-
 extern datUnitWork_t *D_003BAA04;
-extern s32 btlDebugModelEditorActionNames[];
-extern s32 btlDebugModelMotionNames[];
-extern BtlParameterEditor btlDebugPartyRecordEditor, btlDebugPositionEditor, btlDebugTransformEditor, btlDebugActorStatusEditor;
-extern BtlParameterEditorRow btlDebugActorStatusEditorRows[];
+extern const char *btlDebugModelEditorActionNames[8];
+extern const char *btlDebugModelMotionNames[30];
 extern s16 D_003BB93E;
 extern BtlUnit *D_003BB940;
 extern u16 D_003BBA08;
@@ -2729,37 +2710,37 @@ s32 btlUpdateBattleModelDebugEditor(void) {
         btlDebugMenuRecordNoOp(&btlDebugActorStatusEditor);
         btlDebugMenuAfterRecordNoOp();
         memcpy(record, &btlDebugEditorActorStatus, sizeof(btlDebugEditorActorStatus));
-        if (btlDebugActorStatusEditorRows[btlDebugActorStatusEditor.selected].target != &D_003BBA08) {
+        if (btlDebugActorStatusEditorRows[btlDebugActorStatusEditor.cursor].payload.numeric.target != &D_003BBA08) {
             memcpy(&record->motions[D_003BBA08], &btlDebugEditorMotionSlot, sizeof(btlDebugEditorMotionSlot));
         }
-        mnuQueueColoredGlyphAtPosition(btlDebugPartyRecordEditor.x,
-            btlDebugPartyRecordEditor.y + btlDebugPartyRecordEditor.rowCount * 10 + 4, btlDebugModelMotionNames[D_003BBA08]);
-        if (btlDebugActorStatusEditorRows[btlDebugActorStatusEditor.selected].target == &btlDebugEditorActorStatus.shotRadius) {
+        mnuQueueColoredGlyphAtPosition(btlDebugPartyRecordEditor.originX,
+            btlDebugPartyRecordEditor.originY + btlDebugPartyRecordEditor.count * 10 + 4, btlDebugModelMotionNames[D_003BBA08]);
+        if (btlDebugActorStatusEditorRows[btlDebugActorStatusEditor.cursor].payload.numeric.target == &btlDebugEditorActorStatus.shotRadius) {
             state->battleFlags |= 0x800000;
         } else {
             state->battleFlags &= ~0x800000;
         }
-        if (btlDebugActorStatusEditorRows[btlDebugActorStatusEditor.selected].target == &btlDebugEditorActorStatus.positionGuideScale) {
+        if (btlDebugActorStatusEditorRows[btlDebugActorStatusEditor.cursor].payload.numeric.target == &btlDebugEditorActorStatus.positionGuideScale) {
             effBTLModelGetMarkPosition2(unit, 3);
             SDF_VU0_STOREVECTOR_NOMEM(position);
             btlDebugDrawScaledPositionGuide(position, 0x10808080, 0, record->positionGuideScale * unit->scale);
         }
-        if ((btlDebugActorStatusEditorRows[btlDebugActorStatusEditor.selected].target >= (void *)btlDebugEditorActorStatus.position &&
-             btlDebugActorStatusEditorRows[btlDebugActorStatusEditor.selected].target < (void *)&btlDebugEditorActorStatus.scale) ||
-            btlDebugActorStatusEditorRows[btlDebugActorStatusEditor.selected].target == &btlDebugEditorActorStatus.height ||
-            btlDebugActorStatusEditorRows[btlDebugActorStatusEditor.selected].target == &btlDebugEditorActorStatus.reach) {
+        if ((btlDebugActorStatusEditorRows[btlDebugActorStatusEditor.cursor].payload.numeric.target >= (void *)btlDebugEditorActorStatus.position &&
+             btlDebugActorStatusEditorRows[btlDebugActorStatusEditor.cursor].payload.numeric.target < (void *)&btlDebugEditorActorStatus.scale) ||
+            btlDebugActorStatusEditorRows[btlDebugActorStatusEditor.cursor].payload.numeric.target == &btlDebugEditorActorStatus.height ||
+            btlDebugActorStatusEditorRows[btlDebugActorStatusEditor.cursor].payload.numeric.target == &btlDebugEditorActorStatus.reach) {
             state->runtimeFlags |= 0x200;
         } else {
             state->runtimeFlags &= ~0x200;
         }
-        if (btlDebugActorStatusEditorRows[btlDebugActorStatusEditor.selected].target == &btlDebugEditorMotionSlot.muzzleGuideScale) {
+        if (btlDebugActorStatusEditorRows[btlDebugActorStatusEditor.cursor].payload.numeric.target == &btlDebugEditorMotionSlot.muzzleGuideScale) {
             effBTLModelGetSphereCenter(unit);
             SDF_VU0_STOREVECTOR_NOMEM(position);
             btlDebugDrawScaledPositionGuide(position, 0x10106020, 0, btlDebugEditorMotionSlot.muzzleGuideScale * btlDebugEditorActorStatus.scale);
         }
         if (btlDebugActorStatusEditor.flags & 8) {
             btlApplyUnitModelScaledValue(unit);
-            if (btlDebugActorStatusEditorRows[btlDebugActorStatusEditor.selected].target != &btlDebugEditorActorStatus.model) {
+            if (btlDebugActorStatusEditorRows[btlDebugActorStatusEditor.cursor].payload.numeric.target != &btlDebugEditorActorStatus.model) {
                 unit->status.flags &= 0x7FFFFFFF;
                 unit->status.flags &= ~0x2000;
                 motion = D_003BBA08;
@@ -2910,20 +2891,6 @@ void btlResetDebugEncounterSelection(void) {
     dds3WorkClear();
 }
 
-typedef struct BattleDebugSelector {
-    const char *title;
-    u32 unk04;
-    u32 *index;
-} BattleDebugSelector;
-
-typedef struct BattleDebugWindow {
-    u32 unk00;
-    s32 x;
-    s32 y;
-} BattleDebugWindow;
-
-extern BattleDebugSelector btlDebugEncounterIndexSelectorView;
-extern BattleDebugWindow btlDebugEncounterWindowView;
 extern u8 D_003BBB0F;
 extern u32 D_003BBB14, D_003BBB18;
 extern u16 D_003BBB1C, D_003BBB1E, D_003BBB20;
@@ -3010,14 +2977,14 @@ s32 btlUpdateDebugEncounterSelector(void) {
         D_003BBB0F ^= 1;
     }
     if (D_003BBB0F != 0) {
-        btlDebugEncounterIndexSelectorView.title = D_003BBB30;
-        btlDebugEncounterIndexSelectorView.index = &D_003BBB14;
+        btlDebugEncounterIndexSelectorView[0].text = D_003BBB30;
+        btlDebugEncounterIndexSelectorView[0].payload.numeric.target = &D_003BBB14;
     } else {
-        btlDebugEncounterIndexSelectorView.title = D_003BBB2C;
-        btlDebugEncounterIndexSelectorView.index = &D_003BBB18;
+        btlDebugEncounterIndexSelectorView[0].text = D_003BBB2C;
+        btlDebugEncounterIndexSelectorView[0].payload.numeric.target = &D_003BBB18;
     }
     {
-        BattleDebugWindow *window = &btlDebugEncounterWindowView;
+        EffQueuedFileObject *window = &btlDebugEncounterWindowView;
         D_003BBB28 = state->runtimeFlags;
         D_003BBB24 = state->battleFlags;
         btlDebugMenuSetupNoOp(window);
@@ -3032,8 +2999,8 @@ s32 btlUpdateDebugEncounterSelector(void) {
             for (i = 0; i < 8; i++) {
                 enemy = datBattleSceneRecords[D_003BBB18].unitModes[i];
                 if (enemy - 1u < 0x17F) {
-                    glyph = itfCreateConvertedTextGlyph((btlDebugEncounterWindowView.x + 185) << 4,
-                        (btlDebugEncounterWindowView.y + i * 24) << 3, 0, MNU_LIST_NORMAL_COLOR,
+                    glyph = itfCreateConvertedTextGlyph((btlDebugEncounterWindowView.originX + 185) << 4,
+                        (btlDebugEncounterWindowView.originY + i * 24) << 3, 0, MNU_LIST_NORMAL_COLOR,
                         D_003BAA74 + enemy * 17, NULL);
                     frDrawFontOt(glyph, 1, 0x53);
                     frDestroyFontRequestAfter(glyph);
@@ -3041,7 +3008,7 @@ s32 btlUpdateDebugEncounterSelector(void) {
             }
         }
     } else {
-        btlBossDebugPrintfN(btlDebugEncounterWindowView.x + 185, btlDebugEncounterWindowView.y + 4, 0,
+        btlBossDebugPrintfN(btlDebugEncounterWindowView.originX + 185, btlDebugEncounterWindowView.originY + 4, 0,
             D_003BBB50, DDS3_GBWK->conditionalEncounterGauge, btlGetConditionalEncounterInterval(D_003BBB14));
     }
     if (dds3PadBitTable[1] < 0) {

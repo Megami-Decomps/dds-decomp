@@ -13,18 +13,19 @@ enum { BTL_SOUND_ENTRY_COUNT = 0x31 };
  * bank/entry pair into the copy-source index stored in an entry. */
 enum { EFF_BATTLE_PARAMETER_ENTRY_CAPACITY = 0x3C };
 
-/* One SYSEFF archive slot. The loader tests enabled, stores the archive payload
- * pointer from node+0x0C, and retains node+0x08 without interpreting it. */
+/* One SYSEFF archive slot. The loader skips rows without a path, stores the
+ * archive payload pointer from node+0x0C, and retains node+0x08 without
+ * interpreting it. */
 typedef struct BattleSoundArchiveEntry {
-    u32 enabled;       /* +0x00: nonzero rows consume one archive node. */
+    const char *path;  /* +0x00: the .BED file; rows with one consume one archive node. */
     void *archiveData; /* +0x04: borrowed archive payload; opaque08 retains other metadata. */
     u32 opaque08;      /* +0x08: copied archive metadata; role not established. */
 } BattleSoundArchiveEntry;
 
 typedef char BattleSoundArchiveEntry_size_must_be_0x0C[
     (sizeof(BattleSoundArchiveEntry) == 0x0C) ? 1 : -1];
-typedef char BattleSoundArchiveEntry_enabled_at_0x00[
-    ((u32)&((BattleSoundArchiveEntry *)0)->enabled == 0x00) ? 1 : -1];
+typedef char BattleSoundArchiveEntry_path_at_0x00[
+    ((u32)&((BattleSoundArchiveEntry *)0)->path == 0x00) ? 1 : -1];
 typedef char BattleSoundArchiveEntry_archiveData_at_0x04[
     ((u32)&((BattleSoundArchiveEntry *)0)->archiveData == 0x04) ? 1 : -1];
 typedef char BattleSoundArchiveEntry_opaque08_at_0x08[

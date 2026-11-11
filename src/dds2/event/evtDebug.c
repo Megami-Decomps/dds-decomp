@@ -1,4 +1,5 @@
 #include "common.h"
+#include "dds3_node_diagnostic_row.h"
 #include "dds3_task_create.h"
 #include "dds3_task_lifecycle.h"
 
@@ -46,7 +47,6 @@ void evtChkEndProcess(void) {
 #include "sdf_sif_command.h"
 #include "evt_world.h"
 #include "dds3_world_primary.h"
-#include "dds3_node_diagnostic_row.h"
 
 extern sdfGrOt_t sdfGrOtTable[];
 extern s8 dds3PadBitTable[32];
@@ -258,6 +258,8 @@ s32 evtSceneDispProcess(void *task) {
 }
 #else
 
+extern const NodeDiagnosticRow evtSceneDispRows[17];
+
 INCLUDE_RODATA(const s32, "event/evtDebug", D_004221C8);
 
 INCLUDE_RODATA(const s32, "event/evtDebug", D_004221D8);
@@ -279,7 +281,11 @@ void func_00245F80(void) {
     dpy = 0;
 }
 
-INCLUDE_SDATA(const s32, "event/evtDebug", D_00437220);
+extern const char *evtDebugCameraLabels[2];
+
+INCLUDE_SDATA(const s32, "event/evtDebug", evtDebugCameraLabels);
+
+INCLUDE_SDATA(const s32, "event/evtDebug", D_00437228);
 
 INCLUDE_SDATA(const s32, "event/evtDebug", dpy);
 

@@ -96,9 +96,9 @@ extern dds3Effect_PartialMultiBlurParam_t mblurParam;
 
 extern dds3Effect_DistortionBlurParam_t dblurParam;
 
-extern effScreenDrawParams_t D_003B2778;
+extern effScreenDrawParams_t effLoadDescD;
 
-extern dds3Effect_Filter_t D_003B28B8;
+extern dds3Effect_Filter_t dblurParam2;
 
 extern dds3Effect_PartialMultiFilterParam_t mfilterParam;
 
@@ -325,6 +325,7 @@ void Eve_EffectDraw(void) {
 }
 
 /* The result slot must be valid whenever the create callback is present. */
+extern effDebugMenuItem_t effRectangleBlurSetupItems[10];
 extern effDebugMenu_t effRectangleBlurSetupRecord;
 
 extern s8 dds3PadBitTable[];
@@ -371,6 +372,7 @@ void evtSetUnityCalcArea(const dds3Effect_Blur_t *parameters) {
     memcpy(&evtUnityCalcArea, parameters, EFF_EVENT_BLUR_SOURCE_BYTES);
 }
 
+extern effDebugMenuItem_t mblurDebugMenuItems[11];
 extern effDebugMenu_t mblurDebugMenu;
 
 extern s8 mblurDone;
@@ -409,6 +411,7 @@ void mblurSetParam(dds3Effect_PartialMultiBlurParam_t *parameters) {
     mblurParam = *parameters;
 }
 
+extern effDebugMenuItem_t dblurDebugMenuItems[15];
 extern effDebugMenu_t dblurDebugMenu;
 
 extern s8 dblurDone;
@@ -446,6 +449,7 @@ void dblurSetParam(dds3Effect_DistortionBlurParam_t *parameters) {
     dblurParam = *parameters;
 }
 
+extern effDebugMenuItem_t effFramebufferQuadSetupItems[9];
 extern effDebugMenu_t effFramebufferQuadSetupRecord;
 
 extern s8 D_00436504;
@@ -475,14 +479,15 @@ s32 effEventAdvanceScreenDrawSetup(void) {
 
 /* Expose the other screen-draw setup block by address. */
 effScreenDrawParams_t *effGetLoadDescD(void) {
-    return &D_003B2778;
+    return &effLoadDescD;
 }
 
 /* Replace this screen-draw source prefix without changing trailing bytes. */
 void effSetLoadDescD(const dds3Effect_Blur_t *parameters) {
-    memcpy(&D_003B2778, parameters, EFF_EVENT_BLUR_SOURCE_BYTES);
+    memcpy(&effLoadDescD, parameters, EFF_EVENT_BLUR_SOURCE_BYTES);
 }
 
+extern effDebugMenuItem_t filterDebugMenuItems[7];
 extern effDebugMenu_t filterDebugMenu;
 
 extern s8 evtViewerDirty;
@@ -512,14 +517,15 @@ s32 evtViewerCheckDirty(void) {
 
 /* Expose the solid-rectangle setup parameters by address. */
 dds3Effect_Filter_t *dblurGetParam2(void) {
-    return &D_003B28B8;
+    return &dblurParam2;
 }
 
 /* Replace the setup block rather than the active solid-rectangle parameters. */
 void dblurSetParam2(dds3Effect_Filter_t *parameters) {
-    D_003B28B8 = *parameters;
+    dblurParam2 = *parameters;
 }
 
+extern effDebugMenuItem_t mfilterDebugMenuItems[9];
 extern effDebugMenu_t mfilterDebugMenu;
 
 extern s8 mfilterDone;
@@ -557,6 +563,7 @@ void mfilterSetParam(dds3Effect_PartialMultiFilterParam_t *parameters) {
     mfilterParam = *parameters;
 }
 
+extern effDebugMenuItem_t rblurDebugMenuItems[15];
 extern effDebugMenu_t rblurDebugMenu;
 
 extern s8 rblurDone;
@@ -1704,6 +1711,12 @@ void effEveAPP4Randomize(EffEmit *emitter) {
     } while (recordIndex < recordCount);
 }
 
+extern void *effRectangleBlurSetupCreateArgs[2];
+
+extern void *effFramebufferQuadSetupCreateArgs[1];
+
+extern void *filterDebugCreateArgs[2];
+
 INCLUDE_SDATA(const s32, "effect/effEvent", Eve_BlurShow);
 
 INCLUDE_SDATA(const s32, "effect/effEvent", Eve_PartialMultiBlurShow);
@@ -1732,7 +1745,7 @@ INCLUDE_SDATA(const s32, "effect/effEvent", D_00436490);
 
 INCLUDE_SDATA(const s32, "effect/effEvent", D_00436498);
 
-INCLUDE_SDATA(const s32, "effect/effEvent", D_004364A0);
+INCLUDE_SDATA(const s32, "effect/effEvent", effRectangleBlurSetupCreateArgs);
 
 INCLUDE_SDATA(const s32, "effect/effEvent", D_004364A8);
 
@@ -1756,11 +1769,11 @@ INCLUDE_SDATA(const s32, "effect/effEvent", D_004364F0);
 
 INCLUDE_SDATA(const s32, "effect/effEvent", D_004364F8);
 
-INCLUDE_SDATA(const s32, "effect/effEvent", D_00436500);
+INCLUDE_SDATA(const s32, "effect/effEvent", effFramebufferQuadSetupCreateArgs);
 
 INCLUDE_SDATA(const s32, "effect/effEvent", D_00436504);
 
-INCLUDE_SDATA(const s32, "effect/effEvent", D_00436508);
+INCLUDE_SDATA(const s32, "effect/effEvent", filterDebugCreateArgs);
 
 INCLUDE_SDATA(const s32, "effect/effEvent", D_00436510);
 

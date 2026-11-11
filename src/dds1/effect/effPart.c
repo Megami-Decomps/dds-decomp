@@ -49,7 +49,7 @@ void mdlSetColor(mdlObj_t *aHandle, u32 aColor);
 
 void mdlLoopMotion(mdlObj_t *aHandle, s32 aGroup, s32 aNumber);
 
-extern dds3EffectFunc_t dds3EffectFuncTable[7];
+extern dds3EffectFunc_t dds3EffectFuncTable[8];
 
 extern void *sdfModelOtTable[13][4];
 #define D_002F69B8 sdfModelOtTable[10]
@@ -76,6 +76,14 @@ void mdlFree(mdlObj_t *aHandle);
 
 extern dds3EffectFunc_t EffectPCPFuncTable[];
 
+extern void *effPCPThunderSpherePolyDataList[];
+extern void *effPCPThunderPolyDataList[];
+extern void *effPCPThunderRadiatePolyDataList[];
+extern void *effPCPMultiBlurExpDataList[];
+extern void *effPCPSparkleSphereDataList[];
+extern void *effPCPFlashPolySphereDataList[];
+extern void *effPCPMultiFilterExpDataList[];
+extern void *effPCPBlinkMultiBlurDataList[];
 extern void **effPartPCPDataTable[];
 
 void *sdfChipAllocDirect(s32 aSize);

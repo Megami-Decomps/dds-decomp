@@ -10,6 +10,7 @@
 #include "sdf_packet_builders.h"
 #include "sdf_bordered_rectangle_packet.h"
 #include "common.h"
+#include "kernel_draw.h"
 #include "sdf_file_existence_api.h"
 #include "dds3_object_flags.h"
 #include "ps2asm.h"
@@ -190,12 +191,12 @@ typedef struct MdlViewerTaskDef {
 
 extern MdlViewerTaskDef D_00367A40[];
 
-typedef struct MdlSystemTask {
+typedef struct MdlDebugProcessEntry {
     const char *name;
-    s32 arg;
-} MdlSystemTask;
+    dds3ProcessFunc_t update;
+} MdlDebugProcessEntry;
 
-extern MdlSystemTask D_00367AE0[3];
+extern MdlDebugProcessEntry mdlDebugProcessEntries[3];
 
 extern char D_003ABF78[]; /* "modelViewer" */
 
@@ -2671,7 +2672,7 @@ extern char D_003BBCD0[]; /* "%f" */
 
 extern char D_003BBCD8[]; /* "fog=" */
 
-extern sdf3DFogParam_t dds3FogState;
+SYMBOL_AT(sdf3DFogParam_t, dds3FogState, dds3LightParam, 0x20);
 
 /* Read the viewer's config text file: bg-color=, eye-position=, target-position=, fovy=, fog= lines. */
 
@@ -2766,6 +2767,7 @@ void mdlSaveViewerPresentationConfig(void) {
 }
 
 extern s32 fclEncycFreeEntries(const char *);
+extern s32 fclEncycAllocEntry(const char *name, dds3ProcessFunc_t update, dds3ProcessShutdownFunc_t destroy, void *userValue);
 
 extern MdlEyeVec D_00367CD0;
 
@@ -2773,7 +2775,7 @@ extern MdlEyeVec D_003246C0;
 
 /* Load viewer config/resources, initialize view state and recreate the viewer tasks. */
 void mdlInitializeViewerTasksAndResources(void) {
-    MdlSystemTask *task;
+    MdlDebugProcessEntry *task;
     s32 i;
 
     mdlLoadViewerPresentationConfig();
@@ -2801,7 +2803,7 @@ void mdlInitializeViewerTasksAndResources(void) {
     mdlLoadViewerResourceAndResetCursors();
     mdlViewerState.resourceCount = 1;
     mdlMakeHddFileList();
-    for (i = 0, task = D_00367AE0; i != 3; i++, task++) {
+    for (i = 0, task = mdlDebugProcessEntries; i != 3; i++, task++) {
         fclEncycFreeEntries(task->name);
     }
     mdlViewerState.unk00 = dds3StartProcess(D_003ABF78, 0x2AFF, 1, 0, mdlViewer, NULL, 0);
@@ -2822,8 +2824,6 @@ void mdlFreeViewResources(void) {
     }
 }
 
-extern void fclEncycAllocEntry(const char *name, s32, s32, s32);
-
 void mdlCleanupViewerTasksAndResources(void) {
     s32 i;
 
@@ -2831,8 +2831,8 @@ void mdlCleanupViewerTasksAndResources(void) {
     dds3KillProcessName(D_003ABF78, 0);
     dds3KillProcessName(D_003ABF88, 0);
     for (i = 0; i != 3; i++) {
-        if (dds3SearchProcessName(D_00367AE0[i].name) == NULL) {
-            fclEncycAllocEntry(D_00367AE0[i].name, D_00367AE0[i].arg, 0, 0);
+        if (dds3SearchProcessName(mdlDebugProcessEntries[i].name) == NULL) {
+            fclEncycAllocEntry(mdlDebugProcessEntries[i].name, mdlDebugProcessEntries[i].update, NULL, NULL);
         }
     }
 }
@@ -2845,9 +2845,9 @@ extern u16 D_00367D10[16];
 
 extern s8 D_00324520[16];
 
-extern sdf3DLight_t *dds3LightParam[3];
+extern dds3LightState_t dds3LightParam;
 
-extern f32 dds3AmbientColor[4];
+SYMBOL_AT_REGION(f32, dds3AmbientColor, dds3LightParam, 0x10);
 
 extern char D_003BBCF8[]; /* ">" in .sdata */
 
@@ -2929,7 +2929,7 @@ s32 mdlDebugPrintEffectScale(dds3ProcessID_t *task) {
         state->pad = (MdlPadState *)D_00324520;
     }
     if (state->lights == NULL) {
-        state->lights = dds3LightParam;
+        state->lights = dds3LightParam.parallel;
     }
     if (state->ambient == NULL) {
         state->ambient = dds3AmbientColor;

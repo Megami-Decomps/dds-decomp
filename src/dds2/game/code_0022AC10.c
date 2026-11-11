@@ -46,6 +46,7 @@
 #include "btl_sound_release_task.h"
 #include "btl_task_args.h"
 #include "btl_command.h"
+#include "eff_editor_menus.h"
 #include "btl_command_block_reason.h"
 #include "btl_command_target_eligibility.h"
 #include "btl_party_command_use_result.h"
@@ -2293,7 +2294,7 @@ s32 mnuQueueColoredGlyphAtPosition(s32 x, s32 y, s32 text) {
 }
 
 /* Draw the visible text interval, highlighting the selected absolute index. */
-s32 btlDrawSelectableListRows(s32 x, s32 y, s32 unusedMode, MenuList *selectionState, s32 *rowTexts) {
+s32 btlDrawSelectableListRows(s32 x, s32 y, s32 unusedMode, MenuList *selectionState, const char **rowTexts) {
     u32 firstIndex;
     u32 visibleRowCount;
     u32 itemIndex;
@@ -2310,7 +2311,7 @@ s32 btlDrawSelectableListRows(s32 x, s32 y, s32 unusedMode, MenuList *selectionS
         struct frFontHandle_t *textGlyph = itfCreateMeasuredTextGlyph(x << 4, rowY << 3,
             MNU_LIST_TEXT_DEPTH,
             itemIndex == selectedIndex ? MNU_LIST_SELECTED_COLOR : MNU_LIST_NORMAL_COLOR,
-            (const char *)(u32)rowTexts[itemIndex], NULL);
+            rowTexts[itemIndex], NULL);
         frDrawFontOt(textGlyph, 0, 0x60);
         frDestroyFontRequestAfter(textGlyph);
         rowY += MNU_LIST_ROW_HEIGHT;
@@ -2318,7 +2319,7 @@ s32 btlDrawSelectableListRows(s32 x, s32 y, s32 unusedMode, MenuList *selectionS
 }
 
 /* Size the frame from the visible rows, then forward the row-draw result. */
-s32 mnuDrawMenuFrameSizedToRows(s32 x, s32 y, s32 frameWidth, MenuList *selectionState, s32 *rowTexts) {
+s32 mnuDrawMenuFrameSizedToRows(s32 x, s32 y, s32 frameWidth, MenuList *selectionState, const char **rowTexts) {
     s32 frameHeight = selectionState->rows * MNU_LIST_ROW_HEIGHT + MNU_LIST_FRAME_INSET;
     btlDebugDrawTwoColorRectangle(x - MNU_LIST_FRAME_INSET, y - MNU_LIST_FRAME_INSET, frameWidth, frameHeight, 0x80806020, 0x30000000);
     return btlDrawSelectableListRows(x, y, frameWidth, selectionState, rowTexts);
@@ -2326,7 +2327,7 @@ s32 mnuDrawMenuFrameSizedToRows(s32 x, s32 y, s32 frameWidth, MenuList *selectio
 
 /* Submit formatted indices in one packet list, then draw the text column.
  * Preserve the separate fixed-point and pixel-coordinate arithmetic. */
-s32 mnuDrawSelectableMenuRows(s32 x, s32 y, s32 frameWidth, MenuList *selectionState, s32 *rowTexts) {
+s32 mnuDrawSelectableMenuRows(s32 x, s32 y, s32 frameWidth, MenuList *selectionState, const char **rowTexts) {
     void *indexPackets;
     u32 firstIndex;
     u32 visibleRowCount;
@@ -2357,9 +2358,9 @@ s32 mnuDrawSelectableMenuRows(s32 x, s32 y, s32 frameWidth, MenuList *selectionS
     return btlDrawSelectableListRows(x + MNU_LIST_LABEL_OFFSET, y, frameWidth, selectionState, rowTexts);
 }
 
-extern u8 *datUnitNames;
-extern u8 *D_00435E4C;
-extern u8 *D_00435E5C;
+extern const char *datUnitNames;
+extern const char *D_00435E4C;
+extern const char *D_00435E5C;
 /* Reset the selected actor, debug-menu rows/label tables, phase and delay before TEST polling. */
 void btlInitializeBattleDebugMenu(void) {
     BtlState *state = (BtlState *)btlGetRuntime();
@@ -2396,25 +2397,6 @@ void btlInitializeBattleDebugMenu(void) {
 }
 
 /* Battle debug record views. Only observed members are named. */
-typedef struct BtlDebugValueEntry {
-    const char *name;
-    u32 flags;
-    u32 valueAddress;
-    u8 pad0C[0x0C];
-} BtlDebugValueEntry;
-
-typedef struct BtlDebugValueMenu {
-    const char *name;
-    s32 x;
-    s32 y;
-    u32 cursor;
-    u32 flags;
-    BtlDebugValueEntry *entries;
-    u32 count;
-} BtlDebugValueMenu;
-
-typedef char BtlDebugValueEntryStride[(sizeof(BtlDebugValueEntry) == 0x18) ? 1 : -1];
-
 extern BtlIndexList *btlGetSelectedTargetList(void);
 extern void btlCreateTargetSelectionTask(ActionStateLink *sourceTask);
 extern void btlRequestTargetSelectionClose(void);
@@ -2438,9 +2420,8 @@ extern void btlDebugMenuBeforeRecordNoOp(void);
 extern void btlDebugMenuAfterRecordNoOp(void);
 extern u32 btlReturnDebugMenuSetupWord(u32);
 extern void btlDebugMenuRecordNoOp(u32);
-extern s32 btlDebugModelEditorActionNames[], btlDebugModelMotionNames[];
-extern BtlDebugValueMenu btlDebugPartyRecordEditor, btlDebugPositionEditor, btlDebugTransformEditor, btlDebugActorStatusEditor;
-extern BtlDebugValueEntry btlDebugActorStatusEditorRows[];
+extern const char *btlDebugModelEditorActionNames[8];
+extern const char *btlDebugModelMotionNames[30];
 extern datUnitWork_t *D_00435DD4;
 extern s16 D_00436D8E;
 extern BtlUnit *D_00436D90;
@@ -2763,22 +2744,22 @@ s32 btlUpdateBattleModelDebugEditor(void) {
         btlDebugMenuRecordNoOp((u32)&btlDebugActorStatusEditor);
         btlDebugMenuAfterRecordNoOp();
         memcpy(record, &btlDebugEditorActorStatus, sizeof(BtlActorStatusRecord));
-        if (btlDebugActorStatusEditorRows[btlDebugActorStatusEditor.cursor].valueAddress != (u32)&D_00436E58) {
+        if ((u32)btlDebugActorStatusEditorRows[btlDebugActorStatusEditor.cursor].payload.numeric.target != (u32)&D_00436E58) {
             memcpy(&record->motions[D_00436E58], &btlDebugEditorMotionSlot, sizeof(BtlActorMotionSlot));
         }
-        mnuQueueColoredGlyphAtPosition(btlDebugPartyRecordEditor.x, btlDebugPartyRecordEditor.y + btlDebugPartyRecordEditor.count * 10 + 4,
+        mnuQueueColoredGlyphAtPosition(btlDebugPartyRecordEditor.originX, btlDebugPartyRecordEditor.originY + btlDebugPartyRecordEditor.count * 10 + 4,
             btlDebugModelMotionNames[D_00436E58]);
-        if (btlDebugActorStatusEditorRows[btlDebugActorStatusEditor.cursor].valueAddress == (u32)&btlDebugEditorActorStatus.shotRadius) {
+        if ((u32)btlDebugActorStatusEditorRows[btlDebugActorStatusEditor.cursor].payload.numeric.target == (u32)&btlDebugEditorActorStatus.shotRadius) {
             battle->battleFlags |= 0x800000;
         } else {
             battle->battleFlags &= ~0x800000;
         }
-        if (btlDebugActorStatusEditorRows[btlDebugActorStatusEditor.cursor].valueAddress == (u32)&btlDebugEditorActorStatus.positionGuideScale) {
+        if ((u32)btlDebugActorStatusEditorRows[btlDebugActorStatusEditor.cursor].payload.numeric.target == (u32)&btlDebugEditorActorStatus.positionGuideScale) {
             effBTLModelGetMarkPosition2(unit, 3);
             SDF_VU0_STOREVECTOR_NOMEM(position);
             btlDebugDrawScaledPositionGuide(position, 0x10808080, 0, record->positionGuideScale * unit->scale);
         }
-        selectedAddress = btlDebugActorStatusEditorRows[btlDebugActorStatusEditor.cursor].valueAddress;
+        selectedAddress = (u32)btlDebugActorStatusEditorRows[btlDebugActorStatusEditor.cursor].payload.numeric.target;
         if (((u32)selectedAddress >= (u32)&btlDebugEditorActorStatus.position[0] &&
              (u32)selectedAddress < (u32)&btlDebugEditorActorStatus.scale) ||
              selectedAddress == (u32)&btlDebugEditorActorStatus.height || selectedAddress == (u32)&btlDebugEditorActorStatus.reach) {
@@ -2786,14 +2767,14 @@ s32 btlUpdateBattleModelDebugEditor(void) {
         } else {
             battle->runtimeFlags &= ~0x200;
         }
-        if (btlDebugActorStatusEditorRows[btlDebugActorStatusEditor.cursor].valueAddress == (u32)&btlDebugEditorMotionSlot.muzzleGuideScale) {
+        if ((u32)btlDebugActorStatusEditorRows[btlDebugActorStatusEditor.cursor].payload.numeric.target == (u32)&btlDebugEditorMotionSlot.muzzleGuideScale) {
             effBTLModelGetSphereCenter(unit);
             SDF_VU0_STOREVECTOR_NOMEM(position);
             btlDebugDrawScaledPositionGuide(position, 0x10106020, 0, btlDebugEditorMotionSlot.muzzleGuideScale * btlDebugEditorActorStatus.scale);
         }
         if (btlDebugActorStatusEditor.flags & 8) {
             btlApplyUnitModelScaledValue(unit);
-            if (btlDebugActorStatusEditorRows[btlDebugActorStatusEditor.cursor].valueAddress != (u32)&btlDebugEditorActorStatus.model) {
+            if ((u32)btlDebugActorStatusEditorRows[btlDebugActorStatusEditor.cursor].payload.numeric.target != (u32)&btlDebugEditorActorStatus.model) {
                 unit->status.flags &= 0x7FFFFFFF;
                 unit->status.flags &= ~0x2000;
                 motion = D_00436E58;
@@ -2947,20 +2928,6 @@ void btlResetDebugEncounterSelection(void) {
     dds3WorkClear();
 }
 
-typedef struct BattleDebugSelector {
-    const char *title;
-    u32 unk04;
-    u32 *index;
-} BattleDebugSelector;
-
-typedef struct BattleDebugWindow {
-    u32 unk00;
-    s32 x;
-    s32 y;
-} BattleDebugWindow;
-
-extern BattleDebugSelector btlDebugEncounterIndexSelectorView;
-extern BattleDebugWindow btlDebugEncounterWindowView;
 extern u8 D_00436F5F, D_00436F61;
 extern u32 D_00436F64, D_00436F68;
 extern u16 D_00436F6C, D_00436F6E, D_00436F70;
@@ -3058,14 +3025,14 @@ s32 btlUpdateDebugEncounterSelector(void) {
         D_00436F5F ^= 1;
     }
     if (D_00436F5F != 0) {
-        btlDebugEncounterIndexSelectorView.title = D_00436F84;
-        btlDebugEncounterIndexSelectorView.index = &D_00436F64;
+        btlDebugEncounterIndexSelectorView[0].text = D_00436F84;
+        btlDebugEncounterIndexSelectorView[0].payload.numeric.target = &D_00436F64;
     } else {
-        btlDebugEncounterIndexSelectorView.title = D_00436F80;
-        btlDebugEncounterIndexSelectorView.index = &D_00436F68;
+        btlDebugEncounterIndexSelectorView[0].text = D_00436F80;
+        btlDebugEncounterIndexSelectorView[0].payload.numeric.target = &D_00436F68;
     }
     {
-        BattleDebugWindow *window = &btlDebugEncounterWindowView;
+        EffQueuedFileObject *window = &btlDebugEncounterWindowView;
         D_00436F78 = state->runtimeFlags;
         D_00436F74 = state->battleFlags;
         btlReturnDebugMenuSetupWord((u32)window);
@@ -3078,8 +3045,8 @@ s32 btlUpdateDebugEncounterSelector(void) {
     if (D_00436F5F == 0) {
         for (i = 0; i < 5 && (unitId = btlDebugPartyPresets[D_00436F61][i].unitId) != 0; i++) {
             if (unitId - 1u < 15) {
-                glyph = itfCreateConvertedTextGlyph((btlDebugEncounterWindowView.x - 72) << 4,
-                    (btlDebugEncounterWindowView.y + i * 24) << 3, 0, MNU_LIST_NORMAL_COLOR,
+                glyph = itfCreateConvertedTextGlyph((btlDebugEncounterWindowView.originX - 72) << 4,
+                    (btlDebugEncounterWindowView.originY + i * 24) << 3, 0, MNU_LIST_NORMAL_COLOR,
                     (const u8 *)datUnitNames + unitId * 17, NULL);
                 frDrawFontOt(glyph, 1, 0x53);
                 frDestroyFontRequestAfter(glyph);
@@ -3089,8 +3056,8 @@ s32 btlUpdateDebugEncounterSelector(void) {
             for (i = 0; i < 8; i++) {
                 unitId = datBattleSceneRecords[D_00436F68].unitModes[i];
                 if (unitId - 1u < 0x17F) {
-                    glyph = itfCreateConvertedTextGlyph((btlDebugEncounterWindowView.x + 185) << 4,
-                        (btlDebugEncounterWindowView.y + i * 24) << 3, 0, MNU_LIST_NORMAL_COLOR,
+                    glyph = itfCreateConvertedTextGlyph((btlDebugEncounterWindowView.originX + 185) << 4,
+                        (btlDebugEncounterWindowView.originY + i * 24) << 3, 0, MNU_LIST_NORMAL_COLOR,
                         (const u8 *)D_00435E4C + unitId * 17, NULL);
                     frDrawFontOt(glyph, 1, 0x53);
                     frDestroyFontRequestAfter(glyph);
@@ -3098,7 +3065,7 @@ s32 btlUpdateDebugEncounterSelector(void) {
             }
         }
     } else {
-        btlBossDebugPrintfN(btlDebugEncounterWindowView.x + 185, btlDebugEncounterWindowView.y + 4, 0,
+        btlBossDebugPrintfN(btlDebugEncounterWindowView.originX + 185, btlDebugEncounterWindowView.originY + 4, 0,
             D_00436F98, DDS3_GBWK->conditionalEncounterGauge, btlGetConditionalEncounterInterval(D_00436F64));
     }
     if (dds3PadBitTable[1] < 0) {

@@ -2510,7 +2510,7 @@ extern s32 D_003BAED4;
 extern u8 fldAutoMapSeqTestFlag(u32 mask);
 extern void fldAutoMapSeqSetFlag(u32);
 extern void evtDisableMoonDraw(void);
-extern sdf3DFogParam_t dds3FogState;
+SYMBOL_AT(sdf3DFogParam_t, dds3FogState, dds3LightParam, 0x20);
 extern SdfMathVector4 D_003A05D8[];
 
 /* Enter the field scene once: hide the world object, load the scene's two

@@ -440,12 +440,6 @@ typedef struct {
     void (*destroy)();
 } BillDispatch;
 
-/* Resource index configuration (0xC); DDS1/2 game/code_00151F58/00159B48.c. */
-typedef struct EffectConfig {
-    s16 billboardKind;
-    u8 pad02[10];
-} EffectConfig;
-
 struct dds3Particle_BlurBuff_t;
 struct ParSystem;
 struct effMTPolyListHandle_t;

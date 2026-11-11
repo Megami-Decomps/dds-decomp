@@ -1,5 +1,6 @@
 #include "sdk_ps2.h"
 #include "btl_command.h"
+#include "eff_editor_menus.h"
 #include "btl_ui.h"
 #include "btl_motion_transform.h"
 #include "dds3_world_primary.h"
@@ -73,9 +74,7 @@ extern void btlClearUnitDefeatCandidate(BtlUnit *unit);
 extern f32 btlMeasureIndexListBounds(BtlIndexList *list, f32 *maxTop, f32 *minTop);
 extern void btlFlagUnitDefeatCandidate(BtlUnit *unit);
 
-extern s32 D_00360348[];
-extern s32 D_0035FFE0[];
-extern s32 D_003BB6B8;
+extern const char *btlButtonIconTexturePath;
 extern s32 D_003BD854;
 extern void btlPickCommandElementCheckedTarget(BtlTask *context, s32 action);
 extern void btlPickCommandTargetExcludingActor(BtlTask *context, s32);
@@ -1433,8 +1432,8 @@ void btlDrawButtonIcon(sdfGrOt_t *surface, s32 x, s32 y, s32 topLeftColor, s32 t
 }
 
 void btlOpenButtonIconResource(void) {
-    btlBossDebugPrintf("btl:[%s]\n", D_003BB6B8);
-    D_003BD854 = sdfDevLoadFileEx(D_003BB6B8, &btlButtonIconTexture, 0);
+    btlBossDebugPrintf("btl:[%s]\n", btlButtonIconTexturePath);
+    D_003BD854 = sdfDevLoadFileEx(btlButtonIconTexturePath, &btlButtonIconTexture, 0);
 }
 
 /* Cache and later release the loaded battle resource in battle state. */
@@ -2796,19 +2795,19 @@ void btlUpdateDebugCameraFromPad(void) {
         }
     }
     if (state->cameraCommand.flags & 1) {
-        D_00360348[4] |= 0x80;
-        D_0035FFE0[4] |= 0x80;
+        D_00360348.flags |= 0x80;
+        D_0035FFE0.flags |= 0x80;
     } else {
-        D_00360348[4] &= ~0x80;
-        D_0035FFE0[4] &= ~0x80;
+        D_00360348.flags &= ~0x80;
+        D_0035FFE0.flags &= ~0x80;
     }
 }
 
 
 /* Clear bit 0x80 in both battle debug-menu descriptors. */
 void btlResetBattleDebugMenuFlags(void) {
-    D_00360348[4] &= ~0x80;
-    D_0035FFE0[4] &= ~0x80;
+    D_00360348.flags &= ~0x80;
+    D_0035FFE0.flags &= ~0x80;
 }
 
 void func_001FB080(void) {
@@ -3757,7 +3756,9 @@ void btlSetResourceNameLengthLimit(struct BtlResourceNameRecord *record, u32 max
     record->maximumNameLength = maximumNameLength;
 }
 
-INCLUDE_SDATA(const s32, "game/code_001F6110", D_003BB6B8);
+extern void *btlDebugTopMenuList[2];
+
+INCLUDE_SDATA(const s32, "game/code_001F6110", btlButtonIconTexturePath);
 
 INCLUDE_SDATA(const s32, "game/code_001F6110", D_003BB6C8);
 
@@ -3840,6 +3841,10 @@ INCLUDE_SDATA(const s32, "game/code_001F6110", D_003BB7D0);
 INCLUDE_SDATA(const s32, "game/code_001F6110", D_003BB7D8);
 
 INCLUDE_SDATA(const s32, "game/code_001F6110", D_003BB7E0);
+
+INCLUDE_SDATA(const s32, "game/code_001F6110", btlDebugTopMenuList);
+
+INCLUDE_SDATA(const s32, "game/code_001F6110", D_003BB7F0);
 
 INCLUDE_SDATA(const s32, "game/code_001F6110", D_003BB7F8);
 

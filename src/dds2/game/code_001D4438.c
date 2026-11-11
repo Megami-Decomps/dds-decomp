@@ -13,6 +13,7 @@
 #include "btl_motion_transform.h"
 #include "btl_unit_motion_duration_api.h"
 #include "common.h"
+#include "kernel_draw.h"
 #include "btl_unit_defeat_by_delta_result.h"
 #include "btl_action_state_api.h"
 #include "btl_action_entry_is_empty_api.h"
@@ -111,7 +112,6 @@ extern void btlSetActionActorPanelPresentation(ActionStateLink *, s8, s8);
 
 extern void btlResetDebugEncounterSelection(s32);
 
-extern s32 D_003B6940[];
 
 extern s32 btlUpdateDebugEncounterSelector(void);
 
@@ -145,12 +145,12 @@ typedef struct SceneScriptState {
 extern SceneControl *btlCommandPanelWork;
 extern BattleSelectionWork *btlLinkedSelectionTaskBuffer;
 extern f32 D_00433724;
-extern f32 *dds3LightParam[];
+extern dds3LightState_t dds3LightParam;
 extern u32 btlGetActorCommandClass(BattleSceneObject *, s8);
 extern BtlRuntimeTask *btlCreateEffectTaskWithSourceParams(const void *, u32);
 extern s32 btlCountTasksForOwner(u64);
 
-extern SceneInitializer D_003B6938[];
+extern SceneInitializer btlSceneInitializers[];
 
 extern s32 btlCountFlaggedSceneActors(void);
 extern void btlRemoveTaskFromSceneGroup(ActionStateLink *);
@@ -256,7 +256,7 @@ extern void btlUpdateAndDrawTargetActorPanels();
 extern char *D_004367CC;
 
 
-extern char *D_004368B0;
+extern char *btlScenePanelTaskName;
 extern void btlLoadResourceBlock(void);
 extern void btlStartRegisteredChildTask(void);
 extern void btlInitializeStaffActorPanels(void);
@@ -281,8 +281,6 @@ struct dds3ModelHandle_t;
 struct sdfGrOt_t;
 extern void btlDrawUnitTransparencyPasses(void *, void *, s32, u8 *, u32);
 extern struct sdfGrOt_t *sdfModelOtTable[13][4];
-extern u8 btlUnitTransparencySurfaces[];
-
 
 typedef struct BtlUnit BtlUnit;
 
@@ -292,7 +290,7 @@ typedef struct BtlUnit BtlUnit;
 extern void btlAdvanceHistoryCounter(ActionStateLink *);
 
 
-extern BtlActionStateHandler D_003B69D8[];
+extern BtlActionStateHandler btlActionStateHandlers[];
 
 
 typedef struct BtlFxSrcB {
@@ -310,13 +308,6 @@ typedef struct FxTask {
     BtlUnit *unit;
 } FxTask;
 
-typedef struct SoundEntry {
-    u32 unk0;
-    u32 unk4;
-    u32 unk8;
-} SoundEntry;
-
-extern SoundEntry D_003BDE18[];
 
 extern s128 btlDefaultUnitBodyOffset;
 
@@ -473,20 +464,6 @@ extern u8 D_003E9130[];
 
 extern u8 D_003E9120[];
 
-extern s32 D_003BBF70[];
-
-extern s32 D_003BBF88[];
-
-extern s32 D_003BBFA8[];
-
-extern s32 D_003BC090[];
-
-extern s32 D_003BC0A0[];
-
-extern s32 D_003BC0C0[];
-
-extern s32 D_003BC0C8[];
-
 extern void btlAdvanceActorCameraPreset(BtlLinkedCommand *);
 extern void btlAdvanceCursorForUnmarkedUnit(BtlLinkedCommand *, BtlCamState *);
 
@@ -515,9 +492,9 @@ extern void p2sdSetPcmBuffer(const void *, s32);
 
 
 
-extern f32 *dds3LightParam[];
+extern dds3LightState_t dds3LightParam;
 
-extern u8 dds3AmbientColor[];
+SYMBOL_AT_REGION(u8, dds3AmbientColor, dds3LightParam, 0x10);
 
 extern void fldSkyBattle(void);
 
@@ -4787,7 +4764,7 @@ void btlDispatchStateHandler(void *object, BtlActionStateIndex index) {
     BtlActionStateOwner *owner = object;
     owner->state = index;
     owner->stateTime = 0;
-    D_003B69D8[index].start(owner);
+    btlActionStateHandlers[index].start(owner);
 }
 
 INCLUDE_RODATA(const s32, "game/code_001D4438", D_00417508);
@@ -4839,7 +4816,7 @@ void btlUpdateActionSeqs(void) {
     for (unit = ((BtlState *)btlGetRuntime())->tasks; unit != 0; unit = next) {
         next = unit->next;
         if (unit->pendingFlags & 1) {
-            D_003B69D8[unit->state].update(unit);
+            btlActionStateHandlers[unit->state].update(unit);
             unit->stateTime++;
         } else if (unit->pendingFlags & 2) {
             btlDestroyActionSeq(unit);
@@ -4920,10 +4897,10 @@ void btlDebugPrintActionOrder(s32 x, s32 y) {
         }
         if (controller->slots[i].remaining == 100) {
             btlBossDebugPrintfN(x, y + (i + 1) * 12, color, D_00436A10,
-                               D_003B69D8[task->state].name);
+                               btlActionStateHandlers[task->state].name);
         } else {
             btlBossDebugPrintfN(x, y + (i + 1) * 12, color, D_00436A18,
-                               D_003B69D8[task->state].name);
+                               btlActionStateHandlers[task->state].name);
         }
     }
 }

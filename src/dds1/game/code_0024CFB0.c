@@ -238,7 +238,7 @@ s32 mnuStartTerminalPanelFadeOut(dds3ProcessID_t *task) {
 }
 
 extern char D_003AF710[];
-extern char D_0036AE48[];
+extern MenuPopupEntry mnuTerminalIdlePopupEntries[];
 
 /* Propagate the panel worker result; create a ready popup only for an empty slot.
  * Kind zero waits for the named task unless active flag zero overrides the wait;
@@ -263,7 +263,7 @@ s32 mnuUpdateTerminalReadyPopup(dds3ProcessID_t *request) {
             ready = dds3FadeCheck() == 0;
         }
         if (ready) {
-            mnuSetPopupEntryFlagged(popupSlot, (MenuPopupEntry *)D_0036AE48);
+            mnuSetPopupEntryFlagged(popupSlot, mnuTerminalIdlePopupEntries);
         }
     }
     return 0;
