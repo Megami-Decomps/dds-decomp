@@ -66,7 +66,6 @@ extern s32 D_003C88C0[];
 
 extern s32 D_003C88C8[];
 
-extern void fclEncycAllocEntry(s32, s32, s32, s32);
 
 #define MDL_VIEWER_RESOURCE_SLOTS 12
 
@@ -2775,12 +2774,12 @@ void mdlSaveViewerPresentationConfig(void) {
     fileHandleFree((struct FileRequest *)request);
 }
 
-typedef struct MdlTaskDef {
+typedef struct MdlDebugProcessEntry {
     const char *name;
-    s32 arg;
-} MdlTaskDef;
+    dds3ProcessFunc_t update;
+} MdlDebugProcessEntry;
 
-extern MdlTaskDef D_003C8890[];
+extern MdlDebugProcessEntry mdlDebugProcessEntries[3];
 
 extern char D_004214E8[];
 
@@ -2791,6 +2790,7 @@ extern s32 mdlViewer(dds3ProcessID_t *);
 extern s32 mdlViewerEnd(dds3ProcessID_t *);
 
 extern s32 fclEncycFreeEntries(const char *);
+extern s32 fclEncycAllocEntry(const char *name, dds3ProcessFunc_t update, dds3ProcessShutdownFunc_t destroy, void *userValue);
 
 extern MdlEyeVec D_003C8A80;
 
@@ -2798,7 +2798,7 @@ extern MdlEyeVec D_0037F6C0;
 
 /* Load viewer config/resources, initialize view state and recreate the viewer tasks. */
 void mdlInitializeViewerTasksAndResources(void) {
-    MdlTaskDef *task;
+    MdlDebugProcessEntry *task;
     s32 i;
 
     mdlLoadViewerPresentationConfig();
@@ -2826,7 +2826,7 @@ void mdlInitializeViewerTasksAndResources(void) {
     mdlLoadViewerResourceAndResetCursors();
     mdlViewerState.resourceCount = 1;
     mdlMakeHddFileList();
-    for (i = 0, task = D_003C8890; i != 3; i++, task++) {
+    for (i = 0, task = mdlDebugProcessEntries; i != 3; i++, task++) {
         fclEncycFreeEntries(task->name);
     }
     mdlViewerState.unk00 = dds3StartProcess(D_004214E8, 0x2AFF, 1, 0, mdlViewer, NULL, 0);
@@ -2853,16 +2853,16 @@ void mdlFreeViewResources(void) {
 }
 
 void mdlCleanupViewerTasksAndResources(void) {
-    MdlTaskDef *def;
+    MdlDebugProcessEntry *def;
     s32 i = 0;
 
     mdlFreeViewResources();
     dds3KillProcessName(D_004214E8, 0);
     dds3KillProcessName(D_004214F8, 0);
-    def = D_003C8890;
+    def = mdlDebugProcessEntries;
     do {
         if (dds3SearchProcessName(def->name) == NULL) {
-            fclEncycAllocEntry(def->name, def->arg, 0, 0);
+            fclEncycAllocEntry(def->name, def->update, NULL, NULL);
         }
         i++;
         def++;

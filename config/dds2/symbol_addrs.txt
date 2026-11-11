@@ -13918,3 +13918,4 @@ D_003CFCD4 = 0x003CFCD4; // type:SdfTaskItemDesc size:0x14
 D_003CFCE8 = 0x003CFCE8; // type:SdfTaskItemDesc size:0x14
 D_003CFCFC = 0x003CFCFC; // type:SdfTaskItemDesc size:0x14
 D_003C92A8 = 0x003C92A8; // size:0x8
+mdlDebugProcessEntries = 0x003C8890; // size:0x18

@@ -190,12 +190,12 @@ typedef struct MdlViewerTaskDef {
 
 extern MdlViewerTaskDef D_00367A40[];
 
-typedef struct MdlSystemTask {
+typedef struct MdlDebugProcessEntry {
     const char *name;
-    s32 arg;
-} MdlSystemTask;
+    dds3ProcessFunc_t update;
+} MdlDebugProcessEntry;
 
-extern MdlSystemTask D_00367AE0[3];
+extern MdlDebugProcessEntry mdlDebugProcessEntries[3];
 
 extern char D_003ABF78[]; /* "modelViewer" */
 
@@ -2766,6 +2766,7 @@ void mdlSaveViewerPresentationConfig(void) {
 }
 
 extern s32 fclEncycFreeEntries(const char *);
+extern s32 fclEncycAllocEntry(const char *name, dds3ProcessFunc_t update, dds3ProcessShutdownFunc_t destroy, void *userValue);
 
 extern MdlEyeVec D_00367CD0;
 
@@ -2773,7 +2774,7 @@ extern MdlEyeVec D_003246C0;
 
 /* Load viewer config/resources, initialize view state and recreate the viewer tasks. */
 void mdlInitializeViewerTasksAndResources(void) {
-    MdlSystemTask *task;
+    MdlDebugProcessEntry *task;
     s32 i;
 
     mdlLoadViewerPresentationConfig();
@@ -2801,7 +2802,7 @@ void mdlInitializeViewerTasksAndResources(void) {
     mdlLoadViewerResourceAndResetCursors();
     mdlViewerState.resourceCount = 1;
     mdlMakeHddFileList();
-    for (i = 0, task = D_00367AE0; i != 3; i++, task++) {
+    for (i = 0, task = mdlDebugProcessEntries; i != 3; i++, task++) {
         fclEncycFreeEntries(task->name);
     }
     mdlViewerState.unk00 = dds3StartProcess(D_003ABF78, 0x2AFF, 1, 0, mdlViewer, NULL, 0);
@@ -2822,8 +2823,6 @@ void mdlFreeViewResources(void) {
     }
 }
 
-extern void fclEncycAllocEntry(const char *name, s32, s32, s32);
-
 void mdlCleanupViewerTasksAndResources(void) {
     s32 i;
 
@@ -2831,8 +2830,8 @@ void mdlCleanupViewerTasksAndResources(void) {
     dds3KillProcessName(D_003ABF78, 0);
     dds3KillProcessName(D_003ABF88, 0);
     for (i = 0; i != 3; i++) {
-        if (dds3SearchProcessName(D_00367AE0[i].name) == NULL) {
-            fclEncycAllocEntry(D_00367AE0[i].name, D_00367AE0[i].arg, 0, 0);
+        if (dds3SearchProcessName(mdlDebugProcessEntries[i].name) == NULL) {
+            fclEncycAllocEntry(mdlDebugProcessEntries[i].name, mdlDebugProcessEntries[i].update, NULL, NULL);
         }
     }
 }

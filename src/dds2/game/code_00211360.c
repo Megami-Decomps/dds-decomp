@@ -465,6 +465,8 @@ s32 btlRollAiBucket(void) {
     return roll;
 }
 
+extern void (*btlAiActionHandlers[])(ActionStateLink *, u32); /* the AI actions' handlers, by the packed action's top ten bits */
+
 #ifdef NON_MATCHING
 #include "common.h"
 #include "btl_skill_max_api.h"
@@ -491,7 +493,6 @@ s32 btlRollAiBucket(void) {
 #include "btl_actor_entry_code_api.h"
 
 extern s32 btlResolveCommandSlotAndKind(ActionStateLink *task, s32 id, u16 *slot, s32 *result);
-extern void (*btlAiActionHandlers[])(ActionStateLink *, u32); /* the AI actions' handlers, by the packed action's top ten bits */
 
 /* Run one AI table action: turn the slot's command id into the command slot
  * and result kind the task acts on (btlResolveCommandSlotAndKind), record them in the task

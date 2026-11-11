@@ -11613,3 +11613,4 @@
 0x00483540	ctorFrameObject	inferred	SMT3HD name via SLUS_209.11 0x0059AD40, __do_global_ctors static object; was D_00483540
 0x00483558	mainCtorsDone	inferred	SMT3HD name via SLUS_209.11 0x0059AD58, __main static flag; was D_00483558
 0x00483560	frameObjectList	inferred	SMT3HD name via SLUS_209.11 0x0059AD60, __register_frame_info object list head; was D_00483560
+0x003C8890	mdlDebugProcessEntries	inferred	Model viewer debug process names and update functions, re-registered with fclEncycAllocEntry when the viewer closes. DDS1 twin 0x00367AE0; was D_003C8890

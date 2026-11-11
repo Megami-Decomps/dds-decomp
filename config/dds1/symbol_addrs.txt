@@ -12348,3 +12348,4 @@ D_0036C65C = 0x0036C65C; // type:SdfTaskItemDesc size:0x14
 D_0036C670 = 0x0036C670; // type:SdfTaskItemDesc size:0x14
 D_0036C684 = 0x0036C684; // type:SdfTaskItemDesc size:0x14
 D_003684D0 = 0x003684D0; // size:0x8
+mdlDebugProcessEntries = 0x00367AE0; // size:0x18

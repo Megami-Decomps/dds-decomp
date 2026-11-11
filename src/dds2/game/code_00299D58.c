@@ -55,6 +55,7 @@ extern MenuPopupEntry brsPrimaryRewardPopupEntry[];
 extern void brsNoOpMessageInputCallback(void *);
 extern void mnuClearTitleState(BrsSkillPackageWork *);
 extern u8 D_0037F530[];
+extern MenuPopupEntry mnuResultMessagePopupEntry[];
 extern MenuPopupEntry mnuResultSelectionPopupEntry[];
 
 s32 brsMessageInputStep(dds3ProcessID_t *input) {

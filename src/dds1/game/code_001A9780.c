@@ -2639,6 +2639,7 @@ extern void btlDrawIndexedBattleEntryGlyphs(s32, s32, s32, s32, u16);
 extern void btlDrawThreePanelSpriteStrips(s32, s32, s32, s32);
 
 /* Advance and draw the seven analysis rows while the panel fades. */
+
 s32 btlUpdateAndDrawAnalysisPanel(dds3ProcessID_t *task) {
     char text[128];
     s32 offsets[8] = {52, 95, 157, 132, 132, 53, 53, 48};
@@ -3300,6 +3301,7 @@ void btlDrawThreePanelSpriteStrips(s32 unused, s32 x, s32 y, s32 delta) {
 
 
 /* Draw the fixed panel composition at x/y using the requested corner opacity. */
+
 void btlDrawCompositePanelSprites(void *unused, s32 x, s32 y, u32 alpha) {
     s32 strips[37][3] = {
         { 0, -16, 0x5E },
@@ -9706,6 +9708,7 @@ extern s16 D_003BB496;
 extern s16 D_003BB498;
 
 /* Process target confirm/cancel and mode-selected directional input. */
+
 void btlUpdateTargetSelectionInput(BtlState *battle, SceneAiWork *work, s32 mode) {
     BattleSceneObject *object;
     dds3ProcessID_t *task;
