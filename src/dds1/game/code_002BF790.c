@@ -526,7 +526,7 @@ extern ConsMatrixPacket D_003DFD30[2];
 
 extern dds3LightState_t dds3LightParam;
 
-extern sdfVector4_t dds3AmbientColor;
+SYMBOL_AT(sdfVector4_t, dds3AmbientColor, dds3LightParam, 0x10);
 
 extern Matrix4 sdfViewMatrix;
 

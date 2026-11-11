@@ -214,7 +214,7 @@ extern u8 D_003E9130[];
 
 extern dds3LightState_t dds3LightParam;
 
-extern u8 dds3AmbientColor[];
+SYMBOL_AT_REGION(u8, dds3AmbientColor, dds3LightParam, 0x10);
 
 extern dds3LightState_t dds3LightParam;
 

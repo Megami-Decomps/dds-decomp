@@ -10575,7 +10575,7 @@ extern dds3LightState_t dds3LightParam;
 
 extern u128 D_003DCB90[];
 
-extern u128 dds3AmbientColor[];
+SYMBOL_AT_REGION(u128, dds3AmbientColor, dds3LightParam, 0x10);
 
 void effResetDefaultColorTables(void) {
     u128 *dst = D_003DCB90;

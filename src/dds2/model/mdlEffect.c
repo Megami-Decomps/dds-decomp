@@ -2681,7 +2681,7 @@ extern char D_00437110[]; /* "%f" */
 
 extern char D_00437118[]; /* "fog=" */
 
-extern sdf3DFogParam_t dds3FogState;
+SYMBOL_AT(sdf3DFogParam_t, dds3FogState, dds3LightParam, 0x20);
 
 /* Read the viewer's config text file: bg-color=, eye-position=, target-position=, fovy=, fog= lines. */
 
@@ -2880,7 +2880,7 @@ extern s8 D_0037F520[16];
 
 extern dds3LightState_t dds3LightParam;
 
-extern f32 dds3AmbientColor[4];
+SYMBOL_AT_REGION(f32, dds3AmbientColor, dds3LightParam, 0x10);
 
 extern char D_00437138[]; /* ">" in .sdata */
 

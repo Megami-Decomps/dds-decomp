@@ -635,7 +635,7 @@ extern sdfDrawTag_t D_0045C400[2];
 extern sdf3DLightParallelPacket_t D_0045C440[2];
 extern ConsMatrixPacket D_0045C600[2];
 extern dds3LightState_t dds3LightParam;
-extern sdfVector4_t dds3AmbientColor;
+SYMBOL_AT(sdfVector4_t, dds3AmbientColor, dds3LightParam, 0x10);
 extern Matrix4 sdfViewMatrix;
 extern f32 aViewTarget[4];
 extern f32 aViewEye[4];

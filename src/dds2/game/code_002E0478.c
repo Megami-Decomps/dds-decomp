@@ -566,7 +566,7 @@ extern u128 D_00458460[];
 
 extern u128 D_004584A0[];
 
-extern u128 dds3AmbientColor[];
+SYMBOL_AT_REGION(u128, dds3AmbientColor, dds3LightParam, 0x10);
 
 extern s8 D_00437E94;
 

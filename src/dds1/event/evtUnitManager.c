@@ -38,7 +38,7 @@ struct EffNodeDescriptor;
 #include "eff_quaternion_nlerp.h"
 
 extern dds3LightState_t dds3LightParam;
-extern u8 dds3AmbientColor[];
+SYMBOL_AT_REGION(u8, dds3AmbientColor, dds3LightParam, 0x10);
 
 extern void evtGetUnitDirVector(evtUnitHandle_t *unit);
 

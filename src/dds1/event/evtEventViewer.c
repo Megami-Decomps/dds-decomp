@@ -236,7 +236,7 @@ extern void mnuSampleCampPanelVisualTrack(evtViewerInfo_t *runtime, EvtRuntimeGr
 extern void mnuSampleCampDisplayTrack(evtViewerInfo_t *viewer, EvtRuntimeGroup *track, s32 value,
                                       CampDisplayDefaults *display);
 extern void mnuSampleCampListLayoutTrack(evtViewerInfo_t *viewer, EvtRuntimeGroup *track, EvtBlendKey *out);
-extern sdf3DFogParam_t dds3FogState;
+SYMBOL_AT(sdf3DFogParam_t, dds3FogState, dds3LightParam, 0x20);
 
 /* Capture kind-specific defaults before adding a new key to its track. */
 EvtRuntimeChild *evtAddFrameInfo(EvtRuntimeGroup *group, s32 frame, evtViewerInfo_t *viewer) {
@@ -1003,9 +1003,9 @@ void evtViewerApplyParameterKeyTracks(evtViewerInfo_t *viewer) {
     }
 }
 
-extern sdf3DFogParam_t dds3FogState;
+SYMBOL_AT(sdf3DFogParam_t, dds3FogState, dds3LightParam, 0x20);
 extern dds3LightState_t dds3LightParam;
-extern u128 dds3AmbientColor[];
+SYMBOL_AT_REGION(u128, dds3AmbientColor, dds3LightParam, 0x10);
 extern f32 sdfFaceDivSoften;
 extern f32 sdfFaceDivBias;
 extern dds3Effect_PartialMultiBlurParam_t *mblurGetParam(void);

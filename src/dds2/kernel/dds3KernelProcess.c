@@ -144,13 +144,14 @@ extern sdfVector4_t dds3RenderAmbientColor;
 
 extern sdfVector4_t dds3AmbientColor2;
 
-extern sdfVector4_t dds3AmbientColor;
+SYMBOL_AT(sdfVector4_t, dds3AmbientColor, dds3LightParam, 0x10);
 
 extern f32 dds3RenderTargetVector[4], dds3RenderEyeVector[4], effPCPBossTexRect[4];
 
 extern f32 D_0037FA20[4], fldAutoMapEye[4], fldAutoMapUp[4];
 
-extern sdf3DFogParam_t dds3RenderFogParam, dds3FogParam2, dds3FogState;
+extern sdf3DFogParam_t dds3RenderFogParam, dds3FogParam2;
+SYMBOL_AT(sdf3DFogParam_t, dds3FogState, dds3LightParam, 0x20);
 
 extern Matrix4 dds3RenderViewportMatrix;
 

@@ -9407,8 +9407,6 @@
 0x00324690	aViewEye	inferred	SMT3HD name via SLUS_209.11 0x002F5A60, SMT3 name (was sdfViewTargetVector); was sdfViewTargetVector
 0x003246A0	aViewDown	inferred	SMT3HD data name via SLUS_209.11 0x002F5A70, 10 agreeing references; was aViewDown
 0x00324770	dds3LightParam	inferred	SMT3HD name via SLUS_209.11 0x002F5B40 (parallel lights, ambient +0x10, fog +0x20)
-0x00324780	dds3AmbientColor	inferred	confidence=high; matched_users=src/dds1/game/code_001A1960.c:btlInitializeSceneLightingAndTint, src/dds1/event/evtUnitManager.c:GetBaseAmbientRGB; Default color vector copied into battle lighting and selected for units without an explicit secondary color. [names_qp9.tsv]
-0x00324790	dds3FogState	inferred	SMT3HD name via SLUS_209.11 0x2F5B60, SMT3 kernel/dds3KernelDraw name (fog record at dds3LightParam + 0x20); was dds3FogParamMain
 0x00324850	dds3RenderTargetVector	inferred	SMT3HD name via SLUS_209.11 0x002F5C20, kwln rename; was kwlnHeldTextureTargetVector
 0x00324860	dds3RenderEyeVector	inferred	SMT3HD name via SLUS_209.11 0x002F5C30, kwln rename; was kwlnHeldTextureEyeVector
 0x00324870	effPCPBossTexRect	inferred	confidence=high; Existing f32[4] up vector, third argument of the held-texture LookAtMatrix call. All declarations and native payload unchanged. DDS2 twin 0x0037F870; root/interior/addend instruction readers all current matched C, no import/active ASM reader. [PurD readability data b12; identifier-only]; was effPCPBossTexRect

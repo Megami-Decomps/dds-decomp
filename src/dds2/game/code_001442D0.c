@@ -2915,7 +2915,7 @@ INCLUDE_ASM(const s32, "game/code_001442D0", func_00148A98);
 extern u8 fldAutoMapSeqTestFlag(u32);
 extern void fldAutoMapSeqSetFlag(u32);
 extern void evtDisableMoonDraw(void);
-extern sdf3DFogParam_t dds3FogState;
+SYMBOL_AT(sdf3DFogParam_t, dds3FogState, dds3LightParam, 0x20);
 extern SdfMathVector4 D_00413788[];
 extern s32 D_00436268;
 extern s32 D_00436264;
