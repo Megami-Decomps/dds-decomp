@@ -24,7 +24,6 @@ void sdfSubmitGsAlphaOneRegisterPacket(s32 property, s32 object);
 
 void evtDrawSolarNoiseLayerAtConfiguredScale(s32 x, s32 y, s32 z, s32 alpha, s32 layer, s32 mode,
                                              SolarSpriteContext **contextHandle, s32 color);
-extern s32 D_003C90DC[];
 extern s32 evtSolarNoiseLayerPlacements[][3];
 extern SolarOverlayShape evtSolarOverlayShapes[];
 extern void sdfDrawColoredTriangleFan(s32 *points, u32 tail, u32 *colors, s32 count,
@@ -176,7 +175,7 @@ void evtDrawIndexedSolarOverlayLayers(s32 x, s32 y, s32 unused2, s32 alpha, s32 
     evtInitializeSolarOverlay(renderHandle);
     zeroColor = 0;
     if (n < 8) {
-        p = D_003C90DC + entryCount * 8;
+        p = &evtSolarOverlayShapes[entryCount].clearCount;
         while (n < 8) {
             sdfDrawColoredTriangleFan((s32 *)p[-1], 0xFF, &zeroColor, p[0], 1, renderHandle);
             n++;
@@ -201,7 +200,7 @@ void evtDrawPartialSolarOverlay(s32 x, s32 y, s32 unused2, s32 alpha, s32 entryC
     evtInitializeSolarOverlay(renderHandle);
     zeroColor = 0;
     if (n < 8) {
-        p = D_003C90DC + entryCount * 8;
+        p = &evtSolarOverlayShapes[entryCount].clearCount;
         while (n < 8) {
             sdfDrawColoredTriangleFan((s32 *)p[-1], 0xFF, &zeroColor, p[0], 1, renderHandle);
             n++;

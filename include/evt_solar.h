@@ -33,7 +33,8 @@ typedef struct SolarOverlayShape {
     s32 *positions;
     u32 *colors;
     s32 count;
-    u8 opaque18[8];
+    s32 *clearPositions; /* drawn opaque black when fewer than eight layers show */
+    s32 clearCount;
 } SolarOverlayShape;
 
 typedef char SolarSpriteContextLayersOffsetAssert[
