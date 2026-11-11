@@ -128,10 +128,10 @@ u32 scenemainprocuder(dds3Basic_t *object) {
     for (listIndex = 0; listIndex <= 0x11; listIndex++) {
         if (data->slots[listIndex].count != 0) {
             node = data->slots[listIndex].head;
-            if (node->ops != NULL && node->ops->update != NULL) {
+            if (node->ops != NULL && node->ops->mainprocuder != NULL) {
                 do {
                     next = node->next;
-                    node->ops->update(node);
+                    node->ops->mainprocuder(node);
                     node = next;
                 } while (next != NULL);
             }
@@ -161,13 +161,13 @@ u32 scenedrawprocuder(dds3Basic_t *object) {
     if (node->ops == NULL) {
         return 1;
     }
-    if (node->ops->draw == NULL) {
+    if (node->ops->drawprocuder == NULL) {
         return 1;
     }
     drawSceneBasicList();
     do {
         next = node->next;
-        node->ops->draw(node);
+        node->ops->drawprocuder(node);
         node = next;
     } while (next != NULL);
     return 1;

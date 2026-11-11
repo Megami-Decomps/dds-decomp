@@ -120,7 +120,7 @@ extern void effDrawTextureSlotWithBlendedCornerColors(s32, s32, s32, u32, s32, E
 void sdfInitInnerVectors(void) {
     dds3SetPosPoseSet(fldLocalMapCameraObject, (u128 *)&fldLocalMapFirstCameraVector);
     dds3SetRotPoseSet(fldLocalMapCameraObject, (u128 *)&fldLocalMapSecondCameraVector);
-    fldLocalMapCameraObject->ops->update(fldLocalMapCameraObject);
+    fldLocalMapCameraObject->ops->mainprocuder(fldLocalMapCameraObject);
 }
 
 s32 sdfLoadMapCounterCameraVectorsForMask(s32 mask) {

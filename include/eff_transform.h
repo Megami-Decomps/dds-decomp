@@ -51,16 +51,18 @@ typedef struct dds3PoseSet_t {
     u8 padCC[4];
 } dds3PoseSet_t;
 
-/* dds3BasicFuncTablePtr selects six-word tables; sceneBasicTable is kind 1.
- * The last two words in every populated retail table are zero. */
-typedef struct EffWorldOps {
-    s32 (*create)(dds3Basic_t *); /* dds3AllocBasic accepts exactly 1. */
-    void (*destroy)(dds3Basic_t *);
-    s32 (*update)(dds3Basic_t *);
-    s32 (*draw)(dds3Basic_t *);
-    u32 unused10;
-    u32 unused14;
-} EffWorldOps;
+typedef s32 (*dds3BasicProc_t)(dds3Basic_t *basic);
+
+/* One vtable per basic type, indexed by dds3BasicFuncTablePtr[type]; sceneBasicTable is
+ * kind 1. The last two words in every populated retail table are zero. */
+typedef struct dds3BasicFunction_t {
+    dds3BasicProc_t constructor; /* dds3AllocBasic accepts exactly 1. */
+    void (*destructor)(dds3Basic_t *basic);
+    dds3BasicProc_t mainprocuder;
+    dds3BasicProc_t drawprocuder;
+    void *reserve1;
+    void *reserve2;
+} dds3BasicFunction_t;
 
 /* Kind-1 value cursors use these halfwords at 00110490. The same prefix is
  * used by separate 0x10-byte world index nodes (0010FEC8). */
@@ -80,7 +82,7 @@ struct dds3Basic_t {
     u32 key; /* Kind 2: dds3AddAreaBasic at 00111188. */
     const char *name; /* Native caption string for named kinds; other kinds keep a scalar here. */
     u32 kindTag; /* Kind occupies the high byte; constructor clears low 24 bits. */
-    EffWorldOps *ops;
+    dds3BasicFunction_t *ops;
     u32 word14;
     void *workdata; /* Kind-specific payload; never the separately allocated inner. */
     dds3PoseSet_t *poseset;
@@ -94,7 +96,7 @@ struct dds3Basic_t {
 };
 
 typedef char EffWorldNode_size_must_be_0x44[(sizeof(dds3Basic_t) == 0x44) ? 1 : -1];
-typedef char EffWorldOps_size_must_be_0x18[(sizeof(EffWorldOps) == 0x18) ? 1 : -1];
+typedef char dds3BasicFunction_t_size_must_be_0x18[(sizeof(dds3BasicFunction_t) == 0x18) ? 1 : -1];
 typedef char ObjectTransform_size_must_be_0xD0[(sizeof(dds3PoseSet_t) == 0xD0) ? 1 : -1];
 
 #endif

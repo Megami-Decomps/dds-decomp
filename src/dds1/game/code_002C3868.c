@@ -74,7 +74,7 @@ extern void eglLinkKanji(s32 width, s32 height, s32 colors,
 void sdfInitInnerVectors(void) {
     dds3SetPosPoseSet(fldLocalMapCameraObject, (u128 *)&fldLocalMapFirstCameraVector);
     dds3SetRotPoseSet(fldLocalMapCameraObject, (u128 *)&fldLocalMapSecondCameraVector);
-    fldLocalMapCameraObject->ops->update(fldLocalMapCameraObject);
+    fldLocalMapCameraObject->ops->mainprocuder(fldLocalMapCameraObject);
 }
 
 extern char D_003B3D48[];

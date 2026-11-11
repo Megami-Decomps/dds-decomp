@@ -3941,7 +3941,7 @@ void fldUpdateFieldCameraViewState(void) {
     SDF_VU0_COPYVECTOR(fldLookAtNearPoint, &nearPoint);
     SDF_VU0_COPYVECTOR(fldCamTarget, &farPoint);
     node = *sceneSlot;
-    node->ops->update(node);
+    node->ops->mainprocuder(node);
     fldUpdateLookAtSegmentDistance();
 }
 
@@ -4018,7 +4018,7 @@ void func_0012CED0(void) {
     SDF_VU0_COPYVECTOR_NOMEM(fldLookAtNearPoint, nearPoint.f);
     SDF_VU0_COPYVECTOR_NOMEM(fldCamTarget, farPoint.f);
     node = *world;
-    node->ops->update(node);
+    node->ops->mainprocuder(node);
     fldUpdateLookAtSegmentDistance();
 }
 
@@ -4057,7 +4057,7 @@ void fldCamUpdateFollow(void) {
     SDF_VU0_COPYVECTOR(fldCamTarget, &farPoint);
     dds3SetPosPoseSet(*world, &farPoint.q);
     node = *world;
-    node->ops->update(node);
+    node->ops->mainprocuder(node);
     D_003BAD24++;
     if (D_003BAD28 < D_003BAD24) {
         fldGlobalBase.mode = FLD_CAMERA_MODE_PLAYER_FOLLOW;
@@ -4205,7 +4205,7 @@ void fldUpdateCameraFollowPlayer(void) {
     SDF_VU0_COPYVECTOR(fldLookAtNearPoint, &nearPoint);
     SDF_VU0_COPYVECTOR(fldCamTarget, &farPoint);
     node = *sceneSlot;
-    node->ops->update(node);
+    node->ops->mainprocuder(node);
     fldUpdateLookAtSegmentDistance();
 }
 
@@ -4245,7 +4245,7 @@ void fldUpdateCameraViewFromPlayer(void) {
     SDF_VU0_COPYVECTOR(fldLookAtNearPoint, nearPoint);
     SDF_VU0_COPYVECTOR(fldCamTarget, farPoint);
     node = *world;
-    node->ops->update(node);
+    node->ops->mainprocuder(node);
     fldGlobalBase.dist = fsqrtf((nearPoint[0] - farPoint[0]) * (nearPoint[0] - farPoint[0]) +
                                (nearPoint[1] - farPoint[1]) * (nearPoint[1] - farPoint[1]) +
                                (nearPoint[2] - farPoint[2]) * (nearPoint[2] - farPoint[2]));
@@ -4539,7 +4539,7 @@ void fldUpdateCameraFollowLinkedObject(void) {
     dds3SetPosPoseSet((dds3Basic_t *)*world, &farPoint.q);
     SDF_VU0_COPYVECTOR(fldLookAtNearPoint, &nearPoint);
     SDF_VU0_COPYVECTOR(fldCamTarget, &farPoint);
-    ((dds3Basic_t *)*world)->ops->update((dds3Basic_t *)*world);
+    ((dds3Basic_t *)*world)->ops->mainprocuder((dds3Basic_t *)*world);
     dx = nearPoint.f[0] - farPoint.f[0];
     dy = nearPoint.f[1] - farPoint.f[1];
     dz = nearPoint.f[2] - farPoint.f[2];
