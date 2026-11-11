@@ -650,7 +650,17 @@ INCLUDE_ASM(const s32, "hand/at3dec", at3decDecodeTonalComponents);
 
 /* nsub (1..32) subbands: coding mode bit, a step per subband (0 = not
  * coded), a scale factor index per coded subband, then the lines. */
-#ifdef NON_MATCHING
+
+INCLUDE_RODATA(const s32, "hand/at3dec", at3decOutputFirTaps);
+
+INCLUDE_RODATA(const s32, "hand/at3dec", at3decQmfTaps);
+
+INCLUDE_RODATA(const s32, "hand/at3dec", at3decQmfTapsReversed);
+
+INCLUDE_RODATA(const s32, "hand/at3dec", at3decLowHalfMask);
+
+INCLUDE_RODATA(const s32, "hand/at3dec", at3decScaleFactorShifts);
+
 s32 at3decDecodeSpectrum(at3decChannel_t *chan, s32 nsub, at3decWork_t *w)
 {
     s32 step[32];
@@ -683,13 +693,16 @@ s32 at3decDecodeSpectrum(at3decChannel_t *chan, s32 nsub, at3decWork_t *w)
     i = 0;
     do {
         if (step[i] != 0) {
+            const s32 *first;
+
             if ((u32)i >= 0x21) {
                 __assert("libat3dec.c", 0x421, "(unsigned int)iqt < AT2_NQUS+1");
             }
+            first = &at3decSubbandStartLines[i];
             if ((u32)(i + 1) >= 0x21) {
                 __assert("libat3dec.c", 0x421, "(unsigned int)iqt+1 < AT2_NQUS+1");
             }
-            if (at3decDecodeSpectrumLines(chan, mode, step[i], at3decSubbandStartLines[i],
+            if (at3decDecodeSpectrumLines(chan, mode, step[i], *first,
                                           at3decSubbandStartLines[i + 1], sf[i], w) == -1) {
                 return -1;
             }
@@ -707,20 +720,6 @@ s32 at3decDecodeSpectrum(at3decChannel_t *chan, s32 nsub, at3decWork_t *w)
     }
     return 0;
 }
-#else
-
-INCLUDE_RODATA(const s32, "hand/at3dec", at3decOutputFirTaps);
-
-INCLUDE_RODATA(const s32, "hand/at3dec", at3decQmfTaps);
-
-INCLUDE_RODATA(const s32, "hand/at3dec", at3decQmfTapsReversed);
-
-INCLUDE_RODATA(const s32, "hand/at3dec", at3decLowHalfMask);
-
-INCLUDE_RODATA(const s32, "hand/at3dec", at3decScaleFactorShifts);
-
-INCLUDE_ASM(const s32, "hand/at3dec", at3decDecodeSpectrum);
-#endif
 
 /* A silent band: carry the history down and window out the pending overlap
  * half of the band buffer, clearing it. */
