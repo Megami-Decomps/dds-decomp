@@ -20,6 +20,14 @@
 #include "btl.h"
 #include "file_request_api.h"
 extern sdfGrOt_t sdfGrOtTable[];
+extern EffTimedParamRecord D_004002F8[2];
+extern EffTimedParamRecord D_00400328[3];
+extern EffTimedParamRecord D_00400370[3];
+extern EffTimedParamRecord D_004003B8[2];
+extern EffTimedParamRecord D_004003E8[2];
+extern EffTimedParamRecord D_00400418[5];
+extern EffTimedParamRecord D_00400490[3];
+extern EffTimedParamRecord D_004004D8[2];
 extern EffRecordBucket effTimedRecordBuckets[];
 
 static inline void effSubmitSurfacePacket(sdfGrOt_t *surface, sdfDrawTag_t *list) {
@@ -36,8 +44,6 @@ extern char D_004387E8[];
 #define EFF_RECORD_LAST_BUCKET 15
 #define EFF_STATUS_RECORD_BYTES 0x24
 #define EFF_PACKED_STATUS_HEADER_BYTES 0x20
-#define EFF_STATUS_PARAM_STRIDE 0x18
-#define EFF_STATUS_PARAM_HEADER_BYTES 4
 #define EFF_BATCH_HEADER_BYTES 0xC
 #define EFF_SLOT_WORK_BYTES 0xA0
 #define EFF_SLOT_PHASE_ZERO 0
@@ -285,7 +291,7 @@ u32 effSumRecordStatuses(const EffMappedRecord *record) {
     u32 recordIndex;
 
     for (recordIndex = 0; recordIndex < group->count; recordIndex++) {
-        statusBytes += effConvertParamValue(group->records + recordIndex * EFF_STATUS_PARAM_STRIDE + EFF_STATUS_PARAM_HEADER_BYTES, 0, 0, 0);
+        statusBytes += effConvertParamValue(&group->records[recordIndex].kind, 0, 0, 0);
     }
     return statusBytes;
 }

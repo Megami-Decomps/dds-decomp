@@ -82,6 +82,14 @@ extern RefObj *D_003BC978[2];
 
 
 
+extern EffTimedParamRecord D_0038FB78[2];
+extern EffTimedParamRecord D_0038FBA8[3];
+extern EffTimedParamRecord D_0038FBF0[3];
+extern EffTimedParamRecord D_0038FC38[2];
+extern EffTimedParamRecord D_0038FC68[2];
+extern EffTimedParamRecord D_0038FC98[5];
+extern EffTimedParamRecord D_0038FD10[3];
+extern EffTimedParamRecord D_0038FD58[2];
 extern EffRecordBucket effTimedRecordBuckets[];
 
 
@@ -164,8 +172,6 @@ extern char D_003BD198[];
 #define EFF_RECORD_LAST_BUCKET 15
 #define EFF_STATUS_RECORD_BYTES 0x24
 #define EFF_PACKED_STATUS_HEADER_BYTES 0x20
-#define EFF_STATUS_PARAM_STRIDE 0x18
-#define EFF_STATUS_PARAM_HEADER_BYTES 4
 #define EFF_SLOT_WORK_BYTES 0xA0
 #define EFF_SLOT_PHASE_ZERO 0
 #define EFF_SLOT_PHASE_ONE 0x10000
@@ -427,7 +433,7 @@ u32 effSumRecordStatuses(const EffMappedRecord *record) {
     u32 recordIndex;
 
     for (recordIndex = 0; recordIndex < group->count; recordIndex++) {
-        statusBytes += effConvertParamValue((u32 *)(group->records + recordIndex * EFF_STATUS_PARAM_STRIDE + EFF_STATUS_PARAM_HEADER_BYTES), 0, 0, 0);
+        statusBytes += effConvertParamValue(&group->records[recordIndex].kind, 0, 0, 0);
     }
     return statusBytes;
 }
