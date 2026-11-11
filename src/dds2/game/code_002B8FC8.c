@@ -105,7 +105,7 @@ extern void mnuClearListFlagsOneAndTwo(u32 *flags);
 extern EvtStageTestResourceWorkResult evtStageTestAdvanceResourceWork(void);
 
 
-extern char mnuStaffCampPagePopupEntry[];
+extern MenuPopupEntry mnuStaffCampPagePopupEntry[];
 
 extern void mnuDrawWindowDecorations(s32, s32, s32, MenuWindowContainer *, s32);
 
@@ -129,22 +129,22 @@ extern void frEnableMode();
 
 extern void frDisableMode();
 
-extern char mnuCampPartySelectionReturnPopupEntry[];
+extern MenuPopupEntry mnuCampPartySelectionReturnPopupEntry[];
 
 extern struct sdfGrOt_t *sdfModelOtTable[13][4];
 
 extern s8 evtStageTestUpdate(struct sdfGrOt_t **);
 
-extern char mnuSkillMenuDetailPopupEntry[];
+extern MenuPopupEntry mnuSkillMenuDetailPopupEntry[];
 
-extern char mnuCampFieldSkillPopupEntry[];
+extern MenuPopupEntry mnuCampFieldSkillPopupEntry[];
 
-extern char mnuSkillMenuFieldUsePopupEntry[];
+extern MenuPopupEntry mnuSkillMenuFieldUsePopupEntry[];
 
-extern char mnuSkillMenuEquippedSlotsPopupEntry[];
+extern MenuPopupEntry mnuSkillMenuEquippedSlotsPopupEntry[];
 
 
-extern char mnuSkillMenuPagePopupEntry[];
+extern MenuPopupEntry mnuSkillMenuPagePopupEntry[];
 
 extern s32 ptySkillMenuApplyFieldUseAndCost();
 
@@ -174,7 +174,7 @@ extern s32 mnuApplyRandomStatItemEffect();
 
 extern void mnuPrepareStaffValueChangeDialog(MenuStaffContext *, datUnitWork_t *, s32, s32);
 
-extern char mnuCampRingCustomizationPopupEntry[];
+extern MenuPopupEntry mnuCampRingCustomizationPopupEntry[];
 
 extern void mnuDrawCampGridAndLabel();
 
@@ -203,8 +203,8 @@ extern void mnuDrawIconPanel(s32, s32, s32, s32, MenuIconState *, s32, s32);
 extern void mnuUpdateWindowPanelHandleStatesKindFourFive(MenuIconState *);
 
 extern void effDrawTextureSlotWithBlendedCornerColors(s32, s32, s32, u32, s32, EffectSlotSet *, s32, s32);
-extern char mnuStaffPartyBrowsePopupEntry[];
-extern char mnuStaffFieldSkillDisplayPopupEntry[];
+extern MenuPopupEntry mnuStaffPartyBrowsePopupEntry[];
+extern MenuPopupEntry mnuStaffFieldSkillDisplayPopupEntry[];
 extern void mnuSelectPage(MenuPageWindow *window, s32 selected);
 
 /* Menu runtime fields shared by the party, panel and resource handlers. */

@@ -147,7 +147,7 @@ s32 mnuStartTerminalPanelFadeOut(dds3ProcessID_t *task) {
 }
 
 
-extern char D_003CE998[];
+extern MenuPopupEntry mnuTerminalIdlePopupEntries[];
 
 /* When the current panel is idle and no fade is running, start its queued step. */
 s32 mnuUpdateTerminalPanelPopupWhenIdle(dds3ProcessID_t *request) {
@@ -156,7 +156,7 @@ s32 mnuUpdateTerminalPanelPopupWhenIdle(dds3ProcessID_t *request) {
     s32 result = mnuDispatchPopupTransition((MenuPopupState *)((u8 *)context + 8), panelState, 0, request);
     if (result == 0) {
         if (*panelState == 0 && dds3FadeCheck() == 0) {
-            MenuPopupEntry *entry = (MenuPopupEntry *)D_003CE998;
+            MenuPopupEntry *entry = mnuTerminalIdlePopupEntries;
 
             mnuSetPopupEntryFlagged(panelState, entry);
         }
