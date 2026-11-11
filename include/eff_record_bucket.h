@@ -3,9 +3,9 @@
 
 #include "eff.h"
 
-/* Indexed timed-effect table entry; the first word's meaning is unknown. */
+/* Indexed timed-effect table entry: bucket name, step function and its records. */
 typedef struct EffRecordBucket {
-    u32 unk_00;
+    const char *name;
     /* Negative results hold phase; nonnegative results are per-update deltas. */
     s32 (*step)(BdWork *, BdWork *, EffTimedState *);
     u32 count;

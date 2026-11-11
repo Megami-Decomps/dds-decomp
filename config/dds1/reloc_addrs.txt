@@ -244,3 +244,4 @@ rom:0x268260 reloc:MIPS_NONE symbol:none // 00367260 packed-twin: 0x00390002, no
 rom:0x268460 reloc:MIPS_NONE symbol:none // 00367460 packed-twin: 0x00390003, not D_00390000 + 0x3
 rom:0x24F438 reloc:MIPS_NONE symbol:none // 0034E438 manual: 0x00141110, not fldInitInputPanel
 rom:0x255828 reloc:MIPS_NONE symbol:none // 00354828 manual: 0x00141110, not fldInitInputPanel
+rom:0x29317C reloc:MIPS_NONE symbol:none // 0039217C PrfDds1RequirementRecord[46] +0x30: 0x00155CC0, not dds3Particle_SphereSpiralDraw

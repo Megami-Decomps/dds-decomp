@@ -13919,3 +13919,6 @@ D_003CFCE8 = 0x003CFCE8; // type:SdfTaskItemDesc size:0x14
 D_003CFCFC = 0x003CFCFC; // type:SdfTaskItemDesc size:0x14
 D_003C92A8 = 0x003C92A8; // size:0x8
 mdlDebugProcessEntries = 0x003C8890; // size:0x18
+effTimedRecordBuckets = 0x00400508; // size:0x90
+mnuShootingInitializeCallbacks = 0x0040ABE0; // size:0x10
+mnuShootingUpdateCallbacks = 0x0040ABF0; // size:0x8

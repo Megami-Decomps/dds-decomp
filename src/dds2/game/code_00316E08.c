@@ -78,8 +78,8 @@ extern s32 D_00435BB0;
 
 extern s16 dds3VblanksPerFrame;
 
-extern s32 (*D_0040ABF0[])(u8 *work);
-extern s32 (*D_0040ABE0[])(u8 *work);
+extern s32 (*mnuShootingUpdateCallbacks[])(u8 *work);
+extern s32 (*mnuShootingInitializeCallbacks[])(u8 *work);
 
 extern void mdlPackDecode(s32 source, s32 destination, s32 flags, const u8 *packageData, s32 packageSize);
 
@@ -701,8 +701,8 @@ void mnuInitializeShootingScene(MnuShootingWork *handle) {
     mnuSetRuntimeWorkHitCallback(mnuApplyShootingRuntimeRecordEvent);
     mnuSetRuntimeRecordPairCallback(mnuAdvanceShootingProgressFromRecord);
     mnuInitializeHighScoreState(handle);
-    handle->initialize = D_0040ABE0[0];
-    handle->update = D_0040ABF0[0];
+    handle->initialize = mnuShootingInitializeCallbacks[0];
+    handle->update = mnuShootingUpdateCallbacks[0];
     D_004390B4 = 0;
     handle->initialized = 0;
     handle->frameDisplayValue = 2;
@@ -772,12 +772,12 @@ s32 mnuRunShootingInitCallback(MnuShootingWork *work) {
             mnuReleaseShootingSectionResources(work);
             state = work->state;
             work->initialized = 1;
-            work->update = D_0040ABF0[0];
+            work->update = mnuShootingUpdateCallbacks[0];
         }
         if (state == -1) {
             return -1;
         }
-        work->initialize = D_0040ABE0[state];
+        work->initialize = mnuShootingInitializeCallbacks[state];
     }
     return 1;
 }
@@ -788,7 +788,7 @@ u32 mnuRunShootingUpdateCallback(MnuShootingWork *work) {
     s32 (*update)(u8 *work) = work->update;
 
     if (update((u8 *)work) != 0) {
-        work->update = D_0040ABF0[work->state];
+        work->update = mnuShootingUpdateCallbacks[work->state];
     }
     return 1;
 }
@@ -920,7 +920,7 @@ s32 mnuInitializeShootingWorkResources(MnuShootingWork *work) {
     mnuQueueTitleSoundStreamEntry(0x16);
     mnuResetTitleStreamAfterFileIdle();
     work->state = 2;
-    work->update = D_0040ABF0[1];
+    work->update = mnuShootingUpdateCallbacks[1];
     work->horizontalTilt = 0;
     work->targets = 0;
     work->unkA4 = 0;

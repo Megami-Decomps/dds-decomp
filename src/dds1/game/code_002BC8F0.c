@@ -82,7 +82,7 @@ extern RefObj *D_003BC978[2];
 
 
 
-extern EffRecordBucket D_0038FD88[];
+extern EffRecordBucket effTimedRecordBuckets[];
 
 
 extern u32 effSharedTextureReferenceCount;
@@ -422,7 +422,7 @@ extern u32 effConvertParamValue(u32 *, void *, void *, void *);
 
 /* Sum the status-storage byte requirements for the selected record category. */
 u32 effSumRecordStatuses(const EffMappedRecord *record) {
-    EffRecordBucket *group = &D_0038FD88[record->category];
+    EffRecordBucket *group = &effTimedRecordBuckets[record->category];
     u32 statusBytes = 0;
     u32 recordIndex;
 
@@ -875,7 +875,7 @@ EffectSlotSet *effUpdateTimedStates(EffectSlotSet *effect, u32 slot, void *entry
         EffMappedRecord *source = state->source;
 
         if (source != 0 && source->category != 0) {
-            EffRecordBucket *group = &D_0038FD88[source->category];
+            EffRecordBucket *group = &effTimedRecordBuckets[source->category];
             s32 phaseStep = group->step(record, entry, state);
 
             if (state->delay > 0) {
