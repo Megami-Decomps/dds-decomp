@@ -92,7 +92,6 @@ extern void sdfMemFreeDirect(sdfMemHandle_t *aHandle);
 
 extern s32 GetThreadId(void);
 
-#define SDK_SKIP_SleepThread
 #include "sdk_libkernl.h"
 
 extern s32 RemoveDmacHandler(s32 channel, s32 handlerId);

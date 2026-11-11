@@ -1,7 +1,6 @@
 #include "common.h"
 #include "ps2asm.h"
 #include "sdf_resource.h"
-#define SDK_SKIP_SleepThread
 #include "sif_rpc.h"
 
 enum {

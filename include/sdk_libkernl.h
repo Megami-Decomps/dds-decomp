@@ -60,9 +60,6 @@ s32 SetAlarm(u16 delay, void (*callback)(s32 alarmId, u16 time, void *common), v
 #ifndef SDK_SKIP_SignalSema
 s32 SignalSema(s32 semaphoreId);
 #endif
-#ifndef SDK_SKIP_SleepThread
-s32 SleepThread(void);
-#endif
 #ifndef SDK_SKIP_TerminateThread
 s32 TerminateThread(s32 threadId);
 #endif
