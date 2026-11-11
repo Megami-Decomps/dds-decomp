@@ -384,14 +384,14 @@ void sdfReloadChannelSegments(SdfChannel *table) {
     printf(D_0039F930, table->path);
 }
 
-extern SdfChannel D_0032A6F0[];
+extern SdfChannel sdfChannels[8];
 
 void sdfResetChannels(void) {
     u32 i;
 
     sdfFirePendingCallback();
     for (i = 0; i < 8; i++) {
-        sdfReloadChannelSegments(&D_0032A6F0[i]);
+        sdfReloadChannelSegments(&sdfChannels[i]);
     }
     evtInitializeWorkScriptTask();
 }

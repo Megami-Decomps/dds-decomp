@@ -246,3 +246,7 @@ rom:0x24F438 reloc:MIPS_NONE symbol:none // 0034E438 manual: 0x00141110, not fld
 rom:0x255828 reloc:MIPS_NONE symbol:none // 00354828 manual: 0x00141110, not fldInitInputPanel
 rom:0x29317C reloc:MIPS_NONE symbol:none // 0039217C PrfDds1RequirementRecord[46] +0x30: 0x00155CC0, not dds3Particle_SphereSpiralDraw
 rom:0x2BE588 reloc:MIPS_NONE symbol:none // 003BD588 sdfVifUnpackS_8Name: "S_8", not D_00385F38 + 0x1B
+rom:0x278050 reloc:MIPS_NONE symbol:none // 00377050 D_00376630: string "_08", not D_00383058 + 7
+rom:0x2780F0 reloc:MIPS_NONE symbol:none // 003770F0 D_00376630: string "_18", not D_00383110 + 0x4F
+rom:0x278190 reloc:MIPS_NONE symbol:none // 00377190 D_00376630: string "_28", not D_00383110 + 0x14F
+rom:0x27EFE0 reloc:MIPS_NONE symbol:none // 0037DFE0 D_0037DE10: odd scalar 0x00402C16, not D_00402C16

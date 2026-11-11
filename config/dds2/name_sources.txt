@@ -11783,3 +11783,5 @@
 0x0038BB50	fldDisplayLightSources	inferred	sdf3DLight_t *[4] {&D_0038BB10, NULL, NULL, NULL}, ambient D_0038BB60 follows; entry 0 of the display pointer table. DDS1 twin 0x003306B0; was D_0038BB50
 0x00437D90	fileSaveIconSysAddress	inferred	u32 address slot holding &fileSaveIconSysData for slSaveWriteFile; size slot fileSaveIconSysSize follows. DDS1 twin 0x003BC890; was D_00437D90
 0x00437D94	fileSaveIconSysSize	inferred	u32 size slot for slSaveWriteFile. DDS1 twin 0x003BC894; was D_00437D94
+0x00422238	evtSceneDispRows	inferred	NodeDiagnosticRow[17] evtSceneDispProcess copies to its stack. DDS1 twin 0x003ACD78; was D_00422238
+0x00385A90	sdfChannels	inferred	SdfChannel[8] sdfResetChannels reloads. DDS1 twin 0x0032A6F0; was D_00385A90
