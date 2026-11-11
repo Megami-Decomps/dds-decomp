@@ -226,9 +226,9 @@ extern struct sdfMemHandle_t *D_003BC984;
 
 extern struct sdfMemHandle_t *D_003BC994;
 
-extern u8 D_0038E000[];
+extern EffCameraCreateRow D_0038E000[6];
 
-extern u8 D_0038E570[];
+extern EffCameraCreateRow D_0038E570[6];
 
 extern u8 *D_0037EBF8[];
 
@@ -388,9 +388,7 @@ extern EffQueuedFileObject *D_003BD074;
 
 extern void effDrawSurfaceNode(s32);
 
-struct EffCameraCreateRow;
-
-extern u32 effSelectCameraFileJobFromRows(const char *, const struct EffCameraCreateRow *, u32);
+extern u32 effSelectCameraFileJobFromRows(const char *, const EffCameraCreateRow *, u32);
 
 extern char D_003B3968[];
 
@@ -420,33 +418,33 @@ extern char D_003B3888[];
 
 extern char D_003BD000[];
 
-extern u8 D_0038DE70[];
+extern EffCameraCreateRow D_0038DE70[8];
 
-extern u8 D_0038DF50[];
+extern EffCameraCreateRow D_0038DF50[6];
 
-extern u8 D_0038E0F0[];
+extern EffCameraCreateRow D_0038E0F0[6];
 
-extern u8 D_0038E1A0[];
+extern EffCameraCreateRow D_0038E1A0[3];
 
-extern u8 D_0038E280[];
+extern EffCameraCreateRow D_0038E280[5];
 
-extern u8 D_0038E240[];
+extern EffCameraCreateRow D_0038E240[2];
 
-extern u8 D_0038E310[];
+extern EffCameraCreateRow D_0038E310[11];
 
-extern u8 D_0038E450[];
+extern EffCameraCreateRow D_0038E450[6];
 
-extern u8 D_0038E500[];
+extern EffCameraCreateRow D_0038E500[4];
 
-extern u8 D_0038E620[];
+extern EffCameraCreateRow D_0038E620[7];
 
-extern u8 D_0038E6F0[];
+extern EffCameraCreateRow D_0038E6F0[5];
 
-extern u8 D_0038E7C0[];
+extern EffCameraCreateRow D_0038E7C0[2];
 
-extern u8 D_0038E800[];
+extern EffCameraCreateRow D_0038E800[10];
 
-extern u8 D_0038E9A0[];
+extern EffCameraCreateRow D_0038E9A0[2];
 
 extern u8 D_003DF840[];
 
@@ -12434,13 +12432,6 @@ extern void btlDebugMenuRecordNoOp(void *context);
 
 extern void btlDebugMenuAfterRecordNoOp(void);
 
-typedef struct EffCameraCreateRow {
-    EffCameraCreateRequest request;
-    u32 sourceTail;
-} EffCameraCreateRow;
-
-typedef char EffCameraCreateRowSizeCheck[(sizeof(EffCameraCreateRow) == 0x1C) ? 1 : -1];
-
 extern void fileQueueInitTransform(void *);
 
 extern FileJob *fileAppendJob(FileQueue *, u32);
@@ -12457,7 +12448,7 @@ u32 effAppendPositionedCameraFileJob(const EffCameraCreateRequest *request) {
     u32 count;
 
     fileQueueInitTransform(effSelectedJobHeader);
-    entry = fileAppendJob(effFileQueue, (u32)effLoadFileJobPayload(request->resource, request->existingJob));
+    entry = fileAppendJob(effFileQueue, (u32)effLoadFileJobPayload(request->resource, (u32)request->existingJobName));
     effCurrentFileQueueEntry = entry;
     strcpy(entry->name, request->resource->name);
     entry->offset[0] = request->position[0];
@@ -12821,7 +12812,7 @@ u32 effSelectCameraFileJobFromRows(const char *nameKey, const EffCameraCreateRow
                 effTemporaryFileJob = 0;
             }
             request = &((const EffCameraCreateRow *)(requestIndex * sizeof(EffCameraCreateRow) + (u32)requests))->request;
-            if (request->existingJob != 0) {
+            if (request->existingJobName != NULL) {
                 FileJobPayload *sourceJob;
                 if (effAuxiliaryFileQueue != 0) {
                     fileQueueDestroy(effAuxiliaryFileQueue);
@@ -12831,7 +12822,7 @@ u32 effSelectCameraFileJobFromRows(const char *nameKey, const EffCameraCreateRow
                 ((FileJob *)effSelectedJobHeader)->offset[0] = request->position[0];
                 ((FileJob *)effSelectedJobHeader)->offset[1] = request->position[1];
                 ((FileJob *)effSelectedJobHeader)->offset[2] = request->position[2];
-                sourceJob = fileJobCreateFromCommandState((const char *)request->existingJob);
+                sourceJob = fileJobCreateFromCommandState(request->existingJobName);
                 effTemporaryFileJob = fileJobCreateFromJob(sourceJob);
                 fileJobDestroy(sourceJob);
             }

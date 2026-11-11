@@ -15000,7 +15000,7 @@ u32 effAppendPositionedCameraFileJob(const EffCameraCreateRequest *request) {
     u32 count;
 
     fileQueueInitTransform(effSelectedJobHeader);
-    entry = fileAppendJob(effFileQueue, (u32)effLoadFileJobPayload(request->resource, request->existingJob));
+    entry = fileAppendJob(effFileQueue, (u32)effLoadFileJobPayload(request->resource, (s32)request->existingJobName));
     effCurrentFileQueueEntry = entry;
     strcpy(entry->name, request->resource->name);
     entry->offset[0] = request->position[0];
@@ -15290,13 +15290,6 @@ extern void btlDebugMenuRecordNoOp(u32);
 
 extern void btlDebugMenuAfterRecordNoOp(void);
 
-typedef struct EffCameraCreateRow {
-    EffCameraCreateRequest request;
-    u32 sourceTail;
-} EffCameraCreateRow;
-
-typedef char EffCameraCreateRowSizeCheck[(sizeof(EffCameraCreateRow) == 0x1C) ? 1 : -1];
-
 /* Present named camera/file requests, maintaining a preview job and returning selection status. */
 u32 effSelectCameraFileJobFromRows(const char *nameKey, const EffCameraCreateRow *requests, u32 sourceCount) {
     EffQueuedFileObject *menuObject;
@@ -15380,7 +15373,7 @@ u32 effSelectCameraFileJobFromRows(const char *nameKey, const EffCameraCreateRow
                 effTemporaryFileJob = 0;
             }
             request = &((const EffCameraCreateRow *)(requestIndex * sizeof(EffCameraCreateRow) + (u32)requests))->request;
-            if (request->existingJob != 0) {
+            if (request->existingJobName != NULL) {
                 FileJobPayload *sourceJob;
                 if (effAuxiliaryFileQueue != 0) {
                     fileQueueDestroy(effAuxiliaryFileQueue);
@@ -15390,7 +15383,7 @@ u32 effSelectCameraFileJobFromRows(const char *nameKey, const EffCameraCreateRow
                 ((FileJob *)effSelectedJobHeader)->offset[0] = request->position[0];
                 ((FileJob *)effSelectedJobHeader)->offset[1] = request->position[1];
                 ((FileJob *)effSelectedJobHeader)->offset[2] = request->position[2];
-                sourceJob = fileJobCreateFromCommandState((const char *)request->existingJob);
+                sourceJob = fileJobCreateFromCommandState(request->existingJobName);
                 effTemporaryFileJob = fileJobCreateFromJob(sourceJob);
                 fileJobDestroy(sourceJob);
             }
@@ -15403,7 +15396,7 @@ extern u32 effSelectCameraFileJobFromRows(const char *, const EffCameraCreateRow
 
 extern char D_0042CEF8[];
 
-extern u8 D_003FE280[];
+extern EffCameraCreateRow D_003FE280[15];
 
 u32 effCreateParticleTask(void) {
     return effSelectCameraFileJobFromRows(D_0042CEF8, D_003FE280, 0xF);
@@ -15411,13 +15404,13 @@ u32 effCreateParticleTask(void) {
 
 extern char D_0042CED8[];
 
-extern u8 D_003FE430[];
+extern EffCameraCreateRow D_003FE430[7];
 
 u32 effCreatePolyTrackControlTask(void) {
     return effSelectCameraFileJobFromRows(D_0042CED8, D_003FE430, 7);
 }
 
-extern u8 D_003FE500[];
+extern EffCameraCreateRow D_003FE500[7];
 
 u32 effCreatePolyTrackTask(void) {
     return effSelectCameraFileJobFromRows("POLY TRACK S", D_003FE500, 7);
@@ -15425,7 +15418,7 @@ u32 effCreatePolyTrackTask(void) {
 
 extern char D_00437F30[];
 
-extern u8 D_003FE610[];
+extern EffCameraCreateRow D_003FE610[7];
 
 u32 effCreateBlurTask(void) {
     return effSelectCameraFileJobFromRows(D_00437F30, D_003FE610, 7);
@@ -15433,7 +15426,7 @@ u32 effCreateBlurTask(void) {
 
 extern char D_004386A8[];
 
-extern u8 D_003FE6E0[];
+extern EffCameraCreateRow D_003FE6E0[3];
 
 u32 effCreateFilterTask(void) {
     return effSelectCameraFileJobFromRows(D_004386A8, D_003FE6E0, 3);
@@ -15441,7 +15434,7 @@ u32 effCreateFilterTask(void) {
 
 extern char D_0042CE48[];
 
-extern u8 D_003FE7C0[];
+extern EffCameraCreateRow D_003FE7C0[5];
 
 u32 effCreateEnvironmentTask(void) {
     return effSelectCameraFileJobFromRows(D_0042CE48, D_003FE7C0, 5);
@@ -15449,7 +15442,7 @@ u32 effCreateEnvironmentTask(void) {
 
 extern char D_0042CEB8[];
 
-extern u8 D_003FE780[];
+extern EffCameraCreateRow D_003FE780[2];
 
 u32 effCreatePolyTextureTask(void) {
     return effSelectCameraFileJobFromRows(D_0042CEB8, D_003FE780, 2);
@@ -15457,7 +15450,7 @@ u32 effCreatePolyTextureTask(void) {
 
 extern char D_0042CEA8[];
 
-extern u8 D_003FE850[];
+extern EffCameraCreateRow D_003FE850[11];
 
 u32 effCreatePolyFlashTask(void) {
     return effSelectCameraFileJobFromRows(D_0042CEA8, D_003FE850, 0xB);
@@ -15465,7 +15458,7 @@ u32 effCreatePolyFlashTask(void) {
 
 extern char D_0042CE98[]; /* "POLY RING" */
 
-extern u8 D_003FE990[];
+extern EffCameraCreateRow D_003FE990[6];
 
 u32 effCreatePolyRingTask(void) {
     return effSelectCameraFileJobFromRows(D_0042CE98, D_003FE990, 6);
@@ -15473,13 +15466,13 @@ u32 effCreatePolyRingTask(void) {
 
 extern char D_0042CE88[];
 
-extern u8 D_003FEA40[];
+extern EffCameraCreateRow D_003FEA40[5];
 
 u32 effCreatePolyThunderTask(void) {
     return effSelectCameraFileJobFromRows(D_0042CE88, D_003FEA40, 5);
 }
 
-extern u8 D_003FEAD0[];
+extern EffCameraCreateRow D_003FEAD0[6];
 
 /* Present the six POLY TWINKLE requests through the shared camera/file selector. */
 u32 effCreatePolyTwinkleTask(void) {
@@ -15488,7 +15481,7 @@ u32 effCreatePolyTwinkleTask(void) {
 
 extern char D_0042CE78[];
 
-extern u8 D_003FEB80[];
+extern EffCameraCreateRow D_003FEB80[7];
 
 u32 effCreatePolyWindTask(void) {
     return effSelectCameraFileJobFromRows(D_0042CE78, D_003FEB80, 7);
@@ -15496,7 +15489,7 @@ u32 effCreatePolyWindTask(void) {
 
 extern char D_0042CE68[];
 
-extern u8 D_003FEC50[];
+extern EffCameraCreateRow D_003FEC50[5];
 
 u32 effCreatePolyScalyTask(void) {
     return effSelectCameraFileJobFromRows(D_0042CE68, D_003FEC50, 5);
@@ -15504,7 +15497,7 @@ u32 effCreatePolyScalyTask(void) {
 
 extern char D_0042CE58[];
 
-extern u8 D_003FED20[];
+extern EffCameraCreateRow D_003FED20[2];
 
 u32 effCreatePolyCrackTask(void) {
     return effSelectCameraFileJobFromRows(D_0042CE58, D_003FED20, 2);
@@ -15512,7 +15505,7 @@ u32 effCreatePolyCrackTask(void) {
 
 extern char D_0042CDF8[];
 
-extern u8 D_003FED60[];
+extern EffCameraCreateRow D_003FED60[18];
 
 u32 effCreateBattleOnlyTask(void) {
     return effSelectCameraFileJobFromRows(D_0042CDF8, D_003FED60, 0x12);
@@ -15520,7 +15513,7 @@ u32 effCreateBattleOnlyTask(void) {
 
 extern char D_00438640[]; /* "2D" */
 
-extern u8 D_003FEFE0[];
+extern EffCameraCreateRow D_003FEFE0[2];
 
 u32 effCreateTwoDimensionalTask(void) {
     return effSelectCameraFileJobFromRows(D_00438640, D_003FEFE0, 2);
@@ -15528,7 +15521,7 @@ u32 effCreateTwoDimensionalTask(void) {
 
 extern char D_0042CEE8[];
 
-extern u8 D_003FF020[];
+extern EffCameraCreateRow D_003FF020[7];
 
 u32 effCreateObjectParticleTask(void) {
     return effSelectCameraFileJobFromRows(D_0042CEE8, D_003FF020, 7);
