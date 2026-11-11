@@ -11078,3 +11078,7 @@
 0x0037DE28	D_0037DE28	inferred	"(Press SELECT to access debug message)", no reader; split off D_0037DE10 ("Start the game anyway?", SMT3 slNoSpaceStartMsg6 text)
 0x0037DE50	itfMesEmbedded_37DE50	inferred	embedded MSG1 message file (msg_02..msg_04, 0x193 bytes), no reader; SMT3 itfMesEmbedded_<addr> convention; DDS2 0x003E8E48; was inside D_0037DE10
 0x0037DFE8	fileGlyphTextRows	inferred	{glyph-coded text, s32} rows after the embedded message file; no reader in retail, text in the game's font encoding (not decoded); DDS2 0x003E8FE0; was inside D_0037DE10
+0x003BAE64	scriptlabel	inferred	SMT3 name (scriptlabel 0x0054EE04, fldWap.c door table index); was fldSelectedActorEntryIndex; was fldSelectedActorEntryIndex
+0x00359EF0	btlCameraPathPresetsBank0	inferred	battle camera path presets for bank 0 of btlInitializeCameraCursorFromPreset (BtlCameraPathPreset[18]); DDS2 0x003B7680; was D_00359EF0
+0x0035A5B0	btlCameraPathPresetsBank2	inferred	battle camera path presets for bank 2 of btlInitializeCameraCursorFromPreset (BtlCameraPathPreset[2]); DDS2 0x003B7E00; was D_0035A5B0
+0x0035A670	btlCameraPathPresetsBank4	inferred	battle camera path presets for bank 4 of btlInitializeCameraCursorFromPreset (BtlCameraPathPreset[2]); DDS2 0x003B7F20; was D_0035A670

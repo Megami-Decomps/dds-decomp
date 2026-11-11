@@ -180,7 +180,7 @@ extern void fldKanjiDraw(s32 x, s32 y, u32 colors, const u8 *text);
 
 extern s16 D_00444C68[];
 
-extern u32 fldSelectedActorEntryIndex;
+extern u32 scriptlabel;
 
 extern FldIndexPair D_0038A3B8[];
 
@@ -2242,7 +2242,7 @@ const char *fldFindActorEntryByName(const char *name) {
         if ((flag == 0 || evtBitCheck(flag) != 0)
             && entry->floor == fldGlobalBase.floor + 1
             && strcmp(name, entry->name) == 0) {
-            fldSelectedActorEntryIndex = i;
+            scriptlabel = i;
             switch (entry->kind) {
             case FLD_ACTOR_ENTRY_KIND_DOOR:
                 if (fldGlobalBase.specialEventActive != FLD_SPECIAL_EVENT_INACTIVE && (entry->flags31 & 4)) {
@@ -2293,7 +2293,7 @@ const char *fldSelectCurrentActorOnNextFloor(void) {
     s32 index = D_00435F28;
     doormovetbl_s *entry = &fldDoorTable[index];
     if (entry->floor == D_00389784[0] + 1 && entry->kind == FLD_ACTOR_ENTRY_KIND_WARP) {
-        fldSelectedActorEntryIndex = index;
+        scriptlabel = index;
         D_004361F8 = 8;
         return D_00391F30;
     }
@@ -2301,13 +2301,13 @@ const char *fldSelectCurrentActorOnNextFloor(void) {
 }
 
 s32 fldGetSelectedActorMotionId(void) {
-    return fldDoorTable[fldSelectedActorEntryIndex].motion;
+    return fldDoorTable[scriptlabel].motion;
 }
 
 /* Inspect two independent properties of the selected actor, depending on mode:
  * mode 0 derives a size from the first two states; mode 1 tests a flag. */
 s32 fldQuerySelectedActorMotionState(s32 mode) {
-    doormovetbl_s *entry = &fldDoorTable[fldSelectedActorEntryIndex];
+    doormovetbl_s *entry = &fldDoorTable[scriptlabel];
     s16 a;
     u32 result;
     if (mode == 0 && entry->kind == FLD_ACTOR_ENTRY_KIND_DOOR) {
@@ -2340,7 +2340,7 @@ void fldApplyActorEntryTrigger(s32 useTaskRecord) {
             return;
         }
     }
-    index = fldSelectedActorEntryIndex;
+    index = scriptlabel;
     entry = &fldDoorTable[index];
     kind = entry->kind;
     if (kind == FLD_ACTOR_ENTRY_KIND_DOOR) {
@@ -3116,7 +3116,7 @@ void fldDoor_WarpCash(const char *name) {
 /* Read a selected actor state or a named world-object value; cases 1 and 2
  * deliberately fall through when no named object is found. */
 s32 fldGetActorStat0(s32 attribute) {
-    doormovetbl_s *actor = &fldDoorTable[fldSelectedActorEntryIndex];
+    doormovetbl_s *actor = &fldDoorTable[scriptlabel];
     dds3Basic_t *objectNode;
     s32 secondaryMotion;
 
@@ -3152,7 +3152,7 @@ INCLUDE_RODATA(const s32, "game/code_0013B818", D_004134C0);
 INCLUDE_RODATA(const s32, "game/code_0013B818", D_004134D0);
 
 s32 fldGetMappedActorStateAttribute(u32 attribute) {
-    doormovetbl_s *actor = &fldDoorTable[fldSelectedActorEntryIndex];
+    doormovetbl_s *actor = &fldDoorTable[scriptlabel];
     dds3Basic_t *objectNode;
 
     switch (attribute) {
@@ -3194,7 +3194,7 @@ s32 fldGetMappedActorStateAttribute(u32 attribute) {
 /* Look up a motion-table attribute indexed by this actor's state; named
  * object lookups fall through to the next attribute if absent. */
 s32 fldGetActorMotionEntry(u32 attribute) {
-    doormovetbl_s *actor = &fldDoorTable[fldSelectedActorEntryIndex];
+    doormovetbl_s *actor = &fldDoorTable[scriptlabel];
     s16 motionIndex = actor->motion;
     dds3Basic_t *objectNode;
     s32 flags;
@@ -3404,7 +3404,7 @@ void fldResetActorSlots(void) {
         fldActorSlots[actorIndex].secondStep[1] = 0;
         fldActorSlots[actorIndex].secondStep[2] = 0;
     }
-    fldSelectedActorEntryIndex = -1;
+    scriptlabel = -1;
 }
 
 void fldDoorLoad(s32 field) {
@@ -4118,7 +4118,7 @@ INCLUDE_SDATA(const s32, "game/code_0013B818", D_004361EC);
 
 INCLUDE_SDATA(const s32, "game/code_0013B818", D_004361F0);
 
-INCLUDE_SDATA(const s32, "game/code_0013B818", fldSelectedActorEntryIndex);
+INCLUDE_SDATA(const s32, "game/code_0013B818", scriptlabel);
 
 INCLUDE_SDATA(const s32, "game/code_0013B818", D_004361F8);
 

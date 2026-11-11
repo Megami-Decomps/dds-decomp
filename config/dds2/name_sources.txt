@@ -11822,3 +11822,7 @@
 0x0042F4D8	padRequestNameComplete	inferred	libpad data, SMT3 padRequestNameComplete 0x0054AAA8; was D_0042F4D8
 0x003E8E48	itfMesEmbedded_3E8E48	inferred	embedded MSG1 message file (msg_02..msg_04, 0x193 bytes), no reader; SMT3 itfMesEmbedded_<addr> convention; DDS1 0x0037DE50; was D_003E8E48
 0x003E8FE0	fileGlyphTextRows	inferred	{glyph-coded text, s32} rows after the embedded message file; no reader in retail, text in the game's font encoding (not decoded); DDS1 0x0037DFE8; was inside D_003E8FDC
+0x004361F4	scriptlabel	inferred	SMT3 name (scriptlabel 0x0054EE04, fldWap.c door table index); was fldSelectedActorEntryIndex; was fldSelectedActorEntryIndex
+0x003B7680	btlCameraPathPresetsBank0	inferred	battle camera path presets for bank 0 of btlInitializeCameraCursorFromPreset (BtlCameraPathPreset[20]); DDS1 0x00359EF0; was D_003B7680
+0x003B7E00	btlCameraPathPresetsBank2	inferred	battle camera path presets for bank 2 of btlInitializeCameraCursorFromPreset (BtlCameraPathPreset[3]); DDS1 0x0035A5B0; was D_003B7E00
+0x003B7F20	btlCameraPathPresetsBank4	inferred	battle camera path presets for bank 4 of btlInitializeCameraCursorFromPreset (BtlCameraPathPreset[2]); DDS1 0x0035A670; was D_003B7F20

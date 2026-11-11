@@ -3854,9 +3854,9 @@ BtlUnit *btlFindLinkedActorById(BtlLinkedCommand *action, s32 id) {
     return NULL;
 }
 
-extern BtlCameraPathPreset D_00359EF0[18];
-extern BtlCameraPathPreset D_0035A5B0[2];
-extern BtlCameraPathPreset D_0035A670[2];
+extern BtlCameraPathPreset btlCameraPathPresetsBank0[18];
+extern BtlCameraPathPreset btlCameraPathPresetsBank2[2];
+extern BtlCameraPathPreset btlCameraPathPresetsBank4[2];
 extern void btlUnitGetPosVU(BtlUnit *, u8);
 
 /* vu0 routine: initialize the selected battle-camera path preset. */
@@ -3879,16 +3879,16 @@ void btlInitializeCameraCursorFromPreset(BtlLinkedCommand *action, BtlCamState *
 
     switch (bank) {
     case 0:
-        preset = &D_00359EF0[presetIndex];
+        preset = &btlCameraPathPresetsBank0[presetIndex];
         break;
     case 2:
-        preset = &D_0035A5B0[presetIndex];
+        preset = &btlCameraPathPresetsBank2[presetIndex];
         break;
     case 4:
-        preset = &D_0035A670[presetIndex];
+        preset = &btlCameraPathPresetsBank4[presetIndex];
         break;
     default:
-        preset = &D_00359EF0[presetIndex];
+        preset = &btlCameraPathPresetsBank0[presetIndex];
         break;
     }
 

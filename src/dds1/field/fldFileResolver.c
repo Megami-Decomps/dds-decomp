@@ -683,7 +683,7 @@ extern u32 D_003BAE28;
 
 extern s32 gFldInf_HitIdx;
 
-extern u32 fldSelectedActorEntryIndex;
+extern u32 scriptlabel;
 
 extern u32 D_0032E428[];
 
