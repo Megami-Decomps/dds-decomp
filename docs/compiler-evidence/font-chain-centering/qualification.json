@@ -1,0 +1,65 @@
+{
+  "base_commit": "84ff8d8ec97dc28d5f6edf49f95fc938509c0212",
+  "function": "frFontCenterGlyphChainAt",
+  "new_matching_functions": 2,
+  "new_matching_retail_bytes": 592,
+  "games": {
+    "dds1": {
+      "address": "0x00196088",
+      "native_bytes": 296,
+      "emitted_bytes": 296,
+      "whole_owner": "92 match, 0 differ",
+      "source_sha256": "ac46823427d39e66d85df3139a7da7a688bfbf6136500cb637825c8c4c1f1a5d",
+      "symbol_aliases_sha256": "618483f5e1861b506a73a602761c782747cfc5b6ff2109703a3579f0bcc3abc0",
+      "ordinary_probed_parity": {
+        "assembly_parity_only_file_directive": true,
+        "allocated_section_parity": true,
+        "relocation_contract_parity": true,
+        "relocation_counts": {
+          ".rel.text": 317,
+          ".rela.text": 0
+        }
+      },
+      "whole_owner_log_sha256": "e0ab4feea291cb14e42e32cae4ef4cb84b9520566809ee0c9d916e353cf20b59",
+      "probe_manifest_sha256": "0b194a8f32422e15d36c793d97bd7d98bf2419191a533cffbd902aff2c0c248b"
+    },
+    "dds2": {
+      "address": "0x0019DD48",
+      "native_bytes": 296,
+      "emitted_bytes": 296,
+      "whole_owner": "92 match, 0 differ",
+      "source_sha256": "1071848cfa01625b50692f9031cd64684695f735c68a8032ead0ac3a8502bae5",
+      "symbol_aliases_sha256": "dcf68cd815fbfcbe36e1370c96a4a4f232cef8394ccd3d6a1a4b112f5b0b2eea",
+      "ordinary_probed_parity": {
+        "assembly_parity_only_file_directive": true,
+        "allocated_section_parity": true,
+        "relocation_contract_parity": true,
+        "relocation_counts": {
+          ".rel.text": 332,
+          ".rela.text": 0,
+          ".rel.rodata": 79,
+          ".rela.rodata": 0
+        }
+      },
+      "whole_owner_log_sha256": "09177a6a2f1fa60d80a026424f95a901c2bcc123170bb72f968f6fed564aa985",
+      "probe_manifest_sha256": "1833a8a4847ba0922cfd2c291a5c47886de07a4837eb6600c7cda692efd2a183"
+    }
+  },
+  "causal_control": {
+    "source_sha256": "864651ac0f354c4a5e78b8740bb3b66b06db0f213f35291cba33671201fa2823",
+    "check_sha256": "b663471c114705e12da3d6608272f315c2151bfa5fd5f810816ec5ec6c0a268e",
+    "differing_covered_words": 35,
+    "emitted_bytes": 280,
+    "native_bytes": 296,
+    "uncovered_bytes": 16,
+    "ordinary_probed_parity": true
+  },
+  "validation": {
+    "dds1_retail_sha1": "6d18898e2724bf1d145392766e8ba1e678487419",
+    "dds2_retail_sha1": "9be91ee1b4a535a4cb6ec89237b5a6ba41be2add",
+    "tests": "445 tests in 118 batches: OK",
+    "build_log_sha256": "31c02ea416614224bb0cfb9789e4cce80342b91ebd3fbf53b6cc2b4e79f864ee",
+    "test_log_sha256": "c6a032f7f8ab78987798e3bf7b81302aae62169522111759bf462bc3ef0a0ba2",
+    "independent_review_sha256": "ab8f7a100d2f07ace952e5b77e96fb9aace73bb29153d839c76424b47a092c5f"
+  }
+}

@@ -1583,49 +1583,52 @@ void frFontMoveChainTo(s32 targetX, s32 targetY, frFontHandle_t *glyphChain) {
     }
 }
 
-#ifdef NON_MATCHING
-#include "common.h"
-
-#define FR_FONT_POSITION_BAND_HEIGHT 0x54 /* a text line's band: glyphs within it share a line */
-
-/* Move a glyph chain so its first line starts at y and each line is centred
- * on x: a line is the glyphs from its first one whose y is within the band
- * height of it. Every glyph moves by the first line's y offset; each line's
- * glyphs move by x minus the line's first x, less half the line's measured
- * width (in 1/16 pixels). Retail reads the chain head's y before checking
- * the head for null; this reads it after. Upstream: INCLUDE_ASM in
- * interface/frFont; written from the retail routine. The same calls and stores;
- * scheduling differs. DDS2's body is this one with its own band height
- * (game/dds2/bodies/interface/frFont/). */
+/* Center each y-band around x and move the first row to y. A non-NULL chain
+ * requires a non-NULL origin, as in frFontMoveChainTo. Keep the row's original
+ * Y across the width calls, then translate using each glyph's current fields.
+ * The guarded band scan is the same family shape as the width/position queries
+ * above. See docs/matching/font-chain-centering.md for lifetime evidence. */
 void frFontCenterGlyphChainAt(s32 x, s32 y, frFontHandle_t *chain) {
-    frFontHandle_t *glyph;
+    frFontHandle_t *scan;
+    s32 currentY;
     s32 deltaY;
+    s32 deltaX;
+    s32 width;
+    s32 measureLimit;
+    s32 translateLimit;
 
-    if (chain == NULL || chain->chainHead == NULL) {
-        return;
+    if (chain != NULL) {
+        chain = chain->chainHead;
+        currentY = chain->y;
+        deltaY = y - currentY;
+        if (chain != NULL) {
+            do {
+                width = 0;
+                scan = chain;
+                currentY = chain->y;
+                if (chain != NULL) {
+                    measureLimit = currentY + FR_FONT_POSITION_BAND_HEIGHT;
+                    if (currentY < measureLimit) {
+                        do {
+                            width += frGetStrWidth(scan);
+                            scan = scan->next;
+                        } while (scan != NULL && scan->y < measureLimit);
+                    }
+                }
+                deltaX = x - chain->x;
+                if (chain != NULL) {
+                    translateLimit = currentY + FR_FONT_POSITION_BAND_HEIGHT;
+                    while (chain != NULL && chain->y < translateLimit) {
+                        chain->y += deltaY;
+                        chain->x = chain->x + deltaX - (width / 2) * 16;
+                        chain = chain->next;
+                    }
+                }
+            } while (chain != NULL);
+        }
     }
-    glyph = chain->chainHead;
-    deltaY = y - glyph->y;
-    do {
-        s32 limit = glyph->y + FR_FONT_POSITION_BAND_HEIGHT;
-        s32 width = 0;
-        s32 deltaX;
-        frFontHandle_t *scan;
-
-        for (scan = glyph; scan != NULL && scan->y < limit; scan = scan->next) {
-            width += frGetStrWidth(scan);
-        }
-        deltaX = x - glyph->x;
-        while (glyph != NULL && glyph->y < limit) {
-            glyph->y += deltaY;
-            glyph->x += deltaX - (width / 2) * 16;
-            glyph = glyph->next;
-        }
-    } while (glyph != NULL);
 }
-#else
-INCLUDE_ASM(const s32, "interface/frFont", frFontCenterGlyphChainAt);
-#endif
+
 
 /* Return a borrowed read-only bank view. Read the packed table count, skip the
  * table and trailing metadata word; the parser copies that metadata too. */
