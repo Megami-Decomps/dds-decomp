@@ -1,14 +1,3 @@
-/* This unit defines these with SMT3's types; sdk_libkernl.h keeps the game's. */
-#define SDK_SKIP_CreateSema
-#define SDK_SKIP_CreateThread
-#define SDK_SKIP_sceFsReset
-#define SDK_SKIP_sceGetstat
-#define SDK_SKIP_sceSifGetSreg
-#define SDK_SKIP_sceSifLoadFileReset
-#define SDK_SKIP_sceSifLoadModule
-#define SDK_SKIP_sceSifRegisterRpc
-#define SDK_SKIP_sceSifRpcLoop
-#define SDK_SKIP_sceSifSetRpcQueue
 #include "common.h"
 #include "newlib_stat.h"
 #include "sdk_libgcc.h"

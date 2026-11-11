@@ -3,11 +3,6 @@
 #include "common.h"
 #include "libsdf.h"
 #include "ps2asm.h"
-#define SDK_SKIP_CreateThread
-#define SDK_SKIP_sceGetstat
-#define SDK_SKIP_sceSifSetRpcQueue
-#define SDK_SKIP_sceSifRpcLoop
-typedef void *(*sceSifRpcFunc)(s32 function, void *request, s32 size);
 #include "sif_rpc.h"
 
 /* DDS keeps 13 loaded MIDI banks to SMT3's 7, which moves everything after the slots. */
