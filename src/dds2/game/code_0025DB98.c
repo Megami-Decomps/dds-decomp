@@ -2454,7 +2454,7 @@ extern s32 mnuCampAdvanceCounter(s32, MenuTerminalContext *);
 extern MenuPopupEntry mnuShopCommandPopupEntries[];
 extern u8 *datUnitNames;
 extern char D_00437840[];
-extern s32 D_003C9A20[];
+extern const char *D_003C9A20[];
 extern void evtCopyEntryStringToActiveWindow(s32, const char *);
 extern void evtClearActiveFlag();
 extern void mnuBuildEnabledCampEntryWindow();

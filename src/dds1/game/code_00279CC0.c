@@ -590,7 +590,7 @@ void mnuBindAssetEffectPayloads(MenuAssets *assets) {
 extern char D_003B2330[];
 extern char D_003B2348[];
 extern u32 mnuCampBackdropSpriteResourceNames[];
-extern u32 mnuCampBackdropAnimationResourceNames[];
+extern const char *mnuCampBackdropAnimationResourceNames[];
 
 /* Load the base sprite banks synchronously, bind the payloads, and reset the fifth bank's saved corner colors. */
 void mnuLoadBackdropAssetsAndTintSlots(MenuAssets *assets) {
@@ -617,7 +617,7 @@ extern char D_003B2348[];
 
 extern u32 mnuCampBackdropSpriteResourceNames[];
 
-extern u32 mnuCampBackdropAnimationResourceNames[];
+extern const char *mnuCampBackdropAnimationResourceNames[];
 
 void mnuRequestBaseAssets(MenuAssets *assets) {
     effRequestResourceByMode(D_003B2330, mnuCampBackdropSpriteResourceNames[1], EFF_RESOURCE_SOURCE_TRANSIENT,

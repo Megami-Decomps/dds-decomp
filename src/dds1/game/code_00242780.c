@@ -88,7 +88,7 @@ extern s32 mnuCampGetShopPriceStage();
 extern struct EffectSlotSet *D_003BC520;
 extern void mnuUnpackNibbleFields(EvtRuntimeChild *key, s32 *lowBitsOut, s32 *highBitsOut);
 
-extern u8 D_00368C40[];
+extern const char *D_00368C40[];
 
 extern s8 D_003BC39C;
 

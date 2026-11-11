@@ -8884,8 +8884,8 @@ void btlDrawActorCommandRows(BattleSceneObject *ctx, u16 kind, u16 page, u16 col
 }
 
 extern u16 btlReadUnitStatusMask(datUnitWork_t *);
-extern const u32 D_003A2E70[3];
-extern const u32 D_003A2E80[3];
+extern const u8 *const D_003A2E70[3];
+extern const u8 *const D_003A2E80[3];
 
 void func_001BE590(BattleSceneObject *object) {
     typedef struct CommandLabelBank { const u8 *text[3]; } CommandLabelBank;

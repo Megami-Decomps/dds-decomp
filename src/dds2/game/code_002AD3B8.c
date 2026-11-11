@@ -48,7 +48,7 @@ extern void mnuSetStateValue(u32 *, u32);
 extern void mnuSetPanelItemAuxiliaryValue(struct MenuPanelItem *, u32);
 extern char D_00437BD0[];
 extern char D_00437BD8[];
-extern s32 mnuRingCustomizationStatLabels[];
+extern const char *mnuRingCustomizationStatLabels[];
 extern s32 itfCreateFont2TextGlyph(s32, s32, s32, s32, s32, s32);
 typedef struct frFontHandle_t frFontHandle_t;
 extern s32 frDrawFontOt(frFontHandle_t *, s8, u32);

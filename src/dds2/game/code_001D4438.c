@@ -282,8 +282,6 @@ struct dds3ModelHandle_t;
 struct sdfGrOt_t;
 extern void btlDrawUnitTransparencyPasses(void *, void *, s32, u8 *, u32);
 extern struct sdfGrOt_t *sdfModelOtTable[13][4];
-extern u8 btlUnitTransparencySurfaces[];
-
 
 typedef struct BtlUnit BtlUnit;
 
@@ -473,20 +471,6 @@ extern void btlClearRuntimeFlag2000(void);
 extern u8 D_003E9130[];
 
 extern u8 D_003E9120[];
-
-extern s32 D_003BBF70[];
-
-extern s32 D_003BBF88[];
-
-extern s32 D_003BBFA8[];
-
-extern s32 D_003BC090[];
-
-extern s32 D_003BC0A0[];
-
-extern s32 D_003BC0C0[];
-
-extern s32 D_003BC0C8[];
 
 extern void btlAdvanceActorCameraPreset(BtlLinkedCommand *);
 extern void btlAdvanceCursorForUnmarkedUnit(BtlLinkedCommand *, BtlCamState *);

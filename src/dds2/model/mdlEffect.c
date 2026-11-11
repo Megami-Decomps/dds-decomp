@@ -62,9 +62,9 @@
 #include "sdf_gs_header.h"
 #include "mdl_option_state.h"
 
-extern s32 D_003C88C0[];
+extern const char *D_003C88C0[];
 
-extern s32 D_003C88C8[];
+extern const char *D_003C88C8[];
 
 
 #define MDL_VIEWER_RESOURCE_SLOTS 12
