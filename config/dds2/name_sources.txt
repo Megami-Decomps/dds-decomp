@@ -11803,3 +11803,20 @@
 0x0040BED0	padRequestNames	inferred	libpad const char *[4] request names; SMT3 padRequestNames 0x00529FD0; was D_0040BED0; was D_0040BED0
 0x00436C20	btlDebugTopMenuList	inferred	void *[2] {&D_003BEA48 (the DEBUG MENU page), NULL}, after the row text WIDTH; no reader; DDS1 0x003BB7E8; split off D_00436C18
 0x00437220	evtDebugCameraLabels	inferred	const char *[2] {"FREE CAMERA" (D_004221C8), NULL} in evtDebug's .sdata, no reader; DDS1 0x003BBDE0; was D_00437220, split off the "%s" string at D_00437228
+0x0034B3E8	scePadInfoComb	inferred	libpad function, SMT3 scePadInfoComb 0x002CA998; was func_0034B3E8
+0x0034B508	scePadInfoMode	inferred	libpad function, SMT3 scePadInfoMode 0x002CAAB8; was func_0034B508
+0x0040BEA8	padInitialized	inferred	libpad data, SMT3 padInitialized 0x00529FA8; was D_0040BEA8
+0x0040BEAC	padDebugPrint	inferred	libpad data, SMT3 padDebugPrint 0x00529FAC; was D_0040BEAC
+0x0047FE80	padRpcClient	inferred	libpad data, SMT3 padRpcClient 0x00598980; was D_0047FE80
+0x0047FED0	padPortState	inferred	libpad data, SMT3 padPortState 0x005989D0; was D_0047FED0
+0x0047FFC0	padCmdBlock	inferred	libpad data, SMT3 padCmdBlock 0x00598AC0; was D_0047FFC0
+0x004800C0	padRpcPacket	inferred	libpad data, SMT3 padRpcPacket 0x00598BC0; was D_004800C0
+0x0042F390	padDmaFailMsg	inferred	libpad data, SMT3 padDmaFailMsg 0x0054A960; was D_0042F390
+0x0042F488	padStateNameError	inferred	libpad data, SMT3 padStateNameError 0x0054AA58; was D_0042F488
+0x0042F490	padStateNameStable	inferred	libpad data, SMT3 padStateNameStable 0x0054AA60; was D_0042F490
+0x0042F498	padStateNameExecCmd	inferred	libpad data, SMT3 padStateNameExecCmd 0x0054AA68; was D_0042F498
+0x0042F4A0	padStateNameFindCtp1	inferred	libpad data, SMT3 padStateNameFindCtp1 0x0054AA70; was D_0042F4A0
+0x0042F4B8	padStateNameDisconnect	inferred	libpad data, SMT3 padStateNameDisconnect 0x0054AA88; was D_0042F4B8
+0x0042F4C8	padRequestNameBusy	inferred	libpad data, SMT3 padRequestNameBusy 0x0054AA98; was D_0042F4C8
+0x0042F4D0	padRequestNameFailed	inferred	libpad data, SMT3 padRequestNameFailed 0x0054AAA0; was D_0042F4D0
+0x0042F4D8	padRequestNameComplete	inferred	libpad data, SMT3 padRequestNameComplete 0x0054AAA8; was D_0042F4D8
