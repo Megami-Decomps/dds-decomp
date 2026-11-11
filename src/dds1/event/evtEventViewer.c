@@ -1,6 +1,7 @@
 #include "sdk_ps2.h"
 #include "mnu_camp_display.h"
 #include "common.h"
+#include "kernel_draw.h"
 #include "draw3d.h"
 #include "dds3_task_create.h"
 #include "sdf_chip.h"
@@ -1003,7 +1004,7 @@ void evtViewerApplyParameterKeyTracks(evtViewerInfo_t *viewer) {
 }
 
 extern sdf3DFogParam_t dds3FogState;
-extern u128 *dds3LightParam[];
+extern dds3LightState_t dds3LightParam;
 extern u128 dds3AmbientColor[];
 extern f32 sdfFaceDivSoften;
 extern f32 sdfFaceDivBias;
@@ -4301,7 +4302,7 @@ s32 evtEventViewerCopyEffectSetupPayload(s32 unused0, s32 unused1, evtViewerInfo
         switch (viewer->commandCategory) {
         case 13:
             destination = entry->payload;
-            source = dds3LightParam[0];
+            source = (u128 *)dds3LightParam.parallel[0];
             SDF_VU0_COPYVECTOR(destination, source);
             SDF_VU0_COPYVECTOR(destination + 1, source + 1);
             SDF_VU0_COPYVECTOR(destination + 2, dds3AmbientColor);

@@ -9,6 +9,7 @@
 #include "sdf_packet_builders.h"
 #include "sdf_bordered_rectangle_packet.h"
 #include "common.h"
+#include "kernel_draw.h"
 #include "sdf_file_existence_api.h"
 #include "dds3_object_flags.h"
 #include "ps2asm.h"
@@ -2877,7 +2878,7 @@ extern u16 D_003C8AC0[16];
 
 extern s8 D_0037F520[16];
 
-extern sdf3DLight_t *dds3LightParam[3];
+extern dds3LightState_t dds3LightParam;
 
 extern f32 dds3AmbientColor[4];
 
@@ -2961,7 +2962,7 @@ s32 mdlDebugPrintEffectScale(dds3ProcessID_t *task) {
         state->pad = (MdlPadState *)D_0037F520;
     }
     if (state->lights == NULL) {
-        state->lights = dds3LightParam;
+        state->lights = dds3LightParam.parallel;
     }
     if (state->ambient == NULL) {
         state->ambient = dds3AmbientColor;

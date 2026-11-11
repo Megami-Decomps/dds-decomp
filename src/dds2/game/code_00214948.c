@@ -1,5 +1,6 @@
 #include "btl_motion_transform.h"
 #include "common.h"
+#include "kernel_draw.h"
 #include "btl_unit_defeat_by_delta_result.h"
 #include "btl_action_state_api.h"
 #include "btl_task.h"
@@ -6487,7 +6488,7 @@ u64 btlCreateLinkedActorTransformTasks(u64 prerequisiteHandle) {
     return load->handle;
 }
 
-extern f32 *dds3LightParam[];
+extern dds3LightState_t dds3LightParam;
 
 void btlRestoreLinkedActorSceneColor(void) {
     BattleEffectPayload *effect = ((BtlState *)btlGetRuntime())->effect;
@@ -6497,7 +6498,7 @@ void btlRestoreLinkedActorSceneColor(void) {
     if (effect != NULL) {
         actor = effect->action.actor;
         if (actor != NULL && (actor->status.flags & 2)) {
-            SDF_VU0_LOADVECTOR(dds3LightParam[0]);
+            SDF_VU0_LOADVECTOR(&dds3LightParam.parallel[0]->color);
             SDF_VU0_dds3ColorFtoI(packed[0], 128.0f);
             evtSetUnitColorRGB(actor->ext, 0, packed[0]);
         }

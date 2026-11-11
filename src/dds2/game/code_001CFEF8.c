@@ -1,4 +1,5 @@
 #include "common.h"
+#include "kernel_draw.h"
 #include "btl_action_state_api.h"
 #include "btl_actor_resource_table_kind.h"
 #include "btl_selected_entry_api.h"
@@ -109,7 +110,7 @@ typedef struct BattleEffectParams {
 
 
 
-extern f32 *dds3LightParam[];
+extern dds3LightState_t dds3LightParam;
 
 extern BtlRuntimeTask *btlCreateEffectTaskWithSourceParams(const void *sourceParams, u32 value);
 
@@ -259,7 +260,7 @@ s32 fldSceneStateStartTileEffect(BtlState *scene) {
             params.scale[0] = 0.19607843f;
             params.scale[1] = 0.19607843f;
             params.scale[2] = 0.19607843f;
-            origin = dds3LightParam[0];
+            origin = &dds3LightParam.parallel[0]->color.x;
             params.position[0] = origin[4];
             params.position[1] = origin[5];
             params.position[2] = origin[6];

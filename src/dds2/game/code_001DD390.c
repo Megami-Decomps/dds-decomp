@@ -9,6 +9,7 @@
 #include "btl_actor_transform_parameters.h"
 #include "btl_select_transform_parameters_api.h"
 #include "common.h"
+#include "kernel_draw.h"
 #include "sdf_map_position_api.h"
 #include "btl_unit_defeat_by_delta_result.h"
 #include "btl_action_entry_is_empty_api.h"
@@ -211,11 +212,11 @@ extern void btlClearRuntimeFlag2000(void);
 
 extern u8 D_003E9130[];
 
-extern f32 *dds3LightParam[];
+extern dds3LightState_t dds3LightParam;
 
 extern u8 dds3AmbientColor[];
 
-extern f32 *dds3LightParam[];
+extern dds3LightState_t dds3LightParam;
 
 extern s32 btlDoesEnabledStatusMatchCurrentId(datUnitWork_t *, u32);
 
@@ -4570,7 +4571,7 @@ u32 btlUnitBaseLightTask(BtlUnitBaseLightArgs *work) {
                 SDF_VU0_COPYVECTOR(unit->colorEnd, info->secondColor);
                 SDF_VU0_COPYVECTOR(unit->lightDirection, info->direction);
             } else {
-                f32 *defaultLight = dds3LightParam[0];
+                f32 *defaultLight = &dds3LightParam.parallel[0]->color.x;
                 SDF_VU0_COPYVECTOR(unit->colorStart, defaultLight);
                 SDF_VU0_COPYVECTOR(unit->colorEnd, dds3AmbientColor);
                 SDF_VU0_COPYVECTOR(unit->lightDirection, defaultLight + 4);

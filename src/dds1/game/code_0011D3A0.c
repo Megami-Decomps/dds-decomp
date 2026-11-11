@@ -11,6 +11,7 @@
 #include "dds3_task_create.h"
 #include "sdf_vu_matrix.h"
 #include "common.h"
+#include "kernel_draw.h"
 #include "fld_map_slot_auxiliary_flag_selector.h"
 #include "sdf_map_position_api.h"
 #include "fld_scene_ready_api.h"
@@ -996,7 +997,7 @@ extern s8 D_003C3800[26][26][2];
 extern f32 D_003C3D50[26][26][4];
 extern f32 D_003C6790[26][26][4];
 extern f32 aViewTarget[4], aViewEye[4];
-extern sdf3DLight_t *dds3LightParam[3];
+extern dds3LightState_t dds3LightParam;
 
 extern f32 D_00330670[16];
 extern f32 D_003246B0[16];
@@ -1155,9 +1156,9 @@ void fldSdwDraw(dds3Basic_t *object) {
                 D_003C2E90[2] = transition->vec10[2];
                 length = 200.0f;
             } else {
-                D_003C2E90[0] = dds3LightParam[0]->v.x;
+                D_003C2E90[0] = dds3LightParam.parallel[0]->v.x;
                 D_003C2E90[1] = 2.0f;
-                D_003C2E90[2] = dds3LightParam[0]->v.z;
+                D_003C2E90[2] = dds3LightParam.parallel[0]->v.z;
             }
         }
     } else {

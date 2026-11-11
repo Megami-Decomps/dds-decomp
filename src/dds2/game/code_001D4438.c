@@ -13,6 +13,7 @@
 #include "btl_motion_transform.h"
 #include "btl_unit_motion_duration_api.h"
 #include "common.h"
+#include "kernel_draw.h"
 #include "btl_unit_defeat_by_delta_result.h"
 #include "btl_action_state_api.h"
 #include "btl_action_entry_is_empty_api.h"
@@ -146,7 +147,7 @@ typedef struct SceneScriptState {
 extern SceneControl *btlCommandPanelWork;
 extern BattleSelectionWork *btlLinkedSelectionTaskBuffer;
 extern f32 D_00433724;
-extern f32 *dds3LightParam[];
+extern dds3LightState_t dds3LightParam;
 extern u32 btlGetActorCommandClass(BattleSceneObject *, s8);
 extern BtlRuntimeTask *btlCreateEffectTaskWithSourceParams(const void *, u32);
 extern s32 btlCountTasksForOwner(u64);
@@ -500,7 +501,7 @@ extern void p2sdSetPcmBuffer(const void *, s32);
 
 
 
-extern f32 *dds3LightParam[];
+extern dds3LightState_t dds3LightParam;
 
 extern u8 dds3AmbientColor[];
 

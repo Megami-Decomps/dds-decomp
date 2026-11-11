@@ -32,6 +32,7 @@
 #include "eff_point_set_table.h"
 #include "eff_span_work.h"
 #include "common.h"
+#include "kernel_draw.h"
 #include "dds3_camera_update_flags.h"
 #include "ps2asm.h"
 #include "eff_emitter_type.h"
@@ -10570,7 +10571,7 @@ s32 effComputeLightDirectionVU(dds3ModelHandle_t *vector, sdf3DLightParallelPack
     return result;
 }
 
-extern u128 *dds3LightParam[];
+extern dds3LightState_t dds3LightParam;
 
 extern u128 D_003DCB90[];
 
@@ -10578,7 +10579,7 @@ extern u128 dds3AmbientColor[];
 
 void effResetDefaultColorTables(void) {
     u128 *dst = D_003DCB90;
-    u128 *src = dds3LightParam[0];
+    u128 *src = (u128 *)dds3LightParam.parallel[0];
     SDF_VU0_COPYVECTOR(dst, src);
     dst++;
     src++;
