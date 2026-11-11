@@ -316,7 +316,8 @@ segments:
       - [0x1FACD0, asm, sdk/libm]
       - [0x1FCF58, asm, sdk/libgcc]
       - [0x1FF248, asm, sdk/libc]
-      - [0x20B600, asm, sdk/libkernl]  # first signature hit 0x0030A600
+      - [0x20B600, c, sdk/libkernl]  # first signature hit 0x0030A600
+      - [0x214E7C, asm, sdk/libgcc_longlong]
       # .vutext: VU1 microcode (no VU disassembler in splat yet).
       - [0x216BA0, textbin, vutext]
       # .ctors, .dtors, .reginfo
@@ -466,6 +467,8 @@ segments:
       - [0x2B6030, .rodata, sdf/sdf_Decomp]
       - [0x2B6060, .rodata, sdf/sdfTmx]
       - [0x2B6100, rodata, rodata_003B5100]
+      - [0x2B9660, .rodata, sdk/libkernl]
+      - [0x2B98F8, rodata, rodata_003B88F8]
       - [0x2B9D00, .lit4, kernel/dds3PadManager]
       - [0x2B9D08, .lit4, kernel/dds3KernelDraw]
       - [0x2B9D18, .lit4, script/scrCommonCommand]

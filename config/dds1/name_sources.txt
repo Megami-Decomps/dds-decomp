@@ -10893,3 +10893,112 @@
 0x00355FA0	filterDebugMenuItems	inferred	filterDebugMenu items (7 effDebugMenuItem_t), named after SMT3 effBTLDebugMenuItems; was D_00355FA0
 0x003560B0	mfilterDebugMenuItems	inferred	mfilterDebugMenu items (9 effDebugMenuItem_t), named after SMT3 effBTLDebugMenuItems; was D_003560B0
 0x003561F8	rblurDebugMenuItems	inferred	rblurDebugMenu items (15 effDebugMenuItem_t), named after SMT3 effBTLDebugMenuItems; was D_003561F8
+0x00313898	GetTLBEntry	inferred	SMT3 twin GetTLBEntry (TLB syscall block); RFU087_PollEvnetFlag is the event flag stub at 0x0030AB90; was RFU087_PollEvnetFlag
+0x0030A630	RFU003	inferred	SMT3 twin RFU003 (sdk/libkernl, identical code); was func_0030A630
+0x0030A640	libc_2DBAC0	inferred	SMT3 twin libc_2DBAC0 (sdk/libkernl, identical code); was func_0030A640
+0x0030A650	RFU005	inferred	SMT3 twin RFU005 (sdk/libkernl, identical code); was func_0030A650
+0x0030A660	libc_2DBAE0	inferred	SMT3 twin libc_2DBAE0 (sdk/libkernl, identical code); was func_0030A660
+0x0030A700	AddIntcHandler	inferred	SMT3 twin AddIntcHandler (sdk/libkernl, identical code); was func_0030A700
+0x0030A730	AddDmacHandler	inferred	SMT3 twin AddDmacHandler (sdk/libkernl, identical code); was func_0030A730
+0x0030A9E0	RFU060	inferred	SMT3 twin RFU060 (sdk/libkernl, identical code); was func_0030A9E0
+0x0030A9F0	RFU061	inferred	SMT3 twin RFU061 (sdk/libkernl, identical code); was func_0030A9F0
+0x0030AAB0	RFU073	inferred	SMT3 twin RFU073 (sdk/libkernl, identical code); was func_0030AAB0
+0x0030AB10	SetGsVParam	inferred	SMT3 twin SetGsVParam (sdk/libkernl, identical code); was func_0030AB10
+0x0030AB20	RFU080_CreateEventFlag	inferred	SMT3 twin RFU080_CreateEventFlag (sdk/libkernl, identical code); was func_0030AB20
+0x0030AB30	RFU081_DeleteEventFlag	inferred	SMT3 twin RFU081_DeleteEventFlag (sdk/libkernl, identical code); was func_0030AB30
+0x0030AB40	RFU082_SetEventFlag	inferred	SMT3 twin RFU082_SetEventFlag (sdk/libkernl, identical code); was func_0030AB40
+0x0030AB50	RFU083_iSetEventFlag	inferred	SMT3 twin RFU083_iSetEventFlag (sdk/libkernl, identical code); was func_0030AB50
+0x0030AB60	RFU084_ClearEventFlag	inferred	SMT3 twin RFU084_ClearEventFlag (sdk/libkernl, identical code); was func_0030AB60
+0x0030AB70	RFU085_iClearEventFlag	inferred	SMT3 twin RFU085_iClearEventFlag (sdk/libkernl, identical code); was func_0030AB70
+0x0030AB80	RFU086_WaitEvnetFlag	inferred	SMT3 twin RFU086_WaitEvnetFlag (sdk/libkernl, identical code); was func_0030AB80
+0x0030AB90	RFU087_PollEvnetFlag	inferred	SMT3 twin RFU087_PollEvnetFlag (sdk/libkernl, identical code); was func_0030AB90
+0x0030ABA0	RFU088_iPollEvnetFlag	inferred	SMT3 twin RFU088_iPollEvnetFlag (sdk/libkernl, identical code); was func_0030ABA0
+0x0030ABB0	RFU089_ReferEventFlagStatus	inferred	SMT3 twin RFU089_ReferEventFlagStatus (sdk/libkernl, identical code); was func_0030ABB0
+0x0030ABC0	RFU090_iReferEventFlagStatus	inferred	SMT3 twin RFU090_iReferEventFlagStatus (sdk/libkernl, identical code); was func_0030ABC0
+0x0030ABD0	RFU091	inferred	SMT3 twin RFU091 (sdk/libkernl, identical code); was func_0030ABD0
+0x0030ABE0	EnableIntcHandler	inferred	SMT3 twin EnableIntcHandler (sdk/libkernl, identical code); was func_0030ABE0
+0x0030ABF0	iEnableIntcHandler	inferred	SMT3 twin iEnableIntcHandler (sdk/libkernl, identical code); was func_0030ABF0
+0x0030AC00	DisableIntcHandler	inferred	SMT3 twin DisableIntcHandler (sdk/libkernl, identical code); was func_0030AC00
+0x0030AC10	iDisableIntcHandler	inferred	SMT3 twin iDisableIntcHandler (sdk/libkernl, identical code); was func_0030AC10
+0x0030AC20	EnableDmacHandler	inferred	SMT3 twin EnableDmacHandler (sdk/libkernl, identical code); was func_0030AC20
+0x0030AC30	iEnableDmacHandler	inferred	SMT3 twin iEnableDmacHandler (sdk/libkernl, identical code); was func_0030AC30
+0x0030AC40	DisableDmacHandler	inferred	SMT3 twin DisableDmacHandler (sdk/libkernl, identical code); was func_0030AC40
+0x0030AC50	iDisableDmacHandler	inferred	SMT3 twin iDisableDmacHandler (sdk/libkernl, identical code); was func_0030AC50
+0x0030AC60	KSeg0	inferred	SMT3 twin KSeg0 (sdk/libkernl, identical code); was func_0030AC60
+0x0030AC70	EnableCache	inferred	SMT3 twin EnableCache (sdk/libkernl, identical code); was func_0030AC70
+0x0030AC80	DisableCache	inferred	SMT3 twin DisableCache (sdk/libkernl, identical code); was func_0030AC80
+0x0030AC90	GetCop0	inferred	SMT3 twin GetCop0 (sdk/libkernl, identical code); was func_0030AC90
+0x0030ACE0	iCpuConfig	inferred	SMT3 twin iCpuConfig (sdk/libkernl, identical code); was func_0030ACE0
+0x0030AD30	GetOsdConfigParam2	inferred	SMT3 twin GetOsdConfigParam2 (sdk/libkernl, identical code); was func_0030AD30
+0x0030ADA0	RFU116	inferred	SMT3 twin RFU116 (sdk/libkernl, identical code); was func_0030ADA0
+0x0030B1F0	libc_2DC670	inferred	SMT3 twin libc_2DC670 (sdk/libkernl, identical code); was func_0030B1F0
+0x0030BA80	gcc2_compiled__10	inferred	SMT3 twin gcc2_compiled__10 (sdk/libkernl, identical code); was func_0030BA80
+0x0030C940	gcc2_compiled__12	inferred	SMT3 twin gcc2_compiled__12 (sdk/libkernl, identical code); was func_0030C940
+0x0030DFE8	gcc2_compiled__13	inferred	SMT3 twin gcc2_compiled__13 (sdk/libkernl, identical code); was func_0030DFE8
+0x00312ED0	gcc2_compiled__15	inferred	SMT3 twin gcc2_compiled__15 (sdk/libkernl, identical code); was func_00312ED0
+0x00313050	gcc2_compiled__16	inferred	SMT3 twin gcc2_compiled__16 (sdk/libkernl, identical code); was func_00313050
+0x003132F0	gcc2_compiled__17	inferred	SMT3 twin gcc2_compiled__17 (sdk/libkernl, identical code); was func_003132F0
+0x003138B8	ProbeTLBEntry	inferred	SMT3 twin ProbeTLBEntry (sdk/libkernl, identical code); was func_003138B8
+0x003138C8	iProbeTLBEntry	inferred	SMT3 twin iProbeTLBEntry (sdk/libkernl, identical code); was func_003138C8
+0x003138D8	ExpandScratchPad	inferred	SMT3 twin ExpandScratchPad (sdk/libkernl, identical code); was func_003138D8
+0x0039C44C	ttyInitDone	inferred	SMT3 twin ttyInitDone (sdk/libkernl sceResetttyinit reads it at the same instruction); was D_0039C44C
+0x00315B80	__errno_8	inferred	SMT3 twin __errno_8 (sdk/libkernl open reads it at the same instruction); was func_00315B80
+0x00406FF0	threadMgrSema	inferred	SMT3 twin threadMgrSema (sdk/libkernl topThread reads it at the same instruction); was D_00406FF0
+0x003B85C8	kernlInternalErrorMsg	inferred	SMT3 twin kernlInternalErrorMsg (sdk/libkernl topThread reads it at the same instruction); was D_003B85C8
+0x0039C454	topThreadId	inferred	SMT3 twin topThreadId (sdk/libkernl InitThread reads it at the same instruction); was D_0039C454
+0x00406BF0	topThreadStack	inferred	SMT3 twin topThreadStack (sdk/libkernl InitThread reads it at the same instruction); was D_00406BF0
+0x00406FF8	threadCommandQueue	inferred	SMT3 twin threadCommandQueue (sdk/libkernl InitThread reads it at the same instruction); was D_00406FF8
+0x003B85F0	ttyMsgPacketTooLarge	inferred	SMT3 twin ttyMsgPacketTooLarge (sdk/libkernl sceTtyHandler reads it at the same instruction); was D_003B85F0
+0x003B8618	ttyMsgReceiveError	inferred	SMT3 twin ttyMsgReceiveError (sdk/libkernl sceTtyHandler reads it at the same instruction); was D_003B8618
+0x003B8630	ttyMsgSendError	inferred	SMT3 twin ttyMsgSendError (sdk/libkernl sceTtyHandler reads it at the same instruction); was D_003B8630
+0x003B8648	ttyMsgWlenError	inferred	SMT3 twin ttyMsgWlenError (sdk/libkernl sceTtyHandler reads it at the same instruction); was D_003B8648
+0x00407510	ttyState	inferred	SMT3 twin ttyState (sdk/libkernl sceTtyWrite reads it at the same instruction); was D_00407510
+0x00407540	ttySendPacket	inferred	SMT3 twin ttySendPacket (sdk/libkernl sceTtyWrite reads it at the same instruction); was D_00407540
+0x00407680	ttyReceivePacket	inferred	SMT3 twin ttyReceivePacket (sdk/libkernl sceTtyInit reads it at the same instruction); was D_00407680
+0x0039C458	deci2LineIndex	inferred	SMT3 twin deci2LineIndex (sdk/libkernl deci2Putchar reads it at the same instruction); was D_0039C458
+0x004077C0	deci2LineBuffer	inferred	SMT3 twin deci2LineBuffer (sdk/libkernl deci2Putchar reads it at the same instruction); was D_004077C0
+0x0039C45C	printfPutchar	inferred	SMT3 twin printfPutchar (sdk/libkernl printfloat reads it at the same instruction); was D_0039C45C
+0x003158E8	dpdiv	inferred	SMT3 twin dpdiv (sdk/libkernl printfloat reads it at the same instruction); was func_003158E8
+0x00407A40	sifSregs	inferred	SMT3 twin sifSregs (sdk/libkernl sceSifGetSreg reads it at the same instruction); was D_00407A40
+0x00407918	sifCommandContext	inferred	SMT3 twin sifCommandContext (sdk/libkernl sceSifGetDataTable reads it at the same instruction); was D_00407918
+0x00407914	sifDmacHandlerId	inferred	SMT3 twin sifDmacHandlerId (sdk/libkernl sceSifInitCmd reads it at the same instruction); was D_00407914
+0x0039C464	sifRpcInitialized	inferred	SMT3 twin sifRpcInitialized (sdk/libkernl sceSifInitRpc reads it at the same instruction); was D_0039C464
+0x00407AC0	rpcPackets	inferred	SMT3 twin rpcPackets (sdk/libkernl sceSifInitRpc reads it at the same instruction); was D_00407AC0
+0x004092C0	sifRpcQueue	inferred	SMT3 twin sifRpcQueue (sdk/libkernl sceSifInitRpc reads it at the same instruction); was D_004092C0
+0x004082C0	rpcForwardPackets	inferred	SMT3 twin rpcForwardPackets (sdk/libkernl sceSifInitRpc reads it at the same instruction); was D_004082C0
+0x00408AC0	rpcIndexedPackets	inferred	SMT3 twin rpcIndexedPackets (sdk/libkernl sceSifInitRpc reads it at the same instruction); was D_00408AC0
+0x0039C4F8	fsIobSema	inferred	SMT3 twin fsIobSema (sdk/libkernl new_iob reads it at the same instruction); was D_0039C4F8
+0x0040A840	fsIobTable	inferred	SMT3 twin fsIobTable (sdk/libkernl new_iob reads it at the same instruction); was D_0040A840
+0x0039C4F4	fsCommandSema	inferred	SMT3 twin fsCommandSema (sdk/libkernl _sceFsSemInit reads it at the same instruction); was D_0039C4F4
+0x0040AAC0	fsPowerOffState	inferred	SMT3 twin fsPowerOffState (sdk/libkernl scePowerOffHandler reads it at the same instruction); was D_0040AAC0
+0x0039C4EC	fsInitialized	inferred	SMT3 twin fsInitialized (sdk/libkernl scePowerOffHandler reads it at the same instruction); was D_0039C4EC
+0x0040AA68	fsDetectedVersion	inferred	SMT3 twin fsDetectedVersion (sdk/libkernl _fs_version reads it at the same instruction); was D_0040AA68
+0x0039C500	fsFallbackVersion	inferred	SMT3 twin fsFallbackVersion (sdk/libkernl _fs_version reads it at the same instruction); was D_0039C500
+0x00409340	fsRequest	inferred	SMT3 twin fsRequest (sdk/libkernl sceOpen reads it at the same instruction); was D_00409340
+0x0040AA40	fsRpcClient	inferred	SMT3 twin fsRpcClient (sdk/libkernl sceOpen reads it at the same instruction); was D_0040AA40
+0x00409F80	fsVersionRpcBuffer	inferred	SMT3 twin fsVersionRpcBuffer (sdk/libkernl sceOpen reads it at the same instruction); was D_00409F80
+0x0039C4FC	fsIoctlSema	inferred	SMT3 twin fsIoctlSema (sdk/libkernl sceLseek reads it at the same instruction); was D_0039C4FC
+0x0039C468	fsRequestSemas	inferred	SMT3 twin fsRequestSemas (sdk/libkernl sceLseek reads it at the same instruction); was D_0039C468
+0x0040AB00	iopHeapRpcClient	inferred	SMT3 twin iopHeapRpcClient (sdk/libkernl sceSifInitIopHeap reads it at the same instruction); was D_0040AB00
+0x0039C504	iopHeapStatus	inferred	SMT3 twin iopHeapStatus (sdk/libkernl sceSifInitIopHeap reads it at the same instruction); was D_0039C504
+0x0040AB80	iopHeapArgs	inferred	SMT3 twin iopHeapArgs (sdk/libkernl sceSifAllocIopHeap reads it at the same instruction); was D_0040AB80
+0x0040AB40	iopHeapResult	inferred	SMT3 twin iopHeapResult (sdk/libkernl sceSifAllocIopHeap reads it at the same instruction); was D_0040AB40
+0x0040ABC0	iopHeapLoadRequest	inferred	SMT3 twin iopHeapLoadRequest (sdk/libkernl sceSifLoadIopHeap reads it at the same instruction); was D_0040ABC0
+0x0039C508	lfBindStatus	inferred	SMT3 twin lfBindStatus (sdk/libkernl _lf_bind reads it at the same instruction); was D_0039C508
+0x0040AEC0	lfRpcClient	inferred	SMT3 twin lfRpcClient (sdk/libkernl _lf_bind reads it at the same instruction); was D_0040AEC0
+0x0040ACC0	lfRequest	inferred	SMT3 twin lfRequest (sdk/libkernl _lf_bind reads it at the same instruction); was D_0040ACC0
+0x0040AEE8	lfDetectedVersion	inferred	SMT3 twin lfDetectedVersion (sdk/libkernl _lf_bind reads it at the same instruction); was D_0040AEE8
+0x0039C50C	lfFallbackVersion	inferred	SMT3 twin lfFallbackVersion (sdk/libkernl _lf_version reads it at the same instruction); was D_0039C50C
+0x0040AF00	sifResetPacket	inferred	SMT3 twin sifResetPacket (sdk/libkernl sceSifResetIop reads it at the same instruction); was D_0040AF00
+0x0039C528	mallocSema	inferred	SMT3 twin mallocSema (sdk/libkernl supplement_crt0 reads it at the same instruction); was D_0039C528
+0x0039C510	systemCallTable	inferred	SMT3 twin systemCallTable (sdk/libkernl GetSystemCallEntry reads it at the same instruction); was D_0039C510
+0x0039C518	systemCallEntryPairs	inferred	SMT3 twin systemCallEntryPairs (sdk/libkernl GetSystemCallTableEntry reads it at the same instruction); was D_0039C518
+0x003B8870	execDefaultPath	inferred	SMT3 twin execDefaultPath (sdk/libkernl ExecPS2 reads it at the same instruction); was D_003B8870
+0x0040AF68	deci2PacketStorage	inferred	SMT3 twin deci2PacketStorage (sdk/libkernl sceDeci2Open reads it at the same instruction); was D_0040AF68
+0x0039D7D8	debugHandlers	inferred	SMT3 twin debugHandlers (sdk/libkernl SetDebugHandler reads it at the same instruction); was D_0039D7D8
+0x00313D80	_kDebugException	inferred	SMT3 twin _kDebugException (sdk/libkernl SetDebugHandler reads it at the same instruction); was func_00313D80
+0x0039C448	kernelBuiltinVersion	inferred	SMT3 twin kernelBuiltinVersion (_fs_version reads it); was fileioLibraryVersion
+0x00313B40	_kTLBException	inferred	SetTLBHandler installs it where SMT3 installs _kTLBException; was func_00313B40
+0x0030E140	_sceFs_Rcv_Intr	inferred	SMT3 _sceFs_Rcv_Intr at the same place in the fileio unit, newer code; was func_0030E140
+0x0030F450	sceIoctl	inferred	SMT3 sceIoctl at the same place between sceWrite and sceIoctl2, newer code; was func_0030F450
+0x00407400	ttyQueueStorage	inferred	SMT3 twin ttyQueueStorage (gcc2_compiled__10 returns it); was D_00407400

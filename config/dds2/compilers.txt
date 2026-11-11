@@ -1,0 +1,2 @@
+# Per-unit compiler: <unit> <toolchain id>  # evidence
+sdk/libkernl         ee-gcc2.9-991111-01  # SMT3 libkernl.c C bodies rebuild this unit's retail bytes

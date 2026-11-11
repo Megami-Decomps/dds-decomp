@@ -82,6 +82,28 @@ AS_FLAGS = "-EL -march=r5900 -mabi=eabi -G8 -Iinclude"
 # libm call argument moves, mtc1/lwc1/cvt dependents, indexed la/memory macros).
 EE_AS_FLAGS = "-EL -G8 -g -Iinclude"
 
+# The Sony EE libraries were compiled by an older ee-gcc than the game code, at
+# the flags their own makefile records (smt3-decomp docs/sdk-matching.md). Their
+# assembler fills branch delay slots: these units carry no -g.
+EEGCC29 = TOOLS / "compilers" / "ee-gcc2.9-991111-01"
+TOOLCHAINS = {
+    "ee-gcc2.96": {
+        "cc1": CC1,
+        "defines": CC1_DEFINES,
+        "flags": CC1_FLAGS,
+        "as": EE_AS,
+        "as_flags": EE_AS_FLAGS,
+    },
+    "ee-gcc2.9-991111-01": {
+        "cc1": EEGCC29 / "lib" / "gcc-lib" / "ee" / "2.9-ee-991111-01" / "cc1",
+        "defines": CC1_DEFINES.replace("-D__GNUC_MINOR__=96", "-D__GNUC_MINOR__=9"),
+        "flags": "-quiet -O2 -G 0 -fno-common",
+        "as": EE_AS,
+        "as_flags": "-EL -G0 -Iinclude",
+    },
+}
+DEFAULT_TOOLCHAIN = "ee-gcc2.96"
+
 
 def i386_prefix() -> str:
     """cc1/ee-as are 32-bit i386 binaries. Without a system /lib/ld-linux.so.2,
@@ -133,9 +155,32 @@ def unit_cflags(version: str) -> dict[str, str]:
     return out
 
 
-def unit_asflags(cflags: str) -> str:
+def unit_toolchain(version: str) -> dict[str, str]:
+    """Per-unit compiler from config/<v>/compilers.txt (`<dir>/<unit>  <id>  # evidence`)."""
+    path = ROOT / "config" / version / "compilers.txt"
+    out = {}
+    if path.exists():
+        for line in path.read_text().splitlines():
+            line = line.split("#", 1)[0].strip()
+            if line:
+                unit, name = line.split(None, 1)
+                name = name.strip()
+                if name not in TOOLCHAINS:
+                    raise SystemExit(f"{path}: {unit}: unknown compiler {name!r}")
+                out[unit] = name
+    return out
+
+
+def unit_tools(version: str, unit: str, cflags: str) -> dict[str, str]:
+    """Ninja variables selecting a unit's compiler, its flags and assembler."""
+    chain = TOOLCHAINS[unit_toolchain(version).get(unit, DEFAULT_TOOLCHAIN)]
+    return {"cc1": str(chain["cc1"]), "ccdefines": chain["defines"], "ccflags": chain["flags"],
+            "ccas": str(chain["as"]), "asflags": unit_asflags(cflags, chain["as_flags"])}
+
+
+def unit_asflags(cflags: str, base: str = EE_AS_FLAGS) -> str:
     """Assembler flags for a unit, as the gcc driver derives them: its -G, and no -g under -g0."""
-    flags = EE_AS_FLAGS.split()
+    flags = base.split()
     for f in cflags.split():
         if f.startswith("-G"):
             flags = [x for x in flags if not x.startswith("-G")] + [f]
@@ -534,8 +579,8 @@ def write_ninja(versions: list[str], args: argparse.Namespace) -> dict[str, list
     n.rule(
         "cc",
         f"cpp -MM -MG -MF $out.d -MT $out -nostdinc {INCLUDES} $cdefs $in && "
-        f"{prefix}{CC1} {CC1_DEFINES} {INCLUDES} $cdefs {CC1_FLAGS} $cflags $in -o $out.s && "
-        f"{prefix}{EE_AS} $asflags -o $out $out.s && "
+        f"{prefix}$cc1 $ccdefines {INCLUDES} $cdefs $ccflags $cflags $in -o $out.s && "
+        f"{prefix}$ccas $asflags -o $out $out.s && "
         f"{sys.executable} tools/production_report.py record-object $in $out",
         description="cc $in",
         depfile="$out.d",
@@ -671,14 +716,17 @@ def write_ninja(versions: list[str], args: argparse.Namespace) -> dict[str, list
                     n.build(eeasm, "eeasm", asm_files, implicit=["tools/eeas_compat.py"],
                             variables={"unit": str(src)})
                 cdefs = f"'-DASM_ROOT=\"build/eeasm/{nonmatchings}/\"' -DVERSION_{version.upper()}"
-                flags = unit_cflags(version).get(src.relative_to(Path("src") / version).with_suffix("").as_posix(), "")
-                n.build(str(obj), "cc", str(src), implicit=eeasm + ["include/macro.inc", f"config/{version}/cflags.txt", "tools/production_report.py"],
+                unit = src.relative_to(Path("src") / version).with_suffix("").as_posix()
+                flags = unit_cflags(version).get(unit, "")
+                tools = unit_tools(version, unit, flags)
+                configs = [f"config/{version}/cflags.txt", f"config/{version}/compilers.txt"]
+                n.build(str(obj), "cc", str(src), implicit=eeasm + ["include/macro.inc", *configs, "tools/production_report.py"],
                         implicit_outputs=[str(obj) + ".s", str(obj) + ".proof.json"],
-                        variables={"cdefs": cdefs, "cflags": flags, "asflags": unit_asflags(flags)})
+                        variables={"cdefs": cdefs, "cflags": flags, **tools})
                 # objdiff base: the same unit without its INCLUDE_ASM fallbacks, so only C counts.
                 base = Path("build") / version / "base" / src.with_suffix(".o")
-                n.build(str(base), "cc", str(src), implicit=["tools/production_report.py", f"config/{version}/cflags.txt"],
-                        implicit_outputs=[str(base) + ".s", str(base) + ".proof.json"], variables={"cdefs": f"{cdefs} -DSKIP_ASM", "cflags": flags, "asflags": unit_asflags(flags)})
+                n.build(str(base), "cc", str(src), implicit=["tools/production_report.py", *configs],
+                        implicit_outputs=[str(base) + ".s", str(base) + ".proof.json"], variables={"cdefs": f"{cdefs} -DSKIP_ASM", "cflags": flags, **tools})
                 # objdiff target: splat's full disassembly of this C unit, assembled as-is.
                 full = Path("asm") / version / src.relative_to(Path("src") / version).with_suffix(".s")
                 target = Path("build") / version / "target" / full.with_suffix(".o")
@@ -1376,7 +1424,10 @@ def main() -> None:
             ap.error(f"{v}: orig/{v}/{VERSIONS[v]['serial']} missing; run tools/extract.py")
     if not versions:
         ap.error("no extracted versions; run tools/extract.py")
-    for tool in (CC1, EE_AS, AS, LD, OBJCOPY):
+    needed = {DEFAULT_TOOLCHAIN}
+    for version in VERSIONS:
+        needed |= set(unit_toolchain(version).values())
+    for tool in (AS, LD, OBJCOPY, *(TOOLCHAINS[t][k] for t in sorted(needed) for k in ("cc1", "as"))):
         if not (ROOT / tool).exists():
             ap.error(f"{tool} missing; run tools/download_tools.py")
     if args.clean:
