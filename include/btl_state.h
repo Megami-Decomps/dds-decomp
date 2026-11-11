@@ -167,14 +167,14 @@ typedef struct BtlDebugMenuWork {
     u8 pad54[0x10];
     BtlUnit *selectedUnit; /* 0x64 */
 #ifdef VERSION_DDS1
-    s32 partyModelNames[0x20]; /* 0x68 */
-    s32 enemyModelNames[0x180]; /* 0xE8 */
-    s32 gunNames[0x20]; /* 0x6E8 */
+    const char *partyModelNames[0x20]; /* 0x68 */
+    const char *enemyModelNames[0x180]; /* 0xE8 */
+    const char *gunNames[0x20]; /* 0x6E8 */
 #endif
 #ifdef VERSION_DDS2
-    s32 partyModelNames[0x30]; /* 0x68 */
-    s32 enemyModelNames[0x180]; /* 0x128 */
-    s32 gunNames[0x60]; /* 0x728 */
+    const char *partyModelNames[0x30]; /* 0x68 */
+    const char *enemyModelNames[0x180]; /* 0x128 */
+    const char *gunNames[0x60]; /* 0x728 */
 #endif
 } BtlDebugMenuWork;
 

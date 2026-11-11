@@ -12436,3 +12436,5 @@ dblurParam2 = 0x00355F88; // size:0x18
 filterDebugMenuItems = 0x00355FA0; // size:0xa8
 mfilterDebugMenuItems = 0x003560B0; // size:0xd8
 rblurDebugMenuItems = 0x003561F8; // size:0x168
+D_003A6A20 = 0x003A6A20;
+D_003A6A30 = 0x003A6A30;

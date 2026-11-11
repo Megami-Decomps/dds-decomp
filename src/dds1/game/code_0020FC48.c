@@ -2286,7 +2286,7 @@ s32 mnuQueueColoredGlyphAtPosition(s32 x, s32 y, s32 text) {
 }
 
 /* Draw the visible text interval, highlighting the selected absolute index. */
-s32 btlDrawSelectableListRows(s32 x, s32 y, s32 unusedMode, BtlDebugMenuCursor *selectionState, s32 *rowTexts) {
+s32 btlDrawSelectableListRows(s32 x, s32 y, s32 unusedMode, BtlDebugMenuCursor *selectionState, const char **rowTexts) {
     u32 firstIndex;
     u32 visibleRowCount;
     u32 itemIndex;
@@ -2303,7 +2303,7 @@ s32 btlDrawSelectableListRows(s32 x, s32 y, s32 unusedMode, BtlDebugMenuCursor *
         struct frFontHandle_t *textGlyph = itfCreateMeasuredTextGlyph(x << 4, rowY << 3,
             MNU_LIST_TEXT_DEPTH,
             itemIndex == selectedIndex ? MNU_LIST_SELECTED_COLOR : MNU_LIST_NORMAL_COLOR,
-            (const char *)(u32)rowTexts[itemIndex], NULL);
+            rowTexts[itemIndex], NULL);
         frDrawFontOt(textGlyph, 0, 0x60);
         frDestroyFontRequestAfter(textGlyph);
         rowY += MNU_LIST_ROW_HEIGHT;
@@ -2313,7 +2313,7 @@ s32 btlDrawSelectableListRows(s32 x, s32 y, s32 unusedMode, BtlDebugMenuCursor *
 extern void btlDebugDrawTwoColorRectangle(s32 x, s32 y, s32 width, s32 height, u32 color0, u32 color1);
 
 /* Size the frame from the visible rows, then forward the row-draw result. */
-s32 mnuDrawMenuFrameSizedToRows(s32 x, s32 y, s32 frameWidth, BtlDebugMenuCursor *selectionState, s32 *rowTexts) {
+s32 mnuDrawMenuFrameSizedToRows(s32 x, s32 y, s32 frameWidth, BtlDebugMenuCursor *selectionState, const char **rowTexts) {
     s32 frameHeight = selectionState->rows * MNU_LIST_ROW_HEIGHT + MNU_LIST_FRAME_INSET;
     btlDebugDrawTwoColorRectangle(x - MNU_LIST_FRAME_INSET, y - MNU_LIST_FRAME_INSET, frameWidth, frameHeight, 0x80806020, 0x30000000);
     return btlDrawSelectableListRows(x, y, frameWidth, selectionState, rowTexts);
@@ -2327,7 +2327,7 @@ extern sdfGrOt_t sdfDebugGrOt;
 
 /* Submit formatted indices in one packet list, then draw the text column.
  * Preserve the separate fixed-point and pixel-coordinate arithmetic. */
-s32 mnuDrawSelectableMenuRows(s32 x, s32 y, s32 frameWidth, BtlDebugMenuCursor *selectionState, s32 *rowTexts) {
+s32 mnuDrawSelectableMenuRows(s32 x, s32 y, s32 frameWidth, BtlDebugMenuCursor *selectionState, const char **rowTexts) {
     void *indexPackets;
     u32 firstIndex;
     u32 visibleRowCount;
@@ -2358,11 +2358,11 @@ s32 mnuDrawSelectableMenuRows(s32 x, s32 y, s32 frameWidth, BtlDebugMenuCursor *
     return btlDrawSelectableListRows(x + MNU_LIST_LABEL_OFFSET, y, frameWidth, selectionState, rowTexts);
 }
 
-extern u8 *D_003BAA70;
+extern const char *D_003BAA70;
 
 extern const u8 *D_003BAA74;
 
-extern u8 *D_003BAA84;
+extern const char *D_003BAA84;
 
 void btlInitializeBattleDebugMenu(void) {
     BtlState *state = (BtlState *)btlGetRuntime();
@@ -2385,7 +2385,7 @@ void btlInitializeBattleDebugMenu(void) {
     }
     for (i = 0; i < 0x180; i++) {
         /* Debug row tables carry string addresses in EE words. */
-        state->debug.enemyModelNames[i] = (s32)(D_003BAA74 + i * 0x11);
+        state->debug.enemyModelNames[i] = (const char *)(D_003BAA74 + i * 0x11);
     }
     for (i = 0; i < 0x20; i++) {
         state->debug.gunNames[i] = D_003BAA84 + 0xFA0 + i * 0x19;
@@ -2399,8 +2399,8 @@ typedef struct BtlDebugPosition {
 } __attribute__((aligned(16))) BtlDebugPosition;
 
 extern datUnitWork_t *D_003BAA04;
-extern s32 btlDebugModelEditorActionNames[];
-extern s32 btlDebugModelMotionNames[];
+extern const char *btlDebugModelEditorActionNames[8];
+extern const char *btlDebugModelMotionNames[30];
 extern s16 D_003BB93E;
 extern BtlUnit *D_003BB940;
 extern u16 D_003BBA08;

@@ -2294,7 +2294,7 @@ s32 mnuQueueColoredGlyphAtPosition(s32 x, s32 y, s32 text) {
 }
 
 /* Draw the visible text interval, highlighting the selected absolute index. */
-s32 btlDrawSelectableListRows(s32 x, s32 y, s32 unusedMode, MenuList *selectionState, s32 *rowTexts) {
+s32 btlDrawSelectableListRows(s32 x, s32 y, s32 unusedMode, MenuList *selectionState, const char **rowTexts) {
     u32 firstIndex;
     u32 visibleRowCount;
     u32 itemIndex;
@@ -2311,7 +2311,7 @@ s32 btlDrawSelectableListRows(s32 x, s32 y, s32 unusedMode, MenuList *selectionS
         struct frFontHandle_t *textGlyph = itfCreateMeasuredTextGlyph(x << 4, rowY << 3,
             MNU_LIST_TEXT_DEPTH,
             itemIndex == selectedIndex ? MNU_LIST_SELECTED_COLOR : MNU_LIST_NORMAL_COLOR,
-            (const char *)(u32)rowTexts[itemIndex], NULL);
+            rowTexts[itemIndex], NULL);
         frDrawFontOt(textGlyph, 0, 0x60);
         frDestroyFontRequestAfter(textGlyph);
         rowY += MNU_LIST_ROW_HEIGHT;
@@ -2319,7 +2319,7 @@ s32 btlDrawSelectableListRows(s32 x, s32 y, s32 unusedMode, MenuList *selectionS
 }
 
 /* Size the frame from the visible rows, then forward the row-draw result. */
-s32 mnuDrawMenuFrameSizedToRows(s32 x, s32 y, s32 frameWidth, MenuList *selectionState, s32 *rowTexts) {
+s32 mnuDrawMenuFrameSizedToRows(s32 x, s32 y, s32 frameWidth, MenuList *selectionState, const char **rowTexts) {
     s32 frameHeight = selectionState->rows * MNU_LIST_ROW_HEIGHT + MNU_LIST_FRAME_INSET;
     btlDebugDrawTwoColorRectangle(x - MNU_LIST_FRAME_INSET, y - MNU_LIST_FRAME_INSET, frameWidth, frameHeight, 0x80806020, 0x30000000);
     return btlDrawSelectableListRows(x, y, frameWidth, selectionState, rowTexts);
@@ -2327,7 +2327,7 @@ s32 mnuDrawMenuFrameSizedToRows(s32 x, s32 y, s32 frameWidth, MenuList *selectio
 
 /* Submit formatted indices in one packet list, then draw the text column.
  * Preserve the separate fixed-point and pixel-coordinate arithmetic. */
-s32 mnuDrawSelectableMenuRows(s32 x, s32 y, s32 frameWidth, MenuList *selectionState, s32 *rowTexts) {
+s32 mnuDrawSelectableMenuRows(s32 x, s32 y, s32 frameWidth, MenuList *selectionState, const char **rowTexts) {
     void *indexPackets;
     u32 firstIndex;
     u32 visibleRowCount;
@@ -2358,9 +2358,9 @@ s32 mnuDrawSelectableMenuRows(s32 x, s32 y, s32 frameWidth, MenuList *selectionS
     return btlDrawSelectableListRows(x + MNU_LIST_LABEL_OFFSET, y, frameWidth, selectionState, rowTexts);
 }
 
-extern u8 *datUnitNames;
-extern u8 *D_00435E4C;
-extern u8 *D_00435E5C;
+extern const char *datUnitNames;
+extern const char *D_00435E4C;
+extern const char *D_00435E5C;
 /* Reset the selected actor, debug-menu rows/label tables, phase and delay before TEST polling. */
 void btlInitializeBattleDebugMenu(void) {
     BtlState *state = (BtlState *)btlGetRuntime();
@@ -2420,7 +2420,8 @@ extern void btlDebugMenuBeforeRecordNoOp(void);
 extern void btlDebugMenuAfterRecordNoOp(void);
 extern u32 btlReturnDebugMenuSetupWord(u32);
 extern void btlDebugMenuRecordNoOp(u32);
-extern s32 btlDebugModelEditorActionNames[], btlDebugModelMotionNames[];
+extern const char *btlDebugModelEditorActionNames[8];
+extern const char *btlDebugModelMotionNames[30];
 extern datUnitWork_t *D_00435DD4;
 extern s16 D_00436D8E;
 extern BtlUnit *D_00436D90;
