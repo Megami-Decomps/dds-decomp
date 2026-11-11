@@ -10884,3 +10884,12 @@
 0x00353688	effPCPFlashPolySphereDataList	inferred	SMT3 name via SLUS_209.11 0x0031DDB8, effPartPCPDataTable list; was D_00353688
 0x00353690	effPCPMultiFilterExpDataList	inferred	SMT3 name via SLUS_209.11 0x0031DDC0, effPartPCPDataTable list; was D_00353690
 0x00353698	effPCPBlinkMultiBlurDataList	inferred	SMT3 name via SLUS_209.11 0x0031DDC8, effPartPCPDataTable list; was D_00353698
+0x003559C8	effRectangleBlurSetupItems	inferred	effRectangleBlurSetupRecord items (10 effDebugMenuItem_t), named after SMT3 effBTLDebugMenuItems; was D_003559C8
+0x00355B28	mblurDebugMenuItems	inferred	mblurDebugMenu items (11 effDebugMenuItem_t), named after SMT3 effBTLDebugMenuItems; was D_00355B28
+0x00355CA0	dblurDebugMenuItems	inferred	dblurDebugMenu items (15 effDebugMenuItem_t), named after SMT3 effBTLDebugMenuItems; was D_00355CA0
+0x00355E48	effLoadDescD	inferred	Source block of effFramebufferQuadSetupRecord (copied to the effect on edit); was D_00355E48
+0x00355E70	effFramebufferQuadSetupItems	inferred	effFramebufferQuadSetupRecord items (9 effDebugMenuItem_t), named after SMT3 effBTLDebugMenuItems; was D_00355E70
+0x00355F88	dblurParam2	inferred	Source block of filterDebugMenu (copied to the effect on edit); was D_00355F88
+0x00355FA0	filterDebugMenuItems	inferred	filterDebugMenu items (7 effDebugMenuItem_t), named after SMT3 effBTLDebugMenuItems; was D_00355FA0
+0x003560B0	mfilterDebugMenuItems	inferred	mfilterDebugMenu items (9 effDebugMenuItem_t), named after SMT3 effBTLDebugMenuItems; was D_003560B0
+0x003561F8	rblurDebugMenuItems	inferred	rblurDebugMenu items (15 effDebugMenuItem_t), named after SMT3 effBTLDebugMenuItems; was D_003561F8
