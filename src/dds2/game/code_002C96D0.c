@@ -3077,6 +3077,8 @@ s32 slQueryYesNo(FileSelectionCallback start, FileSelectionCallback finish, s32 
     return (s32)fileUpdatePromptDialog;
 }
 
+extern char *fileLoadingSlotTexts[20]; /* each slot's prompt title (retail copies the table to its frame) */
+
 #ifdef NON_MATCHING
 #include "common.h"
 #include "sdf_textured_rect.h"
@@ -3091,7 +3093,6 @@ extern u32 D_00437D1C;        /* the prompt shown; 0 for none. As DDS1's 1-9, an
                                * asks the difficulty) */
 extern s32 fileSelectedSlotIndex;
 extern s32 D_003E8008[];      /* highlight pulse: [2] its angle in degrees, [3] its alpha */
-extern char *D_0042B770[16];  /* each slot's prompt title (retail copies the table to its frame) */
 extern char D_003E83F0[], D_003E8410[], D_003E8438[];
 extern char D_003E8100[], D_003E8130[], D_003E8250[];
 extern char D_003E8648[];
@@ -3214,7 +3215,7 @@ void fileShowPromptDialog(void) {
         filePromptLines(62, 114, unformattedCardLines, 3);
     }
     if (D_00437D1C == 3 && fileDrawFileMenuPromptAndCheckDelay() == FILE_PROMPT_REVEAL_READY) {
-        filePromptLine(86, 114, 0, D_0042B770[fileSelectedSlotIndex]);
+        filePromptLine(86, 114, 0, fileLoadingSlotTexts[fileSelectedSlotIndex]);
         filePromptLine(86, 114, 1, D_003E8648);
     }
     if (D_00437D1C == 4 && fileDrawFileMenuPromptAndCheckDelay() == FILE_PROMPT_REVEAL_READY) {
@@ -3309,7 +3310,7 @@ void fileFadeStepDown(void) {
     D_003E8008[0] = D_003E8008[0] <= 0 ? 0 : D_003E8008[0] > 0x80 ? 0x80 : D_003E8008[0];
 }
 
-INCLUDE_RODATA(const s32, "game/code_002C96D0", D_0042B770);
+INCLUDE_RODATA(const s32, "game/code_002C96D0", fileLoadingSlotTexts);
 
 void fileDrawSlotIcon(s32 index, s32 x, s32 y, s32 alpha) {
     s32 uv[21][2] = {

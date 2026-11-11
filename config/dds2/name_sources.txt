@@ -11796,3 +11796,4 @@
 0x003C58E8	mdlFieldFiles	inferred	dds3ModelFileTable_t[64], modelFileTable slot 2 (first model field/player_a.PB); was D_003C58E8; was D_003C58E8
 0x003C5BE8	mdlEventFiles	inferred	dds3ModelFileTable_t[192], modelFileTable slot 3 (first model event/test/tool.PB); was D_003C5BE8; was D_003C5BE8
 0x003C64E8	mdlMiscFiles	inferred	dds3ModelFileTable_t[13], modelFileTable slot 4 (first model misc/colorbar.TB); was D_003C64E8; was D_003C64E8
+0x0042B770	fileLoadingSlotTexts	inferred	char *[20], fileLoadingSlot01Text..20Text, the save slot prompt titles; DDS1 0x003B2718; was D_0042B770; was D_0042B770

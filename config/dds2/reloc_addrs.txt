@@ -195,3 +195,16 @@ rom:0x3320AC reloc:MIPS_NONE symbol:none // 004310AC manual: 0x00439041 in a two
 rom:0x3320C0 reloc:MIPS_NONE symbol:none // 004310C0 manual: 0x00424DD2 in a two_over_pi-style s32 table, not mnuTerminalBgSarfSpriteName + 0x2
 rom:0x332154 reloc:MIPS_NONE symbol:none // 00431154 manual: 0x0046FC7B in a two_over_pi-style s32 table, not corePktFaceList + 0x7A6B
 rom:0x332128 reloc:MIPS_NONE symbol:none // 00431128 D_00431090: odd scalar 0x003F669E, not D_003F6608 + 0x96
+rom:0x311A00 reloc:MIPS_NONE symbol:none // 00410A00 tlbKernelEntries: TLB entry word 00400017, not D_003FFF58
+rom:0x311A10 reloc:MIPS_NONE symbol:none // 00410A10 tlbKernelEntries: TLB entry word 00400097, not D_00400068
+rom:0x311A14 reloc:MIPS_NONE symbol:none // 00410A14 tlbKernelEntries: TLB entry word 004000D7, not D_004000B8
+rom:0x311A20 reloc:MIPS_NONE symbol:none // 00410A20 tlbKernelEntries: TLB entry word 00400117, not D_004000F0
+rom:0x311A24 reloc:MIPS_NONE symbol:none // 00410A24 tlbKernelEntries: TLB entry word 00400157, not D_00400150
+rom:0x311A30 reloc:MIPS_NONE symbol:none // 00410A30 tlbKernelEntries: TLB entry word 00400197, not D_00400188
+rom:0x311A34 reloc:MIPS_NONE symbol:none // 00410A34 tlbKernelEntries: TLB entry word 004001D7, not D_004001A0
+rom:0x311A40 reloc:MIPS_NONE symbol:none // 00410A40 tlbKernelEntries: TLB entry word 00400217, not D_004001D8
+rom:0x311A44 reloc:MIPS_NONE symbol:none // 00410A44 tlbKernelEntries: TLB entry word 00400257, not D_00400250
+rom:0x311A50 reloc:MIPS_NONE symbol:none // 00410A50 tlbKernelEntries: TLB entry word 00400297, not D_00400288
+rom:0x311A54 reloc:MIPS_NONE symbol:none // 00410A54 tlbKernelEntries: TLB entry word 004002D7, not D_004002B8
+rom:0x311A84 reloc:MIPS_NONE symbol:none // 00410A84 tlbKernelEntries: TLB entry word 00440415, not D_00440415
+rom:0x311A94 reloc:MIPS_NONE symbol:none // 00410A94 tlbKernelEntries: TLB entry word 00480415, not D_00480415

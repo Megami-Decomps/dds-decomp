@@ -5605,13 +5605,14 @@ void effResetRenderResourceKind(EffQuadWork *work) {
     work->frame = 0;
 }
 
+extern sdfGrOt_t *effLayerSurfaces[];
+
 #ifdef NON_MATCHING
 
 extern void *effPkt3DPrimMakePoly(sdf3DPrimPolyParm_t *);
 
 extern sdf3DPrimPolyParm_t effQuadPacketParams;
 
-extern sdfGrOt_t *effLayerSurfaces[];
 
 extern u32 effModelUpdateControlFlags;
 

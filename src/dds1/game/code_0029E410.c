@@ -5384,13 +5384,14 @@ void effResetRenderResourceKind(EffQuadWork *work) {
     work->frame = 0;
 }
 
+extern sdfGrOt_t *effLayerSurfaces[];
+
 #ifdef NON_MATCHING
 
 extern void *effPkt3DPrimMakePoly(sdf3DPrimPolyParm_t *);
 
 extern sdf3DPrimPolyParm_t effQuadPacketParams;
 
-extern sdfGrOt_t *effLayerSurfaces[];
 
 /* Per-frame draw of a textured effect quad: samples the color, alpha, size and
  * angle tracks at the current frame, takes the rectangle and texture
