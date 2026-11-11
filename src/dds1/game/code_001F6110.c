@@ -1,5 +1,6 @@
 #include "sdk_ps2.h"
 #include "btl_command.h"
+#include "eff_editor_menus.h"
 #include "btl_ui.h"
 #include "btl_motion_transform.h"
 #include "dds3_world_primary.h"
@@ -73,8 +74,6 @@ extern void btlClearUnitDefeatCandidate(BtlUnit *unit);
 extern f32 btlMeasureIndexListBounds(BtlIndexList *list, f32 *maxTop, f32 *minTop);
 extern void btlFlagUnitDefeatCandidate(BtlUnit *unit);
 
-extern s32 D_00360348[];
-extern s32 D_0035FFE0[];
 extern s32 D_003BB6B8;
 extern s32 D_003BD854;
 extern void btlPickCommandElementCheckedTarget(BtlTask *context, s32 action);
@@ -2796,19 +2795,19 @@ void btlUpdateDebugCameraFromPad(void) {
         }
     }
     if (state->cameraCommand.flags & 1) {
-        D_00360348[4] |= 0x80;
-        D_0035FFE0[4] |= 0x80;
+        D_00360348.flags |= 0x80;
+        D_0035FFE0.flags |= 0x80;
     } else {
-        D_00360348[4] &= ~0x80;
-        D_0035FFE0[4] &= ~0x80;
+        D_00360348.flags &= ~0x80;
+        D_0035FFE0.flags &= ~0x80;
     }
 }
 
 
 /* Clear bit 0x80 in both battle debug-menu descriptors. */
 void btlResetBattleDebugMenuFlags(void) {
-    D_00360348[4] &= ~0x80;
-    D_0035FFE0[4] &= ~0x80;
+    D_00360348.flags &= ~0x80;
+    D_0035FFE0.flags &= ~0x80;
 }
 
 void func_001FB080(void) {

@@ -99,8 +99,6 @@ extern u8 D_003BD088[];
 
 extern u8 D_003BD090[];
 
-extern u8 *D_003BD074;
-
 extern u8 D_003BCA40[];
 
 extern u8 D_003BD050[];

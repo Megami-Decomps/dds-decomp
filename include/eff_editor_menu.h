@@ -61,7 +61,13 @@ typedef struct EffQueuedFileObject {
     u32 flags; /* 0x10 */
     EffEditorRow *rows; /* 0x14 */
     s32 count; /* 0x18 */
-    u32 unknown1C[6];
+    /* Page callbacks. Retail has no reader; the roles follow the values the pages hold. */
+    void *argument; /* 0x1C: passed to openCallback and applyCallback */
+    EffEditorCallback openCallback; /* 0x20: its result goes to *result */
+    EffEditorCallback updateCallback; /* 0x24 */
+    EffEditorCallback closeCallback; /* 0x28 */
+    u32 *result; /* 0x2C */
+    EffEditorCallback applyCallback; /* 0x30 */
     u8 *linkedState; /* 0x34: the menu to switch to */
 } EffQueuedFileObject;
 

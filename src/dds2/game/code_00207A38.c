@@ -174,9 +174,8 @@ extern const char D_00419668[];
 
 extern const char D_00419688[];
 
-extern s32 D_003BEA48[];
-
-extern s32 D_003BE6E0[];
+extern EffQueuedFileObject D_003BEA48;
+extern EffQueuedFileObject D_003BE6E0;
 
 extern u8 sdfHddValid;
 
@@ -3105,18 +3104,18 @@ void btlUpdateDebugCameraFromPad(void) {
         }
     }
     if (state->cameraCommand.flags & 1) {
-        D_003BEA48[4] |= 0x80;
-        D_003BE6E0[4] |= 0x80;
+        D_003BEA48.flags |= 0x80;
+        D_003BE6E0.flags |= 0x80;
     } else {
-        D_003BEA48[4] &= ~0x80;
-        D_003BE6E0[4] &= ~0x80;
+        D_003BEA48.flags &= ~0x80;
+        D_003BE6E0.flags &= ~0x80;
     }
 }
 
 /* Clear bit 0x80 in both battle debug-menu descriptors. */
 void btlResetBattleDebugMenuFlags(void) {
-    D_003BEA48[4] &= ~0x80;
-    D_003BE6E0[4] &= ~0x80;
+    D_003BEA48.flags &= ~0x80;
+    D_003BE6E0.flags &= ~0x80;
 }
 
 void func_0020D100(void) {

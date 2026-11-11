@@ -1,6 +1,7 @@
 #include "sdk_ps2.h"
 #include "eff_block128.h"
 #include "eff_editor_menu.h"
+#include "eff_editor_menus.h"
 #include "eff_surface_grid_node.h"
 #include "eff_surface_node.h"
 #include "eff_animation_state.h"
@@ -371,16 +372,6 @@ typedef struct BaObj {
 
 extern s32 effEditScalarTrack(EffScalarTrack *, u32, void *, void *);
 
-extern u8 D_0038F9D0[];
-
-extern u8 D_0038FAD0[];
-
-extern u8 D_0038F8E8[];
-
-extern u8 D_0038FA20[];
-
-extern u8 D_0038F938[];
-
 extern struct BtlResourceNameRecord *effQueuedResourceNameRecord;
 
 extern void effReleaseQueuedResourceName(void);
@@ -391,11 +382,9 @@ extern const char D_003BD090[];
 
 extern char D_003DF8D0[];
 
-extern u8 D_0038F2B8[];
-
 extern u8 effBattleOffset[];
 
-extern u8 *D_003BD074;
+extern EffQueuedFileObject *D_003BD074;
 
 extern void effDrawSurfaceNode(s32);
 
@@ -11497,7 +11486,7 @@ void effSetParticleSharedColor(u32 *dst, u32 value) {
 }
 
 void btlInitializeEffectWork(void) {
-    D_003BD074 = D_0038F2B8;
+    D_003BD074 = &D_0038F2B8;
     D_003DF8D0[0] = 0;
     effPartsListScroll = 0;
     effPartsListExitRequested = 0;
@@ -13067,8 +13056,6 @@ typedef char EffectStateSnapshotSizeCheck[(sizeof(EffectStateSnapshot) == 0x80) 
 
 extern s32 effUpdateCameraDiagnostics(EffectStateSnapshot *, s8);
 
-extern u8 D_0038F4F0[];
-
 extern s8 D_0039862B[];
 
 extern void btlDebugDrawPoint(f32 *position);
@@ -13092,13 +13079,13 @@ extern void effComputeBattleCameraPositionVU(u8 *snapshot);
 /* Synchronize the diagnostic camera position and calculate its positional guides.
  * Return input flags; the native diagnostic drawing providers are retail stubs. */
 s32 effUpdateCameraDiagnostics(EffectStateSnapshot *snapshot, s8 mode) {
-    u8 *camera = D_0038F4F0;
+    EffQueuedFileObject *camera = &D_0038F4F0;
     f32 vectors[6][4] __attribute__((aligned(16)));
     f32 length;
     f32 deltaY;
     s32 result = 1;
 
-    if ((*(u32 *)(camera + 0x10) & 2) == 0) {
+    if ((camera->flags & 2) == 0) {
         if (D_0039862B[0] < 0) {
             result = 0;
         }
@@ -13111,7 +13098,7 @@ s32 effUpdateCameraDiagnostics(EffectStateSnapshot *snapshot, s8 mode) {
     btlDebugMenuAfterRecordNoOp();
     SDF_VU0_COPYVECTOR(snapshot->position, D_003DFA20);
 
-    if ((*(u32 *)(camera + 0x10) & 8) != 0) {
+    if ((camera->flags & 8) != 0) {
         result |= 2;
     }
     if ((result & 2) != 0 && (snapshot->flags & 0x18) != 0) {
@@ -13344,13 +13331,6 @@ typedef union EffectCameraSnapshotView {
     } camera;
 } EffectCameraSnapshotView;
 
-typedef struct EffectCameraDebugState {
-    u32 unknown00[4];
-    u32 flags;
-    u32 unknown14[9];
-} EffectCameraDebugState;
-
-extern EffectCameraDebugState D_0038F588;
 
 extern s8 D_0039862B[];
 
@@ -13707,8 +13687,6 @@ extern f32 effColorEditKeyFraction;
 
 extern s32 effColorEditKeyFrame, effColorEditFadeInFrame, effColorEditFadeOutFrame;
 
-extern u8 effColorEditRgbMenu[];
-
 extern char effColorEditFrameCountFormat[];
 
 extern u32 btlDebugMenuSetupNoOp(void *);
@@ -13790,7 +13768,7 @@ s32 effEditColorTrack(s32 colorTrackAddr, s32 alphaTrackAddr, s32 frameCount) {
 
     btlDebugMenuSetupNoOp(&effMappingState);
     if (effColorEditRgbMenuOpen == 1) {
-        btlDebugMenuSetupNoOp(effColorEditRgbMenu);
+        btlDebugMenuSetupNoOp(&effColorEditRgbMenu);
     }
     newSelection = effColorEditSelectedKey;
     if (effColorEditRgbMenuOpen == 0) {
@@ -13939,7 +13917,7 @@ s32 effEditColorTrack(s32 colorTrackAddr, s32 alphaTrackAddr, s32 frameCount) {
     btlDebugMenuBeforeRecordNoOp();
     btlDebugMenuRecordNoOp(&effMappingState);
     if (effColorEditRgbMenuOpen == 1) {
-        btlDebugMenuRecordNoOp(effColorEditRgbMenu);
+        btlDebugMenuRecordNoOp(&effColorEditRgbMenu);
     }
     btlDebugMenuAfterRecordNoOp();
     btlDebugDrawTwoColorRectangle(0x10, 0x108, 0xB8, 0x10, 0x40404040, 0x80000000);
@@ -14250,13 +14228,13 @@ s32 effEditTwoDimensionalColorTrack(s32 request) {
 }
 
 void btlResetEffectWork(void) {
-    u8 *first = D_0038F9D0;
-    u8 *second = D_0038FAD0;
+    EffQueuedFileObject *first = &D_0038F9D0;
+    EffQueuedFileObject *second = &D_0038FAD0;
 
-    ((EffQueuedFileObject *)first)->flags |= 0x10;
-    ((EffQueuedFileObject *)first)->cursor = 0;
-    ((EffQueuedFileObject *)second)->flags |= 0x10;
-    ((EffQueuedFileObject *)second)->cursor = 0;
+    first->flags |= 0x10;
+    first->cursor = 0;
+    second->flags |= 0x10;
+    second->cursor = 0;
     D_003BD158 = 0;
     D_003BD15C = 0;
     D_003BD160 = 0;
@@ -14533,92 +14511,92 @@ s32 effEditScalarTrack(EffScalarTrack *track, u32 frames, void *panelWork, void 
 
 /* Edit the requested P-family SCALE track; return the native editor status. */
 s32 effEditPScaleTrack(BaObj *p) {
-    return effEditScalarTrack((EffScalarTrack *)(p->x0C + 0x60), ((EffMappingObject *)p->x0C)->valueB8, D_0038F9D0, D_0038F8E8);
+    return effEditScalarTrack((EffScalarTrack *)(p->x0C + 0x60), ((EffMappingObject *)p->x0C)->valueB8, &D_0038F9D0, &D_0038F8E8);
 }
 
 /* Edit the requested P-family ROTATE track with its independent editor state. */
 s32 effEditPRotationTrack(BaObj *p) {
-    return effEditScalarTrack((EffScalarTrack *)(p->x0C + 0x8C), ((EffMappingObject *)p->x0C)->valueB8, D_0038FAD0, D_0038FA20);
+    return effEditScalarTrack((EffScalarTrack *)(p->x0C + 0x8C), ((EffMappingObject *)p->x0C)->valueB8, &D_0038FAD0, &D_0038FA20);
 }
 
 /* SCALE property callback shared by native G-/K-family descriptors. */
 s32 effEditGkScaleTrack(BaObj *p) {
-    return effEditScalarTrack((EffScalarTrack *)(p->x0C + 0x7C), ((EffMappingObject *)p->x0C)->valueD4, D_0038F9D0, D_0038F8E8);
+    return effEditScalarTrack((EffScalarTrack *)(p->x0C + 0x7C), ((EffMappingObject *)p->x0C)->valueD4, &D_0038F9D0, &D_0038F8E8);
 }
 
 /* ROTATE property callback for native K-family descriptors. */
 s32 effEditKRotationTrack(BaObj *p) {
-    return effEditScalarTrack((EffScalarTrack *)(p->x0C + 0xA8), ((EffMappingObject *)p->x0C)->valueD4, D_0038FAD0, D_0038FA20);
+    return effEditScalarTrack((EffScalarTrack *)(p->x0C + 0xA8), ((EffMappingObject *)p->x0C)->valueD4, &D_0038FAD0, &D_0038FA20);
 }
 
 /* SCALE property callback for native B-family descriptors. */
 s32 effEditBScaleTrack(BaObj *p) {
-    return effEditScalarTrack((EffScalarTrack *)(p->x0C + 0x34), ((EffMappingObject *)p->x0C)->valueB8, D_0038F9D0, D_0038F8E8);
+    return effEditScalarTrack((EffScalarTrack *)(p->x0C + 0x34), ((EffMappingObject *)p->x0C)->valueB8, &D_0038F9D0, &D_0038F8E8);
 }
 
 /* B-family ROTATE callback; identical forwarding code does not imply P-family SCALE. */
 s32 effEditBRotationTrack(BaObj *p) {
-    return effEditScalarTrack((EffScalarTrack *)(p->x0C + 0x60), ((EffMappingObject *)p->x0C)->valueB8, D_0038F9D0, D_0038F8E8);
+    return effEditScalarTrack((EffScalarTrack *)(p->x0C + 0x60), ((EffMappingObject *)p->x0C)->valueB8, &D_0038F9D0, &D_0038F8E8);
 }
 
 /* AREA property callback shared by B-/F-family descriptors. */
 s32 effEditBfAreaTrack(BaObj *p) {
-    return effEditScalarTrack((EffScalarTrack *)(p->x0C + 0x8C), ((EffMappingObject *)p->x0C)->valueB8, D_0038F9D0, D_0038F8E8);
+    return effEditScalarTrack((EffScalarTrack *)(p->x0C + 0x8C), ((EffMappingObject *)p->x0C)->valueB8, &D_0038F9D0, &D_0038F8E8);
 }
 
 /* Pass the requested T-BOARD SCALE track and its frame bound to the editor. */
 s32 effEditTBoardScaleTrack(BaObj *p) {
-    return effEditScalarTrack((EffScalarTrack *)(p->x0C + 0x34), ((EffMappingObject *)p->x0C)->value8C, D_0038F9D0, D_0038F8E8);
+    return effEditScalarTrack((EffScalarTrack *)(p->x0C + 0x34), ((EffMappingObject *)p->x0C)->value8C, &D_0038F9D0, &D_0038F8E8);
 }
 
 /* Pass the requested T-BOARD ROTATE track and its frame bound to the editor. */
 s32 effEditTBoardRotationTrack(BaObj *p) {
-    return effEditScalarTrack((EffScalarTrack *)(p->x0C + 0x60), ((EffMappingObject *)p->x0C)->value8C, D_0038F9D0, D_0038F8E8);
+    return effEditScalarTrack((EffScalarTrack *)(p->x0C + 0x60), ((EffMappingObject *)p->x0C)->value8C, &D_0038F9D0, &D_0038F8E8);
 }
 
 /* SCALE property callback for native W-family descriptors. */
 s32 effEditWScaleTrack(BaObj *p) {
-    return effEditScalarTrack((EffScalarTrack *)(p->x0C + 0x80), ((EffMappingObject *)p->x0C)->valueD8, D_0038F9D0, D_0038F8E8);
+    return effEditScalarTrack((EffScalarTrack *)(p->x0C + 0x80), ((EffMappingObject *)p->x0C)->valueD8, &D_0038F9D0, &D_0038F8E8);
 }
 
 /* ROTATE property callback for native W-family descriptors. */
 s32 effEditWRotationTrack(BaObj *p) {
-    return effEditScalarTrack((EffScalarTrack *)(p->x0C + 0xAC), ((EffMappingObject *)p->x0C)->valueD8, D_0038FAD0, D_0038FA20);
+    return effEditScalarTrack((EffScalarTrack *)(p->x0C + 0xAC), ((EffMappingObject *)p->x0C)->valueD8, &D_0038FAD0, &D_0038FA20);
 }
 
 /* Edit the SCALE_UV curve in U-CYLND's POLYGON child; forward editor status. */
 s32 effEditUCylinderPolygonUvScaleTrack(BaObj *p) {
-    return effEditScalarTrack((EffScalarTrack *)(p->x0C + 0x90), ((EffMappingObject *)p->x0C)->value80, D_0038F9D0, D_0038F938);
+    return effEditScalarTrack((EffScalarTrack *)(p->x0C + 0x90), ((EffMappingObject *)p->x0C)->value80, &D_0038F9D0, &D_0038F938);
 }
 
 /* Edit the shared U-SMOKE/U-SPIRL root SCALE curve; forward editor status. */
 s32 effEditUSmokeSpiralScaleTrack(BaObj *p) {
-    return effEditScalarTrack((EffScalarTrack *)(p->x0C + 0x9C), ((EffMappingObject *)p->x0C)->valueF4, D_0038F9D0, D_0038F8E8);
+    return effEditScalarTrack((EffScalarTrack *)(p->x0C + 0x9C), ((EffMappingObject *)p->x0C)->valueF4, &D_0038F9D0, &D_0038F8E8);
 }
 
 /* Edit the shared U-SMOKE/U-SPIRL root ROTATE curve; forward editor status. */
 s32 effEditUSmokeSpiralRotationTrack(BaObj *p) {
-    return effEditScalarTrack((EffScalarTrack *)(p->x0C + 0xC8), ((EffMappingObject *)p->x0C)->valueF4, D_0038FAD0, D_0038FA20);
+    return effEditScalarTrack((EffScalarTrack *)(p->x0C + 0xC8), ((EffMappingObject *)p->x0C)->valueF4, &D_0038FAD0, &D_0038FA20);
 }
 
 /* Edit SCALE_UV in their POLYGON children; forward the numeric editor's status. */
 s32 effEditUSmokeSpiralPolygonUvScaleTrack(BaObj *p) {
-    return effEditScalarTrack((EffScalarTrack *)(p->x0C), ((EffMappingObject *)p->x0C)->valueF4, D_0038F9D0, D_0038F938);
+    return effEditScalarTrack((EffScalarTrack *)(p->x0C), ((EffMappingObject *)p->x0C)->valueF4, &D_0038F9D0, &D_0038F938);
 }
 
 /* Edit the native U-SPHRE root SCALE curve; forward editor status. */
 s32 effEditUSphereScaleTrack(BaObj *p) {
-    return effEditScalarTrack((EffScalarTrack *)(p->x0C + 0x34), ((EffMappingObject *)p->x0C)->value70, D_0038F9D0, D_0038F938);
+    return effEditScalarTrack((EffScalarTrack *)(p->x0C + 0x34), ((EffMappingObject *)p->x0C)->value70, &D_0038F9D0, &D_0038F938);
 }
 
 /* Edit the native 2D root SCALE curve; forward editor status. */
 s32 effEditTwoDimensionalScaleTrack(BaObj *p) {
-    return effEditScalarTrack((EffScalarTrack *)(p->x0C + 0x34), ((EffMappingObject *)p->x0C)->value8C, D_0038F9D0, D_0038F8E8);
+    return effEditScalarTrack((EffScalarTrack *)(p->x0C + 0x34), ((EffMappingObject *)p->x0C)->value8C, &D_0038F9D0, &D_0038F8E8);
 }
 
 /* Edit the native 2D root ROTATE curve; forward editor status. */
 s32 effEditTwoDimensionalRotationTrack(BaObj *p) {
-    return effEditScalarTrack((EffScalarTrack *)(p->x0C + 0x60), ((EffMappingObject *)p->x0C)->value8C, D_0038F9D0, D_0038F8E8);
+    return effEditScalarTrack((EffScalarTrack *)(p->x0C + 0x60), ((EffMappingObject *)p->x0C)->value8C, &D_0038F9D0, &D_0038F8E8);
 }
 
 /* Reset the color/alpha editor's selected curve key to one, not a pending flag. */
@@ -14627,8 +14605,6 @@ void effResetCurveEditorSelection(void) {
 }
 
 extern SdfAlphaTrack effColorEditAlphaTrack;
-
-extern u8 D_0038FB38[];
 
 extern s32 effColorEditFadeInFrame;
 
@@ -14654,7 +14630,7 @@ s32 func_002BB188(SdfAlphaTrack *range, s32 frames) {
     u32 i;
 
     effColorEditAlphaTrack = *range;
-    btlDebugMenuSetupNoOp(D_0038FB38);
+    btlDebugMenuSetupNoOp(&D_0038FB38);
     if (dds3PadBitTable[0xB] & 2) {
         if (effColorEditSelectedAlphaKey == 1) {
             effColorEditAlphaTrack.fadeInFraction += step * 10.0f;
@@ -14713,7 +14689,7 @@ s32 func_002BB188(SdfAlphaTrack *range, s32 frames) {
     *range = effColorEditAlphaTrack;
     btlDebugDrawRectangle(8, 0x164, 0xDC, 0x4C);
     btlDebugMenuBeforeRecordNoOp();
-    btlDebugMenuRecordNoOp(D_0038FB38);
+    btlDebugMenuRecordNoOp(&D_0038FB38);
     btlDebugMenuAfterRecordNoOp();
     shades[0] = 0;
     marks[0] = 0.0f;
