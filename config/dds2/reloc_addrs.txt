@@ -191,3 +191,6 @@ rom:0x3231A0 reloc:MIPS_NONE symbol:none // 004221A0 manual: 0x00320020, not dds
 rom:0x3231AC reloc:MIPS_NONE symbol:none // 004221AC manual: 0x00320020, not dds3PackSpriteRecords
 rom:0x328428 reloc:MIPS_NONE symbol:none // 00427428 manual: 0x003B0061, not D_003B0060 + 0x1
 rom:0x328488 reloc:MIPS_NONE symbol:none // 00427488 manual: 0x003B0061, not D_003B0060 + 0x1
+rom:0x3320AC reloc:MIPS_NONE symbol:none // 004310AC manual: 0x00439041 in a two_over_pi-style s32 table, not fileSaveReadBufferResource + 0x1
+rom:0x3320C0 reloc:MIPS_NONE symbol:none // 004310C0 manual: 0x00424DD2 in a two_over_pi-style s32 table, not mnuTerminalBgSarfSpriteName + 0x2
+rom:0x332154 reloc:MIPS_NONE symbol:none // 00431154 manual: 0x0046FC7B in a two_over_pi-style s32 table, not corePktFaceList + 0x7A6B

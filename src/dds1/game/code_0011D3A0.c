@@ -1001,8 +1001,8 @@ extern sdf3DLight_t *dds3LightParam[3];
 extern f32 D_00330670[16];
 extern f32 D_003246B0[16];
 
-extern FldShadowStrip D_0032C880;
-extern FldShadowStrip D_0032C8C0;
+extern FldShadowStrip fldSdwQuadIndices;
+extern FldShadowStrip fldSdwTriIndices;
 extern const f32 D_0039FA28[18];
 
 /* Packed XYZ geometry, followed by triples of signed vertex indices. */
@@ -1124,8 +1124,8 @@ void fldSdwDraw(dds3Basic_t *object) {
     memset(viewDirection, 0, sizeof(viewDirection));
     viewDirection[3] = 1.0f;
     memcpy(extrusionLengths, D_0039FA28, sizeof(extrusionLengths));
-    triangleStrip = D_0032C8C0;
-    quadStrip = D_0032C880;
+    triangleStrip = fldSdwTriIndices;
+    quadStrip = fldSdwQuadIndices;
     opacity = 100.0f;
     base = dds3GetBaseControlWorkData(object);
     model = ((dds3ModelHandle_t *)dds3ObjectBaseGetModelHandle(object))->inner;
