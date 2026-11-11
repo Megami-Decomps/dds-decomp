@@ -3821,7 +3821,7 @@ u32 GetSystemCallEntry(s32 index)
 
 typedef struct {
     u32 index;
-    void *entry;
+    void (*entry)(void);
 } kernelEntryPair_t;
 
 extern kernelEntryPair_t systemCallEntryPairs[2];
