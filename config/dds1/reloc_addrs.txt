@@ -258,3 +258,6 @@ rom:0x253FF0 reloc:MIPS_NONE symbol:none // 00352FF0 D_00352FA0: packed colour w
 rom:0x254050 reloc:MIPS_NONE symbol:none // 00353050 D_00353000: packed colour word 0x003A0200, not D_003A0200 (which split "%sF%03d.INF")
 rom:0x256050 reloc:MIPS_NONE symbol:none // 00355050 effPCP_ShockWave01_ThunderSpherePoly_Param: packed colour word 0x003A0200, not D_003A0200 (which split "%sF%03d.INF")
 rom:0x2560B0 reloc:MIPS_NONE symbol:none // 003550B0 effPCPShockWave02Param: packed colour word 0x003A0200, not D_003A0200 (which split "%sF%03d.INF")
+rom:0x27803C reloc:MIPS_NONE symbol:none // 0037703C D_00376630: string bytes "_06", not mdlDevilFiles + N
+rom:0x2780DC reloc:MIPS_NONE symbol:none // 003770DC D_00376630: string bytes "_16", not mdlDevilFiles + N
+rom:0x27817C reloc:MIPS_NONE symbol:none // 0037717C D_00376630: string bytes "_26", not mdlDevilFiles + N

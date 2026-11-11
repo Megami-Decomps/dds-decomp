@@ -209,3 +209,8 @@ rom:0x311A54 reloc:MIPS_NONE symbol:none // 00410A54 tlbKernelEntries: TLB entry
 rom:0x311A84 reloc:MIPS_NONE symbol:none // 00410A84 tlbKernelEntries: TLB entry word 00440415, not D_00440415
 rom:0x311A94 reloc:MIPS_NONE symbol:none // 00410A94 tlbKernelEntries: TLB entry word 00480415, not D_00480415
 rom:0x339C78 reloc:MIPS_NONE symbol:none // 00438C78 sdfVifUnpackS_8Name: "S_8", not sdfChannels + 0x4C3
+rom:0x2C30B4 reloc:MIPS_NONE symbol:none // 003C20B4 D_003C0EF4: byte data 0x003C4B4B, not mdlOnFiles + N
+rom:0x2C3278 reloc:MIPS_NONE symbol:none // 003C2278 D_003C0EF4: byte data 0x003C4B4B, not mdlOnFiles + N
+rom:0x2C343C reloc:MIPS_NONE symbol:none // 003C243C D_003C0EF4: byte data 0x003C4B4B, not mdlOnFiles + N
+rom:0x2C3600 reloc:MIPS_NONE symbol:none // 003C2600 D_003C0EF4: byte data 0x003C4B4B, not mdlOnFiles + N
+rom:0x2C37C4 reloc:MIPS_NONE symbol:none // 003C27C4 D_003C0EF4: byte data 0x003C4B4B, not mdlOnFiles + N

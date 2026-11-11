@@ -14167,3 +14167,5 @@ D_00436C18 = 0x00436C18; // size:0x8
 btlDebugTopMenuList = 0x00436C20; // size:0x8
 evtDebugCameraLabels = 0x00437220; // size:0x8
 D_00437228 = 0x00437228; // type:asciz size:0x4
+D_00437308 = 0x00437308; // type:asciz
+D_00437C98 = 0x00437C98; // type:asciz
