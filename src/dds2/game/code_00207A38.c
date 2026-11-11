@@ -4044,6 +4044,8 @@ void btlFormatResourceNameWithoutExtension(const struct BtlResourceNameRecord *r
     sprintf(output, D_00436C58, record->resourceName);
 }
 
+extern void *btlDebugTopMenuList[2];
+
 INCLUDE_SDATA(const s32, "game/code_00207A38", btlButtonIconTexturePath);
 
 INCLUDE_SDATA(const s32, "game/code_00207A38", D_00436B00);
@@ -4127,6 +4129,10 @@ INCLUDE_SDATA(const s32, "game/code_00207A38", D_00436C08);
 INCLUDE_SDATA(const s32, "game/code_00207A38", D_00436C10);
 
 INCLUDE_SDATA(const s32, "game/code_00207A38", D_00436C18);
+
+INCLUDE_SDATA(const s32, "game/code_00207A38", btlDebugTopMenuList);
+
+INCLUDE_SDATA(const s32, "game/code_00207A38", D_00436C28);
 
 INCLUDE_SDATA(const s32, "game/code_00207A38", D_00436C30);
 

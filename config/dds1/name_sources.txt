@@ -11055,3 +11055,5 @@
 0x003657B8	mdlMiscFiles	inferred	dds3ModelFileTable_t[13], modelFileTable slot 4 (first model misc/colorbar.TB); was D_003657B8; was D_003657B8
 0x003B2718	fileLoadingSlotTexts	inferred	char *[20], fileLoadingSlot01Text..20Text, the save slot prompt titles; DDS2 0x0042B770; was D_003B2718; was D_003B2718
 0x0035F748	btlSoundArchiveEntries	inferred	BattleSoundArchiveEntry[49], SYSEFF .BED archive rows (/battle/bed/HOJYO.BED...); DDS2 0x003BDE18; was D_0035F748; was D_0035F748
+0x00398D30	padStateNames	inferred	libpad const char *[8] state names (DISCONNECT, FINDCTP1, EXECCMD, STABLE, ERROR); SMT3 padStateNames 0x00529FB0; was D_00398D30; was D_00398D30
+0x00398D50	padRequestNames	inferred	libpad const char *[4] request names (COMPLETE, FAILED, BUSY, NULL); SMT3 padRequestNames 0x00529FD0; was D_00398D50; was D_00398D50

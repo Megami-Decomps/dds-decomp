@@ -14161,3 +14161,7 @@ mdlFieldFiles = 0x003C58E8; // size:0x300
 mdlEventFiles = 0x003C5BE8; // size:0x900
 mdlMiscFiles = 0x003C64E8; // size:0x9C
 fileLoadingSlotTexts = 0x0042B770; // size:0x50
+padStateNames = 0x0040BEB0; // size:0x20
+padRequestNames = 0x0040BED0; // size:0x10
+D_00436C18 = 0x00436C18; // size:0x8
+btlDebugTopMenuList = 0x00436C20; // size:0x8

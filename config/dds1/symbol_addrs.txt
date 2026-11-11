@@ -12568,3 +12568,5 @@ mdlFieldFiles = 0x00364BB8; // size:0x300
 mdlEventFiles = 0x00364EB8; // size:0x900
 mdlMiscFiles = 0x003657B8; // size:0x9C
 fileLoadingSlotTexts = 0x003B2718; // size:0x50
+padStateNames = 0x00398D30; // size:0x20
+padRequestNames = 0x00398D50; // size:0x10
