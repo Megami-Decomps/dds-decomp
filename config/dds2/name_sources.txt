@@ -11748,3 +11748,25 @@
 0x0036F000	_kDebugException	inferred	SMT3 twin _kDebugException (sdk/libkernl SetDebugHandler reads it at the same instruction); was func_0036F000
 0x0040F5C8	kernelBuiltinVersion	inferred	SMT3 twin kernelBuiltinVersion (_fs_version reads it); was fileioLibraryVersion
 0x00483D80	ttyQueueStorage	inferred	SMT3 twin ttyQueueStorage (gcc2_compiled__10 returns it); was D_00483D80
+0x0035A550	_fstat_r	inferred	SMT3 twin _fstat_r (identical code, calls fstat); was func_0035A550
+0x00362B40	_lseek_r	inferred	SMT3 twin _lseek_r (identical code, calls lseek); was func_00362B40
+0x00360F28	_write_r	inferred	SMT3 twin _write_r (identical code, calls write); was func_00360F28
+0x00363CD0	_read_r	inferred	SMT3 twin _read_r (identical code, calls read); was func_00363CD0
+0x003610D0	_close_r	inferred	SMT3 twin _close_r (identical code, calls close); was func_003610D0
+0x003598B0	_cleanup	inferred	SMT3 twin _cleanup (identical code, tail calls _cleanup_r); was func_003598B0
+0x00362B20	localeconv	inferred	SMT3 twin localeconv (identical code, tail calls _localeconv_r); was func_00362B20
+0x0035C7C0	_getpid_r	inferred	SMT3 twin _getpid_r (identical code, tail calls libc_2DC670); was func_0035C7C0
+0x003596C0	std	inferred	SMT3 twin std (newlib findfp.c static, identical code); was func_003596C0
+0x0035E660	__sprint	inferred	SMT3 twin __sprint (newlib vfprintf.c static, identical code; the copy at 0x0035D8F0 is vfiprintf.c's); was func_0035E660
+0x00361128	quorem	inferred	SMT3 twin quorem (newlib dtoa.c static, identical code); was func_00361128
+0x00358F18	__muldi3	inferred	SMT3 twin __muldi3 (called at the same instruction of _strtol_r); was func_00358F18
+0x0036FE48	__udivdi3	inferred	SMT3 twin __udivdi3 (called at the same instruction of _strtol_r); was func_0036FE48
+0x003703C8	__umoddi3	inferred	SMT3 twin __umoddi3 (called at the same instruction of _strtol_r); was func_003703C8
+0x0040F5B0	mallocLockOwner	inferred	SMT3 twin mallocLockOwner (sdk/libc __malloc_lock reads it at the same instruction); was D_0040F5B0
+0x0040F5B4	mallocLockCount	inferred	SMT3 twin mallocLockCount (sdk/libc __malloc_lock reads it at the same instruction); was D_0040F5B4
+0x00431BE0	putsNewline	inferred	SMT3 twin putsNewline (sdk/libc _puts_r reads it at the same instruction); was D_00431BE0
+0x004324E8	localeEmptyStr	inferred	SMT3 twin localeEmptyStr (sdk/libc _setlocale_r reads it at the same instruction); was D_004324E8
+0x004324F8	localeCName	inferred	SMT3 twin localeCName (sdk/libc _setlocale_r reads it at the same instruction); was D_004324F8
+0x00432500	pow5MultTable	inferred	SMT3 twin pow5MultTable (sdk/libc _pow5mult reads it at the same instruction); was D_00432500
+0x00432510	pow10Table	inferred	SMT3 twin pow10Table (sdk/libc _mprec_log10 reads it at the same instruction); was D_00432510
+0x0040EE60	impure_data	inferred	SMT3 twin impure_data (newlib impure.c _reent, _impure_ptr points at it); was D_0040EE60

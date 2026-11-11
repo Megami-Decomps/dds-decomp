@@ -315,7 +315,7 @@ segments:
       - [0x1F8628, c, hand/at3dec]
       - [0x1FACD0, asm, sdk/libm]
       - [0x1FCF58, asm, sdk/libgcc]
-      - [0x1FF248, asm, sdk/libc]
+      - [0x1FF248, c, sdk/libc]
       - [0x20B600, c, sdk/libkernl]  # first signature hit 0x0030A600
       - [0x214E7C, asm, sdk/libgcc_longlong]
       # .vutext: VU1 microcode (no VU disassembler in splat yet).
