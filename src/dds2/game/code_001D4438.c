@@ -113,7 +113,6 @@ extern void btlSetActionActorPanelPresentation(ActionStateLink *, s8, s8);
 
 extern void btlResetDebugEncounterSelection(s32);
 
-extern s32 D_003B6940[];
 
 extern s32 btlUpdateDebugEncounterSelector(void);
 
@@ -152,7 +151,7 @@ extern u32 btlGetActorCommandClass(BattleSceneObject *, s8);
 extern BtlRuntimeTask *btlCreateEffectTaskWithSourceParams(const void *, u32);
 extern s32 btlCountTasksForOwner(u64);
 
-extern SceneInitializer D_003B6938[];
+extern SceneInitializer btlSceneInitializers[];
 
 extern s32 btlCountFlaggedSceneActors(void);
 extern void btlRemoveTaskFromSceneGroup(ActionStateLink *);
@@ -294,7 +293,7 @@ typedef struct BtlUnit BtlUnit;
 extern void btlAdvanceHistoryCounter(ActionStateLink *);
 
 
-extern BtlActionStateHandler D_003B69D8[];
+extern BtlActionStateHandler btlActionStateHandlers[];
 
 
 typedef struct BtlFxSrcB {
@@ -4779,7 +4778,7 @@ void btlDispatchStateHandler(void *object, BtlActionStateIndex index) {
     BtlActionStateOwner *owner = object;
     owner->state = index;
     owner->stateTime = 0;
-    D_003B69D8[index].start(owner);
+    btlActionStateHandlers[index].start(owner);
 }
 
 INCLUDE_RODATA(const s32, "game/code_001D4438", D_00417508);
@@ -4831,7 +4830,7 @@ void btlUpdateActionSeqs(void) {
     for (unit = ((BtlState *)btlGetRuntime())->tasks; unit != 0; unit = next) {
         next = unit->next;
         if (unit->pendingFlags & 1) {
-            D_003B69D8[unit->state].update(unit);
+            btlActionStateHandlers[unit->state].update(unit);
             unit->stateTime++;
         } else if (unit->pendingFlags & 2) {
             btlDestroyActionSeq(unit);
@@ -4912,10 +4911,10 @@ void btlDebugPrintActionOrder(s32 x, s32 y) {
         }
         if (controller->slots[i].remaining == 100) {
             btlBossDebugPrintfN(x, y + (i + 1) * 12, color, D_00436A10,
-                               D_003B69D8[task->state].name);
+                               btlActionStateHandlers[task->state].name);
         } else {
             btlBossDebugPrintfN(x, y + (i + 1) * 12, color, D_00436A18,
-                               D_003B69D8[task->state].name);
+                               btlActionStateHandlers[task->state].name);
         }
     }
 }

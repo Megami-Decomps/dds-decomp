@@ -1506,7 +1506,7 @@ u32 fldBeginFadeWhenSceneReady(void) {
     return 0;
 }
 
-extern SceneInitializer D_00359A88[];
+extern SceneInitializer btlSceneInitializers[];
 
 /* Select a scene and reset its frame/state before invoking its initializer. */
 void btlSetScene(s32 sceneId) {
@@ -1515,7 +1515,7 @@ void btlSetScene(s32 sceneId) {
     scene->currentScene = sceneId;
     scene->frame = 0;
     scene->sceneEndFrame = 0;
-    D_00359A88[sceneId].initialize(scene);
+    btlSceneInitializers[sceneId].initialize(scene);
 }
 
 /* Queue a transition for the next scene update. */
@@ -1538,7 +1538,7 @@ void btlUpdateScene(void) {
         btlSetScene(queuedSceneId);
         scene->queuedScene = 0;
     }
-    updateResult = D_00359A88[scene->currentScene].update(scene);
+    updateResult = btlSceneInitializers[scene->currentScene].update(scene);
     if (updateResult != 0) {
         btlQueueScene(updateResult);
     }
@@ -1557,12 +1557,12 @@ void btlResetToInitialScene(void) {
 void btlGetCurrentSceneRecordValue(void) {
 }
 
-/* Return the current initializer row's flags word. */
-s32 fldGetSceneDescriptorProperty(void) {
+/* Return the current scene row's name. */
+const char *fldGetSceneDescriptorProperty(void) {
     s32 sceneId;
 
     sceneId = ((BattleSceneWork *)btlGetRuntime())->currentScene;
-    return D_00359A88[sceneId].flags;
+    return btlSceneInitializers[sceneId].name;
 }
 
 /* Select the task's group array; the handle-group bit takes precedence. */

@@ -195,7 +195,7 @@ extern TaskWork *mnuSceneResourceContext;
 
 extern EffectSlotSet *mnuMantraSpriteSlots[];
 
-extern u8 mnuMantraResourceTaskDescriptor[];
+extern SdfTaskItemDesc mnuMantraResourceTaskDescriptor;
 
 extern void mnuDestroyMantraDrawPool(MnuSpriteResourceGroup *);
 
@@ -310,7 +310,7 @@ void mnuReleaseMantraResourceWork(s32 unused, MnuResourceTaskWork *resourceWork)
  * both clear it when the resource group is no longer active. */
 void mnuCreateResourceTask(void) {
     MnuResourceTaskWork *resourceWork = mnuAllocateMantraResourceWork();
-    mnuSceneResourceContext = sdfCreateTaskWorker(mnuResourceTaskName, 0x402, 0x2B12, (const SdfTaskItemDesc *)mnuMantraResourceTaskDescriptor, mnuReleaseMantraResourceWork, resourceWork);
+    mnuSceneResourceContext = sdfCreateTaskWorker(mnuResourceTaskName, 0x402, 0x2B12, &mnuMantraResourceTaskDescriptor, mnuReleaseMantraResourceWork, resourceWork);
 }
 
 /* Return whether the named resource task exists; invalidate the cached handle when it does not. */

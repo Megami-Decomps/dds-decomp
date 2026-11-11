@@ -115,7 +115,7 @@ extern BtlRuntimeTask *btlCreateEffectTaskWithSourceParams(const void *sourcePar
 
 extern s32 btlCountTasksForOwner(u64);
 
-extern SceneInitializer D_003B6938[];
+extern SceneInitializer btlSceneInitializers[];
 
 extern void btlRemoveTaskFromSceneGroup(ActionStateLink *);
 
@@ -1543,7 +1543,7 @@ void btlSetScene(s32 sceneId) {
     scene->currentScene = sceneId;
     scene->frame = 0;
     scene->sceneEndFrame = 0;
-    D_003B6938[sceneId].initialize(scene);
+    btlSceneInitializers[sceneId].initialize(scene);
 }
 
 /* Queue a transition for the next scene update. */
@@ -1563,7 +1563,7 @@ void btlUpdateScene(void) {
         btlSetScene(scene->queuedScene);
         scene->queuedScene = 0;
     }
-    sceneInitializer = &D_003B6938[scene->currentScene];
+    sceneInitializer = &btlSceneInitializers[scene->currentScene];
     updateResult = sceneInitializer->update(scene);
     if (updateResult != 0) {
         btlQueueScene(updateResult);
@@ -1583,11 +1583,11 @@ void btlResetToInitialScene(void) {
 void btlGetCurrentSceneRecordValue(void) {
 }
 
-/* Return the current initializer row's flags word. */
-s32 fldGetSceneDescriptorProperty(void) {
+/* Return the current scene row's name. */
+const char *fldGetSceneDescriptorProperty(void) {
     BtlState *scene = (BtlState *)btlGetRuntime();
     s32 sceneId = scene->currentScene;
-    return D_003B6938[sceneId].flags;
+    return btlSceneInitializers[sceneId].name;
 }
 
 /* Select the task's group array; the handle-group bit takes precedence. */

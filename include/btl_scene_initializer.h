@@ -18,18 +18,18 @@ BtlSurpriseAttackResult btlRollSurpriseAttack(void);
 /* Zero keeps the current scene; a nonzero result queues that scene index. */
 typedef s32 BtlSceneUpdateResult;
 
-/* One indexed scene row stores its initializer, updater, and behavior flags. */
+/* One indexed scene row: initializer, updater and scene name. */
 typedef struct SceneInitializer {
     void (*initialize)(void *sceneState);
     BtlSceneUpdateResult (*update)(void *sceneState);
-    s32 flags;
+    const char *name;
 } SceneInitializer;
 
 typedef char SceneInitializer_extent_must_be_0x0C[
     (sizeof(SceneInitializer) == 0x0C) ? 1 : -1];
 typedef char SceneInitializer_update_offset_must_be_0x04[
     ((u32)&((SceneInitializer *)0)->update == 0x04) ? 1 : -1];
-typedef char SceneInitializer_flags_offset_must_be_0x08[
-    ((u32)&((SceneInitializer *)0)->flags == 0x08) ? 1 : -1];
+typedef char SceneInitializer_name_offset_must_be_0x08[
+    ((u32)&((SceneInitializer *)0)->name == 0x08) ? 1 : -1];
 
 #endif /* BTL_SCENE_INITIALIZER_H */
