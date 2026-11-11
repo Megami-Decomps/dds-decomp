@@ -3254,6 +3254,9 @@ extern char *D_003684B8[];
 extern char *D_003684C0[];
 extern char *D_003684C8[];
 extern char *D_003684D0[];
+
+typedef s32 (*evtViewerCommandFunc_t)(s32, s32, evtViewerInfo_t *);
+extern evtViewerCommandFunc_t evtViewerCommandHandlers[24];
 extern char D_003BBF60[];
 extern char D_003BBF68[];
 extern char D_003BBF70[];
