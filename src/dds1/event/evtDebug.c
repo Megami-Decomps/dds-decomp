@@ -351,7 +351,11 @@ void func_0022B618(void) {
     dpy = 0;
 }
 
-INCLUDE_SDATA(const s32, "event/evtDebug", D_003BBDE0);
+extern const char *evtDebugCameraLabels[2];
+
+INCLUDE_SDATA(const s32, "event/evtDebug", evtDebugCameraLabels);
+
+INCLUDE_SDATA(const s32, "event/evtDebug", D_003BBDE8);
 
 INCLUDE_SDATA(const s32, "event/evtDebug", D_003BBDEC);
 

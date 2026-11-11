@@ -12570,3 +12570,5 @@ mdlMiscFiles = 0x003657B8; // size:0x9C
 fileLoadingSlotTexts = 0x003B2718; // size:0x50
 padStateNames = 0x00398D30; // size:0x20
 padRequestNames = 0x00398D50; // size:0x10
+evtDebugCameraLabels = 0x003BBDE0; // size:0x8
+D_003BBDE8 = 0x003BBDE8; // type:asciz size:0x4

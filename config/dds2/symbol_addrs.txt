@@ -14165,3 +14165,5 @@ padStateNames = 0x0040BEB0; // size:0x20
 padRequestNames = 0x0040BED0; // size:0x10
 D_00436C18 = 0x00436C18; // size:0x8
 btlDebugTopMenuList = 0x00436C20; // size:0x8
+evtDebugCameraLabels = 0x00437220; // size:0x8
+D_00437228 = 0x00437228; // type:asciz size:0x4

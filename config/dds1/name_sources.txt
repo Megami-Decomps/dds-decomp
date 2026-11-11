@@ -11057,3 +11057,4 @@
 0x0035F748	btlSoundArchiveEntries	inferred	BattleSoundArchiveEntry[49], SYSEFF .BED archive rows (/battle/bed/HOJYO.BED...); DDS2 0x003BDE18; was D_0035F748; was D_0035F748
 0x00398D30	padStateNames	inferred	libpad const char *[8] state names (DISCONNECT, FINDCTP1, EXECCMD, STABLE, ERROR); SMT3 padStateNames 0x00529FB0; was D_00398D30; was D_00398D30
 0x00398D50	padRequestNames	inferred	libpad const char *[4] request names (COMPLETE, FAILED, BUSY, NULL); SMT3 padRequestNames 0x00529FD0; was D_00398D50; was D_00398D50
+0x003BBDE0	evtDebugCameraLabels	inferred	const char *[2] {"FREE CAMERA" (D_003ACC58), NULL} in evtDebug's .sdata, no reader; DDS2 0x00437220; was D_003BBDE0, split off the "%s" string at D_003BBDE8
