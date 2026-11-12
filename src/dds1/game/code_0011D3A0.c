@@ -92,6 +92,7 @@ extern FldActivationEntry D_0034C8F0[256];
 extern void fldFindTakaraSlot(s32);
 
 
+/* Retail loads and passes a parameter the definition ignores. */
 extern void ptyReturnOne(s32);
 
 extern FieldStageCoordinate fldStageCoordinateRecords[];

@@ -2121,6 +2121,7 @@ u8 fldTestMapSlotValueFlag(s32 mapId, u32 slotIndex, s32 bit) {
 
 extern void fldFindTakaraSlot(s32);
 
+/* Retail loads and passes a parameter the definition ignores. */
 extern void ptyReturnOne(s32);
 
 void fldActivateFlaggedObject(u32 flagIndex) {
