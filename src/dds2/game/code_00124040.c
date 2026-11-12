@@ -8,6 +8,7 @@
 #include "fld_area_encounter_table.h"
 #include "sdf_packet_list.h"
 #include "common.h"
+#include "sdfFrame.h"
 #include "fld_camera_link_mode.h"
 #include "pty_status_query_api.h"
 #include "pty_field_hp_attrition_api.h"
@@ -1405,12 +1406,12 @@ void fldPreparePlayerSceneCameraTarget(void) {
         fldEncountSetFlag(0x40);
         dds3ObjectBaseSetPrimaryControl(fldPlayerObject, fldPlayerCameraTargetNoPathUpdate);
     }
-    fldGlobalBase.cameraTargetGraceTicks = 4;
-    if (fldGlobalBase.sceneTransitionCooldown < 4) {
-        fldGlobalBase.sceneTransitionCooldown = 4;
+    fldGlobalBase.cameraTargetGraceTicks = SDF_FRAMES(4);
+    if (fldGlobalBase.sceneTransitionCooldown < SDF_FRAMES(4)) {
+        fldGlobalBase.sceneTransitionCooldown = SDF_FRAMES(4);
     }
-    if (fldGlobalBase.movementInputSuppressionFrames < 5) {
-        fldGlobalBase.movementInputSuppressionFrames = 5;
+    if (fldGlobalBase.movementInputSuppressionFrames < SDF_FRAMES(5)) {
+        fldGlobalBase.movementInputSuppressionFrames = SDF_FRAMES(5);
     }
     fldGlobalBase.primaryMovingMatterIndex = -1;
     fldGlobalBase.secondaryMovingMatterIndex = -1;
@@ -1850,7 +1851,7 @@ s32 fldUpdateTravelAndEncounters(void) {
     SDF_VU0_STOREVECTOR(previousPosition);
     SDF_VU0_SUBVECTOR();
     SDF_VU0_GETLENGTH(distance);
-    if (distance < 0.2f) distance = 0.0f;
+    if (distance < SDF_FRAME_STEP(0.2f)) distance = 0.0f;
     fldGlobalBase.frameTravelDistance = distance;
     previousPhase = evtGetAgeOfMoon16();
     if (fldGlobalBase.cameraTargetGraceTicks > 0) {
@@ -1876,8 +1877,8 @@ s32 fldUpdateTravelAndEncounters(void) {
         previousPhase != phase) {
         evtUpdateFlaggedStats();
         if (phase == 0 && evtClearRandomStatusFlags() != EVT_RANDOM_STATUS_CLEAR_NO_FLAGS) {
-            fldGlobalBase.sceneTransitionCooldown = 4;
-            fldGlobalBase.movementInputSuppressionFrames = 5;
+            fldGlobalBase.sceneTransitionCooldown = SDF_FRAMES(4);
+            fldGlobalBase.movementInputSuppressionFrames = SDF_FRAMES(5);
             fldResetPlayerSceneObjectState();
             evtStartSceneResourceTask(dds3GetActiveScene(), D_00412F40);
             return 0;
@@ -2101,8 +2102,8 @@ s32 fldUpdateCampMenuTransition(void) {
         fldResetPlayerSceneObjectState();
         fldUpdateCameraHeadingTransition();
         evtDisableMoonDraw();
-        scene->sceneTransitionCooldown = 4;
-        scene->movementInputSuppressionFrames = 5;
+        scene->sceneTransitionCooldown = SDF_FRAMES(4);
+        scene->movementInputSuppressionFrames = SDF_FRAMES(5);
         fldEncountClearFlag(0x20);
         dds3FadeOut(0, 0, 0, 4);
         D_00435F7C = 5;
@@ -2138,8 +2139,8 @@ s32 fldUpdateNextFloorTransition(void) {
     if (fldFindLocationCoordinateRecord(scene->area, scene->floor + 1)[2] <= 0) {
         if (scene->sceneTransitionCooldown == 0) {
             if (fldEncountTestFlag(0x40) != 0 && transitionInput != 0) {
-                scene->sceneTransitionCooldown = 4;
-                scene->movementInputSuppressionFrames = 5;
+                scene->sceneTransitionCooldown = SDF_FRAMES(4);
+                scene->movementInputSuppressionFrames = SDF_FRAMES(5);
                 fldResetPlayerSceneObjectState();
                 evtStartSceneResourceTask(dds3GetActiveScene(), D_00412F58);
             }
@@ -2163,8 +2164,8 @@ s32 fldUpdateNextFloorTransition(void) {
                 return 0;
             }
             if (fldEncountTestFlag(0x40) != 0 && transitionInput != 0 && fldRunDanteGunFlag[0x48 / 4] == 0) {
-                scene->sceneTransitionCooldown = 4;
-                scene->movementInputSuppressionFrames = 5;
+                scene->sceneTransitionCooldown = SDF_FRAMES(4);
+                scene->movementInputSuppressionFrames = SDF_FRAMES(5);
                 fldResetPlayerSceneObjectState();
                 fldUpdateCameraHeadingTransition();
                 dds3FadeOut(0, 0, 0, 4);

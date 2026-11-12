@@ -127,6 +127,7 @@
 #include "btl.h"
 #include "itf.h"
 #include "fld_index_pair.h"
+#include "sdfFrame.h"
 
 typedef struct SdfGsTextureAlphaFlushPacket {
     SdfGsPacketHeader header;
@@ -4102,13 +4103,13 @@ void fldUpdateCameraFollowPlayer(void) {
     nearPoint.f[3] = cameraScalar;
     nearPoint.f[1] += fldGlobalBase.cameraTilt;
     if (fldGlobalBase.cameraTiltActive) {
-        nearPoint.f[0] = fldLookAtNearPoint[0] + (nearPoint.f[0] - fldLookAtNearPoint[0]) * 0.5f;
-        nearPoint.f[1] = fldLookAtNearPoint[1] + (nearPoint.f[1] - fldLookAtNearPoint[1]) * 0.5f;
-        nearPoint.f[2] = fldLookAtNearPoint[2] + (nearPoint.f[2] - fldLookAtNearPoint[2]) * 0.5f;
+        nearPoint.f[0] = fldLookAtNearPoint[0] + (nearPoint.f[0] - fldLookAtNearPoint[0]) * SDF_FRAME_FRACTION(0.5f);
+        nearPoint.f[1] = fldLookAtNearPoint[1] + (nearPoint.f[1] - fldLookAtNearPoint[1]) * SDF_FRAME_FRACTION(0.5f);
+        nearPoint.f[2] = fldLookAtNearPoint[2] + (nearPoint.f[2] - fldLookAtNearPoint[2]) * SDF_FRAME_FRACTION(0.5f);
     } else {
-        nearPoint.f[0] = fldLookAtNearPoint[0] + (nearPoint.f[0] - fldLookAtNearPoint[0]) * 0.5f;
-        nearPoint.f[1] = fldLookAtNearPoint[1] + (nearPoint.f[1] - fldLookAtNearPoint[1]) * 0.125f;
-        nearPoint.f[2] = fldLookAtNearPoint[2] + (nearPoint.f[2] - fldLookAtNearPoint[2]) * 0.5f;
+        nearPoint.f[0] = fldLookAtNearPoint[0] + (nearPoint.f[0] - fldLookAtNearPoint[0]) * SDF_FRAME_FRACTION(0.5f);
+        nearPoint.f[1] = fldLookAtNearPoint[1] + (nearPoint.f[1] - fldLookAtNearPoint[1]) * SDF_FRAME_FRACTION(0.125f);
+        nearPoint.f[2] = fldLookAtNearPoint[2] + (nearPoint.f[2] - fldLookAtNearPoint[2]) * SDF_FRAME_FRACTION(0.5f);
     }
     dds3CameraObjectBasicGetCameraTM(*sceneSlot, &nearPoint.q);
     referencePoint[0] = fldGlobalBase.x;
@@ -4147,12 +4148,12 @@ void fldUpdateCameraFollowPlayer(void) {
     SDF_VU0_COPYVECTOR(&referenceCopy, &referencePoint);
     SDF_VU0_COPYVECTOR(&farCopy, &farPoint);
     if (D_003BAD14 > D_003BAD10) {
-        D_003BAD14 -= 1000.0f;
+        D_003BAD14 -= SDF_FRAME_STEP(1000.0f);
         if (D_003BAD14 < D_003BAD10) {
             D_003BAD14 = D_003BAD10;
         }
     } else if (D_003BAD14 < D_003BAD10) {
-        D_003BAD14 += 1000.0f;
+        D_003BAD14 += SDF_FRAME_STEP(1000.0f);
         if (D_003BAD10 < D_003BAD14) {
             D_003BAD14 = D_003BAD10;
         }
@@ -4189,17 +4190,17 @@ void fldUpdateCameraFollowPlayer(void) {
         farPoint.f[1] = fy;
         farPoint.f[2] = fz;
     }
-    fx = fldCamTarget[0] + (fx - fldCamTarget[0]) * 0.5f;
+    fx = fldCamTarget[0] + (fx - fldCamTarget[0]) * SDF_FRAME_FRACTION(0.5f);
     farPoint.f[0] = fx;
     if (D_003BAD30 != 0) {
-        fy = fldCamTarget[1] + (fy - fldCamTarget[1]) * 0.5f;
+        fy = fldCamTarget[1] + (fy - fldCamTarget[1]) * SDF_FRAME_FRACTION(0.5f);
         farPoint.f[1] = fy;
     } else {
-        fy = fldCamTarget[1] + (fy - fldCamTarget[1]) * 0.125f;
+        fy = fldCamTarget[1] + (fy - fldCamTarget[1]) * SDF_FRAME_FRACTION(0.125f);
         farPoint.f[1] = fy;
     }
     node = *sceneSlot;
-    fz = fldCamTarget[2] + (fz - fldCamTarget[2]) * 0.5f;
+    fz = fldCamTarget[2] + (fz - fldCamTarget[2]) * SDF_FRAME_FRACTION(0.5f);
     farPoint.f[2] = fz;
     dds3SetPosPoseSet(node, &farPoint.q);
     SDF_VU0_COPYVECTOR(fldLookAtNearPoint, &nearPoint);
@@ -4425,9 +4426,9 @@ void fldUpdateCameraFollowLinkedObject(void) {
     nearPoint.f[0] = area->x;
     nearPoint.f[2] = area->z;
     nearPoint.f[1] = area->y + fldCameraFollowRows[area->cameraFollowRowIndex].y;
-    nearPoint.f[0] = fldLookAtNearPoint[0] + (nearPoint.f[0] - fldLookAtNearPoint[0]) * 0.5f;
-    nearPoint.f[1] = fldLookAtNearPoint[1] + (nearPoint.f[1] - fldLookAtNearPoint[1]) * 0.125f;
-    nearPoint.f[2] = fldLookAtNearPoint[2] + (nearPoint.f[2] - fldLookAtNearPoint[2]) * 0.5f;
+    nearPoint.f[0] = fldLookAtNearPoint[0] + (nearPoint.f[0] - fldLookAtNearPoint[0]) * SDF_FRAME_FRACTION(0.5f);
+    nearPoint.f[1] = fldLookAtNearPoint[1] + (nearPoint.f[1] - fldLookAtNearPoint[1]) * SDF_FRAME_FRACTION(0.125f);
+    nearPoint.f[2] = fldLookAtNearPoint[2] + (nearPoint.f[2] - fldLookAtNearPoint[2]) * SDF_FRAME_FRACTION(0.5f);
     dds3CameraObjectBasicGetCameraTM((dds3Basic_t *)*world, &nearPoint.q);
     dds3GetTMPoseSet((dds3Basic_t *)fldPlayerObject);
     farPoint.f[0] = area->focusPos[0];
@@ -4593,10 +4594,10 @@ void fldCamElvTask(void) {
         if (D_003BAD1C == FLD_ELV_CAMERA_SCENE_MODE_TRAVEL_INCREASING_FLOOR_INDEX ||
             D_003BAD1C == FLD_ELV_CAMERA_SCENE_MODE_TRAVEL_DECREASING_FLOOR_INDEX) {
             if (phase < 3.14f) {
-                phase += 0.2f;
+                phase += SDF_FRAME_STEP(0.2f);
                 camera->poseset->pos[1] = D_003C9220[1] + sdfSin(phase * direction) * 2.5f;
             } else {
-                phase += 0.02f;
+                phase += SDF_FRAME_STEP(0.02f);
                 camera->poseset->pos[1] = D_003C9220[1] + sdfSin(phase * direction) * 2.0f;
             }
         }
@@ -4604,12 +4605,12 @@ void fldCamElvTask(void) {
             D_003BAD1C == FLD_ELV_CAMERA_SCENE_MODE_ARRIVAL_DECREASING_FLOOR_INDEX) {
             phase += 11.0f;
             if (phase > 0.0f) {
-                phase -= 1.0f;
+                phase -= SDF_FRAME_STEP(1.0f);
             } else if (phase > -3.14f) {
-                phase -= 0.2f;
+                phase -= SDF_FRAME_STEP(0.2f);
                 camera->poseset->pos[1] = D_003C9220[1] + sdfSin(phase * direction) * 2.0f;
             } else {
-                phase -= 0.01f;
+                phase -= SDF_FRAME_STEP(0.01f);
             }
             phase -= 11.0f;
         }
@@ -5050,9 +5051,9 @@ void fldUpdateModeOneCameraPose(void) {
                           OBJECT_TRANSFORM_FLAG_USE_SMOOTHED_POSITION);
         if (D_003BAB50 != 0) {
             if (fldGlobalBase.cameraSupportHeightDelta > 0.0f) {
-                fldGlobalBase.y = position[1] + 5.0f;
+                fldGlobalBase.y = position[1] + SDF_FRAME_STEP(5.0f);
             } else {
-                fldGlobalBase.y = position[1] + 10.0f;
+                fldGlobalBase.y = position[1] + SDF_FRAME_STEP(10.0f);
             }
         }
     }
@@ -5085,7 +5086,7 @@ void fldUpdateModeOneCameraPose(void) {
         difference = -difference;
     }
     /* Native literal is 0x3D9F49F4; do not replace by rounded 14/180. */
-    distance = (180.0f - difference) * 0x1.3e93e8p-4f;
+    distance = SDF_FRAME_STEP((180.0f - difference) * 0x1.3e93e8p-4f);
     position[0] = fldGlobalBase.x - sdfSin(-fldGlobalBase.modeOneCameraHeadingTarget * 3.14f / 180.0f) * distance;
     position[1] = fldGlobalBase.y;
     position[2] = fldGlobalBase.z - sdfCos(-fldGlobalBase.modeOneCameraHeadingTarget * 3.14f / 180.0f) * distance;
@@ -5115,19 +5116,19 @@ void fldUpdateModeOneCameraPose(void) {
             ((dds3Basic_t *)fldPlayerObject)->poseset->smoothedPosition[0] = position[0];
         } else {
             ((dds3Basic_t *)fldPlayerObject)->poseset->smoothedPosition[0] =
-                smoothed[0] + (position[0] - smoothed[0]) / 3.0f;
+                smoothed[0] + (position[0] - smoothed[0]) / SDF_FRAME_DIVISOR(3.0f);
         }
         if (ffabsf(smoothed[1] - position[1]) < 1.0f) {
             ((dds3Basic_t *)fldPlayerObject)->poseset->smoothedPosition[1] = position[1];
         } else {
             ((dds3Basic_t *)fldPlayerObject)->poseset->smoothedPosition[1] =
-                smoothed[1] + (position[1] - smoothed[1]) / 3.0f;
+                smoothed[1] + (position[1] - smoothed[1]) / SDF_FRAME_DIVISOR(3.0f);
         }
         if (ffabsf(smoothed[2] - position[2]) < 1.0f) {
             ((dds3Basic_t *)fldPlayerObject)->poseset->smoothedPosition[2] = position[2];
         } else {
             ((dds3Basic_t *)fldPlayerObject)->poseset->smoothedPosition[2] =
-                smoothed[2] + (position[2] - smoothed[2]) / 3.0f;
+                smoothed[2] + (position[2] - smoothed[2]) / SDF_FRAME_DIVISOR(3.0f);
         }
         ((dds3Basic_t *)fldPlayerObject)->poseset->smoothedPosition[3] = 1.0f;
     }
@@ -5139,6 +5140,7 @@ void fldUpdateModeOneCameraPose(void) {
     if (step < 2.0f) {
         step = 2.0f;
     }
+    step = SDF_FRAME_STEP(step);
     if ((0.0f <= difference && difference <= step) ||
         (difference <= 0.0f && -step <= difference)) {
         difference = fldGlobalBase.modeOneCameraHeadingTarget;
@@ -5175,7 +5177,7 @@ s32 fldApplyPlayerVerticalStep(void) {
         fldGlobalBase.previousY = fldGlobalBase.y;
         fldGlobalBase.previousZ = fldGlobalBase.z;
         fldGlobalBase.x = position[0];
-        fldGlobalBase.y = position[1] - 2.0f;
+        fldGlobalBase.y = position[1] - SDF_FRAME_STEP(2.0f);
         fldGlobalBase.z = position[2];
         position[0] = fldGlobalBase.x;
         position[1] = fldGlobalBase.y;
@@ -5190,7 +5192,7 @@ s32 fldApplyPlayerVerticalStep(void) {
         fldGlobalBase.previousY = fldGlobalBase.y;
         fldGlobalBase.previousZ = fldGlobalBase.z;
         fldGlobalBase.x = position[0];
-        fldGlobalBase.y = position[1] + 2.0f;
+        fldGlobalBase.y = position[1] + SDF_FRAME_STEP(2.0f);
         fldGlobalBase.z = position[2];
         position[0] = fldGlobalBase.x;
         position[1] = fldGlobalBase.y;
@@ -5373,17 +5375,17 @@ s32 fldUpdateFieldPlayerMovement(void) {
         FLD_LOCATION_COORDINATE_FLAG_CAMERA_TILT) {
         if (D_003BA870[0][0][1] < 0x40) {
             if (fileTestSavedSlotFlags(FILE_CONFIG_OPTION_REVERSE_FIELD_CAMERA) != 0) {
-                fldGlobalBase.cameraTilt -= 10.0f;
+                fldGlobalBase.cameraTilt -= SDF_FRAME_STEP(10.0f);
             } else {
-                fldGlobalBase.cameraTilt += 10.0f;
+                fldGlobalBase.cameraTilt += SDF_FRAME_STEP(10.0f);
             }
             fldGlobalBase.cameraTiltActive = 1;
         }
         if (D_003BA870[0][0][1] > 0xC0) {
             if (fileTestSavedSlotFlags(FILE_CONFIG_OPTION_REVERSE_FIELD_CAMERA) != 0) {
-                fldGlobalBase.cameraTilt += 10.0f;
+                fldGlobalBase.cameraTilt += SDF_FRAME_STEP(10.0f);
             } else {
-                fldGlobalBase.cameraTilt -= 10.0f;
+                fldGlobalBase.cameraTilt -= SDF_FRAME_STEP(10.0f);
             }
             fldGlobalBase.cameraTiltActive = 1;
         }
@@ -5449,7 +5451,7 @@ s32 fldUpdateFieldPlayerMovement(void) {
         D_003BAD54++;
         if (D_003BAD4C != direction) {
             D_003BAD48 = 0;
-        } else if (D_003BAD54 > 12) {
+        } else if (D_003BAD54 > SDF_FRAMES(12)) {
             D_003BAD48 = 0;
         }
     }
@@ -5491,9 +5493,9 @@ s32 fldUpdateFieldPlayerMovement(void) {
                       OBJECT_TRANSFORM_FLAG_USE_SMOOTHED_POSITION);
     if (direction != -1 && D_003BAB50 != 0) {
         if (fldGlobalBase.cameraSupportHeightDelta > 0.0f) {
-            fldGlobalBase.y = position[1] + 5.0f;
+            fldGlobalBase.y = position[1] + SDF_FRAME_STEP(5.0f);
         } else {
-            fldGlobalBase.y = position[1] + 10.0f;
+            fldGlobalBase.y = position[1] + SDF_FRAME_STEP(10.0f);
         }
     }
     if (fldGetLocationCoordinateFlags(fldGlobalBase.area, fldGlobalBase.floor + 1) &
@@ -5530,7 +5532,7 @@ s32 fldUpdateFieldPlayerMovement(void) {
         if (difference < 0.0f) {
             difference = -difference;
         }
-        distance = (distance / 180.0f) * (180.0f - difference);
+        distance = SDF_FRAME_STEP((distance / 180.0f) * (180.0f - difference));
         radians = -heading * 3.14f / 180.0f;
         position[0] = fldGlobalBase.x - sdfSin(radians) * distance;
         position[1] = fldGlobalBase.y;
@@ -5583,19 +5585,19 @@ s32 fldUpdateFieldPlayerMovement(void) {
             ((dds3Basic_t *)fldPlayerObject)->poseset->smoothedPosition[0] = position[0];
         } else {
             ((dds3Basic_t *)fldPlayerObject)->poseset->smoothedPosition[0] =
-                smoothed[0] + (position[0] - smoothed[0]) / 3.0f;
+                smoothed[0] + (position[0] - smoothed[0]) / SDF_FRAME_DIVISOR(3.0f);
         }
         if (ffabsf(smoothed[1] - position[1]) < 1.0f) {
             ((dds3Basic_t *)fldPlayerObject)->poseset->smoothedPosition[1] = position[1];
         } else {
             ((dds3Basic_t *)fldPlayerObject)->poseset->smoothedPosition[1] =
-                smoothed[1] + (position[1] - smoothed[1]) / 3.0f;
+                smoothed[1] + (position[1] - smoothed[1]) / SDF_FRAME_DIVISOR(3.0f);
         }
         if (ffabsf(smoothed[2] - position[2]) < 1.0f) {
             ((dds3Basic_t *)fldPlayerObject)->poseset->smoothedPosition[2] = position[2];
         } else {
             ((dds3Basic_t *)fldPlayerObject)->poseset->smoothedPosition[2] =
-                smoothed[2] + (position[2] - smoothed[2]) / 3.0f;
+                smoothed[2] + (position[2] - smoothed[2]) / SDF_FRAME_DIVISOR(3.0f);
         }
         ((dds3Basic_t *)fldPlayerObject)->poseset->smoothedPosition[3] = 1.0f;
     }
@@ -5608,6 +5610,7 @@ s32 fldUpdateFieldPlayerMovement(void) {
     if (step < 2.0f) {
         step = 2.0f;
     }
+    step = SDF_FRAME_STEP(step);
     if ((0.0f <= difference && difference <= step) ||
         (difference <= 0.0f && -step <= difference)) {
         difference = heading;
@@ -5624,7 +5627,7 @@ s32 fldUpdateFieldPlayerMovement(void) {
     if (fldGlobalBase.mode != FLD_CAMERA_MODE_ALTERNATE_FOCUS && fldGlobalBase.mode != FLD_CAMERA_MODE_OBJECT_FOCUS) {
         if (D_003BAD2C != 0) {
             difference = fldAngleDifference(fldGlobalBase.negatedAngle, fldGlobalBase.cameraTargetAngle);
-            step = 30.0f;
+            step = SDF_FRAME_STEP(30.0f);
             if ((0.0f <= difference && difference <= step) ||
                 (difference <= 0.0f && -step <= difference)) {
                 D_003BAD2C = 0;
@@ -5642,7 +5645,7 @@ s32 fldUpdateFieldPlayerMovement(void) {
                 fldGlobalBase.cameraTargetAngle = fldPlayerCalc360_4(fldGlobalBase.cameraTargetAngle);
                 difference = fldAngleDifference(fldGlobalBase.cameraTargetAngle, fldGlobalBase.negatedAngle);
                 if (difference < -100.0f || difference > 100.0f) {
-                    D_003BAD30 = 2;
+                    D_003BAD30 = SDF_FRAMES(2);
                     fldGlobalBase.negatedAngle = fldGlobalBase.cameraTargetAngle;
                 } else {
                     D_003BAD2C = 1;
@@ -5657,7 +5660,7 @@ s32 fldUpdateFieldPlayerMovement(void) {
         if (fldGlobalBase.unkA0 != -1 && direction != -1 &&
             (s32)fldGlobalBase.negatedAngle != (s32)fldGlobalBase.cameraTargetAngle) {
             difference = fldAngleDifference(fldGlobalBase.negatedAngle, fldGlobalBase.cameraTargetAngle);
-            step = 0.4f;
+            step = SDF_FRAME_STEP(0.4f);
             if ((0.0f <= difference && difference <= step) ||
                 (difference <= 0.0f && -step <= difference)) {
                 difference = fldGlobalBase.cameraTargetAngle;
@@ -5683,32 +5686,32 @@ s32 fldUpdateFieldPlayerMovement(void) {
         } else {
             s32 reversed = fileTestSavedSlotFlags(FILE_CONFIG_OPTION_REVERSE_FIELD_CAMERA) == 0;
             if (dds3PadButtonState[1][0][8] != 0 && dds3PadButtonState[1][0][10] == 0) {
-                fldGlobalBase.negatedAngle -= 4.5f;
+                fldGlobalBase.negatedAngle -= SDF_FRAME_STEP(4.5f);
             } else if (dds3PadButtonState[1][0][8] == 0 && dds3PadButtonState[1][0][10] != 0) {
-                fldGlobalBase.negatedAngle += 4.5f;
+                fldGlobalBase.negatedAngle += SDF_FRAME_STEP(4.5f);
             } else if (D_003BA870[0][0][0] < 0x20) {
                 if (reversed) {
-                    fldGlobalBase.negatedAngle += 3.0f;
+                    fldGlobalBase.negatedAngle += SDF_FRAME_STEP(3.0f);
                 } else {
-                    fldGlobalBase.negatedAngle -= 3.0f;
+                    fldGlobalBase.negatedAngle -= SDF_FRAME_STEP(3.0f);
                 }
             } else if (D_003BA870[0][0][0] < 0x40) {
                 if (reversed) {
-                    fldGlobalBase.negatedAngle += 1.5f;
+                    fldGlobalBase.negatedAngle += SDF_FRAME_STEP(1.5f);
                 } else {
-                    fldGlobalBase.negatedAngle -= 1.5f;
+                    fldGlobalBase.negatedAngle -= SDF_FRAME_STEP(1.5f);
                 }
             } else if (D_003BA870[0][0][0] > 0xE0) {
                 if (reversed) {
-                    fldGlobalBase.negatedAngle -= 3.0f;
+                    fldGlobalBase.negatedAngle -= SDF_FRAME_STEP(3.0f);
                 } else {
-                    fldGlobalBase.negatedAngle += 3.0f;
+                    fldGlobalBase.negatedAngle += SDF_FRAME_STEP(3.0f);
                 }
             } else if (D_003BA870[0][0][0] > 0xC0) {
                 if (reversed) {
-                    fldGlobalBase.negatedAngle -= 1.5f;
+                    fldGlobalBase.negatedAngle -= SDF_FRAME_STEP(1.5f);
                 } else {
-                    fldGlobalBase.negatedAngle += 1.5f;
+                    fldGlobalBase.negatedAngle += SDF_FRAME_STEP(1.5f);
                 }
             } else {
                 goto camera_input_done;
@@ -5994,6 +5997,7 @@ void fldUpdateSmoothedCameraPose(void) {
                 if (step < 2.0f) {
                     step = 2.0f;
                 }
+                step = SDF_FRAME_STEP(step);
                 if ((0.0f <= difference && difference <= step) ||
                     (difference <= 0.0f && -step <= difference)) {
                     fldGlobalBase.headingState = FLD_CAMERA_TURN_REQUEST_IDLE;
@@ -6039,19 +6043,19 @@ void fldUpdateSmoothedCameraPose(void) {
                     fldPlayerObject->poseset->smoothedPosition[0] = position[0];
                 } else {
                     fldPlayerObject->poseset->smoothedPosition[0] =
-                        smoothed[0] + (position[0] - smoothed[0]) / 3.0f;
+                        smoothed[0] + (position[0] - smoothed[0]) / SDF_FRAME_DIVISOR(3.0f);
                 }
                 if (ffabsf(smoothed[1] - position[1]) < 1.0f) {
                     fldPlayerObject->poseset->smoothedPosition[1] = position[1];
                 } else {
                     fldPlayerObject->poseset->smoothedPosition[1] =
-                        smoothed[1] + (position[1] - smoothed[1]) / 3.0f;
+                        smoothed[1] + (position[1] - smoothed[1]) / SDF_FRAME_DIVISOR(3.0f);
                 }
                 if (ffabsf(smoothed[2] - position[2]) < 1.0f) {
                     fldPlayerObject->poseset->smoothedPosition[2] = position[2];
                 } else {
                     fldPlayerObject->poseset->smoothedPosition[2] =
-                        smoothed[2] + (position[2] - smoothed[2]) / 3.0f;
+                        smoothed[2] + (position[2] - smoothed[2]) / SDF_FRAME_DIVISOR(3.0f);
                 }
                 fldPlayerObject->poseset->smoothedPosition[3] = 1.0f;
                 player = fldPlayerObject;
@@ -8587,7 +8591,7 @@ void fldRefreshAreaStateFromPosition(f32 *input) {
         if (support->matter != 0) {
             carrier = (support->matter)->poseset;
             carried[0] = carrier->pos[0] - support->previousPosition[0];
-            carried[1] = carrier->pos[1] - support->previousPosition[1] + 10.0f;
+            carried[1] = carrier->pos[1] - support->previousPosition[1] + SDF_FRAME_STEP(10.0f);
             carried[2] = carrier->pos[2] - support->previousPosition[2];
         }
         fldGlobalBase.secondaryMovingMatterIndex = -1;
@@ -8750,6 +8754,7 @@ void fldRefreshAreaStateFromPosition(f32 *input) {
                         if (fldMatterTable[index].normal[1] < -0.75f) {
                             fldGlobalBase.unkA4 = index;
                             if (floorRecord >= 0 && contactInset < absoluteDistance) clearance = absoluteDistance;
+                            SDF_FRAME_FLOOR_EDGE(clearance, absoluteDistance, distance);
                             position[0] = projected[0] + fldMatterTable[index].normal[0] * clearance;
                             position[1] = projected[1] + fldMatterTable[index].normal[1] * clearance - 1.0f;
                             position[2] = projected[2] + fldMatterTable[index].normal[2] * clearance;

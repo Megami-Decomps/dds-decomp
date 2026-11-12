@@ -18,6 +18,7 @@
 #include "file_pac.h"
 #include "evt_world.h"
 #include "common.h"
+#include "sdfFrame.h"
 #include "fld_scene_selection_index.h"
 #include "fld_scene_selection_resource.h"
 #include "fld_spatial_sound_id.h"
@@ -2656,7 +2657,7 @@ void fldEnterSceneCamera(void) {
     fldPreparePlayerSceneCameraTarget();
     evtEnableMoonDraw();
     fldApplySkyLightSetToPlayerVU();
-    cam->sceneTransitionCooldown = 4;
+    cam->sceneTransitionCooldown = SDF_FRAMES(4);
     frSetFontDrawOT(0x54);
     dds3VisibleSceneBasic((dds3Basic_t *)(u32)dds3GetActiveScene(), 1);
     D_003BAED4 = 0;

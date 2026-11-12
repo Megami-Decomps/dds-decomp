@@ -1314,6 +1314,7 @@ void fldHitChkUnitDamage(f32 *position) {
 #include "fld.h"
 #include "fpu.h"
 #include "dds3obj.h"
+#include "sdfFrame.h"
 
 extern f32 MATH_VectorLength(const f32 *vector);
 
@@ -1398,7 +1399,7 @@ void fldRefreshAreaStateFromPosition(f32 *input) {
         if (support->matter != NULL) {
             carrier = support->matter->poseset;
             carried[0] = carrier->pos[0] - support->previousPosition[0];
-            carried[1] = carrier->pos[1] - support->previousPosition[1] + 10.0f;
+            carried[1] = carrier->pos[1] - support->previousPosition[1] + SDF_FRAME_STEP(10.0f);
             carried[2] = carrier->pos[2] - support->previousPosition[2];
         }
         fldGlobalBase.secondaryMovingMatterIndex = -1;
@@ -1593,6 +1594,7 @@ void fldRefreshAreaStateFromPosition(f32 *input) {
                             if (floorRecord >= 0 && contactInset < absoluteDistance) {
                                 clearance = absoluteDistance;
                             }
+                            SDF_FRAME_FLOOR_EDGE(clearance, absoluteDistance, distance);
                             position[0] = projected[0] + fldMatterTable[index].normal[0] * clearance;
                             position[1] = projected[1] + fldMatterTable[index].normal[1] * clearance - 1.0f;
                             position[2] = projected[2] + fldMatterTable[index].normal[2] * clearance;

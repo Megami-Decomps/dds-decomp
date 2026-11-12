@@ -6,6 +6,7 @@
 #include "fld_scene_record.h"
 #include "fld_scene_selection_resource.h"
 #include "common.h"
+#include "sdfFrame.h"
 #include "fld_map_slot_auxiliary_flag_selector.h"
 #include "scr_integer_parameter_api.h"
 #include "fld_inf.h"
@@ -635,7 +636,7 @@ s32 fldCommand_CAM_SEL_PHOKAN(void) {
         D_0038BAE0[1] = rot[1];
         D_0038BAE0[2] = rot[2];
         D_004360B4 = 0;
-        D_004360B8 = scrGetIntPara(1);
+        D_004360B8 = SDF_FRAMES(scrGetIntPara(1));
         D_003897C0[0] = 4;
     } else {
         world = dds3GetActiveScene();

@@ -9,6 +9,7 @@
 #include "btl_actor_transform_parameters.h"
 #include "btl_select_transform_parameters_api.h"
 #include "common.h"
+#include "sdfFrame.h"
 #include "kernel_draw.h"
 #include "sdf_map_position_api.h"
 #include "btl_unit_defeat_by_delta_result.h"
@@ -3696,7 +3697,7 @@ s32 btlApproachTargetTask(BtlApproachTaskArgs *args) {
     SDF_VU0_SCALEVECTOR_V0(reach);
     SDF_VU0_ADDVECTOR();
     SDF_VU0_COPYVECTOR_C_TO_B();
-    SDF_VU0_INTERPOLATE(0.8f / scale);
+    SDF_VU0_INTERPOLATE(SDF_FRAME_FRACTION(0.8f / scale));
     SDF_VU0_STOREVECTOR(pos);
     SDF_VU0_LOADVECTOR_B(fromPos);
     SDF_VU0_SUBVECTOR();
@@ -3748,7 +3749,7 @@ s32 btlUpdateUnitPositionInterpolationTask(BtlPosLerpTaskArgs *args) {
         if (args->count == 0) {
             SDF_VU0_COPYVECTOR(&args->from, unit->currentPosition);
         }
-        args->t = t + (1.0f - t) * rate;
+        args->t = t + (1.0f - t) * SDF_FRAME_FRACTION(rate);
         if (args->t > 0.999f) {
             args->t = 1.0f;
         }
@@ -3816,7 +3817,7 @@ s32 btlStepUnitRotationNlerp(BtlSlerpTaskArgs *args) {
             if (args->count == 0) {
                 SDF_VU0_COPYVECTOR(&args->initialOrientation, unit->orientation);
             }
-            args->t = t + (1.0f - t) * rate;
+            args->t = t + (1.0f - t) * SDF_FRAME_FRACTION(rate);
             if (args->t > 0.999f) {
                 args->t = 1.0f;
             }

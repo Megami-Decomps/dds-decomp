@@ -1,4 +1,5 @@
 #include "common.h"
+#include "sdfFrame.h"
 #include "kernel_draw.h"
 #include "ps2asm.h"
 #include "dds3_path.h"
@@ -125,7 +126,7 @@ EvtUnitPathAdvanceResult evtGetNextMovePos(evtUnitHandle_t *unit) {
                 return 0;
             }
         }
-        t += unit->pathSpeed;
+        t += SDF_FRAME_STEP(unit->pathSpeed);
         if (t < 0.0f) {
             t = 0.0f;
         }
@@ -1061,11 +1062,11 @@ EvtUnitFacingTargetResult evtRotateUnitTowardTarget(evtUnitHandle_t *unit, f32 *
     }
     rotationAngle *= scale;
     if (!(unit->flags & 0x200000)) {
-        if (rotationAngle < (-3.14159265f / 20.0f)) {
-            rotationAngle = (-3.14159265f / 20.0f);
+        if (rotationAngle < SDF_FRAME_STEP(-3.14159265f / 20.0f)) {
+            rotationAngle = SDF_FRAME_STEP(-3.14159265f / 20.0f);
         }
-        if ((3.14159265f / 20.0f) < rotationAngle) {
-            rotationAngle = (3.14159265f / 20.0f);
+        if (SDF_FRAME_STEP(3.14159265f / 20.0f) < rotationAngle) {
+            rotationAngle = SDF_FRAME_STEP(3.14159265f / 20.0f);
         }
     }
     SDF_VU0_LOADVECTOR(b);
@@ -1096,7 +1097,7 @@ EvtUnitMotionStepResult evtUnitMoveType0(evtUnitHandle_t *unit) {
     f32 scale;
     dds3Basic_t *obj;
 
-    evtRotateUnitTowardTarget(unit, unit->targetVector, unit->directionOffset * 0.01f);
+    evtRotateUnitTowardTarget(unit, unit->targetVector, SDF_FRAME_FRACTION(unit->directionOffset * 0.01f));
     if (unit->directionOffset != 0) {
         evtGetUnitDirVector(unit);
         obj = unit->effObj;
@@ -1107,7 +1108,7 @@ EvtUnitMotionStepResult evtUnitMoveType0(evtUnitHandle_t *unit) {
         SDF_VU0_SUBVECTOR();
         SDF_VU0_NORMALIZE();
     }
-    scale = unit->motionParameter * 0.1f;
+    scale = SDF_FRAME_STEP(unit->motionParameter * 0.1f);
     SDF_VU0_SCALEVECTOR_V0(scale);
     SDF_VU0_STOREVECTOR(v);
     dds3GetPosPoseSetMCR(obj, (u128 *)v);
@@ -1453,7 +1454,7 @@ EvtUnitMotionStepResult evtUpdateUnitMotion(dds3PoseSet_t *unused, dds3Basic_t *
             wobble = 0;
         }
         if (unit->motionState == EVT_UNIT_MOTION_STATE_VECTOR) {
-            if (evtUnitRotationQuat(unit, unit->targetVector, (f32)unit->motionParameter / 100.0f) !=
+            if (evtUnitRotationQuat(unit, unit->targetVector, SDF_FRAME_FRACTION((f32)unit->motionParameter / 100.0f)) !=
                 EVT_UNIT_ROTATION_STEP_APPLIED) {
                 unit->motionState = EVT_UNIT_MOTION_STATE_IDLE;
             }
@@ -1542,7 +1543,7 @@ EvtUnitMotionStepResult evtUpdateUnitMotion(dds3PoseSet_t *unused, dds3Basic_t *
         wobble = 1;
     }
     if (wobble != 0) {
-        unit->wobblePhase += 0.104719755f;
+        unit->wobblePhase += SDF_FRAME_STEP(0.104719755f);
         if (6.2831853f <= unit->wobblePhase) {
             unit->wobblePhase -= 6.2831853f;
         }
@@ -1589,7 +1590,7 @@ EvtUnitMotionStepResult evtUpdateUnitMotion(dds3PoseSet_t *unused, dds3Basic_t *
         if (unit->idleTicks < 0x7FFF) {
             unit->idleTicks++;
         }
-        if (unit->idleTicks >= 6) {
+        if (unit->idleTicks >= SDF_FRAMES(6)) {
             unit->movingTicks = 0;
         }
     }

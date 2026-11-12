@@ -1,5 +1,6 @@
 #include "sdk_ps2.h"
 #include "common.h"
+#include "sdfFrame.h"
 #include "sdf_chip.h"
 #include "dds3_path.h"
 #include "dds3obj.h"
@@ -256,7 +257,7 @@ s32 dds3PathBasicControlIsFinished(SdfFloatCounter *counter) {
     }
     if (counter->direction == 0) {
         if (counter->duration > counter->time) {
-            counter->time = counter->time + 1.0f;
+            counter->time = SDF_FRAME_STEP_UP(counter->time, 1.0f, counter->duration);
         } else if (counter->flags & SDF_FLOAT_COUNTER_WRAP_FLAG) {
             counter->time = 0.0f;
         } else {
@@ -264,7 +265,7 @@ s32 dds3PathBasicControlIsFinished(SdfFloatCounter *counter) {
         }
     } else if (counter->direction == 1) {
         if (counter->time > 0.0f) {
-            counter->time = counter->time - 1.0f;
+            counter->time = SDF_FRAME_STEP_DOWN(counter->time, 1.0f, 0.0f);
         } else if (counter->flags & SDF_FLOAT_COUNTER_WRAP_FLAG) {
             counter->time = counter->duration;
         } else {

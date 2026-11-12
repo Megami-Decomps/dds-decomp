@@ -21,6 +21,7 @@
 #include "evt_unit.h"
 #include "evt_unit_color_transition.h"
 #include "common.h"
+#include "sdfFrame.h"
 #include "fld_scene_selection_index.h"
 #include "fld_scene_selection_resource.h"
 #include "fld_spatial_sound_id.h"
@@ -3108,7 +3109,7 @@ void fldEnterSceneCamera(void) {
     fldPreparePlayerSceneCameraTarget();
     evtEnableMoonDraw();
     fldApplySkyLightSetToPlayerVU();
-    cam->sceneTransitionCooldown = 4;
+    cam->sceneTransitionCooldown = SDF_FRAMES(4);
     frSetFontDrawOT(0x54);
     dds3VisibleSceneBasic((dds3Basic_t *)(u32)dds3GetActiveScene(), 1);
     D_00436268 = 0;
@@ -7939,7 +7940,7 @@ void fldUpdateGuideMarkerPulse(void) {
 
     for (i = 0; i < 15; i++) {
         if (D_00451DB0[i].active) {
-            D_00451DB0[i].progress += 1.0f;
+            D_00451DB0[i].progress += SDF_FRAME_STEP(1.0f);
             if (D_00451DB0[i].progress > 150.0f) {
                 D_00451DB0[i].progress = 0.0f;
             }

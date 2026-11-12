@@ -3,6 +3,7 @@
 #include "fld_camera_move_tracking.h"
 #include "fld_title_banner_menu.h"
 #include "common.h"
+#include "sdfFrame.h"
 #include "fld_map_slot_auxiliary_flag_selector.h"
 #include "scr_integer_parameter_api.h"
 #include "fld_scene_status_api.h"
@@ -467,7 +468,7 @@ s32 fldCommand_CAM_SEL_PHOKAN(void) {
         D_00330640[1] = rot[1];
         D_00330640[2] = rot[2];
         D_003BAD24 = 0;
-        D_003BAD28 = scrGetIntPara(1);
+        D_003BAD28 = SDF_FRAMES(scrGetIntPara(1));
         D_0032E400[0] = 4;
     } else {
         world = dds3GetActiveScene();
