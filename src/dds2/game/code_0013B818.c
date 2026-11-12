@@ -168,11 +168,11 @@ extern u8 D_00399EA0[][16];
 
 extern s32 fmProcessChk(void);
 
-extern s32 fldHasKiretaLabelProcess(void);
+extern u8 fldHasKiretaLabelProcess(void);
 
-extern s32 fldProcKiretaChk(void);
+extern u8 fldProcKiretaChk(void);
 
-extern s32 fldProcHirakenaiChk(void);
+extern u8 fldProcHirakenaiChk(void);
 
 extern u8 fldIsEventPhaseAtLeastTwo(void);
 

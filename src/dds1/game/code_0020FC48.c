@@ -513,7 +513,7 @@ s32 btlOpStartSelectedUnitModelChange(void) {
     return 1;
 }
 
-u8 btlAreModelChangeTasksFinished(void) {
+s32 btlAreModelChangeTasksFinished(void) {
     s32 taskCount;
 
     taskCount = btlCountTasksByKind(0x1a);

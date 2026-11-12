@@ -254,7 +254,7 @@ extern void fldSetFloorFlag(s32 area, s32 floor, s32 flagNumber);
 
 extern s32 D_0038984C[];
 
-extern s32 fldDoor_ChkWarp(void);
+extern u8 fldDoor_ChkWarp(void);
 
 extern void fldMarkStageExplorationBitmapRegion(s32, s32, s32, s32, s32, s32);
 
@@ -1680,7 +1680,7 @@ s32 fldCommandPlaySe(void) {
     return 1;
 }
 
-u8 fldCommandLoadArchive(void) {
+s32 fldCommandLoadArchive(void) {
     return fldPollArchiveLoad(scrGetIntPara(0)) != FLD_ARCHIVE_LOAD_PENDING;
 }
 

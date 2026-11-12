@@ -79,7 +79,7 @@ enum {
     EVT_DEV_CONSOLE_BUFFER_BYTES = 0x200,
     BF_FLW0_MAGIC = 0x30574C46
 };
-extern s32 mdlViewerPackageTaskExists(void);
+extern u8 mdlViewerPackageTaskExists(void);
 extern u32 D_00435D28;
 extern s32 fileMenuOperationSucceeded(void);
 extern s32 fmProcessChk(void);

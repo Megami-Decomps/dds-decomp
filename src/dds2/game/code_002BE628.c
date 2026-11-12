@@ -3538,15 +3538,15 @@ s32 ptyChooseFirstAvailableRosterId(void) {
     return ptyIsPartyUnitPresent(8) != PTY_PARTY_UNIT_PRESENCE_NOT_FOUND ? 8 : 1;
 }
 
-extern s32 fldEsutoMaChk(void);
+extern u8 fldEsutoMaChk(void);
 
 extern void fldEsutoMaStart(void);
 
-extern s32 fldRiberaMaChk(void);
+extern u8 fldRiberaMaChk(void);
 
 extern void fldRiberaMaStart(void);
 
-extern s32 fldRifutoMaChk(void);
+extern u8 fldRifutoMaChk(void);
 
 extern void fldRifutoMaStart(void);
 

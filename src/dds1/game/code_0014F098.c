@@ -147,7 +147,7 @@ s32 fldCommandPlaySe(void) {
 }
 
 /* Unlike the other field commands, this reports the archive poll result. */
-u8 fldCommandLoadArchive(void) {
+s32 fldCommandLoadArchive(void) {
     return fldPollArchiveLoad(scrGetIntPara(0)) != FLD_ARCHIVE_LOAD_PENDING;
 }
 

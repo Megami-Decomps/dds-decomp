@@ -133,7 +133,7 @@ extern void mnuClearListFlagsOneAndTwo(u32 *flags);
 
 extern EvtStageTestResourceWorkResult evtStageTestAdvanceResourceWork(void);
 
-extern s32 mnuIsStaffMenuInputBlocked();
+extern u8 mnuIsStaffMenuInputBlocked(void);
 
 extern MenuPopupEntry mnuStaffCampPagePopupEntry[];
 
