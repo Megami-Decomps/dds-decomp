@@ -2,6 +2,7 @@
 #include "fld_item_box_object_api.h"
 #include "fld_area_work.h"
 #include "common.h"
+#include "sdfFrame.h"
 #include "fld_stop_entry.h"
 #include "sdf_textured_rect.h"
 #include "sdf_chip.h"
@@ -1314,7 +1315,6 @@ void fldHitChkUnitDamage(f32 *position) {
 #include "fld.h"
 #include "fpu.h"
 #include "dds3obj.h"
-#include "sdfFrame.h"
 
 extern f32 MATH_VectorLength(const f32 *vector);
 

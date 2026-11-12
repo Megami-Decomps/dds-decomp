@@ -1,5 +1,6 @@
 #include "sdk_ps2.h"
 #include "common.h"
+#include "sdfFrame.h"
 #include "ps2asm.h"
 #include "fld_map_selection.h"
 #include "sdf_vu_matrix.h"
@@ -606,7 +607,7 @@ void fldAdvanceMapRequest(MapRequestState *state, s32 x, s32 y, s32 z) {
         state->elapsed = 0;
         return;
     }
-    state->elapsed = state->elapsed + 1;
+    state->elapsed = state->elapsed + SDF_FRAME_DUE();
 }
 
 void fldSetMapRequestInterval(MapRequestState *state, u16 interval) {

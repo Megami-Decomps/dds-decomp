@@ -1,4 +1,5 @@
 #include "sdk_ps2.h"
+#include "sdfFrame.h"
 #include "camp_menu_context.h"
 #include "mnu_input.h"
 #include "snd_sequence_volume_pan.h"
@@ -1264,7 +1265,7 @@ void mnuIdleVoiceTimer(StaffMenuRuntime *menu) {
     if (menu->motionSelection == -1 &&
         evtStageTestPollModelRequest() != EVT_STAGE_TEST_RESOURCE_WORK_PROCESSING) {
         if (evtStageTestHasPendingMotion() == EVT_STAGE_MOTION_QUEUE_SETTLED) {
-            menu->idleFrames = menu->idleFrames + 1;
+            menu->idleFrames = menu->idleFrames + SDF_FRAME_DUE();
         }
         if (menu->idleFrames >= MENU_IDLE_VOICE_TICKS) {
             voiceCount = evtStageTestCountFlags(0);

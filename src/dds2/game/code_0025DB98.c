@@ -4,6 +4,7 @@
 #include "dsp_active_api.h"
 #include "dsp_entry_api.h"
 #include "common.h"
+#include "sdfFrame.h"
 #include "dds3_task_add_child.h"
 #include "mnu_camp_display.h"
 #include "mnu_camp_option_index_api.h"
@@ -3264,7 +3265,7 @@ s32 evtQueryStateProgress(dds3ProcessID_t *callbackContext) {
             if (fclChkMessage() == EVT_MESSAGE_WINDOW_CONTROL_RESULT_NO_ACTIVE_CONTROL) {
                 s32 progressTicks = ((MenuTerminalContext *)stateAddress)->retryFrames;
                 if ((f32)progressTicks < 20.0f) {
-                    ((MenuTerminalContext *)stateAddress)->retryFrames = progressTicks + 1;
+                    ((MenuTerminalContext *)stateAddress)->retryFrames = progressTicks + SDF_FRAME_DUE();
                 } else {
                     mnuSetPopupEntry(dispatchSlot, mnuShopReturnFadePopupEntry);
                 }

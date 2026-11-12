@@ -1,4 +1,6 @@
 #include "sdk_ps2.h"
+#include "common.h"
+#include "sdfFrame.h"
 #include "sdf_gs_register_submit_api.h"
 #include "dsp_message_window_api.h"
 #include "evt_message_window_api.h"
@@ -1718,7 +1720,7 @@ void mnuIdleVoiceTimer(StaffMenuRuntime *object) {
     if (object->motionSelection == -1) {
         if (evtStageTestAdvanceResourceWork() != EVT_STAGE_TEST_RESOURCE_WORK_PROCESSING) {
             if (evtStageTestHasPendingMotion() == EVT_STAGE_MOTION_QUEUE_SETTLED) {
-                object->idleFrames += 1;
+                object->idleFrames += SDF_FRAME_DUE();
             }
             if (object->idleFrames >= 0x12d) {
                 count = evtStageTestCountFlags(0);

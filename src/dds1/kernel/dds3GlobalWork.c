@@ -1,6 +1,7 @@
 #include "sdk_ps2.h"
 #include "evt_run_context_api.h"
 #include "common.h"
+#include "sdfFrame.h"
 #include "scr.h"
 #include "ps2asm.h"
 #include "sdf_channel.h"
@@ -94,7 +95,7 @@ s32 dds3GlobalWorkMainProc(dds3ProcessID_t *task) {
 
     runtime = DDS3_GBWK;
     runtime->header.firstTick += 1;
-    runtime->header.secondTick += 1;
+    runtime->header.secondTick += SDF_FRAME_DUE();
     return 0;
 }
 

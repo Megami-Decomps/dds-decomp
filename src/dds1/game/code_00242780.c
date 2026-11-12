@@ -1,4 +1,6 @@
 #include "sdk_ps2.h"
+#include "common.h"
+#include "sdfFrame.h"
 #include "dsp_entry_api.h"
 #include "dsp_channel.h"
 #include "dsp_active_api.h"
@@ -2518,7 +2520,7 @@ s32 evtQueryStateProgress(dds3ProcessID_t *callbackContext) {
             s32 progressTicks = ((ShopScene *)stateAddress)->progressTicks;
 
             if ((f32)progressTicks < 20.0f) {
-                ((ShopScene *)stateAddress)->progressTicks = progressTicks + 1;
+                ((ShopScene *)stateAddress)->progressTicks = progressTicks + SDF_FRAME_DUE();
             } else {
                 mnuSetPopupEntry(&((ShopScene *)stateAddress)->dispatchState, mnuShopReturnFadePopupEntry);
             }
