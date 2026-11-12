@@ -197,7 +197,7 @@ void evtAdvanceUnitVisualTransitions(evtUnitHandle_t *unit) {
     flags = unit->flags;
     if (flags & EVT_UNIT_FLAG_RGB_TRANSITION) {
         u32 packed;
-        factor = unit->rgbDuration ? (f32)unit->rgbElapsed / unit->rgbDuration : 1.0f;
+        factor = unit->rgbDuration ? (f32)unit->rgbElapsed / SDF_FRAMES(unit->rgbDuration) : 1.0f;
         rgbTarget[0] = unit->color64;
         EE_MMI_RGBA_UNPACK_READONLY(rgbTarget, 0.0078125f);
         SDF_VU0_COPYVECTOR_A_TO_B();
@@ -210,7 +210,7 @@ void evtAdvanceUnitVisualTransitions(evtUnitHandle_t *unit) {
         MMI_RGBA_PACK_UNIT(packed, 128.0f);
         rgbResult[0] = packed;
         mdlSetColor((dds3ModelHandle_t *)unit->owner, (oldColor & 0xFF000000) | (rgbResult[0] & 0xFFFFFF));
-        if (unit->rgbElapsed >= unit->rgbDuration) {
+        if (unit->rgbElapsed >= SDF_FRAMES(unit->rgbDuration)) {
             flags = unit->flags &= ~EVT_UNIT_FLAG_RGB_TRANSITION;
         } else {
             flags = unit->flags;
@@ -219,7 +219,7 @@ void evtAdvanceUnitVisualTransitions(evtUnitHandle_t *unit) {
     }
     if (flags & EVT_UNIT_FLAG_ALPHA_TRANSITION) {
         u32 packed;
-        factor = unit->alphaDuration ? (f32)unit->alphaElapsed / unit->alphaDuration : 1.0f;
+        factor = unit->alphaDuration ? (f32)unit->alphaElapsed / SDF_FRAMES(unit->alphaDuration) : 1.0f;
         alphaTarget[0] = unit->color64;
         EE_MMI_RGBA_UNPACK_READONLY(alphaTarget, 0.0078125f);
         SDF_VU0_COPYVECTOR_A_TO_B();
@@ -232,7 +232,7 @@ void evtAdvanceUnitVisualTransitions(evtUnitHandle_t *unit) {
         MMI_RGBA_PACK_UNIT(packed, 128.0f);
         alphaResult[0] = packed;
         mdlSetColor((dds3ModelHandle_t *)unit->owner, (oldColor & 0xFFFFFF) | (alphaResult[0] & 0xFF000000));
-        if (unit->alphaElapsed >= unit->alphaDuration) {
+        if (unit->alphaElapsed >= SDF_FRAMES(unit->alphaDuration)) {
             flags = unit->flags &= ~EVT_UNIT_FLAG_ALPHA_TRANSITION;
         } else {
             flags = unit->flags;

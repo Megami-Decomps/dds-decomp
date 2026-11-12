@@ -1,5 +1,6 @@
 #include "sdk_ps2.h"
 #include "common.h"
+#include "sdfFrame.h"
 #include "sdf_map_position_api.h"
 #include "scr_integer_parameter_api.h"
 #include "scr_command_parameter_index.h"
@@ -706,7 +707,7 @@ s32 btlUpdateLinkedNumberDisplay(BtlLinkedEffectArgs *args) {
     color = args->payload.linked.color;
     rise = 0;
     offsets = NULL;
-    ticks = args->payload.linked.elapsedTicks;
+    ticks = SDF_FRAME_TICK(args->payload.linked.elapsedTicks);
     if (ticks < 5) {
         s32 remaining = ticks;
         u32 i = 0;
@@ -752,7 +753,7 @@ s32 btlUpdateLinkedNumberDisplay(BtlLinkedEffectArgs *args) {
         }
     }
     args->payload.linked.elapsedTicks++;
-    return args->payload.linked.elapsedTicks >= 36;
+    return args->payload.linked.elapsedTicks >= SDF_FRAMES(36);
 }
 
 
@@ -855,7 +856,7 @@ s32 func_0020FA98(BtlLinkedEffectArgs *args) {
         SDF_VU0_STOREVECTOR_NOMEM(args->anchorOffset);
     }
 
-    ticks = (u32)args->payload.counter.elapsedTicks;
+    ticks = (u32)SDF_FRAME_TICK(args->payload.counter.elapsedTicks);
     animationOffset = 0;
     packedColor = 0x80808080;
     if (mode == 0) {
@@ -909,7 +910,7 @@ s32 func_0020FA98(BtlLinkedEffectArgs *args) {
     }
 
     args->payload.counter.elapsedTicks++;
-    return args->payload.counter.elapsedTicks >= 0x1E;
+    return args->payload.counter.elapsedTicks >= SDF_FRAMES(0x1E);
 }
 
 /* Decrement the counter-display task's unit counter without underflowing zero. */
@@ -963,7 +964,7 @@ s32 btlPollActorOrEntryLabelTask(BtlEffLink *link) {
             btlCreateSkillNamePanel(datSkillNames + resourceIndex * 17);
         }
     }
-    if (btlHasRegisteredSkillNamePanelTask() == 0 || link->elapsedTicks >= 0x1E) {
+    if (btlHasRegisteredSkillNamePanelTask() == 0 || link->elapsedTicks >= SDF_FRAMES(0x1E)) {
         return 1;
     }
     link->elapsedTicks++;
@@ -992,7 +993,7 @@ s32 btlPollTimedTaskLink(BtlEffLink *link) {
     if (link->elapsedTicks == 0) {
         btlCreateSkillNamePanel(D_00435E5C + link->arg * 25);
     }
-    if (btlHasRegisteredSkillNamePanelTask() == 0 || link->elapsedTicks >= 0x1E) {
+    if (btlHasRegisteredSkillNamePanelTask() == 0 || link->elapsedTicks >= SDF_FRAMES(0x1E)) {
         return 1;
     }
     link->elapsedTicks++;
@@ -1060,7 +1061,7 @@ s32 btlPollCategoryLabelTask(BtlEffLink *link) {
             return 1;
         }
     }
-    if (btlHasRegisteredSkillNamePanelTask() == 0 || link->elapsedTicks >= 0x1E) {
+    if (btlHasRegisteredSkillNamePanelTask() == 0 || link->elapsedTicks >= SDF_FRAMES(0x1E)) {
         return 1;
     }
     link->elapsedTicks++;
@@ -1097,7 +1098,7 @@ s32 btlPollActorDialogTask(BtlEffLink *link) {
         }
         btlReplaceDialogTasksAndQueueMessage(battleState->messageWindows[0], link->arg);
     }
-    if (btlHasRegisteredAphNamePanelTask() == 0 || link->elapsedTicks >= 0x2D) {
+    if (btlHasRegisteredAphNamePanelTask() == 0 || link->elapsedTicks >= SDF_FRAMES(0x2D)) {
         return 1;
     }
     link->elapsedTicks++;
@@ -1136,7 +1137,7 @@ s32 btlUpdateLinkedDialogueEffect(BtlEffLink *link) {
         }
         btlReplaceDialogTasksAndQueueMessage(battleState->messageWindows[1], link->arg);
     }
-    if (btlHasRegisteredAphNamePanelTask() == 0 || link->elapsedTicks >= 0x2D) {
+    if (btlHasRegisteredAphNamePanelTask() == 0 || link->elapsedTicks >= SDF_FRAMES(0x2D)) {
         return 1;
     }
     link->elapsedTicks++;
@@ -1194,7 +1195,7 @@ s32 btlPollTimedPresentationTask(BtlEffLink *link) {
         }
         btlReplaceDialogTasksAndQueueMessage(battleState->scriptTarget, link->arg);
     }
-    if (btlHasRegisteredAphNamePanelTask() == 0 || link->elapsedTicks >= 0x2D) {
+    if (btlHasRegisteredAphNamePanelTask() == 0 || link->elapsedTicks >= SDF_FRAMES(0x2D)) {
         return 1;
     }
     link->elapsedTicks++;
@@ -1227,7 +1228,7 @@ s32 btlPollEffectWaitTask(BtlEffLink *link) {
         }
         btlReplaceDialogTasksAndQueueMessage(battleState->messageWindows[0], 0x75);
     }
-    if (btlHasRegisteredAphNamePanelTask() == 0 || link->elapsedTicks >= 0x2D) {
+    if (btlHasRegisteredAphNamePanelTask() == 0 || link->elapsedTicks >= SDF_FRAMES(0x2D)) {
         return 1;
     }
     link->elapsedTicks++;
@@ -1259,7 +1260,7 @@ s32 btlWaitEffectTask(BtlAnalysisPanelWaitArgs *task) {
         btlCreateAnalysisPanelTask(task->unit, 0);
         btlSetCommandPanelFadeMode(0, 8);
     }
-    if (task->elapsedTicks >= 0x11) {
+    if (task->elapsedTicks >= SDF_FRAMES(0x11)) {
         if (btlGetRegisteredTaskValueOrDefault() == BTL_ANALYSIS_PANEL_TRANSITION_ACTIVE) {
             if (dds3PadButtonState[0x21] < 0 || dds3PadButtonState[0x23] < 0) {
                 btlSetCommandPanelFadeMode(1, 8);
@@ -1302,7 +1303,7 @@ s32 btlAdvanceActorEffectLabelTask(BtlEffLink *link) {
         }
         btlReplaceDialogTasksAndQueueMessage(battleState->messageWindows[0], 0xD5);
     }
-    if (btlHasRegisteredAphNamePanelTask() == 0 || link->elapsedTicks >= 0x2D) {
+    if (btlHasRegisteredAphNamePanelTask() == 0 || link->elapsedTicks >= SDF_FRAMES(0x2D)) {
         return 1;
     }
     link->elapsedTicks++;
