@@ -1,5 +1,6 @@
 #include "sdk_ps2.h"
 #include "common.h"
+#include "sdfFrame.h"
 #include "sdf_trig.h"
 #include "eff_random.h"
 #include "sdf_heap_api.h"
@@ -70,6 +71,9 @@ extern void mtrSpawnGridPropagationCells(MtrGrid *grid, MtrCell *source, s8 prop
 extern void mtrAdvanceGridCellPropagation(MtrGrid *grid);
 
 void mtrUpdateGridPropagation(MtrGrid *grid) {
+    if (!SDF_FRAME_DUE()) {
+        return;
+    }
     if (grid->remainingDelay == 0) {
         if (grid->unk14 < grid->unk16) {
             mtrSpawnGridPropagationCells(grid, NULL, 1);

@@ -3,6 +3,7 @@
 #include "btl_runtime_state.h"
 #include "eff_random.h"
 #include "common.h"
+#include "sdfFrame.h"
 #include "btl_unit_model_progress_api.h"
 #include "scr_integer_parameter_api.h"
 #include "btl_command_target_policy.h"
@@ -3075,7 +3076,7 @@ s32 btlUpdateDebugEncounterSelector(void) {
         return 0;
     }
     if (D_00436F5F != 0) {
-        encounter = btlAdvanceConditionalEncounterRoll(200.0f, D_00436F64);
+        encounter = btlAdvanceConditionalEncounterRoll(SDF_FRAME_STEP(200.0f), D_00436F64);
         if (encounter == BTL_CONDITIONAL_ENCOUNTER_ROLL_NO_SELECTION) {
             return 0;
         }

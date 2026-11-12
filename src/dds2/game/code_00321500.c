@@ -1,5 +1,6 @@
 #include "sdk_ps2.h"
 #include "common.h"
+#include "sdfFrame.h"
 #include "mnu_callback_list.h"
 #include "mnu_work.h"
 #include "dds_nested_resource.h"
@@ -368,8 +369,8 @@ void mnuAdvanceMovingRuntimeRecords(MenuRuntimeList *list) {
             pi = 3.1415926f;
             angle = record->state.directionDegrees * pi / 180.0f +
                     record->angle + 1.5707963f;
-            record->displacementX += record->speed * cos(angle);
-            record->displacementY -= record->speed * sin(angle);
+            record->displacementX += SDF_FRAME_STEP(record->speed) * cos(angle);
+            record->displacementY -= SDF_FRAME_STEP(record->speed) * sin(angle);
             x = record->displacementX + record->rotatedOffsetX + record->baseX;
             y = record->displacementY + record->rotatedOffsetY + record->baseY;
             if ((record->state.kind & 0xF) == 3) {
@@ -385,25 +386,27 @@ void mnuAdvanceMovingRuntimeRecords(MenuRuntimeList *list) {
                 if (y > parameters->height) {
                     y = parameters->height;
                 }
-                if (x <= 0.0f) {
-                    record->angle = (-135.0f + (rand() % 100) *
-                                     90.0f / 100.0f) * pi / 180.0f;
-                } else if (x >= parameters->width) {
-                    record->angle = (135.0f - (rand() % 100) *
-                                     90.0f / 100.0f) * pi / 180.0f;
-                } else if (y <= 0.0f) {
-                    record->angle = ((rand() % 100) *
-                                     90.0f / 100.0f + 135.0f) * pi / 180.0f;
-                } else if (y >= parameters->height) {
-                    record->angle = (-45.0f + (rand() % 100) *
-                                     90.0f / 100.0f) * pi / 180.0f;
+                if (SDF_FRAME_DUE()) {
+                    if (x <= 0.0f) {
+                        record->angle = (-135.0f + (rand() % 100) *
+                                         90.0f / 100.0f) * pi / 180.0f;
+                    } else if (x >= parameters->width) {
+                        record->angle = (135.0f - (rand() % 100) *
+                                         90.0f / 100.0f) * pi / 180.0f;
+                    } else if (y <= 0.0f) {
+                        record->angle = ((rand() % 100) *
+                                         90.0f / 100.0f + 135.0f) * pi / 180.0f;
+                    } else if (y >= parameters->height) {
+                        record->angle = (-45.0f + (rand() % 100) *
+                                         90.0f / 100.0f) * pi / 180.0f;
+                    }
                 }
             } else if (x < -50.0f || x > parameters->width + 50.0f ||
                        y < -150.0f || y > parameters->height + 50.0f) {
                 mnuDeactivateListRecord(list, record);
             }
             if (record->remaining > 0) {
-                record->remaining--;
+                record->remaining -= SDF_FRAME_DUE();
                 if (record->remaining == 0) {
                     mnuDeactivateListRecord(list, record);
                 }

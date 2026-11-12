@@ -4,6 +4,7 @@
 #include "sdf_gs_header.h"
 #include "ps2asm.h"
 #include "common.h"
+#include "sdfFrame.h"
 #include "btl_unit_model_progress_api.h"
 #include "scr_integer_parameter_api.h"
 #include "scr_command_parameter_index.h"
@@ -3018,7 +3019,7 @@ s32 btlUpdateDebugEncounterSelector(void) {
         return 0;
     }
     if (D_003BBB0F != 0) {
-        encounter = btlAdvanceConditionalEncounterRoll(200.0f, D_003BBB14);
+        encounter = btlAdvanceConditionalEncounterRoll(SDF_FRAME_STEP(200.0f), D_003BBB14);
         if (encounter == BTL_CONDITIONAL_ENCOUNTER_ROLL_NO_SELECTION) {
             return 0;
         }

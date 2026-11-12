@@ -5,6 +5,7 @@
 #include "eff_resource_slots.h"
 #include "eff_resource_source_lifetime.h"
 #include "common.h"
+#include "sdfFrame.h"
 #include "ps2asm.h"
 #include "snd_sequence_volume_pan.h"
 #include "sdf_trig.h"
@@ -4866,7 +4867,7 @@ s32 mnuDrawMantraPulseIcon(s32 x, s32 y, s32 z, s32 amount, s32 unused, u8 *obje
     u8 table[4] = {0, 10, 20, 30};
     f32 t;
 
-    object[0x20] += 1;
+    object[0x20] += SDF_FRAME_DUE();
     if (object[0x20] > 0x82) {
         object[0x20] = table[(u8)(dds3GetRandFloatA(0) * 3.0f)];
     }
@@ -7155,7 +7156,7 @@ void mnuUpdateAndDrawMantraSparkleEmitter(s32 x, s32 y, s32 z, s32 amount, Mantr
     s32 drawX;
     s32 drawY;
 
-    emitter->duration--;
+    emitter->duration -= SDF_FRAME_DUE();
     if (emitter->duration < 0) {
         mnuSpawnMantraSparkle(emitter);
         if (emitter->kind == 0) {
@@ -7606,7 +7607,7 @@ void mnuTickMantraSparkParticles(MantraSparkState *state) {
     s32 value;
     s32 i;
 
-    state->timer = state->timer - 1;
+    state->timer = state->timer - SDF_FRAME_DUE();
     if (state->timer < 0) {
         value = dds3GetRandFloatA(0) * 60.0f + 60.0f;
         state->unk4 = value;
@@ -7621,7 +7622,7 @@ void mnuTickMantraSparkParticles(MantraSparkState *state) {
 }
 
 void mnuUpdateSparkle(MantraSpark *spark) {
-    spark->timer -= 1;
+    spark->timer -= SDF_FRAME_DUE();
     if (spark->timer < 0) {
         if (spark->phase != 0) {
             spark->phase = 0;

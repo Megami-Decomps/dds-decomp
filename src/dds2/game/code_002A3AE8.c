@@ -1,5 +1,6 @@
 #include "sdk_ps2.h"
 #include "common.h"
+#include "sdfFrame.h"
 #include "mnu_movie_menu_selection_index.h"
 #include "eff_random.h"
 #include "eff_resource_slots.h"
@@ -330,6 +331,10 @@ void mnuClearMovieMenuPickList(PickList *bar) {
 void mnuTitlePickRandomSlot(PickList *list) {
     u32 range = 0x20;
     s32 tries;
+
+    if (!SDF_FRAME_DUE()) {
+        return;
+    }
     tries = 0;
     do {
         u32 id;
@@ -497,7 +502,7 @@ void mnuStartRandomMovieMenuPulse(PickList *work) {
     s32 selected = -1;
     s32 i;
 
-    if (dds3GetRandA(0) % 60u == 0) {
+    if (SDF_FRAME_DUE() && dds3GetRandA(0) % 60u == 0) {
         for (i = 0; i < 4; i++) {
             if (work->effectSlots[i].active == 0) {
                 selected = i;

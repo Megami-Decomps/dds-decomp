@@ -8,6 +8,7 @@
 #include "eff_resource_records.h"
 #include "fpu.h"
 #include "common.h"
+#include "sdfFrame.h"
 #include "dat_assigned_item_id.h"
 #include "pty_record_slot_value_api.h"
 #include "ps2asm.h"
@@ -2305,7 +2306,7 @@ MenuProfilePanel *mnuCreateProfilePanel(datUnitWork_t *selectionState) {
     profileRecord = ptyGetCurrentProfileRecord(selectionState);
     mnuSetProfilePanelValues(panel, ptyGetProfileRecordCap((u16)profileId), profileRecord->value);
     for (randomWordIndex = 0; randomWordIndex < 5; randomWordIndex++) {
-        panel->randomOpacity[randomWordIndex] = dds3GetRandA(0) % 0xC0 + 0x40;
+        panel->randomOpacity[randomWordIndex] = dds3GetRandA(SDF_FRAME_RAND()) % 0xC0 + 0x40;
     }
     panel->opacity = 0x100;
     return panel;
@@ -2414,7 +2415,7 @@ void mnuDrawProfilePanel(s32 x, s32 y, s32 depth, MenuProfilePanel *panel, s32 s
     for (i = 0; i < 5; i++) {
         travel = panel->phase + i * 0x80;
         t = travel % 0x200;
-        if (t == 0) {
+        if (t == 0 && SDF_FRAME_DUE()) {
             panel->randomOpacity[i] = dds3GetRandA(0) % 0xC0 + 0x40;
         }
         effDrawTextureSlotWithBlendedCornerColors(
@@ -2484,6 +2485,9 @@ void mnuDrawAndAdvanceProfilePanel(s32 x, s32 y, s32 z, MenuProfilePanel *panel,
     s32 nextPhase;
 
     mnuDrawProfilePanel(x, y, z, panel, option);
+    if (!SDF_FRAME_DUE()) {
+        return;
+    }
     phase = panel->phase;
     nextPhase = phase + MNU_PROFILE_PHASE_STEP;
     if (phase < MNU_PROFILE_PHASE_PERIOD) {

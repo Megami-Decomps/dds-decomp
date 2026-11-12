@@ -1,6 +1,7 @@
 #include "sdk_ps2.h"
 #include "mnu_movie.h"
 #include "common.h"
+#include "sdfFrame.h"
 #include "mnu_movie_menu_selection_index.h"
 #include "sdf_delayed_resource_check_api.h"
 #include "mnu_sprite_placement.h"
@@ -1370,7 +1371,7 @@ void mnuUpdateStaffSparkleEffects(StaffSparkleState *state) {
     s32 j;
     s32 age;
 
-    if (dds3GetRandA(0) % 60 == 0 && state->count < 8) {
+    if (SDF_FRAME_DUE() && dds3GetRandA(0) % 60 == 0 && state->count < 8) {
         s32 x = dds3GetRandA(0) % 60 - 100;
         u32 y = dds3GetRandA(0) % 448;
         state->positions[state->count][0] = x * 16;
@@ -1485,8 +1486,8 @@ void mnuShuffleTitlePaletteSpriteOrder(MnuTitlePaletteTransition *transition, s3
     i = 19;
     while (i >= 0) {
         i--;
-        first = dds3GetRandA(0) % count;
-        second = dds3GetRandA(0) % count;
+        first = dds3GetRandA(SDF_FRAME_RAND()) % count;
+        second = dds3GetRandA(SDF_FRAME_RAND()) % count;
         savedSpriteIndex = transition->spriteIndices[first + skip];
         transition->spriteIndices[first + skip] = transition->spriteIndices[second + skip];
         transition->spriteIndices[second + skip] = savedSpriteIndex;
@@ -1570,15 +1571,15 @@ void mnuAdvanceStaffTextScroll(StaffScrollTransition *state) {
     uiDrawSurfaceAtNearDepth(0x53);
     if (state->scrolling == 0) {
         if (state->countdown == 0) {
-            if (dds3GetRandA(0) % 180U == 0) {
+            if (SDF_FRAME_DUE() && dds3GetRandA(0) % 180U == 0) {
                 state->scrolling = 1;
                 state->y = (sprites->workEntries[7].sourceHeight + 0x1C0) << 3;
             }
         } else {
-            state->countdown--;
+            state->countdown -= SDF_FRAME_DUE();
         }
     } else {
-        state->y -= 0xA0;
+        state->y -= SDF_FRAME_STEP_INT(0xA0);
         if (state->y < -(sprites->workEntries[7].sourceHeight << 3)) {
             state->scrolling = 0;
             state->countdown = 120;

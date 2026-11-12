@@ -3484,12 +3484,12 @@ void mnuDrawAndAdvanceCampSparks(MenuCampEffect *fx, s32 surface) {
         if (fx->direction[i] > 0) {
             itfDrawGridWithResolvedSlot(fx->velocity[i][0], fx->velocity[i][1], 0, 0, fx->resources.packet.sheets[0], fx->resources.packet.items[6], surface);
             if (fx->direction[i] == 1) {
-                fx->velocity[i][0] += fx->life[i];
+                fx->velocity[i][0] += SDF_FRAME_STEP_INT(fx->life[i]);
                 if (fx->velocity[i][0] > 0x2000) {
                     mnuRetireCampSpark(fx, i);
                 }
             } else {
-                fx->velocity[i][0] -= fx->life[i];
+                fx->velocity[i][0] -= SDF_FRAME_STEP_INT(fx->life[i]);
                 if (fx->velocity[i][0] < -0xFA0) {
                     mnuRetireCampSpark(fx, i);
                 }
@@ -3497,10 +3497,10 @@ void mnuDrawAndAdvanceCampSparks(MenuCampEffect *fx, s32 surface) {
         }
     }
     if (fx->resources.packet.type & 4) {
-        if ((dds3GetRandA(0) & 3) == 0) {
+        if (SDF_FRAME_DUE() && (dds3GetRandA(0) & 3) == 0) {
             mnuSpawnSpark(fx);
         }
-    } else if ((dds3GetRandA(0) & 0x1F) == 0) {
+    } else if (SDF_FRAME_DUE() && (dds3GetRandA(0) & 0x1F) == 0) {
         mnuSpawnSpark(fx);
     }
 }
