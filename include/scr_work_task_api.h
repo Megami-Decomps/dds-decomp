@@ -5,8 +5,9 @@
 
 struct scrProcessWork_s;
 
-/* Report whether a process node is the event script currently executing. */
-typedef u8 ScrCurrentWorkTaskResult;
+/* Report whether a process node is the event script currently executing. A
+ * full word: callers test the whole register. */
+typedef s32 ScrCurrentWorkTaskResult;
 enum {
     SCR_WORK_TASK_NOT_CURRENT = 0,
     SCR_WORK_TASK_CURRENT = 1

@@ -10,7 +10,7 @@ typedef struct
 extern dds3GlobalWork_t *DDS3_GBWK;
 #include "scr.h"
 
-extern s32 scrIsCurrentWorkTask(scrProcessWork_s *pw);
+#include "scr_work_task_api.h"
 
 extern s32 scrHandleCount;
 extern scrProcessWork_s *scrHandleFirst;
