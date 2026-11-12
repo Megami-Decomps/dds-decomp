@@ -4896,7 +4896,7 @@ void fldDispatchCameraModelFrameEvents(s32 motion, s32 selector) {
         if (volume < 0) volume = 0;
     } else {
         volume = 127;
-        volume -= (dds3GetRandA(NULL) >> 2) & 0x3F;
+        volume -= (dds3GetRandA(SDF_FRAME_RAND()) >> 2) & 0x3F;
         if (volume >= 128) volume = 127;
         if (volume < 0) volume = 0;
     }

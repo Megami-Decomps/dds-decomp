@@ -1,5 +1,6 @@
 #include "sdk_ps2.h"
 #include "common.h"
+#include "sdfFrame.h"
 #include "file_config_option_api.h"
 #include "ps2asm.h"
 #include "sdf_pad_motor_api.h"
@@ -24,7 +25,7 @@ extern u8 dds3PadVibrationState[2];
 
 /* Periodically pulses both pad motors, varying the large-motor level. */
 s32 dds3PadVibrationTest(dds3ProcessID_t *task) {
-    if (dds3GetProcessRunTime(task) % DDS3_DEBUG_RUMBLE_PERIOD == 0) {
+    if (dds3GetProcessRunTime(task) % SDF_FRAMES(DDS3_DEBUG_RUMBLE_PERIOD) == 0) {
         dds3PadVibrationSet(DDS3_PAD_SMALL_MOTOR, 1, DDS3_DEBUG_SMALL_PULSE_FRAMES);
         dds3PadVibrationSet(DDS3_PAD_LARGE_MOTOR, (u8)(dds3GetRandIntA(0, DDS3_DEBUG_RUMBLE_VARIATION) + DDS3_DEBUG_RUMBLE_BASE), DDS3_DEBUG_LARGE_PULSE_FRAMES);
     }

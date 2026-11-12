@@ -471,7 +471,7 @@ void dds3RunQuake(void) {
     }
     limits[0] = D_00435CEC * 0.01f;
     limits[1] = D_00435CEE * 0.01f;
-    for (axis = 0; axis < 2; axis++) {
+    for (axis = 0; axis < 2 && SDF_FRAME_DUE(); axis++) {
         if (limits[axis] != 0.0f) {
             f32 step = dds3GetRandFloatA(0) * limits[axis] * 0.5f + limits[axis] * 0.5f;
 
@@ -493,10 +493,10 @@ void dds3RunQuake(void) {
         }
     }
     if (D_00435CEA > 0) {
-        s32 divisor = D_00435CEA + 5;
+        s32 divisor = SDF_FRAME_TICK(D_00435CEA) + 5;
 
-        D_00435CEC -= D_00435CEC / divisor;
-        D_00435CEE -= D_00435CEE / divisor;
+        D_00435CEC -= SDF_FRAME_STEP_INT(D_00435CEC / divisor);
+        D_00435CEE -= SDF_FRAME_STEP_INT(D_00435CEE / divisor);
         D_00435CEA--;
     }
 }
@@ -531,7 +531,7 @@ void dds3SetQuake(s32 fadeMode, s32 frames) {
     if (fadeMode == 0) {
         D_00435CEA = -1;
     } else {
-        D_00435CEA = fadeMode;
+        D_00435CEA = SDF_FRAMES(fadeMode);
     }
     D_00435CEE = frames * DDS3_FADE_TICKS_PER_FRAME;
     D_00435CEC = D_00435CEE * DDS3_FADE_MARK_NUMERATOR / DDS3_FADE_TICKS_PER_FRAME;
@@ -2635,6 +2635,9 @@ void evtUpdateSelectionStateInterpolation(void) {
     f32 jitter;
     s32 axis;
 
+    if (!SDF_FRAME_DUE()) {
+        return;
+    }
     switch (state->mode) {
     case 0:
         if (state->rampUpFrames <= state->count) {
