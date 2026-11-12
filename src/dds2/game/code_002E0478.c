@@ -39,6 +39,7 @@
 #include "eff_point_set_table.h"
 #include "eff_span_work.h"
 #include "common.h"
+#include "sdfFrame.h"
 #include "kernel_draw.h"
 #include "btl_horizontal_aim_result.h"
 #include "dds3_camera_update_flags.h"
@@ -824,13 +825,13 @@ void billAdvanceFrameInstances(EffClassWork *work) {
             if (remainingSpawn != 0) {
                 f32 randomValue;
                 f32 factor;
-                entry->angle = dds3GetRandFloatA(dds3RandCB) * 6.28318500518798828125f;
-                randomValue = dds3GetRandFloatA(dds3RandCB);
+                entry->angle = dds3GetRandFloatA(SDF_FRAME_RAND_STATE(dds3RandCB)) * 6.28318500518798828125f;
+                randomValue = dds3GetRandFloatA(SDF_FRAME_RAND_STATE(dds3RandCB));
                 entry->spin = config->spin * (randomValue * config->spinJitter + (1.0f - config->spinJitter));
                 if (dds3GetRandA((EffRandState *)dds3RandCB) & 1) entry->spin = -entry->spin;
-                randomValue = dds3GetRandFloatA(dds3RandCB);
+                randomValue = dds3GetRandFloatA(SDF_FRAME_RAND_STATE(dds3RandCB));
                 entry->radius = config->radius * (randomValue * config->radiusJitter + (1.0f - config->radiusJitter));
-                randomValue = dds3GetRandFloatA(dds3RandCB);
+                randomValue = dds3GetRandFloatA(SDF_FRAME_RAND_STATE(dds3RandCB));
                 factor = randomValue * config->widthJitter + (1.0f - config->widthJitter);
                 entry->innerWidth = config->innerWidth * factor;
                 entry->outerWidth = config->outerWidth * factor;
@@ -1097,19 +1098,19 @@ void billAdvanceCellInstances(EffClassWork *work) {
                 f32 randomValue;
                 f32 jitter;
                 f32 base;
-                entry->angle = dds3GetRandFloatA(dds3RandCB) * 6.28318500518798828125f;
+                entry->angle = dds3GetRandFloatA(SDF_FRAME_RAND_STATE(dds3RandCB)) * 6.28318500518798828125f;
                 jitter = config->radiusJitter;
-                randomValue = dds3GetRandFloatA(dds3RandCB);
+                randomValue = dds3GetRandFloatA(SDF_FRAME_RAND_STATE(dds3RandCB));
                 base = 1.0f - jitter;
                 entry->radiusA = config->radius * (randomValue * jitter + base);
-                randomValue = dds3GetRandFloatA(dds3RandCB);
+                randomValue = dds3GetRandFloatA(SDF_FRAME_RAND_STATE(dds3RandCB));
                 entry->radiusB = config->radius * (randomValue * jitter + base);
                 jitter = config->centerOffsetJitter;
-                randomValue = dds3GetRandFloatA(dds3RandCB);
+                randomValue = dds3GetRandFloatA(SDF_FRAME_RAND_STATE(dds3RandCB));
                 entry->centerOffset = config->centerOffset * (randomValue * jitter + (1.0f - jitter));
-                randomValue = dds3GetRandFloatA(dds3RandCB);
+                randomValue = dds3GetRandFloatA(SDF_FRAME_RAND_STATE(dds3RandCB));
                 entry->velocity = config->velocity * (randomValue * config->velocityJitter + (1.0f - config->velocityJitter));
-                randomValue = dds3GetRandFloatA(dds3RandCB);
+                randomValue = dds3GetRandFloatA(SDF_FRAME_RAND_STATE(dds3RandCB));
                 jitter = randomValue * config->extentJitter + (1.0f - config->extentJitter);
                 entry->extent = config->extent * jitter;
                 if (randomAge != 0) entry->age = (s32)(dds3GetRandA((EffRandState *)dds3RandCB) % (u32)lifetime);
@@ -1396,29 +1397,29 @@ void billAdvanceParticleInstances(EffClassWork *work) {
                 f32 endJitter;
                 f32 endOffset;
 
-                entry->angle = dds3GetRandFloatA(dds3RandCB) * 6.2831853f;
+                entry->angle = dds3GetRandFloatA(SDF_FRAME_RAND_STATE(dds3RandCB)) * 6.2831853f;
                 jitter = config->radiusJitter;
-                randomValue = dds3GetRandFloatA(dds3RandCB);
+                randomValue = dds3GetRandFloatA(SDF_FRAME_RAND_STATE(dds3RandCB));
                 base = 1.0f - jitter;
                 entry->radiusA = config->radius * (randomValue * jitter + base);
-                randomValue = dds3GetRandFloatA(dds3RandCB);
+                randomValue = dds3GetRandFloatA(SDF_FRAME_RAND_STATE(dds3RandCB));
                 entry->radiusB = config->radius * (randomValue * jitter + base);
-                randomValue = dds3GetRandFloatA(dds3RandCB);
+                randomValue = dds3GetRandFloatA(SDF_FRAME_RAND_STATE(dds3RandCB));
                 offset = config->offset * (randomValue * config->offsetJitter + (1.0f - config->offsetJitter));
-                randomValue = dds3GetRandFloatA(dds3RandCB);
+                randomValue = dds3GetRandFloatA(SDF_FRAME_RAND_STATE(dds3RandCB));
                 endJitter = config->endOffsetJitter;
                 endOffset = config->endOffset;
                 entry->offset = offset;
                 entry->offsetStep = (endOffset * (randomValue * endJitter + (1.0f - endJitter)) - offset) / lifetimeF;
-                randomValue = dds3GetRandFloatA(dds3RandCB);
+                randomValue = dds3GetRandFloatA(SDF_FRAME_RAND_STATE(dds3RandCB));
                 entry->rise = -config->rise * (randomValue * config->riseJitter + (1.0f - config->riseJitter));
-                randomValue = dds3GetRandFloatA(dds3RandCB);
+                randomValue = dds3GetRandFloatA(SDF_FRAME_RAND_STATE(dds3RandCB));
                 entry->spinRate = config->spinRate * (randomValue * config->spinRateJitter + (1.0f - config->spinRateJitter));
-                randomValue = dds3GetRandFloatA(dds3RandCB);
+                randomValue = dds3GetRandFloatA(SDF_FRAME_RAND_STATE(dds3RandCB));
                 jitter = randomValue * config->extentJitter + (1.0f - config->extentJitter);
                 entry->extent = config->extent * jitter;
                 if (randomAge != 0) {
-                    entry->age = (s32)(dds3GetRandA(dds3RandCB) % (u32)lifetime);
+                    entry->age = (s32)(dds3GetRandA(SDF_FRAME_RAND_STATE(dds3RandCB)) % (u32)lifetime);
                 } else {
                     entry->age = 0;
                 }
@@ -1729,14 +1730,14 @@ void billAdvanceAnimatedFrameTransforms(EffClassWork *work) {
         if (age == waitingState) {
             if (remainingSpawn != 0) {
                 f32 randomValue;
-                entry->angle = dds3GetRandFloatA(dds3RandCB) * 6.28318500518798828125f;
-                randomValue = dds3GetRandFloatA(dds3RandCB);
+                entry->angle = dds3GetRandFloatA(SDF_FRAME_RAND_STATE(dds3RandCB)) * 6.28318500518798828125f;
+                randomValue = dds3GetRandFloatA(SDF_FRAME_RAND_STATE(dds3RandCB));
                 entry->spin = config->spin * (randomValue * config->spinJitter + (1.0f - config->spinJitter));
                 if (dds3GetRandA((EffRandState *)dds3RandCB) & 1) entry->spin = -entry->spin;
                 entry->radius = 0.0f;
-                randomValue = dds3GetRandFloatA(dds3RandCB);
+                randomValue = dds3GetRandFloatA(SDF_FRAME_RAND_STATE(dds3RandCB));
                 entry->radiusStep = config->radius * (randomValue * config->radiusJitter + (1.0f - config->radiusJitter)) / (f32)frames;
-                randomValue = dds3GetRandFloatA(dds3RandCB);
+                randomValue = dds3GetRandFloatA(SDF_FRAME_RAND_STATE(dds3RandCB));
                 entry->width = config->width * (randomValue * config->widthJitter + (1.0f - config->widthJitter));
                 if (randomAge != 0) {
                     entry->age = (s32)(dds3GetRandA((EffRandState *)dds3RandCB) % (u32)lifetime);
@@ -2030,16 +2031,16 @@ void billAdvanceEmitterInstances(EffClassWork *work) {
             if (remainingSpawn != 0) {
                 f32 randomValue;
                 f32 jitter;
-                entry->angle = dds3GetRandFloatA(dds3RandCB) * 6.28318500518798828125f;
+                entry->angle = dds3GetRandFloatA(SDF_FRAME_RAND_STATE(dds3RandCB)) * 6.28318500518798828125f;
                 jitter = config->radiusJitter;
-                randomValue = dds3GetRandFloatA(dds3RandCB);
+                randomValue = dds3GetRandFloatA(SDF_FRAME_RAND_STATE(dds3RandCB));
                 entry->radius = config->radius * (randomValue * jitter + (1.0f - jitter));
                 jitter = config->offsetJitter;
-                randomValue = dds3GetRandFloatA(dds3RandCB);
+                randomValue = dds3GetRandFloatA(SDF_FRAME_RAND_STATE(dds3RandCB));
                 entry->offset = config->offset * (randomValue * jitter + (1.0f - jitter));
-                randomValue = dds3GetRandFloatA(dds3RandCB);
+                randomValue = dds3GetRandFloatA(SDF_FRAME_RAND_STATE(dds3RandCB));
                 entry->speed = config->speed * (randomValue * config->speedJitter + (1.0f - config->speedJitter));
-                randomValue = dds3GetRandFloatA(dds3RandCB);
+                randomValue = dds3GetRandFloatA(SDF_FRAME_RAND_STATE(dds3RandCB));
                 jitter = randomValue * config->widthJitter + (1.0f - config->widthJitter);
                 entry->width = config->width * jitter;
                 if (randomAge != 0) entry->age = (s32)(dds3GetRandA((EffRandState *)dds3RandCB) % (u32)lifetime);
@@ -2335,31 +2336,31 @@ void billAdvanceStripInstances(EffClassWork *work) {
                 f32 start;
                 f32 end;
 
-                entry->angle = dds3GetRandFloatA(dds3RandCB) * 6.28318500518798828125f;
-                randomValue = dds3GetRandFloatA(dds3RandCB);
+                entry->angle = dds3GetRandFloatA(SDF_FRAME_RAND_STATE(dds3RandCB)) * 6.28318500518798828125f;
+                randomValue = dds3GetRandFloatA(SDF_FRAME_RAND_STATE(dds3RandCB));
                 start = config->lengthStart * (randomValue * config->lengthStartJitter + (1.0f - config->lengthStartJitter));
-                randomValue = dds3GetRandFloatA(dds3RandCB);
+                randomValue = dds3GetRandFloatA(SDF_FRAME_RAND_STATE(dds3RandCB));
                 end = config->lengthEnd * (randomValue * config->lengthEndJitter + (1.0f - config->lengthEndJitter));
                 entry->length = start;
                 entry->lengthStep = (end - start) / (f32)lifetime;
 
-                randomValue = dds3GetRandFloatA(dds3RandCB);
+                randomValue = dds3GetRandFloatA(SDF_FRAME_RAND_STATE(dds3RandCB));
                 start = config->radiusStart * (randomValue * config->radiusStartJitter + (1.0f - config->radiusStartJitter));
-                randomValue = dds3GetRandFloatA(dds3RandCB);
+                randomValue = dds3GetRandFloatA(SDF_FRAME_RAND_STATE(dds3RandCB));
                 end = config->radiusEnd * (randomValue * config->radiusEndJitter + (1.0f - config->radiusEndJitter));
                 entry->radius = start;
                 entry->radiusStep = (end - start) / (f32)lifetime;
 
-                randomValue = dds3GetRandFloatA(dds3RandCB);
+                randomValue = dds3GetRandFloatA(SDF_FRAME_RAND_STATE(dds3RandCB));
                 start = config->tiltStart * (randomValue * config->tiltStartJitter + (1.0f - config->tiltStartJitter));
-                randomValue = dds3GetRandFloatA(dds3RandCB);
+                randomValue = dds3GetRandFloatA(SDF_FRAME_RAND_STATE(dds3RandCB));
                 end = config->tiltEnd * (randomValue * config->tiltEndJitter + (1.0f - config->tiltEndJitter));
                 entry->tilt = start;
                 entry->tiltStep = (end - start) / (f32)lifetime;
 
-                randomValue = dds3GetRandFloatA(dds3RandCB);
+                randomValue = dds3GetRandFloatA(SDF_FRAME_RAND_STATE(dds3RandCB));
                 entry->width = config->width * (randomValue * config->widthJitter + (1.0f - config->widthJitter));
-                randomValue = dds3GetRandFloatA(dds3RandCB);
+                randomValue = dds3GetRandFloatA(SDF_FRAME_RAND_STATE(dds3RandCB));
                 entry->spin = config->spin * (randomValue * config->spinJitter + (1.0f - config->spinJitter));
                 if (randomAge != 0) {
                     time = (f32)(dds3GetRandA((struct EffRandState *)dds3RandCB) % (u32)lifetime);
@@ -2623,36 +2624,36 @@ void billAdvanceTrailInstances(EffClassWork *work) {
                 f32 start;
                 f32 end;
 
-                entry->angle = dds3GetRandFloatA(dds3RandCB) * 6.2831853f;
-                random = dds3GetRandFloatA(dds3RandCB);
+                entry->angle = dds3GetRandFloatA(SDF_FRAME_RAND_STATE(dds3RandCB)) * 6.2831853f;
+                random = dds3GetRandFloatA(SDF_FRAME_RAND_STATE(dds3RandCB));
                 start = config->lengthStart * (random * config->lengthStartJitter + (1.0f - config->lengthStartJitter));
-                random = dds3GetRandFloatA(dds3RandCB);
+                random = dds3GetRandFloatA(SDF_FRAME_RAND_STATE(dds3RandCB));
                 end = config->lengthEnd * (random * config->lengthEndJitter + (1.0f - config->lengthEndJitter));
                 entry->length = start;
                 entry->lengthStep = (end - start) / (f32)lifetime;
 
-                random = dds3GetRandFloatA(dds3RandCB);
+                random = dds3GetRandFloatA(SDF_FRAME_RAND_STATE(dds3RandCB));
                 start = config->radiusStart * (random * config->radiusStartJitter + (1.0f - config->radiusStartJitter));
-                random = dds3GetRandFloatA(dds3RandCB);
+                random = dds3GetRandFloatA(SDF_FRAME_RAND_STATE(dds3RandCB));
                 end = config->radiusEnd * (random * config->radiusEndJitter + (1.0f - config->radiusEndJitter));
                 entry->radius = start;
                 entry->radiusStep = (end - start) / (f32)lifetime;
 
-                random = dds3GetRandFloatA(dds3RandCB);
+                random = dds3GetRandFloatA(SDF_FRAME_RAND_STATE(dds3RandCB));
                 start = config->tiltStart * (random * config->tiltStartJitter + (1.0f - config->tiltStartJitter));
-                random = dds3GetRandFloatA(dds3RandCB);
+                random = dds3GetRandFloatA(SDF_FRAME_RAND_STATE(dds3RandCB));
                 end = config->tiltEnd * (random * config->tiltEndJitter + (1.0f - config->tiltEndJitter));
                 entry->tilt = start;
                 entry->tiltStep = (end - start) / (f32)lifetime;
 
-                random = dds3GetRandFloatA(dds3RandCB);
+                random = dds3GetRandFloatA(SDF_FRAME_RAND_STATE(dds3RandCB));
                 scale = random * config->widthJitter + (1.0f - config->widthJitter);
                 entry->widthA = config->widthA * scale;
                 entry->widthB = config->widthB * scale;
-                random = dds3GetRandFloatA(dds3RandCB);
+                random = dds3GetRandFloatA(SDF_FRAME_RAND_STATE(dds3RandCB));
                 entry->spin = config->spin * (random * config->spinJitter + (1.0f - config->spinJitter));
                 if (randomAge != 0) {
-                    time = (f32)(dds3GetRandA(dds3RandCB) % (u32)lifetime);
+                    time = (f32)(dds3GetRandA(SDF_FRAME_RAND_STATE(dds3RandCB)) % (u32)lifetime);
                     entry->age = (s32)time;
                     entry->length += entry->lengthStep * time;
                     entry->radius += entry->radiusStep * time;
@@ -2998,26 +2999,26 @@ void billAdvanceQuadInstances(EffClassWork *work) {
                 f32 radialStart;
                 f32 radialEnd;
 
-                entry->angle = dds3GetRandFloatA(dds3RandCB) * 6.28318500518798828125f;
+                entry->angle = dds3GetRandFloatA(SDF_FRAME_RAND_STATE(dds3RandCB)) * 6.28318500518798828125f;
                 randomFactor = config->radiusJitter;
-                randomValue = dds3GetRandFloatA(dds3RandCB);
+                randomValue = dds3GetRandFloatA(SDF_FRAME_RAND_STATE(dds3RandCB));
                 entry->radius = config->radius * (randomValue * randomFactor + (1.0f - randomFactor));
-                randomValue = dds3GetRandFloatA(dds3RandCB);
+                randomValue = dds3GetRandFloatA(SDF_FRAME_RAND_STATE(dds3RandCB));
                 heightStartJitter = config->heightStartJitter;
                 radialStart = config->heightStart * (randomValue * heightStartJitter + (1.0f - heightStartJitter));
-                randomValue = dds3GetRandFloatA(dds3RandCB);
+                randomValue = dds3GetRandFloatA(SDF_FRAME_RAND_STATE(dds3RandCB));
                 heightEndJitter = config->heightEndJitter;
                 radialEnd = config->heightEnd * (randomValue * heightEndJitter + (1.0f - heightEndJitter));
                 entry->height = radialStart;
                 entry->heightStep = (radialEnd - radialStart) / (f32)lifetime;
-                randomValue = dds3GetRandFloatA(dds3RandCB);
+                randomValue = dds3GetRandFloatA(SDF_FRAME_RAND_STATE(dds3RandCB));
                 velocityJitter = config->velocityJitter;
                 entry->velocity = config->velocity * (randomValue * velocityJitter + (1.0f - velocityJitter));
-                randomValue = dds3GetRandFloatA(dds3RandCB);
+                randomValue = dds3GetRandFloatA(SDF_FRAME_RAND_STATE(dds3RandCB));
                 widthJitter = config->widthJitter;
                 randomFactor = randomValue * widthJitter + (1.0f - widthJitter);
                 entry->width = config->width * randomFactor;
-                randomValue = dds3GetRandFloatA(dds3RandCB);
+                randomValue = dds3GetRandFloatA(SDF_FRAME_RAND_STATE(dds3RandCB));
                 tiltJitter = config->tiltJitter;
                 entry->tilt = config->tilt * (randomValue * tiltJitter + (1.0f - tiltJitter));
                 if (randomAge != 0) {
@@ -5778,7 +5779,7 @@ void effRandomizeParticleFields(EffClassWork *work) {
     EffPointSetRow *entry = ((EffPointSetTable *)work->resource)->rows;
     u32 i;
     for (i = 0; i < count; i++, entry++) {
-        entry->key = -1 - (s32)(dds3GetRandA((struct EffRandState *)dds3RandCB) & 3);
+        entry->key = -1 - (s32)(dds3GetRandA(SDF_FRAME_RAND_STATE((struct EffRandState *)dds3RandCB)) & 3);
     }
 }
 
@@ -5927,7 +5928,7 @@ void effUpdateRadialWavePointRows(EffClassWork *work) {
             if (entry->key == -1) {
                 entry->color = 0xA0808080;
             } else {
-                f32 r = dds3GetRandFloatA(dds3RandCB);
+                f32 r = dds3GetRandFloatA(SDF_FRAME_RAND_STATE(dds3RandCB));
                 f32 bendStep = speed * (r * speedJitter + (1.0f - speedJitter));
                 f32 bend;
 
@@ -5967,8 +5968,8 @@ void effUpdateRadialWavePointRows(EffClassWork *work) {
                         amplitude = -amplitude;
                     }
                     stepSquared = step * step;
-                    waveAngle = dds3GetRandFloatA(dds3RandCB) * 3.14159265f;
-                    waveRadius = amplitude * (dds3GetRandFloatA(dds3RandCB) * 0.9f + (1.0f - 0.9f));
+                    waveAngle = dds3GetRandFloatA(SDF_FRAME_RAND_STATE(dds3RandCB)) * 3.14159265f;
+                    waveRadius = amplitude * (dds3GetRandFloatA(SDF_FRAME_RAND_STATE(dds3RandCB)) * 0.9f + (1.0f - 0.9f));
                     waveHeight = sdfSin(waveAngle) * waveRadius;
                     waveAngle += waveStep;
                     newHeight = sdfSin(waveAngle) * waveRadius;
@@ -6007,7 +6008,7 @@ void effUpdateRadialWavePointRows(EffClassWork *work) {
                     }
                     vertices += 20;
                     for (k = 1; k < rows; k++) {
-                        f32 tilt = bendScale * (dds3GetRandFloatA(dds3RandCB) * 0.75 + 0.25);
+                        f32 tilt = bendScale * (dds3GetRandFloatA(SDF_FRAME_RAND_STATE(dds3RandCB)) * 0.75 + 0.25);
                         f32 slope;
                         f32 tangentScale;
                         f32 sine;
@@ -6019,7 +6020,7 @@ void effUpdateRadialWavePointRows(EffClassWork *work) {
                         if (waveAngle >= 3.14159265f) {
                             waveAngle -= 3.14159265f;
                             amplitude = -amplitude;
-                            waveRadius = amplitude * (dds3GetRandFloatA(dds3RandCB) * 0.9f + (1.0f - 0.9f));
+                            waveRadius = amplitude * (dds3GetRandFloatA(SDF_FRAME_RAND_STATE(dds3RandCB)) * 0.9f + (1.0f - 0.9f));
                         }
                         newHeight = sdfSin(waveAngle) * waveRadius;
                         delta = newHeight - waveHeight;
@@ -6260,12 +6261,12 @@ void effSeedBillScaleRange(EffClassWork *work) {
     EffScaleRange *range = (EffScaleRange *)work->resource;
     s32 steps = config->point.timed.time.duration;
     EffScaleRangeEntry *entry = range->entries;
-    f32 start = config->startBase * (dds3GetRandFloatA(dds3RandCB) * config->startRand + (1.0f - config->startRand));
+    f32 start = config->startBase * (dds3GetRandFloatA(SDF_FRAME_RAND_STATE(dds3RandCB)) * config->startRand + (1.0f - config->startRand));
     u32 index;
     u32 count;
 
     if (steps > 0) {
-        f32 end = config->endBase * (dds3GetRandFloatA(dds3RandCB) * config->endRand + (1.0f - config->endRand));
+        f32 end = config->endBase * (dds3GetRandFloatA(SDF_FRAME_RAND_STATE(dds3RandCB)) * config->endRand + (1.0f - config->endRand));
         range->start = start;
         range->delta = (end - start) / (f32)steps;
     } else {
@@ -6425,19 +6426,19 @@ void effUpdateOrbitalPointSpanWaves(EffClassWork *work) {
     remaining = count;
     for (; remaining != 0; remaining--, entry++) {
         if (entry->negativeSeed == -1) {
-            f32 r = dds3GetRandFloatA(dds3RandCB);
+            f32 r = dds3GetRandFloatA(SDF_FRAME_RAND_STATE(dds3RandCB));
             f32 jitter = config->angularRand;
             f32 baseSpeed = config->angularBase;
             entry->phase = 0;
             entry->angularRate = baseSpeed * (r * jitter + (1.0f - jitter));
             if (!useHeight) {
-                entry->yaw = (dds3GetRandFloatA(dds3RandCB) - 0.5f) * 2.0f * 3.14159265f;
+                entry->yaw = (dds3GetRandFloatA(SDF_FRAME_RAND_STATE(dds3RandCB)) - 0.5f) * 2.0f * 3.14159265f;
                 entry->height = 0;
             } else {
-                entry->yaw = (dds3GetRandFloatA(dds3RandCB) - 0.5f) * 2.0f * (45.0f * (3.14159265f / 180.0f));
-                entry->height = -config->heightScale * dds3GetRandFloatA(dds3RandCB);
+                entry->yaw = (dds3GetRandFloatA(SDF_FRAME_RAND_STATE(dds3RandCB)) - 0.5f) * 2.0f * (45.0f * (3.14159265f / 180.0f));
+                entry->height = -config->heightScale * dds3GetRandFloatA(SDF_FRAME_RAND_STATE(dds3RandCB));
             }
-            entry->pitch = (dds3GetRandFloatA(dds3RandCB) - 0.5f) * 2.0f * 3.14159265f;
+            entry->pitch = (dds3GetRandFloatA(SDF_FRAME_RAND_STATE(dds3RandCB)) - 0.5f) * 2.0f * 3.14159265f;
             SetRotateMatrixX(entry->yaw);
             SetRotateMatrixY_B(entry->pitch);
             MultMatrixRevNoArg();
@@ -6485,8 +6486,8 @@ void effUpdateOrbitalPointSpanWaves(EffClassWork *work) {
                     amplitude = -amplitude;
                 }
                 stepSquared = step * step;
-                waveAngle = dds3GetRandFloatA(dds3RandCB) * 3.14159265f;
-                waveRadius = amplitude * (dds3GetRandFloatA(dds3RandCB) * 0.95f + (1.0f - 0.95f));
+                waveAngle = dds3GetRandFloatA(SDF_FRAME_RAND_STATE(dds3RandCB)) * 3.14159265f;
+                waveRadius = amplitude * (dds3GetRandFloatA(SDF_FRAME_RAND_STATE(dds3RandCB)) * 0.95f + (1.0f - 0.95f));
                 waveHeight = sdfSin(waveAngle) * waveRadius;
                 waveAngle += waveStep;
                 newHeight = sdfSin(waveAngle) * waveRadius;
@@ -6496,7 +6497,7 @@ void effUpdateOrbitalPointSpanWaves(EffClassWork *work) {
                 oldSlope = asinf(delta / segmentLength);
                 inner = config->point.halfWidth;
                 edgeWidth = config->point.edgeWidth;
-                curveSample = dds3GetRandFloatA(dds3RandCB);
+                curveSample = dds3GetRandFloatA(SDF_FRAME_RAND_STATE(dds3RandCB));
                 width = inner + edgeWidth;
                 phase = (entry->angularRate + acceleration * (f32)(entry->negativeSeed + 1) * 0.5f) * (f32)(entry->negativeSeed + 1);
                 phase = phase + entry->phase;
@@ -6551,7 +6552,7 @@ void effUpdateOrbitalPointSpanWaves(EffClassWork *work) {
                 entry->position[2] = previous[2];
                 vertices += 20;
                 for (k = 1; k < rows; k++) {
-                    f32 tilt = bendScale * (dds3GetRandFloatA(dds3RandCB) * 0.75 + 0.25);
+                    f32 tilt = bendScale * (dds3GetRandFloatA(SDF_FRAME_RAND_STATE(dds3RandCB)) * 0.75 + 0.25);
                     f32 slope;
                     f32 distance;
                     f32 tangentScale;
@@ -6562,8 +6563,8 @@ void effUpdateOrbitalPointSpanWaves(EffClassWork *work) {
                     if (waveAngle >= 3.14159265f) {
                         waveAngle -= 3.14159265f;
                         amplitude = -amplitude;
-                        waveRadius = amplitude * (dds3GetRandFloatA(dds3RandCB) * 0.95f + (1.0f - 0.95f));
-                        curve = bendStep * (dds3GetRandFloatA(dds3RandCB) * 0.7f + (1.0f - 0.7f));
+                        waveRadius = amplitude * (dds3GetRandFloatA(SDF_FRAME_RAND_STATE(dds3RandCB)) * 0.95f + (1.0f - 0.95f));
+                        curve = bendStep * (dds3GetRandFloatA(SDF_FRAME_RAND_STATE(dds3RandCB)) * 0.7f + (1.0f - 0.7f));
                     }
                     newHeight = sdfSin(waveAngle) * waveRadius;
                     delta = newHeight - waveHeight;
@@ -6676,7 +6677,7 @@ void effSeedBillboardFrameCounters(EffClassWork *work) {
     EffAlternatingPointSetRow *entry = ((EffAlternatingPointSetTable *)work->resource)->rows;
     u32 i;
     for (i = 0; i < count; i++, entry++) {
-        entry->key = -1 - (s32)(dds3GetRandA((struct EffRandState *)dds3RandCB) & 3);
+        entry->key = -1 - (s32)(dds3GetRandA(SDF_FRAME_RAND_STATE((struct EffRandState *)dds3RandCB)) & 3);
     }
 }
 
@@ -6866,7 +6867,7 @@ void effUpdateLightningPointSetRows(EffClassWork *work) {
                 SDF_VU0_OUTERPRODUCT();
                 SDF_VU0_NORMALIZE();
                 SDF_VU0_STOREVECTOR(side);
-                phase = dds3GetRandFloatA(dds3RandCB) * 6.28318531f;
+                phase = dds3GetRandFloatA(SDF_FRAME_RAND_STATE(dds3RandCB)) * 6.28318531f;
                 cycle = phase - 6.28318531f;
                 currentWave = amplitude * sdfSin(phase);
                 SDF_VU0_LOADVECTOR(side);
@@ -6955,7 +6956,7 @@ void effUpdateLightningPointSetRows(EffClassWork *work) {
                     phase += phaseStep;
                     if (cycle > 3.14159265f) {
                         cycle -= 3.14159265f;
-                        amplitude = baseAmplitude * (1.0f - dds3GetRandFloatA(dds3RandCB) * 0.95f);
+                        amplitude = baseAmplitude * (1.0f - dds3GetRandFloatA(SDF_FRAME_RAND_STATE(dds3RandCB)) * 0.95f);
                     }
                     previousWave = currentWave;
                     currentWave = amplitude * sdfSin(phase);
@@ -6966,7 +6967,7 @@ void effUpdateLightningPointSetRows(EffClassWork *work) {
                     SDF_VU0_SCALEVECTOR_BITS(currentWave - previousWave);
                     SDF_VU0_ADDVECTOR_A_C();
                     SDF_VU0_STOREVECTOR(delta);
-                    SetRotateMatrixAxis((dds3GetRandFloatA(dds3RandCB) - 0.5f) * 2.0f * 0.34906582f,
+                    SetRotateMatrixAxis((dds3GetRandFloatA(SDF_FRAME_RAND_STATE(dds3RandCB)) - 0.5f) * 2.0f * 0.34906582f,
                                         (const RwV3d *)view);
                     SDF_VU0_LOADVECTOR(delta);
                     SDF_VU0_APPLYMATRIX_XYZ();
@@ -7005,7 +7006,7 @@ void effUpdateLightningPointSetRows(EffClassWork *work) {
             } else {
                 row->key = -1;
                 if (respawnDelay > 0) {
-                    row->key -= dds3GetRandA(dds3RandCB) % (u32)respawnDelay;
+                    row->key -= dds3GetRandA(SDF_FRAME_RAND_STATE(dds3RandCB)) % (u32)respawnDelay;
                 }
                 continue;
             }
@@ -7759,12 +7760,12 @@ void func_002EF1C0(EffClassWork *work) {
                 f32 radiusStep;
                 f32 climbStep;
 
-                randomValue = dds3GetRandFloatA(dds3RandCB);
+                randomValue = dds3GetRandFloatA(SDF_FRAME_RAND_STATE(dds3RandCB));
                 variation = randomValue * config->common.radiusStartJitter +
                             (1.0f - config->common.radiusStartJitter);
                 radiusStart = config->common.radiusStart * variation;
 
-                randomValue = dds3GetRandFloatA(dds3RandCB);
+                randomValue = dds3GetRandFloatA(SDF_FRAME_RAND_STATE(dds3RandCB));
                 variation = randomValue * config->common.radiusEndJitter +
                             (1.0f - config->common.radiusEndJitter);
                 radiusStep =
@@ -7772,49 +7773,49 @@ void func_002EF1C0(EffClassWork *work) {
                 entry->radius = radiusStart;
                 entry->radiusStep = radiusStep;
 
-                randomValue = dds3GetRandFloatA(dds3RandCB);
+                randomValue = dds3GetRandFloatA(SDF_FRAME_RAND_STATE(dds3RandCB));
                 variation = randomValue * config->climbStartJitter +
                             (1.0f - config->climbStartJitter);
                 climbStart = -config->climbStart * variation;
 
-                randomValue = dds3GetRandFloatA(dds3RandCB);
+                randomValue = dds3GetRandFloatA(SDF_FRAME_RAND_STATE(dds3RandCB));
                 variation = randomValue * config->climbEndJitter +
                             (1.0f - config->climbEndJitter);
                 climbStep = (-config->climbEnd * variation - climbStart) / (f32)life;
                 entry->vertical.vortex.climb = climbStart;
                 entry->vertical.vortex.climbStep = climbStep;
 
-                randomValue = dds3GetRandFloatA(dds3RandCB);
+                randomValue = dds3GetRandFloatA(SDF_FRAME_RAND_STATE(dds3RandCB));
                 variation = randomValue * config->flareJitter +
                             (1.0f - config->flareJitter);
                 entry->geometry.vortex.flare = config->flare * variation;
 
-                randomValue = dds3GetRandFloatA(dds3RandCB);
+                randomValue = dds3GetRandFloatA(SDF_FRAME_RAND_STATE(dds3RandCB));
                 entry->angle = randomValue * 6.2831853f;
 
-                randomValue = dds3GetRandFloatA(dds3RandCB);
+                randomValue = dds3GetRandFloatA(SDF_FRAME_RAND_STATE(dds3RandCB));
                 variation = randomValue * config->spinJitter +
                             (1.0f - config->spinJitter);
                 entry->spin = config->spin * variation;
 
-                randomValue = dds3GetRandFloatA(dds3RandCB);
+                randomValue = dds3GetRandFloatA(SDF_FRAME_RAND_STATE(dds3RandCB));
                 variation = randomValue * config->common.widthJitter +
                             (1.0f - config->common.widthJitter);
                 entry->width = config->common.width * variation;
 
-                randomValue = dds3GetRandFloatA(dds3RandCB);
+                randomValue = dds3GetRandFloatA(SDF_FRAME_RAND_STATE(dds3RandCB));
                 variation = randomValue * config->common.extentJitter +
                             (1.0f - config->common.extentJitter);
                 entry->geometry.vortex.sweep = config->common.extent * variation;
 
-                randomValue = dds3GetRandFloatA(dds3RandCB);
+                randomValue = dds3GetRandFloatA(SDF_FRAME_RAND_STATE(dds3RandCB));
                 variation = randomValue * config->common.heightJitter +
                             (1.0f - config->common.heightJitter);
                 *colors = 0;
                 entry->geometry.vortex.height = config->common.height * variation;
 
                 if (initialBurst != 0) {
-                    u32 randomAge = dds3GetRandA(dds3RandCB) % life;
+                    u32 randomAge = dds3GetRandA(SDF_FRAME_RAND_STATE(dds3RandCB)) % life;
                     f32 ageAsFloat = (f32)(s32)randomAge;
 
                     entry->timer = randomAge;
@@ -8147,33 +8148,33 @@ void effUpdateColumnParticlesAndRibbons(EffClassWork *work) {
 
                 if (spawnRemaining != 0) {
                     radius = common->radiusStart *
-                        (dds3GetRandFloatA(dds3RandCB) * common->radiusStartJitter +
+                        (dds3GetRandFloatA(SDF_FRAME_RAND_STATE(dds3RandCB)) * common->radiusStartJitter +
                          (1.0f - common->radiusStartJitter));
                     radiusStep =
-                        (common->radiusEnd * (dds3GetRandFloatA(dds3RandCB) * common->radiusEndJitter +
+                        (common->radiusEnd * (dds3GetRandFloatA(SDF_FRAME_RAND_STATE(dds3RandCB)) * common->radiusEndJitter +
                                               (1.0f - common->radiusEndJitter)) - radius) /
                         (f32)life;
                     particle->radius = radius;
                     particle->radiusStep = radiusStep;
                     particle->drag = config->drag *
-                        (dds3GetRandFloatA(dds3RandCB) * config->dragJitter +
+                        (dds3GetRandFloatA(SDF_FRAME_RAND_STATE(dds3RandCB)) * config->dragJitter +
                          (1.0f - config->dragJitter));
-                    particle->verticalOffset = -config->velocity * dds3GetRandFloatA(dds3RandCB);
+                    particle->verticalOffset = -config->velocity * dds3GetRandFloatA(SDF_FRAME_RAND_STATE(dds3RandCB));
                     particle->flare = config->flare *
-                        (dds3GetRandFloatA(dds3RandCB) * config->flareJitter +
+                        (dds3GetRandFloatA(SDF_FRAME_RAND_STATE(dds3RandCB)) * config->flareJitter +
                          (1.0f - config->flareJitter));
-                    particle->spinPhase = dds3GetRandFloatA(dds3RandCB) * 6.2831853f;
+                    particle->spinPhase = dds3GetRandFloatA(SDF_FRAME_RAND_STATE(dds3RandCB)) * 6.2831853f;
                     particle->spin = config->spin *
-                        (dds3GetRandFloatA(dds3RandCB) * config->spinJitter +
+                        (dds3GetRandFloatA(SDF_FRAME_RAND_STATE(dds3RandCB)) * config->spinJitter +
                          (1.0f - config->spinJitter));
                     particle->width = common->width *
-                        (dds3GetRandFloatA(dds3RandCB) * common->widthJitter +
+                        (dds3GetRandFloatA(SDF_FRAME_RAND_STATE(dds3RandCB)) * common->widthJitter +
                          (1.0f - common->widthJitter));
                     particle->extent = common->extent *
-                        (dds3GetRandFloatA(dds3RandCB) * common->extentJitter +
+                        (dds3GetRandFloatA(SDF_FRAME_RAND_STATE(dds3RandCB)) * common->extentJitter +
                          (1.0f - common->extentJitter)) * 10.0f;
                     {
-                        f32 random = dds3GetRandFloatA(dds3RandCB);
+                        f32 random = dds3GetRandFloatA(SDF_FRAME_RAND_STATE(dds3RandCB));
                         f32 height = common->height *
                             (random * common->heightJitter + (1.0f - common->heightJitter));
                         colors[0] = 0;
@@ -8539,20 +8540,20 @@ void effUpdateBillSpiral(EffClassWork *work) {
             if (timer == -1) {
                 if (spawn != 0) {
                     f32 radiusDelta;
-                    start = config->common.radiusStart * (dds3GetRandFloatA(dds3RandCB) * config->common.radiusStartJitter + (1.0f - config->common.radiusStartJitter));
-                    radiusDelta = (config->common.radiusEnd * (dds3GetRandFloatA(dds3RandCB) * config->common.radiusEndJitter + (1.0f - config->common.radiusEndJitter)) - start) / (f32)life;
+                    start = config->common.radiusStart * (dds3GetRandFloatA(SDF_FRAME_RAND_STATE(dds3RandCB)) * config->common.radiusStartJitter + (1.0f - config->common.radiusStartJitter));
+                    radiusDelta = (config->common.radiusEnd * (dds3GetRandFloatA(SDF_FRAME_RAND_STATE(dds3RandCB)) * config->common.radiusEndJitter + (1.0f - config->common.radiusEndJitter)) - start) / (f32)life;
                     particle->radius = start;
                     particle->radiusStep = radiusDelta;
-                    particle->tiltX = (dds3GetRandFloatA(dds3RandCB) - 0.5f) * 2.0f * 3.14159265f;
-                    particle->tiltY = (dds3GetRandFloatA(dds3RandCB) - 0.5f) * 2.0f * 3.14159265f;
-                    particle->phase = dds3GetRandFloatA(dds3RandCB) * 6.2831853f;
-                    particle->spin = config->spin * (dds3GetRandFloatA(dds3RandCB) * config->spinJitter + (1.0f - config->spinJitter));
-                    particle->width = config->common.width * (dds3GetRandFloatA(dds3RandCB) * config->common.widthJitter + (1.0f - config->common.widthJitter));
-                    particle->sweep = config->common.extent * (dds3GetRandFloatA(dds3RandCB) * config->common.extentJitter + (1.0f - config->common.extentJitter));
-                    particle->height = config->common.height * (dds3GetRandFloatA(dds3RandCB) * config->common.heightJitter + (1.0f - config->common.heightJitter));
+                    particle->tiltX = (dds3GetRandFloatA(SDF_FRAME_RAND_STATE(dds3RandCB)) - 0.5f) * 2.0f * 3.14159265f;
+                    particle->tiltY = (dds3GetRandFloatA(SDF_FRAME_RAND_STATE(dds3RandCB)) - 0.5f) * 2.0f * 3.14159265f;
+                    particle->phase = dds3GetRandFloatA(SDF_FRAME_RAND_STATE(dds3RandCB)) * 6.2831853f;
+                    particle->spin = config->spin * (dds3GetRandFloatA(SDF_FRAME_RAND_STATE(dds3RandCB)) * config->spinJitter + (1.0f - config->spinJitter));
+                    particle->width = config->common.width * (dds3GetRandFloatA(SDF_FRAME_RAND_STATE(dds3RandCB)) * config->common.widthJitter + (1.0f - config->common.widthJitter));
+                    particle->sweep = config->common.extent * (dds3GetRandFloatA(SDF_FRAME_RAND_STATE(dds3RandCB)) * config->common.extentJitter + (1.0f - config->common.extentJitter));
+                    particle->height = config->common.height * (dds3GetRandFloatA(SDF_FRAME_RAND_STATE(dds3RandCB)) * config->common.heightJitter + (1.0f - config->common.heightJitter));
                     *colors = 0;
                     if (burst != 0) {
-                        particle->timer = dds3GetRandA(dds3RandCB) % life;
+                        particle->timer = dds3GetRandA(SDF_FRAME_RAND_STATE(dds3RandCB)) % life;
                         time = (f32)particle->timer;
                         particle->radius += particle->radiusStep * time;
                     } else {
@@ -9165,32 +9166,32 @@ void effUpdateBillFlame(EffClassWork *work) {
                 f32 start;
                 f32 end;
 
-                random = dds3GetRandFloatA(dds3RandCB);
+                random = dds3GetRandFloatA(SDF_FRAME_RAND_STATE(dds3RandCB));
                 start = config->radiusStart *
                     (random * config->radiusStartJitter + (1.0f - config->radiusStartJitter));
-                random = dds3GetRandFloatA(dds3RandCB);
+                random = dds3GetRandFloatA(SDF_FRAME_RAND_STATE(dds3RandCB));
                 end = config->radiusEnd *
                     (random * config->radiusEndJitter + (1.0f - config->radiusEndJitter));
                 particle->radiusStep = (end - start) / (f32)life;
                 particle->radius = start;
-                random = dds3GetRandFloatA(dds3RandCB);
+                random = dds3GetRandFloatA(SDF_FRAME_RAND_STATE(dds3RandCB));
                 particle->vertical.flame.drag = config->drag *
                     (random * config->dragJitter + (1.0f - config->dragJitter));
-                random = dds3GetRandFloatA(dds3RandCB);
+                random = dds3GetRandFloatA(SDF_FRAME_RAND_STATE(dds3RandCB));
                 particle->vertical.flame.velocity = -config->velocity * random;
-                random = dds3GetRandFloatA(dds3RandCB);
+                random = dds3GetRandFloatA(SDF_FRAME_RAND_STATE(dds3RandCB));
                 particle->angle = random * 6.2831853f;
-                random = dds3GetRandFloatA(dds3RandCB);
+                random = dds3GetRandFloatA(SDF_FRAME_RAND_STATE(dds3RandCB));
                 particle->spin = config->spin *
                     (random * config->spinJitter + (1.0f - config->spinJitter));
-                random = dds3GetRandFloatA(dds3RandCB);
+                random = dds3GetRandFloatA(SDF_FRAME_RAND_STATE(dds3RandCB));
                 particle->width = config->width *
                     (random * config->widthJitter + (1.0f - config->widthJitter));
-                random = dds3GetRandFloatA(dds3RandCB);
+                random = dds3GetRandFloatA(SDF_FRAME_RAND_STATE(dds3RandCB));
                 particle->geometry.flame.length = config->length *
                     (random * config->lengthJitter + (1.0f - config->lengthJitter)) * 10.0f;
-                particle->geometry.flame.baseA = dds3GetRandFloatA(dds3RandCB);
-                random = dds3GetRandFloatA(dds3RandCB);
+                particle->geometry.flame.baseA = dds3GetRandFloatA(SDF_FRAME_RAND_STATE(dds3RandCB));
+                random = dds3GetRandFloatA(SDF_FRAME_RAND_STATE(dds3RandCB));
                 *colors = 0;
                 particle->geometry.flame.baseB = random;
                 if (burst != 0) {
@@ -9198,7 +9199,7 @@ void effUpdateBillFlame(EffClassWork *work) {
                     f32 initialAge;
                     f32 gravityDisplacement;
 
-                    initialFrame = dds3GetRandA(dds3RandCB) % life;
+                    initialFrame = dds3GetRandA(SDF_FRAME_RAND_STATE(dds3RandCB)) % life;
                     particle->timer = initialFrame;
                     initialAge = (f32)(s32)initialFrame;
                     gravityDisplacement = gravity * initialAge * initialAge * 0.5f;
@@ -9348,8 +9349,8 @@ void effInitializeAnimationPositions(EffClassWork *work) {
 
     fileClearRecordReferences(record);
     for (; i < count; i++) {
-        positions[0] = dds3GetRandFloatA(dds3RandCB);
-        positions[1] = dds3GetRandFloatA(dds3RandCB);
+        positions[0] = dds3GetRandFloatA(SDF_FRAME_RAND_STATE(dds3RandCB));
+        positions[1] = dds3GetRandFloatA(SDF_FRAME_RAND_STATE(dds3RandCB));
         positions += 2;
     }
 }
@@ -10181,8 +10182,8 @@ void effSeedParticleSpanParameters(EffModelResource *work) {
             if (spans != 0) {
                 do {
                     span++;
-                    entry->first = dds3GetRandFloatA(dds3RandCB) * config->firstRand + (1.0f - config->firstRand);
-                    entry->second = config->secondBase * (dds3GetRandFloatA(dds3RandCB) * config->rangeRand + (1.0f - config->rangeRand));
+                    entry->first = dds3GetRandFloatA(SDF_FRAME_RAND_STATE(dds3RandCB)) * config->firstRand + (1.0f - config->firstRand);
+                    entry->second = config->secondBase * (dds3GetRandFloatA(SDF_FRAME_RAND_STATE(dds3RandCB)) * config->rangeRand + (1.0f - config->rangeRand));
                     entry->referenceAge = 0;
                     entry++;
                 } while (span < spans);
@@ -13103,9 +13104,9 @@ void effInitializeParticleDirection(u8 *work, float *entry) {
         vector[1] = ((EffectSlotNode80 *)work)->seedDirection[1];
         vector[2] = ((EffectSlotNode80 *)work)->seedDirection[2];
     } else {
-        vector[0] = (dds3GetRandFloatA(dds3RandCB) - 0.5f) * 2.0f;
-        vector[1] = (dds3GetRandFloatA(dds3RandCB) - 0.5f) * 2.0f;
-        vector[2] = (dds3GetRandFloatA(dds3RandCB) - 0.5f) * 2.0f;
+        vector[0] = (dds3GetRandFloatA(SDF_FRAME_RAND_STATE(dds3RandCB)) - 0.5f) * 2.0f;
+        vector[1] = (dds3GetRandFloatA(SDF_FRAME_RAND_STATE(dds3RandCB)) - 0.5f) * 2.0f;
+        vector[2] = (dds3GetRandFloatA(SDF_FRAME_RAND_STATE(dds3RandCB)) - 0.5f) * 2.0f;
     }
     VU0_NORMALIZE_PACKED_VECTOR(vector);
     entry[0] = vector[0];
@@ -13113,9 +13114,9 @@ void effInitializeParticleDirection(u8 *work, float *entry) {
     entry[1] = vector[1];
     entry[5] =
         ((EffectSlotNode80 *)work)->angularSpeed *
-        (dds3GetRandFloatA(dds3RandCB) * ((EffectSlotNode80 *)work)->speedRandomness +
+        (dds3GetRandFloatA(SDF_FRAME_RAND_STATE(dds3RandCB)) * ((EffectSlotNode80 *)work)->speedRandomness +
          (1.0f - ((EffectSlotNode80 *)work)->speedRandomness));
-    entry[4] = dds3GetRandFloatA(dds3RandCB) * 6.2831853f;
+    entry[4] = dds3GetRandFloatA(SDF_FRAME_RAND_STATE(dds3RandCB)) * 6.2831853f;
 }
 
 void effSetRotationFromAcceleratedFrameAngle(u8 *work, f32 *params, s32 frame) {
