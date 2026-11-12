@@ -48,6 +48,7 @@ extern u32 btlRandomState;
 
 extern s32 func_00202668(BtlTask *, s32);
 extern s32 btlSelectLowestNonzeroHpTarget(BtlTask *, s32);
+/* Retail passes a second argument (0) that the definition ignores. */
 extern void btlSelectLowestHealthRateTarget(BtlTask *, s32);
 extern void btlSelectLowestHealthElementBlockTarget(BtlTask *, s32);
 extern s32 btlSelectLowestRankTarget(BtlTask *, s32);
@@ -60,6 +61,7 @@ extern void btlPickUnlinkedPartyTarget(BtlTask *, u32);
 extern void btlPickLinkedPartyTarget(BtlTask *, u32);
 extern void btlAppendSelfAfterTargetScan(BtlTask *);
 extern s32 btlSelectTargetsExcludingActorUnit(BtlTask *);
+/* Retail passes a second argument (0) that the definition ignores. */
 extern void btlAppendEffectActorToCommandIndices(BtlTask *, s32);
 extern void btlSelectTargetsBlockingElement(BtlTask *, s32);
 

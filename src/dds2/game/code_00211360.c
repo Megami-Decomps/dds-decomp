@@ -77,6 +77,7 @@ extern u8 btlHasAvailableOption(BtlUnit *);
 
 extern s8 btlHistoryCounter;
 
+/* Retail passes the task, which the definition ignores. */
 extern void btlSyncEligibleActorPanelHpMp(ActionStateLink *);
 
 extern BtlActorEntrySlotIndex btlEntryCodeConditionIndices[];

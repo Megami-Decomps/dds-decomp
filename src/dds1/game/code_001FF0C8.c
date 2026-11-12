@@ -107,6 +107,7 @@ extern s32 btlRollAiBucket(void);
 extern s32 btlHasAdjacentActorRecordStatus(BtlUnit *);
 extern u32 btlIsActorHighStateFlagClear(BtlUnit *);
 extern s32 btlRunAiAction(BtlTask *, s32, u32);
+/* Retail passes the task, which the definition ignores. */
 extern s32 btlSyncEligibleActorPanelHpMp(BtlTask *);
 void btlSelectAndRunModeAiAction(BtlTask *task, u32 mode) {
     BtlAiScratchWork *work;

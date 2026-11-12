@@ -200,6 +200,7 @@ extern s32 ptyTestSecondaryProfileFlag(datUnitWork_t *, u16);
 
 extern u32 ptyGetProfileRecordValue(const datUnitWork_t *, u16);
 
+/* u16 id: the zero extension from the caller's lhu is retail codegen. */
 extern s32 prfReqEvaluateRules(u32, u32, datUnitWork_t *, u16, u32 *);
 
 extern s32 prfCheckRequirementRules(u32, datUnitWork_t *, u16);

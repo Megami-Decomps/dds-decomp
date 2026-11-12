@@ -71,6 +71,7 @@ extern s32 func_002152D8(ActionStateLink *, s32);
 
 extern s32 btlSelectLowestNonzeroHpTarget(ActionStateLink *, s32);
 
+/* Retail passes a second argument (0) that the definition ignores. */
 extern void btlSelectLowestHealthRateTarget(ActionStateLink *, s32);
 
 extern s32 btlSelectLowestRankTarget(ActionStateLink *, s32);
@@ -85,6 +86,7 @@ extern void btlAppendSelfAfterTargetScan(ActionStateLink *);
 
 extern s32 btlSelectTargetsExcludingActorUnit(ActionStateLink *);
 
+/* Retail passes a second argument (0) that the definition ignores. */
 extern void btlAppendEffectActorToCommandIndices(ActionStateLink *, s32);
 
 extern void btlAppendSelectedOrCurrentActorTarget(ActionStateLink *, s32);

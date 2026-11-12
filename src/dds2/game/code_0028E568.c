@@ -8,6 +8,7 @@
 #include "dat_state.h"
 #include "mnu_list.h"
 #include "prf_profile_cap.h"
+#include "prf_requirement.h"
 
 
 extern void datDebugPrintf(const char *, ...);
@@ -603,7 +604,6 @@ void mnuUpdateSelectedMantraLimitLineState(MnuStatusResource *object) {
 
 extern s32 prfIsMantraCategoryEnabled(u32 categoryIndex);
 extern s32 evtTestMantraNodePartyRequirements(u16, s32);
-extern s32 prfReqEvaluateRules(u32, u32, datUnitWork_t *, u32, u32 *);
 extern s32 prfReqCheckWithFallback(datUnitWork_t *, u16);
 
 s32 mnuScanMantraSourceCandidates(MnuStatusResource *object) {
