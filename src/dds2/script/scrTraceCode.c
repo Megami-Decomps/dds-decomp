@@ -672,11 +672,21 @@ scrProcessWork_s *scrSetIntReturnValue(s32 i)
     return pw;
 }
 
+#ifdef FIX_BUGS
+/* BUG: retail leaves nowpwork in v0 and the float commands return it as their continue flag. */
+scrProcessWork_s *scrSetFloatReturnValue(f32 f)
+{
+    nowpwork->StackType[27] = SCR_STACK_TYPE_FLOAT;
+    nowpwork->StackData[27].f = f;
+    return nowpwork;
+}
+#else
 void scrSetFloatReturnValue(f32 f)
 {
     nowpwork->StackType[27] = SCR_STACK_TYPE_FLOAT;
     nowpwork->StackData[27].f = f;
 }
+#endif
 
 s32 scrGetProcedureCodeAddress(s32 procindex)
 {

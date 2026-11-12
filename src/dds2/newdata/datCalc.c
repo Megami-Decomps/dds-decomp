@@ -494,7 +494,11 @@ extern EventRosterStat *datRosterDetails;
 extern EvtScriptContext evtWorkScriptContext;
 
 
+#ifdef FIX_BUGS
+extern struct scrProcessWork_s *scrSetFloatReturnValue(f32 value);
+#else
 extern void scrSetFloatReturnValue(f32 value);
+#endif
 
 
 
