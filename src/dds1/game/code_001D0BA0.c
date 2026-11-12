@@ -2153,7 +2153,7 @@ void btlRunTask(BtlRuntimeTask *task) {
         return;
     }
     counter = task->pollCount;
-    task->pollCount = counter + 1;
+    task->pollCount = counter + SDF_FRAME_DUE();
     switch (task->state) {
     case BTL_TASK_PHASE_WAITING:
         if (btlEvalTaskCondition(&task->startCondition, counter) == 0) {
@@ -2164,7 +2164,7 @@ void btlRunTask(BtlRuntimeTask *task) {
         if (task->startDelay <= 0) {
             task->state = BTL_TASK_PHASE_RUNNING;
         } else {
-            task->startDelay = task->startDelay - 1;
+            task->startDelay = task->startDelay - SDF_FRAME_DUE();
             break;
         }
     case BTL_TASK_PHASE_RUNNING:
@@ -2173,14 +2173,14 @@ void btlRunTask(BtlRuntimeTask *task) {
         } else if ((BtlTaskPollResult)task->callback(task->args) != BTL_TASK_POLL_CONTINUE) {
             task->state = BTL_TASK_PHASE_END_DELAY;
         } else {
-            task->runCount = task->runCount + 1;
+            task->runCount = task->runCount + SDF_FRAME_DUE();
             break;
         }
     case BTL_TASK_PHASE_END_DELAY:
         if (task->endDelay <= 0) {
             btlFreeTask(task);
         } else {
-            task->endDelay = task->endDelay - 1;
+            task->endDelay = task->endDelay - SDF_FRAME_DUE();
         }
         break;
     }
