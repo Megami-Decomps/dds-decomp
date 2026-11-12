@@ -15,6 +15,7 @@
 #include "dsp_entry_api.h"
 #include "sdf_packet_list.h"
 #include "common.h"
+#include "sdfFrame.h"
 #include "btl_unit_defeat_by_delta_result.h"
 #include "btl_target_list_builder.h"
 #include "btl_target_selection_state_api.h"
@@ -8822,6 +8823,9 @@ void btlUpdateAndDrawVitalBarPulse(BtlUnit *unit, BattleStatPulse *pulse, s32 x,
 void btlUpdateActorVitalEffectState(BtlUnit *unit, BattleActorPanelWork *work, s32 slot) {
     switch (work->activeEntries[slot].presentation.hpState) {
     case 0x11:
+        if (!SDF_FRAME_DUE()) {
+            break;
+        }
         work->activeEntries[slot].presentation.offset[0] = btlNextScaledRandom(8);
         work->activeEntries[slot].presentation.offset[0] =
             work->activeEntries[slot].presentation.offset[0] <= 0 ? 0 :
@@ -9414,7 +9418,7 @@ extern u8 *D_00435E5C;
 
 void btlUpdateSceneFlow(void) {
     BtlState *scene = (BtlState *)btlGetRuntime();
-    btlNextScaledRandom(7);
+    SDF_FRAME_WHEN(btlNextScaledRandom(7));
     if ((scene->battleFlags & 0x400) != 0) {
         if (scene->mode == 1) {
             btlInvalidateSceneFadeCounts(0);

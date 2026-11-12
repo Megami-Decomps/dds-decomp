@@ -10,6 +10,7 @@
 #include "btl_camera_parameter_record.h"
 #include "btl_camera_mode_index.h"
 #include "common.h"
+#include "sdfFrame.h"
 #include "kernel_draw.h"
 #include "sdf_map_position_api.h"
 #include "btl_action_entry_is_empty_api.h"
@@ -6287,7 +6288,7 @@ case 0x0c: {
     BtlUnit *unitB;
     f32 targetLength;
 
-    if (btlNextScaledRandom(2) == 0) {
+    if (!SDF_FRAME_DUE() || btlNextScaledRandom(2) == 0) {
         unitA = btlFindActorLinkByCategory(
             action, 0);
         btlUnitGetPosVU(unitA, 0);

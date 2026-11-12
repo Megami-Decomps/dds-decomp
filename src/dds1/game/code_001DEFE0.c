@@ -11,6 +11,7 @@
 #include "btl_camera_parameter_record.h"
 #include "btl_camera_mode_index.h"
 #include "common.h"
+#include "sdfFrame.h"
 #include "kernel_draw.h"
 #include "snd_battle_sound_file_request_status.h"
 #include "sdf_map_position_api.h"
@@ -5007,7 +5008,7 @@ void btlBuildPresetCameraPose(BtlLinkedCommand *action, BtlCamState *out, s16 ba
         break;
 
     case 0xB: case 0xC: /* 001E8C60 */
-        if (btlNextScaledRandom(2) == 0) {
+        if (!SDF_FRAME_DUE() || btlNextScaledRandom(2) == 0) {
             btlUnitGetPosVU(btlFindLinkedActorById(action, 0), 0);
             SDF_VU0_STOREVECTOR_NOMEM(actorPoint);
             btlUnitGetPosVU(btlFindLinkedActorById(action, 1), 0);

@@ -4583,8 +4583,8 @@ u32 btlStiffenDamageShakeStep(BtlDamageShakeArgs *task) {
     }
     if (0.5f < task->amplitude) {
         BtlUnit *actor;
-        scale = task->amplitude * (dds3GetRandFloatA(dds3RandCB) * 0.5f + 0.5f);
-        if (task->tick & 1) {
+        scale = task->amplitude * (dds3GetRandFloatA(SDF_FRAME_RAND_STATE(dds3RandCB)) * 0.5f + 0.5f);
+        if (SDF_FRAME_TICK(task->tick) & 1) {
             scale = -scale;
         }
         actor = task->unit;
@@ -4598,7 +4598,7 @@ u32 btlStiffenDamageShakeStep(BtlDamageShakeArgs *task) {
             pos[2] += task->unit->positionZOffset;
         }
         dds3SetPosPoseSet(task->unit->effectObject, (u128 *)pos);
-        task->amplitude *= 0.85f;
+        task->amplitude *= SDF_FRAME_DECAY(0.85f);
     } else {
         BtlUnit *actor = task->unit;
         if (btlUnitStatusPair(actor) & 0x808000000000) {
