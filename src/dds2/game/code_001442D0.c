@@ -872,7 +872,7 @@ s32 fldPlayFieldBgm(void) {
     }
 }
 
-extern void p2sdResumeBgm(s32, s32);
+extern void p2sdResumeBgm(s32);
 
 void fldStartSceneBgmAlternate(void) {
     s32 handle;
@@ -894,7 +894,7 @@ void fldStartSceneBgmAlternate(void) {
             }
             if (fldGlobalBase.sceneBgmSuppressed != FLD_SCENE_BGM_SUPPRESSED) {
                 fldSeLastBgm = handle;
-                p2sdResumeBgm(handle, handle);
+                p2sdResumeBgm(handle);
             }
         }
     }

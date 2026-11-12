@@ -673,7 +673,7 @@ void fldPlayFieldBgm(void) {
 
 extern s32 fldResolveSpecialBgmTrack(s32);
 
-extern u64 p2sdResumeBgm(s32);
+extern void p2sdResumeBgm(s32);
 
 void fldStartSceneBgmAlternate(void) {
     s32 handle = fldResolveSpecialBgmTrack(fldGlobalBase.sequenceCode);
