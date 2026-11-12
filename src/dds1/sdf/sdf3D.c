@@ -2,6 +2,11 @@
 #include "libsdf.h"
 #include "fpu.h"
 #include "ps2asm.h"
+
+/* div.s saturates a zero divisor; the host build maps this to ffdivf. */
+#ifndef SDF_DIVF
+#define SDF_DIVF(a, b) ((a) / (b))
+#endif
 #include "sdf_lighting.h"
 #include "libsdf.h"
 #include "sdf_resource.h"
@@ -328,7 +333,7 @@ void sdf3DMakeScreenParam(sdf3DScreenParam_t *camera)
     f32 centerY;
 
     SDF_MMI_STORE_UNIT_MATRIX(projectionMatrix);
-    projectionMatrix[0] = 1.0f / (halfWidth * camera->aspect);
+    projectionMatrix[0] = SDF_DIVF(1.0f, halfWidth * camera->aspect);
     projectionMatrix[5] = 1.0f / halfHeight;
     projectionMatrix[10] = farZ * nearZ * 2.0f / depthRange;
     projectionMatrix[14] = -(nearZ + farZ) / depthRange;
