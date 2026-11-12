@@ -394,7 +394,7 @@ s32 ioctl()
     return -1;
 }
 
-long lseek(s32 descriptor, s32 offset, s32 whence)
+long lseek(s32 descriptor, long offset, s32 whence)
 {
     return -1;
 }

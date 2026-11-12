@@ -77,10 +77,10 @@ s32 sdfSndTimerStart(sdfSndTimer_t *tm);
 s32 sdfSndTimerStop(sdfSndTimer_t *tm);
 s32 sdfSndInitWorkAreas(void);
 void sdfSndSeqThread(void *arg);
-s32 sdfSndInitSpu2(void);
+void sdfSndInitSpu2(void);
 s32 sdfSndMidiSelect(s32 slot, s32 seq, s32 bank, void *data, s32 loc);
 s32 sdfSndStopAll(s32 which);
-s32 sdfSndInitSynth(sdfSndWorkArea_t *work);
+void sdfSndInitSynth(sdfSndWorkArea_t *work);
 s32 sdfSndQuitSynth(void);
 s32 sdfSndFindSlotById(s32 idPacked);
 s32 sdfSndBgmPlay(sdfSndBgmReq_t *req);
@@ -93,8 +93,8 @@ s32 sdfSndSePlay(sdfSndSeReq_t *req);
 s32 sdfSndDistanceAtten(s32 dist, s32 radius);
 s32 sdfSndUpdate3dVoice(s32 slot);
 s32 sdfSndSePlayPositional(s32 id, s32 angle, s32 dist, s32 radius);
-s32 sdfSndSetListener(sdfSndListenerReq_t *req);
-s32 sdfSndSePlay3d(sdfSndSe3dReq_t *req);
+void sdfSndSetListener(sdfSndListenerReq_t *req);
+void sdfSndSePlay3d(sdfSndSe3dReq_t *req);
 s32 sdfSndIsBankLoaded(s32 kind);
 s32 sdfSndLoadSmg(const char *path, s32 mode);
 void sdfSndSmgLoadThread(void *arg);
@@ -106,23 +106,23 @@ s32 sdfSndFadeOutById(s32 *req);
 s32 sdfSndRequestBgmSwitch(s32 midi);
 s32 sdfSndAllocBgmSlot(void);
 s32 sdfSndAllocSeSlot(void);
-s32 sdfSndSetSeqVolume(s32 vol);
+void sdfSndSetSeqVolume(s32 vol);
 s32 sdfSndFadeOutAll(void);
 s32 sdfSndFadeInAll(void);
 s32 sdfSndSifCmdHandler(sdfSndCmd_t *pkt, void *harg);
-s32 sdfSndCreateRpcSema(void);
+void sdfSndCreateRpcSema(void);
 s32 sdfSndLoadVolTables(void);
 s32 sdfSndStoreVolTables(void);
 void sdfSndKeepAliveThread(void *arg);
 s32 sdfSndStartKeepAliveThread(void);
 s32 sdfSndDrvRpcInit(void *arg);
-s32 sdfSndCallEeRpc(s32 arg, void *buf, s32 len, u32 fno, u32 *reply);
+s32 sdfSndCallEeRpc(s32 arg, void *buf, s32 len, u32 fno, void *reply);
 s32 sdfAdpcmFadeTick(void);
 s32 sdfAdpcmFadeOut(s32 step);
 s32 sdfAdpcmStop(void);
-s32 sdfAdpcmUploadBlock(void);
+void sdfAdpcmUploadBlock(void);
 s32 sdfAdpcmSpu2IntrHandler(void *arg);
-s32 sdfAdpcmFillBuffer(s32 blocking);
+void sdfAdpcmFillBuffer(s32 blocking);
 s32 sdfAdpcmSetVolume(s32 vol);
 s32 sdfAdpcmStreamPlay(const char *path, s32 vol, s8 onMemory);
 void sdfAdpcmStreamInit(void *arg);
@@ -198,10 +198,9 @@ s32 sdfSndIsqrt(s32 v)
     } while (g != prev && g != prev + 1 && g != prev - 1);
     return g;
 }
-#ifdef NON_MATCHING
 /* The angle of (x, y) in degrees, from a 32 entry table of atan(n/31).
- * Two instructions short: gcc copies x into the negation where the retail
- * code negates its own copy in place. */
+ * The compiler absolute-value operation keeps each magnitude in its own
+ * temporary while the original coordinates remain live for the quadrant. */
 s32 sdfSndAtan2Deg(s32 x, s32 y)
 {
     s32 ax;
@@ -209,14 +208,8 @@ s32 sdfSndAtan2Deg(s32 x, s32 y)
     s32 deg;
     s32 idx;
 
-    ax = x;
-    if (x < 0) {
-        ax = -ax;
-    }
-    ay = y;
-    if (y < 0) {
-        ay = -ay;
-    }
+    ax = __builtin_abs(x);
+    ay = __builtin_abs(y);
     if (ax == 0) {
         deg = 0;
     } else if (ay == 0) {
@@ -236,9 +229,6 @@ s32 sdfSndAtan2Deg(s32 x, s32 y)
     }
     return deg;
 }
-#else
-INCLUDE_ASM("SDFSDMAN", sdfSndAtan2Deg);
-#endif
 
 s32 sdfSndPostError(s32 code)
 {
@@ -249,29 +239,20 @@ s32 sdfSndPostError(s32 code)
 
 /* Copy the synthesiser voice map into the work area the EE reads: 24 voices
  * per core, -1 where the voice is not in use. */
-#ifdef NON_MATCHING
-/* One instruction short: gcc fills the branch delay slot with the second
- * arm instead of the address of the slot being written. */
 s32 sdfSndUpdateVoiceMap(void)
 {
     s32 core;
     s32 base;
     s32 i;
-    u8 m;
-    u8 v;
 
     core = 0;
     base = 0;
     do {
         i = 0;
         do {
-            m = sdfSndHsynVoiceMap[i + base];
-            if ((m & 0x80) != 0) {
-                v = m & 0x70;
-            } else {
-                v = -1;
-            }
-            sdfSndWorkArea->voiceMap[i + 32 * core] = v;
+            sdfSndWorkArea->voiceMap[i + 32 * core] =
+                (sdfSndHsynVoiceMap[i + base] & 0x80) != 0 ?
+                sdfSndHsynVoiceMap[i + base] & 0x70 : -1;
             i++;
         } while (i < 24);
         core++;
@@ -279,9 +260,6 @@ s32 sdfSndUpdateVoiceMap(void)
     } while (core < 2);
     return p2sdIrxSpuIopMap();
 }
-#else
-INCLUDE_ASM("SDFSDMAN", sdfSndUpdateVoiceMap);
-#endif
 
 /* mode 1 reads through the EE instead of the file library. */
 s32 sdfSndFileOpen(const char *path, s32 mode)
@@ -389,10 +367,8 @@ u8 *sdfSndGetVolTable(s32 kind, s32 *count)
 INCLUDE_ASM("SDFSDMAN", sdfSndGetVolTable);
 #endif
 
-#ifdef NON_MATCHING
 /* Scale the slot volume by the per sound entry in its volume table, and by
- * the global sequence volume for the three sequence slots.
- * Matches but for the two registers id and vol land in. */
+ * the global sequence volume for the three sequence slots. */
 s32 sdfSndApplyVolume(s32 id, s32 slot, s32 vol)
 {
     s32 kind;
@@ -410,23 +386,20 @@ s32 sdfSndApplyVolume(s32 id, s32 slot, s32 vol)
     } else {
         v = 127;
     }
-    v = (vol * v) >> 7;
+    vol = (vol * v) >> 7;
     if (slot < 3) {
-        v = (v * sdfSndSeqVolume) >> 7;
+        vol = (vol * sdfSndSeqVolume) >> 7;
     }
-    if (v >= 128) {
-        v = 127;
+    if (vol >= 128) {
+        vol = 127;
     }
-    if (v < 0) {
-        v = 0;
+    if (vol < 0) {
+        vol = 0;
     }
     intrman_CpuSuspendIntr(&state);
-    modmidi_sceMidi_MidiSetVolume(&sdfSndMidiWork, slot, 255, (u8)v);
+    modmidi_sceMidi_MidiSetVolume(&sdfSndMidiWork, slot, 255, (u8)vol);
     return intrman_CpuResumeIntr(state);
 }
-#else
-INCLUDE_ASM("SDFSDMAN", sdfSndApplyVolume);
-#endif
 
 /* Reset all 16 channels of a slot: bank select, volume and all notes off. */
 s32 sdfSndPutMsg(s32 slot)
@@ -475,18 +448,17 @@ s32 sdfSndMidiCbIgnore2(void)
 {
     return 1;
 }
-#ifdef NON_MATCHING
 /* The synthesiser calls this for every MIDI message. Controller 0 on the
  * pending switch channel picks the next BGM, controller 15 records where the
- * sequence is so a resume can come back to it.
- * Matches but for the register the channel number lands in. */
+ * sequence is so a resume can come back to it. */
 s32 sdfSndMidiCbMessage(u32 msg, s32 slot)
 {
     s32 val;
 
     val = (msg >> 8) & 0xFF;
     if ((msg & 0xF0) == 0xD0) {
-        switch (msg & 0xF) {
+        msg &= 0xF;
+        switch (msg) {
         case 0:
             if (sdfSndBgmSwitchReq != 0) {
                 if (sdfSndBgmSwitchMidi < 0) {
@@ -507,9 +479,6 @@ s32 sdfSndMidiCbMessage(u32 msg, s32 slot)
     }
     return msg;
 }
-#else
-INCLUDE_ASM("SDFSDMAN", sdfSndMidiCbMessage);
-#endif
 
 s32 sdfSndTimerHandler(sdfSndTimer_t *tm)
 {
@@ -794,41 +763,25 @@ INCLUDE_ASM("SDFSDMAN", sdfSndSeqThread);
 #endif
 
 
-#ifdef NON_MATCHING
-/* Same instructions in a different order: gcc fills the call delay slot
- * with the argument truncation the retail code schedules earlier. */
-s32 sdfSndInitSpu2(void)
+/* Initialise both SPU2 cores and clear the pending BGM switch. */
+void sdfSndInitSpu2(void)
 {
     s32 core;
-    sceSdEffectAttr_t *attr;
-    u32 addr;
 
     libsd_sceSdInit(0);
-    core = 0;
-    attr = sdfSndEffectAttr;
-    do {
-        addr = 0x1FFFFF;
-        if (core == 1) {
-            addr = 0x1FFFF;
-        }
-        libsd_sceSdSetAddr(core | 0x1D00, addr);
-        libsd_sceSdSetEffectAttr(core, attr);
+    for (core = 0; core < 2; core++) {
+        libsd_sceSdSetAddr(core | 0x1D00, core == 1 ? 0x1FFFF : 0x1FFFFF);
+        libsd_sceSdSetEffectAttr(core, &sdfSndEffectAttr[core]);
         libsd_sceSdSetCoreAttr(core | 2, 1);
         libsd_sceSdSetParam(core | 0xB80, 0x4FFF);
         libsd_sceSdSetParam(core | 0xC80, 0x4FFF);
         libsd_sceSdSetParam(core | 0x980, 0x3FFF);
         libsd_sceSdSetParam(core | 0xA80, 0x3FFF);
-        core++;
-        attr++;
-    } while (core < 2);
+    }
     sdfSndBgmSwitchReq = 0;
     sdfSndBgmSwitchSlot = -1;
     sdfSndBgmSwitchMidi = -1;
-    return -1;
 }
-#else
-INCLUDE_ASM("SDFSDMAN", sdfSndInitSpu2);
-#endif
 
 #ifdef NON_MATCHING
 /* 7 instructions short of the retail code. */
@@ -934,12 +887,10 @@ s32 sdfSndStopAll(s32 which)
 #else
 INCLUDE_ASM("SDFSDMAN", sdfSndStopAll);
 #endif
-#ifdef NON_MATCHING
-/* 1 instruction short of the retail code. */
 /* FUNC sdfSndInitSynth */
 /* Takes the work area the EE allocated, then brings up the sequence thread,
  * its timer, the synthesiser and the MIDI front end. */
-s32 sdfSndInitSynth(sdfSndWorkArea_t *work)
+void sdfSndInitSynth(sdfSndWorkArea_t *work)
 {
     iop_thread_t thp;
     s32 param[2];
@@ -981,7 +932,7 @@ s32 sdfSndInitSynth(sdfSndWorkArea_t *work)
     sdfSndInitWorkAreas();
     if (modhsyn_sceHSyn_Init(&sdfSndHsynWork, 4167) != 0) {
         stdio_printf(aSdfsnddrvScehs);
-        return sdfSndPostError(9);
+        sdfSndPostError(9);
     } else {
         param[0] = 3;
         param[1] = 0;
@@ -990,16 +941,14 @@ s32 sdfSndInitSynth(sdfSndWorkArea_t *work)
         sdfSndSeqVolume = 127;
         if (modmidi_sceMidi_Init(&sdfSndMidiWork, 4167) != 0) {
             stdio_printf(aSdfsnddrvScemi_2);
-            return sdfSndPostError(10);
+            sdfSndPostError(10);
         } else {
-            return sdfSndTimerStart(&sdfSndTimer);
+            sdfSndTimerStart(&sdfSndTimer);
         }
     }
 }
 /* ENDF sdfSndInitSynth */
-#else
-INCLUDE_ASM("SDFSDMAN", sdfSndInitSynth);
-#endif
+
 
 /* FUNC sdfSndQuitSynth */
 s32 sdfSndQuitSynth(void)
@@ -1020,31 +969,25 @@ s32 sdfSndQuitSynth(void)
     return ret;
 }
 /* ENDF sdfSndQuitSynth */
-#ifdef NON_MATCHING
-/* Matches instruction for instruction, but gcc chooses different
- * registers. */
 /* FUNC sdfSndFindSlotById */
 /* The bank slot a packed sound id belongs to, or -1. */
 s32 sdfSndFindSlotById(s32 idPacked)
 {
     s32 i;
-    s32 id;
 
-    id = idPacked >> 16;
     if (idPacked < 0) {
         return -1;
     }
+    idPacked >>= 16;
     for (i = 0; i < SDF_SND_KINDS; i++) {
-        if (sdfSndWorkArea->stat[i].id == id) {
+        if (sdfSndWorkArea->stat[i].id == idPacked) {
             return i;
         }
     }
     return -1;
 }
 /* ENDF sdfSndFindSlotById */
-#else
-INCLUDE_ASM("SDFSDMAN", sdfSndFindSlotById);
-#endif
+
 #ifdef NON_MATCHING
 /* 9 instructions short of the retail code. */
 /* FUNC sdfSndBgmPlay */
@@ -1202,9 +1145,6 @@ sdfSndResume_t *sdfSndFindResumePoint(s32 id)
     return NULL;
 }
 /* ENDF sdfSndFindResumePoint */
-#ifdef NON_MATCHING
-/* Matches instruction for instruction, but gcc chooses different
- * registers. */
 /* FUNC sdfSndBgmResume */
 s32 sdfSndBgmResume(sdfSndBgmReq_t *req)
 {
@@ -1222,18 +1162,16 @@ s32 sdfSndBgmResume(sdfSndBgmReq_t *req)
         }
     }
     rp = sdfSndFindResumePoint(req->id);
-    if (rp != NULL && rp->location >= 0) {
-        req->location = rp->location;
-    } else {
+    if (rp == NULL || rp->location < 0) {
         req->location = 0;
+    } else {
+        req->location = rp->location;
     }
     req->vol = 256;
     return sdfSndBgmPlay(req);
 }
 /* ENDF sdfSndBgmResume */
-#else
-INCLUDE_ASM("SDFSDMAN", sdfSndBgmResume);
-#endif
+
 #ifdef NON_MATCHING
 /* Matches instruction for instruction, but gcc chooses different
  * registers. */
@@ -1507,46 +1445,32 @@ s32 sdfSndSePlayPositional(s32 id, s32 angle, s32 dist, s32 radius)
 INCLUDE_ASM("SDFSDMAN", sdfSndSePlayPositional);
 #endif
 
-#ifdef NON_MATCHING
-/* 1 instruction longer than the retail code. */
 /* FUNC sdfSndSetListener */
 /* Remember where the listener is and which way it faces; the sequence thread
  * re-pans the positional sounds on the next tick. */
-s32 sdfSndSetListener(sdfSndListenerReq_t *req)
+void sdfSndSetListener(sdfSndListenerReq_t *req)
 {
     s32 angle;
-    s32 posZ;
-    s32 atZ;
-    s32 posY;
-    s32 dx;
 
     if (sdfSndListenerX == req->posX && sdfSndListenerY == req->posY &&
         sdfSndListenerZ == req->posZ) {
         angle = sdfSndAtan2Deg(req->atX - sdfSndListenerX, sdfSndListenerZ - req->atZ);
         if (sdfSndListenerAngle == angle) {
-            return angle;
+            return;
         }
     }
-    posZ = req->posZ;
-    atZ = req->atZ;
-    posY = req->posY;
-    dx = req->atX - req->posX;
     sdfSndListenerX = req->posX;
-    sdfSndListenerY = posY;
-    sdfSndListenerZ = posZ;
-    sdfSndListenerAngle = sdfSndAtan2Deg(dx, posZ - atZ);
+    sdfSndListenerY = req->posY;
+    sdfSndListenerZ = req->posZ;
+    sdfSndListenerAngle = sdfSndAtan2Deg(req->atX - sdfSndListenerX,
+                                       sdfSndListenerZ - req->atZ);
     sdfSndListenerDirty = 1;
-    return 1;
 }
 /* ENDF sdfSndSetListener */
-#else
-INCLUDE_ASM("SDFSDMAN", sdfSndSetListener);
-#endif
-#ifdef NON_MATCHING
-/* 1 instruction longer than the retail code. */
+
 /* FUNC sdfSndSePlay3d */
 /* Play a sound effect at a point in the world. */
-s32 sdfSndSePlay3d(sdfSndSe3dReq_t *req)
+void sdfSndSePlay3d(sdfSndSe3dReq_t *req)
 {
     s32 dx;
     s32 dz;
@@ -1560,18 +1484,17 @@ s32 sdfSndSePlay3d(sdfSndSe3dReq_t *req)
                        dz * dz);
     angle = sdfSndAtan2Deg(-dx, dz);
     slot = sdfSndSePlayPositional(req->id, angle - sdfSndListenerAngle, dist, req->radius);
-    if (slot >= 0) {
-        sdfSndSlots[slot].is3d = 1;
-        sdfSndSlots[slot].posX = req->x;
-        sdfSndSlots[slot].posY = req->y;
-        sdfSndSlots[slot].posZ = req->z;
-        sdfSndSlots[slot].radius = req->radius;
+    if (slot < 0) {
+        return;
     }
+    sdfSndSlots[slot].is3d = 1;
+    sdfSndSlots[slot].posX = req->x;
+    sdfSndSlots[slot].posY = req->y;
+    sdfSndSlots[slot].posZ = req->z;
+    sdfSndSlots[slot].radius = req->radius;
 }
 /* ENDF sdfSndSePlay3d */
-#else
-INCLUDE_ASM("SDFSDMAN", sdfSndSePlay3d);
-#endif
+
 
 /* FUNC sdfSndIsBankLoaded */
 s32 sdfSndIsBankLoaded(s32 kind)
@@ -1932,8 +1855,6 @@ s32 sdfSndUnloadBank(s32 kind)
     }
 }
 /* ENDF sdfSndUnloadBank */
-#ifdef NON_MATCHING
-/* 1 instruction short of the retail code. */
 /* FUNC p2sdIrxSpuIopMap */
 /* Push the work area up to the EE by DMA and wait for it to land. */
 s32 p2sdIrxSpuIopMap(void)
@@ -1950,8 +1871,8 @@ s32 p2sdIrxSpuIopMap(void)
     sdd.src = sdfSndWorkArea;
     sdd.dest = sdfSndWorkArea->eeAddr;
     tries = 5;
-    sdd.attr = 0;
     sdd.size = sdfSndWorkArea->size;
+    sdd.attr = 0;
     loadcore_FlushDcache();
     while (1) {
         intrman_CpuSuspendIntr(&state);
@@ -1984,9 +1905,7 @@ s32 p2sdIrxSpuIopMap(void)
     return ret;
 }
 /* ENDF p2sdIrxSpuIopMap */
-#else
-INCLUDE_ASM("SDFSDMAN", p2sdIrxSpuIopMap);
-#endif
+
 
 /* FUNC sdfSndFadeOutById */
 s32 sdfSndFadeOutById(s32 *req)
@@ -2096,21 +2015,20 @@ s32 sdfSndAllocSeSlot(void)
 #else
 INCLUDE_ASM("SDFSDMAN", sdfSndAllocSeSlot);
 #endif
-#ifdef NON_MATCHING
-/* 1 instruction short of the retail code. */
 /* FUNC sdfSndSetSeqVolume */
 /* The EE sends 0..15; the driver keeps it in eighths with the odd steps
  * rounded up to the next full one. */
-s32 sdfSndSetSeqVolume(s32 vol)
+void sdfSndSetSeqVolume(s32 vol)
 {
-    s32 v;
+    s32 inputVol;
     s32 i;
 
-    v = 8 * vol;
-    if ((vol & 1) != 0) {
-        v |= 7;
+    inputVol = vol;
+    vol *= 8;
+    if ((inputVol & 1) != 0) {
+        vol |= 7;
     }
-    sdfSndSeqVolume = v;
+    sdfSndSeqVolume = vol;
     for (i = 0; i < 3; i++) {
         if ((sdfSndMidiWork.tbl->seq[i].slot->flags & 2) != 0) {
             sdfSndApplyVolume(sdfSndSlots[i].id, i, sdfSndSeqVolume);
@@ -2118,9 +2036,7 @@ s32 sdfSndSetSeqVolume(s32 vol)
     }
 }
 /* ENDF sdfSndSetSeqVolume */
-#else
-INCLUDE_ASM("SDFSDMAN", sdfSndSetSeqVolume);
-#endif
+
 
 /* FUNC sdfSndFadeOutAll */
 s32 sdfSndFadeOutAll(void)
@@ -2183,29 +2099,21 @@ s32 sdfSndSifCmdHandler(sdfSndCmd_t *pkt, void *harg)
 INCLUDE_ASM("SDFSDMAN", sdfSndSifCmdHandler);
 #endif
 
-#ifdef NON_MATCHING
-/* Matches instruction for instruction, but gcc chooses different
- * registers. */
 /* FUNC sdfSndCreateRpcSema */
-s32 sdfSndCreateRpcSema(void)
+void sdfSndCreateRpcSema(void)
 {
-    s32 sema;
 
     sdfSndRpcSemaParam.initial = 1;
     sdfSndRpcSemaParam.max = 2;
     sdfSndRpcSemaParam.option = 0;
-    sema = thsemap_CreateSema(&sdfSndRpcSemaParam);
-    sdfSndRpcSema = sema;
-    if (sema <= 0) {
+    sdfSndRpcSema = thsemap_CreateSema(&sdfSndRpcSemaParam);
+    if (sdfSndRpcSema <= 0) {
         stdio_printf(aSdfsnddrvCreat);
-        return thbase_ExitThread();
+        thbase_ExitThread();
     }
-    return sema;
 }
 /* ENDF sdfSndCreateRpcSema */
-#else
-INCLUDE_ASM("SDFSDMAN", sdfSndCreateRpcSema);
-#endif
+
 
 /* FUNC sdfSndLoadVolTables */
 /* The EE writes the volume tables into the work area; take a copy. */
@@ -2476,18 +2384,13 @@ INCLUDE_ASM("SDFSDMAN", sdfSndDrvRpcInit);
 #endif
 
 ALIGN_TEXT(4);
-#ifdef NON_MATCHING
-/* 8 instructions short of the retail code. */
 /* FUNC sdfSndCallEeRpc */
 /* Ask the EE to do something for us: read a block of the stream, open a
  * file, and so on. */
-s32 sdfSndCallEeRpc(s32 arg, void *buf, s32 len, u32 fno, u32 *reply)
+s32 sdfSndCallEeRpc(s32 arg, void *buf, s32 len, u32 fno, void *reply)
 {
     sdfSndEeReq_t send;
-    u32 recv[4];
-    u32 a;
-    u32 b;
-    u32 c;
+    u8 recv[16];
 
     thsemap_WaitSema(sdfSndEeRpcSema);
     send.buf = buf;
@@ -2497,20 +2400,13 @@ s32 sdfSndCallEeRpc(s32 arg, void *buf, s32 len, u32 fno, u32 *reply)
     }
     sifcmd_SifCallRpc(&sdfSndEeRpcClient, fno, 0, &send, 16, recv, 16, NULL, NULL);
     if (reply != NULL) {
-        a = recv[1];
-        b = recv[2];
-        c = recv[3];
-        reply[0] = recv[0];
-        reply[1] = a;
-        reply[2] = b;
-        reply[3] = c;
+        /* RPC replies are byte buffers, with no word-alignment contract. */
+        __builtin_memcpy(reply, recv, sizeof(recv));
     }
     return thsemap_SignalSema(sdfSndEeRpcSema);
 }
 /* ENDF sdfSndCallEeRpc */
-#else
-INCLUDE_ASM("SDFSDMAN", sdfSndCallEeRpc);
-#endif
+
 
 ALIGN_TEXT(4);
 /* FUNC sdfAdpcmFadeTick */
@@ -2558,17 +2454,11 @@ s32 sdfAdpcmStop(void)
 }
 /* ENDF sdfAdpcmStop */
 
-#ifdef NON_MATCHING
-/* 1 instruction short of the retail code. */
 /* FUNC sdfAdpcmUploadBlock */
 /* Send the block the reader just filled to the SPU2 and point the voice at
  * it. Stereo splits the 512 bytes into two 256 byte halves. */
-s32 sdfAdpcmUploadBlock(void)
+void sdfAdpcmUploadBlock(void)
 {
-    u32 spuAddr;
-    u16 entry;
-    s32 off;
-    s32 next;
 
     if (sdfAdpcm.stereo) {
         while (libsd_sceSdVoiceTrans(sdfAdpcm.core, 0,
@@ -2582,28 +2472,22 @@ s32 sdfAdpcmUploadBlock(void)
                                      0x100) < 0) {
         }
         libsd_sceSdVoiceTransStatus(sdfAdpcm.core, 1);
-        spuAddr = sdfAdpcm.spuAddr;
-        entry = (s8)sdfAdpcm.coreId | 0x1F00;
-        off = sdfAdpcm.xferBlk << 8;
+        libsd_sceSdSetAddr((s8)sdfAdpcm.coreId | 0x1F00,
+                          sdfAdpcm.spuAddr + (sdfAdpcm.xferBlk << 8));
     } else {
         while (libsd_sceSdVoiceTrans(sdfAdpcm.core, 0,
                                      (u8 *)(sdfAdpcm.iopBuf + ((s8)sdfAdpcm.xferIdx << 9)),
                                      sdfAdpcm.spuAddr + (sdfAdpcm.xferBlk << 9), 0x200) < 0) {
         }
         libsd_sceSdVoiceTransStatus(sdfAdpcm.core, 1);
-        spuAddr = sdfAdpcm.spuAddr;
-        entry = (s8)sdfAdpcm.coreId | 0x1F00;
-        off = sdfAdpcm.xferBlk << 9;
+        libsd_sceSdSetAddr((s8)sdfAdpcm.coreId | 0x1F00,
+                          sdfAdpcm.spuAddr + (sdfAdpcm.xferBlk << 9));
     }
-    libsd_sceSdSetAddr(entry, spuAddr + off);
-    next = sdfAdpcm.xferBlk + 1;
     sdfAdpcm.xferIdx = (sdfAdpcm.xferIdx + 1) & 1;
-    sdfAdpcm.xferBlk = next % 3;
+    sdfAdpcm.xferBlk = (sdfAdpcm.xferBlk + 1) % 3;
 }
 /* ENDF sdfAdpcmUploadBlock */
-#else
-INCLUDE_ASM("SDFSDMAN", sdfAdpcmUploadBlock);
-#endif
+
 
 /* FUNC sdfAdpcmSpu2IntrHandler */
 s32 sdfAdpcmSpu2IntrHandler(void *arg)
@@ -2615,59 +2499,60 @@ s32 sdfAdpcmSpu2IntrHandler(void *arg)
     return 0;
 }
 /* ENDF sdfAdpcmSpu2IntrHandler */
-#ifdef NON_MATCHING
-/* 4 instructions longer than the retail code. */
 /* FUNC sdfAdpcmFillBuffer */
 /* Read the next 512 bytes of the stream from the EE and write the ADPCM
  * block flags: 6 on the first block, 2 while it runs, 3 on the last. */
-s32 sdfAdpcmFillBuffer(s32 blocking)
+void sdfAdpcmFillBuffer(s32 blocking)
 {
-    u32 reply[4];
+    s32 reply[4];
     u8 *buf;
     u8 *left;
     u8 *right;
     s32 i;
     s32 count;
-    s32 next;
 
     sdfAdpcm.intrState = 0;
     if (sdfAdpcm.playing == 0) {
-        return sdfAdpcm.playing;
+        return;
     }
     if (sdfAdpcm.bytesLeft == 0) {
-        return sdfAdpcmStop();
+        sdfAdpcmStop();
+        return;
     }
     buf = (u8 *)(sdfAdpcm.iopBuf + ((s8)sdfAdpcm.fillIdx << 9));
     do {
-        if (sdfAdpcm.onMemory) {
-            sdfSndCallEeRpc(0, buf, 512, 7, reply);
-        } else {
+        if (!sdfAdpcm.onMemory) {
             sdfSndCallEeRpc(0, buf, 512, 1, reply);
+        } else {
+            sdfSndCallEeRpc(0, buf, 512, 7, reply);
         }
-    } while (blocking && (reply[0] & 0x80000000) != 0);
+    } while (blocking && reply[0] < 0);
 
-    if (sdfAdpcm.fadeState == 1) {
-        if ((reply[0] & 0x80000000) != 0) {
+    switch (sdfAdpcm.fadeState) {
+    case 1:
+        if (reply[0] < 0) {
             sdfAdpcm.fadeState = 2;
             sdfAdpcmSetVolume(0);
         }
-    } else if (sdfAdpcm.fadeState == 2) {
-        if ((reply[0] & 0x80000000) == 0) {
+        break;
+    case 2:
+        if (reply[0] >= 0) {
             sdfAdpcm.fadeState = 1;
             sdfAdpcmSetVolume(sdfAdpcm.volume);
         }
+        break;
     }
 
     left = buf + 1;
     right = buf + 257;
-    if (sdfAdpcm.fillBlk != 0) {
-        i = 0;
-    } else {
+    if (sdfAdpcm.fillBlk == 0) {
         left = buf + 17;
         right = buf + 273;
         i = 1;
         buf[1] = 6;
         buf[257] = 6;
+    } else {
+        i = 0;
     }
     count = 31;
     if (sdfAdpcm.stereo) {
@@ -2686,21 +2571,18 @@ s32 sdfAdpcmFillBuffer(s32 blocking)
         *right = 2;
         *left = 2;
     }
-    if ((reply[0] & 0x80000000) == 0 && sdfAdpcm.bytesLeft != 0) {
-        if (sdfAdpcm.bytesLeft >= 0x201) {
-            sdfAdpcm.bytesLeft -= 512;
-        } else {
+    if (reply[0] >= 0 && sdfAdpcm.bytesLeft != 0) {
+        if (sdfAdpcm.bytesLeft < 0x201) {
             sdfAdpcm.bytesLeft = 0;
+        } else {
+            sdfAdpcm.bytesLeft -= 512;
         }
     }
-    next = sdfAdpcm.fillBlk + 1;
     sdfAdpcm.fillIdx = (sdfAdpcm.fillIdx + 1) & 1;
-    sdfAdpcm.fillBlk = next % 3;
+    sdfAdpcm.fillBlk = (sdfAdpcm.fillBlk + 1) % 3;
 }
 /* ENDF sdfAdpcmFillBuffer */
-#else
-INCLUDE_ASM("SDFSDMAN", sdfAdpcmFillBuffer);
-#endif
+
 /* FUNC sdfAdpcmSetVolume */
 s32 sdfAdpcmSetVolume(s32 vol)
 {

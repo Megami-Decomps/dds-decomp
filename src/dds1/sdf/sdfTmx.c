@@ -299,7 +299,7 @@ typedef struct __sFILE {
     void *_cookie;
     s32 (*_read)(void *cookie, char *buf, s32 n);
     s32 (*_write)(void *cookie, const char *buf, s32 n);
-    long (*_seek)(void *cookie, s32 offset, s32 whence);
+    long (*_seek)(void *cookie, long offset, s32 whence);
     s32 (*_close)(void *cookie);
     __sbuf _ub;
     u8 *_up;
@@ -459,7 +459,7 @@ extern s32 write(s32 fd, const void *buf, s32 count);
 
 extern s32 read(s32 fd, void *buf, s32 count);
 
-extern long lseek(s32 fd, s32 offset, s32 whence);
+extern long lseek(s32 fd, long offset, s32 whence);
 
 extern s32 fstat(s32 fd, void *buf);
 
@@ -469,7 +469,7 @@ extern long _read_r(_reent *r, s32 fd, char *buf, s32 n);
 
 extern long _write_r(_reent *r, s32 fd, const char *buf, s32 n);
 
-extern long _lseek_r(_reent *r, s32 fd, s32 offset, s32 whence);
+extern long _lseek_r(_reent *r, s32 fd, long offset, s32 whence);
 
 extern s32 __sfvwrite(FILE *fp, __suio *uio);
 
@@ -477,7 +477,7 @@ extern s32 __sread(void *cookie, char *buf, s32 n);
 
 extern s32 __swrite(void *cookie, const char *buf, s32 n);
 
-extern long __sseek(void *cookie, s32 offset, s32 whence);
+extern long __sseek(void *cookie, long offset, s32 whence);
 
 extern s32 __sclose(void *cookie);
 

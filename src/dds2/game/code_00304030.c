@@ -30,6 +30,99 @@ extern EffTimedParamRecord D_00400490[3];
 extern EffTimedParamRecord D_004004D8[2];
 extern EffRecordBucket effTimedRecordBuckets[];
 
+/* Timed-effect parameter definitions and their category dispatch table. */
+extern char D_0042D170[];
+extern char D_0042D180[];
+extern char D_0042D190[];
+extern char D_0042D1A0[];
+extern char D_0042D1B0[];
+extern char D_0042D1C0[];
+extern char D_0042D1D0[];
+extern char D_0042D1E0[];
+extern char D_0042D1F0[];
+extern char D_004387F0[];
+extern char D_004387F8[];
+extern char D_00438800[];
+extern char D_00438808[];
+extern char D_00438810[];
+extern char D_00438818[];
+extern char D_00438820[];
+extern char D_00438828[];
+extern char D_00438830[];
+extern char D_00438838[];
+extern char D_00438840[];
+extern char D_00438848[];
+extern char D_00438850[];
+extern char D_00438858[];
+extern char D_00438860[];
+extern s32 itfGridApplyLinearZoomBoundsAndFadeAlpha(BdWork *, BdWork *, EffTimedState *);
+extern s32 itfGridApplyQuadraticZoomBoundsAndFadeAlpha(BdWork *, BdWork *, EffTimedState *);
+extern s32 itfGridApplySqrtBoundsAndColorScale(BdWork *, BdWork *, EffTimedState *);
+extern s32 itfGridApplyTimedBoundsAndAlpha(BdWork *, BdWork *, EffTimedState *);
+extern s32 itfGridInterpolateCornerColorsToTarget(BdWork *, BdWork *, EffTimedState *);
+extern s32 itfGridShrinkBoundsAndFadeAlpha(BdWork *, BdWork *, EffTimedState *);
+extern s32 itfGridShrinkBoundsAndFadeThresholdAlpha(BdWork *, BdWork *, EffTimedState *);
+extern s32 itfUpdateAngleAndGetCycleStep(BdWork *, BdWork *, EffTimedState *);
+
+EffTimedParamRecord D_004002F8[2] = {
+    { D_004387F8, 0, 1.0f, 1024.0f, 1.0f, 15.0f },
+    { D_004387F0, 0, 0.0f, 1.0f, 1.0f, 0.0f },
+};
+
+EffTimedParamRecord D_00400328[3] = {
+    { D_0042D190, 0, 0.0f, 1024.0f, 1.0f, 64.0f },
+    { D_0042D180, 0, 0.0f, 1024.0f, 1.0f, 64.0f },
+    { D_0042D170, 0, 1.0f, 1024.0f, 1.0f, 15.0f },
+};
+
+EffTimedParamRecord D_00400370[3] = {
+    { D_0042D1C0, 0, 0.0f, 1024.0f, 1.0f, 15.0f },
+    { D_0042D1B0, 0, 1.0f, 1024.0f, 1.0f, 15.0f },
+    { D_0042D1A0, 0, 0.0f, 1024.0f, 1.0f, 15.0f },
+};
+
+EffTimedParamRecord D_004003B8[2] = {
+    { D_004387F8, 0, 1.0f, 1024.0f, 1.0f, 30.0f },
+    { D_00438800, 0, 0.0f, 100.0f, 1.0f, 50.0f },
+};
+
+EffTimedParamRecord D_004003E8[2] = {
+    { D_00438810, 0, 1.0f, 1024.0f, 1.0f, 30.0f },
+    { D_00438808, 0, 0.0f, 1.0f, 1.0f, 0.0f },
+};
+
+EffTimedParamRecord D_00400418[5] = {
+    { D_00438810, 0, 1.0f, 1024.0f, 1.0f, 30.0f },
+    { D_00438830, 0, 0.0f, 255.0f, 1.0f, 0.0f },
+    { D_00438828, 0, 0.0f, 255.0f, 1.0f, 0.0f },
+    { D_00438820, 0, 0.0f, 255.0f, 1.0f, 0.0f },
+    { D_00438818, 0, 0.0f, 255.0f, 1.0f, 0.0f },
+};
+
+EffTimedParamRecord D_00400490[3] = {
+    { D_0042D190, 0, 0.0f, 1024.0f, 1.0f, 64.0f },
+    { D_0042D180, 0, 0.0f, 1024.0f, 1.0f, 64.0f },
+    { D_0042D170, 0, 1.0f, 1024.0f, 1.0f, 15.0f },
+};
+
+EffTimedParamRecord D_004004D8[2] = {
+    { D_004387F8, 0, 1.0f, 1024.0f, 1.0f, 15.0f },
+    { D_004387F0, 0, 0.0f, 1.0f, 1.0f, 0.0f },
+};
+
+EffRecordBucket effTimedRecordBuckets[9] = {
+    { D_00438860, NULL, 0, NULL },
+    { D_00438858, itfGridApplySqrtBoundsAndColorScale, 2, D_004002F8 },
+    { D_00438850, itfGridApplyQuadraticZoomBoundsAndFadeAlpha, 3, D_00400328 },
+    { D_0042D1F0, itfGridApplyTimedBoundsAndAlpha, 3, D_00400370 },
+    { D_00438848, itfGridShrinkBoundsAndFadeThresholdAlpha, 2, D_004003B8 },
+    { D_0042D1E0, itfUpdateAngleAndGetCycleStep, 2, D_004003E8 },
+    { D_0042D1D0, itfGridInterpolateCornerColorsToTarget, 5, D_00400418 },
+    { D_00438840, itfGridApplyLinearZoomBoundsAndFadeAlpha, 3, D_00400490 },
+    { D_00438838, itfGridShrinkBoundsAndFadeAlpha, 2, D_004004D8 },
+};
+
+
 static inline void effSubmitSurfacePacket(sdfGrOt_t *surface, sdfDrawTag_t *list) {
     surface->regFunc(surface, list);
 }

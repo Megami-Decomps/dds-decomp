@@ -1,4 +1,5 @@
 #include "common.h"
+#include "dds3_basic_tables.h"
 #include "dds3_basic_lifecycle.h"
 #include "dds3_object_flags.h"
 #include "dds3obj.h"
@@ -261,6 +262,17 @@ void dds3CameraObjectBasicSetMode(dds3Basic_t *camera, CameraEyePositionMode mod
         ((CameraData *)camera->workdata)->eyeIsRelative = mode;
     }
 }
+
+
+/* Complete lifecycle dispatch table for this basic kind. */
+dds3BasicFunction_t dds3CameraObjectBasicTable = {
+    dds3CameraObjectBasicConstructor,
+    dds3CameraObjectBasicDestructor,
+    dds3CameraObjectBasicMainProcedure,
+    dds3CameraObjectBasicDrawProcedure,
+    NULL,
+    NULL,
+};
 
 INCLUDE_RODATA(const s32, "basic/dds3CameraObjectBasic", D_00412878);
 

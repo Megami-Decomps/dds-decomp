@@ -542,6 +542,400 @@ class FocusedRodataTests(unittest.TestCase):
         self.assertIn("1 of 5 entries differ", report)
 
 
+class SharedRodataCLITests(unittest.TestCase):
+    def check_shared(self, *, anonymous=False, local=False, duplicate=False,
+                     bad_skip=False, bad_full=False, size=16, full_failed=False,
+                     retained_label=False, func=None, padding=False, merged=False,
+                     pointer=False, duplicate_reloc=False, conflicting_metadata="",
+                     interior=False, raw_proof=False, wrong_delta=False, zero_tail=False):
+
+        payload = b"0123456789abcdef" if not zero_tail else b"01234567" + b"\0" * 8
+        code = struct.pack("<4I", 0x3C020000, 0x24420000, 0x03E00008, 0)
+        if merged or interior:
+            code *= 2
+        if interior:
+            code = code[:20] + struct.pack("<I", 0x24420008) + code[24:]
+        retail = bytearray(0x2040)
+        struct.pack_into("<4I", retail, 0x1000, 0x3C020010, 0x24421000, 0x03E00008, 0)
+        native_data = payload + (struct.pack("<II", 0x1111, 0) if pointer else b"padding!" if padding else payload if merged else b"")
+        retail[0x2000:0x2000 + len(native_data)] = native_data
+        if interior:
+            struct.pack_into("<4I", retail, 0x1010, 0x3C020010,
+                             0x24421004 if wrong_delta else 0x24421008, 0x03E00008, 0)
+        if merged:
+            struct.pack_into("<4I", retail, 0x1010, 0x3C020010, 0x24421010, 0x03E00008, 0)
+        skip_data = (b"!" + payload[1:]) if bad_skip else payload
+        full_data = ((b"!" + payload[1:]) if bad_full else payload) + (payload if duplicate else b"padding!" if padding else payload if merged else b"")
+        relocs = {".text": {0: ("R_MIPS_HI16", ".rodata"), 4: ("R_MIPS_LO16", ".rodata")},
+                  ".rodata": {}, ".data": {}, ".sdata": {}}
+        if pointer:
+            skip_data += b"\0" * 8
+            full_data += b"\0" * 8
+            relocs[".rodata"] = {16: ("R_MIPS_32", "external")}
+        if merged or interior:
+            relocs[".text"].update({16: ("R_MIPS_HI16", ".rodata"), 20: ("R_MIPS_LO16", ".rodata")})
+        with tempfile.TemporaryDirectory() as tmp, contextlib.ExitStack() as stack:
+            root = Path(tmp)
+            unit = root / "src/dds1/game/unit.c"
+            unit.parent.mkdir(parents=True)
+            unit.write_text(("extern const char table[16];\n" if anonymous else
+                             'const char table[16] = "0123456789abcdef";\n') +
+                            'void target(void) {}\nINCLUDE_ASM(const s32, "game/unit", consumer);\n')
+            config = root / "config/dds1"
+            config.mkdir(parents=True)
+            (config / "symbol_addrs.txt").write_text("target = 0x100000; // type:func\ntable = 0x101000;" +
+                (" // size:0x10" if padding or pointer else "") + "\n" +
+                ("neighbor = 0x100010; // type:func\nother = 0x101010;\n" if merged else "") +
+                ("external = 0x1111;\nfirst = 0x2222;\n" if pointer else "") + conflicting_metadata)
+            (config / "SLUS_209.74.yaml").write_text(
+                f"  - [0x2000, .rodata, game/unit]\n  - [0x{0x2000 + len(native_data):X}, .rodata, game/next]\n")
+            original = root / check_unit.RETAIL["dds1"]
+            original.parent.mkdir(parents=True)
+            original.write_bytes(retail)
+            assembly = root / "asm/dds1/data/game/unit.rodata.s"
+            assembly.parent.mkdir(parents=True)
+            assembly.write_text("dlabel table\n" + ("dlabel other\n" if merged else ""))
+            consumer = root / "asm/dds1/nonmatchings/game/unit/consumer.s"
+            consumer.parent.mkdir(parents=True)
+            consumer.write_text(("dlabel table\n.word 0\n" if retained_label else "") +
+                                "glabel consumer\nlui $2, %hi(table)\naddiu $2, $2, %lo(table)\n")
+            argv = ["check_unit.py", str(unit)] + (["--func", func] if func else [])
+            stack.enter_context(patch.object(check_unit, "ROOT", root))
+            stack.enter_context(patch.object(check_unit.sys, "argv", argv))
+            stack.enter_context(patch("eeas_compat.lit4_range", return_value=(0, 0)))
+            stack.enter_context(patch.object(check_unit, "load_segments", return_value=[]))
+            stack.enter_context(patch.object(check_unit, "va_to_off", side_effect=lambda segments, addr: addr - 0xFF000))
+            stack.enter_context(patch.object(check_unit, "off_to_va", side_effect=lambda segments, off: off + 0xFF000))
+            stack.enter_context(patch.object(check_unit, "text_section", return_value=code))
+            stack.enter_context(patch.object(check_unit, "sections", side_effect=lambda obj:
+                (full_data, {".rodata": (0, len(full_data))}) if obj.name == "full.o" else
+                (skip_data, {".rodata": (0, len(skip_data))})))
+            original_relocations = check_unit.relocations
+            stack.enter_context(patch.object(check_unit, "relocations", side_effect=lambda obj:
+                original_relocations(obj) if pointer else relocs))
+            stack.enter_context(patch.object(check_unit, "owns_rodata", return_value=True))
+            def output(*args):
+                if "-S" in args:
+                    return ("0 20 T target\n" if interior else "0 10 T target\n") + ("10 10 T neighbor\n" if merged else "")
+                if "-r" in args and pointer:
+                    return ("RELOCATION RECORDS FOR [.text]:\n"
+                            "00000000 R_MIPS_HI16 .rodata\n00000004 R_MIPS_LO16 .rodata\n"
+                            "RELOCATION RECORDS FOR [.rodata]:\n" +
+                            ("00000010 R_MIPS_32 first\n" if duplicate_reloc and str(args[-1]).endswith("full.o") else "") +
+                            "00000010 R_MIPS_32 external\n")
+                if "-t" in args and not anonymous:
+                    return f"00000000 {'l' if local else 'g'} O .rodata {size:08x} table\n"
+                return ""
+            stack.enter_context(patch.object(check_unit, "run", side_effect=output))
+            def compile_stub(args, **kwargs):
+                if raw_proof:
+                    Path(args[-1]).write_bytes(b"synthetic ELF; raw parser tested separately")
+                return SimpleNamespace(returncode=int(full_failed and str(args[-1]).endswith("full.o")), stderr="")
+            if raw_proof:
+                stack.enter_context(patch.object(check_unit, "raw_metadata_clear", return_value=True))
+            stack.enter_context(patch.object(check_unit.subprocess, "run", side_effect=compile_stub))
+            report = stack.enter_context(contextlib.redirect_stdout(io.StringIO()))
+            with self.assertRaises(SystemExit) as stopped:
+                check_unit.main()
+            return stopped.exception.code, report.getvalue()
+
+    def test_named_shared_owner_passes_full_and_focused_checks(self):
+        for func in (None, "target"):
+            status, report = self.check_shared(func=func)
+            self.assertEqual(status, 0, report)
+            self.assertIn("1 match, 0 differ", report)
+
+    def test_literals_local_identity_and_retained_blobs_still_report_shared(self):
+        for change in (dict(anonymous=True), dict(local=True), dict(retained_label=True)):
+            with self.subTest(change=change):
+                status, report = self.check_shared(**change)
+                self.assertEqual(status, 1, report)
+                self.assertIn("SHARED rodata", report)
+
+    def test_bad_payload_size_and_missing_production_context_remain_failures(self):
+        for change in (dict(bad_skip=True), dict(bad_full=True), dict(size=8), dict(full_failed=True)):
+            with self.subTest(change=change):
+                status, report = self.check_shared(**change)
+                self.assertEqual(status, 1, report)
+
+    def test_genuine_duplicates_fail_for_named_and_anonymous_objects(self):
+        for anonymous in (False, True):
+            for func in (None, "target"):
+                with self.subTest(anonymous=anonymous, func=func):
+                    status, report = self.check_shared(anonymous=anonymous, duplicate=True, func=func)
+                    self.assertEqual(status, 1, report)
+                    self.assertIn("SHARED rodata", report)
+
+    def test_raw_duplicate_relocation_rows_do_not_disappear_into_dictionary(self):
+        status, report = self.check_shared(pointer=True)
+        self.assertEqual(status, 0, report)
+        for func in (None, "target"):
+            status, report = self.check_shared(pointer=True, duplicate_reloc=True, func=func)
+            self.assertEqual(status, 1, report)
+            self.assertIn("SHARED rodata", report)
+
+    def test_conflicting_native_metadata_cannot_be_overwritten_by_dictionary(self):
+        for row in ("table = 0x101008;\n", "table = 0x101000; // size:8\n"):
+            with self.subTest(row=row):
+                status, report = self.check_shared(pointer=True, conflicting_metadata=row)
+                self.assertEqual(status, 1, report)
+                self.assertIn("SHARED rodata", report)
+        status, report = self.check_shared(pointer=True, conflicting_metadata="table = 0x101000; // size:0x10\n")
+        self.assertEqual(status, 0, report)
+
+    def test_named_owner_does_not_bypass_padding_gate(self):
+        status, report = self.check_shared(padding=True)
+        self.assertEqual(status, 1, report)
+        self.assertIn("PAD rodata", report)
+
+    def test_named_owner_does_not_bypass_merged_native_copies_gate(self):
+        status, report = self.check_shared(merged=True)
+        self.assertEqual(status, 1, report)
+        self.assertIn("MERGED rodata", report)
+
+
+
+    def test_proven_interior_reference_keeps_complete_extent_full_and_focused(self):
+        for func in (None, "target"):
+            for zero_tail in (False, True):
+                status, report = self.check_shared(interior=True, raw_proof=True, func=func, zero_tail=zero_tail)
+                self.assertEqual(status, 0, report)
+
+    def test_interior_without_raw_proof_retains_old_padding_rejection(self):
+        status, report = self.check_shared(interior=True)
+        self.assertEqual(status, 1, report)
+        self.assertIn("PAD rodata", report)
+
+    def test_interior_wrong_native_delta_fails_explicitly(self):
+        status, report = self.check_shared(interior=True, raw_proof=True, wrong_delta=True)
+        self.assertEqual(status, 1, report)
+        self.assertIn("ADDRESS rodata", report)
+
+    def test_extent_correction_preserves_payload_padding_and_ownership_failures(self):
+        for change in (dict(bad_skip=True), dict(bad_full=True), dict(size=8),
+                       dict(full_failed=True), dict(anonymous=True), dict(local=True),
+                       dict(padding=True), dict(duplicate=True), dict(retained_label=True)):
+            with self.subTest(change=change):
+                status, report = self.check_shared(interior=True, raw_proof=True, **change)
+                self.assertEqual(status, 1, report)
+
+
+class RodataAttributionTests(unittest.TestCase):
+    def classify(self, tables, *, bounds=(), objects=None, sites=None, native=None):
+        from rodata_attribution import attribute_rodata_references
+        if objects is None:
+            objects = [(8, 24, 0x2008, 'array')]
+        if sites is None:
+            sites = {8: ('array', 8, 16, -4, 'f', 0, 6, 2)}
+        if native is None:
+            native = struct.pack('<III', 0x3c060000, 0x00c23021, 0x8cc62004)
+        return attribute_rodata_references(tables, bounds, objects, sites, lambda name: native)
+
+    def test_interior_references_normalize_only_equal_positive_delta(self):
+        tables, bounds, merged, errors = self.classify([(8, 0x2008, 'f', 40), (16, 0x2010, 'f', 48)],
+                                                     bounds=[(20, 'other', 60)])
+        self.assertEqual(tables, [(8, 0x2008, 'f'), (8, 0x2008, 'f')])
+        self.assertEqual(bounds, [8])
+        self.assertFalse(errors)
+        self.assertEqual(merged, {8: {0x2008: 'f'}, 16: {0x2010: 'f'}})
+
+    def test_wrong_interior_offset_fails_even_when_payload_might_repeat(self):
+        tables, _, _, errors = self.classify([(16, 0x200c, 'f', 48)])
+        self.assertEqual(tables, [(16, 0x200c, 'f')])
+        self.assertIn('wrong native offset', errors[0])
+
+    def test_prebias_has_its_own_site_and_does_not_claim_compacted_storage(self):
+        tables, bounds, merged, errors = self.classify([(4, 0x2004, 'f', 8)], bounds=[(4, 'f', 8)])
+        self.assertEqual(tables, [(8, 0x2008, 'f')])
+        self.assertEqual(bounds, [8])
+        self.assertEqual(merged, {})
+        self.assertFalse(errors)
+
+    def test_real_table_same_numeric_target_cannot_borrow_site_proof(self):
+        tables, _, merged, errors = self.classify([(4, 0x2004, 'f', 8), (4, 0x2004, 'f', 40)])
+        self.assertIn((4, 0x2004, 'f'), tables)
+        self.assertIn((8, 0x2008, 'f'), tables)
+        self.assertEqual(merged, {4: {0x2004: 'f'}})
+        self.assertFalse(errors)
+
+    def test_genuine_merged_storage_identities_remain_visible(self):
+        _, _, merged, errors = self.classify([(4, 0x2004, 'f', 40), (4, 0x3004, 'g', 80)])
+        self.assertEqual(set(merged[4]), {0x2004, 0x3004})
+        self.assertFalse(errors)
+
+    def test_unproved_objects_and_missing_site_evidence_do_not_normalize(self):
+        for changes in ({'objects': []}, {'sites': {}},
+                        {'objects': [(8, 24, 0x2008, 'different')]},
+                        {'objects': [(8, 20, 0x2008, 'array')]}):
+            with self.subTest(changes=changes):
+                tables, _, merged, errors = self.classify([(4, 0x2004, 'f', 8)], **changes)
+                self.assertEqual(tables, [(4, 0x2004, 'f')])
+                self.assertIn(4, merged)
+
+    def test_wrong_native_prebias_arithmetic_is_explicit_failure(self):
+        for native in (b'', struct.pack('<III', 0x3c060000, 0x00c23021, 0x8cc62000),
+                       struct.pack('<III', 0x3c060000, 0x00c33021, 0x8cc62004)):
+            tables, _, _, errors = self.classify([(4, 0x2004, 'f', 8)], native=native)
+            self.assertEqual(tables, [(4, 0x2004, 'f')])
+            self.assertIn('wrong native instruction/address', errors[0])
+
+    def test_end_and_arbitrary_nearby_addresses_are_not_interior_objects(self):
+        tables, _, _, errors = self.classify([(24, 0x2018, 'f', 40), (4, 0x2004, 'f', 44)], sites={})
+        self.assertEqual(tables, [(24, 0x2018, 'f'), (4, 0x2004, 'f')])
+        self.assertFalse(errors)
+
+    def test_other_function_cannot_borrow_provenance(self):
+        tables, _, _, errors = self.classify([(4, 0x2004, 'other', 8)])
+        self.assertEqual(tables, [(4, 0x2004, 'other')])
+        self.assertFalse(errors)
+
+    def test_multiple_reference_sites_remain_separate_before_storage_dedup(self):
+        fact = ('array', 8, 16, -4, 'f', 0, 6, 2)
+        tables, _, _, errors = self.classify([(4, 0x2004, 'f', 8), (4, 0x2004, 'f', 40)],
+                                           sites={8: fact, 40: fact})
+        self.assertEqual(tables, [(8, 0x2008, 'f'), (8, 0x2008, 'f')])
+        self.assertFalse(errors)
+
+
+class SharedRodataOwnershipTests(unittest.TestCase):
+    def evidence(self):
+        return dict(
+            skip=("00000000 g O .rodata 00000008 sharedTable\n", b"abcdefgh", {}),
+            full=("00000008 g O .rodata 00000008 sharedTable\n", b"prefix!!abcdefgh", {}),
+            retail=b"prefix!!abcdefgh", origin=0x2000,
+            syms={"sharedTable": 0x2008}, sizes={},
+            labels={"prefix": 0x2000, "sharedTable": 0x2008, "(end)": 0x2010},
+            source_text="const char sharedTable[8] = {1};\n",
+            included_assembly=["glabel consumer\nlui $2, %hi(sharedTable)\n"])
+
+    def check(self, **changes):
+        evidence = self.evidence()
+        evidence.update(changes)
+        return check_unit.shared_rodata_owners(**evidence)
+
+    def test_named_shared_c_object_qualifies(self):
+        self.assertEqual(self.check(), {(0, 0x2008)})
+
+    def test_source_macro_alias_preserves_native_object_identity(self):
+        self.assertEqual(self.check(source_text="#define table sharedTable\nconst char table[8] = {1};\n"),
+                         {(0, 0x2008)})
+
+    def test_anonymous_literal_cannot_claim_shared_native_object(self):
+        self.assertEqual(self.check(skip=("00000000 l .rodata 00000000 $LC0\n", b"abcdefgh", {})), set())
+
+    def test_static_local_and_compiler_suffix_are_not_global_identity(self):
+        for row in ("00000000 l O .rodata 00000008 sharedTable\n",
+                    "00000000 g O .rodata 00000008 sharedTable.0\n"):
+            with self.subTest(row=row):
+                self.assertEqual(self.check(skip=(row, b"abcdefgh", {})), set())
+
+    def test_duplicate_object_alias_and_zero_size_label_fail_closed(self):
+        for context in ("skip", "full"):
+            dump, data, relocs = self.evidence()[context]
+            offset = 0 if context == "skip" else 8
+            for extra in (f"{offset:08x} g O .rodata 00000008 alias\n",
+                          f"{offset:08x} g .rodata 00000000 alias\n",
+                          dump):
+                with self.subTest(context=context, extra=extra):
+                    self.assertEqual(self.check(**{context: (dump + extra, data, relocs)}), set())
+
+    def test_retained_fallback_native_blob_and_interior_alias_are_rejected(self):
+        for name in ("sharedTable", "D_00002008", "D_0000200C"):
+            with self.subTest(name=name):
+                self.assertEqual(self.check(included_assembly=[f"dlabel {name}\n.word 1\n"]), set())
+
+    def test_unavailable_assembly_evidence_is_not_permission(self):
+        self.assertEqual(self.check(included_assembly=[None]), set())
+
+    def test_missing_definition_or_competing_source_identity_is_rejected(self):
+        for source in ("extern const char sharedTable[8];\n",
+                       "const char sharedTable[8] = {1};\n" * 2):
+            self.assertEqual(self.check(source_text=source), set())
+
+    def test_wrong_native_address_and_missing_native_label_are_rejected(self):
+        for changes in (dict(syms={"sharedTable": 0x2004}), dict(labels={"(end)": 0x2010}),
+                        dict(origin=None), dict(labels={"sharedTable": 0x2008})):
+            with self.subTest(changes=changes):
+                self.assertEqual(self.check(**changes), set())
+
+    def test_explicit_size_must_agree_and_cannot_cross_native_boundary(self):
+        self.assertEqual(self.check(sizes={"sharedTable": 8}), {(0, 0x2008)})
+        self.assertEqual(self.check(sizes={"sharedTable": 4}), set())
+        labels = dict(self.evidence()["labels"], interior=0x200C)
+        self.assertEqual(self.check(sizes={"sharedTable": 8}, labels=labels), set())
+
+    def test_ambiguous_unbounded_extent_requires_truthful_explicit_size(self):
+        labels = {"sharedTable": 0x2008, "(end)": 0x2018}
+        self.assertEqual(self.check(labels=labels, retail=b"prefix!!abcdefgh" + b"\0" * 8), set())
+        dump, data, relocs = self.evidence()["full"]
+        self.assertEqual(self.check(labels=labels, retail=data + b"\0" * 8,
+                                    full=(dump, data + b"\0" * 8, relocs),
+                                    sizes={"sharedTable": 8}), {(0, 0x2008)})
+
+    def test_wrong_object_size_or_production_offset_is_rejected(self):
+        for context in ("skip", "full"):
+            dump, data, relocs = self.evidence()[context]
+            self.assertEqual(self.check(**{context: (dump.replace("00000008 shared", "00000004 shared"), data, relocs)}), set())
+        dump, data, relocs = self.evidence()["full"]
+        self.assertEqual(self.check(full=(dump.replace("00000008 g", "00000004 g"), data, relocs)), set())
+
+    def test_bad_payload_and_truncation_in_either_context_are_rejected(self):
+        for context in ("skip", "full"):
+            dump, data, relocs = self.evidence()[context]
+            for changed in (data[:-1], data[:-1] + b"!"):
+                with self.subTest(context=context, changed=changed):
+                    self.assertEqual(self.check(**{context: (dump, changed, relocs)}), set())
+
+    def test_relocated_object_is_not_covered_by_scalar_ownership_rule(self):
+        for context, offset in (("skip", 0), ("full", 8)):
+            dump, data, _ = self.evidence()[context]
+            self.assertEqual(self.check(**{context: (dump, data, {offset: ("R_MIPS_32", "external")})}), set())
+
+    def test_competing_native_base_label_and_overlapping_declared_extent_fail(self):
+        evidence = self.evidence()
+        self.assertEqual(self.check(labels=dict(evidence["labels"], competing=0x2008)), set())
+        self.assertEqual(self.check(syms=dict(evidence["syms"], prefix=0x2000), sizes={"prefix": 16}), set())
+
+    def test_full_span_relocations_must_resolve_to_exact_native_bytes(self):
+        dump, data, _ = self.evidence()["full"]
+        full = struct.pack("<I", 4) + data[4:]
+        retail = struct.pack("<I", 0x3004) + data[4:]
+        syms = dict(self.evidence()["syms"], external=0x3000)
+        relocs = {0: ("R_MIPS_32", "external")}
+        self.assertEqual(self.check(full=(dump, full, relocs), retail=retail, syms=syms), {(0, 0x2008)})
+        for target in ("unresolved", ".text", "external+0x4"):
+            self.assertEqual(self.check(full=(dump, full, {0: ("R_MIPS_32", target)}), retail=retail, syms=syms), set())
+        self.assertEqual(self.check(full=(dump, full, {0: ("R_MIPS_64", "external")}), retail=retail, syms=syms), set())
+        self.assertEqual(self.check(full=(dump, full, relocs), syms=syms), set())
+
+    def test_full_span_code_pointers_require_unique_function_ownership(self):
+        dump, data, _ = self.evidence()["full"]
+        full = struct.pack("<I", 4) + data[4:]
+        retail = struct.pack("<I", 0x3004) + data[4:]
+        syms = dict(self.evidence()["syms"], function=0x3000)
+        relocs = {0: ("R_MIPS_32", ".text")}
+        function = "00000000 g F .text 00000008 function\n"
+        self.assertEqual(self.check(full=(dump + function, full, relocs), retail=retail, syms=syms), {(0, 0x2008)})
+        self.assertEqual(self.check(full=(dump + function * 2, full, relocs), retail=retail, syms=syms), set())
+        self.assertEqual(self.check(full=(dump + function, full, {0: ("R_MIPS_32", ".text"), 2: ("R_MIPS_32", "external")}),
+                                    retail=retail, syms=syms), set())
+
+    def test_partial_relocation_overlap_is_rejected(self):
+        dump, data, _ = self.evidence()["full"]
+        self.assertEqual(self.check(full=(dump, data, {6: ("R_MIPS_32", "external")})), set())
+
+    def test_full_span_must_include_zero_tail_and_cannot_append_zero_padding(self):
+        dump, data, relocs = self.evidence()["full"]
+        self.assertEqual(self.check(retail=data + b"\0" * 8), set())
+        self.assertEqual(self.check(full=(dump, data + b"\0" * 8, relocs)), set())
+
+    def test_full_section_duplicate_payload_or_missing_nonzero_tail_is_rejected(self):
+        dump, data, relocs = self.evidence()["full"]
+        self.assertEqual(self.check(full=(dump, data + b"abcdefgh", relocs)), set())
+        self.assertEqual(self.check(retail=self.evidence()["retail"] + b"tail"), set())
+        self.assertEqual(self.check(full=(dump, b"wrong!!!" + data[8:], relocs)), set())
+
+
 class SdataRelocationTests(unittest.TestCase):
     def test_resolves_local_text_and_external_pointers(self):
         item = struct.pack("<II", 0x24, 4)
@@ -1298,6 +1692,464 @@ class NestedFunctionCheckerTests(unittest.TestCase):
         status, report = self.run_checker(explicit_address=0x1008)
         self.assertEqual(status, 1, report)
         self.assertIn("DIFF helper.0 @ 0x00001008", report)
+
+
+import rodata_attribution as p
+
+def provenance_words(value=0x18004, rt=7, rs=13):
+    return [0x3c000000 | (rt << 16) | (((value + 0x8000) >> 16) & 0xffff),
+            (rt << 21) | (rs << 16) | (rt << 11) | 0x21,
+            0x8c000000 | (rt << 21) | (rt << 16) | (value & 0xffff)]
+
+
+def provenance_packed(ws):
+    return struct.pack('<' + 'I' * len(ws), *ws)
+
+
+def provenance_elf_blob(code=None, value=0x18000, size=32, name='arbitrary_table', rels=None,
+             extra_symbols=(), section_symbols=1, func='worker', function_size=None,
+             object_section=2, object_info=0x11, extra_relocation_sections=(), ro_padding=16):
+    """Build a real ET_REL ELF from struct, not mocked ELFFile objects.
+
+    Symbol indices: zero, rodata section symbol(s), function, named object,
+    extra symbols. Extra-symbol tuples: (name,value,size,info,section).
+    """
+    code = provenance_packed(provenance_words()) if code is None else code
+    strings = bytearray(b'\0')
+    def string(s):
+        offset = len(strings)
+        strings.extend(s.encode() + b'\0')
+        return offset
+    def sym(n, v, z, info, sec):
+        return struct.pack('<IIIBBH', string(n) if n else 0, v, z, info, 0, sec)
+    symbols = [b'\0' * 16]
+    symbols += [sym('', 0, 0, 3, 2)] * section_symbols
+    symbols += [sym(func, 0, len(code) if function_size is None else function_size, 0x12, 1)]
+    symbols += [sym(name, value, size, object_info, object_section)]
+    symbols += [sym(*args) for args in extra_symbols]
+    rels = [(0, 5, 1), (8, 6, 1)] if rels is None else rels
+    def relocation_data(items):
+        return b''.join(struct.pack('<II', offset, (index << 8) | typ) for offset, typ, index in items)
+    # name,type,flags,data,link,info,align,entsize
+    sections = [('', 0, 0, b'', 0, 0, 0, 0),
+                ('.text', 1, 6, code, 0, 0, 4, 0),
+                ('.rodata', 1, 2, b'\0' * (value + max(size, 0) + ro_padding), 0, 0, 4, 0),
+                ('.symtab', 2, 0, b''.join(symbols), 4, 1 + section_symbols, 4, 16),
+                ('.strtab', 3, 0, bytes(strings), 0, 0, 1, 0),
+                ('.rel.text', 9, 0, relocation_data(rels), 3, 1, 4, 8)]
+    for secname, target, items in extra_relocation_sections:
+        sections.append((secname, 9, 0, relocation_data(items), 3, target, 4, 8))
+    shstr = bytearray(b'\0')
+    name_offsets = []
+    for section in sections + [('.shstrtab',)]:
+        name_offsets.append(len(shstr))
+        shstr.extend(section[0].encode() + b'\0')
+    sections.append(('.shstrtab', 3, 0, bytes(shstr), 0, 0, 1, 0))
+    image = bytearray(b'\0' * 52)
+    headers = []
+    for i, (_, typ, flags, data, link, info, align, entsize) in enumerate(sections):
+        while len(image) % max(align, 1):
+            image.append(0)
+        offset = len(image)
+        image.extend(data)
+        headers.append(struct.pack('<IIIIIIIIII', name_offsets[i], typ, flags, 0,
+                                   offset, len(data), link, info, align, entsize))
+    while len(image) % 4:
+        image.append(0)
+    shoff = len(image)
+    image.extend(b''.join(headers))
+    ident = b'\x7fELF' + bytes([1, 1, 1, 0, 0]) + b'\0' * 7
+    image[:52] = struct.pack('<16sHHIIIIIHHHHHH', ident, 1, 8, 1, 0, 0, shoff,
+                             0, 52, 0, 0, 40, len(sections), len(sections) - 1)
+    return bytes(image)
+
+
+def listing(source, claims=None):
+    claims = {3: (0, provenance_packed(provenance_words()))} if claims is None else claims
+    rows = []
+    for n, line in enumerate(source.splitlines(), 1):
+        if n not in claims:
+            rows.append(f'{n} \t{line}')
+            continue
+        offset, payload = claims[n]
+        chunks = [payload[i:i + 4].hex() for i in range(0, len(payload), 4)]
+        rows.append(f'{n} {offset:04x} {chunks[0]}\t{line}')
+        rows.extend(f'{n} {chunk}' for chunk in chunks[1:])
+    return '\n'.join(rows)
+
+
+SOURCE = '.text\n.ent worker\nlw $7,arbitrary_table+4($13)\n.end worker'
+
+
+class ProvenanceAdversarialTests(unittest.TestCase):
+    def facts(self, source=SOURCE, blob=None, report=None, listed=None):
+        blob = provenance_elf_blob() if blob is None else blob
+        return p.named_lw_sites(source, listing(source) if report is None else report,
+                                blob, blob if listed is None else listed)
+
+    def test_positive_generic_registers_and_signed_carry(self):
+        for rt, rs, name, value, addend in [(7, 13, 'arbitrary_table', 0x18000, 4),
+                                           (19, 25, 'Other_32', 0x20000, -32768),
+                                           (31, 2, 'zeroAddend', 0x8000, 0)]:
+            with self.subTest(rt=rt, addend=addend):
+                code = provenance_packed(provenance_words(value + addend, rt, rs))
+                expr = name + (f'{addend:+d}' if addend else '')
+                source = f'.text\n.ent worker\nlw ${rt},{expr}(${rs})\n.end worker'
+                fact = self.facts(source, provenance_elf_blob(code, value=value, name=name), listing(source, {3: (0, code)}))
+                self.assertEqual(fact, {8: (name, value, 32, addend, 'worker', 0, rt, rs)})
+
+    def test_changed_whole_elf(self):
+        original = provenance_elf_blob()
+        changed = bytearray(original)
+        changed[9] ^= 1  # ELF identity padding, outside code, is still covered.
+        self.assertEqual(self.facts(blob=original, listed=bytes(changed)), {})
+
+    def test_listing_line_identity_and_sequence(self):
+        good = listing(SOURCE)
+        variants = [good.replace('3 0000', '9 0000'), good.replace('arbitrary_table+4', 'arbitrary_table+8'),
+                    '\n'.join(good.splitlines()[1:]), good + '\n4\t.end worker',
+                    good.replace('2 \t.ent worker', '1 \t.ent worker')]
+        for report in variants:
+            with self.subTest(report=report):
+                self.assertIsNone(p.listing_lines(SOURCE, report))
+                self.assertEqual(self.facts(report=report), {})
+
+    def test_continuation_missing_duplicate_noncontiguous_truncated(self):
+        rows = listing(SOURCE).splitlines()
+        variants = ['\n'.join(rows[:4] + rows[5:]),
+                    '\n'.join(rows[:5] + [rows[4]] + rows[5:]),
+                    '\n'.join(rows[:4] + [rows[-1]] + rows[4:-1]),
+                    '\n'.join(rows[:4] + [rows[4][:-2]] + rows[5:]),
+                    '\n'.join(rows[:4] + [rows[4].replace('3 ', '3 0004 ')] + rows[5:])]
+        for report in variants:
+            with self.subTest(report=report):
+                self.assertEqual(self.facts(report=report), {})
+
+    def test_wrong_text_bytes(self):
+        self.assertEqual(self.facts(blob=provenance_elf_blob(provenance_packed(provenance_words(0x18008)))), {})
+
+    def test_wrong_section_function_and_inline_context(self):
+        for source in [SOURCE.replace('.text', '.rdata'), SOURCE.replace('worker', 'stranger'),
+                       SOURCE.replace('.ent worker', '# no owner'),
+                       SOURCE.replace('.ent worker', '.ent worker\n#APP'),
+                       SOURCE.replace('.end worker', '.end stranger')]:
+            with self.subTest(source=source):
+                line = next(i for i, x in enumerate(source.splitlines(), 1) if x.startswith('lw '))
+                self.assertEqual(self.facts(source, report=listing(source, {line: (0, provenance_packed(provenance_words()))})), {})
+
+    def test_macro_include_conditional_and_unsupported_context(self):
+        for directive in ['.macro x', '.include "x.s"', '.if 1', '.ifdef X', '.else', '.endif',
+                          '.rept 2', '.irp x,1', '.incbin "x.bin"', '.pushsection .text', '.subsection 1']:
+            source = directive + '\n' + SOURCE
+            with self.subTest(directive=directive):
+                self.assertEqual(self.facts(source, report=listing(source, {4: (0, provenance_packed(provenance_words()))})), {})
+
+    def test_raw_missing_duplicate_section_symbol(self):
+        for count in [0, 2]:
+            blob = provenance_elf_blob(section_symbols=count)
+            self.assertFalse(p.raw_metadata_clear(blob))
+            self.assertEqual(self.facts(blob=blob), {})
+
+    def test_raw_duplicate_overlapping_and_out_of_bounds_relocations(self):
+        for rels in [[(0, 5, 1), (8, 6, 1), (8, 6, 1)], [(0, 5, 1), (2, 6, 1)],
+                     [(0, 5, 1), (10, 6, 1)], [(0, 5, 1), (100, 6, 1)]]:
+            blob = provenance_elf_blob(rels=rels)
+            with self.subTest(rels=rels):
+                self.assertFalse(p.raw_metadata_clear(blob))
+                self.assertEqual(self.facts(blob=blob), {})
+
+    def test_extra_and_wrong_relocation_identities(self):
+        for rels in [[(0, 5, 1), (4, 2, 1), (8, 6, 1)], [(0, 5, 1)],
+                     [(0, 5, 1), (8, 6, 3)], [(0, 5, 3), (8, 6, 3)],
+                     [(0, 6, 1), (8, 5, 1)], [(8, 6, 1), (0, 5, 1)]]:
+            with self.subTest(rels=rels):
+                self.assertEqual(self.facts(blob=provenance_elf_blob(rels=rels)), {})
+
+    def test_duplicate_relocation_sections_and_cross_section_overlap(self):
+        for name in ['.rel.text', '.rel.text.extra']:
+            blob = provenance_elf_blob(extra_relocation_sections=[(name, 1, [(8, 6, 1)])])
+            self.assertFalse(p.raw_metadata_clear(blob))
+            self.assertEqual(self.facts(blob=blob), {})
+
+    def test_repeated_symbol_identities_and_overlapping_functions(self):
+        for extra in [('arbitrary_table', 0x18000, 32, 0x11, 2),
+                      ('arbitrary_table', 0x18020, 4, 0x11, 2),
+                      ('worker', 0, 12, 0x12, 1), ('other_owner', 4, 4, 0x12, 1)]:
+            with self.subTest(extra=extra):
+                self.assertEqual(self.facts(blob=provenance_elf_blob(extra_symbols=[extra])), {})
+        self.assertEqual(self.facts(blob=provenance_elf_blob(function_size=8)), {})
+
+    def test_wrong_object_attributes(self):
+        for kwargs in [dict(object_section=1), dict(object_info=1), dict(object_info=0x10), dict(size=0)]:
+            with self.subTest(kwargs=kwargs):
+                self.assertEqual(self.facts(blob=provenance_elf_blob(**kwargs)), {})
+
+    def test_altered_flow_and_unsupported_expansions(self):
+        good = provenance_words()
+        variants = [provenance_words(rt=6), provenance_words(rs=12), [good[0], good[1] ^ (1 << 11), good[2]],
+                    [good[0], 0, good[2]], good[:2], good + [0], provenance_words(rt=0), provenance_words(rt=13)]
+        for ws in variants:
+            code = provenance_packed(ws)
+            with self.subTest(provenance_words=ws):
+                self.assertEqual(self.facts(blob=provenance_elf_blob(code), report=listing(SOURCE, {3: (0, code)})), {})
+
+    def test_same_numeric_address_in_different_sections(self):
+        source = SOURCE + '\n.rdata\n.word 0'
+        report = listing(source, {3: (0, provenance_packed(provenance_words())), 6: (0, b'\0' * 4)})
+        self.assertIn(8, self.facts(source, report=report))
+        # The same claim in .text is ambiguous and must not acquire provenance.
+        source = SOURCE + '\n.text\n.word 0'
+        report = listing(source, {3: (0, provenance_packed(provenance_words())), 6: (0, b'\0' * 4)})
+        self.assertEqual(self.facts(source, report=report), {})
+
+    def test_two_source_sites_cannot_claim_one_macro(self):
+        source = SOURCE.replace('.end worker', 'lw $7,arbitrary_table+4($13)\n.end worker')
+        report = listing(source, {3: (0, provenance_packed(provenance_words())), 4: (0, provenance_packed(provenance_words()))})
+        self.assertEqual(self.facts(source, report=report), {})
+
+    def test_native_exact_addend_flow_and_bounds(self):
+        fact = self.facts()[8]
+        self.assertTrue(p.native_site_agrees(fact, provenance_packed(provenance_words(0x28004)), 0x28000))
+        for code, address in [(provenance_packed(provenance_words(0x28008)), 0x28000),
+                              (provenance_packed(provenance_words(0x28000)), 0x28000),
+                              (provenance_packed(provenance_words(0x28004, rt=6)), 0x28000),
+                              (provenance_packed(provenance_words(0x28004))[:8], 0x28000),
+                              (provenance_packed(provenance_words(0x28004)), None)]:
+            self.assertFalse(p.native_site_agrees(fact, code, address))
+        bad_offset = fact[:5] + (-1,) + fact[6:]
+        self.assertFalse(p.native_site_agrees(bad_offset, provenance_packed(provenance_words()), 0x18000))
+
+    def test_invalid_or_truncated_elf_fails_closed(self):
+        for blob in [b'', b'not an ELF', provenance_elf_blob()[:32], provenance_elf_blob()[:-10]]:
+            with self.subTest(length=len(blob)):
+                self.assertFalse(p.raw_metadata_clear(blob))
+                self.assertEqual(self.facts(blob=blob), {})
+
+
+
+
+class PrebiasedRodataCLITests(unittest.TestCase):
+    def check_prebias(self, *, func=None, wrong_native=False, real_table=False,
+                      missing_listing=False, unequal_listing=False, missing_listed_object=False,
+                      full_failed=False, corrupted_payload=False, padding=False):
+        from elftools.elf.elffile import ELFFile
+        source = '.text\n.ent worker\nlw $7,array-4($13)\n.end worker'
+        code = provenance_packed(provenance_words(4))
+        code_relocs = {0: ('R_MIPS_HI16', '.rodata'), 8: ('R_MIPS_LO16', '.rodata')}
+        if real_table:
+            code += struct.pack('<III', 0x3c020000, 0x24420004, 0)
+            code_relocs.update({12: ('R_MIPS_HI16', '.rodata'), 16: ('R_MIPS_LO16', '.rodata')})
+        native = provenance_packed(provenance_words(0x101000 if wrong_native else 0x101004))
+        if real_table:
+            native += struct.pack('<III', 0x3c020010, 0x24421004, 0)
+        payload = struct.pack('<4I', 1, 2, 3, 4)
+        skip_data = b'\0' * 8 + payload
+        full_data = b'\0' * 4 + struct.pack('<I', 4) + payload
+        retail_data = b'\0' * 4 + struct.pack('<I', 0x100004) + payload
+        if padding:
+            full_data += b'padding!'
+            retail_data += b'padding!'
+        if corrupted_payload:
+            skip_data = skip_data[:-1] + b'!'
+        relocs = {'.text': code_relocs, '.rodata': {4: ('R_MIPS_32', '.text')}, '.data': {}, '.sdata': {}}
+        def object_blob(data):
+            blob = bytearray(provenance_elf_blob(
+                code=code, value=8, size=16, name='array', ro_padding=len(data)-24,
+                extra_symbols=(('', 0, 0, 3, 1),),
+                rels=[(o, 5 if kind == 'R_MIPS_HI16' else 6, 1) for o, (kind, _) in code_relocs.items()],
+                extra_relocation_sections=(('.rel.rodata', 2, [(4, 2, 4)]),)))
+            elf = ELFFile(io.BytesIO(blob))
+            start = elf.get_section_by_name('.rodata')['sh_offset']
+            blob[start:start+len(data)] = data
+            return bytes(blob)
+        skip_blob, full_blob = object_blob(skip_data), object_blob(full_data)
+        report_listing = listing(source, {3: (0, code[:12])})
+        with tempfile.TemporaryDirectory() as tmp, contextlib.ExitStack() as stack:
+            root = Path(tmp)
+            unit = root / 'src/dds1/game/unit.c'
+            unit.parent.mkdir(parents=True)
+            unit.write_text('const int array[4] = {1,2,3,4};\nvoid worker(void) {}\n')
+            config = root / 'config/dds1'
+            config.mkdir(parents=True)
+            (config/'symbol_addrs.txt').write_text('worker = 0x100000; // type:func\narray = 0x101008; // size:0x10\nprefix = 0x101000;\n')
+            (config/'SLUS_209.74.yaml').write_text(f'  - [0x2000, .rodata, game/unit]\n  - [0x{0x2000+len(full_data):X}, .rodata, game/next]\n')
+            image = bytearray(0x3000)
+            image[0x1000:0x1000+len(native)] = native
+            image[0x2000:0x2000+len(retail_data)] = retail_data
+            retail_path = root/check_unit.RETAIL['dds1']
+            retail_path.parent.mkdir(parents=True)
+            retail_path.write_bytes(image)
+            assembly = root/'asm/dds1/data/game/unit.rodata.s'
+            assembly.parent.mkdir(parents=True)
+            assembly.write_text('dlabel prefix\ndlabel array\n')
+            argv = ['check_unit.py',str(unit)] + (['--func',func] if func else [])
+            stack.enter_context(patch.object(check_unit, 'ROOT', root))
+            stack.enter_context(patch.object(check_unit.sys, 'argv', argv))
+            stack.enter_context(patch('eeas_compat.lit4_range',return_value=(0,0)))
+            stack.enter_context(patch.object(check_unit,'load_segments',return_value=[]))
+            stack.enter_context(patch.object(check_unit,'va_to_off',side_effect=lambda segs,a:a-0xff000))
+            stack.enter_context(patch.object(check_unit,'off_to_va',side_effect=lambda segs,a:a+0xff000))
+            stack.enter_context(patch.object(check_unit,'text_section',return_value=code))
+            stack.enter_context(patch.object(check_unit,'sections',side_effect=lambda obj:
+                (full_data,{'.rodata':(0,len(full_data))}) if obj.name=='full.o' else
+                (skip_data,{'.rodata':(0,len(skip_data))})))
+            stack.enter_context(patch.object(check_unit,'relocations',return_value=relocs))
+            stack.enter_context(patch.object(check_unit,'owns_rodata',return_value=True))
+            def output(*args):
+                if '-S' in args:
+                    return f'0 {len(code):x} T worker\n'
+                if '-t' in args:
+                    return f'00000000 g F .text {len(code):08x} worker\n00000008 g O .rodata 00000010 array\n'
+                if '-r' in args:
+                    return 'RELOCATION RECORDS FOR [.rodata]:\n00000004 R_MIPS_32 .text\n'
+                return ''
+            stack.enter_context(patch.object(check_unit,'run',side_effect=output))
+            def compile_stub(args, **kwargs):
+                out = Path(args[-1]); full = out.name=='full.o'
+                out.write_bytes(full_blob if full else skip_blob)
+                env = kwargs['env']
+                if 'DDS_KEEP_S' in env:
+                    Path(env['DDS_KEEP_S']).write_text(source)
+                    if not missing_listing:
+                        lp = Path(env['DDS_KEEP_LISTING'])
+                        lp.write_text(report_listing)
+                        if not missing_listed_object:
+                            Path(str(lp)+'.o').write_bytes(skip_blob+b'!' if unequal_listing else skip_blob)
+                return SimpleNamespace(returncode=int(full and full_failed),stderr='')
+            stack.enter_context(patch.object(check_unit.subprocess,'run',side_effect=compile_stub))
+            captured = stack.enter_context(contextlib.redirect_stdout(io.StringIO()))
+            with self.assertRaises(SystemExit) as stopped:
+                check_unit.main()
+            return stopped.exception.code,captured.getvalue()
+
+    def test_main_path_named_prebias_full_and_focused(self):
+        for func in (None,'worker'):
+            status, report = self.check_prebias(func=func)
+            self.assertEqual(status,0,report)
+
+    def test_main_path_real_table_same_compact_value_keeps_its_comparison(self):
+        for func in (None,'worker'):
+            status, report = self.check_prebias(real_table=True,func=func)
+            self.assertEqual(status,1,report)
+            self.assertIn('DIFF jump table',report)
+
+    def test_main_path_wrong_native_addend_fails_explicitly(self):
+        status, report = self.check_prebias(wrong_native=True)
+        self.assertEqual(status,1,report)
+        self.assertIn('ADDRESS rodata',report)
+
+    def test_main_path_optional_evidence_failure_keeps_old_rejection(self):
+        for change in ({'missing_listing':True},{'unequal_listing':True},{'missing_listed_object':True}):
+            with self.subTest(change=change):
+                status, report = self.check_prebias(**change)
+                self.assertEqual(status,1,report)
+                self.assertIn('DIFF jump table',report)
+
+    def test_main_path_prebias_preserves_payload_padding_and_production_gate(self):
+        for change in ({'full_failed':True},{'corrupted_payload':True},{'padding':True}):
+            with self.subTest(change=change):
+                status, report = self.check_prebias(**change)
+                self.assertEqual(status,1,report)
+
+
+
+class ProvenanceContractRevisionTests(unittest.TestCase):
+    def test_non_mips_or_non_rel_elf_cannot_supply_mips_site_proof(self):
+        for field, value in ((18,3),(16,2)):
+            blob=bytearray(provenance_elf_blob())
+            struct.pack_into('<H',blob,field,value)
+            self.assertFalse(p.raw_metadata_clear(bytes(blob)))
+            self.assertEqual(p.named_lw_sites(SOURCE,listing(SOURCE),bytes(blob),bytes(blob)),{})
+
+    def test_relocation_link_type_and_entry_width_are_explicit(self):
+        for field,value in ((24,4),(4,4),(36,12)):
+            blob=bytearray(provenance_elf_blob())
+            shoff=struct.unpack_from('<I',blob,32)[0]
+            struct.pack_into('<I',blob,shoff+5*40+field,value)
+            self.assertFalse(p.raw_metadata_clear(bytes(blob)))
+
+    def test_raw_record_tails_and_out_of_file_sections_are_rejected(self):
+        for section,field,value in ((5,20,17),(3,20,65),(5,16,0xfffffff0),(3,16,0xfffffff0)):
+            blob=bytearray(provenance_elf_blob())
+            shoff=struct.unpack_from('<I',blob,32)[0]
+            struct.pack_into('<I',blob,shoff+section*40+field,value)
+            self.assertFalse(p.raw_metadata_clear(bytes(blob)))
+            self.assertEqual(p.named_lw_sites(SOURCE,listing(SOURCE),bytes(blob),bytes(blob)),{})
+
+    def test_empty_native_rela_companions_are_allowed_but_never_populated_rela(self):
+        blob=bytearray(provenance_elf_blob(extra_relocation_sections=[('.rela.text',1,[])]))
+        shoff=struct.unpack_from('<I',blob,32)[0]
+        struct.pack_into('<I',blob,shoff+6*40+4,4)
+        struct.pack_into('<I',blob,shoff+6*40+36,12)
+        self.assertTrue(p.raw_metadata_clear(bytes(blob)))
+        self.assertTrue(p.named_lw_sites(SOURCE,listing(SOURCE),bytes(blob),bytes(blob)))
+        struct.pack_into('<I',blob,shoff+6*40+20,12)
+        self.assertFalse(p.raw_metadata_clear(bytes(blob)))
+
+    def test_zero_size_function_competitors_do_not_disappear(self):
+        for name,offset in (('worker',0),('other_owner',0),('interior_owner',4)):
+            blob=provenance_elf_blob(extra_symbols=[(name,offset,0,0x12,1)])
+            self.assertEqual(p.named_lw_sites(SOURCE,listing(SOURCE),blob,blob),{})
+        # Ordinary local assembly labels remain legitimate, not function aliases.
+        blob=provenance_elf_blob(extra_symbols=[('local_label',4,0,0,1)])
+        self.assertTrue(p.named_lw_sites(SOURCE,listing(SOURCE),blob,blob))
+
+    def test_missing_unreadable_partial_and_invalid_optional_evidence(self):
+        with tempfile.TemporaryDirectory() as tmp:
+            lp=Path(tmp)/'listing'
+            self.assertEqual(p.load_named_lw_sites(SOURCE,provenance_elf_blob(),lp),{})
+            lp.write_text(listing(SOURCE))
+            self.assertEqual(p.load_named_lw_sites(SOURCE,provenance_elf_blob(),lp),{})
+            Path(str(lp)+'.o').mkdir()
+            self.assertEqual(p.load_named_lw_sites(SOURCE,provenance_elf_blob(),lp),{})
+            lp.write_bytes(b'\xff')
+            self.assertEqual(p.load_named_lw_sites(SOURCE,provenance_elf_blob(),lp),{})
+
+
+class OptionalAssemblerListingWrapperTests(unittest.TestCase):
+    def test_listing_failures_do_not_change_original_compile_result(self):
+        import os
+        import subprocess
+        import shutil
+        with tempfile.TemporaryDirectory() as tmp:
+            root=Path(tmp)
+            tools=root/'tools'; tools.mkdir()
+            shutil.copy2(Path(check_unit.__file__).with_name('cc.sh'),tools/'cc.sh')
+            cc=tools/'compilers/ee-gcc2.96/lib/gcc-lib/ee/2.96-ee-001003-1/cc1'
+            assembler=tools/'compilers/ee-gcc2.96/ee/bin/as'
+            fake='''#!/usr/bin/env python3
+import os,sys,json
+from pathlib import Path
+args=sys.argv[1:]
+with open(os.environ['CALL_LOG'],'a') as f:f.write(json.dumps([Path(sys.argv[0]).name,args])+'\\n')
+out=Path(args[args.index('-o')+1])
+listing=next((a.split('=',1)[1] for a in args if a.startswith('-aln=')),None)
+if Path(sys.argv[0]).name=='cc1':out.write_text('.text\\n')
+else:
+ if listing and os.environ.get('LISTING_MODE')=='fail':sys.exit(1)
+ out.write_bytes(b'different' if listing and os.environ.get('LISTING_MODE')=='unequal' else b'original')
+ if listing:Path(listing).write_text('listing')
+'''
+            for exe in (cc,assembler):
+                exe.parent.mkdir(parents=True,exist_ok=True);exe.write_text(fake);exe.chmod(0o755)
+            Path(str(cc)+'.aslr-fixed').write_text('d11ca9e2086edf122df8580c00fd9024f036d0b6c9d782fe986ad1d881d0c8f1\n')
+            src=root/'input.c';src.write_text('int f(void) { return 1; }\n')
+            out=root/'output.o'; lp=root/'listing'
+            env=dict(os.environ,DDS_I386_LIBDIR='',DDS_KEEP_LISTING='',CALL_LOG=str(root/'calls'))
+            env.pop('DDS_AS_UNIT',None);env.pop('DDS_KEEP_S',None)
+            run=lambda:subprocess.run([str(tools/'cc.sh'),str(src),'-o',str(out)],env=env,capture_output=True,text=True)
+            plain=run();self.assertEqual(plain.returncode,0,plain.stderr)
+            self.assertEqual(out.read_bytes(),b'original')
+            self.assertNotIn('-aln=',(root/'calls').read_text())
+            for mode,destination in [('ok',lp),('fail',lp),('unequal',lp),('ok',root/'absent'/'listing'),
+                                     ('ok',out),('ok',root/'output')]:
+                with self.subTest(mode=mode,destination=destination):
+                    env.update(LISTING_MODE=mode,DDS_KEEP_LISTING=str(destination))
+                    result=run();self.assertEqual(result.returncode,0,result.stderr)
+                    self.assertEqual(out.read_bytes(),b'original')
+                    if destination==lp:
+                        self.assertEqual(lp.exists(),mode=='ok')
+                        self.assertEqual(Path(str(lp)+'.o').exists(),mode=='ok')
 
 
 if __name__ == "__main__":

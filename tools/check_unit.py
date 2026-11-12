@@ -24,6 +24,7 @@ from pathlib import Path
 sys.path.insert(0, str(Path(__file__).resolve().parent))
 from pairing import RETAIL, ROOT, load_segments, off_to_va, va_to_off  # noqa: E402
 from symbol_aliases import load_symbol_aliases  # noqa: E402
+from rodata_attribution import load_named_lw_sites, raw_metadata_clear, attribute_rodata_references
 from nonmatching import matching_source  # noqa: E402
 from c_aliases import function_aliases  # noqa: E402
 from resolved_code import (  # noqa: E402
@@ -435,6 +436,138 @@ def source_owned_item_size(definitions, syms, offset, retail_addr):
     return sizes.pop() if len(sizes) == 1 else None
 
 
+def shared_rodata_metadata_unambiguous(relocation_text, symbol_text):
+    """Keep raw conflicts from being lost in the ordinary dictionary readers.
+
+    This is an extra prerequisite for shared ownership only. Identical native
+    rows repeat the same fact; conflicting address/extent rows do not.
+    """
+    seen_offsets, section = set(), None
+    for line in relocation_text.splitlines():
+        if line.startswith("RELOCATION RECORDS FOR"):
+            section = line.split("[", 1)[1].rstrip("]:")
+            continue
+        parts = line.split()
+        if section == ".rodata" and len(parts) >= 3 and re.fullmatch(r"[0-9a-f]{8}", parts[0]):
+            off = int(parts[0], 16)
+            if off in seen_offsets:
+                return False
+            seen_offsets.add(off)
+    seen_names = {}
+    for line in symbol_text.splitlines():
+        row = ROW.match(line)
+        if row is None:
+            continue
+        size = re.search(r"\bsize:([^\s/]+)", line)
+        fact = (int(row.group(2), 16), int(size.group(1), 0) if size else None)
+        name = row.group(1)
+        if name in seen_names and seen_names[name] != fact:
+            return False
+        seen_names[name] = fact
+    return True
+
+
+def shared_rodata_owners(skip, full, retail, origin, syms, sizes, labels,
+                         source_text, included_assembly):
+    """Prove named C objects supply shared native data, not a second literal.
+
+    Each compilation context is (objdump symbols, section bytes, relocations).
+    Only global, unsuffixed STT_OBJECT identities with independently bounded
+    native extents qualify. Local/anonymous objects and pointer initializers
+    retain the literal rules. This does not replace any normal unit checks.
+    """
+    from include_sdata import DATA_DEF, defined_name, macro_aliases
+
+    def definitions(dump, section=".rodata"):
+        rows = []
+        for line in dump.splitlines():
+            parts = line.split()
+            if len(parts) >= 4 and parts[-3] == section:
+                try:
+                    rows.append((int(parts[0], 16), int(parts[-2], 16),
+                                 parts[-1], parts[1:-3]))
+                except ValueError:
+                    pass
+        return rows
+
+    skip_dump, skip_bytes, skip_relocs = skip
+    full_dump, full_bytes, full_relocs = full
+    # Prove the complete linked production span, independently of --func.
+    # Reuse the data relocation resolver, but reject ambiguous function owners
+    # before resolving section-relative code pointers. No masking grants this
+    # exception; unsupported or unresolved relocations leave SHARED in force.
+    if origin is None or len(full_bytes) != len(retail):
+        return set()
+    full_funcs = [(off, size, name) for off, size, name, flags in
+                  definitions(full_dump, ".text") if "F" in flags and size > 0]
+    previous = -4
+    for off, (kind, target) in sorted(full_relocs.items()):
+        if not 0 <= off <= len(full_bytes) - 4 or off < previous + 4 or \
+                kind != "R_MIPS_32" or "+" in target:
+            return set()
+        previous = off
+        if target == ".text":
+            addend = struct.unpack_from("<I", full_bytes, off)[0]
+            if len([1 for start, size, _ in full_funcs if start <= addend < start + size]) != 1:
+                return set()
+    linked, problems = relocate_sdata_item(
+        full_bytes, 0, full_relocs, full_funcs, syms, {".rodata": origin})
+    if problems or linked != retail or any(text is None for text in included_assembly):
+        return set()
+    active = matching_source(source_text)
+    macros = macro_aliases(active)
+    declared = [defined_name(m.group(1), macros) for m in DATA_DEF.finditer(active)]
+    skips, fulls = definitions(skip_dump), definitions(full_dump)
+    result = set()
+    for off, size, name, flags in skips:
+        if size <= 0 or not re.fullmatch(r"[A-Za-z_]\w*", name) \
+                or flags != ["g", "O"] or declared.count(name) != 1:
+            continue
+        addr = address(name, syms)
+        if addr is None or labels.get(name) != addr or list(labels.values()).count(addr) != 1:
+            continue
+        boundary = min((a for a in labels.values() if a > addr), default=None)
+        if boundary is None or addr + size > boundary:
+            continue
+        if sizes.get(name, boundary - addr) != size:
+            continue
+        if any(other != name and (where := address(other, syms)) is not None
+               and where < addr + size and where + extent > addr
+               for other, extent in sizes.items()):
+            continue
+        full_off = addr - origin
+        if not 0 <= off <= len(skip_bytes) - size \
+                or not 0 <= full_off <= len(full_bytes) - size:
+            continue
+        # Include zero-sized labels and aliases in the uniqueness proof. A
+        # section symbol is not an object/label competitor; all others are.
+        def unique(rows, start):
+            overlaps = [row for row in rows if row[2] != ".rodata" and
+                        (start <= row[0] < start + size or
+                         row[0] < start < row[0] + row[1] or row[2] == name or
+                         address(row[2], syms) == addr)]
+            return overlaps == [(start, size, name, ["g", "O"])]
+        if not unique(skips, off) or not unique(fulls, full_off):
+            continue
+        if any(r < off + size and r + 4 > off for r in skip_relocs) or any(
+                r < full_off + size and r + 4 > full_off for r in full_relocs):
+            continue
+        payload = retail[full_off:full_off + size]
+        if skip_bytes[off:off + size] != payload or full_bytes[full_off:full_off + size] != payload:
+            continue
+        # Retained assembly may reference this object, but must not define
+        # another native label in its extent (including an address alias).
+        duplicates = False
+        for text in included_assembly:
+            for label in re.findall(r"^\s*(?:dlabel|glabel)\s+(\w+)\b", text, re.M):
+                where = labels.get(label, address(label, syms))
+                if label == name or where is not None and addr <= where < addr + size:
+                    duplicates = True
+        if not duplicates:
+            result.add((off, addr))
+    return result
+
+
 def relocations(obj):
     """{section: {offset: (type, symbol)}} for verified content sections."""
     out, section = {name: {} for name in (".text", ".rodata", ".data", ".sdata")}, None
@@ -831,7 +964,8 @@ def main():
         # cc.sh compiles under the unit's own path (and flags) even for --source.
         env = dict(os.environ, DDS_VERSION=version, DDS_AS_UNIT=str(unit.relative_to(ROOT)))
         asm_text = Path(tmp) / "unit.s"
-        env_s = dict(env, DDS_KEEP_S=str(asm_text))
+        listing_path = Path(tmp) / "unit.listing"
+        env_s = dict(env, DDS_KEEP_S=str(asm_text), DDS_KEEP_LISTING=str(listing_path))
         extra = args.cflags.split()
         r = subprocess.run([str(ROOT / "tools/cc.sh"), "-DSKIP_ASM", *extra,
                             str(source), "-o", str(obj)],
@@ -841,6 +975,9 @@ def main():
         if r.returncode:
             sys.stderr.write(r.stderr)
             sys.exit(f"compile failed: {args.unit}")
+        skip_blob = obj.read_bytes() if obj.exists() else b""
+        provenance = load_named_lw_sites(asm_source, skip_blob, listing_path)
+        metadata_clear = bool(skip_blob) and raw_metadata_clear(skip_blob)
         text = text_section(obj)
         data, secs = sections(obj)
         emitted = {n: secs[n][1] for n in DATA_SECTIONS if secs.get(n, (0, 0))[1]}
@@ -897,12 +1034,14 @@ def main():
                              str(source), "-o", str(full)],
                             capture_output=True, text=True, env=env)
         if rf.returncode == 0:
+            metadata_clear = metadata_clear and full.exists() and raw_metadata_clear(full.read_bytes())
             ftext, frel = text_section(full), relocations(full)[".text"]
             fsyms = {p[3]: (int(p[0], 16), int(p[1], 16)) for p in (
                 l.split() for l in run(str(BIN / "mips-ps2-decompals-nm"), "-S", "--defined-only",
                                        str(full)).splitlines()) if len(p) == 4 and p[2] in "Tt"}
 
             full_objdump = run(str(BIN / "mips-ps2-decompals-objdump"), "-t", str(full))
+            full_relocation_text = run(str(BIN / "mips-ps2-decompals-objdump"), "-r", str(full))
             skip_aliases = compiler_local_function_aliases(
                 object_symbols, funcs, syms, function_names)
             full_aliases = compiler_local_function_aliases(
@@ -1062,6 +1201,7 @@ def main():
                     else:
                         owned_rodata.append((skip_off, skip_off + size))
             fro_off, fro_size = fsecs.get(".rodata", (0, 0))
+            full_ro_relocs = relocations(full)[".rodata"]
             ro_start = re.search(rf"\[0x([0-9A-F]+), \.rodata, {re.escape(unit_name)}\]",
                                  (ROOT / "config" / version / f"{VERSIONS[version]['serial']}.yaml").read_text())
             if fro_size and ro_start:
@@ -1107,7 +1247,7 @@ def main():
         for problem in data_context:
             bad += 1
             print(f"DATA CONTEXT {problem}")
-    tables = []  # (offset in our .rodata, retail address, function)
+    tables = []  # (offset in our .rodata, retail address, function, LO16 site)
     bounds = []  # .rodata items of unexamined functions: they only end a neighbour
     small = []   # the same for .sdata
     hi16_addends = paired_hi16_addends(text, relocs)
@@ -1125,7 +1265,7 @@ def main():
                     if r[0] == "R_MIPS_HI16":
                         hi = w & 0xFFFF
                     elif r[0] == "R_MIPS_LO16" and hi is not None:
-                        bounds.append((hi << 16) + sext16(w))
+                        bounds.append(((hi << 16) + sext16(w), name, off + i))
         if args.func and name != args.func:
             continue
         addr = address(name, syms)
@@ -1192,7 +1332,7 @@ def main():
                     rodata_hi = (mine & 0xFFFF, want & 0xFFFF)
                 elif rtype == "R_MIPS_LO16" and rodata_hi:
                     tables.append(((rodata_hi[0] << 16) + sext16(mine),
-                                   (rodata_hi[1] << 16) + sext16(want), name))
+                                   (rodata_hi[1] << 16) + sext16(want), name, off + i))
                 continue
             if base == ".text" and rtype == "R_MIPS_26":
                 # A call into this unit's own C: the field holds our offset.
@@ -1307,6 +1447,46 @@ def main():
     included = set(re.findall(r'^INCLUDE_(?:ASM|RODATA)\([^,]+,\s*"[^"]+",\s*(\w+)\);', source_text, re.M))
     eeasm_dir = ROOT / "build" / "eeasm" / "asm" / version / "nonmatchings" / unit_name
 
+    shared_owned = set()
+    if rf.returncode == 0 and rodata_range is not None and shared_rodata_metadata_unambiguous(
+            full_relocation_text, (ROOT / "config" / version / "symbol_addrs.txt").read_text()):
+        start, end = rodata_range
+        native_labels = {n: address(n, syms) for n in re.findall(r"^dlabel (\w+)\b", ro_text, re.M)
+                         if address(n, syms) is not None}
+        origin = off_to_va(segs, start)
+        native_end = off_to_va(segs, end - 1)
+        if native_end is not None:
+            native_labels["(end)"] = native_end + 1
+        included_assembly = [(asm_dir / f"{n}.s").read_text()
+                             if (asm_dir / f"{n}.s").exists() else None for n in included]
+        shared_owned = shared_rodata_owners(
+            (object_symbols, rodata, rodata_relocs),
+            (full_objdump, fdata[fro_off:fro_off + fro_size], full_ro_relocs),
+            retail[start:end], origin, syms, symbol_sizes(version), native_labels,
+            source_text, included_assembly)
+
+    # Storage and address expressions are distinct. Keep each instruction site
+    # until its own named expression and native arithmetic have been proved.
+    proven_objects = []
+    if metadata_clear:
+        for start, size, symbol in rodata_symbols:
+            native = address(symbol, syms)
+            if (start, native) in shared_owned:
+                proven_objects.append((start, start + size, native, symbol))
+
+    def native_code(name):
+        addr = address(name, syms)
+        where = va_to_off(segs, addr) if addr is not None else None
+        size = next((size for _, size, fn in funcs if fn == name), 0)
+        return retail[where:where + size] if where is not None else b""
+
+    tables, bounds, merged_uses, attribution_errors = attribute_rodata_references(
+        tables, bounds, proven_objects, provenance, native_code)
+    for problem in attribution_errors:
+        bad += 1
+        print(problem)
+    object_extents = {(o[0], o[2]): o[1] for o in proven_objects}
+
     def realigned(addr):
         """The retail item at addr is an included asm blob that eeas_compat
         16-aligns (`.align 4`), so the object supplies the padding before it."""
@@ -1333,13 +1513,11 @@ def main():
     pointed = {struct.unpack_from("<I", rodata, o)[0] for o, (_, s) in rodata_relocs.items()
                if s == ".rodata" and o + 4 <= len(rodata)}
     starts = sorted({t[0] for t in tables} | set(bounds) | {p for p in pointed if p < len(rodata)}
-                    | {len(rodata)})
+                    | {x for o in proven_objects for x in o[:2]} | {len(rodata)})
     # Two retail copies that the C compiles to one object item: gcc merged
     # identical constants (e.g. two equal string initializers) that the
     # original kept apart, so the unit's rodata comes out short.
-    by_off = {}
-    for table_off, retail_addr, name in tables:
-        by_off.setdefault(table_off, {}).setdefault(retail_addr, name)
+    by_off = merged_uses
     for off, uses in by_off.items():
         if len(uses) > 1:
             bad += 1
@@ -1348,7 +1526,8 @@ def main():
     for table_off, retail_addr, name in dict.fromkeys(tables):
         if not 0 <= table_off < len(rodata):
             continue
-        end = next(s for s in starts if s > table_off)
+        declared_end = object_extents.get((table_off, retail_addr))
+        end = declared_end if declared_end is not None else next(s for s in starts if s > table_off)
         code_pointers = rodata_code_pointers(
             rodata, table_off, end, rodata_relocs, funcs_by_off, syms, func_starts)
         if not code_pointers:
@@ -1358,7 +1537,9 @@ def main():
             # pointer values to the full build's checksum.
             reloc_words = {o - table_off for o in rodata_relocs if table_off <= o < end}
             nul = item.find(b"\0")
-            if reloc_words:
+            if declared_end is not None:
+                pass  # Exact declared bytes, including terminal zero elements.
+            elif reloc_words:
                 item = item[:max(max(reloc_words) + 4, len(item.rstrip(b"\0")))]
             elif nul >= 0 and all(32 <= c < 127 or c in b"\t\n\r\x1b" for c in item[:nul]) \
                     and not any(item[nul:]):
@@ -1382,8 +1563,9 @@ def main():
                 bad += 1
                 print(f"PAD rodata of {name} (retail 0x{retail_addr:08X}): retail has {pad} more bytes "
                       "after it that no C emits: keep the extern D_ symbol")
-            elif users := asm_users(retail_addr):
-                # The object keeps one copy; an asm function still pulls in its own.
+            elif (users := asm_users(retail_addr)) and (table_off, retail_addr) not in shared_owned:
+                # Anonymous literals still duplicate the retained native copy.
+                # Named C objects are exempt only with the ownership proof above.
                 bad += 1
                 print(f"SHARED rodata of {name} (retail 0x{retail_addr:08X}) is also used by asm "
                       f"{', '.join(users)}: keep the extern D_ symbol until they are C")

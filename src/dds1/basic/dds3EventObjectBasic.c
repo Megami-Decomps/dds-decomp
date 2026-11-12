@@ -1,4 +1,5 @@
 #include "common.h"
+#include "dds3_basic_tables.h"
 #include "sdf_chip.h"
 #include "eff_event.h"
 #include "dds3_basic_lifecycle.h"
@@ -62,3 +63,13 @@ dds3ObjectBaseControlWorkData_t *dds3EventObjectBasicGetControlWorkData(const dd
     const DdsSlotResourceBlock *block = (const DdsSlotResourceBlock *)object->workdata;
     return block->baseControlWorkData;
 }
+
+/* Complete lifecycle dispatch table for this basic kind. */
+dds3BasicFunction_t EventObjectBasicTable = {
+    EventObjectBasicConstructor,
+    EventObjectBasicDestructor,
+    EventObjectBasicMainProcuder,
+    NULL,
+    NULL,
+    NULL,
+};

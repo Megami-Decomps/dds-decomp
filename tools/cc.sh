@@ -80,3 +80,22 @@ for f in $flags; do
     case $f in -G*) asg=$f ;; -g0) asdbg= ;; esac
 done
 run "$ee/ee/bin/as" -EL $asg $asdbg -Iinclude -o "$out" "$cc_out"
+
+# Optional instruction-site evidence. A listing is usable only when enabling it
+# reproduces the entire original ELF, including raw symbols and relocations.
+if [ -n "$DDS_KEEP_LISTING" ]; then
+    # Optional evidence must never replace/remove the production output, and a
+    # missing/unwritable destination must not turn a good compile into failure.
+    if [ "$(realpath -m "$DDS_KEEP_LISTING")" != "$(realpath -m "$out")" ] &&
+       [ "$(realpath -m "$DDS_KEEP_LISTING.o")" != "$(realpath -m "$out")" ]; then
+        if rm -f "$DDS_KEEP_LISTING" "$DDS_KEEP_LISTING.o" &&
+           run "$ee/ee/bin/as" -EL $asg $asdbg -Iinclude -aln="$tmp/listing" -o "$tmp/listed.o" "$cc_out" &&
+           cmp -s "$out" "$tmp/listed.o" &&
+           cp "$tmp/listing" "$DDS_KEEP_LISTING" &&
+           cp "$tmp/listed.o" "$DDS_KEEP_LISTING.o"; then
+            :
+        else
+            rm -f "$DDS_KEEP_LISTING" "$DDS_KEEP_LISTING.o" || :
+        fi
+    fi
+fi

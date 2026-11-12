@@ -12596,7 +12596,7 @@ rand = 0x0035C200; // type:func
 func_0035C268 = 0x0035C268; // type:func
 _sbrk_r = 0x0035C420; // type:func
 _getpid_r = 0x0035C7C0; // type:func
-_vsprintf_r = 0x0035C7D8; // type:func
+_sprintf_r = 0x0035C7D8; // type:func
 sprintf = 0x0035C860; // type:func
 func_0035C8F0 = 0x0035C8F0; // type:func
 sscanf = 0x0035C8F8; // type:func
@@ -12621,16 +12621,7 @@ func_0035D938 = 0x0035D938; // type:func
 __sprint = 0x0035E660; // type:func
 vfprintf = 0x0035E760; // type:func
 _vfprintf_r = 0x0035E7D8; // type:func
-func_00360040 = 0x00360040; // type:func
-func_003600C0 = 0x003600C0; // type:func
 func_003600E8 = 0x003600E8; // type:func
-func_003601E0 = 0x003601E0; // type:func
-func_00360304 = 0x00360304; // type:func
-func_00360370 = 0x00360370; // type:func
-func_00360410 = 0x00360410; // type:func
-func_00360D30 = 0x00360D30; // type:func
-func_00360D40 = 0x00360D40; // type:func
-func_00360D44 = 0x00360D44; // type:func
 func_00360D78 = 0x00360D78; // type:func
 _write_r = 0x00360F28; // type:func
 func_00361098 = 0x00361098; // type:func
@@ -12641,9 +12632,6 @@ func_003625C0 = 0x003625C0; // type:func
 localeconv = 0x00362B20; // type:func
 _lseek_r = 0x00362B40; // type:func
 memchr = 0x00362BD4; // type:func
-func_00363230 = 0x00363230; // type:func
-func_00363530 = 0x00363530; // type:func
-func_00363730 = 0x00363730; // type:func
 _read_r = 0x00363CD0; // type:func
 func_00363DB8 = 0x00363DB8; // type:func
 func_00363E28 = 0x00363E28; // type:func
@@ -14130,7 +14118,7 @@ mallocLockCount = 0x0040F5B4;
 putsNewline = 0x00431BE0;
 localeEmptyStr = 0x004324E8;
 localeCName = 0x004324F8;
-pow5MultTable = 0x00432500;
+pow5MultTable = 0x00432500; // size:0xC
 pow10Table = 0x00432510;
 impure_data = 0x0040EE60; // size:0x2F0
 btlHelpLineRevertedNames = 0x004165F0; // size:0x10
@@ -14192,3 +14180,23 @@ padRequestNameComplete = 0x0042F4D8;
 btlCameraPathPresetsBank0 = 0x003B7680; // size:0x780
 btlCameraPathPresetsBank2 = 0x003B7E00; // size:0x120
 btlCameraPathPresetsBank4 = 0x003B7F20; // size:0xC0
+
+D_004325D8 = 0x004325D8; // size:0x28
+
+D_00432600 = 0x00432600; // size:0x28
+
+D_004002F8 = 0x004002F8; // type:EffTimedParamRecord size:0x30
+
+D_00400328 = 0x00400328; // type:EffTimedParamRecord size:0x48
+
+D_00400370 = 0x00400370; // type:EffTimedParamRecord size:0x48
+
+D_004003B8 = 0x004003B8; // type:EffTimedParamRecord size:0x30
+
+D_004003E8 = 0x004003E8; // type:EffTimedParamRecord size:0x30
+
+D_00400418 = 0x00400418; // type:EffTimedParamRecord size:0x78
+
+D_00400490 = 0x00400490; // type:EffTimedParamRecord size:0x48
+
+D_004004D8 = 0x004004D8; // type:EffTimedParamRecord size:0x30

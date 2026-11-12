@@ -30,7 +30,7 @@ s32 sceMcSync(s32 mode, s32 *command, s32 *result);
 void *malloc(u32 size);
 #endif
 #ifndef SDK_SKIP_fclose
-void fclose(SdkFileStream *stream);
+s32 fclose(SdkFileStream *stream);
 #endif
 #ifndef SDK_SKIP_sdfFreeHeapMemory
 void free(void *memory);

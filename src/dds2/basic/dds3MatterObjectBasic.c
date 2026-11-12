@@ -1,6 +1,7 @@
 #include "sdk_ps2.h"
 #include "mdl.h"
 #include "common.h"
+#include "dds3_basic_tables.h"
 #include "sdf_map_position_api.h"
 #include "ps2asm.h"
 #include "sdf_vu_matrix.h"
@@ -363,6 +364,17 @@ void dds3RefreshStoredVec3(dds3Basic_t *object) {
     destination->offset[1] = source->pos[1];
     destination->offset[2] = source->pos[2];
 }
+
+
+/* Complete lifecycle dispatch table for this basic kind. */
+dds3BasicFunction_t dds3MatterObjectBasicTable = {
+    dds3MatterObjectBasicConstructor,
+    dds3MatterObjectBasicDestructor,
+    dds3MatterObjectBasicMainProcedure,
+    dds3MatterObjectBasicDrawProcedure,
+    NULL,
+    NULL,
+};
 
 INCLUDE_SDATA(const s32, "basic/dds3MatterObjectBasic", effObjOpacityPassEnabled);
 

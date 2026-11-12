@@ -1,4 +1,5 @@
 #include "common.h"
+#include "dds3_basic_tables.h"
 #include "dds3obj.h"
 #include "dds3_object_control_slot.h"
 #include "eff_object.h"
@@ -480,6 +481,17 @@ attach_transition:
         dds3FreeBasicArrayHandle(list);
     }
 }
+
+
+/* Complete lifecycle dispatch table for this basic kind. */
+dds3BasicFunction_t dds3UnitObjectBasicTable = {
+    dds3UnitObjectBasicConstructor,
+    dds3UnitObjectBasicDestructor,
+    dds3UnitObjectBasicMainProcedure,
+    dds3UnitObjectBasicDrawProcedure,
+    NULL,
+    NULL,
+};
 
 INCLUDE_RODATA(const s32, "basic/dds3UnitObjectBasic", D_004128A0);
 

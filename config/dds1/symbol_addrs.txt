@@ -11280,13 +11280,6 @@ func_00302580 = 0x00302580; // type:func
 func_003025C8 = 0x003025C8; // type:func
 __sprint = 0x003032F0; // type:func
 func_00304D78 = 0x00304D78; // type:func
-func_00304E70 = 0x00304E70; // type:func
-func_00304F94 = 0x00304F94; // type:func
-func_00305000 = 0x00305000; // type:func
-func_003050A0 = 0x003050A0; // type:func
-func_003059C0 = 0x003059C0; // type:func
-func_003059D0 = 0x003059D0; // type:func
-func_003059D4 = 0x003059D4; // type:func
 func_00305A08 = 0x00305A08; // type:func
 _write_r = 0x00305BB8; // type:func
 func_00305D28 = 0x00305D28; // type:func
@@ -12533,7 +12526,7 @@ mallocLockCount = 0x0039C434;
 putsNewline = 0x003B7AA0;
 localeEmptyStr = 0x003B83A8;
 localeCName = 0x003B83B8;
-pow5MultTable = 0x003B83C0;
+pow5MultTable = 0x003B83C0; // size:0xC
 pow10Table = 0x003B83D0;
 impure_data = 0x0039BCE0; // size:0x2F0
 btlHelpLineAttackNames = 0x003A2AA0; // size:0x10
@@ -12596,3 +12589,23 @@ fileGlyphTextRows = 0x0037DFE8; // type:FileGlyphTextRow size:0x20
 btlCameraPathPresetsBank0 = 0x00359EF0; // size:0x6C0
 btlCameraPathPresetsBank2 = 0x0035A5B0; // size:0xC0
 btlCameraPathPresetsBank4 = 0x0035A670; // size:0xC0
+
+D_003B8498 = 0x003B8498; // size:0x28
+
+D_003B84C0 = 0x003B84C0; // size:0x28
+
+D_0038FB78 = 0x0038FB78; // type:EffTimedParamRecord size:0x30
+
+D_0038FBA8 = 0x0038FBA8; // type:EffTimedParamRecord size:0x48
+
+D_0038FBF0 = 0x0038FBF0; // type:EffTimedParamRecord size:0x48
+
+D_0038FC38 = 0x0038FC38; // type:EffTimedParamRecord size:0x30
+
+D_0038FC68 = 0x0038FC68; // type:EffTimedParamRecord size:0x30
+
+D_0038FC98 = 0x0038FC98; // type:EffTimedParamRecord size:0x78
+
+D_0038FD10 = 0x0038FD10; // type:EffTimedParamRecord size:0x48
+
+D_0038FD58 = 0x0038FD58; // type:EffTimedParamRecord size:0x30

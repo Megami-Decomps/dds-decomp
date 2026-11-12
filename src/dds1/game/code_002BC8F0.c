@@ -92,6 +92,99 @@ extern EffTimedParamRecord D_0038FD10[3];
 extern EffTimedParamRecord D_0038FD58[2];
 extern EffRecordBucket effTimedRecordBuckets[];
 
+/* Timed-effect parameter definitions and their category dispatch table. */
+extern char D_003B3BD0[];
+extern char D_003B3BE0[];
+extern char D_003B3BF0[];
+extern char D_003B3C00[];
+extern char D_003B3C10[];
+extern char D_003B3C20[];
+extern char D_003B3C30[];
+extern char D_003B3C40[];
+extern char D_003B3C50[];
+extern char D_003BD1A0[];
+extern char D_003BD1A8[];
+extern char D_003BD1B0[];
+extern char D_003BD1B8[];
+extern char D_003BD1C0[];
+extern char D_003BD1C8[];
+extern char D_003BD1D0[];
+extern char D_003BD1D8[];
+extern char D_003BD1E0[];
+extern char D_003BD1E8[];
+extern char D_003BD1F0[];
+extern char D_003BD1F8[];
+extern char D_003BD200[];
+extern char D_003BD208[];
+extern char D_003BD210[];
+extern s32 itfGridApplyLinearBoundsAndColorScale(BdWork *, BdWork *, EffTimedState *);
+extern s32 itfGridApplyLinearZoomBoundsAndFadeAlpha(BdWork *, BdWork *, EffTimedState *);
+extern s32 itfGridApplyQuadraticZoomBoundsAndFadeAlpha(BdWork *, BdWork *, EffTimedState *);
+extern s32 itfGridApplySqrtBoundsAndColorScale(BdWork *, BdWork *, EffTimedState *);
+extern s32 itfGridApplyThresholdBoundsAndAlpha(BdWork *, BdWork *, EffTimedState *);
+extern s32 itfGridApplyTimedBoundsAndAlpha(BdWork *, BdWork *, EffTimedState *);
+extern s32 itfGridInterpolateCornerColorsToTarget(BdWork *, BdWork *, EffTimedState *);
+extern s32 itfUpdateAngleAndGetCycleStep(BdWork *, BdWork *, EffTimedState *);
+
+EffTimedParamRecord D_0038FB78[2] = {
+    { D_003BD1A8, 0, 1.0f, 1024.0f, 1.0f, 15.0f },
+    { D_003BD1A0, 0, 0.0f, 1.0f, 1.0f, 0.0f },
+};
+
+EffTimedParamRecord D_0038FBA8[3] = {
+    { D_003B3BF0, 0, 0.0f, 1024.0f, 1.0f, 64.0f },
+    { D_003B3BE0, 0, 0.0f, 1024.0f, 1.0f, 64.0f },
+    { D_003B3BD0, 0, 1.0f, 1024.0f, 1.0f, 15.0f },
+};
+
+EffTimedParamRecord D_0038FBF0[3] = {
+    { D_003B3C20, 0, 0.0f, 1024.0f, 1.0f, 15.0f },
+    { D_003B3C10, 0, 1.0f, 1024.0f, 1.0f, 15.0f },
+    { D_003B3C00, 0, 0.0f, 1024.0f, 1.0f, 15.0f },
+};
+
+EffTimedParamRecord D_0038FC38[2] = {
+    { D_003BD1A8, 0, 1.0f, 1024.0f, 1.0f, 30.0f },
+    { D_003BD1B0, 0, 0.0f, 100.0f, 1.0f, 50.0f },
+};
+
+EffTimedParamRecord D_0038FC68[2] = {
+    { D_003BD1C0, 0, 1.0f, 1024.0f, 1.0f, 30.0f },
+    { D_003BD1B8, 0, 0.0f, 1.0f, 1.0f, 0.0f },
+};
+
+EffTimedParamRecord D_0038FC98[5] = {
+    { D_003BD1C0, 0, 1.0f, 1024.0f, 1.0f, 30.0f },
+    { D_003BD1E0, 0, 0.0f, 255.0f, 1.0f, 0.0f },
+    { D_003BD1D8, 0, 0.0f, 255.0f, 1.0f, 0.0f },
+    { D_003BD1D0, 0, 0.0f, 255.0f, 1.0f, 0.0f },
+    { D_003BD1C8, 0, 0.0f, 255.0f, 1.0f, 0.0f },
+};
+
+EffTimedParamRecord D_0038FD10[3] = {
+    { D_003B3BF0, 0, 0.0f, 1024.0f, 1.0f, 64.0f },
+    { D_003B3BE0, 0, 0.0f, 1024.0f, 1.0f, 64.0f },
+    { D_003B3BD0, 0, 1.0f, 1024.0f, 1.0f, 15.0f },
+};
+
+EffTimedParamRecord D_0038FD58[2] = {
+    { D_003BD1A8, 0, 1.0f, 1024.0f, 1.0f, 15.0f },
+    { D_003BD1A0, 0, 0.0f, 1.0f, 1.0f, 0.0f },
+};
+
+EffRecordBucket effTimedRecordBuckets[9] = {
+    { D_003BD210, NULL, 0, NULL },
+    { D_003BD208, itfGridApplySqrtBoundsAndColorScale, 2, D_0038FB78 },
+    { D_003BD200, itfGridApplyQuadraticZoomBoundsAndFadeAlpha, 3, D_0038FBA8 },
+    { D_003B3C50, itfGridApplyTimedBoundsAndAlpha, 3, D_0038FBF0 },
+    { D_003BD1F8, itfGridApplyThresholdBoundsAndAlpha, 2, D_0038FC38 },
+    { D_003B3C40, itfUpdateAngleAndGetCycleStep, 2, D_0038FC68 },
+    { D_003B3C30, itfGridInterpolateCornerColorsToTarget, 5, D_0038FC98 },
+    { D_003BD1F0, itfGridApplyLinearZoomBoundsAndFadeAlpha, 3, D_0038FD10 },
+    { D_003BD1E8, itfGridApplyLinearBoundsAndColorScale, 2, D_0038FD58 },
+};
+
+
 
 extern u32 effSharedTextureReferenceCount;
 

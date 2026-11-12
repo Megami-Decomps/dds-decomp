@@ -1,4 +1,5 @@
 #include "common.h"
+#include "dds3_basic_tables.h"
 #include "kernel_draw.h"
 #include "dds3obj.h"
 #include "dds3_object_flags.h"
@@ -272,3 +273,13 @@ s32 dds3AllocEventBasicWorkData(dds3Basic_t *basic)
     memset(work, 0, 28);
     return 1;
 }
+
+/* Complete lifecycle dispatch table for this basic kind. */
+dds3BasicFunction_t lightBasicTable = {
+    lightconstructor,
+    lightdestructor,
+    lightmainprocedure,
+    lightdrawprocedure,
+    NULL,
+    NULL,
+};

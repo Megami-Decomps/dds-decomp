@@ -1,6 +1,7 @@
 #include "sdk_ps2.h"
 #include "mdl.h"
 #include "common.h"
+#include "dds3_basic_tables.h"
 #include "sdf_map_position_api.h"
 #include "ps2asm.h"
 #include "sdf_vu_matrix.h"
@@ -1111,6 +1112,17 @@ void dds3EffectObjectBasicCalcFldEx(dds3Basic_t *object) {
         break;
     }
 }
+
+
+/* Complete lifecycle dispatch table for this basic kind. */
+dds3BasicFunction_t dds3EffectObjectBasicTable = {
+    dds3EffectObjectBasicConstructor,
+    dds3EffectObjectBasicDestructor,
+    dds3EffectObjectBasicMainProcedure,
+    dds3EffectObjectBasicDrawProcedure,
+    NULL,
+    NULL,
+};
 
 INCLUDE_RODATA(const s32, "basic/dds3EffectObjectBasic", D_0039F7D0);
 

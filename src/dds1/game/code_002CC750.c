@@ -131,7 +131,7 @@ extern SdkFileStream *fopen(const char *, const char *);
 
 extern s32 fprintf(SdkFileStream *, const char *, ...);
 
-extern void fclose(SdkFileStream *);
+extern s32 fclose(SdkFileStream *);
 
 extern char sdfDebugLogAppendMode[];
 
