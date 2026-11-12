@@ -35,6 +35,7 @@ MODULES = [
     "test_ee_gcc_aslr",
     "test_include_sdata",
     "test_include_rodata",
+    "test_include_asm_sections",
     "test_lb",
     "test_m2ctx",
     "test_source_tokens",

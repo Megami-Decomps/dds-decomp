@@ -29,10 +29,13 @@
             "\t.set reorder\n"                                 \
             "\t.set at\n")
 
+/* Restore the compiler's section AND subsection after the included body.
+ * A fixed .text return corrupts subsequent C data when ee-gcc still tracks
+ * .rdata. .previous is not sufficient: included files select .rodata too. */
 #define INCLUDE_RODATA(TYPE, FOLDER, NAME)                     \
-    __asm__(".section .rodata\n"                               \
+    __asm__(".pushsection .rodata\n"                               \
             "\t.include \"" ASM_ROOT FOLDER "/" #NAME ".s\"\n" \
-            ".section .text\n")
+            ".popsection\n")
 
 /* Small data not yet defined in C (tools/include_sdata.py places these). */
 #define INCLUDE_SDATA(TYPE, FOLDER, NAME)                      \

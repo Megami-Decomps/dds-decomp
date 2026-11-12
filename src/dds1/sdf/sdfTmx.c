@@ -555,7 +555,7 @@ extern fp_number_type_df *libc_2D1590(const fp_number_type_df *a, const fp_numbe
 
 extern long __fpcmp_parts_df(const fp_number_type_df *a, const fp_number_type_df *b);
 
-extern const u8 _ctype_[];
+extern const char _ctype_[];
 
 #define SDF_TOLOWER(c) (((_ctype_ + 1)[(c)] & 1) ? (c) + 0x20 : (c))
 
