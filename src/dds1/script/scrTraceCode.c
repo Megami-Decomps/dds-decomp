@@ -664,10 +664,12 @@ u8 *scrGetStrPara(s32 n)
     return NULL;
 }
 
-void scrSetIntReturnValue(s32 i)
+scrProcessWork_s *scrSetIntReturnValue(s32 i)
 {
-    nowpwork->StackType[27] = SCR_STACK_TYPE_INT;
+    scrProcessWork_s *pw = nowpwork;
+    pw->StackType[27] = SCR_STACK_TYPE_INT;
     nowpwork->StackData[27].i = i;
+    return pw;
 }
 
 void scrSetFloatReturnValue(f32 f)
