@@ -4243,13 +4243,13 @@ u32 btlStepUnitDefeatFadeIn(BtlUnitFadeTaskArgs *taskArgs) {
         evtSetUnitColorA((struct evtUnitHandle_t *)unit->ext, 0,
                                   (unit->overlayColor & 0xFFFFFF) | 0x80000000);
     }
-    if (taskArgs->elapsed >= taskArgs->duration) {
+    if (taskArgs->elapsed >= SDF_FRAMES(taskArgs->duration)) {
         unit->status.flags &= ~0x20000;
         unit->overlayColor = (unit->baseColor & 0xFFFFFF) | 0x80000000;
         return 1;
     }
     unit->status.flags |= 0x20000;
-    alpha = (u32)((f32)taskArgs->elapsed * 128.0f / (f32)taskArgs->duration);
+    alpha = (u32)((f32)taskArgs->elapsed * 128.0f / (f32)SDF_FRAMES(taskArgs->duration));
     alpha <<= 24;
     unit->overlayColor = alpha | (unit->baseColor & 0xFFFFFF);
     taskArgs->elapsed++;
@@ -4326,30 +4326,30 @@ u32 btlStepUnitExitFade(BtlUnitFadeTaskArgs *taskArgs) {
 
     switch (taskArgs->exitMode) {
     case BTL_UNIT_EXIT_FADE_MODE_EVENT_COLOR:
-        if (taskArgs->elapsed == 1) {
+        if (taskArgs->elapsed == SDF_FRAMES(1)) {
             btlFlagUnitDefeatCandidate(unit);
             evtSetUnitColorRGB(unit->ext,
                                     10, 0x80000000);
-        } else if (taskArgs->elapsed == 10) {
+        } else if (taskArgs->elapsed == SDF_FRAMES(10)) {
             evtSetUnitColorRGB(unit->ext,
                                     0, 0x80000000);
             evtSetUnitColorA(unit->ext, 6, 0);
             unit->status.flags = (u32)unit->status.flags | (0x200000);
         }
         if (((u32)unit->status.flags & 0x200000) == 0 &&
-            taskArgs->elapsed >= 16) {
+            taskArgs->elapsed >= SDF_FRAMES(16)) {
             finished = 1;
         }
         break;
 
     case BTL_UNIT_EXIT_FADE_MODE_FRAME_ALPHA:
-        if (taskArgs->elapsed >= 8) {
+        if (taskArgs->elapsed >= SDF_FRAMES(8)) {
             unit->status.flags = (u32)unit->status.flags & (~0x20000);
             unit->overlayColor = unit->baseColor & 0xFFFFFF;
             finished = 1;
         } else {
             unit->status.flags = (u32)unit->status.flags | (0x20000);
-            alpha = (u32)((1.0f - (f32)taskArgs->elapsed * 0.125f) * 128.0f);
+            alpha = (u32)((1.0f - (f32)taskArgs->elapsed * SDF_FRAME_STEP(0.125f)) * 128.0f);
             alpha <<= 24;
             unit->overlayColor = alpha | (unit->baseColor & 0xFFFFFF);
         }
@@ -4514,7 +4514,7 @@ u32 btlUnitBaseLightTask(BtlUnitBaseLightArgs *work) {
     EvtTargetInfo *info;
     dds3Basic_t *target;
     if (unit->status.flags & 2) {
-        if (work->delay >= 2) {
+        if (work->delay >= SDF_FRAMES(2)) {
             ext = unit->ext;
             evtUnitLightOn(ext);
             target = ext->currentTransitionTarget;
@@ -4677,7 +4677,9 @@ u32 btlAdvanceActorPositionEffectTask(BtlPositionEffectArgs *task) {
         task->velocity = 0.3f;
     }
     velocity = task->velocity;
-    if (velocity >= 0.0f) {
+    if (!SDF_FRAME_DUE()) {
+        offset = amplitude * task->amount;
+    } else if (velocity >= 0.0f) {
         offset = amplitude * task->amount;
         task->velocity = velocity + 0.02f;
         delta = (1.0f - task->amount) * velocity;

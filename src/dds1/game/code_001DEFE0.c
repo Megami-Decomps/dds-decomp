@@ -9106,8 +9106,8 @@ s32 sndUpdateActorEffectTask(ActorEffectTaskArgs *args) {
     if (effBTLCutGetFrame(args->effect) >= args->duration) {
         return 1;
     }
-    if (args->counter < 6) {
-        args->effect->color = ((u32)(args->counter * 128.0f / 6.0f) << 24) | 0x00808080;
+    if (args->counter < SDF_FRAMES(6)) {
+        args->effect->color = ((u32)(args->counter * 128.0f / SDF_FRAMES_F(6.0f)) << 24) | 0x00808080;
     } else {
         args->effect->color = 0x80808080;
     }
@@ -9171,7 +9171,7 @@ s32 sndWaitEffectFramesAndApplyUnitParameter(TimedUnitEffectArgs *args) {
         return 0;
     }
     frames = sndGetEffectNodeParameter(effect, args->kind);
-    if (args->frame >= frames) {
+    if (args->frame >= SDF_FRAMES(frames)) {
         args->source->activeCount -= 1;
         if (args->channel >= 0) {
             btlApplyScaledUnitEffectParameter(args->unit, args->channel, args->volume, 1.0f);
@@ -9348,11 +9348,11 @@ s32 sndUpdateEffectSourceFade(SoundEffectSourceArgs *args) {
         args->effect = effCreateBattleVoiceOwner(args->source->resourceHandle, 0, owner, 0);
         args->effect->flags |= 1;
     }
-    if (args->frameCount < 12) {
-        args->effect->color = ((u32)((f32)args->frameCount * 128.0f / 12.0f) << 24) | 0x808080;
+    if (args->frameCount < SDF_FRAMES(12)) {
+        args->effect->color = ((u32)((f32)args->frameCount * 128.0f / SDF_FRAMES_F(12.0f)) << 24) | 0x808080;
     } else if (btlFindTaskByHandle(args->waitForTaskHandle) == 0) {
-        if (args->fadeOutFrame != 12) {
-            args->effect->color = ((u32)((1.0f - (f32)args->fadeOutFrame / 12.0f) * 128.0f) << 24) | 0x808080;
+        if (args->fadeOutFrame != SDF_FRAMES(12)) {
+            args->effect->color = ((u32)((1.0f - (f32)args->fadeOutFrame / SDF_FRAMES_F(12.0f)) * 128.0f) << 24) | 0x808080;
             args->fadeOutFrame++;
         } else {
             return 1;
@@ -10294,7 +10294,7 @@ s32 sndPlaySkillSeTask(SkillSeTaskArgs *args) {
     BtlActorWork *work = (BtlActorWork *)btlGetRuntime();
     u32 value;
 
-    if (args->optionId == 2 && work->skillSeLoadFrame < 6) {
+    if (args->optionId == 2 && work->skillSeLoadFrame < SDF_FRAMES(6)) {
         btlBossDebugPrintf("btl:skill SE ignore[frame:%d]\n", work->skillSeLoadFrame);
         return 1;
     }
@@ -10769,7 +10769,7 @@ u32 sndPollMotionSePlayback(SoundTaskArgs *args) {
         key >>= 16;
         btlBossDebugPrintf("btl:motSE load wait[%X]\n", key);
     } else {
-        if (work->motionSeLoadFrame >= 0xB) {
+        if (work->motionSeLoadFrame >= SDF_FRAMES(0xB)) {
             if (mnuGetSoundBufferStateLocked() != MNU_TITLE_SOUND_BUFFER_UNALLOCATED) {
                 mnuResetSoundBufferLocked();
                 mnuReleaseSoundBufferLocked();
@@ -10787,7 +10787,7 @@ u32 sndPollMotionSePlayback(SoundTaskArgs *args) {
         }
         return 1;
     }
-    if (args->waitFrames > 90) {
+    if (args->waitFrames > SDF_FRAMES(90)) {
         owner->flags &= ~SOUND_SLOT_TRACK_LOADING;
         owner->flags |= SOUND_SLOT_TRACK_READY;
         btlBossDebugPrintf("btl:motSE load time out[%X]\n", key);

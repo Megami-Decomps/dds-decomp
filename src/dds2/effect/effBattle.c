@@ -1,4 +1,5 @@
 #include "common.h"
+#include "sdfFrame.h"
 #include "btl_special_entry_object_class.h"
 #include "ps2asm.h"
 #include "sdf_chip.h"
@@ -193,7 +194,7 @@ void effBattleUpdate(effBTLCutHandle_t *work) {
                 &list->rgbCommand, frame);
         }
 
-        if (list->shake != 0 && list->shakeFrame == frame) {
+        if (list->shake != 0 && list->shakeFrame == frame && SDF_FRAME_DUE()) {
             if (list->shake < 0x1F) {
                 dds3SetQuake(list->shakeFade, list->shake * 10);
             } else {
@@ -394,13 +395,13 @@ void effBattleUpdate(effBTLCutHandle_t *work) {
         }
     }
 
-    if (list->callbackFrame == frame && work->sourceFrameCallback != 0) {
+    if (list->callbackFrame == frame && work->sourceFrameCallback != 0 && SDF_FRAME_DUE()) {
         ((void (*)(effBTLCutHandle_t *))work->sourceFrameCallback)(work);
     }
-    if (work->triggerFrame == frame && work->triggerFrameCallback != 0) {
+    if (work->triggerFrame == frame && work->triggerFrameCallback != 0 && SDF_FRAME_DUE()) {
         ((void (*)(effBTLCutHandle_t *))work->triggerFrameCallback)(work);
     }
-    work->currentFrame++;
+    work->currentFrame += SDF_FRAME_DUE();
 }
 
 void effBTLCutSetScale(effBTLCutHandle_t *effect, f32 scale) {
