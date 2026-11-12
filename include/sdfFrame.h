@@ -88,6 +88,13 @@
 #define SDF_FRAME_RAND(age) ((void *)0)
 #endif
 
+/* SDF_FRAME_RAND for a draw from the random state at state rather than the
+ * shared stream, such as the battle stream: a host answers state on one host
+ * tick of each retail tick and a stream of its own on the rest. */
+#ifndef SDF_FRAME_RAND_STATE
+#define SDF_FRAME_RAND_STATE(age, state) (state)
+#endif
+
 /* Runs one statement on the first host tick of each retail tick. */
 #ifndef SDF_FRAME_WHEN
 #define SDF_FRAME_WHEN(age, stmt) stmt
@@ -192,5 +199,9 @@
 #endif
 typedef SDF_FRAME_U8 sdfFrameU8_t;
 typedef SDF_FRAME_U16 sdfFrameU16_t;
+
+/* The count of logic ticks run since boot, the age to pass where no owner
+ * keeps a count of its own. */
+u32 dds3GetKernelCount(void);
 
 #endif
