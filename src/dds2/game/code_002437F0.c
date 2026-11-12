@@ -1,5 +1,6 @@
 #include "sdf_gs_register_submit_api.h"
 #include "common.h"
+#include "sdfFrame.h"
 #include "sdf_trig.h"
 #include "eff_random.h"
 #include "eff_resource_slots.h"
@@ -254,7 +255,7 @@ void evtAdvanceShortSolarNoiseLayers(SolarNoiseState *state) {
     s32 i;
     f32 angle;
 
-    state->spawnAge++;
+    state->spawnAge += SDF_FRAME_DUE();
     if ((s16)state->spawnAge > state->spawnInterval) {
         state->spawnAge = 0;
         if (state->activeCount < 10 && state->activeCount < spawnLimit) {
@@ -303,7 +304,7 @@ void evtAdvanceLongSolarNoiseLayers(SolarNoiseState *state) {
 
         if (phase >= 2) {
             s32 spawnLimit = (s32)((f32)phase * 3.0f * 0.125f + 1.0f);
-            state->spawnAge++;
+            state->spawnAge += SDF_FRAME_DUE();
             if ((s16)state->spawnAge > state->spawnInterval) {
                 state->spawnAge = 0;
                 if (state->activeCount < 10 && state->activeCount < spawnLimit) {
@@ -443,7 +444,7 @@ void evtUpdateSolarPointTimers(SolarOverlayWork *overlay) {
     s32 i;
     for (i = 7; i >= 0; i--, point++) {
         if (point->active != 0) {
-            s32 age = point->age + 1;
+            s32 age = point->age + SDF_FRAME_DUE();
             point->age = age;
             if ((s16)age > point->duration) {
                 point->age = 0;

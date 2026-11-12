@@ -1,5 +1,6 @@
 #include "mnu_variant_sprite_placement.h"
 #include "common.h"
+#include "sdfFrame.h"
 #include "mnu_mantra_sprite_draw.h"
 #include "dsp_channel.h"
 #include "mnu_title_stream.h"
@@ -3099,7 +3100,7 @@ void itfDspSignalE(void) {
 
 
 void mnuUpdateSparkle(DspParticle *spark) {
-    spark->timer = spark->timer - 1;
+    spark->timer = spark->timer - SDF_FRAME_DUE();
     if (spark->timer < 0) {
         if (spark->phase != 0) {
             spark->phase = 0;
@@ -3125,7 +3126,7 @@ void mnuTickMantraSparkParticles(DspParticleState *state) {
     s32 duration;
     s32 i;
 
-    state->countdown = state->countdown - 1;
+    state->countdown = state->countdown - SDF_FRAME_DUE();
     if (state->countdown < 0) {
         duration = dds3GetRandFloatA(0) * 60.0f + 60.0f;
         state->period = duration;
