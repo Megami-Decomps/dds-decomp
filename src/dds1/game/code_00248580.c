@@ -1091,7 +1091,11 @@ void fldSaveSceneOptionsAndClearFlags(datUnitWork_t *option) {
 }
 
 /* Definition is void; retail reads its leftover v0 here (callers ignore the result). */
+#ifdef FIX_BUGS
+extern void mnuDrawMantraPulseAndSparks(void *, s32, s32);
+#else
 extern s32 mnuDrawMantraPulseAndSparks(void *, s32, s32);
+#endif
 
 s32 mnuDrawTerminalEffectIfAvailable(s32 state) {
     MenuTerminalWork *work = (MenuTerminalWork *)state;
@@ -1104,7 +1108,13 @@ s32 mnuDrawTerminalEffectIfAvailable(s32 state) {
             if (result != 0) {
                 result = mnuHasEffectResourceHandle(work->effectHandle);
                 if (result != 0) {
+#ifdef FIX_BUGS
+                    /* BUG: the callee is void and its leftover v0 was returned; no caller reads it. */
+                    mnuDrawMantraPulseAndSparks((void *)work->effectHandle, 0x80, 0x53);
+                    result = 1;
+#else
                     result = mnuDrawMantraPulseAndSparks((void *)work->effectHandle, 0x80, 0x53);
+#endif
                 }
             }
         }
