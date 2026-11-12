@@ -1,5 +1,6 @@
 #include "sdk_ps2.h"
 #include "common.h"
+#include "sdfFrame.h"
 #include "mnu_movie_menu_selection_index.h"
 #include "snd_sequence_volume_pan.h"
 #include "sdf_trig.h"
@@ -331,7 +332,7 @@ void mnuAdvanceMovieMenuIdleAnimation(void) {
     fldDrawCameraColorLayerPass();
 
     state = mnuMovieMenuState;
-    state->pulseTimer++;
+    state->pulseTimer += SDF_FRAME_DUE();
     if (state->pulseTimer >= 61) {
         state->pulseTimer = 0;
         if (state->slideOffset == 0 && dds3GetRandFloatA(0) < 0.1f) {

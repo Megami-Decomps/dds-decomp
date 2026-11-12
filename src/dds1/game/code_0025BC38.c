@@ -1,6 +1,7 @@
 #include "sdk_ps2.h"
 #include "mnu_scene_sprite_entry.h"
 #include "common.h"
+#include "sdfFrame.h"
 #include "sdf_trig.h"
 #include "eff_random.h"
 #include "sdf_chip.h"
@@ -98,6 +99,10 @@ void mnuUpdateMantraSpriteCueGroups(MnuSpriteResourceGroup *resources) {
     SdfList **slot;
     s32 i;
     SdfList *group;
+
+    if (!SDF_FRAME_DUE()) {
+        return;
+    }
 
     if (resources->spawnCountdown == 0) {
         if (resources->activeCount < 10) {

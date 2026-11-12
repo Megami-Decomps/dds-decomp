@@ -1,5 +1,6 @@
 #include "sdk_ps2.h"
 #include "common.h"
+#include "sdfFrame.h"
 #include "eff_random_mod.h"
 #include "sdf_trig.h"
 #include "eff_random.h"
@@ -58,6 +59,10 @@ void mnuUpdateMovieSpriteResourceGroup(MnuSpriteResourceGroup *resources) {
     SdfList **slot;
     s32 i;
     SdfList *group;
+
+    if (!SDF_FRAME_DUE()) {
+        return;
+    }
 
     if (resources->spawnCountdown == 0) {
         if (resources->activeCount < 10) {
@@ -244,6 +249,9 @@ void mnuInitializeMovieRollEntry(void) {
 
 
 void mnuUpdateMovieRollEntry(MnuMovieRollEntry *entry) {
+    if (!SDF_FRAME_DUE()) {
+        return;
+    }
     entry->y += entry->velocity;
     entry->timer--;
     if (entry->active && entry->y < -256.0f) {

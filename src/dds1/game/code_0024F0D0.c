@@ -4391,7 +4391,7 @@ static inline s16 mnuRandomPulseDuration(void *state) {
 
 void mnuUpdateMantraGridEntryPulse(MnuMantraGridEntry *entry) {
     MnuMantraGridPulse *pulse = &entry->pulse;
-    s32 timer = pulse->timer + 1;
+    s32 timer = pulse->timer + SDF_FRAME_DUE();
     f32 random;
 
     pulse->timer = timer;
