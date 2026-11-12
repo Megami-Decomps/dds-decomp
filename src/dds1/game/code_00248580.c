@@ -1090,6 +1090,7 @@ void fldSaveSceneOptionsAndClearFlags(datUnitWork_t *option) {
     option->status = retainedStatus;
 }
 
+/* Definition is void; retail reads its leftover v0 here (callers ignore the result). */
 extern s32 mnuDrawMantraPulseAndSparks(void *, s32, s32);
 
 s32 mnuDrawTerminalEffectIfAvailable(s32 state) {

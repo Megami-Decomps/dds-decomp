@@ -29,6 +29,7 @@ void mnuRemoveMatchedNodesFromLinkedResourceLists(MnuCallbackListPair *pair, u32
     dds3RemoveListNodeAndNotify(pair->first, node);
 }
 
+/* Definition is void; retail returns its leftover v0, so the pair function needs a value. */
 extern s32 mnuClearResourceList(MnuCallbackList *);
 
 s64 mnuClearOwnedResourceListPair(MnuCallbackListPair *pair) {

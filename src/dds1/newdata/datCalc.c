@@ -449,6 +449,7 @@ extern scrProcessWork_s *evtWorkScriptTask;
 extern EvtScriptContext evtWorkScriptContext;
 
 extern struct scrProcessWork_s *scrSetIntReturnValue(s32 retVal);
+/* Definition is void; retail returns nowpwork left in v0 and the commands pass it on. */
 extern struct scrProcessWork_s *scrSetFloatReturnValue(f32 value);
 extern datUnitWork_t *dds3FindEntry(DatUnitId unitId);
 extern void ptyMergeStockSkills(datUnitWork_t *unit);
