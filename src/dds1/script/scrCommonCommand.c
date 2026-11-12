@@ -55,7 +55,7 @@ extern void evtBitOff(s32 no);
 extern s32 dds3GetRandIntA(s32 aLimit, s32 name);
 extern void dds3FadeIn(s32 r, s32 g, s32 b, s32 frame);
 extern void dds3FadeOut(s32 r, s32 g, s32 b, s32 frame);
-extern void dds3PadVibrationSet(s32 port, s32 motor, s32 level);
+extern void dds3PadVibrationSet(u32 motor, u8 level, s32 duration);
 extern void dds3SetScreenFovy(f32 fovy);
 extern s32 dds3ExistProcess(dds3ProcessID_t *id);
 extern s32 dds3KillProcess(dds3ProcessID_t *id, s32 shutdowntimer);
@@ -301,12 +301,12 @@ s32 scrCommand_PAD_PRESS(void)
 
 s32 scrCommand_PAD_ACT(void)
 {
-    s32 port;
     s32 motor;
+    s32 level;
 
-    port = scrGetIntPara(0);
-    motor = scrGetIntPara(1);
-    dds3PadVibrationSet(port, motor & 0xFF, scrGetIntPara(2));
+    motor = scrGetIntPara(0);
+    level = scrGetIntPara(1);
+    dds3PadVibrationSet(motor, level & 0xFF, scrGetIntPara(2));
     return 1;
 }
 
