@@ -2,23 +2,28 @@
 #include "dds1/sdk/libc_internal.h"
 
 
-extern const char printfSpaces[16];
+typedef struct {
+    char *decimal_point;
+    char *thousands_sep;
+    char *grouping;
+    char *int_curr_symbol;
+    char *currency_symbol;
+    char *mon_decimal_point;
+    char *mon_thousands_sep;
+    char *mon_grouping;
+    char *positive_sign;
+    char *negative_sign;
+    char int_frac_digits;
+    char frac_digits;
+    char p_cs_precedes;
+    char p_sep_by_space;
+    char n_cs_precedes;
+    char n_sep_by_space;
+    char p_sign_posn;
+    char n_sign_posn;
+} lconv_t;
 
-extern const char printfZeros[16];
-
-extern const char printfNanText[8] __attribute__((section(".rodata")));
-
-extern const char printfHexLower[24];
-
-extern const char printfNullText[8] __attribute__((section(".rodata")));
-
-extern const char printfHexUpper[24];
-
-extern const char printfBadBaseMsg[32];
-
-extern const char printfZeroDigit[8] __attribute__((section(".rodata")));
-
-extern const char printfDecimalPoint[16];
+extern int D_0039C438 __attribute__((section(".data")));
 
 s32 __sprint(FILE *fp, __suio *uio) {
     s32 err;
@@ -71,8 +76,42 @@ s32 vfprintf(FILE *fp, const char *fmt, va_list ap)
     return _vfprintf_r(fp->_data, fp, fmt, ap);
 }
 
-#ifdef NON_MATCHING
-/* Formatted-output core. Arguments occupy the EE ABI's eight-byte slots. */
+/*-
+ * Copyright (c) 1990 The Regents of the University of California.
+ * All rights reserved.
+ *
+ * This code is derived from software contributed to Berkeley by
+ * Chris Torek.
+ *
+ * Redistribution and use in source and binary forms, with or without
+ * modification, are permitted provided that the following conditions
+ * are met:
+ * 1. Redistributions of source code must retain the above copyright
+ *    notice, this list of conditions and the following disclaimer.
+ * 2. Redistributions in binary form must reproduce the above copyright
+ *    notice, this list of conditions and the following disclaimer in the
+ *    documentation and/or other materials provided with the distribution.
+ * 3. All advertising materials mentioning features or use of this software
+ *    must display the following acknowledgement:
+ *	This product includes software developed by the University of
+ *	California, Berkeley and its contributors.
+ * 4. Neither the name of the University nor the names of its contributors
+ *    may be used to endorse or promote products derived from this software
+ *    without specific prior written permission.
+ *
+ * THIS SOFTWARE IS PROVIDED BY THE REGENTS AND CONTRIBUTORS ``AS IS'' AND
+ * ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE
+ * IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE
+ * ARE DISCLAIMED.  IN NO EVENT SHALL THE REGENTS OR CONTRIBUTORS BE LIABLE
+ * FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL
+ * DAMAGES (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS
+ * OR SERVICES; LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION)
+ * HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT
+ * LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY
+ * OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF
+ * SUCH DAMAGE.
+ */
+
 
 extern s32 __swsetup(FILE *fp);
 extern s32 __sbprintf(FILE *fp, const char *format, va_list ap);
@@ -86,468 +125,689 @@ extern s32 isinf(f64 value);
 extern s32 isnan(f64 value);
 extern s32 exponent(char *out, s32 value, s32 marker);
 extern _reent *_impure_ptr;
-extern s32 mbCurMax __attribute__((section(".data")));
-extern const char printfInfText[];
-extern const char printfNanText[];
-extern const char printfHexLower[];
-extern const char printfNullText[];
-extern const char printfHexUpper[];
-extern const char printfBadBaseMsg[];
-extern const char printfZeroDigit[];
-extern const char printfDecimalPoint[];
-extern const char printfSpaces[16];
-extern const char printfZeros[16];
 
-/* Native output uses eight vectors and a 348-byte digit workspace. */
-s32 _vfprintf_r(_reent *r, FILE *fp, const char *format, va_list ap)
+/* Disclosed adaptation of newlib 5bacbf109f58efba1901137f251e79f9e0e1407a
+ * (2000-08-16), with the e9cd87b82a1f798b379fbdae146c8dde11a3657e
+ * (2001-01-23) expt || ndig correction, independently confirmed in native.
+ * FLOATING_POINT, default _NO_LONGLONG; long64/int32/pointer32,
+ * double/long-double64. Helpers retain their actual floating identities.
+ * Short strings use inferred-size static const .rodata objects: immutable
+ * static lifetime and semantic extents, not explicit alignment or padding.
+ * Assignments to historical char pointers retain the compiler's discarded-
+ * const extension; this is not a claim of strict conforming C89 source.
+ */
+#define FLOATING_POINT
+#define _NO_LONGLONG
+/*
+ * Copyright (c) 1990 The Regents of the University of California.
+ * All rights reserved.
+ *
+ * Redistribution and use in source and binary forms are permitted
+ * provided that the above copyright notice and this paragraph are
+ * duplicated in all such forms and that any documentation,
+ * advertising materials, and other materials related to such
+ * distribution and use acknowledge that the software was developed
+ * by the University of California, Berkeley.  The name of the
+ * University may not be used to endorse or promote products derived
+ * from this software without specific prior written permission.
+ * THIS SOFTWARE IS PROVIDED ``AS IS'' AND WITHOUT ANY EXPRESS OR
+ * IMPLIED WARRANTIES, INCLUDING, WITHOUT LIMITATION, THE IMPLIED
+ * WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE.
+ *
+ *	%W% (Berkeley) %G%
+ */
+
+/*
+ * Floating point scanf/printf (input/output) definitions.
+ */
+
+/* 11-bit exponent (VAX G floating point) is 308 decimal digits */
+#define	MAXEXP		308
+/* 128 bit fraction takes up 39 decimal digits; max reasonable precision */
+#define	MAXFRACT	39
+
+#define	BUF		(MAXEXP+MAXFRACT+1)	/* + decimal point */
+#define	DEFPREC		6
+#define __SNBF 0x0002
+#define __SWR 0x0008
+#define __SRW 0x0010
+#define __SERR 0x0040
+#define EOF (-1)
+#define	cantwrite(fp) \
+  ((((fp)->_flags & __SWR) == 0 || (fp)->_bf._base == NULL) && \
+   __swsetup(fp))
+#define __sferror(p) (((p)->_flags & __SERR) != 0)
+
+/*
+ * Macros for converting digits to letters and vice versa
+ */
+#define	to_digit(c)	((c) - '0')
+#define is_digit(c)	((unsigned)to_digit(c) <= 9)
+#define	to_char(n)	((n) + '0')
+
+/*
+ * Flags used during conversion.
+ */
+#define	ALT		0x001		/* alternate form */
+#define	HEXPREFIX	0x002		/* add 0x or 0X prefix */
+#define	LADJUST		0x004		/* left adjustment */
+#define	LONGDBL		0x008		/* long double; unimplemented */
+#define	LONGINT		0x010		/* long integer */
+#define	QUADINT		0x020		/* quad integer */
+#define	SHORTINT	0x040		/* short integer */
+#define	ZEROPAD		0x080		/* zero (as opposed to blank) pad */
+#define FPT		0x100		/* Floating point number */
+
+int _vfprintf_r(struct _reent *data, FILE *fp, const char *fmt0, va_list ap)
 {
-    char exponentBuffer[16];
-    __suio uio;
-    __siov iov[8];
-    __siov *current;
-    s32 cumulative;
-    char numberBuffer[0x15C];
-    char prefix[2];
-    char floatSign;
-    char signByte;
-    char *text;
-    char *decimalPoint;
-    const char *scanStart;
-    const char *cursor;
-    s32 mbstate;
-    s32 wideCharacter;
-    s32 decodedBytes;
-    s32 literalBytes;
-    s32 flags;
-    s32 width;
-    s32 precision;
-    s32 integerPrecision;
-    s32 conversion;
-    s32 textBytes;
-    s32 fieldBytes;
-    s32 precisionZeros;
-    s32 decimalPosition;
-    s32 digitLength;
-    s32 exponentLength;
-    s32 renderedLength;
-    s32 padBytes;
-    s32 base;
-    s32 nonzero;
-    u16 unsignedShort;
-    saddr_t signedWord;
-    u32 unsignedWord;
-    s64 signedLong;
-    u64 unsignedLong;
-    f64 floatValue;
-    s32 *countWord;
-    s16 *countShort;
-    s64 *countLong;
+	register char *fmt;	/* format string */
+	register int ch;	/* character from fmt */
+	register int n, m;	/* handy integers (short term usage) */
+	register char *cp;	/* handy char pointer (short term usage) */
+	register struct __siov *iovp;/* for PRINT macro */
+	register int flags;	/* flags as above */
+	int ret;		/* return value accumulator */
+	int width;		/* width from format (%8d), or 0 */
+	int prec;		/* precision from format (%.3d), or -1 */
+	char sign;		/* sign prefix (' ', '+', '-', or \0) */
+	__WCHAR_TYPE__ wc;
+#ifdef FLOATING_POINT
+	char *decimal_point = ((lconv_t *)localeconv())->decimal_point;
+	char softsign;		/* temporary negative sign for floats */
+	double _double;		/* double precision arguments %[eEfgG] */
+	int expt;		/* integer value of exponent */
+	int expsize;		/* character count for expstr */
+	int ndig;		/* actual number of digits returned by cvt */
+	char expstr[7];		/* buffer for exponent string */
+#endif
 
-#define PRINT(source_, length_) { \
-        current->iov_base = (void *)(source_); \
-        current->iov_len = (length_); \
-        current++; \
-        uio.uio_iovcnt++; \
-        uio.uio_resid += (length_); \
-        if (uio.uio_iovcnt == 8) { \
-            if (__sprint(fp, &uio) != 0) goto error_exit; \
-            else current = iov; \
-        } \
-    }
-#define PAD(source_, length_) { \
-        s32 padRemaining_ = (length_); \
-        while (padRemaining_ > 0) { \
-            s32 padBlock_ = padRemaining_ > 16 ? 16 : padRemaining_; \
-            PRINT((source_), padBlock_); \
-            padRemaining_ -= padBlock_; \
-        } \
-    }
+#ifndef _NO_LONGLONG
+#define	quad_t	  long long
+#define	u_quad_t  unsigned long long
+#endif
 
-    decimalPoint = *(char **)localeconv();
-    mbstate = 0;
-    if ((fp->_flags & 8) == 0 || fp->_bf._base == NULL) {
-        if (__swsetup(fp) != 0) return -1;
-    }
-    if ((fp->_flags & 0x1A) == 0x0A && fp->_file >= 0) {
-        return __sbprintf(fp, format, ap);
-    }
+#ifndef _NO_LONGLONG
+	u_quad_t _uquad;	/* integer arguments %[diouxX] */
+#else
+	unsigned long _uquad;
+#endif
+	enum { OCT, DEC, HEX } base;/* base for [diouxX] conversion */
+	int dprec;		/* a copy of prec if [diouxX], 0 otherwise */
+	int realsz;		/* field size expanded by dprec */
+	int size;		/* size of converted field or string */
+	char *xdigs;		/* digits for [xX] conversion */
+#define NIOV 8
+	struct __suio uio;	/* output information: summary */
+	struct __siov iov[NIOV];/* ... and individual io vectors */
+	char buf[BUF];		/* space for %c, %[diouxX], %[eEfgG] */
+	char ox[2];		/* space for 0x hex-prefix */
+        int state = 0;          /* mbtowc calls from library must not change state */
 
-    uio.uio_iov = iov;
-    uio.uio_iovcnt = 0;
-    uio.uio_resid = 0;
-    current = iov;
-    cumulative = 0;
-    cursor = format;
+	/*
+	 * Choose PADSIZE to trade efficiency vs. size.  If larger printf
+	 * fields occur frequently, increase PADSIZE and make the initialisers
+	 * below longer.
+	 */
+#define	PADSIZE	16		/* pad chunk size */
+	static const char blanks[PADSIZE] =
+	 {' ',' ',' ',' ',' ',' ',' ',' ',' ',' ',' ',' ',' ',' ',' ',' '};
+	static const char zeroes[PADSIZE] =
+	 {'0','0','0','0','0','0','0','0','0','0','0','0','0','0','0','0'};
 
-    for (;;) {
-        scanStart = cursor;
-        for (;;) {
-            decodedBytes = _mbtowc_r(_impure_ptr, &wideCharacter, cursor,
-                                      mbCurMax, &mbstate);
-            if (decodedBytes <= 0) break;
-            cursor += decodedBytes;
-            if (wideCharacter == '%') {
-                cursor--;
-                break;
-            }
-        }
-        literalBytes = cursor - scanStart;
-        if (literalBytes != 0) {
-            PRINT(scanStart, literalBytes);
-            cumulative += literalBytes;
-        }
-        if (decodedBytes <= 0) break;
-
-        cursor++;
-        signByte = 0;
-        flags = 0;
-        width = 0;
-        precision = -1;
-        integerPrecision = 0;
-        textBytes = 0;
-read_conversion:
-        conversion = (s8)*cursor++;
-dispatch_conversion:
-        switch (conversion) {
-        case ' ':
-            if (signByte == 0) signByte = ' ';
-            goto read_conversion;
-        case '#':
-            flags |= 1;
-            goto read_conversion;
-        case '*':
-            width = __builtin_va_arg(ap, s32);
-            if (width < 0) {
-                width = (s32)(0u - (u32)width);
-                flags |= 4;
-            }
-            goto read_conversion;
-        case '-':
-            flags |= 4;
-            goto read_conversion;
-        case '+':
-            signByte = '+';
-            goto read_conversion;
-        case '.':
-            conversion = (s8)*cursor++;
-            if (conversion == '*') {
-                precision = __builtin_va_arg(ap, s32);
-                if (precision < -1) precision = -1;
-                goto read_conversion;
-            }
-            precision = 0;
-            while ((u32)(conversion - '0') < 10) {
-                precision = (s32)((u32)precision * 10u + (u32)(conversion - '0'));
-                conversion = (s8)*cursor++;
-            }
-            if (precision < -1) precision = -1;
-            goto dispatch_conversion;
-        case '0':
-            flags |= 0x80;
-            goto read_conversion;
-        case '1': case '2': case '3': case '4': case '5':
-        case '6': case '7': case '8': case '9':
-            width = 0;
-            do {
-                width = (s32)((u32)width * 10u + (u32)(conversion - '0'));
-                conversion = (s8)*cursor++;
-            } while ((u32)(conversion - '0') < 10);
-            goto dispatch_conversion;
-        case 'L':
-            flags |= 8;
-            goto read_conversion;
-        case 'h':
-            flags |= 0x40;
-            goto read_conversion;
-        case 'l':
-            if (*cursor == 'l') {
-                cursor++;
-                flags |= 0x20;
-            } else flags |= 0x10;
-            goto read_conversion;
-        case 'q':
-            flags |= 0x20;
-            goto read_conversion;
-        case 'D':
-            flags |= 0x10;
-            /* fall through */
-        case 'd':
-        case 'i':
-            if (flags & 0x10) signedLong = __builtin_va_arg(ap, s64);
-            else if (flags & 0x40) signedLong = (s16)__builtin_va_arg(ap, s32);
-            else signedLong = __builtin_va_arg(ap, s32);
-            unsignedLong = (u64)signedLong;
-            if (signedLong < 0) {
-                signByte = '-';
-                unsignedLong = 0 - unsignedLong;
-            }
-            base = 1;
-            goto format_integer;
-        case 'O':
-            flags |= 0x10;
-            /* fall through */
-        case 'o':
-            signByte = 0;
-            if (flags & 0x10) unsignedLong = __builtin_va_arg(ap, u64);
-            else if (flags & 0x40) {
-                unsignedShort = (u16)__builtin_va_arg(ap, u32);
-                unsignedLong = unsignedShort;
-            } else {
-                unsignedWord = __builtin_va_arg(ap, u32);
-                unsignedLong = unsignedWord;
-            }
-            base = 0;
-            goto format_integer;
-        case 'U':
-            flags |= 0x10;
-            /* fall through */
-        case 'u':
-            signByte = 0;
-            if (flags & 0x10) unsignedLong = __builtin_va_arg(ap, u64);
-            else if (flags & 0x40) {
-                unsignedShort = (u16)__builtin_va_arg(ap, u32);
-                unsignedLong = unsignedShort;
-            } else {
-                unsignedWord = __builtin_va_arg(ap, u32);
-                unsignedLong = unsignedWord;
-            }
-            base = 1;
-            goto format_integer;
-        case 'X':
-        case 'x':
-            signByte = 0;
-            if (flags & 0x10) unsignedLong = __builtin_va_arg(ap, u64);
-            else if (flags & 0x40) {
-                unsignedShort = (u16)__builtin_va_arg(ap, u32);
-                unsignedLong = unsignedShort;
-            } else {
-                unsignedWord = __builtin_va_arg(ap, u32);
-                unsignedLong = unsignedWord;
-            }
-            base = 2;
-            goto format_integer;
-        case 'p':
-            signByte = 0;
-            flags |= 2;
-            signedWord = EE_ADDR_S(__builtin_va_arg(ap, void *));
-            unsignedLong = (u64)(s64)signedWord;
-            base = 2;
-            conversion = 'x';
-            goto format_integer;
-        case 's':
-            signByte = 0;
-            text = __builtin_va_arg(ap, char *);
-            if (text == NULL) text = (char *)printfNullText;
-            if (precision >= 0) {
-                char *end = (char *)memchr(text, 0, (u32)precision);
-                textBytes = end != NULL ? end - text : precision;
-                if (textBytes > precision) textBytes = precision;
-            } else textBytes = strlen(text);
-            goto emit_field;
-        case 'c':
-            signByte = 0;
-            numberBuffer[0] = (u8)__builtin_va_arg(ap, u32);
-            text = numberBuffer;
-            textBytes = 1;
-            goto emit_field;
-        case 'n':
-            if (flags & 0x10) {
-                countLong = __builtin_va_arg(ap, s64 *);
-                *countLong = (s64)cumulative;
-            } else if (flags & 0x40) {
-                countShort = __builtin_va_arg(ap, s16 *);
-                *countShort = (s16)cumulative;
-            } else {
-                countWord = __builtin_va_arg(ap, s32 *);
-                *countWord = cumulative;
-            }
-            continue;
-        case 'e': case 'E': case 'f': case 'g': case 'G':
-            if (precision == -1) precision = 6;
-            if ((conversion == 'g' || conversion == 'G') && precision == 0)
-                precision = 1;
-            floatValue = __builtin_va_arg(ap, f64);
-            if (isinf(floatValue) != 0) {
-                if (dpcmp(floatValue, 0.0) < 0) signByte = '-';
-                text = (char *)printfInfText;
-                textBytes = 3;
-                renderedLength = 3;
-            } else if (isnan(floatValue) != 0) {
-                text = (char *)printfNanText;
-                textBytes = 3;
-                renderedLength = 3;
-            } else {
-                flags |= 0x100;
-                text = cvt(r, floatValue, precision, flags, &floatSign,
-                             &decimalPosition, conversion, &digitLength);
-                if (conversion == 'g' || conversion == 'G') {
-                    if (decimalPosition < -3 || precision < decimalPosition)
-                        conversion = conversion == 'G' ? 'E' : 'e';
-                    else
-                        conversion = 'g';
-                }
-                if (conversion == 'e' || conversion == 'E') {
-                    decimalPosition--;
-                    exponentLength = exponent(exponentBuffer, decimalPosition, conversion);
-                    renderedLength = exponentLength + digitLength;
-                    if (digitLength >= 2 || (flags & 1)) renderedLength++;
-                } else {
-                    if (conversion == 'f') {
-                        renderedLength = precision + 2;
-                        if (decimalPosition > 0) {
-                            renderedLength = decimalPosition;
-                            if (precision != 0 || (flags & 1))
-                                renderedLength += precision + 1;
-                        }
-                    } else if (decimalPosition >= digitLength) {
-                        renderedLength = decimalPosition;
-                        if (flags & 1) renderedLength++;
-                    } else if (decimalPosition > 0) {
-                        renderedLength = digitLength + 1;
-                    } else {
-                        renderedLength = digitLength - decimalPosition + 2;
-                    }
-                }
-                if (floatSign != 0) signByte = '-';
-                textBytes = renderedLength;
-            }
-            goto emit_field;
-        default:
-            signByte = 0;
-            if (conversion == '%') numberBuffer[0] = '%';
-            else numberBuffer[0] = (u8)conversion;
-            if (conversion == 0) goto flush_output;
-            text = numberBuffer;
-            textBytes = 1;
-            goto emit_field;
-        }
-format_integer:
-        {
-            const char *alphabet = conversion == 'X' ? printfHexUpper : printfHexLower;
-            char *end = numberBuffer + sizeof(numberBuffer);
-            text = end;
-            nonzero = unsignedLong != 0;
-            integerPrecision = precision;
-            if (precision >= 0) flags &= ~0x80;
-            if ((conversion == 'x' || conversion == 'X') && (flags & 1) && nonzero)
-                flags |= 2;
-            if (precision != 0 || unsignedLong != 0) {
-                if (base == 1) {
-                    while (unsignedLong >= 10) {
-                        *--text = (char)('0' + unsignedLong % 10);
-                        unsignedLong /= 10;
-                    }
-                    *--text = (char)('0' + unsignedLong);
-                } else if (base == 0) {
-                    do {
-                        *--text = (char)('0' + (unsignedLong & 7));
-                        unsignedLong >>= 3;
-                    } while (unsignedLong != 0);
-                    if ((flags & 1) && *text != '0') *--text = '0';
-                } else if (base == 2) {
-                    do {
-                        *--text = alphabet[unsignedLong & 15];
-                        unsignedLong >>= 4;
-                    } while (unsignedLong != 0);
-                } else {
-                    text = (char *)printfBadBaseMsg;
-                    textBytes = strlen(text);
-                    goto emit_field;
-                }
-            }
-            textBytes = end - text;
-        }
-
-emit_field:
-        precisionZeros = integerPrecision > textBytes ? integerPrecision - textBytes : 0;
-        fieldBytes = textBytes;
-        if (integerPrecision > fieldBytes) fieldBytes = integerPrecision;
-        if (signByte != 0) fieldBytes++;
-        else fieldBytes += flags & 2;
-        if (width > fieldBytes) padBytes = width - fieldBytes;
-        else padBytes = 0;
-        if ((flags & 0x84) == 0 && (flags & 4) == 0) {
-            PAD(printfSpaces, padBytes);
-        }
-        if (signByte != 0) {
-            PRINT(&signByte, 1);
-        } else if (flags & 2) {
-            prefix[0] = '0';
-            prefix[1] = conversion;
-            PRINT(prefix, 2);
-        }
-        if ((flags & 0x80) && !(flags & 4) && width > fieldBytes) {
-            PAD(printfZeros, width - fieldBytes);
-        }
-        if (precisionZeros > 0) PAD(printfZeros, precisionZeros);
-        if ((flags & 0x100) == 0) {
-            PRINT(text, textBytes);
-        } else if (conversion == 'e' || conversion == 'E') {
-            if (digitLength < 2 && !(flags & 1)) {
-                PRINT(text, 1);
-            } else {
-                prefix[0] = text[0];
-                prefix[1] = '.';
-                PRINT(prefix, 2);
-                if (dpcmp(floatValue, 0.0) != 0) {
-                    PRINT(text + 1, digitLength - 1);
-                } else if (digitLength - 1 > 0) {
-                    PAD(printfZeros, digitLength - 1);
-                }
-            }
-            PRINT(exponentBuffer, exponentLength);
-        } else if (dpcmp(floatValue, 0.0) == 0) {
-            PRINT(printfZeroDigit, 1);
-            if (decimalPosition < digitLength || (flags & 1)) PRINT(decimalPoint, 1);
-            if (digitLength - 1 > 0) PAD(printfZeros, digitLength - 1);
-        } else if (decimalPosition <= 0) {
-            PRINT(printfZeroDigit, 1);
-            if (decimalPosition != 0 || digitLength != 0) {
-                PRINT(decimalPoint, 1);
-                if (decimalPosition < 0) PAD(printfZeros, -decimalPosition);
-                PRINT(text, digitLength);
-            }
-        } else if (decimalPosition < digitLength) {
-            PRINT(text, decimalPosition);
-            PRINT(printfDecimalPoint, 1);
-            PRINT(text + decimalPosition, digitLength - decimalPosition);
-        } else {
-            PRINT(text, digitLength);
-            if (decimalPosition > digitLength)
-                PAD(printfZeros, decimalPosition - digitLength);
-            if (flags & 1) PRINT(printfDecimalPoint, 1);
-        }
-        if (flags & 4) {
-            padBytes = width - fieldBytes;
-            if (padBytes > 0) {
-                PAD(printfSpaces, padBytes);
-            }
-        }
-        if (width > fieldBytes) cumulative += width;
-        else cumulative += fieldBytes;
-        if (uio.uio_resid != 0) {
-            if (__sprint(fp, &uio) != 0) goto error_exit;
-        }
-        uio.uio_iovcnt = 0;
-        current = iov;
-    }
-
-flush_output:
-    if (uio.uio_resid != 0 && __sprint(fp, &uio) != 0) goto error_exit;
-error_exit:
-#undef PAD
-#undef PRINT
-    return (fp->_flags & 0x40) != 0 ? -1 : cumulative;
+	/*
+	 * BEWARE, these `goto error' on error, and PAD uses `n'.
+	 */
+#define	PRINT(ptr, len) { \
+	iovp->iov_base = (ptr); \
+	iovp->iov_len = (len); \
+	uio.uio_resid += (len); \
+	iovp++; \
+	if (++uio.uio_iovcnt >= NIOV) { \
+		if (__sprint(fp, &uio)) \
+			goto error; \
+		iovp = iov; \
+	} \
+}
+#define	PAD(howmany, with) { \
+	if ((n = (howmany)) > 0) { \
+		while (n > PADSIZE) { \
+			PRINT(with, PADSIZE); \
+			n -= PADSIZE; \
+		} \
+		PRINT(with, n); \
+	} \
+}
+#define	FLUSH() { \
+	if (uio.uio_resid && __sprint(fp, &uio)) \
+		goto error; \
+	uio.uio_iovcnt = 0; \
+	iovp = iov; \
 }
 
+	/*
+	 * To extend shorts properly, we need both signed and unsigned
+	 * argument extraction methods.
+	 */
+#ifndef _NO_LONGLONG
+#define	SARG() \
+	(flags&QUADINT ? __builtin_va_arg(ap, quad_t) : \
+	    flags&LONGINT ? __builtin_va_arg(ap, long) : \
+	    flags&SHORTINT ? (long)(short)__builtin_va_arg(ap, int) : \
+	    (long)__builtin_va_arg(ap, int))
+#define	UARG() \
+	(flags&QUADINT ? __builtin_va_arg(ap, u_quad_t) : \
+	    flags&LONGINT ? __builtin_va_arg(ap, unsigned long) : \
+	    flags&SHORTINT ? (unsigned long)(unsigned short)__builtin_va_arg(ap, int) : \
+	    (unsigned long)__builtin_va_arg(ap, unsigned int))
 #else
-
-INCLUDE_RODATA(const s32, "sdk/libc_vfprintf", D_003B7CA0);
-
-INCLUDE_RODATA(const s32, "sdk/libc_vfprintf", D_003B7CB0);
-
-INCLUDE_ASM(const s32, "sdk/libc_vfprintf", _vfprintf_r);
+#define	SARG() \
+	(flags&LONGINT ? __builtin_va_arg(ap, long) : \
+	    flags&SHORTINT ? (long)(short)__builtin_va_arg(ap, int) : \
+	    (long)__builtin_va_arg(ap, int))
+#define	UARG() \
+	(flags&LONGINT ? __builtin_va_arg(ap, unsigned long) : \
+	    flags&SHORTINT ? (unsigned long)(unsigned short)__builtin_va_arg(ap, int) : \
+	    (unsigned long)__builtin_va_arg(ap, unsigned int))
 #endif
+
+	/* sorry, fprintf(read_only_file, "") returns EOF, not 0 */
+	if (cantwrite(fp))
+		return (EOF);
+
+	/* optimise fprintf(stderr) (and other unbuffered Unix files) */
+	if ((fp->_flags & (__SNBF|__SWR|__SRW)) == (__SNBF|__SWR) &&
+	    fp->_file >= 0)
+		return (__sbprintf(fp, fmt0, ap));
+
+	fmt = (char *)fmt0;
+	uio.uio_iov = iovp = iov;
+	uio.uio_resid = 0;
+	uio.uio_iovcnt = 0;
+	ret = 0;
+
+	/*
+	 * Scan the format for conversions (`%' character).
+	 */
+	for (;;) {
+	        cp = fmt;
+	        while ((n = _mbtowc_r(_impure_ptr, &wc, fmt, D_0039C438, &state)) > 0) {
+			fmt += n;
+			if (wc == '%') {
+				fmt--;
+				break;
+			}
+		}
+		if ((m = fmt - cp) != 0) {
+			PRINT(cp, m);
+			ret += m;
+		}
+		if (n <= 0)
+			goto done;
+		fmt++;		/* skip over '%' */
+
+		flags = 0;
+		dprec = 0;
+		width = 0;
+		prec = -1;
+		sign = '\0';
+
+rflag:		ch = *fmt++;
+reswitch:	switch (ch) {
+		case ' ':
+			/*
+			 * ``If the space and + flags both appear, the space
+			 * flag will be ignored.''
+			 *	-- ANSI X3J11
+			 */
+			if (!sign)
+				sign = ' ';
+			goto rflag;
+		case '#':
+			flags |= ALT;
+			goto rflag;
+		case '*':
+			/*
+			 * ``A negative field width argument is taken as a
+			 * - flag followed by a positive field width.''
+			 *	-- ANSI X3J11
+			 * They don't exclude field widths read from args.
+			 */
+			if ((width = __builtin_va_arg(ap, int)) >= 0)
+				goto rflag;
+			width = -width;
+			/* FALLTHROUGH */
+		case '-':
+			flags |= LADJUST;
+			goto rflag;
+		case '+':
+			sign = '+';
+			goto rflag;
+		case '.':
+			if ((ch = *fmt++) == '*') {
+				n = __builtin_va_arg(ap, int);
+				prec = n < 0 ? -1 : n;
+				goto rflag;
+			}
+			n = 0;
+			while (is_digit(ch)) {
+				n = 10 * n + to_digit(ch);
+				ch = *fmt++;
+			}
+			prec = n < 0 ? -1 : n;
+			goto reswitch;
+		case '0':
+			/*
+			 * ``Note that 0 is taken as a flag, not as the
+			 * beginning of a field width.''
+			 *	-- ANSI X3J11
+			 */
+			flags |= ZEROPAD;
+			goto rflag;
+		case '1': case '2': case '3': case '4':
+		case '5': case '6': case '7': case '8': case '9':
+			n = 0;
+			do {
+				n = 10 * n + to_digit(ch);
+				ch = *fmt++;
+			} while (is_digit(ch));
+			width = n;
+			goto reswitch;
+#ifdef FLOATING_POINT
+		case 'L':
+			flags |= LONGDBL;
+			goto rflag;
+#endif
+		case 'h':
+			flags |= SHORTINT;
+			goto rflag;
+		case 'l':
+			if (*fmt == 'l') {
+				fmt++;
+				flags |= QUADINT;
+			} else {
+				flags |= LONGINT;
+			}
+			goto rflag;
+		case 'q':
+			flags |= QUADINT;
+			goto rflag;
+		case 'c':
+			*(cp = buf) = __builtin_va_arg(ap, int);
+			size = 1;
+			sign = '\0';
+			break;
+		case 'D':
+			flags |= LONGINT;
+			/*FALLTHROUGH*/
+		case 'd':
+		case 'i':
+			_uquad = SARG();
+#ifndef _NO_LONGLONG
+			if ((quad_t)_uquad < 0)
+#else
+			if ((long) _uquad < 0)
+#endif
+			{
+
+				_uquad = -_uquad;
+				sign = '-';
+			}
+			base = DEC;
+			goto number;
+#ifdef FLOATING_POINT
+		case 'e':
+		case 'E':
+		case 'f':
+		case 'g':
+		case 'G':
+			if (prec == -1) {
+				prec = DEFPREC;
+			} else if ((ch == 'g' || ch == 'G') && prec == 0) {
+				prec = 1;
+			}
+
+			if (flags & LONGDBL) {
+				_double = (double) __builtin_va_arg(ap, long double);
+			} else {
+				_double = __builtin_va_arg(ap, double);
+			}
+
+			/* do this before tricky precision changes */
+			if (isinf(_double)) {
+				static const char inf_text[] __attribute__((section(".rodata"))) = "Inf";
+				if (_double < 0)
+					sign = '-';
+				cp = inf_text;
+				size = 3;
+				break;
+			}
+			if (isnan(_double)) {
+				static const char nan_text[] __attribute__((section(".rodata"))) = "NaN";
+				cp = nan_text;
+				size = 3;
+				break;
+			}
+
+			flags |= FPT;
+			cp = cvt(data, _double, prec, flags, &softsign,
+				&expt, ch, &ndig);
+			if (ch == 'g' || ch == 'G') {
+				if (expt <= -4 || expt > prec)
+					ch = (ch == 'g') ? 'e' : 'E';
+				else
+					ch = 'g';
+			}
+			if (ch <= 'e') {	/* 'e' or 'E' fmt */
+				--expt;
+				expsize = exponent(expstr, expt, ch);
+				size = expsize + ndig;
+				if (ndig > 1 || flags & ALT)
+					++size;
+			} else if (ch == 'f') {		/* f fmt */
+				if (expt > 0) {
+					size = expt;
+					if (prec || flags & ALT)
+						size += prec + 1;
+				} else	/* "0.X" */
+					size = prec + 2;
+			} else if (expt >= ndig) {	/* fixed g fmt */
+				size = expt;
+				if (flags & ALT)
+					++size;
+			} else
+				size = ndig + (expt > 0 ?
+					1 : 2 - expt);
+
+			if (softsign)
+				sign = '-';
+			break;
+#endif /* FLOATING_POINT */
+		case 'n':
+#ifndef _NO_LONGLONG
+			if (flags & QUADINT)
+				*__builtin_va_arg(ap, quad_t *) = ret;
+			else
+#endif
+			if (flags & LONGINT)
+				*__builtin_va_arg(ap, long *) = ret;
+			else if (flags & SHORTINT)
+				*__builtin_va_arg(ap, short *) = ret;
+			else
+				*__builtin_va_arg(ap, int *) = ret;
+			continue;	/* no output */
+		case 'O':
+			flags |= LONGINT;
+			/*FALLTHROUGH*/
+		case 'o':
+			_uquad = UARG();
+			base = OCT;
+			goto nosign;
+		case 'p':
+			/*
+			 * ``The argument shall be a pointer to void.  The
+			 * value of the pointer is converted to a sequence
+			 * of printable characters, in an implementation-
+			 * defined manner.''
+			 *	-- ANSI X3J11
+			 */
+			/* NOSTRICT */
+			_uquad = (unsigned long)(unsigned long)__builtin_va_arg(ap, void *);
+			base = HEX;
+			xdigs = "0123456789abcdef";
+			flags |= HEXPREFIX;
+			ch = 'x';
+			goto nosign;
+		case 's':
+			if ((cp = __builtin_va_arg(ap, char *)) == NULL) {
+				static const char null_text[] __attribute__((section(".rodata"))) = "(null)";
+				cp = null_text;
+			}
+			if (prec >= 0) {
+				/*
+				 * can't use strlen; can only look for the
+				 * NUL in the first `prec' characters, and
+				 * strlen() will go further.
+				 */
+				char *p = memchr(cp, 0, prec);
+
+				if (p != NULL) {
+					size = p - cp;
+					if (size > prec)
+						size = prec;
+				} else
+					size = prec;
+			} else
+				size = strlen(cp);
+			sign = '\0';
+			break;
+		case 'U':
+			flags |= LONGINT;
+			/*FALLTHROUGH*/
+		case 'u':
+			_uquad = UARG();
+			base = DEC;
+			goto nosign;
+		case 'X':
+			xdigs = "0123456789ABCDEF";
+			goto hex;
+		case 'x':
+			xdigs = "0123456789abcdef";
+hex:			_uquad = UARG();
+			base = HEX;
+			/* leading 0x/X only if non-zero */
+			if (flags & ALT && _uquad != 0)
+				flags |= HEXPREFIX;
+
+			/* unsigned conversions */
+nosign:			sign = '\0';
+			/*
+			 * ``... diouXx conversions ... if a precision is
+			 * specified, the 0 flag will be ignored.''
+			 *	-- ANSI X3J11
+			 */
+number:			if ((dprec = prec) >= 0)
+				flags &= ~ZEROPAD;
+
+			/*
+			 * ``The result of converting a zero value with an
+			 * explicit precision of zero is no characters.''
+			 *	-- ANSI X3J11
+			 */
+			cp = buf + BUF;
+			if (_uquad != 0 || prec != 0) {
+				/*
+				 * Unsigned mod is hard, and unsigned mod
+				 * by a constant is easier than that by
+				 * a variable; hence this switch.
+				 */
+				switch (base) {
+				case OCT:
+					do {
+						*--cp = to_char(_uquad & 7);
+						_uquad >>= 3;
+					} while (_uquad);
+					/* handle octal leading 0 */
+					if (flags & ALT && *cp != '0')
+						*--cp = '0';
+					break;
+
+				case DEC:
+					/* many numbers are 1 digit */
+					while (_uquad >= 10) {
+						*--cp = to_char(_uquad % 10);
+						_uquad /= 10;
+					}
+					*--cp = to_char(_uquad);
+					break;
+
+				case HEX:
+					do {
+						*--cp = xdigs[_uquad & 15];
+						_uquad >>= 4;
+					} while (_uquad);
+					break;
+
+				default:
+					cp = "bug in vfprintf: bad base";
+					size = strlen(cp);
+					goto skipsize;
+				}
+			}
+			size = buf + BUF - cp;
+		skipsize:
+			break;
+		default:	/* "%?" prints ?, unless ? is NUL */
+			if (ch == '\0')
+				goto done;
+			/* pretend it was %c with argument ch */
+			cp = buf;
+			*cp = ch;
+			size = 1;
+			sign = '\0';
+			break;
+		}
+
+		/*
+		 * All reasonable formats wind up here.  At this point, `cp'
+		 * points to a string which (if not flags&LADJUST) should be
+		 * padded out to `width' places.  If flags&ZEROPAD, it should
+		 * first be prefixed by any sign or other prefix; otherwise,
+		 * it should be blank padded before the prefix is emitted.
+		 * After any left-hand padding and prefixing, emit zeroes
+		 * required by a decimal [diouxX] precision, then print the
+		 * string proper, then emit zeroes required by any leftover
+		 * floating precision; finally, if LADJUST, pad with blanks.
+		 *
+		 * Compute actual size, so we know how much to pad.
+		 * size excludes decimal prec; realsz includes it.
+		 */
+		realsz = dprec > size ? dprec : size;
+		if (sign)
+			realsz++;
+		else if (flags & HEXPREFIX)
+			realsz+= 2;
+
+		/* right-adjusting blank padding */
+		if ((flags & (LADJUST|ZEROPAD)) == 0)
+			PAD(width - realsz, blanks);
+
+		/* prefix */
+		if (sign) {
+			PRINT(&sign, 1);
+		} else if (flags & HEXPREFIX) {
+			ox[0] = '0';
+			ox[1] = ch;
+			PRINT(ox, 2);
+		}
+
+		/* right-adjusting zero padding */
+		if ((flags & (LADJUST|ZEROPAD)) == ZEROPAD)
+			PAD(width - realsz, zeroes);
+
+		/* leading zeroes from decimal precision */
+		PAD(dprec - size, zeroes);
+
+		/* the string or number proper */
+#ifdef FLOATING_POINT
+		if ((flags & FPT) == 0) {
+			PRINT(cp, size);
+		} else {	/* glue together f_p fragments */
+			if (ch >= 'f') {	/* 'f' or 'g' */
+				static const char zero_text[] __attribute__((section(".rodata"))) = "0";
+				static const char point_text[] __attribute__((section(".rodata"))) = ".";
+				if (_double == 0) {
+					/* kludge for __dtoa irregularity */
+					PRINT(zero_text, 1);
+					if (expt < ndig || (flags & ALT) != 0) {
+						PRINT(decimal_point, 1);
+						PAD(ndig - 1, zeroes);
+					}
+				} else if (expt <= 0) {
+					PRINT(zero_text, 1);
+					if(expt || ndig) {
+						PRINT(decimal_point, 1);
+						PAD(-expt, zeroes);
+						PRINT(cp, ndig);
+					}
+				} else if (expt >= ndig) {
+					PRINT(cp, ndig);
+					PAD(expt - ndig, zeroes);
+					if (flags & ALT)
+						PRINT(point_text, 1);
+				} else {
+					PRINT(cp, expt);
+					cp += expt;
+					PRINT(point_text, 1);
+					PRINT(cp, ndig-expt);
+				}
+			} else {	/* 'e' or 'E' */
+				if (ndig > 1 || flags & ALT) {
+					ox[0] = *cp++;
+					ox[1] = '.';
+					PRINT(ox, 2);
+                                       if (_double) {
+						PRINT(cp, ndig-1);
+					} else	/* 0.[0..] */
+						/* __dtoa irregularity */
+						PAD(ndig - 1, zeroes);
+				} else	/* XeYYY */
+					PRINT(cp, 1);
+				PRINT(expstr, expsize);
+			}
+		}
+#else
+		PRINT(cp, size);
+#endif
+		/* left-adjusting padding (always blank) */
+		if (flags & LADJUST)
+			PAD(width - realsz, blanks);
+
+		/* finally, adjust ret */
+		ret += width > realsz ? width : realsz;
+
+		FLUSH();	/* copy out the I/O vectors */
+	}
+done:
+	FLUSH();
+error:
+	return (__sferror(fp) ? EOF : ret);
+	/* NOTREACHED */
+}
+
+#undef FLOATING_POINT
+#undef _NO_LONGLONG
+#undef MAXEXP
+#undef MAXFRACT
+#undef DEFPREC
+#undef BUF
+#undef __SNBF
+#undef __SWR
+#undef __SRW
+#undef __SERR
+#undef EOF
+#undef cantwrite
+#undef __sferror
+#undef to_digit
+#undef is_digit
+#undef to_char
+#undef ALT
+#undef HEXPREFIX
+#undef LADJUST
+#undef LONGDBL
+#undef LONGINT
+#undef QUADINT
+#undef SHORTINT
+#undef ZEROPAD
+#undef FPT
+#undef NIOV
+#undef PADSIZE
+#undef PRINT
+#undef PAD
+#undef FLUSH
+#undef SARG
+#undef UARG
+#undef quad_t
+#undef u_quad_t
 
 char *cvt(_reent *r, f64 value, s32 precision, s32 flags, char *sign,
           s32 *decimalPoint, s32 format, s32 *length)
