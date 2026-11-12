@@ -67,6 +67,13 @@
 #ifndef SDF_FRAME_DIVISOR
 #define SDF_FRAME_DIVISOR(d) (1.0f / (1.0f - SDF_FRAME_DECAY(1.0f - 1.0f / (d))))
 #endif
+
+/* A share of the remaining gap closed once per tick, as x += (target - x) * f:
+ * the decay 1 - f, so a host's SDF_FRAME_DECAY scales it and closes the same
+ * share over a retail tick. Folds to f here. */
+#ifndef SDF_FRAME_FRACTION
+#define SDF_FRAME_FRACTION(f) (f)
+#endif
 /* The retail tick a host tick count falls in, an integer: the inverse of
  * SDF_FRAMES, for a key or a parity that must advance at the retail rate. */
 #ifndef SDF_FRAME_TICK
