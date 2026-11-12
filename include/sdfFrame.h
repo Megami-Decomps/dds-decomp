@@ -47,7 +47,9 @@
 #ifndef SDF_FRAME_STEP_INT
 #define SDF_FRAME_STEP_INT(d) (d)
 #endif
-/* SDF_FRAME_STEP_INT keyed by a count of host ticks an owner keeps from 0. */
+
+/* SDF_FRAME_STEP_INT counted from an object's own age, a count of host ticks
+ * from 0, so the steps keep the object's phase. */
 #ifndef SDF_FRAME_STEP_INT_AGE
 #define SDF_FRAME_STEP_INT_AGE(age, d) (d)
 #endif
@@ -72,26 +74,27 @@
 #define SDF_FRAME_DIVISOR(d) (1.0f / (1.0f - SDF_FRAME_DECAY(1.0f - 1.0f / (d))))
 #endif
 
-/* A share of the remaining gap closed once per tick, as x += (target - x) * f:
- * the decay 1 - f, so a host's SDF_FRAME_DECAY scales it and closes the same
- * share over a retail tick. Folds to f here. */
+/* A share of the remaining gap closed once per tick, as x += (target - x) * f
+ * with f in [0, 1]: the decay 1 - f, so a host's SDF_FRAME_DECAY scales it.
+ * Folds to f here. */
 #ifndef SDF_FRAME_FRACTION
 #define SDF_FRAME_FRACTION(f) (f)
 #endif
 /* The retail tick a host tick count falls in, an integer: the inverse of
  * SDF_FRAMES, for a key or a parity that must advance at the retail rate. */
 #ifndef SDF_FRAME_TICK
-#define SDF_FRAME_TICK(count) (count)
+#define SDF_FRAME_TICK(age) (age)
 #endif
 
 /* True on the first host tick of each retail tick. Gates a step that cannot
  * be scaled, such as a record into a history ring or an integer ramp, so it
- * runs at the retail rate. The host counts its own ticks. */
+ * runs at the retail rate. */
 #ifndef SDF_FRAME_DUE
 #define SDF_FRAME_DUE() 1
 #endif
-/* SDF_FRAME_DUE of a count of host ticks an owner keeps from 0, such as a
- * particle's age: true on the first host tick of each of its retail ticks. */
+
+/* SDF_FRAME_DUE counted from an object's own age, a count of host ticks from
+ * 0, so the step keeps the object's phase. */
 #ifndef SDF_FRAME_DUE_AGE
 #define SDF_FRAME_DUE_AGE(age) 1
 #endif
@@ -103,6 +106,7 @@
 #ifndef SDF_FRAME_RAND
 #define SDF_FRAME_RAND() ((void *)0)
 #endif
+
 /* SDF_FRAME_RAND keyed by a count of host ticks an owner keeps from 0. */
 #ifndef SDF_FRAME_RAND_AGE
 #define SDF_FRAME_RAND_AGE(age) ((void *)0)
@@ -122,7 +126,9 @@
 #ifndef SDF_FRAME_WHEN
 #define SDF_FRAME_WHEN(stmt) stmt
 #endif
-/* SDF_FRAME_WHEN keyed by a count of host ticks an owner keeps from 0. */
+
+/* SDF_FRAME_WHEN counted from an object's own age, a count of host ticks from
+ * 0. */
 #ifndef SDF_FRAME_WHEN_AGE
 #define SDF_FRAME_WHEN_AGE(age, stmt) stmt
 #endif
@@ -206,10 +212,11 @@
  * posOld the one before. A host running more ticks than retail may move the
  * followers between retail ticks, reading the mark itself from root's node
  * mark, and must put pos and posOld back at END so the next record still
- * spans one retail tick. Retail reads the recorded positions, so both expand
- * to nothing. */
-#ifndef SDF_FRAME_FOLLOW_BEGIN
-#define SDF_FRAME_FOLLOW_BEGIN(pos, posOld, root, mark)
+ * spans one retail tick. BEGIN takes the age of the part's owner, a count
+ * of host ticks from 0. Retail reads the recorded positions, so both expand to
+ * nothing. */
+#ifndef SDF_FRAME_FOLLOW_BEGIN_AGE
+#define SDF_FRAME_FOLLOW_BEGIN_AGE(age, pos, posOld, root, mark)
 #endif
 #ifndef SDF_FRAME_FOLLOW_END
 #define SDF_FRAME_FOLLOW_END(pos, posOld)
