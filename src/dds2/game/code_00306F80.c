@@ -778,12 +778,12 @@ void uiFillQuadColorWords(UiQuadWords *quad, u32 colorWord) {
     quad->unk00[3] = colorWord;
 }
 
-void cmpDrawTriG();
+void cmpDrawTriG(const u32 *xs, const u32 *ys, u32 z, const u32 *colors, u32 surfaceIndex);
 
 /* Draw a triangle with the same packed color at all three vertices. */
-void uiDrawUniformRgbRange(u32 xCoordinates, u32 yCoordinates, u32 z, u32 color, u32 surfaceIndex, u32 extraA, u32 extraB, u32 extraC) {
+void uiDrawUniformRgbRange(const u32 *xCoordinates, const u32 *yCoordinates, u32 z, u32 color, u32 surfaceIndex) {
     u32 vertexColors[3] = {color, color, color};
-    cmpDrawTriG((const s32 *)xCoordinates, (const s32 *)yCoordinates, z, (const u32 *)vertexColors, surfaceIndex, extraA, extraB, extraC);
+    cmpDrawTriG(xCoordinates, yCoordinates, z, vertexColors, surfaceIndex);
 }
 
 /* Queue three GS vertices with individual colors on the selected draw surface. */
