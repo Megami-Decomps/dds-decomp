@@ -1614,9 +1614,17 @@ u32 fldCommand_FLD_WARP_RUN_START(void) {
     return 1;
 }
 
+#ifdef FIX_BUGS
+/* BUG: retail leaves 3 in v0 from evtBeginSolarOverlayFadeIn(0); a zero return would stall the command. */
+s32 fldCmdResetAfterEvent(void) {
+    fldResetAfterEvent();
+    return 1;
+}
+#else
 void fldCmdResetAfterEvent(void) {
     fldResetAfterEvent();
 }
+#endif
 
 s32 fldCommand_FLD_INF_NEXT(void) {
     s32 param0 = scrGetIntPara(0);
