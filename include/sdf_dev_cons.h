@@ -34,8 +34,8 @@ typedef struct sdfDevConsDrawCB_t {
 } sdfDevConsDrawCB_t;
 
 /* Update the console state stored at the corresponding field offsets. */
-void sdfDevConsSetMode(sdfDevConsCB_tag *console, u8 controlByte);
-void sdfDevConsAttribute(sdfDevConsCB_tag *console, u8 attribute);
+void sdfDevConsSetMode(sdfDevConsCB_tag *console, s32 controlByte);
+void sdfDevConsAttribute(sdfDevConsCB_tag *console, s32 attribute);
 s32 sdfDevConsPrintf(sdfDevConsCB_tag *console, const char *format, ...);
 
 typedef char DevConsState_size_must_be_0x20[(sizeof(sdfDevConsCB_tag) == 0x20) ? 1 : -1];

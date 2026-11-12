@@ -1635,7 +1635,7 @@ extern ScrProcedureIndex btlFindReadyScriptResource(void);
 extern void btlPrepareVritraUnitMotion(BtlUnit *, s32, s32, s32, s32, f32);
 extern void func_0021B828(ActionStateLink *);
 extern s32 btlUpdateLinkedDefeatCamera(BtlLinkedCommand *, BtlCamState *, s32);
-extern s32 btlSelectVritraActorCategoryCamera(BtlLinkedCommand *, s32, s32);
+extern s32 btlSelectVritraActorCategoryCamera(BtlLinkedCommand *, s8, s8);
 extern s32 btlSetupDefeatCameraFromAnimationFlags(BtlLinkedCommand *);
 extern void btlScheduleCherunShadowSkillPresentation(ActionStateLink *, BtlUnit *, u64, u64);
 extern void btlSetSpecialEnemyGeometry(void);
