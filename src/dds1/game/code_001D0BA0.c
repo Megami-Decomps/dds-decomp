@@ -117,6 +117,7 @@ enum { BTL_SELECTED_UNIT_EFFECT_SOUND_SLOT = 0x26 };
 
 
 
+extern void func_001F2818(struct SoundResourceLink *link);
 extern BtlUnit *btlSelectUnitAtExtremeX(BtlUnit *, BtlIndexList *);
 
 void btlPrepareSavedCommandTargets(BtlTask *, BattleIndexWork *);

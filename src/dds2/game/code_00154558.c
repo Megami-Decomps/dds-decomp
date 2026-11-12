@@ -20,6 +20,7 @@
 #include "eff_random.h"
 #include "dds3_path.h"
 #include "dds3_slot1_handler_api.h"
+extern u32 p2sdGetPcmState(void);
 extern void fldApplyCurrentTaskScene(const char *name);
 #include "ps2asm.h"
 #include "fpu.h"
