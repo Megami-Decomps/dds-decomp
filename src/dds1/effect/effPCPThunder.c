@@ -1,5 +1,6 @@
 #include "sdk_ps2.h"
 #include "common.h"
+#include "sdfFrame.h"
 #include "ps2asm.h"
 
 #define VEC3_SPLAT(v, x) ((v)[0] = (x), (v)[1] = (x), (v)[2] = (x))
@@ -311,7 +312,7 @@ void effPCPThunderSpherePolyDraw(EffThunderVectorWork *work) {
     if (cellCount > 0) {
         renderColor = &renderCells->color;
         do {
-            if (cell->delayFrames == 0) {
+            if (cell->delayFrames == 0 && SDF_FRAME_DUE()) {
                 if (cell->activeFrames != 0) {
                     effPCPThunderSphereRotate(work, i);
                     effPCPThunderSphereRotateAxis(work, i);
@@ -324,7 +325,7 @@ void effPCPThunderSpherePolyDraw(EffThunderVectorWork *work) {
                     dds3TrackPolyListInit(work->cellSystem, i);
                 }
             } else {
-                cell->delayFrames--;
+                cell->delayFrames -= SDF_FRAME_DUE();
             }
             *renderColor = effMagaCylinderCalcColor(cell->color, tintColor);
             i++;
@@ -576,7 +577,7 @@ void effPCPThunderSpherePolyLowDraw(EffThunderVectorWork *work) {
     if (cellCount > 0) {
         renderColor = &renderCells->color;
         do {
-            if (cell->delayFrames == 0) {
+            if (cell->delayFrames == 0 && SDF_FRAME_DUE()) {
                 if (cell->activeFrames != 0) {
                     effPCPThunderSphereLowRotate(work, i);
                     effPCPThunderSphereLowRotateAxis(work, i);
@@ -589,7 +590,7 @@ void effPCPThunderSpherePolyLowDraw(EffThunderVectorWork *work) {
                     dds3TrackPolyListInit(work->cellSystem, i);
                 }
             } else {
-                cell->delayFrames--;
+                cell->delayFrames -= SDF_FRAME_DUE();
             }
             *renderColor = effMagaCylinderCalcColor(cell->color, tintColor);
             i++;
@@ -723,7 +724,7 @@ void effThunderBuildSparkStripCell(EffThunderSparkWork *work, s32 index) {
     SDF_VU0_OUTERPRODUCT_EXTENDED();
     SDF_VU0_NORMALIZE_EXTENDED();
     SDF_VU0_STOREVECTOR_NOMEM(side);
-    phase = dds3GetRandFloatA(effDefaultRandomState) * (EFF_THUNDER_HALF_TURN * 2.0f);
+    phase = dds3GetRandFloatA(SDF_FRAME_RAND_STATE(effDefaultRandomState)) * (EFF_THUNDER_HALF_TURN * 2.0f);
     cycle = phase - (EFF_THUNDER_HALF_TURN * 2.0f);
     SDF_VU0_COPYVECTOR(position, work->head.loweredPosition);
     currentWave = amplitude * sdfSin(phase);
@@ -1225,7 +1226,7 @@ void effPCP_ThunderPolyDraw(EffThunderFragmentWork *work) {
     if (count > 0) {
         canRestart = updateCount < restartLimit;
         do {
-            if (fragment->delayFrames == 0) {
+            if (fragment->delayFrames == 0 && SDF_FRAME_DUE()) {
                 if (fragment->activeFrames != 0) {
                     effPCP_ThunderPolyPartRefresh(work, i);
                     fragment->activeFrames--;
@@ -1238,7 +1239,7 @@ void effPCP_ThunderPolyDraw(EffThunderFragmentWork *work) {
                     renderCells[i].vertexCount = 0;
                 }
             } else {
-                fragment->delayFrames--;
+                fragment->delayFrames -= SDF_FRAME_DUE();
             }
             renderCells[i].color = effMagaCylinderCalcColor(fragment->color, tintColor);
             i++;
@@ -1530,7 +1531,7 @@ void effPCP_ThunderPolyLowDraw(EffThunderFragmentWork *work) {
 
     if (fragmentCount > 0) {
         do {
-            if (fragment->delayFrames == 0) {
+            if (fragment->delayFrames == 0 && SDF_FRAME_DUE()) {
                 if (fragment->activeFrames != 0) {
                     effPCP_ThunderPolyLowPartRefresh(work, index);
                     fragment->activeFrames--;
@@ -1542,7 +1543,7 @@ void effPCP_ThunderPolyLowDraw(EffThunderFragmentWork *work) {
                     dds3TrackPolyListInit(work->system, index);
                 }
             } else {
-                fragment->delayFrames--;
+                fragment->delayFrames -= SDF_FRAME_DUE();
             }
             packedColor = effMagaCylinderCalcColor(fragment->color, tintColor);
             secondaryCells[index].color = packedColor;
@@ -1774,7 +1775,7 @@ void effPCP_ThunderRadiatePolyDraw(EffThunderCellWork *work) {
 
     if (cellCount > 0) {
         do {
-            if (cell->delayFrames == 0) {
+            if (cell->delayFrames == 0 && SDF_FRAME_DUE()) {
                 if (cell->activeFrames != 0) {
                     effPCP_ThunderRadiatePolyPartRefresh(work, i);
                     cell->activeFrames--;
@@ -1785,7 +1786,7 @@ void effPCP_ThunderRadiatePolyDraw(EffThunderCellWork *work) {
                     dds3TrackPolyListInit(work->system, i);
                 }
             } else {
-                cell->delayFrames--;
+                cell->delayFrames -= SDF_FRAME_DUE();
             }
             cell++;
             i++;
@@ -2084,10 +2085,10 @@ void effPCP_ThunderPolyListDraw(EffThunderGroup *group) {
         for (j = 0; j < fragmentCount; j++) {
             if (i > 0) {
                 previous = group->handles[i - 1];
-                effPCP_ThunderPolyListPartRefresh(work, j,
-                    previous->system->cells[j].history + previous->system->cells[j].vertexCount - 5);
+                SDF_FRAME_WHEN(effPCP_ThunderPolyListPartRefresh(work, j,
+                    previous->system->cells[j].history + previous->system->cells[j].vertexCount - 5));
             } else {
-                effPCP_ThunderPolyPartRefresh(work, j);
+                SDF_FRAME_WHEN(effPCP_ThunderPolyPartRefresh(work, j));
             }
             cell[j].color = color;
         }
