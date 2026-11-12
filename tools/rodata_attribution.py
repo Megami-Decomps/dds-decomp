@@ -8,17 +8,18 @@ import re
 import struct
 from pathlib import Path
 
-from elftools.elf.elffile import ELFFile
-from elftools.common.exceptions import ELFError
-from elftools.elf.sections import SymbolTableSection
-from elftools.elf.relocation import RelocationSection
-
-
 LW = re.compile(r'\s*lw\s+\$(\d+),([A-Za-z_]\w*)(?:([+-])(0[xX][0-9a-fA-F]+|[0-9]+))?\(\$(\d+)\)\s*')
 
 
 def raw_metadata_clear(blob):
     """Reject duplicate/overlapping raw relocation sites before dictionary loss."""
+    # Keep pure checker helpers importable in the dependency-free test job.
+    # Missing ELF support is an error, never evidence of valid metadata.
+    from elftools.elf.elffile import ELFFile
+    from elftools.common.exceptions import ELFError
+    from elftools.elf.sections import SymbolTableSection
+    from elftools.elf.relocation import RelocationSection
+
     try:
         elf = ELFFile(io.BytesIO(blob))
         if elf.elfclass != 32 or not elf.little_endian or elf['e_type'] != 'ET_REL' or elf['e_machine'] != 'EM_MIPS':
@@ -106,6 +107,10 @@ def signed_target(words):
 
 def named_lw_sites(source, listing, original, listed):
     """Return {LO16 site: named-expression fact}, only for identical whole ELFs."""
+    from elftools.elf.elffile import ELFFile
+    from elftools.common.exceptions import ELFError
+    from elftools.elf.relocation import RelocationSection
+
     if original != listed or not raw_metadata_clear(original):
         return {}
     records = listing_lines(source, listing)

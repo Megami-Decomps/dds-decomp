@@ -4,8 +4,6 @@ from __future__ import annotations
 
 from pathlib import Path
 
-import yaml
-
 ROOT = Path(__file__).resolve().parents[1]
 CONFIG = ROOT / "config" / "irx"
 
@@ -22,6 +20,9 @@ def modules() -> list[str]:
 
 
 def load(module: str) -> dict:
+    # Pure config-path helpers and mocked checker tests need no YAML parser.
+    import yaml
+
     cfg = yaml.safe_load((CONFIG / module / f"{module}.yaml").read_text())
     cfg["module_dir"] = module
     for key in ("name", "sha1", "module", "paths"):

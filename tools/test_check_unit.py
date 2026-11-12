@@ -3,6 +3,9 @@
 
 import contextlib
 import io
+import importlib.util
+import subprocess
+import sys
 import struct
 import tempfile
 import unittest
@@ -37,6 +40,37 @@ from check_unit import (
     text_comparison_extent,
     text_residual_summary,
 )
+
+
+class DependencyFreeImportTests(unittest.TestCase):
+    def test_discovery_without_site_packages_and_elf_validation_requires_dependency(self):
+        script = """
+import importlib.util
+import sys
+sys.path.insert(0, sys.argv[1])
+assert importlib.util.find_spec('elftools') is None
+import check_unit
+import rodata_attribution
+import irx_config
+import run_tests
+for module in run_tests.MODULES:
+    assert run_tests.test_ids(module), module
+for validate, args in (
+    (irx_config.load, ('test',)),
+    (rodata_attribution.raw_metadata_clear, (b'',)),
+    (rodata_attribution.named_lw_sites, ('', '', b'', b'')),
+):
+    try:
+        validate(*args)
+    except ModuleNotFoundError as error:
+        assert error.name == ('yaml' if validate is irx_config.load else 'elftools'), error
+    else:
+        raise AssertionError('Validation silently accepted a missing dependency')
+"""
+        result = subprocess.run(
+            [sys.executable, "-I", "-S", "-c", script, str(Path(__file__).resolve().parent)],
+            capture_output=True, text=True)
+        self.assertEqual(result.returncode, 0, result.stdout + result.stderr)
 
 
 class SourceReviewDiagnosticsTests(unittest.TestCase):
@@ -1781,6 +1815,7 @@ def listing(source, claims=None):
 SOURCE = '.text\n.ent worker\nlw $7,arbitrary_table+4($13)\n.end worker'
 
 
+@unittest.skipUnless(importlib.util.find_spec("elftools"), "pyelftools is not installed")
 class ProvenanceAdversarialTests(unittest.TestCase):
     def facts(self, source=SOURCE, blob=None, report=None, listed=None):
         blob = provenance_elf_blob() if blob is None else blob
@@ -1928,6 +1963,7 @@ class ProvenanceAdversarialTests(unittest.TestCase):
 
 
 
+@unittest.skipUnless(importlib.util.find_spec("elftools"), "pyelftools is not installed")
 class PrebiasedRodataCLITests(unittest.TestCase):
     def check_prebias(self, *, func=None, wrong_native=False, real_table=False,
                       missing_listing=False, unequal_listing=False, missing_listed_object=False,
@@ -2053,6 +2089,7 @@ class PrebiasedRodataCLITests(unittest.TestCase):
 
 
 
+@unittest.skipUnless(importlib.util.find_spec("elftools"), "pyelftools is not installed")
 class ProvenanceContractRevisionTests(unittest.TestCase):
     def test_non_mips_or_non_rel_elf_cannot_supply_mips_site_proof(self):
         for field, value in ((18,3),(16,2)):
@@ -2094,6 +2131,8 @@ class ProvenanceContractRevisionTests(unittest.TestCase):
         blob=provenance_elf_blob(extra_symbols=[('local_label',4,0,0,1)])
         self.assertTrue(p.named_lw_sites(SOURCE,listing(SOURCE),blob,blob))
 
+
+class OptionalProvenanceEvidenceTests(unittest.TestCase):
     def test_missing_unreadable_partial_and_invalid_optional_evidence(self):
         with tempfile.TemporaryDirectory() as tmp:
             lp=Path(tmp)/'listing'
