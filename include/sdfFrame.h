@@ -47,6 +47,10 @@
 #ifndef SDF_FRAME_STEP_INT
 #define SDF_FRAME_STEP_INT(d) (d)
 #endif
+/* SDF_FRAME_STEP_INT keyed by a count of host ticks an owner keeps from 0. */
+#ifndef SDF_FRAME_STEP_INT_AGE
+#define SDF_FRAME_STEP_INT_AGE(age, d) (d)
+#endif
 
 /* Runs where a floor face's edge band reached a sphere, before the sphere is
  * moved to that clearance. Below retail's step the move pulls a sphere above
@@ -86,6 +90,11 @@
 #ifndef SDF_FRAME_DUE
 #define SDF_FRAME_DUE() 1
 #endif
+/* SDF_FRAME_DUE of a count of host ticks an owner keeps from 0, such as a
+ * particle's age: true on the first host tick of each of its retail ticks. */
+#ifndef SDF_FRAME_DUE_AGE
+#define SDF_FRAME_DUE_AGE(age) 1
+#endif
 
 /* The random state for a draw that code retail runs once per tick makes each
  * host tick, such as a jitter drawn while drawing. A host answers the shared
@@ -94,6 +103,10 @@
 #ifndef SDF_FRAME_RAND
 #define SDF_FRAME_RAND() ((void *)0)
 #endif
+/* SDF_FRAME_RAND keyed by a count of host ticks an owner keeps from 0. */
+#ifndef SDF_FRAME_RAND_AGE
+#define SDF_FRAME_RAND_AGE(age) ((void *)0)
+#endif
 
 /* SDF_FRAME_RAND for a draw from the random state at state rather than the
  * shared stream, such as the battle stream: a host answers state on one host
@@ -101,10 +114,17 @@
 #ifndef SDF_FRAME_RAND_STATE
 #define SDF_FRAME_RAND_STATE(state) (state)
 #endif
+#ifndef SDF_FRAME_RAND_STATE_AGE
+#define SDF_FRAME_RAND_STATE_AGE(age, state) (state)
+#endif
 
 /* Runs one statement on the first host tick of each retail tick. */
 #ifndef SDF_FRAME_WHEN
 #define SDF_FRAME_WHEN(stmt) stmt
+#endif
+/* SDF_FRAME_WHEN keyed by a count of host ticks an owner keeps from 0. */
+#ifndef SDF_FRAME_WHEN_AGE
+#define SDF_FRAME_WHEN_AGE(age, stmt) stmt
 #endif
 
 /* The bits of a key mask, read only on the first host tick of each retail

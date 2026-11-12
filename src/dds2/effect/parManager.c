@@ -3373,16 +3373,16 @@ void dds3Particle_SphereSpiral2Draw(dds3Particle_SphereSpiral2_t3 *hData) {
             if (kind != 0) {
                 u32 color;
 
-                SDF_FRAME_WHEN(history->points[history->point][0] = packet->radialOffset[0]);
-                SDF_FRAME_WHEN(history->points[history->point][1] = packet->radialOffset[1]);
-                SDF_FRAME_WHEN(history->points[history->point][2] = packet->radialOffset[2]);
+                SDF_FRAME_WHEN_AGE(age, history->points[history->point][0] = packet->radialOffset[0]);
+                SDF_FRAME_WHEN_AGE(age, history->points[history->point][1] = packet->radialOffset[1]);
+                SDF_FRAME_WHEN_AGE(age, history->points[history->point][2] = packet->radialOffset[2]);
                 color = (packet->color & 0xFF000000) | (hData->head.abgr & 0xFFFFFF);
-                history->point += SDF_FRAME_DUE();
+                history->point += SDF_FRAME_DUE_AGE(age);
                 if ((u32)history->point >= capacity) {
                     history->point = 0;
                 }
                 if ((u32)history->count < capacity) {
-                    history->count += SDF_FRAME_DUE();
+                    history->count += SDF_FRAME_DUE_AGE(age);
                 }
                 switch (hData->head.kindState.type) {
                 case 1:
