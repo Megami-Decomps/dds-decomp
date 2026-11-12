@@ -706,7 +706,6 @@ void dds3ParticleSetColorTable(dds3ParticleColorAnim_t *pColAnim, s32 frame);
 dds3Particle_BlurBuff_t *dds3Particle_BlurCreate(u32 number, u16 length, billHandle_t **pBill_Handle);
 void dds3Particle_BlurDelete(dds3Particle_BlurBuff_t *hBlur);
 void dds3Particle_BlurSet(dds3Particle_BlurBuff_t *table, s32 slotIndex, u32 color, f32 billboardScale);
-extern u32 dds3GetKernelCount(void);
 void dds3Particle_BlurSetExp(dds3Particle_BlurBuff_t *hBlur, s32 index, const f32 *pPosBase, u32 abgr,
                    dds3ParOffsetBuff_t *pOffBuff, f32 scale);
 void dds3Particle_BlurDraw(dds3Particle_BlurBuff_t *hBlur);
@@ -3374,16 +3373,16 @@ void dds3Particle_SphereSpiral2Draw(dds3Particle_SphereSpiral2_t3 *hData) {
             if (kind != 0) {
                 u32 color;
 
-                SDF_FRAME_WHEN(age, history->points[history->point][0] = packet->radialOffset[0]);
-                SDF_FRAME_WHEN(age, history->points[history->point][1] = packet->radialOffset[1]);
-                SDF_FRAME_WHEN(age, history->points[history->point][2] = packet->radialOffset[2]);
+                SDF_FRAME_WHEN(history->points[history->point][0] = packet->radialOffset[0]);
+                SDF_FRAME_WHEN(history->points[history->point][1] = packet->radialOffset[1]);
+                SDF_FRAME_WHEN(history->points[history->point][2] = packet->radialOffset[2]);
                 color = (packet->color & 0xFF000000) | (hData->head.abgr & 0xFFFFFF);
-                history->point += SDF_FRAME_DUE(age);
+                history->point += SDF_FRAME_DUE();
                 if ((u32)history->point >= capacity) {
                     history->point = 0;
                 }
                 if ((u32)history->count < capacity) {
-                    history->count += SDF_FRAME_DUE(age);
+                    history->count += SDF_FRAME_DUE();
                 }
                 switch (hData->head.kindState.type) {
                 case 1:
@@ -3563,14 +3562,14 @@ void dds3Particle_BlurSet(dds3Particle_BlurBuff_t *table, s32 slotIndex, u32 col
     u128 *point = slot->pPos + last;
     s32 i;
 
-    for (i = 0; i < last * SDF_FRAME_DUE(dds3GetKernelCount()); i++) {
+    for (i = 0; i < last * SDF_FRAME_DUE(); i++) {
         point--;
         SDF_VU0_COPYVECTOR(point + 1, point);
     }
     if (slot->count <= last) {
-        slot->count += SDF_FRAME_DUE(dds3GetKernelCount());
+        slot->count += SDF_FRAME_DUE();
     }
-    SDF_FRAME_WHEN(dds3GetKernelCount(), SDF_VU0_STOREVECTOR_C(point));
+    SDF_FRAME_WHEN(SDF_VU0_STOREVECTOR_C(point));
     slot->abgr = color;
     slot->scale = billboardScale;
 }
