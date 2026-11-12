@@ -30,12 +30,22 @@ void mnuRemoveMatchedNodesFromLinkedResourceLists(MnuCallbackListPair *pair, u32
 }
 
 /* Definition is void; retail returns its leftover v0, so the pair function needs a value. */
+#ifdef FIX_BUGS
+extern void mnuClearResourceList(MnuCallbackList *);
+
+/* BUG: retail returns whatever v0 holds after the second clear; nothing reads it. */
+void mnuClearOwnedResourceListPair(MnuCallbackListPair *pair) {
+    mnuClearResourceList(pair->first);
+    mnuClearResourceList(pair->second);
+}
+#else
 extern s32 mnuClearResourceList(MnuCallbackList *);
 
 s64 mnuClearOwnedResourceListPair(MnuCallbackListPair *pair) {
     mnuClearResourceList(pair->first);
     return mnuClearResourceList(pair->second);
 }
+#endif
 
 void func_00324F20(MnuCallbackList **list, u32 handle) {
     mnuFindResourceNodeByHandle(*list, handle);
