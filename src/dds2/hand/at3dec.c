@@ -103,8 +103,8 @@ extern const char at3decModeName8ch[];
 extern const char at3decModeNameJoint[];
 extern const char at3decModeNameUnknown[];
 
-extern void *memset(void *s, s32 c, u32 n);
-extern void *memcpy(void *dst, const void *src, u32 n);
+extern void *memset(void *s, s32 c, size_t n);
+extern void *memcpy(void *dst, const void *src, size_t n);
 extern s32 strcmp(const char *a, const char *b);
 extern void __assert(const char *file, s32 line, const char *expr);
 

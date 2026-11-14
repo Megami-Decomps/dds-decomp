@@ -20,7 +20,7 @@
 #include "btl.h"
 #include "file_request_api.h"
 /* Declared before first use (were implicit int). */
-extern void * memset(void *, s32, u32);
+extern void * memset(void *, s32, size_t);
 
 
 extern u32 effColorEditRgbMenuOpen;

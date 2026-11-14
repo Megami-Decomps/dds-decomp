@@ -3992,7 +3992,7 @@ extern void *execArgumentBlock;
 extern kernelEntryPair_t setArgEntryPairs[1];
 extern void PatchIsNeeded(u32 index, void *entry);
 extern s32 gcc2_compiled__16(void *destination, const void *source, u32 size);
-extern u32 strlen(const char *text);
+extern size_t strlen(const char *text);
 
 char *SetArg(const char *path, s32 count, const char *const *arguments)
 {

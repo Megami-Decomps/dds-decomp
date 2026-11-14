@@ -64,7 +64,7 @@ typedef struct BtlUnitStatus {
     u32 stateFlags;
 } BtlUnitStatus;
 
-extern void *memcpy(void *, const void *, unsigned int);
+extern void *memcpy(void *, const void *, size_t);
 
 /* Six-byte status-entry record; each game's battle unit contains seven. */
 typedef struct BtlUnitEntrySlot {

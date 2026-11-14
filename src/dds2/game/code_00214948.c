@@ -136,7 +136,7 @@ extern s32 func_002152D8(ActionStateLink *, s32);
 
 extern s32 btlSelectLowestNonzeroHpTarget(ActionStateLink *, s32);
 
-extern void *memset(void *, s32, u32);
+extern void *memset(void *, s32, size_t);
 
 extern s32 btlSelectHighestCurrentMpTarget(ActionStateLink *, s32);
 

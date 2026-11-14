@@ -17,7 +17,7 @@ extern void *malloc(size_t size);
 extern s32 DIntr(void);
 extern void EIntr(void);
 extern void *memcpy(void *a, const void *b, size_t c);
-extern u32 strlen(const char *s);
+extern size_t strlen(const char *s);
 extern void *sdfChipAllocDirect(u32 aSize);
 extern void sdfChipFreeDirect(void *aPtr);
 extern void sdfDelayedResrcInitCB(sdfDelayedResrcCB_t *aCB, sdfDelayedResrcFreeFunc aFreeFunc);

@@ -1438,7 +1438,7 @@ void *sdfModelGetExtraChunk(sdfModelRootNode_t *aRoot, u32 aChunkId)
 
 #ifdef NON_MATCHING
 extern s32 memcmp(const void *first, const void *second, size_t size);
-extern u32 strlen(const char *text);
+extern size_t strlen(const char *text);
 #endif
 
 s32 sdfModelGetNodeIndexByName(sdfModelRootNode_t *aRoot, const char *aName)
