@@ -300,7 +300,7 @@ void effBTLModelGetSphereCenter(BtlUnit *unit) {
     SDF_VU0_LOADVECTOR(unit->orientation);
     ToMatrix();
     SDF_VU0_LOADVECTOR(unit->bodyOffset);
-    VU0_SET_VF2X(unit->scale);
+    VU0_SET_VF2X((f32)unit->scale);
     VU0_MULX_XYZW_VF10_VF10_VF2X();
     SDF_VU0_APPLYMATRIX();
     SDF_VU0_LOADVECTOR_B(pos);
@@ -316,7 +316,7 @@ void btlUnitGetBodyPosVU(const BtlUnit *unit) {
     SDF_VU0_LOADVECTOR(unit->orientation);
     ToMatrix();
     SDF_VU0_LOADVECTOR(unit->muzzleOffset);
-    VU0_SET_VF2X(unit->scale);
+    VU0_SET_VF2X((f32)unit->scale);
     VU0_MULX_XYZW_VF10_VF10_VF2X();
     SDF_VU0_APPLYMATRIX();
     SDF_VU0_LOADVECTOR_B(pos);
@@ -335,7 +335,7 @@ void btlUnitGetEffectPosVU(BtlUnit *unit) {
     SDF_VU0_LOADVECTOR(unit->orientation);
     ToMatrix();
     SDF_VU0_LOADVECTOR(unit->bodyOffset);
-    VU0_SET_VF2X(unit->scale);
+    VU0_SET_VF2X((f32)unit->scale);
     VU0_MULX_XYZW_VF10_VF10_VF2X();
     SDF_VU0_APPLYMATRIX();
     SDF_VU0_LOADVECTOR_B(pos);

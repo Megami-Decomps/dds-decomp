@@ -1650,8 +1650,7 @@ extern void btlQueueLinkedPairModelSwapTasks(ActionStateLink *, s32, u64, u64, u
 /* Copy the verified four-byte EE callback representation into its actual slot.
  * Some callback slots remain byte storage or carry older shared prototypes. */
 #define BTL_INSTALL_CALLBACK(storage, byteOffset, provider) { \
-    __typeof__(&(provider)) callback = &(provider); \
-    typedef char CallbackWidthIsFour[(sizeof(callback) == 4) ? 1 : -1]; \
+    u32 callback = EE_ADDR(&(provider)); \
     typedef char CallbackFitsSlot[((byteOffset) + sizeof(callback) <= sizeof(storage)) ? 1 : -1]; \
     memcpy((u8 *)&(storage) + (byteOffset), &callback, sizeof(callback)); \
 }
