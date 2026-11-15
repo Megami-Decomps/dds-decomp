@@ -45,7 +45,7 @@ def check(module: str, shim: Path) -> int:
     cfg = irx_config.load(module)
     src = irx_config.path(cfg, "src")
     out = subprocess.run(
-        ["gcc", "-m32", "-fsyntax-only", "-DNON_MATCHING",
+        ["gcc", "-m32", "-std=gnu17", "-fsyntax-only", "-DNON_MATCHING",
          "-include", str(shim / "irx.h"),
          "-I", str(ROOT / "include" / "irx"), str(src)],
         capture_output=True, text=True, cwd=ROOT)
