@@ -16,6 +16,10 @@ typedef dds3TaskUpdateResult_t (*dds3ProcessFunc_t)(dds3ProcessID_t *task);
  * frees it after the callback returns. */
 typedef void (*dds3ProcessShutdownFunc_t)(dds3ProcessID_t *task);
 
+/* Tasks below this priority are the kernel's (the file manager is 0x384, the movie
+ * manager 0x385); game tasks start at it. */
+#define DDS3_USERPROC_PRIORITY 1000
+
 struct dds3ProcessID_t {
     char name[0x18];          /* 0x00: NUL-padded task name, compared byte-wise */
     u32 namehash;             /* 0x18: sum of name's bytes */
@@ -63,5 +67,8 @@ typedef struct dds3AdminiData_t
     u8 CallDataSize;
     u8 CallCount;
 } dds3AdminiData_t;
+
+/* The sequence the admini switches to next, or -1 when none is pending. */
+s8 dds3AdminiGetNextSequence(void);
 
 #endif /* KERNEL_H */
