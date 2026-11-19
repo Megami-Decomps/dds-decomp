@@ -8802,6 +8802,7 @@ at3decModeNameUnknown = 0x00430FE8; // type:asciz size:0x8
 D_00431090 = 0x00431090; // type:s32 size:0x104
 D_00431194 = 0x00431194; // type:s32 size:0xD4
 localeconvData = 0x004324B8; // size:0x30
+dds3FrameCount = 0x00435B80; // type:u32 size:0x4
 dds3VblanksPerFrame = 0x00435BAC;
 startinglistf = 0x00435BD0;
 startinglistcnt = 0x00435BD8;

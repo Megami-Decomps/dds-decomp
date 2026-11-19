@@ -10747,6 +10747,7 @@
 0x00430FE0	at3decModeNameJoint	inferred	libat3dec: mode name string read by at3decModeFromName and at3decModeName. DDS1 twin 0x003B7290; was D_00430FE0
 0x00430FE8	at3decModeNameUnknown	inferred	libat3dec: mode name string read by at3decModeFromName and at3decModeName. DDS1 twin 0x003B7298; was D_00430FE8
 0x004324B8	localeconvData	inferred	SMT3HD name via SLUS_209.11 0x0054B8D8, newlib lconv data _localeconv_r returns; was D_004324B8
+0x00435B80	dds3FrameCount	inferred	SMT3HD name via SLUS_209.11 0x0054E800, the main-loop frame count dds3GetKernelCount returns; was D_00435B80
 0x00435BAC	dds3VblanksPerFrame	inferred	SMT3HD data name via SLUS_209.11 0x0054E82C, 1 agreeing references; was dds3VblanksPerFrame
 0x00435BD0	startinglistf	inferred	SMT3HD data name via SLUS_209.11 0x0054E850, 11 agreeing references; was startinglistf
 0x00435BD8	startinglistcnt	inferred	SMT3HD data name via SLUS_209.11 0x0054E858, 6 agreeing references; was startinglistcnt

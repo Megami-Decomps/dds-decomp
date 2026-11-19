@@ -22,7 +22,7 @@ extern u32 D_003BA714;
 
 extern u32 D_003BD680;
 
-extern u32 D_003BA700;
+extern u32 dds3FrameCount;
 
 extern s8 D_003BA708;
 
@@ -139,7 +139,7 @@ void dds3FirstInit(void) {
     dds3GlobalWorkInit();
     printf(D_003BA7D0);
     D_003BA708 = 0;
-    D_003BA700 = 0;
+    dds3FrameCount = 0;
     dds3AddWorld(0x2710);
     printf(D_003BA7D8);
     dds3InitRandCB();
@@ -162,7 +162,7 @@ void dds3SoftReset(void) {
 }
 
 u32 dds3GetKernelCount(void) {
-    return D_003BA700;
+    return dds3FrameCount;
 }
 
 u32 dds3GetFrameID(void) {
@@ -253,7 +253,7 @@ void dds3KernelMain(void) {
             if (dds3ProcessMain() == DDS3_PROCESS_MAIN_STOP) {
                 break;
             }
-            D_003BA700++;
+            dds3FrameCount++;
             D_003BA728 = sdfGetRunTimeCount(startTick) - sdfReqDrawDelaySleepCount;
             D_003BD680 ^= 1;
             D_003BA72A = sdfDrawFrameCounter;
@@ -429,7 +429,7 @@ void AddProcessList(dds3ProcessID_t *task) {
     }
 }
 
-INCLUDE_SDATA(const s32, "game/code_00100000", D_003BA700);
+INCLUDE_SDATA(const s32, "game/code_00100000", dds3FrameCount);
 
 INCLUDE_SDATA(const s32, "game/code_00100000", D_003BA704);
 
