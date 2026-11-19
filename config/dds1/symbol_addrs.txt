@@ -8364,6 +8364,7 @@ sdfGrVifUnpackBits = 0x003989E8;
 sdfGsMemTypeNames = 0x00398A28;
 sdfGsMemTypeNamesTail = 0x00398A38;
 mcModuleNames = 0x00398C80;
+sceDmaChanRegs = 0x00398CF0; // size:0x28
 ipuDefaultQuantizerMatrices = 0x0039A820; // type:u8 size:0x50
 ipuDefaultVqClut = 0x0039A870; // type:u16 size:0x20
 at3decImdctTwiddles = 0x0039B4D0; // type:u32 size:0x800

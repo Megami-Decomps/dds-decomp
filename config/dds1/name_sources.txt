@@ -9942,6 +9942,7 @@
 0x00398A38	sdfGsMemTypeNamesTail	inferred	SMT3HD name via SLUS_209.11 0x00529CD8, sdf/sdfSound SMT3 rename; was D_00398A38
 0x00398A48	sdfIpuAudioModeIdecBits	inferred	Per stream audio mode, IDEC's OFM bit then its DTE bit, which sdfIpuDecode sets. DDS2 twin 0x0040BBF8.
 0x00398C80	mcModuleNames	inferred	SMT3HD name via SLUS_209.11 0x00529F00, sdfTmx twin; was D_00398C80
+0x00398CF0	sceDmaChanRegs	inferred	SMT3HD name via SLUS_209.11 0x00529F70, libdma table of the ten channel register addresses; was D_00398CF0
 0x0039A820	ipuDefaultQuantizerMatrices	inferred	libipu: the intra and non-intra quantizer matrices sceIpuInit loads; read by its routines. DDS2 twin 0x0040D9A0.
 0x0039A870	ipuDefaultVqClut	inferred	libipu: the VQ colour lookup table sceIpuInit loads; read by its routines. DDS2 twin 0x0040D9F0.
 0x0039B4D0	at3decImdctTwiddles	inferred	libat3dec: 128 x 4 words, the butterfly twiddles of the 256-point inverse transform; read by its routines. DDS2 twin 0x0040E650.
