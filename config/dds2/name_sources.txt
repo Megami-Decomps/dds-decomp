@@ -1470,7 +1470,7 @@
 0x001576A0	dds3EffectDispatchUpdate	inferred	Dispatches EffMajorTable[node->type].update for the live effect node; callers use it in per-frame updates. Replaces the shared-hash name dds3EffectDraw (older alias effUpdateNode).
 0x001576D8	dds3EffectReset	inferred	SMT3HD name via SLUS_209.11 0x0015ABD8, shared-hash-in-run; was effRestartNodeInstance
 0x00157710	dds3EffectSetScale	inferred	SMT3HD name via SLUS_209.11 0x0015AC10, shared-hash-in-run; was effApplyNodeScale
-0x00157748	effInvokeNodeConditionOrAcceptDefault	inferred	Accepts a missing optional effect-node condition callback or returns its result. [names_reviewed17.tsv]
+0x00157748	dds3EffectGetState	inferred	SMT3HD name via SLUS_209.11 0x0015AC48, the EffMajorTable slot 0x10 dispatch after dds3EffectSetScale; nonzero while the effect runs; was effInvokeNodeConditionOrAcceptDefault
 0x00157790	effCopyVectorToNodeInstance	inferred	confidence=medium; src/dds2/effect/effManager.c:func_00157790; Dispatches the type-selected vector operation; particle implementations copy to the instance and the file-queue implementation sets position. [names_qp9.tsv]
 0x001577C8	effApplyNodeTransformMatrix	inferred	confidence=high; matched-C; src/dds2/effect/effManager.c:98:func_001577C8; Dispatches matrix operation; effect consumers apply animated transform matrices using this entry.; twin=0x0014FC28, anchored ordered retail pairing.; sources=names_R_Names35.tsv [names_qp10.tsv]
 0x00157800	effSetNodeParameterValue	inferred	confidence=high; matched-C; src/dds2/effect/effManager.c:102:func_00157800; Dispatches scalar/packed parameter operation on node instance.; twin=0x0014FC60, anchored ordered retail pairing.; sources=names_R_Names35.tsv [names_qp10.tsv]

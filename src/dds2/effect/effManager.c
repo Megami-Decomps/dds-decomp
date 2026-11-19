@@ -131,7 +131,7 @@ void dds3EffectSetScale(EffNode *node, f32 factor) {
     EffMajorTable[node->type].applyScale(node->instanceWord, factor);
 }
 
-EffNodeConditionResult effInvokeNodeConditionOrAcceptDefault(EffNode *node) {
+EffNodeConditionResult dds3EffectGetState(EffNode *node) {
     if (EffMajorTable[node->type].queryCondition == NULL) {
         return 1;
     }

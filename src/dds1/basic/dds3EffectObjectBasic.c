@@ -253,7 +253,7 @@ s32 dds3EffectObjectBasicMainProcedure(dds3Basic_t *obj) {
             SDF_VU0_STOREMATRIX(matrix);
             effApplyNodeTransformMatrix(node, matrix);
         }
-        result = effInvokeNodeConditionOrAcceptDefault(node);
+        result = dds3EffectGetState(node);
     expired:
         if (result == EFF_NODE_CONDITION_EXPIRED) {
             u32 flags = data->flags;

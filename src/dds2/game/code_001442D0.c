@@ -4963,7 +4963,7 @@ void func_0014DEA8(void) {
             }
             kind = D_003A8EB0[slot->effectKindIndex].kind;
             if (kind == 2 || kind == 3) {
-                if (effInvokeNodeConditionOrAcceptDefault(D_004362DC) != 0) {
+                if (dds3EffectGetState(D_004362DC) != 0) {
                     placeEffectNode(D_004362DC, position);
                 }
                 continue;
@@ -5029,7 +5029,7 @@ void func_0014DEA8(void) {
     }
 
     if (fldAreaDamageEffectPlaced != 0) {
-        if (effInvokeNodeConditionOrAcceptDefault((EffNode *)(u32)fldAreaDamageEffect) != 0) {
+        if (dds3EffectGetState((EffNode *)(u32)fldAreaDamageEffect) != 0) {
             dds3EffectDispatchUpdate((EffNode *)(u32)fldAreaDamageEffect);
         } else {
             fldAreaDamageEffectPlaced = 0;

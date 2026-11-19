@@ -49,7 +49,7 @@ void dds3EffectDelete(EffNode *node);
 void dds3EffectDispatchUpdate(EffNode *node);
 void dds3EffectReset(EffNode *node);
 void dds3EffectSetScale(EffNode *node, f32 factor);
-EffNodeConditionResult effInvokeNodeConditionOrAcceptDefault(EffNode *node);
+EffNodeConditionResult dds3EffectGetState(EffNode *node);
 void effCopyVectorToNodeInstance(EffNode *node, const void *vector);
 void effApplyNodeTransformMatrix(EffNode *node, const void *matrix);
 void effSetNodeParameterValue(EffNode *node, u32 parameterWord);

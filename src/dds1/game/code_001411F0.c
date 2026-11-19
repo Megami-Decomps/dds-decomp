@@ -4495,7 +4495,7 @@ void func_00149B68(void) {
             }
             kind = D_0034C8F0[slot->effectKindIndex].kind;
             if (kind == 2 || kind == 3) {
-                if (effInvokeNodeConditionOrAcceptDefault((EffNode *)(u32)D_003BAF4C) != 0) {
+                if (dds3EffectGetState((EffNode *)(u32)D_003BAF4C) != 0) {
                     placeEffectNode(D_003BAF4C, position);
                 }
                 continue;
@@ -4561,7 +4561,7 @@ void func_00149B68(void) {
     }
 
     if (D_003BAF40 != 0) {
-        if (effInvokeNodeConditionOrAcceptDefault((EffNode *)(u32)D_003BAF3C) != 0) {
+        if (dds3EffectGetState((EffNode *)(u32)D_003BAF3C) != 0) {
             dds3EffectDispatchUpdate((EffNode *)(u32)D_003BAF3C);
         } else {
             D_003BAF40 = 0;
