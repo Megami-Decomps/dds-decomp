@@ -1511,7 +1511,7 @@ void fldSpawnPlayerUnits(f32 *input) {
             dds3PoseSet_t *inner = player->poseset;
             SDF_VU0_COPYVECTOR_F32(inner->pos, input);
             SDF_VU0_COPYVECTOR_F32(inner->smoothedPosition, input);
-            SDF_VU0_COPYVECTOR_F32(inner->rotation, input + 4);
+            SDF_VU0_COPYVECTOR_F32(inner->rot, input + 4);
         }
 
         dds3SetPosPoseSet(player, (u128 *)input);

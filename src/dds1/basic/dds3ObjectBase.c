@@ -329,7 +329,7 @@ void dds3RebuildObjectModelContext(dds3Basic_t *object, s32 resourceGroup, s32 r
     mdlGetScale(model);
     SDF_VU0_STOREVECTOR(scale);
     dds3SetSclPoseSet(object, (u128 *)scale);
-    SDF_VU0_LOADVECTOR(object->poseset->rotation);
+    SDF_VU0_LOADVECTOR(object->poseset->rot);
     Normalize();
     mdlSetRotate(model);
     SDF_VU0_LOADVECTOR(object->poseset->pos);

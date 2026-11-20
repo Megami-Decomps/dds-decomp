@@ -3081,10 +3081,10 @@ void btlUpdateDebugCameraFromPad(void) {
     if (dds3PadBitTable[0] < 0) {
         if ((u8)(D_00436BA8 & 1) == 0) {
             SDF_VU0_COPYVECTOR_NOMEM(btlDebugCameraPositions[0], camera->poseset->pos);
-            SDF_VU0_COPYVECTOR_NOMEM(btlDebugCameraRotations[0], camera->poseset->rotation);
+            SDF_VU0_COPYVECTOR_NOMEM(btlDebugCameraRotations[0], camera->poseset->rot);
         } else {
             SDF_VU0_COPYVECTOR_NOMEM(btlDebugCameraPositions[1], camera->poseset->pos);
-            SDF_VU0_COPYVECTOR_NOMEM(btlDebugCameraRotations[1], camera->poseset->rotation);
+            SDF_VU0_COPYVECTOR_NOMEM(btlDebugCameraRotations[1], camera->poseset->rot);
         }
         D_00436BA8 ^= 1;
     } else if (dds3PadBitTable[1] < 0) {

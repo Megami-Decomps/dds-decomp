@@ -6126,10 +6126,10 @@ void btlDebugPrintWorldTransform(s32 x, s32 y) {
                                 (double)object->poseset->pos[1],
                                 (double)object->poseset->pos[2]);
             btlBossDebugPrintfN(x, y + 12, 0, (s32)D_003A3E08,
-                                (double)object->poseset->rotation[0],
-                                (double)object->poseset->rotation[1],
-                                (double)object->poseset->rotation[2],
-                                (double)object->poseset->rotation[3]);
+                                (double)object->poseset->rot[0],
+                                (double)object->poseset->rot[1],
+                                (double)object->poseset->rot[2],
+                                (double)object->poseset->rot[3]);
         }
     }
 }

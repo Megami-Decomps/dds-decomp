@@ -278,7 +278,7 @@ s32 dds3UnitObjectBasicMainProcedure(dds3Basic_t *obj) {
         dds3BackupPoseSet(&node);
         if (evtUpdateUnitMotion(&node, obj) != EVT_UNIT_MOTION_STEP_NOT_APPLIED) {
             dds3GetSclPoseSetMCR(obj, (u128 *)node.scale);
-            dds3AddRotPoseSet(obj, (u128 *)node.rotation);
+            dds3AddRotPoseSet(obj, (u128 *)node.rot);
             dds3GetPosPoseSetMCR(obj, (u128 *)node.pos);
         }
     }
@@ -307,7 +307,7 @@ s32 dds3UnitObjectBasicMainProcedure(dds3Basic_t *obj) {
             SDF_VU0_ADDVECTOR();
         }
         mdlSetScale(model);
-        SDF_VU0_LOADVECTOR(&obj->poseset->rotation[0]);
+        SDF_VU0_LOADVECTOR(&obj->poseset->rot[0]);
         Normalize();
         if (data->transitionWork != 0 && flag != 0) {
             SDF_VU0_COPYVECTOR_A_TO_B();

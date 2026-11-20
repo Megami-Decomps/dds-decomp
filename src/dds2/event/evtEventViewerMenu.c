@@ -4756,7 +4756,7 @@ s32 evtMakeMotionName(PolyMovieWork *work, evtViewerInfo_t *runtime) {
             }
             transform = group->info->poseset;
             SDF_VU0_COPYVECTOR(group->savedPosition, transform->pos);
-            SDF_VU0_COPYVECTOR(group->savedRotation, transform->rotation);
+            SDF_VU0_COPYVECTOR(group->savedRotation, transform->rot);
         }
     }
     for (row = 0; row < (s32)work->mainEntry7Count; row++) {

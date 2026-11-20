@@ -3700,7 +3700,7 @@ void fldInitializeHuntSparkUnit(evtUnitHandle_t *unit) {
 
     object = unit->effObj;
     resource = (dds3ModelHandle_t *)dds3ObjectBaseGetModelHandle(object);
-    SDF_VU0_LOADVECTOR(object->poseset->rotation);
+    SDF_VU0_LOADVECTOR(object->poseset->rot);
     index = D_0032E3C4[0] + 1;
     if (index >= 64) {
         index = 63;

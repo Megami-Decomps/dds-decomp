@@ -67,7 +67,7 @@ void evtVu0SubVectorXZAxis(f32 *a, f32 *b) {
 void evtGetUnitDirVector(evtUnitHandle_t *unit) {
     f32 v[4];
 
-    SDF_VU0_LOADVECTOR(unit->effObj->poseset->rotation);
+    SDF_VU0_LOADVECTOR(unit->effObj->poseset->rot);
     ToMatrix();
     SDF_VU0_STORE_ROW2(v);
     v[1] = 0.0f;
@@ -1134,7 +1134,7 @@ EvtUnitVerticalMoveStepCount evtUnitPrepareVerticalMoveSteps(evtUnitHandle_t *un
     s32 vectorComponentIndex;
     for (vectorComponentIndex = 0; vectorComponentIndex < 4; vectorComponentIndex++) {
         savedA[vectorComponentIndex] = unit->effObj->poseset->pos[vectorComponentIndex];
-        savedB[vectorComponentIndex] = unit->effObj->poseset->rotation[vectorComponentIndex];
+        savedB[vectorComponentIndex] = unit->effObj->poseset->rot[vectorComponentIndex];
     }
     copy = *unit;
     while (evtCheckMoveEnd(&copy) == EVT_UNIT_MOVE_END_NOT_REACHED) {
@@ -1143,7 +1143,7 @@ EvtUnitVerticalMoveStepCount evtUnitPrepareVerticalMoveSteps(evtUnitHandle_t *un
     }
     for (vectorComponentIndex = 0; vectorComponentIndex < 4; vectorComponentIndex++) {
         unit->effObj->poseset->pos[vectorComponentIndex] = savedA[vectorComponentIndex];
-        unit->effObj->poseset->rotation[vectorComponentIndex] = savedB[vectorComponentIndex];
+        unit->effObj->poseset->rot[vectorComponentIndex] = savedB[vectorComponentIndex];
     }
     if (simulatedStepCount == 0) {
         printf("ymove frameno = 0\n");
@@ -3011,10 +3011,10 @@ ScrCommandResult evtCommand_EFFECT_POS(void) {
         params->pos[0] = vec->position.x;
         params->pos[1] = vec->position.y;
         params->pos[2] = vec->position.z;
-        params->rotation[0] = vec->rotation[0];
-        params->rotation[1] = vec->rotation[1];
-        params->rotation[2] = vec->rotation[2];
-        params->rotation[3] = vec->rotation[3];
+        params->rot[0] = vec->rotation[0];
+        params->rot[1] = vec->rotation[1];
+        params->rot[2] = vec->rotation[2];
+        params->rot[3] = vec->rotation[3];
     }
     obj->poseset->flags = (obj->poseset->flags | OBJECT_TRANSFORM_FLAG_UPDATE_PENDING) & ~OBJECT_TRANSFORM_FLAG_MATRIX_CACHE_VALID;
     return 1;

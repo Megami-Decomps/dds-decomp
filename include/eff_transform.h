@@ -38,7 +38,7 @@ typedef struct dds3Basic_t dds3Basic_t;
 typedef struct dds3PoseSet_t {
     u128 matrix[4];
     f32 pos[4]; /* 0x40: used as the returned inner-position vector. */
-    f32 rotation[4]; /* 0x50: used as the returned inner-rotation vector. */
+    f32 rot[4]; /* 0x50: used as the returned inner-rotation vector. */
     f32 scale[4]; /* 0x60: used as the returned inner-scale vector. */
     f32 smoothedPosition[4];
     f32 savedPosition[4];

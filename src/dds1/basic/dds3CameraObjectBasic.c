@@ -91,7 +91,7 @@ void MakeCamera(dds3Basic_t *camera) {
     CameraData *data = camera->workdata;
     dds3PoseSet_t *inner = camera->poseset;
 
-    SDF_VU0_LOADVECTOR(&inner->rotation);
+    SDF_VU0_LOADVECTOR(&inner->rot);
     ToMatrix();
     SDF_VU0_LOADVECTOR(&data->localUp);
     SDF_VU0_APPLYMATRIX();
@@ -220,7 +220,7 @@ void dds3CameraObjectBasicGetTgtCam(dds3Basic_t *obj, f32 *worldEyeOut, f32 *tar
     CameraData *data = obj->workdata;
     dds3PoseSet_t *inner = obj->poseset;
 
-    SDF_VU0_LOADVECTOR(&inner->rotation);
+    SDF_VU0_LOADVECTOR(&inner->rot);
     ToMatrix();
     SDF_VU0_LOADVECTOR(&data->localUp);
     SDF_VU0_APPLYMATRIX();

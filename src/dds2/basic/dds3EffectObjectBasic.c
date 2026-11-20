@@ -179,7 +179,7 @@ s32 dds3EffectObjectBasicMainProcedure(dds3Basic_t *obj) {
             } else {
                 switch (data->ownerKind) {
                 case 4: case 5: case 6: case 7: case 8: case 9:
-                    SDF_VU0_LOADVECTOR(data->owner->poseset->rotation);
+                    SDF_VU0_LOADVECTOR(data->owner->poseset->rot);
                     SDF_VU0_STOREVECTOR(rotation);
                     ToMatrix();
                     break;
@@ -227,7 +227,7 @@ s32 dds3EffectObjectBasicMainProcedure(dds3Basic_t *obj) {
         SDF_VU0_VECTOR_W_SET_ONE();
         SDF_VU0_STOREVECTOR(position);
         dds3SetRadiusPoseSet(obj->poseset);
-        SDF_VU0_LOADVECTOR(obj->poseset->rotation);
+        SDF_VU0_LOADVECTOR(obj->poseset->rot);
         Normalize();
         SDF_VU0_STOREVECTOR(rotation);
         moved = 1;

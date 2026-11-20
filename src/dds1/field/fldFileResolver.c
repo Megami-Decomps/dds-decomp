@@ -5747,10 +5747,10 @@ camera_input_done:
     D_0032F170[1] = ((dds3Basic_t *)fldPlayerObject)->poseset->smoothedPosition[1];
     D_0032F170[2] = ((dds3Basic_t *)fldPlayerObject)->poseset->smoothedPosition[2];
     D_0032F170[3] = ((dds3Basic_t *)fldPlayerObject)->poseset->smoothedPosition[3];
-    D_0032F170[4] = ((dds3Basic_t *)fldPlayerObject)->poseset->rotation[0];
-    D_0032F170[5] = ((dds3Basic_t *)fldPlayerObject)->poseset->rotation[1];
-    D_0032F170[6] = ((dds3Basic_t *)fldPlayerObject)->poseset->rotation[2];
-    D_0032F170[7] = ((dds3Basic_t *)fldPlayerObject)->poseset->rotation[3];
+    D_0032F170[4] = ((dds3Basic_t *)fldPlayerObject)->poseset->rot[0];
+    D_0032F170[5] = ((dds3Basic_t *)fldPlayerObject)->poseset->rot[1];
+    D_0032F170[6] = ((dds3Basic_t *)fldPlayerObject)->poseset->rot[2];
+    D_0032F170[7] = ((dds3Basic_t *)fldPlayerObject)->poseset->rot[3];
     return 0;
 }
 
@@ -6064,10 +6064,10 @@ void fldUpdateSmoothedCameraPose(void) {
             D_0032F170[1] = player->poseset->smoothedPosition[1];
             D_0032F170[2] = player->poseset->smoothedPosition[2];
             D_0032F170[3] = player->poseset->smoothedPosition[3];
-            D_0032F170[4] = player->poseset->rotation[0];
-            D_0032F170[5] = player->poseset->rotation[1];
-            D_0032F170[6] = player->poseset->rotation[2];
-            D_0032F170[7] = player->poseset->rotation[3];
+            D_0032F170[4] = player->poseset->rot[0];
+            D_0032F170[5] = player->poseset->rot[1];
+            D_0032F170[6] = player->poseset->rot[2];
+            D_0032F170[7] = player->poseset->rot[3];
         }
     }
 }

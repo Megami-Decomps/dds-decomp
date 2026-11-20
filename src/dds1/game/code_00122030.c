@@ -1363,7 +1363,7 @@ void fldPreparePlayerAndCameraScene(u128 *transform) {
         dds3PoseSet_t *inner = object->poseset;
         SDF_VU0_COPYVECTOR(inner->pos, transform);
         SDF_VU0_COPYVECTOR(inner->smoothedPosition, transform);
-        SDF_VU0_COPYVECTOR(inner->rotation, rotation);
+        SDF_VU0_COPYVECTOR(inner->rot, rotation);
     }
     dds3SetPosPoseSet(object, transform);
     dds3SetRotPoseSet(fldPlayerObject, (u128 *)&quaternion);

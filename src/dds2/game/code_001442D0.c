@@ -4116,7 +4116,7 @@ void fldInitializeHuntSparkUnit(evtUnitHandle_t *unit) {
 
     object = unit->effObj;
     resource = (dds3ModelHandle_t *)dds3ObjectBaseGetModelHandle(object);
-    SDF_VU0_LOADVECTOR(object->poseset->rotation);
+    SDF_VU0_LOADVECTOR(object->poseset->rot);
     index = D_00389784[0] + 1;
     if (index >= 64) {
         index = 63;
@@ -7829,7 +7829,7 @@ void fldCreateGrippedUnitMarker(s32 gridX, s32 gridY, s32 slot) {
         scale[2] = 1.0f;
         SDF_VU0_COPYVECTOR_F32(object->poseset->pos, position);
         SDF_VU0_COPYVECTOR_F32(object->poseset->smoothedPosition, position);
-        SDF_VU0_COPYVECTOR_F32(object->poseset->rotation, rotation);
+        SDF_VU0_COPYVECTOR_F32(object->poseset->rot, rotation);
         dds3SetPosPoseSet(object, (u128 *)position);
         dds3SetRotPoseSet(object, (u128 *)rotation);
         dds3SetSclPoseSet(object, (u128 *)scale);
@@ -7916,7 +7916,7 @@ void fldCreateChaseCameraObject(void) {
     inner = object->poseset;
     SDF_VU0_COPYVECTOR_F32(inner->pos, position);
     SDF_VU0_COPYVECTOR_F32(inner->smoothedPosition, position);
-    SDF_VU0_COPYVECTOR_F32(inner->rotation, rotation);
+    SDF_VU0_COPYVECTOR_F32(inner->rot, rotation);
     dds3SetPosPoseSet(object, (u128 *)position);
     dds3SetRotPoseSet(D_00435F1C, (u128 *)rotation);
     dds3SetSclPoseSet(D_00435F1C, (u128 *)scale);

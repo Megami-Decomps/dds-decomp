@@ -4545,7 +4545,7 @@ s32 evtMakeMotionName(PolyMovieWork *work, evtViewerInfo_t *runtime) {
                 {
                     dds3PoseSet_t *transform = group->info->poseset;
                     SDF_VU0_COPYVECTOR(group->savedPosition, transform->pos);
-                    SDF_VU0_COPYVECTOR(group->savedRotation, transform->rotation);
+                    SDF_VU0_COPYVECTOR(group->savedRotation, transform->rot);
                 }
             }
         }

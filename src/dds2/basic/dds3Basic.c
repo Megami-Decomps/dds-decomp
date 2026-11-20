@@ -180,7 +180,7 @@ void dds3BackupPoseSet(dds3PoseSet_t *node) {
     u8 *p60;
 
     SDF_VU0_STOREIDENTITYVECTOR(p40);
-    p50 = (u8 *)&node->rotation;
+    p50 = (u8 *)&node->rot;
     SDF_VU0_STOREIDENTITYVECTOR(p50);
     SDF_VU0_SETSCALE1VECTOR();
     p60 = (u8 *)&node->scale;
@@ -189,7 +189,7 @@ void dds3BackupPoseSet(dds3PoseSet_t *node) {
 
 void dds3SetRadiusPoseSet(dds3PoseSet_t *node) {
     SDF_VU0_COPYVECTOR(&node->savedScale, &node->scale);
-    SDF_VU0_COPYVECTOR(&node->savedRotation, &node->rotation);
+    SDF_VU0_COPYVECTOR(&node->savedRotation, &node->rot);
     SDF_VU0_COPYVECTOR(&node->savedPosition, &node->pos);
 }
 
@@ -214,7 +214,7 @@ void dds3SetRotPoseSet(dds3Basic_t *node, u128 *vector) {
 
     inner->flags = (inner->flags | OBJECT_TRANSFORM_FLAG_UPDATE_PENDING) &
         ~OBJECT_TRANSFORM_FLAG_MATRIX_CACHE_VALID;
-    SDF_VU0_COPYVECTOR(&inner->rotation, vector);
+    SDF_VU0_COPYVECTOR(&inner->rot, vector);
 }
 
 void dds3SetSclPoseSet(dds3Basic_t *node, u128 *vector) {
@@ -233,7 +233,7 @@ void dds3GetPosPoseSet(dds3Basic_t *node) {
 }
 
 void dds3GetRotPoseSet(dds3Basic_t *node) {
-    u8 *p = (u8 *)&node->poseset->rotation;
+    u8 *p = (u8 *)&node->poseset->rot;
 
     SDF_VU0_LOADVECTOR_BARRIER(p);
     Normalize();
@@ -261,10 +261,10 @@ void dds3AddRotPoseSet(dds3Basic_t *node, u128 *vector) {
 
     inner->flags = (inner->flags | OBJECT_TRANSFORM_FLAG_UPDATE_PENDING) &
         ~OBJECT_TRANSFORM_FLAG_MATRIX_CACHE_VALID;
-    SDF_VU0_LOADVECTOR(&inner->rotation);
+    SDF_VU0_LOADVECTOR(&inner->rot);
     SDF_VU0_LOADVECTOR_B(vector);
     Mult();
-    SDF_VU0_STOREVECTOR(&inner->rotation);
+    SDF_VU0_STOREVECTOR(&inner->rot);
 }
 
 void dds3GetSclPoseSetMCR(dds3Basic_t *node, u128 *vector) {
@@ -303,7 +303,7 @@ void dds3GetTMPoseSet(dds3Basic_t *object) {
         SDF_VU0_LOADMATRIX(transform->matrix);
     } else {
         transform->flags = flags | OBJECT_TRANSFORM_FLAG_MATRIX_CACHE_VALID;
-        dds3MakeMatrix(transform->scale, transform->rotation, transform->pos);
+        dds3MakeMatrix(transform->scale, transform->rot, transform->pos);
         SDF_VU0_STOREMATRIX(transform->matrix);
     }
 }

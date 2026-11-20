@@ -865,7 +865,7 @@ s32 fldTestRoomProbeFacingAndRange(dds3Basic_t *actor, dds3Basic_t *entry) {
                 position[0] = source->position.x;
                 position[1] = source->position.y;
                 position[2] = source->position.z;
-                SDF_VU0_LOADVECTOR(actor->poseset->rotation);
+                SDF_VU0_LOADVECTOR(actor->poseset->rot);
                 ToMatrix();
                 SDF_VU0_STORE_ROW2(dir);
                 dir[1] = 0.0f;
@@ -893,7 +893,7 @@ s32 fldTestRoomProbeFacingAndRange(dds3Basic_t *actor, dds3Basic_t *entry) {
             case FLD_TRIGGER_SHAPE_KIND_PLANE:
                 return fldEveHitTable[i].crossingDirection == kind;
             case FLD_TRIGGER_SHAPE_KIND_BOX:
-                SDF_VU0_LOADVECTOR(actor->poseset->rotation);
+                SDF_VU0_LOADVECTOR(actor->poseset->rot);
                 ToMatrix();
                 SDF_VU0_STORE_ROW2(dir);
                 dir[1] = 0.0f;
@@ -930,7 +930,7 @@ s32 fldTestRoomProbeFacing(dds3Basic_t *actor, dds3Basic_t *entry) {
             case FLD_TRIGGER_SHAPE_KIND_SPHERE:
                 source = entry->workdata;
                 SDF_VU0_COPYVECTOR(position, &source->position);
-                SDF_VU0_LOADVECTOR(actor->poseset->rotation);
+                SDF_VU0_LOADVECTOR(actor->poseset->rot);
                 ToMatrix();
                 SDF_VU0_STORE_ROW2(dir);
                 dir[1] = 0.0f;
@@ -955,7 +955,7 @@ s32 fldTestRoomProbeFacing(dds3Basic_t *actor, dds3Basic_t *entry) {
             case FLD_TRIGGER_SHAPE_KIND_PLANE:
                 return fldEveHitTable[i].crossingDirection == kind;
             case FLD_TRIGGER_SHAPE_KIND_BOX:
-                SDF_VU0_LOADVECTOR(actor->poseset->rotation);
+                SDF_VU0_LOADVECTOR(actor->poseset->rot);
                 ToMatrix();
                 SDF_VU0_STORE_ROW2(dir);
                 dir[1] = 0.0f;
@@ -983,7 +983,7 @@ s32 fldTestActorRoomProbeCondition(s32 roomIndex, dds3Basic_t *actor, f32 *posit
     kind = ((FldTaskInfo *)fldRoomResources[roomIndex]->data)->shape->kind;
     switch (kind) {
     case FLD_TRIGGER_SHAPE_KIND_SPHERE:
-        SDF_VU0_LOADVECTOR(actor->poseset->rotation);
+        SDF_VU0_LOADVECTOR(actor->poseset->rot);
         ToMatrix();
         SDF_VU0_STORE_ROW2(dir);
         dir[1] = 0.0f;
@@ -1011,7 +1011,7 @@ s32 fldTestActorRoomProbeCondition(s32 roomIndex, dds3Basic_t *actor, f32 *posit
     case FLD_TRIGGER_SHAPE_KIND_PLANE:
         return fldEveHitTable[roomIndex].crossingDirection == kind;
     case FLD_TRIGGER_SHAPE_KIND_BOX:
-        SDF_VU0_LOADVECTOR(actor->poseset->rotation);
+        SDF_VU0_LOADVECTOR(actor->poseset->rot);
         ToMatrix();
         SDF_VU0_STORE_ROW2(dir);
         dir[1] = 0.0f;

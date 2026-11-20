@@ -129,7 +129,7 @@ s32 MoverBasicMainprocuder(dds3Basic_t *moverNode)
             dds3BackupPoseSet(&relativeTransform);
             if (updateCallback(&relativeTransform, targetObject) == DDS3_MOVER_UPDATE_APPLY_RELATIVE_TRANSFORM) {
                 dds3GetSclPoseSetMCR(targetObject, (u128 *)relativeTransform.scale);
-                dds3AddRotPoseSet(targetObject, (u128 *)&relativeTransform.rotation);
+                dds3AddRotPoseSet(targetObject, (u128 *)&relativeTransform.rot);
                 dds3GetPosPoseSetMCR(targetObject, (u128 *)relativeTransform.pos);
             }
         }

@@ -6289,8 +6289,8 @@ void btlDebugPrintWorldTransform(s32 x, s32 y) {
             btlBossDebugPrintfN(x, y, 0, "P:%.1f %.1f %.1f", (double)object->poseset->pos[0],
                                 (double)object->poseset->pos[1], (double)object->poseset->pos[2]);
             btlBossDebugPrintfN(x, y + 12, 0, "R:%.3f %.3f %.3f %.3f",
-                                (double)object->poseset->rotation[0], (double)object->poseset->rotation[1],
-                                (double)object->poseset->rotation[2], (double)object->poseset->rotation[3]);
+                                (double)object->poseset->rot[0], (double)object->poseset->rot[1],
+                                (double)object->poseset->rot[2], (double)object->poseset->rot[3]);
         }
     }
 }

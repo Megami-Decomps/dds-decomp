@@ -96,8 +96,8 @@ s32 DispBaseData(dds3Basic_t *node, s32 x, s32 y, sdfDrawTag_t *list) {
             rotationY, 0xFEFFFF, 0, D_003BA9A8));
         sdfDrawTagLink(list, (u32)sdfDevPrintf(valueX,
             rotationY, 0xFEFFFF, 0xE, "%3.2f %3.2f %3.2f %3.2f",
-            transform->rotation[0], transform->rotation[1],
-            transform->rotation[2], transform->rotation[3]));
+            transform->rot[0], transform->rot[1],
+            transform->rot[2], transform->rot[3]));
         y += 2;
         scaleY = (y * 6 << 4) + 0x7900;
         sdfDrawTagLink(list, (u32)sdfDevPrintf(labelX,

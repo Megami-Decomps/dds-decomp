@@ -4591,9 +4591,9 @@ void evtStageTestDrawCameraTransformDebug(void) {
                                                            camera->poseset->pos[1],
                                                            camera->poseset->pos[2]));
     sdfDrawTagLink(list, (u32)sdfDevPrintf(0x7240, 0x7A20, 0xFF0000, 0, "R:%.2f %.2f %.2f",
-                                                           camera->poseset->rotation[0],
-                                                           camera->poseset->rotation[1],
-                                                           camera->poseset->rotation[2]));
+                                                           camera->poseset->rot[0],
+                                                           camera->poseset->rot[1],
+                                                           camera->poseset->rot[2]));
     surface = &sdfGrOtTable[96];
     surface->regFunc(surface, list);
     list = dds3FontReqAllocDrawTag();

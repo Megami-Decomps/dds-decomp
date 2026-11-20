@@ -5648,10 +5648,10 @@ camera_input_done:
     D_0038A610[1] = fldPlayerObject->poseset->smoothedPosition[1];
     D_0038A610[2] = fldPlayerObject->poseset->smoothedPosition[2];
     D_0038A610[3] = fldPlayerObject->poseset->smoothedPosition[3];
-    D_0038A610[4] = fldPlayerObject->poseset->rotation[0];
-    D_0038A610[5] = fldPlayerObject->poseset->rotation[1];
-    D_0038A610[6] = fldPlayerObject->poseset->rotation[2];
-    D_0038A610[7] = fldPlayerObject->poseset->rotation[3];
+    D_0038A610[4] = fldPlayerObject->poseset->rot[0];
+    D_0038A610[5] = fldPlayerObject->poseset->rot[1];
+    D_0038A610[6] = fldPlayerObject->poseset->rot[2];
+    D_0038A610[7] = fldPlayerObject->poseset->rot[3];
     return 0;
 }
 
@@ -6026,14 +6026,14 @@ void fldUpdateCameraHeadingTransition(void) {
         secondary->pos[1] = source->pos[1];
         secondary->pos[2] = source->pos[2];
         secondary->pos[3] = source->pos[3];
-        secondary->rotation[0] = source->rotation[0];
-        secondary->rotation[1] = source->rotation[1];
-        secondary->rotation[2] = source->rotation[2];
-        secondary->rotation[3] = source->rotation[3];
-        quaternion.f[0] = source->rotation[0];
-        quaternion.f[1] = source->rotation[1];
-        quaternion.f[2] = source->rotation[2];
-        quaternion.f[3] = source->rotation[3];
+        secondary->rot[0] = source->rot[0];
+        secondary->rot[1] = source->rot[1];
+        secondary->rot[2] = source->rot[2];
+        secondary->rot[3] = source->rot[3];
+        quaternion.f[0] = source->rot[0];
+        quaternion.f[1] = source->rot[1];
+        quaternion.f[2] = source->rot[2];
+        quaternion.f[3] = source->rot[3];
         dds3SetPosPoseSet((dds3Basic_t *)fldSecondarySceneObject, (u128 *)position);
         dds3SetRotPoseSet((dds3Basic_t *)fldSecondarySceneObject, &quaternion.q);
         player = fldPlayerObject;
@@ -6043,10 +6043,10 @@ void fldUpdateCameraHeadingTransition(void) {
     D_0038A610[1] = ((dds3Basic_t *)player)->poseset->smoothedPosition[1];
     D_0038A610[2] = ((dds3Basic_t *)player)->poseset->smoothedPosition[2];
     D_0038A610[3] = ((dds3Basic_t *)player)->poseset->smoothedPosition[3];
-    D_0038A610[4] = ((dds3Basic_t *)player)->poseset->rotation[0];
-    D_0038A610[5] = ((dds3Basic_t *)player)->poseset->rotation[1];
-    D_0038A610[6] = ((dds3Basic_t *)player)->poseset->rotation[2];
-    D_0038A610[7] = ((dds3Basic_t *)player)->poseset->rotation[3];
+    D_0038A610[4] = ((dds3Basic_t *)player)->poseset->rot[0];
+    D_0038A610[5] = ((dds3Basic_t *)player)->poseset->rot[1];
+    D_0038A610[6] = ((dds3Basic_t *)player)->poseset->rot[2];
+    D_0038A610[7] = ((dds3Basic_t *)player)->poseset->rot[3];
 }
 #else
 INCLUDE_ASM(const s32, "field/fldFileResolver", fldUpdateCameraHeadingTransition);
