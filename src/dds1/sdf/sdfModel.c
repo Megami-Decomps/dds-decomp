@@ -948,7 +948,7 @@ s32 sdfModelCheckBounds(const f32 *aMinMax) {
 }
 
 extern void sdfMatListUpdatePacket(sdfMatList_t *aMatList, s32 aId);
-extern void sdfResourceListApplyEntryChanges(sdfMatList_t *aMatList, s32 aId);
+extern void sdfResourceListApplyEntryChanges(sdfItemArray_t *aMatList, s32 aId);
 extern void sdfSetForcedAssetTextureMode(s32 aMode);
 extern void *sdf3DLightDefault;
 extern void *sdf3DFogDefault;
@@ -973,16 +973,15 @@ typedef struct QWORD_ALIGNED
 } sdfModelTempDrawPacket_t;
 
 /* vu0 routine: each node's screen transform, and its w lane as the sort key. */
-/* NON_MATCHING: 163 of 282 words match at the exact size (first differing word
- * at +0x60). */
-#ifdef NON_MATCHING
+/* Engine counterpart: smt3-decomp b1899d7. DDS1 applies resource-list changes
+ * at the entry call (retail 0x002D8E24). */
 void sdfModelTempPacketLinkOt(sdfGrOt_t **ot, sdfModelRootNode_t *root)
 {
     sdfDrawTag_t *tags[4];
     s32 i;
     s32 frame;
     u32 rootColor;
-    u32 color;
+    s32 color;
     u32 drawAttr;
     u32 attr;
     void *light;
@@ -996,13 +995,13 @@ void sdfModelTempPacketLinkOt(sdfGrOt_t **ot, sdfModelRootNode_t *root)
     f32 bias;
 
     frame = (s8)sdfFrameId;
-    sdfMatListUpdatePacket(root->matList, frame);
+    sdfResourceListApplyEntryChanges((sdfItemArray_t *)root->matList, frame);
     rootColor = root->color;
     light = root->light;
-    fog = root->fog;
     if (light == NULL) {
         light = sdf3DLightDefault;
     }
+    fog = root->fog;
     if (fog == NULL) {
         fog = sdf3DFogDefault;
     }
@@ -1015,18 +1014,21 @@ void sdfModelTempPacketLinkOt(sdfGrOt_t **ot, sdfModelRootNode_t *root)
         soften = sdfFaceDivSoften;
         bias = sdfFaceDivBias;
     }
-    softenParm = softenBias << 16;
     drew = 0;
     for (i = 0; i < root->nodeList->count; i++) {
         sdfModelNode_t *node = root->nodeList->items[i];
         sdfModelNodeDef_t *def = node->shape;
         sdfModelBounds_t *bounds;
         struct sdfShapeHeader_t **list;
-        struct sdfShapeHeader_t *header;
+        /* The cursor starts at a shape header, then walks its packet array. */
+        void *packetCursor;
         sdfDrawTag_t *tag;
         f32 *matrix;
         f32 zValue;
-        s32 j;
+        s32 slotIndex;
+
+        softenParm = softenBias;
+        softenParm <<= 16;
 
         if (def == NULL) {
             continue;
@@ -1057,22 +1059,30 @@ void sdfModelTempPacketLinkOt(sdfGrOt_t **ot, sdfModelRootNode_t *root)
             color = node->color;
         }
         attr = drawAttr & node->drawAttr;
-        for (j = 0; j != 4; j++) {
-            tags[j] = NULL;
+        for (slotIndex = 0; slotIndex != 4; slotIndex++) {
+            tags[slotIndex] = NULL;
         }
         sdfCoreDrawSetZBias(root->zBias);
-        semiTrans = (s32)color < 0;
-        parmTag = ((u64)(attr | softenParm) << 32) | 0x6102C000;
-        while ((header = *list++) != NULL) {
-            s32 otIndex;
-            sdfShapePacket_t **packets;
+        while ((packetCursor = *list++) != NULL) {
+            u32 headerInfo;
             sdfShapePacket_t *pkt;
 
-            otIndex = (*(u32 *)header & 0xFFFF0000) >> 16;
-            if (otIndex == 0) {
-                otIndex = semiTrans == 0;
+            semiTrans = 0;
+            if (color < 0) {
+                semiTrans = 1;
             }
-            tag = tags[otIndex];
+            parmTag = ((u64)(attr | softenParm) << 32) | 0x6102C000;
+
+            headerInfo = *(u32 *)packetCursor;
+            /* Retail loads the full count/priority word before extracting priority.
+             * This input keeps ee-gcc 2.96 from narrowing it to a halfword. */
+            FAKEMATCH_ASM_READ(headerInfo);
+            slotIndex = headerInfo >> 16;
+            if (slotIndex == 0) {
+                slotIndex = semiTrans == 0;
+            }
+            packetCursor = ((struct sdfShapeHeader_t *)packetCursor)->packet;
+            tag = tags[slotIndex];
             if (tag == NULL) {
                 sdfModelTempDrawPacket_t *buf;
 
@@ -1080,13 +1090,14 @@ void sdfModelTempPacketLinkOt(sdfGrOt_t **ot, sdfModelRootNode_t *root)
                 *(f32 *)&tag->z = zValue;
                 tag->lightPacket = EE_ADDR(light);
                 tag->fogPacket = EE_ADDR(fog);
-                tags[otIndex] = tag;
-                buf = sdfGrAllocPacketBuff(sizeof(*buf));
+                tags[slotIndex] = tag;
+                buf = EE_ADDR_AS(sdfModelTempDrawPacket_t *, sdfGrAllocPacketBuff(sizeof(*buf)));
                 *(u64 *)&buf->tmTag = 0x10000008;
                 *(u64 *)&buf->tmTag.dat0 = (u64)0x6C07C000 << 32;
                 SDF_VU0_LOADMATRIX(matrix);
                 sdf3DPrimSetTmPacket(buf->tm);
                 *(u64 *)&buf->parm.next = 0x20000002;
+                *(u64 *)&buf->parm.next.dat0 = parmTag;
                 buf->parm.unpackColor = 0x6E01C002;
                 buf->parm.color = color;
                 buf->parm.unpackParm = 0x6003C003;
@@ -1095,25 +1106,30 @@ void sdfModelTempPacketLinkOt(sdfGrOt_t **ot, sdfModelRootNode_t *root)
                 buf->parm.faceDivBias = bias;
                 buf->parm.itop = 0x04000004;
                 buf->parm.mscal = 0x14000000;
-                *(u64 *)&buf->parm.next.dat0 = parmTag;
                 sdfDrawTagLink2(tag, EE_ADDR(buf), EE_ADDR(&buf->parm));
             }
-            packets = (sdfShapePacket_t **)header->packet;
-            while ((pkt = *packets++) != NULL) {
+            for (;;) {
+                void **nextPacket = packetCursor;
+
+                pkt = *nextPacket++;
+                packetCursor = nextPacket;
+                if (pkt == NULL) {
+                    break;
+                }
                 if (pkt->packetType == PACKET_TYPE_NORMAL) {
                     u32 packed;
                     u16 matIndex;
                     sdfDmaTag_t *buf;
                     sdfDmaTag_t *body;
 
-                    buf = sdfGrAllocPacketBuff(0x30);
+                    buf = EE_ADDR_AS(sdfDmaTag_t *, sdfGrAllocPacketBuff(0x30));
                     packed = *(u32 *)&pkt->packetSize;
                     matIndex = packed >> 16;
                     packed &= 0xFFFF;
                     body = sdfModelSetMatRefPacket(root, matIndex, buf, frame);
                     *(u64 *)&body->dat0 = 0;
-                    *(u64 *)body = SDF_DMA_TAG(EE_ADDR(pkt->dataBody),
-                                               packed | 0x30000000);
+                    *(u64 *)body = SDF_DMA_TAG_WORD_FIRST(packed | 0x30000000,
+                                                        EE_ADDR(pkt->dataBody));
                     body++;
                     *(u64 *)body = 0x20000000;
                     *(u64 *)&body->dat0 = 0;
@@ -1121,22 +1137,24 @@ void sdfModelTempPacketLinkOt(sdfGrOt_t **ot, sdfModelRootNode_t *root)
                 }
             }
         }
-        for (j = 0; j != 4; j++) {
-            tag = tags[j];
+        for (slotIndex = 0; slotIndex != 4; slotIndex++) {
+            tag = tags[slotIndex];
             if (tag != NULL) {
+                sdfGrOt_t **slot = ot + slotIndex;
+
                 drew = 1;
-                ot[j]->regFunc(ot[j], tag);
+                (*slot)->regFunc(*slot, tag);
             }
-            tags[j] = NULL;
+            /* Retail clears the slot during the flush at 0x002D91BC.
+             * The live initial clear above is also used by sdfModelLinkOt,
+             * whose flush clears the slot at 0x002D969C. */
+            tags[slotIndex] = NULL;
         }
     }
     if (drew != 0) {
         root->flags |= SDF_MODEL_FLAG_DREW;
     }
 }
-#else
-INCLUDE_ASM(const s32, "sdf/sdfModel", sdfModelTempPacketLinkOt);
-#endif
 
 /* DDS engine donor: dds-decomp (redthing1), sdfModelBuildNodeResourcePackets. */
 /* vu0 routine: each node's screen transform, and its w lane as the sort key. */
@@ -1175,7 +1193,7 @@ void sdfModelLinkOt(sdfGrOt_t **aOt, sdfModelRootNode_t *aRoot)
         sdfMatListUpdatePacket(aRoot->matList, frame);
         sdfSetForcedAssetTextureMode(0);
     } else {
-        sdfResourceListApplyEntryChanges(aRoot->matList, frame);
+        sdfResourceListApplyEntryChanges((sdfItemArray_t *)aRoot->matList, frame);
     }
     rootColor = aRoot->color;
     light = aRoot->light;
