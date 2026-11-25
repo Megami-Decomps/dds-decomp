@@ -3,6 +3,7 @@
 #include "model.h"
 #include "draw.h"
 #include "ps2asm.h"
+#include "sdk_libc.h"
 
 #include "eeregs.h"
 
@@ -948,7 +949,6 @@ s32 sdfModelCheckBounds(const f32 *aMinMax) {
 }
 
 extern void sdfMatListUpdatePacket(sdfMatList_t *aMatList, s32 aId);
-extern void sdfResourceListApplyEntryChanges(sdfItemArray_t *aMatList, s32 aId);
 extern void sdfSetForcedAssetTextureMode(s32 aMode);
 extern void *sdf3DLightDefault;
 extern void *sdf3DFogDefault;
@@ -973,8 +973,7 @@ typedef struct QWORD_ALIGNED
 } sdfModelTempDrawPacket_t;
 
 /* vu0 routine: each node's screen transform, and its w lane as the sort key. */
-/* Engine counterpart: smt3-decomp b1899d7. DDS1 applies resource-list changes
- * at the entry call (retail 0x002D8E24). */
+/* Adapted from smt3-decomp b1899d7. */
 void sdfModelTempPacketLinkOt(sdfGrOt_t **ot, sdfModelRootNode_t *root)
 {
     sdfDrawTag_t *tags[4];
@@ -987,10 +986,7 @@ void sdfModelTempPacketLinkOt(sdfGrOt_t **ot, sdfModelRootNode_t *root)
     void *light;
     void *fog;
     s32 drew;
-    u32 softenParm;
     u32 softenBias;
-    u64 parmTag;
-    s32 semiTrans;
     f32 soften;
     f32 bias;
 
@@ -1020,12 +1016,16 @@ void sdfModelTempPacketLinkOt(sdfGrOt_t **ot, sdfModelRootNode_t *root)
         sdfModelNodeDef_t *def = node->shape;
         sdfModelBounds_t *bounds;
         struct sdfShapeHeader_t **list;
-        /* The cursor starts at a shape header, then walks its packet array. */
-        void *packetCursor;
+        /* Each header is read before its packet list is walked. */
+        union {
+            struct sdfShapeHeader_t *header;
+            sdfShapePacket_t **packets;
+        } cursor;
         sdfDrawTag_t *tag;
         f32 *matrix;
         f32 zValue;
         s32 slotIndex;
+        u32 softenParm;
 
         softenParm = softenBias;
         softenParm <<= 16;
@@ -1063,8 +1063,11 @@ void sdfModelTempPacketLinkOt(sdfGrOt_t **ot, sdfModelRootNode_t *root)
             tags[slotIndex] = NULL;
         }
         sdfCoreDrawSetZBias(root->zBias);
-        while ((packetCursor = *list++) != NULL) {
+        cursor.header = *list++;
+        while (cursor.header != NULL) {
             u32 headerInfo;
+            s32 semiTrans;
+            u64 parmTag;
             sdfShapePacket_t *pkt;
 
             semiTrans = 0;
@@ -1073,7 +1076,7 @@ void sdfModelTempPacketLinkOt(sdfGrOt_t **ot, sdfModelRootNode_t *root)
             }
             parmTag = ((u64)(attr | softenParm) << 32) | 0x6102C000;
 
-            headerInfo = *(u32 *)packetCursor;
+            memcpy(&headerInfo, cursor.header, sizeof(headerInfo));
             /* Retail loads the full count/priority word before extracting priority.
              * This input keeps ee-gcc 2.96 from narrowing it to a halfword. */
             FAKEMATCH_ASM_READ(headerInfo);
@@ -1081,7 +1084,7 @@ void sdfModelTempPacketLinkOt(sdfGrOt_t **ot, sdfModelRootNode_t *root)
             if (slotIndex == 0) {
                 slotIndex = semiTrans == 0;
             }
-            packetCursor = ((struct sdfShapeHeader_t *)packetCursor)->packet;
+            cursor.packets = (sdfShapePacket_t **)cursor.header->packet;
             tag = tags[slotIndex];
             if (tag == NULL) {
                 sdfModelTempDrawPacket_t *buf;
@@ -1108,14 +1111,7 @@ void sdfModelTempPacketLinkOt(sdfGrOt_t **ot, sdfModelRootNode_t *root)
                 buf->parm.mscal = 0x14000000;
                 sdfDrawTagLink2(tag, EE_ADDR(buf), EE_ADDR(&buf->parm));
             }
-            for (;;) {
-                void **nextPacket = packetCursor;
-
-                pkt = *nextPacket++;
-                packetCursor = nextPacket;
-                if (pkt == NULL) {
-                    break;
-                }
+            while ((pkt = *cursor.packets++) != NULL) {
                 if (pkt->packetType == PACKET_TYPE_NORMAL) {
                     u32 packed;
                     u16 matIndex;
@@ -1129,25 +1125,24 @@ void sdfModelTempPacketLinkOt(sdfGrOt_t **ot, sdfModelRootNode_t *root)
                     body = sdfModelSetMatRefPacket(root, matIndex, buf, frame);
                     *(u64 *)&body->dat0 = 0;
                     *(u64 *)body = SDF_DMA_TAG_WORD_FIRST(packed | 0x30000000,
-                                                        EE_ADDR(pkt->dataBody));
+                                                          EE_ADDR(pkt->dataBody));
                     body++;
                     *(u64 *)body = 0x20000000;
                     *(u64 *)&body->dat0 = 0;
                     sdfDrawTagLink2(tag, EE_ADDR(buf), EE_ADDR(body));
                 }
             }
+            cursor.header = *list++;
         }
         for (slotIndex = 0; slotIndex != 4; slotIndex++) {
             tag = tags[slotIndex];
             if (tag != NULL) {
-                sdfGrOt_t **slot = ot + slotIndex;
+                sdfGrOt_t **slot = &ot[slotIndex];
 
                 drew = 1;
                 (*slot)->regFunc(*slot, tag);
             }
-            /* Retail clears the slot during the flush at 0x002D91BC.
-             * The live initial clear above is also used by sdfModelLinkOt,
-             * whose flush clears the slot at 0x002D969C. */
+            /* Retail clears each slot during the flush, as sdfModelLinkOt does. */
             tags[slotIndex] = NULL;
         }
     }
@@ -1334,10 +1329,6 @@ void sdfModelLinkOt(sdfGrOt_t **aOt, sdfModelRootNode_t *aRoot)
         aRoot->flags |= SDF_MODEL_FLAG_DREW;
     }
 }
-
-#ifdef NON_MATCHING
-extern void *memcpy(void *a, const void *b, size_t c);
-#endif
 
 void sdfModelMorphListCopyStat(sdfModelMorphList_t *aDst, sdfModelMorphList_t *aSrc)
 {

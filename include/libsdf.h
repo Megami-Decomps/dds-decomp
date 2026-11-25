@@ -264,6 +264,8 @@ struct sdfItemArray_t
     void *items;
 };
 
+void sdfResourceListApplyEntryChanges(sdfItemArray_t *aList, s32 aId);
+
 /* One ordering table: the draw tags filed into it this frame, plus the two
  * callbacks that file and flush them. sdfGrOtTable is 85 of these back to back,
  * which is what fixes the 32-byte stride. */
