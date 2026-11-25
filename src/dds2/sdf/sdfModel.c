@@ -948,7 +948,6 @@ s32 sdfModelCheckBounds(const f32 *aMinMax) {
 }
 
 extern void sdfMatListUpdatePacket(sdfMatList_t *aMatList, s32 aId);
-extern void sdfResourceListApplyEntryChanges(sdfMatList_t *aMatList, s32 aId);
 extern void sdfSetForcedAssetTextureMode(s32 aMode);
 extern void *sdf3DLightDefault;
 extern void *sdf3DFogDefault;
@@ -1175,7 +1174,7 @@ void sdfModelLinkOt(sdfGrOt_t **aOt, sdfModelRootNode_t *aRoot)
         sdfMatListUpdatePacket(aRoot->matList, frame);
         sdfSetForcedAssetTextureMode(0);
     } else {
-        sdfResourceListApplyEntryChanges(aRoot->matList, frame);
+        sdfResourceListApplyEntryChanges((sdfItemArray_t *)aRoot->matList, frame);
     }
     rootColor = aRoot->color;
     light = aRoot->light;
